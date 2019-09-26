@@ -20,7 +20,8 @@ Feature: Session
 
   Background:
     Given connection has been opened
-    Given connection has no keyspaces
+    Given connection delete all keyspaces
+    Given connection does not have any keyspace
 
   Scenario: connection can open session
     When connection open 1 session for one keyspace: alice

@@ -23,12 +23,3 @@ exports_files([
     "session.feature",
     "transaction.feature",
 ])
-
-filegroup(
-    name = "features",
-    srcs = [
-#        "keyspace.feature",
-        "session.feature",
-#        "transaction.feature"
-    ]
-)

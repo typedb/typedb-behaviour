@@ -20,7 +20,8 @@ Feature: Transaction
 
   Background:
     Given connection has been opened
-    Given connection has no keyspaces
+    Given connection delete all keyspaces
+    Given connection does not have any keyspace
 
   Scenario: session can open read transaction
     Given connection open session for keyspace: alice
