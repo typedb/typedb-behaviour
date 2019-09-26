@@ -39,3 +39,35 @@ Feature: Transaction
     Then transaction has type: write
     Then transaction has keyspace: bob
     Then transaction has session has keyspace: bob
+
+  Scenario: session can open multiple read transaction
+
+  Scenario: session can open multiple write transaction
+
+  Scenario: session can open multiple read transaction in parallel
+
+  Scenario: session can open multiple write transaction in parallel
+
+  Scenario: sessions can open read transaction
+
+  Scenario: sessions can open write transaction
+
+  Scenario: sessions can open multiple read transaction
+
+  Scenario: sessions can open multiple write transaction
+
+  Scenario: sessions can open multiple read transaction in parallel
+
+  Scenario: sessions can open multiple write transaction in parallel
+
+  Scenario: sessions in parallel can open read transaction
+
+  Scenario: sessions in parallel can open write transaction
+
+  Scenario: sessions in parallel can open multiple read transaction
+
+  Scenario: sessions in parallel can open multiple write transaction
+
+  Scenario: sessions in parallel can open multiple read transaction in parallel
+
+  Scenario: sessions in parallel can open multiple write transaction in parallel

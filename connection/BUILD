@@ -18,11 +18,17 @@
 
 package(default_visibility = ["//visibility:public"])
 
+exports_files([
+    "keyspace.feature",
+    "session.feature",
+    "transaction.feature",
+])
+
 filegroup(
     name = "features",
     srcs = [
-        "keyspace.feature",
+#        "keyspace.feature",
         "session.feature",
-        "transaction.feature"
+#        "transaction.feature"
     ]
 )

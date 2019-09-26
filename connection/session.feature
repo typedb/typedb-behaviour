@@ -22,20 +22,20 @@ Feature: Session
     Given connection has been opened
     Given connection has no keyspaces
 
-  Scenario: connection can open session for default keyspace
-    When connection open session for keyspace: grakn
-    Then session is null: false
-    Then session is open: true
-    Then session has keyspace: grakn
-
-  Scenario: connection can open session for named keyspace
-    When connection open session for keyspace: alice
+  Scenario: connection can open session
+    When connection open 1 session for one keyspace: alice
     Then session is null: false
     Then session is open: true
     Then session has keyspace: alice
 
-  Scenario: connection open multiple sessions for different keyspaces
-    When connection open sessions for keyspaces:
+  Scenario: connection open multiple sessions for one keyspace
+    When connection open 32 sessions for one keyspace: alice
+    Then sessions are null: false
+    Then sessions are open: true
+    Then sessions have correct keyspace: alice
+
+  Scenario: connection open multiple sessions for multiple keyspaces
+    When connection open multiple sessions for multiple keyspaces:
       | alice   |
       | bob     |
       | charlie |
@@ -43,13 +43,49 @@ Feature: Session
     Then sessions are null: false
     Then sessions are open: true
     Then sessions have correct keyspaces:
-      | alice   | alice   |
-      | bob     | bob     |
-      | charlie | charlie |
-      | dylan   | dylan   |
+      | alice   |
+      | bob     |
+      | charlie |
+      | dylan   |
 
-  Scenario: connection open multiple sessions in parallel
-    When connection open sessions in parallel for different keyspaces: 32
+  Scenario: connection open multiple sessions in parallel for one keyspace
+    When connection open 32 sessions for one keyspace: alice
+    Then sessions are null: false
+    Then sessions are open: true
+    Then sessions have correct keyspace: alice
+
+  Scenario: connection open multiple sessions in parallel for multiple keyspaces
+    When connection open multiple sessions for multiple keyspaces:
+      | alice   |
+      | bob     |
+      | charlie |
+      | dylan   |
+      | eve     |
+      | frank   |
+      | george  |
+      | heidi   |
+      | ivan    |
+      | judy    |
+      | mike    |
+      | neil    |
+    Then sessions are null: false
+    Then sessions are open: true
+    Then sessions have correct keyspaces:
+      | alice   |
+      | bob     |
+      | charlie |
+      | dylan   |
+      | eve     |
+      | frank   |
+      | george  |
+      | heidi   |
+      | ivan    |
+      | judy    |
+      | mike    |
+      | neil    |
+
+  Scenario: connection open multiple sessions in parallel for multiple random keyspaces
+    When connection open 32 sessions in parallel for multiple keyspaces: random
     Then sessions in parallel are null: false
     Then sessions in parallel are open: true
     Then sessions in parallel have correct keyspaces

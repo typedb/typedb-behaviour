@@ -20,47 +20,47 @@ Feature: Keyspace
 
   Background:
     Given connection has been opened
-    Given connection has no keyspaces
+    Given connection delete all keyspaces
+    Given connection does not have any keyspace
 
-  Scenario: connection can create keyspace
-      # This  step should be rewritten once we can create keypsaces without opening sessions
-    When connection open session for keyspace: alice
-    Then connection has keyspace: alice
+  Scenario: connection can create one keyspace
+    When  connection create one keyspace: alice
+    Then  connection has one keyspace: alice
 
   Scenario: connection can create multiple keyspaces
-      # This  step should be rewritten once we can create keypsaces without opening sessions
-    When connection open sessions for keyspaces:
+    When  connection create multiple keyspaces:
       | alice   |
       | bob     |
       | charlie |
       | dylan   |
-    Then connection has keyspaces:
+    Then  connection has multiple keyspaces:
       | alice   |
       | bob     |
       | charlie |
       | dylan   |
 
-  Scenario: connection can delete a keyspace
+  Scenario: connection can delete one keyspace
       # This step should be rewritten once we can create keypsaces without opening sessions
-    Given connection open sessions for keyspaces:
-      | alice |
-    Then connection delete keyspace: alice
-    Then connection does not have keyspace: alice
+    Given connection create one keyspace: alice
+    When  connection delete one keyspace: alice
+    Then  connection does not have one keyspace: alice
+    Then  connection does not have any keyspace
 
   Scenario: connection can delete multiple keyspaces
       # This step should be rewritten once we can create keypsaces without opening sessions
-    Given connection open sessions for keyspaces:
+    Given connection create multiple keyspaces:
       | alice   |
       | bob     |
       | charlie |
       | dylan   |
-    Then connection delete keyspaces:
+    When  connection delete multiple keyspaces:
       | alice   |
       | bob     |
       | charlie |
       | dylan   |
-    Then connection does not have keyspaces:
+    Then  connection does not have multiple keyspaces:
       | alice   |
       | bob     |
       | charlie |
       | dylan   |
+    Then  connection does not have any keyspace
