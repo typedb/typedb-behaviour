@@ -37,17 +37,33 @@ Feature: Session
 
   Scenario: connection open many sessions for many keyspaces
     When connection open many sessions for many keyspaces:
-      | 1 | alice   |
-      | 2 | bob     |
-      | 3 | charlie |
-      | 4 | dylan   |
+      | 1  | alice   |
+      | 2  | bob     |
+      | 3  | charlie |
+      | 4  | dylan   |
+      | 5  | eve     |
+      | 6  | frank   |
+      | 7  | george  |
+      | 8  | heidi   |
+      | 9  | ivan    |
+      | 10 | judy    |
+      | 11 | mike    |
+      | 12 | neil    |
     Then sessions are null: false
     Then sessions are open: true
     Then sessions have keyspaces:
-      | 1 | alice   |
-      | 2 | bob     |
-      | 3 | charlie |
-      | 4 | dylan   |
+      | 1  | alice   |
+      | 2  | bob     |
+      | 3  | charlie |
+      | 4  | dylan   |
+      | 5  | eve     |
+      | 6  | frank   |
+      | 7  | george  |
+      | 8  | heidi   |
+      | 9  | ivan    |
+      | 10 | judy    |
+      | 11 | mike    |
+      | 12 | neil    |
 
   Scenario: connection open many sessions in parallel for one keyspace
     When connection open 32 sessions in parallel for one keyspace: alice
@@ -55,38 +71,32 @@ Feature: Session
     Then sessions in parallel are open: true
     Then sessions in parallel have keyspace: alice
 
-#  Scenario: connection open many sessions in parallel for many keyspaces
-#    When connection open many sessions for many keyspaces:
-#      | alice   |
-#      | bob     |
-#      | charlie |
-#      | dylan   |
-#      | eve     |
-#      | frank   |
-#      | george  |
-#      | heidi   |
-#      | ivan    |
-#      | judy    |
-#      | mike    |
-#      | neil    |
-#    Then sessions are null: false
-#    Then sessions are open: true
-#    Then sessions have correct keyspaces:
-#      | alice   |
-#      | bob     |
-#      | charlie |
-#      | dylan   |
-#      | eve     |
-#      | frank   |
-#      | george  |
-#      | heidi   |
-#      | ivan    |
-#      | judy    |
-#      | mike    |
-#      | neil    |
-#
-#  Scenario: connection open many sessions in parallel for many random keyspaces
-#    When connection open 32 sessions in parallel for many keyspaces: random
-#    Then sessions in parallel are null: false
-#    Then sessions in parallel are open: true
-#    Then sessions in parallel have correct keyspaces
+  Scenario: connection open many sessions in parallel for many keyspaces
+    When connection open many sessions in parallel for many keyspaces:
+      | 1  | alice   |
+      | 2  | bob     |
+      | 3  | charlie |
+      | 4  | dylan   |
+      | 5  | eve     |
+      | 6  | frank   |
+      | 7  | george  |
+      | 8  | heidi   |
+      | 9  | ivan    |
+      | 10 | judy    |
+      | 11 | mike    |
+      | 12 | neil    |
+    Then sessions in parallel are null: false
+    Then sessions in parallel are open: true
+    Then sessions in parallel have keyspaces:
+      | 1  | alice   |
+      | 2  | bob     |
+      | 3  | charlie |
+      | 4  | dylan   |
+      | 5  | eve     |
+      | 6  | frank   |
+      | 7  | george  |
+      | 8  | heidi   |
+      | 9  | ivan    |
+      | 10 | judy    |
+      | 11 | mike    |
+      | 12 | neil    |
