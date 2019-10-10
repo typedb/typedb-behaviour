@@ -16,7 +16,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-Feature: Keyspace
+Feature: Connection Keyspace
 
   Background:
     Given connection has been opened

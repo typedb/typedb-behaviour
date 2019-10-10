@@ -16,7 +16,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-Feature: Session
+Feature: Connection Session
 
   Background:
     Given connection has been opened
@@ -37,6 +37,7 @@ Feature: Session
 
   Scenario: connection open many sessions for many keyspaces
     When connection open many sessions for many keyspaces:
+      # map of {session-id: keyspace-name}
       | 1  | alice   |
       | 2  | bob     |
       | 3  | charlie |
@@ -52,6 +53,7 @@ Feature: Session
     Then sessions are null: false
     Then sessions are open: true
     Then sessions have keyspaces:
+      # map of {session-id: keyspace-name}
       | 1  | alice   |
       | 2  | bob     |
       | 3  | charlie |
@@ -73,6 +75,7 @@ Feature: Session
 
   Scenario: connection open many sessions in parallel for many keyspaces
     When connection open many sessions in parallel for many keyspaces:
+      # map of {session-id: keyspace-name}
       | 1  | alice   |
       | 2  | bob     |
       | 3  | charlie |
@@ -88,6 +91,7 @@ Feature: Session
     Then sessions in parallel are null: false
     Then sessions in parallel are open: true
     Then sessions in parallel have keyspaces:
+      # map of {session-id: keyspace-name}
       | 1  | alice   |
       | 2  | bob     |
       | 3  | charlie |

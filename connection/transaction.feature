@@ -16,7 +16,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-Feature: Transaction
+Feature: Connection Transaction
 
   Background:
     Given connection has been opened
@@ -30,7 +30,6 @@ Feature: Transaction
     Then transaction is open: true
     Then transaction has type: read
     Then transaction has keyspace: alice
-    Then transaction has session has keyspace: alice
 
   Scenario: session can open write transaction
     Given connection open session for keyspace: bob
@@ -39,7 +38,6 @@ Feature: Transaction
     Then transaction is open: true
     Then transaction has type: write
     Then transaction has keyspace: bob
-    Then transaction has session has keyspace: bob
 
   Scenario: session can open multiple read transaction
 
