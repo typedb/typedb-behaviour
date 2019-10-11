@@ -24,16 +24,16 @@ Feature: Connection Session
     Given connection does not have any keyspace
 
   Scenario: connection open one session for one keyspace
-    When connection open 1 session for one keyspace: alice
+    When connection open 1 session for one keyspace: grakn
     Then session is null: false
     Then session is open: true
-    Then session has keyspace: alice
+    Then session has keyspace: grakn
 
   Scenario: connection open many sessions for one keyspace
-    When connection open 32 sessions for one keyspace: alice
+    When connection open 32 sessions for one keyspace: grakn
     Then sessions are null: false
     Then sessions are open: true
-    Then sessions have keyspace: alice
+    Then sessions have keyspace: grakn
 
   Scenario: connection open many sessions for many keyspaces
     When connection open many sessions for many keyspaces:
@@ -68,10 +68,10 @@ Feature: Connection Session
       | 12 | neil    |
 
   Scenario: connection open many sessions in parallel for one keyspace
-    When connection open 32 sessions in parallel for one keyspace: alice
+    When connection open 32 sessions in parallel for one keyspace: grakn
     Then sessions in parallel are null: false
     Then sessions in parallel are open: true
-    Then sessions in parallel have keyspace: alice
+    Then sessions in parallel have keyspace: grakn
 
   Scenario: connection open many sessions in parallel for many keyspaces
     When connection open many sessions in parallel for many keyspaces:
