@@ -23,13 +23,13 @@ Feature: Connection Keyspace
     Given connection delete all keyspaces
     Given connection does not have any keyspace
 
-  Scenario: connection can create one keyspace
+  Scenario: create one keyspace
     When  connection create keyspace:
       | alice   |
     Then  connection has keyspace:
       | alice   |
 
-  Scenario: connection can create many keyspaces
+  Scenario: create many keyspaces
     When  connection create keyspaces:
       | alice   |
       | bob     |
@@ -58,7 +58,7 @@ Feature: Connection Keyspace
       | neil    |
 
   @ignore
-  Scenario: connection can create many keyspaces in parallel
+  Scenario: create many keyspaces in parallel
     When  connection create keyspaces in parallel:
       | alice   |
       | bob     |
@@ -86,7 +86,7 @@ Feature: Connection Keyspace
       | mike    |
       | neil    |
 
-  Scenario: connection can delete one keyspace
+  Scenario: delete one keyspace
       # This step should be rewritten once we can create keypsaces without opening sessions
     Given connection create keyspace:
       | alice   |
@@ -139,7 +139,7 @@ Feature: Connection Keyspace
       | neil    |
     Then  connection does not have any keyspace
 
-  Scenario: connection can delete many keyspaces in parallel
+  Scenario: delete many keyspaces in parallel
       # This step should be rewritten once we can create keypsaces without opening sessions
     Given connection create keyspaces in parallel:
       | alice   |

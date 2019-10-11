@@ -23,84 +23,130 @@ Feature: Connection Session
     Given connection delete all keyspaces
     Given connection does not have any keyspace
 
-  Scenario: connection open one session for one keyspace
-    When connection open 1 session for one keyspace: grakn
+  Scenario: for one keyspace, open one session
+    When connection open session for keyspace:
+      | grakn   |
     Then session is null: false
     Then session is open: true
-    Then session has keyspace: grakn
+    Then session has keyspace:
+      | grakn   |
 
-  Scenario: connection open many sessions for one keyspace
-    When connection open 32 sessions for one keyspace: grakn
-    Then sessions are null: false
-    Then sessions are open: true
-    Then sessions have keyspace: grakn
-
-  Scenario: connection open many sessions for many keyspaces
-    When connection open many sessions for many keyspaces:
-      # map of {session-id: keyspace-name}
-      | 1  | alice   |
-      | 2  | bob     |
-      | 3  | charlie |
-      | 4  | dylan   |
-      | 5  | eve     |
-      | 6  | frank   |
-      | 7  | george  |
-      | 8  | heidi   |
-      | 9  | ivan    |
-      | 10 | judy    |
-      | 11 | mike    |
-      | 12 | neil    |
+  Scenario: for one keyspace, open many sessions
+    When connection open sessions for keyspaces:
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
     Then sessions are null: false
     Then sessions are open: true
     Then sessions have keyspaces:
-      # map of {session-id: keyspace-name}
-      | 1  | alice   |
-      | 2  | bob     |
-      | 3  | charlie |
-      | 4  | dylan   |
-      | 5  | eve     |
-      | 6  | frank   |
-      | 7  | george  |
-      | 8  | heidi   |
-      | 9  | ivan    |
-      | 10 | judy    |
-      | 11 | mike    |
-      | 12 | neil    |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
 
-  Scenario: connection open many sessions in parallel for one keyspace
-    When connection open 32 sessions in parallel for one keyspace: grakn
-    Then sessions in parallel are null: false
-    Then sessions in parallel are open: true
-    Then sessions in parallel have keyspace: grakn
-
-  Scenario: connection open many sessions in parallel for many keyspaces
-    When connection open many sessions in parallel for many keyspaces:
-      # map of {session-id: keyspace-name}
-      | 1  | alice   |
-      | 2  | bob     |
-      | 3  | charlie |
-      | 4  | dylan   |
-      | 5  | eve     |
-      | 6  | frank   |
-      | 7  | george  |
-      | 8  | heidi   |
-      | 9  | ivan    |
-      | 10 | judy    |
-      | 11 | mike    |
-      | 12 | neil    |
+  Scenario: for one keyspace, open many sessions in parallel
+    When connection open sessions in parallel for keyspaces:
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
     Then sessions in parallel are null: false
     Then sessions in parallel are open: true
     Then sessions in parallel have keyspaces:
-      # map of {session-id: keyspace-name}
-      | 1  | alice   |
-      | 2  | bob     |
-      | 3  | charlie |
-      | 4  | dylan   |
-      | 5  | eve     |
-      | 6  | frank   |
-      | 7  | george  |
-      | 8  | heidi   |
-      | 9  | ivan    |
-      | 10 | judy    |
-      | 11 | mike    |
-      | 12 | neil    |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+
+  Scenario: for many keyspaces, open many sessions
+    When connection open sessions for keyspaces:
+      | alice   |
+      | bob     |
+      | charlie |
+      | dylan   |
+      | eve     |
+      | frank   |
+      | george  |
+      | heidi   |
+      | ivan    |
+      | judy    |
+      | mike    |
+      | neil    |
+    Then sessions are null: false
+    Then sessions are open: true
+    Then sessions have keyspaces:
+      | alice   |
+      | bob     |
+      | charlie |
+      | dylan   |
+      | eve     |
+      | frank   |
+      | george  |
+      | heidi   |
+      | ivan    |
+      | judy    |
+      | mike    |
+      | neil    |
+
+  Scenario: for many keyspaces, open many sessions in parallel
+    When connection open sessions in parallel for keyspaces:
+      | alice   |
+      | bob     |
+      | charlie |
+      | dylan   |
+      | eve     |
+      | frank   |
+      | george  |
+      | heidi   |
+      | ivan    |
+      | judy    |
+      | mike    |
+      | neil    |
+    Then sessions in parallel are null: false
+    Then sessions in parallel are open: true
+    Then sessions in parallel have keyspaces:
+      | alice   |
+      | bob     |
+      | charlie |
+      | dylan   |
+      | eve     |
+      | frank   |
+      | george  |
+      | heidi   |
+      | ivan    |
+      | judy    |
+      | mike    |
+      | neil    |
