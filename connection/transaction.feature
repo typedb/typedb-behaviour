@@ -55,21 +55,21 @@ Feature: Connection Transaction
     Then transactions have type: write
     Then transactions have keyspace: alice
 
-#  Scenario: session can open multiple read transaction in parallel
-#    Given connection open 1 session for one keyspace: alice
-#    When session open 32 transactions in parallel of type: read
-#    Then transactions in parallel are null: false
-#    Then transactions in parallel are open: true
-#    Then transactions in parallel have type: read
-#    Then transactions in parallel have keyspace: alice
-#
-#  Scenario: session can open multiple write transaction in parallel
-#    Given connection open 1 session for one keyspace: alice
-#    When session open 32 transactions in parallel of type: write
-#    Then transactions in parallel are null: false
-#    Then transactions in parallel are open: true
-#    Then transactions in parallel have type: write
-#    Then transactions in parallel have keyspace: alice
+  Scenario: session can open multiple read transaction in parallel
+    Given connection open 1 session for one keyspace: alice
+    When session open 32 transactions in parallel of type: read
+    Then transactions in parallel are null: false
+    Then transactions in parallel are open: true
+    Then transactions in parallel have type: read
+    Then transactions in parallel have keyspace: alice
+
+  Scenario: session can open multiple write transaction in parallel
+    Given connection open 1 session for one keyspace: alice
+    When session open 32 transactions in parallel of type: write
+    Then transactions in parallel are null: false
+    Then transactions in parallel are open: true
+    Then transactions in parallel have type: write
+    Then transactions in parallel have keyspace: alice
 
 #  Scenario: sessions can each open one read transaction
 #
