@@ -23,50 +23,74 @@ Feature: Connection Transaction
     Given connection delete all keyspaces
     Given connection does not have any keyspace
 
-  Scenario: session can open read transaction
-    Given connection open session for keyspace: alice
-    When session open transaction: read
+  Scenario: session can open one read transaction
+    Given connection open 1 session for one keyspace: alice
+    When session open 1 transaction of type: read
     Then transaction is null: false
     Then transaction is open: true
     Then transaction has type: read
     Then transaction has keyspace: alice
 
-  Scenario: session can open write transaction
-    Given connection open session for keyspace: bob
-    When session open transaction: write
+  Scenario: session can open one write transaction
+    Given connection open 1 session for one keyspace: alice
+    When session open 1 transaction of type: write
     Then transaction is null: false
     Then transaction is open: true
     Then transaction has type: write
-    Then transaction has keyspace: bob
+    Then transaction has keyspace: alice
 
   Scenario: session can open multiple read transaction
+    Given connection open 1 session for one keyspace: alice
+    When session open 32 transactions of type: read
+    Then transactions are null: false
+    Then transactions are open: true
+    Then transactions have type: read
+    Then transactions have keyspace: alice
 
   Scenario: session can open multiple write transaction
+    Given connection open 1 session for one keyspace: alice
+    When session open 32 transactions of type: write
+    Then transactions are null: false
+    Then transactions are open: true
+    Then transactions have type: write
+    Then transactions have keyspace: alice
 
-  Scenario: session can open multiple read transaction in parallel
+#  Scenario: session can open multiple read transaction in parallel
+#    Given connection open 1 session for one keyspace: alice
+#    When session open 32 transactions in parallel of type: read
+#    Then transactions in parallel are null: false
+#    Then transactions in parallel are open: true
+#    Then transactions in parallel have type: read
+#    Then transactions in parallel have keyspace: alice
+#
+#  Scenario: session can open multiple write transaction in parallel
+#    Given connection open 1 session for one keyspace: alice
+#    When session open 32 transactions in parallel of type: write
+#    Then transactions in parallel are null: false
+#    Then transactions in parallel are open: true
+#    Then transactions in parallel have type: write
+#    Then transactions in parallel have keyspace: alice
 
-  Scenario: session can open multiple write transaction in parallel
-
-  Scenario: sessions can open read transaction
-
-  Scenario: sessions can open write transaction
-
-  Scenario: sessions can open multiple read transaction
-
-  Scenario: sessions can open multiple write transaction
-
-  Scenario: sessions can open multiple read transaction in parallel
-
-  Scenario: sessions can open multiple write transaction in parallel
-
-  Scenario: sessions in parallel can open read transaction
-
-  Scenario: sessions in parallel can open write transaction
-
-  Scenario: sessions in parallel can open multiple read transaction
-
-  Scenario: sessions in parallel can open multiple write transaction
-
-  Scenario: sessions in parallel can open multiple read transaction in parallel
-
-  Scenario: sessions in parallel can open multiple write transaction in parallel
+#  Scenario: sessions can each open one read transaction
+#
+#  Scenario: sessions can each open one write transaction
+#
+#  Scenario: sessions can each open multiple read transaction
+#
+#  Scenario: sessions can each open multiple write transaction
+#
+#  Scenario: sessions can each open multiple read transaction in parallel
+#
+#  Scenario: sessions can each open multiple write transaction in parallel
+#
+#  Scenario: sessions in parallel can each open one read transaction
+#
+#  Scenario: sessions in parallel can each open one write transaction
+#
+#  Scenario: sessions in parallel can each open multiple read transaction
+#
+#  Scenario: sessions in parallel can each open multiple write transaction
+#
+#  Scenario: sessions in parallel can each open multiple read transaction in parallel
+#
+#  Scenario: sessions in parallel can each open multiple write transaction in parallel
