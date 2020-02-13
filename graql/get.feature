@@ -15,12 +15,4 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
-Feature: Concept Entity
-
-  Scenario:
-    Given define:
-      | person sub entity;  |
-      | name sub attribute; |
-    When person has name
-    Then insert
+Feature: Graql Get Query
