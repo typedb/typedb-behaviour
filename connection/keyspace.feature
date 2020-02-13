@@ -139,6 +139,7 @@ Feature: Connection Keyspace
       | neil    |
     Then  connection does not have any keyspace
 
+  @ignore
   Scenario: delete many keyspaces in parallel
       # This step should be rewritten once we can create keypsaces without opening sessions
     Given connection create keyspaces in parallel:
