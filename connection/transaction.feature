@@ -406,22 +406,135 @@ Feature: Connection Transaction
       | read    |
       | write   |
 
-#  Scenario: one keyspace, many sessions, each session opens many transactions in parallel to read
-#    Given connection open 32 sessions for one keyspace: grakn
-#    When sessions each open 32 transaction in parallel of type: read
-#    Then transactions in parallel are null: false
-#    Then transactions in parallel are open: true
-#    Then transactions in parallel have type: read
-#
-#  Scenario: one keyspace, many sessions, each session opens many transactions in parallel to write
-#    Given connection open 32 sessions for one keyspace: grakn
-#    When sessions each open 32 transaction in parallel of type: write
-#    Then transactions in parallel are null: false
-#    Then transactions in parallel are open: true
-#    Then transactions in parallel have type: write
-#
-#  Scenario: one keyspace, many sessions, each session opens many transactions in parallel to read and write
-#
+  Scenario: one keyspace, many sessions, many transactions in parallel to read
+    Given connection open session for keyspace:
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+    When for each session, open transactions in parallel of type:
+      | read    |
+      | read    |
+      | read    |
+      | read    |
+      | read    |
+      | read    |
+      | read    |
+      | read    |
+      | read    |
+      | read    |
+      | read    |
+      | read    |
+    Then for each session, transactions in parallel are null: false
+    Then for each session, transactions in parallel are open: true
+    Then for each session, transactions in parallel have type:
+      | read    |
+      | read    |
+      | read    |
+      | read    |
+      | read    |
+      | read    |
+      | read    |
+      | read    |
+      | read    |
+      | read    |
+      | read    |
+      | read    |
+
+  Scenario: one keyspace, many sessions, many transactions in parallel to write
+    Given connection open session for keyspace:
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+    When for each session, open transactions in parallel of type:
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+    Then for each session, transactions in parallel are null: false
+    Then for each session, transactions in parallel are open: true
+    Then for each session, transactions in parallel have type:
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+
+  Scenario: one keyspace, many sessions, many transactions in parallel to read and write
+    Given connection open session for keyspace:
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+      | grakn   |
+    When for each session, open transactions in parallel of type:
+      | read    |
+      | write   |
+      | read    |
+      | write   |
+      | read    |
+      | write   |
+      | read    |
+      | write   |
+      | read    |
+      | write   |
+      | read    |
+      | write   |
+    Then for each session, transactions in parallel are null: false
+    Then for each session, transactions in parallel are open: true
+    Then for each session, transactions in parallel have type:
+      | read    |
+      | write   |
+      | read    |
+      | write   |
+      | read    |
+      | write   |
+      | read    |
+      | write   |
+      | read    |
+      | write   |
+      | read    |
+      | write   |
+
 #  Scenario: one keyspace, many sessions in parallel, one transactions to read
 #
 #  Scenario: one keyspace, many sessions in parallel, one transactions to write
