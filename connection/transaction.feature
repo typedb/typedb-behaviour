@@ -171,15 +171,70 @@ Feature: Connection Transaction
       | read    |
       | read    |
 
-#  Scenario: one keyspace, one session, open many transactions in parallel to write
-#    Given connection open 1 session for one keyspace: grakn
-#    When session open 32 transactions in parallel of type: write
-#    Then transactions in parallel are null: false
-#    Then transactions in parallel are open: true
-#    Then transactions in parallel have type: write
-#
-#  Scenario: one keyspace, one session, open many transactions in parallel to read and write
-#
+  Scenario: one keyspace, one session, open many transactions in parallel to write
+    Given connection open session for keyspace:
+      | grakn   |
+    When for each session, open transactions in parallel of type:
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+    Then for each session, transactions in parallel are null: false
+    Then for each session, transactions in parallel are open: true
+    Then for each session, transactions in parallel have type:
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+      | write   |
+
+  Scenario: one keyspace, one session, open many transactions in parallel to read and write
+    Given connection open session for keyspace:
+      | grakn   |
+    When for each session, open transactions in parallel of type:
+      | read    |
+      | write   |
+      | read    |
+      | write   |
+      | read    |
+      | write   |
+      | read    |
+      | write   |
+      | read    |
+      | write   |
+      | read    |
+      | write   |
+    Then for each session, transactions in parallel are null: false
+    Then for each session, transactions in parallel are open: true
+    Then for each session, transactions in parallel have type:
+      | read    |
+      | write   |
+      | read    |
+      | write   |
+      | read    |
+      | write   |
+      | read    |
+      | write   |
+      | read    |
+      | write   |
+      | read    |
+      | write   |
+
 #  Scenario: one keyspace, many sessions, each session opens one transaction to read
 #    Given connection open 32 sessions for one keyspace: grakn
 #    When sessions each open 1 transaction of type: read
