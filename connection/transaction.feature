@@ -30,12 +30,11 @@ Feature: Connection Transaction
       | read    |
     Then for each session, transaction is null: false
     Then for each session, transaction is open: true
-    Then for each session, transaction has type: read
-    Then for all sessions, transaction has keyspace:
-      | grakn   |
+    Then for each session, transaction has type:
+      | read    |
 
   Scenario: for one keyspace and one session, open one transaction to write
-    Given connection open session for one keyspace:
+    Given connection open session for keyspace:
       | grakn   |
     When for each session, open transaction of type:
       | write   |
@@ -43,11 +42,9 @@ Feature: Connection Transaction
     Then for each session, transaction is open: true
     Then for each session, transaction has type:
       | write   |
-    Then for all sessions, transaction has keyspace:
-      | grakn   |
 
   Scenario: for one keyspace and one session, open many transactions to read
-    Given connection open session for one keyspace:
+    Given connection open session for keyspace:
       | grakn   |
     When for each session, open transactions of type:
       | read    |
@@ -77,11 +74,9 @@ Feature: Connection Transaction
       | read    |
       | read    |
       | read    |
-    Then for all sessions, transactions have keyspace:
-      | grakn   |
 
   Scenario: for one keyspace and one session, open many transactions to write
-    Given connection open session for one keyspace:
+    Given connection open session for keyspace:
       | grakn   |
     When for each session, open transactions of type:
       | write   |
@@ -111,29 +106,38 @@ Feature: Connection Transaction
       | write   |
       | write   |
       | write   |
-    Then for all sessions, transactions have keyspace:
-      | grakn   |
 
   Scenario: for one keyspace and one session, open many transactions to read and write
-    Given connection open 1 session for one keyspace: grakn
-    When session open many transactions of type:
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
+    Given connection open session for keyspace:
+      | grakn   |
+    When for each session, open transactions of type:
+      | read    |
+      | write   |
+      | read    |
+      | write   |
+      | read    |
+      | write   |
+      | read    |
+      | write   |
+      | read    |
+      | write   |
+      | read    |
+      | write   |
     Then for each session, transactions are null: false
     Then for each session, transactions are open: true
     Then for each session, transactions have type:
-    Then for all sessions, transactions have keyspace:
-      | grakn   |
+      | read    |
+      | write   |
+      | read    |
+      | write   |
+      | read    |
+      | write   |
+      | read    |
+      | write   |
+      | read    |
+      | write   |
+      | read    |
+      | write   |
 
 #  Scenario: for one keyspace and one session, open many transactions in parallel of type read
 #    Given connection open 1 session for one keyspace: grakn
