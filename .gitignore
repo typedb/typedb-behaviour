@@ -45,7 +45,7 @@ logs/
 # Analytics files #
 grakn-test/db/
 grakn-test/output/
-grakn-test/*.txt
+grakn-grakn.verification.tools.operator.test/*.txt
 
 # Sample Date Files #
 grakn-test/test-biomed/data/*

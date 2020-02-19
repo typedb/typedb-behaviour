@@ -1,0 +1,88 @@
+#
+# GRAKN.AI - THE KNOWLEDGE GRAPH
+# Copyright (C) 2019 Grakn Labs Ltd
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+
+version: 2.1
+commands:
+  install-bazel-linux-rbe:
+    steps:
+      - run: curl -OL https://raw.githubusercontent.com/graknlabs/build-tools/master/ci/install-bazel-linux.sh
+      - run: bash ./install-bazel-linux.sh && rm ./install-bazel-linux.sh
+      - run: curl -OL https://raw.githubusercontent.com/graknlabs/build-tools/master/ci/install-bazel-rbe.sh
+      - run: bash ./install-bazel-rbe.sh && rm ./install-bazel-rbe.sh
+
+  install-pandoc-latex:
+    steps:
+      - run: sudo apt-get update
+      - run: sudo apt-get install pandoc texlive-latex-base texlive-latex-extra texlive-fonts-recommended xzdec
+
+  run-bazel-rbe:
+    parameters:
+      command:
+        type: string
+    steps:
+      - run: bazel run @graknlabs_build_tools//ci:run-bazel-rbe -- << parameters.command >>
+
+jobs:
+  build:
+    machine: true
+    working_directory: ~/verification
+    steps:
+      - install-bazel-linux-rbe
+      - checkout
+      - run-bazel-rbe:
+          command: bazel build //...
+      - run: bazel run @graknlabs_build_tools//unused_deps -- list
+
+  build-checkstyle:
+    machine: true
+    working_directory: ~/verification
+    steps:
+      - install-bazel-linux-rbe
+      - checkout
+      - run: bazel run @graknlabs_build_tools//checkstyle:test-coverage
+      - run-bazel-rbe:
+          command: bazel test $(bazel query 'kind(checkstyle_test, //...)')
+
+  build-pdf:
+    machine: true
+    working_directory: ~/verification
+    steps:
+      - install-pandoc-latex
+      - checkout
+      - run: |
+          cd theory
+          for f in `find semantics -name '*.md'`; do echo $f; pandoc -o $f.pdf $f; done;
+          for f in `find subsumption -name '*.md'`; do echo $f; pandoc -o $f.pdf $f; done;
+
+  test-tools:
+    machine: true
+    working_directory: ~/verification
+    steps:
+      - install-bazel-linux-rbe
+      - checkout
+      - run: dependencies/maven/update.sh
+      - run-bazel-rbe:
+          command: bazel test //tools/... --test_output=errors
+
+workflows:
+  verification:
+    jobs:
+      - build
+      - build-checkstyle
+      - build-pdf
+      - test-tools

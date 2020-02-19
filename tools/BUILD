@@ -17,3 +17,21 @@
 #
 
 package(default_visibility = ["//visibility:public"])
+load("@graknlabs_build_tools//checkstyle:rules.bzl", "checkstyle_test")
+
+java_library(
+    name = "operator",
+    srcs = glob(["operator/*.java"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "//dependencies/maven/artifacts/com/google/guava",
+        "@graknlabs_graql//java:graql",
+    ],
+)
+
+checkstyle_test(
+    name = "checkstyle",
+    targets = [
+        ":operator",
+    ],
+)
