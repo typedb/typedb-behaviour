@@ -17,24 +17,29 @@
  *
  */
 
-package grakn.verification.tools.operator;
+package grakn.verification.tools.operator.range;
 
-public class Operators {
+import graql.lang.property.ValueProperty;
+import java.util.Set;
 
-    public static Operator identity(){
-        return new IdentityOperator();
-    }
+public interface Range<T> {
 
-    public static Operator typeGeneralise(){ return new TypeGeneraliseOperator();}
+    T lowerBound();
+    T upperBound();
 
-    public static Operator roleGeneralise(){ return new RoleGeneraliseOperator();}
+    /**
+     * @param that range to merge with
+     * @return range being a subrange of this and provided ranges
+     */
+    Range<T> merge(Range<T> that);
 
-    public static Operator removeSubstitution(){ return new RemoveSubstitutionOperator();}
+    /**
+     * @return a range that contains this range (a generalisation of this range)
+     */
+    Range<T> generalise();
 
-    public static Operator removeRoleplayer(){ return new RemoveRoleplayerOperator();}
-
-    public static Operator generaliseAttribute(){ return new GeneraliseAttributeOperator();}
-
-    public static Operator fuzzVariables(){ return new VariableFuzzyingOperator();}
-
+    /**
+     * @return Set of ValueProperty that corresponds to this range.
+     */
+    Set<ValueProperty> toProperties();
 }

@@ -17,24 +17,16 @@
  *
  */
 
-package grakn.verification.tools.operator;
+package grakn.verification.tools.operator.range;
 
-public class Operators {
+import graql.lang.property.ValueProperty;
 
-    public static Operator identity(){
-        return new IdentityOperator();
+public class Ranges {
+
+    public static Range create(ValueProperty vp){
+        if(vp.operation().value() instanceof Number) {
+            return NumberRange.create(vp.operation().comparator(), vp.operation().value());
+        }
+        return null;
     }
-
-    public static Operator typeGeneralise(){ return new TypeGeneraliseOperator();}
-
-    public static Operator roleGeneralise(){ return new RoleGeneraliseOperator();}
-
-    public static Operator removeSubstitution(){ return new RemoveSubstitutionOperator();}
-
-    public static Operator removeRoleplayer(){ return new RemoveRoleplayerOperator();}
-
-    public static Operator generaliseAttribute(){ return new GeneraliseAttributeOperator();}
-
-    public static Operator fuzzVariables(){ return new VariableFuzzyingOperator();}
-
 }
