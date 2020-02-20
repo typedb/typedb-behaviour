@@ -32,13 +32,12 @@ import graql.lang.property.NeqProperty;
 import graql.lang.property.ValueProperty;
 import graql.lang.property.VarProperty;
 import graql.lang.statement.Variable;
-import org.junit.Test;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.junit.Test;
 
 import static graql.lang.Graql.and;
 import static graql.lang.Graql.var;
@@ -278,6 +277,42 @@ public class OperatorTest {
         Pattern input = and(var("x").isa("subEntity"));
         Set<Pattern> output = Operators.removeRoleplayer().apply(input, ctx).collect(Collectors.toSet());
         assertEquals(Sets.newHashSet(input), output);
+    }
+
+    @Test
+    public void whenApplyingGeneraliseAttributeOperator_weExtendTheValueRange(){
+        Pattern input = and(var("x").has("someAttribute", Graql.var().eq(1500)));
+
+        Set<Pattern> expectedOutput = Sets.newHashSet(
+                and(var("x").has("someAttribute", Graql.var().lt(4500.0).gt(-1500.0)))
+        );
+
+        Set<Pattern> output = Stream.of(input)
+                .flatMap(p -> Operators.generaliseAttribute().apply(p, ctx))
+                .flatMap(p -> Operators.generaliseAttribute().apply(p, ctx))
+                .flatMap(p -> Operators.generaliseAttribute().apply(p, ctx))
+                .collect(Collectors.toSet());
+        assertEquals(expectedOutput, output);
+
+        input = and(
+                var("x").has("someAttribute", Graql.var().gt(16)),
+                var("x").has("someAttribute", Graql.var().lt(64))
+        );
+
+        expectedOutput = Sets.newHashSet(
+                and(
+                        var("x").has("someAttribute", var().gt(8.0)),
+                        var("x").has("someAttribute", var().lt(64))),
+                and(
+                        var("x").has("someAttribute", var().gt(16)),
+                        var("x").has("someAttribute", var().lt(96.0))),
+                and(
+                        var("x").has("someAttribute", var().gt(8.0)),
+                        var("x").has("someAttribute", var().lt(96.0)))
+        );
+
+        output = Operators.generaliseAttribute().apply(input, ctx).collect(Collectors.toSet());
+        assertEquals(expectedOutput, output);
     }
 
     @Test
