@@ -19,16 +19,40 @@
 
 package grakn.verification.tools.operator;
 
+import com.google.common.collect.Sets;
 import graql.lang.Graql;
+import graql.lang.pattern.Pattern;
 import graql.lang.property.RelationProperty;
 import graql.lang.statement.Statement;
 
+import graql.lang.statement.Variable;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Utils {
+
+    static Pattern sanitise(Pattern p, Pattern src){
+        Set<Variable> toRemove = Sets.difference(rolePlayerVariables(src), rolePlayerVariables(p));
+        return Graql.and(
+                p.statements().stream()
+                        .filter(st -> !st.properties().isEmpty())
+                        .filter(s -> !toRemove.contains(s.var()))
+                        .collect(Collectors.toList())
+        );
+    }
+
+    static Set<Variable> rolePlayerVariables(Pattern p){
+        return p.statements().stream()
+                .flatMap(s -> s.properties().stream())
+                .filter(RelationProperty.class::isInstance)
+                .map(RelationProperty.class::cast)
+                .flatMap(rp -> rp.relationPlayers().stream())
+                .map(rp -> rp.getPlayer().var())
+                .collect(Collectors.toSet());
+    }
 
     static RelationProperty relationProperty(Collection<RelationProperty.RolePlayer> relationPlayers) {
         if (relationPlayers.isEmpty()) return null;
