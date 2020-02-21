@@ -36,12 +36,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static grakn.verification.tools.operator.Utils.sanitise;
 import static java.util.stream.Collectors.toSet;
 
 /**
  * Generates a set of generalised patterns by removing existing roleplayers.
  * The set is computed from a Cartesian product of sets of statements each containing a single roleplayer removal
  * - the set is computed in analogous fashion to RemoveSubstitutionOperator for substitution removal.
+ *
  */
 public class RemoveRoleplayerOperator implements Operator {
 
@@ -50,19 +52,14 @@ public class RemoveRoleplayerOperator implements Operator {
         if (!src.statements().stream().flatMap(s -> s.getProperties(RelationProperty.class)).findFirst().isPresent()){
             return Stream.of(src);
         }
-
         List<Set<Statement>> transformedStatements = src.statements().stream()
                 .map(this::transformStatement)
                 .collect(Collectors.toList());
         return Sets.cartesianProduct(transformedStatements).stream()
                 .map(Graql::and)
                 .filter(p -> !p.equals(src))
-                .map(p -> Graql.and(
-                        p.statements().stream()
-                                .filter(st -> !st.properties().isEmpty())
-                                .collect(toSet())
-                        )
-                );
+                .map(p -> sanitise(p, src))
+                .filter(p -> !p.statements().isEmpty());
     }
 
     private Set<Statement> transformStatement(Statement src){
