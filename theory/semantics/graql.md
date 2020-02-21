@@ -2,7 +2,7 @@
 
 We use [[ `expr` ]]  instead of the actual joined double brackets to represent denotations
 
-So, we need to take each Graql expression `E` and define the denotation [`E`] in our mathematical domain. We use the domain theoretic definitions.
+So, we need to take each Graql expression `E` and define the denotation [[`E`]] in our mathematical domain. We use the domain theoretic definitions.
 
 ## Graql Syntax
 
@@ -51,20 +51,24 @@ Get = Var | Var, Get
 
 ## Denotational Semantics
 
-Let $Var$ be the countably infinite set of all variable names.
-
-[[`Var`]] = $Var$  -- ie. `Var` is mapped to domain $Var$ \
-[[`Type`]] = $Lab$ \
-[[`TypeOrVar`]] = $Var \cup Lab$ \
-[[`Datatype`]] = $Datatype$ \
-[[`Regex`]] = $Regex$ \
-[[`Id`]] = $Id$ \
-[[`Value`]] = $Val$
-
-Answers have the following domain:
+In combination with the domains defined for $KG$, we also define the following domains:
 
 $Answer = \Pi_{n=0}^{n=\infty} (Var, (Type \cup I))$  \
 In other words, an answer is any length list of pairs, where each pair is a Variable mapped to a type or instance.
+
+$Var$ = countably infinite set of all valid variable strings preceded by $
+
+$Id$ = set of all possible IDs
+
+The following syntactic elements have the direct mapping into semantic domains:
+
+[[`Var`]] - $Var$  -- ie. `Var` is mapped to domain $Var$ \
+[[`Type`]] - $Lab$ \
+[[`TypeOrVar`]] - $Var \cup Lab$ \
+[[`Datatype`]] - $Datatype$ \
+[[`Regex`]] - $Regex$ \
+[[`Id`]] - $Id$ \
+[[`Value`]] - $Values$
 
 A Graql query takes the following form: `Q -> A`, with `Q` being the query and `->` being the evaluation to an [LIST OF??] answer `A`.
 
