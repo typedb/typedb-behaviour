@@ -26,6 +26,7 @@ import grakn.verification.tools.operator.Operator;
 import grakn.verification.tools.operator.Operators;
 import grakn.verification.tools.operator.TypeContext;
 import graql.lang.Graql;
+import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Pattern;
 import graql.lang.property.IsaProperty;
 import graql.lang.property.NeqProperty;
@@ -124,6 +125,27 @@ public class OperatorTest {
         Pattern output = Iterables.getOnlyElement(
                 Operators.roleGeneralise().apply(input, ctx).collect(Collectors.toSet())
         );
+        assertEquals(expectedOutput, output);
+
+
+    }
+
+    @Test
+    public void whenGeneralisingRoles_weRemoveStrayStatementsIfRPIsRemoved(){
+        Pattern input = and(
+                var("r").rel(var("rx"), var("x")).rel(var("ry"), var("y")),
+                var("x").isa("someType"),
+                var("y").isa("someType")
+        );
+        Set<Pattern> expectedOutput = Sets.newHashSet(
+                and(
+                        var("r").rel(var("rx"), var("x")),
+                        var("x").isa("someType")),
+                and(
+                        var("r").rel(var("ry"), var("y")),
+                        var("y").isa("someType"))
+        );
+        Set<Pattern> output = Operators.roleGeneralise().apply(input, ctx).collect(Collectors.toSet());
         assertEquals(expectedOutput, output);
     }
 
@@ -268,6 +290,25 @@ public class OperatorTest {
                 and(var("r").rel(var("z")).isa("baseRelation"))
         );
 
+        Set<Pattern> output = Operators.removeRoleplayer().apply(input, ctx).collect(Collectors.toSet());
+        assertEquals(expectedOutput, output);
+    }
+
+    @Test
+    public void whenApplyingRemoveRoleplayerOperator_weRemoveStrayStatements(){
+        Pattern input = and(
+                var("r").rel(var("rx"), var("x")).rel(var("ry"), var("y")),
+                var("x").isa("someType"),
+                var("y").isa("someType")
+        );
+        Set<Pattern> expectedOutput = Sets.newHashSet(
+                and(
+                        var("r").rel(var("rx"), var("x")),
+                        var("x").isa("someType")),
+                and(
+                        var("r").rel(var("ry"), var("y")),
+                        var("y").isa("someType"))
+        );
         Set<Pattern> output = Operators.removeRoleplayer().apply(input, ctx).collect(Collectors.toSet());
         assertEquals(expectedOutput, output);
     }
