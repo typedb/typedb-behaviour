@@ -119,9 +119,9 @@ NOTE to self: in general, the instances stored must be flat ie. directly mapped 
   * $\forall d, a, t_a. (d, a) \in has_d \wedge (a, t_a) \in isa \implies t_a \in Type_{attribute}$ -- can only own instances that have Attribute type
   * $\forall d, t_d, a, t_a. (d, a) \in has_d \wedge (d, t_d) \in isa \wedge (a, t_a) \in isa \implies (t_d, t_a) \in has_{trans}$ -- can only own instances of type allowed by the schema
 * $key_D$ is similar to `has_D`, plus unique ownership restrictions
-  * $\forall d, a, t_a. (d, a) \in key_d \wedge (a, t_a) \in isa \implies t_a \in Type_{attribute}$ -- can only key instances that have Attribute type
+  * $\forall d, a, t_a. (d, a) \in key_D \wedge (a, t_a) \in isa \implies t_a \in Type_{attribute}$ -- can only key instances that have Attribute type
   * $\forall d, d', k, t. (d, k) \in key_D \wedge (d', k) \in key_D \wedge (d, t) \in isa \wedge (d', t) \in isa \implies d = d'$ -- two elements of the same type cannot have the same key
-  * $\forall d, k, k', t. (d,k) \in key \wedge (d, k') \in key \wedge (k, t) \in isa \wedge (k', t) \in isa \implies k = k'$ -- an element can not have more than one key of the same type
+ * $\forall d, k, k', t. (d,k) \in key_d \wedge (d, k') \in key \wedge (k, t) \in isa \wedge (k', t) \in isa \implies k = k'$ -- an element can not have more than one key of the same type (?)
   * $\forall d, t_d, k, t_k. (d, k) \in key_d \wedge (d, t_d) \in isa \wedge (k, t_k) \in isa \implies (t_d, t_k) \in key_{trans}$ -- can only key instances of type allowed by the schema
   * $\forall d, t_d, t_k \exists k. (d, t_d) \in isa \wedge (t_d, t_k) \in key_{trans} \implies (k, t_k) \in isa \wedge (d, k) \in key_D$ -- every instance that is of a type that is associated with a key, must have a key
 * Values are unique per attribute type

@@ -87,15 +87,19 @@ The least element $\bot$ is the tuple of empty tuples.
 
 We define the domain $Data$:
 
-$Data = Instances \times Isa \times Rel \times Has_D \times Key_D$
+$Data = Instances \times Isa \times Rel \times Has_D \times Key_D \times Val$
 
 Set $I = Naturals$
+
+Set $Values = all possible strings, longs, doubles, dates, and booleans$
 
 Domain $Instances = \wp (I)$.  \
 Domain $Isa = \wp (I \times T)$ \
 Domain $Rel = \wp (I \times I \times T)$ \
 Domain $Has_D = \wp (I \times I)$ \
 Domain $Key_D = \wp (I \times I)$ \
+
+Domain $Val = I \rightarrow Values$
 
 
 
