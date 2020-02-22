@@ -26,7 +26,6 @@ import grakn.verification.tools.operator.Operator;
 import grakn.verification.tools.operator.Operators;
 import grakn.verification.tools.operator.TypeContext;
 import graql.lang.Graql;
-import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Pattern;
 import graql.lang.property.IsaProperty;
 import graql.lang.property.NeqProperty;
@@ -104,6 +103,26 @@ public class OperatorTest {
                         var("y").isa("subEntity"))
         );
 
+        Set<Pattern> output = Operators.typeGeneralise().apply(input, ctx).collect(Collectors.toSet());
+        assertEquals(expectedOutput, output);
+    }
+
+    @Test
+    public void whenApplyingGeneraliseTypeOperatorToStatementWithVariableType_weRemoveBareIsaStatements(){
+        Pattern input = and(
+                var("r")
+                        .rel(var("rx"), var("x"))
+                        .isa(var("rtype")),
+                var("x").isa("subEntity")
+        );
+        Set<Pattern> expectedOutput = Sets.newHashSet(
+                and(
+                        var("r")
+                                .rel(var("rx"), var("x"))
+                                .isa(var("rtype")),
+                        var("x").isa("baseEntity")
+                )
+        );
         Set<Pattern> output = Operators.typeGeneralise().apply(input, ctx).collect(Collectors.toSet());
         assertEquals(expectedOutput, output);
     }

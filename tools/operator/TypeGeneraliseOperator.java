@@ -62,7 +62,10 @@ public class TypeGeneraliseOperator implements Operator {
         if (isaProperty == null) return src;
 
         String type = isaProperty.type().getType().orElse(null);
-        if (type == null) return null;
+        //we only remove the statement if it's a bare ISA (not relation)
+        if (type == null){
+            return src.properties().size() == 1? null : src;
+        }
 
         LinkedHashSet<VarProperty> properties = new LinkedHashSet<>(src.properties());
         properties.remove(isaProperty);
