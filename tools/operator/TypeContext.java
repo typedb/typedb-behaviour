@@ -27,4 +27,6 @@ public interface TypeContext {
     String sup(String label);
     Stream<String> sups(String label);
     Stream<String> subs(String label);
+
+    String instanceId();
 }

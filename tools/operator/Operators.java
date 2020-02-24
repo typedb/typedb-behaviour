@@ -37,4 +37,6 @@ public class Operators {
 
     public static Operator fuzzVariables(){ return new VariableFuzzyingOperator();}
 
+    public static Operator fuzzIds(){ return new IdFuzzyingOperator();}
+
 }

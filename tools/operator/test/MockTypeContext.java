@@ -21,9 +21,14 @@ package grakn.verification.tools.operator.test;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import grakn.verification.tools.operator.TypeContext;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -43,6 +48,8 @@ public class MockTypeContext implements TypeContext {
             .add("entity").add("relation")
             .build();
 
+    private final List<String> ids = Lists.newArrayList("123", "456", "789");
+
     @Override
     public boolean isMetaType(String label) {
         return metaTypes.contains(label);
@@ -61,5 +68,11 @@ public class MockTypeContext implements TypeContext {
     @Override
     public Stream<String> subs(String label) {
         return Stream.empty();
+    }
+
+    @Override
+    public String instanceId() {
+        Collections.shuffle(ids);
+        return ids.stream().findFirst().orElse(null);
     }
 }
