@@ -33,6 +33,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.management.relation.Relation;
+
+import static grakn.verification.tools.operator.Utils.rolePlayerVariables;
+import static grakn.verification.tools.operator.Utils.sanitise;
 
 /**
  * Generates a set of generalised patterns by removing generalising roles within relations.
@@ -50,7 +54,10 @@ public class RoleGeneraliseOperator implements Operator {
                 .collect(Collectors.toList());
         //we obtain a set of all possible patterns by computing a CP between sets of possible generalisation
         //of all statements
-        return Sets.cartesianProduct(transformedStatements).stream().map(Graql::and);
+        return Sets.cartesianProduct(transformedStatements).stream()
+                .map(Graql::and)
+                .map(p -> sanitise(p, src))
+                .filter(p -> !p.statements().isEmpty());
     }
 
     /**

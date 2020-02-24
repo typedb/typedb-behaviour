@@ -43,6 +43,32 @@ Feature: Connection Transaction
     Then for each session, transaction has type:
       | write   |
 
+  Scenario: one keyspace, one session, one committed write transaction is closed
+    Given connection open session for keyspace:
+      | grakn   |
+    When for each session, open transaction of type:
+      | write   |
+    Then for each session, transaction commits successfully: true
+    Then for each session, transaction is open: false
+
+  Scenario: one keyspace, one session, re-committing transaction throws
+    Given connection open session for keyspace:
+      | grakn   |
+    When for each session, open transaction of type:
+      | write   |
+    Then for each session, transaction commits successfully: true
+    Then for each session, transaction commits successfully: false
+
+  Scenario: one keyspace, one session, transaction close is idempotent
+    Given connection open session for keyspace:
+      | grakn   |
+    When for each session, open transaction of type:
+      | write   |
+    Then for each session, transaction close
+    Then for each session, transaction is open: false
+    Then for each session, transaction close
+    Then for each session, transaction is open: false
+
   Scenario: one keyspace, one session, many transactions to read
     Given connection open session for keyspace:
       | grakn   |
