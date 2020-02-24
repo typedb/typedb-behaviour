@@ -48,7 +48,7 @@ Feature: Connection Transaction
       | grakn   |
     When for each session, open transaction of type:
       | write   |
-    Then for each session, transaction commit
+    Then for each session, transaction commits successfully: true
     Then for each session, transaction is open: false
 
   Scenario: one keyspace, one session, re-committing transaction throws
@@ -56,8 +56,8 @@ Feature: Connection Transaction
       | grakn   |
     When for each session, open transaction of type:
       | write   |
-    Then for each session, transaction commit
-    Then for each session, transaction commit throws
+    Then for each session, transaction commits successfully: true
+    Then for each session, transaction commits successfully: false
 
   Scenario: one keyspace, one session, transaction close is idempotent
     Given connection open session for keyspace:
