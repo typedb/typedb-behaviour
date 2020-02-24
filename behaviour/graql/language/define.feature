@@ -36,7 +36,7 @@ Feature: Graql Define Query
     Given graql define
       | define dog sub entity; |
     Given the integrity is validated
-    When executing graql query
+    When get answers of graql query
       | match $x type dog; get; |
     # do we want to also check the number of answers
     Then answers have concepts labeled
@@ -49,7 +49,7 @@ Feature: Graql Define Query
       | define child sub person;  |
     Given the integrity is validated
 
-    When executing graql query
+    When get answers of graql query
       | match $x sub person; get; |
     Then answers have concepts labeled
       | x      |
@@ -62,7 +62,7 @@ Feature: Graql Define Query
       | define child sub person; |
     Given the integrity is validated
 
-    When executing graql query
+    When get answers of graql query
       | match $x plays employee; get; |
 
     Then answers have concepts labeled
@@ -76,7 +76,7 @@ Feature: Graql Define Query
       | define child sub person; |
     Given the integrity is validated
 
-    When executing graql query
+    When get answers of graql query
       | match $x has name; get; |
 
     Then answers have concepts labeled
@@ -90,7 +90,7 @@ Feature: Graql Define Query
       | define child sub person; |
     Given the integrity is validated
 
-    When executing graql query
+    When get answers of graql query
       | match $x key email; get; |
 
     Then answers have concepts labeled
@@ -106,7 +106,7 @@ Feature: Graql Define Query
       | define part-time-employment sub employment; |
     Given the integrity is validated
 
-    When executing graql query
+    When get answers of graql query
       | match $x relates employee; get; |
 
     Then answers have concepts labeled
@@ -122,7 +122,7 @@ Feature: Graql Define Query
       | define part-time-employment sub employment, relates part-timer as employee; |
     Given the integrity is validated
 
-    When executing graql query
+    When get answers of graql query
       | match $x relates employee; get; |
     Then answers have concepts labeled
       | x                    |
@@ -145,7 +145,7 @@ Feature: Graql Define Query
       | define first-name sub name;   |
     Given the integrity is validated
 
-    When executing graql query
+    When get answers of graql query
       | match $x datatype string; get; |
     Then answers have concepts labeled
       | x          |
@@ -170,7 +170,7 @@ Feature: Graql Define Query
       | person sub entity, plays employer; |
     Given the integrity is validated
 
-    When executing graql query
+    When get answers of graql query
       | match $x type child, plays $r; get; |
 
     Then answers have concepts labeled
@@ -191,7 +191,7 @@ Feature: Graql Define Query
       | person sub entity, has phone-number;       |
     Given the integrity is validated
 
-    When executing graql query
+    When get answers of graql query
       | match $x type child, has $y; get; |
 
     Then answers have concepts labeled
@@ -210,7 +210,7 @@ Feature: Graql Define Query
       | person sub entity, key phone-number;       |
     Given the integrity is validated
 
-    When executing graql query
+    When get answers of graql query
       | match $x type child, key $y; get; |
 
     Then answers have concepts labeled
@@ -228,7 +228,7 @@ Feature: Graql Define Query
       | employment sub relation, relates employer; |
     Given the integrity is validated
 
-    When executing graql query
+    When get answers of graql query
       | match $x type part-time-employment, relates $r; get; |
 
     Then answers have concepts labeled
@@ -250,7 +250,7 @@ Feature: Graql Define Query
 
 
   Scenario: defining an attribute key- and owner-ship creates the implicit attribute key/ownership relation types
-    When executing graql query
+    When get answers of graql query
       | match $x sub relation; get;  |
     Then answers have concepts labeled
       | x              |
@@ -267,7 +267,7 @@ Feature: Graql Define Query
       | define first-name sub name; person sub entity, has first-name; |
     Given the integrity is validated
 
-    When executing graql query
+    When get answers of graql query
       | match $child sub $super; $super sub @has-attribute; get;  |
     Then answers have concepts labeled
       | child           | super            |
