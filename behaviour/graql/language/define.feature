@@ -22,20 +22,21 @@ Feature: Graql Define Query
     Given connection delete all keyspaces
     Given connection open sessions for keyspaces:
       | test_define_keyspace |
-    Given the schema
+    Given the integrity is validated
+    Given graql define
       | define                                                        |
       | person sub entity, plays employee, has name, key email;       |
       | employment sub relation, relates employee;                    |
       | name sub attribute, datatype string;                          |
       | email sub attribute, datatype string;                         |
-    Given the KB is valid
+    Given the integrity is validated
 
 
   Scenario: define a subtype creates a type
-    Given the schema
+    Given graql define
       | define dog sub entity; |
-    Given the KB is valid
-    When executing
+    Given the integrity is validated
+    When executing graql query
       | match $x type dog; get; |
     # do we want to also check the number of answers
     Then answers have concepts labeled
@@ -44,23 +45,24 @@ Feature: Graql Define Query
 
 
   Scenario: define subtype creates child of supertype
-    Given the schema
+    Given graql define
       | define child sub person;  |
-    Given the KB is valid
+    Given the integrity is validated
 
-    When executing
+    When executing graql query
       | match $x sub person; get; |
     Then answers have concepts labeled
       | x      |
       | person |
       | child  |
 
-  Scenario: define entity subtype inherits 'plays' from supertypes
-    Given the schema
-      | define child sub person; |
-    Given the KB is valid
 
-    When executing
+  Scenario: define entity subtype inherits 'plays' from supertypes
+    Given graql define
+      | define child sub person; |
+    Given the integrity is validated
+
+    When executing graql query
       | match $x plays employee; get; |
 
     Then answers have concepts labeled
@@ -70,11 +72,11 @@ Feature: Graql Define Query
 
 
   Scenario: define entity subtype inherits 'has' from supertypes
-    Given the schema
+    Given graql define
       | define child sub person; |
-    Given the KB is valid
+    Given the integrity is validated
 
-    When executing
+    When executing graql query
       | match $x has name; get; |
 
     Then answers have concepts labeled
@@ -84,11 +86,11 @@ Feature: Graql Define Query
 
 
   Scenario: define entity inherits 'key' from supertypes
-    Given the schema
+    Given graql define
       | define child sub person; |
-    Given the KB is valid
+    Given the integrity is validated
 
-    When executing
+    When executing graql query
       | match $x key email; get; |
 
     Then answers have concepts labeled
@@ -100,11 +102,11 @@ Feature: Graql Define Query
   @ignore
   # re-enable when 'relates' is inherited
   Scenario: define relation subtype inherits 'relates' from supertypes without role subtyping
-    Given the schema
+    Given graql define
       | define part-time-employment sub employment; |
-    Given the KB is valid
+    Given the integrity is validated
 
-    When executing
+    When executing graql query
       | match $x relates employee; get; |
 
     Then answers have concepts labeled
@@ -116,11 +118,11 @@ Feature: Graql Define Query
   @ignore
   # re-enable when 'relates' is bound to a relation and blockable
   Scenario: define relation subtype with role subtyping blocks parent role
-    Given the schema
+    Given graql define
       | define part-time-employment sub employment, relates part-timer as employee; |
-    Given the KB is valid
+    Given the integrity is validated
 
-    When executing
+    When executing graql query
       | match $x relates employee; get; |
     Then answers have concepts labeled
       | x                    |
@@ -139,11 +141,11 @@ Feature: Graql Define Query
 
 
   Scenario: define attribute subtype has same datatype as supertype
-    Given the schema
+    Given graql define
       | define first-name sub name;   |
-    Given the KB is valid
+    Given the integrity is validated
 
-    When executing
+    When executing graql query
       | match $x datatype string; get; |
     Then answers have concepts labeled
       | x          |
@@ -158,17 +160,17 @@ Feature: Graql Define Query
 
 
   Scenario: define additional 'plays' is visible from all children
-    Given the schema
+    Given graql define
       | define employment sub relation, relates employer; |
-    Given the KB is valid
+    Given the integrity is validated
 
-    Given the schema
+    Given graql define
       | define                             |
       | child sub person;                  |
       | person sub entity, plays employer; |
-    Given the KB is valid
+    Given the integrity is validated
 
-    When executing
+    When executing graql query
       | match $x type child, plays $r; get; |
 
     Then answers have concepts labeled
@@ -178,17 +180,18 @@ Feature: Graql Define Query
       | child  | @has-name-owner  |
       | child  | @key-email-owner  |
 
+
   @ignore
   # re-enable when we can query schema 'has' and 'key' with variables eg: 'match $x type ___, has key $a; get;'
   Scenario: define additional 'has' is visible from all children
-    Given the schema
+    Given graql define
       | define                                     |
       | child sub person;                          |
       | phone-number sub attribute, datatype long; |
       | person sub entity, has phone-number;       |
-    Given the KB is valid
+    Given the integrity is validated
 
-    When executing
+    When executing graql query
       | match $x type child, has $y; get; |
 
     Then answers have concepts labeled
@@ -200,14 +203,14 @@ Feature: Graql Define Query
   @ignore
   # re-enable when we can query schema 'has' and 'key' with variables eg: 'match $x type ___, has key $a; get;'
   Scenario: define additional 'key' is visible from all children
-    Given the schema
+    Given graql define
       | define                                     |
       | child sub person;                          |
       | phone-number sub attribute, datatype long; |
       | person sub entity, key phone-number;       |
-    Given the KB is valid
+    Given the integrity is validated
 
-    When executing
+    When executing graql query
       | match $x type child, key $y; get; |
 
     Then answers have concepts labeled
@@ -215,16 +218,17 @@ Feature: Graql Define Query
       | child  | email  |
       | child  | email  |
 
+
   @ignore
   # re-enable when we can inherit 'relates
   Scenario: define additional 'relates' is visible from all children
-    Given the schema
+    Given graql define
       | define                                       |
       | part-time-employment sub employment;         |
       | employment sub relation, relates employer; |
-    Given the KB is valid
+    Given the integrity is validated
 
-    When executing
+    When executing graql query
       | match $x type part-time-employment, relates $r; get; |
 
     Then answers have concepts labeled
@@ -246,7 +250,7 @@ Feature: Graql Define Query
 
 
   Scenario: defining an attribute key- and owner-ship creates the implicit attribute key/ownership relation types
-    When executing
+    When executing graql query
       | match $x sub relation; get;  |
     Then answers have concepts labeled
       | x              |
@@ -257,14 +261,13 @@ Feature: Graql Define Query
       | @key-attribute |
       | @key-email     |
 
-  Scenario: implicit attribute ownerships exist in a hierarchy matching attribute hierarchy
-    Given the schema
-      | define first-name sub name; person sub entity, has first-name; |
-    Given the data
-      | $x isa person, has name $a, has first-name $b, has email $e; $a "John Hopkins"; $b "John"; $e "abc@xyz.com"; |
-    Given the KB is valid
 
-    When executing
+  Scenario: implicit attribute ownerships exist in a hierarchy matching attribute hierarchy
+    Given graql define
+      | define first-name sub name; person sub entity, has first-name; |
+    Given the integrity is validated
+
+    When executing graql query
       | match $child sub $super; $super sub @has-attribute; get;  |
     Then answers have concepts labeled
       | child           | super            |
