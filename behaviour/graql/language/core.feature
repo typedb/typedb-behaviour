@@ -23,27 +23,3 @@ Feature: Graql Base Cases
 
   Scenario: Empty graph is Valid
     Given the KB is valid
-
-
-  Scenario: define a subtype creates a type
-    Given the schema
-      | define person sub entity; |
-    And the KB is valid
-    When executing
-      |  match $x type child; get; |
-    Then there is 1 answer
-
-
-  Scenario: define subtype creates child of supertype
-    Given the schema
-      | define person sub entity; |
-    And the KB is valid
-
-    And the schema
-      | define child sub person;  |
-    And the KB is valid
-
-    When executing
-      | match $x sub person; get; |
-    Then there are 2 answers
-
