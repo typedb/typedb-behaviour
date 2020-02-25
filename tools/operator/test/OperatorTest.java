@@ -439,7 +439,7 @@ public class OperatorTest {
     }
 
     @Test
-    public void whenApplyingVariableFuzzyingOperator_weFuzzAllIds(){
+    public void whenApplyingVariableFuzzyingOperator_atLeastOneIdIsFuzzed(){
         List<String> inputIds = Lists.newArrayList("V123", "V456");
         Pattern input = and(
                 var("x").id(inputIds.get(0)),
