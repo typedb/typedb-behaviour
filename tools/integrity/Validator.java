@@ -56,6 +56,7 @@ public class Validator {
         Has has = createAndValidateHas(types, attributes);
         Has key = createAndValidateKey(types, attributes, has);
 
+        Types abstractTypes = createAndValidateAbstractTypes(types);
 
         return false;
     }
@@ -200,6 +201,20 @@ public class Validator {
         return key;
     }
 
+    private Types createAndValidateAbstractTypes(Types types) {
+        Types abstractTypes = new Types();
+        try (GraknClient.Transaction tx = session.transaction().read()) {
+            for (Type type : types) {
+                GraqlGet query = Graql.parse(String.format("match $owner type %s; $type abstract; get;", type)).asGet();
+                boolean trueInGrakn = ask(tx, query);
+                if (trueInGrakn) {
+                    abstractTypes.add(type);
+                }
+            }
+        }
+        abstractTypes.validate();
+        return abstractTypes;
+    }
 
     private boolean ask(GraknClient.Transaction tx, GraqlGet query) {
         List<ConceptMap> answer = tx.execute(query);

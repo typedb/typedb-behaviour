@@ -44,4 +44,8 @@ public class IntegrityException extends RuntimeException {
     public static IntegrityException keyshipNotSubsetOfOwnership(Type owner, Type attribute) {
         return new IntegrityException(String.format("Keyship from %s to attribute type %s is identified as attribute ownership as well", owner, attribute));
     }
+
+    public static IntegrityException metaTypeNotAbstract(String metaLabel) {
+        return new IntegrityException(String.format("Meta type %s is not labeled abstract", metaLabel));
+    }
 }
