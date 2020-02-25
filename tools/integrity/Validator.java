@@ -24,7 +24,7 @@ import grakn.client.answer.ConceptMap;
 import grakn.common.util.Pair;
 import grakn.verification.tools.integrity.schema.Has;
 import grakn.verification.tools.integrity.schema.Sub;
-import grakn.verification.tools.integrity.schema.SubTrans;
+import grakn.verification.tools.integrity.schema.TransitiveSub;
 import grakn.verification.tools.integrity.schema.Types;
 import graql.lang.Graql;
 import graql.lang.query.GraqlGet;
@@ -48,12 +48,14 @@ public class Validator {
     public boolean validate() {
         Types types = createAndValidateTypes();
         Sub sub = createAndValidateSub(types);
-        SubTrans transitiveSub = createAndValidateTransitiveSubWithoutIdentity(sub);
+        TransitiveSub transitiveSub = createAndValidateTransitiveSubWithoutIdentity(sub);
         Types entities = createEntityTypes(transitiveSub);
         Types relations = createRelationTypes(transitiveSub);
         Types attributes = createAttributeTypes(transitiveSub);
 
         Has has = createAndValidateHas(types, attributes);
+        Has key = createAndValidateKey(types, attributes, has);
+
 
         return false;
     }
@@ -77,20 +79,20 @@ public class Validator {
         try (GraknClient.Transaction tx = session.transaction().read()) {
             for (Type child : types) {
                 for (Type parent : types) {
-                    List<ConceptMap> answers = tx.execute(
-                            Graql.parse(String.format("match $child type %s; $parent type %s; $child sub! $parent; get;", child, parent)).asGet());
-                    if (answers.size() == 1) {
+                    GraqlGet query = Graql.parse(String.format("match $child type %s; $parent type %s; $child sub! $parent; get;", child, parent)).asGet();
+                    boolean trueInGrakn = ask(tx, query);
+                    if (trueInGrakn) {
                         sub.add(new Pair<>(child, parent));
                     }
                 }
             }
+            sub.validate();
+            return sub;
         }
-        sub.validate();
-        return sub;
     }
 
-    SubTrans createAndValidateTransitiveSubWithoutIdentity(Sub sub) {
-        SubTrans transitiveSub = new SubTrans();
+    TransitiveSub createAndValidateTransitiveSubWithoutIdentity(Sub sub) {
+        TransitiveSub transitiveSub = new TransitiveSub();
 
         for (Pair<Type, Type> subEntry : sub) {
             // don't include (x,x) in the transitive sub closure
@@ -101,7 +103,7 @@ public class Validator {
 
         // note: inefficient!
         // computes transitive closure, updating into `updatedTransitiveSub` from `transitiveSub`
-        SubTrans updatedTransitiveSub = transitiveSub.shallowCopy();
+        TransitiveSub updatedTransitiveSub = transitiveSub.shallowCopy();
         boolean changed = true;
         while (changed) {
             transitiveSub = updatedTransitiveSub.shallowCopy();
@@ -123,7 +125,7 @@ public class Validator {
         return updatedTransitiveSub;
     }
 
-    Types createEntityTypes(SubTrans transitiveSub) {
+    Types createEntityTypes(TransitiveSub transitiveSub) {
         Types entityTypes = new Types();
         for (Pair<Type, Type> sub : transitiveSub) {
             if (sub.second().label().equals("entity")) {
@@ -133,7 +135,7 @@ public class Validator {
         return entityTypes;
     }
 
-    Types createRelationTypes(SubTrans transitiveSub) {
+    Types createRelationTypes(TransitiveSub transitiveSub) {
         Types entityTypes = new Types();
         for (Pair<Type, Type> sub : transitiveSub) {
             if (sub.second().label().equals("relation")) {
@@ -143,7 +145,7 @@ public class Validator {
         return entityTypes;
     }
 
-    Types createAttributeTypes(SubTrans transitiveSub) {
+    Types createAttributeTypes(TransitiveSub transitiveSub) {
         Types entityTypes = new Types();
         for (Pair<Type, Type> sub : transitiveSub) {
             if (sub.second().label().equals("attribute")) {
@@ -167,9 +169,37 @@ public class Validator {
                 }
             }
         }
-
+        has.validate();
         return has;
     }
+
+    Has createAndValidateKey(Types types, Types attributes, Has has) {
+        Has key = new Has();
+
+        try (GraknClient.Transaction tx = session.transaction().read()) {
+            for (Type type : types) {
+                for (Type attribute : attributes) {
+                    GraqlGet query = Graql.parse(String.format("match $owner type %s; $owner key %s; get;", type, attribute)).asGet();
+                    boolean trueInGrakn = ask(tx, query);
+                    if (trueInGrakn) {
+                        key.add(new Pair<>(type, attribute));
+                    }
+                }
+            }
+        }
+
+        key.validate();
+
+        // also validate key is a subset of has
+        for (Pair<Type, Type> keyship : key) {
+            if (!has.contains(keyship)) {
+                throw IntegrityException.keyshipNotSubsetOfOwnership(keyship.first(), keyship.second());
+            }
+        }
+
+        return key;
+    }
+
 
     private boolean ask(GraknClient.Transaction tx, GraqlGet query) {
         List<ConceptMap> answer = tx.execute(query);

@@ -37,11 +37,11 @@ import java.util.stream.Collectors;
  * Transitive closure of Sub, not including (x,x) pairs
  * In other words, transitive Sub relation without the identity relation
  */
-public class SubTrans implements SemanticSet<Pair<Type, Type>> {
+public class TransitiveSub implements SemanticSet<Pair<Type, Type>> {
 
     private Set<Pair<Type,Type>> set;
 
-    public SubTrans() {
+    public TransitiveSub() {
         set = new HashSet<>();
     }
 
@@ -111,8 +111,8 @@ public class SubTrans implements SemanticSet<Pair<Type, Type>> {
         return set.iterator();
     }
 
-    public SubTrans shallowCopy() {
-        SubTrans copy = new SubTrans();
+    public TransitiveSub shallowCopy() {
+        TransitiveSub copy = new TransitiveSub();
         set.forEach(copy::add);
         return copy;
     }

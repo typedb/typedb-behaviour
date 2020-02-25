@@ -40,4 +40,8 @@ public class IntegrityException extends RuntimeException {
     public static IntegrityException metaTypeCannotOwnAttribute(Type metaType) {
         return new IntegrityException(String.format("%s meta type may not own attributes", metaType.label()));
     }
+
+    public static IntegrityException keyshipNotSubsetOfOwnership(Type owner, Type attribute) {
+        return new IntegrityException(String.format("Keyship from %s to attribute type %s is identified as attribute ownership as well", owner, attribute));
+    }
 }

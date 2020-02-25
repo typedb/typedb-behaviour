@@ -24,7 +24,7 @@ import grakn.client.concept.Label;
 import grakn.client.concept.SchemaConcept;
 import grakn.common.util.Pair;
 import grakn.verification.tools.integrity.schema.Sub;
-import grakn.verification.tools.integrity.schema.SubTrans;
+import grakn.verification.tools.integrity.schema.TransitiveSub;
 import grakn.verification.tools.integrity.schema.Types;
 import org.junit.Rule;
 import org.junit.Test;
@@ -100,7 +100,7 @@ public class ValidatorSetConstruction {
         Validator validator = new Validator(mockSession);
 
         // this should not error
-        SubTrans transitiveSub = validator.createAndValidateTransitiveSubWithoutIdentity(semanticSub);
+        TransitiveSub transitiveSub = validator.createAndValidateTransitiveSubWithoutIdentity(semanticSub);
         assertNotNull(transitiveSub);
     }
 
@@ -159,7 +159,7 @@ public class ValidatorSetConstruction {
         Validator validator = new Validator(mockSession);
 
         // this should not error
-        SubTrans transitiveSub = validator.createAndValidateTransitiveSubWithoutIdentity(semanticSub);
+        TransitiveSub transitiveSub = validator.createAndValidateTransitiveSubWithoutIdentity(semanticSub);
 
         Types entities = validator.createEntityTypes(transitiveSub);
         for (Type type : Arrays.asList(type0, type1, type2)) {

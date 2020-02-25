@@ -23,13 +23,11 @@ import grakn.client.concept.Label;
 import grakn.client.concept.SchemaConcept;
 import grakn.common.util.Pair;
 import grakn.verification.tools.integrity.schema.Has;
-import grakn.verification.tools.integrity.schema.SubTrans;
+import grakn.verification.tools.integrity.schema.TransitiveSub;
 import org.hamcrest.CoreMatchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import java.util.HashMap;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -58,7 +56,7 @@ public class SemanticSets {
 
     @Test
     public void subTransitiveSet_noExceptionWhenConstraintsSatisfied() {
-        SubTrans subTransSet = new SubTrans();
+        TransitiveSub transitiveSubSet = new TransitiveSub();
 
         SchemaConcept mockSchemaConcept0 = mock(SchemaConcept.class);
         when(mockSchemaConcept0.label()).thenReturn(Label.of("z"));
@@ -99,14 +97,14 @@ public class SemanticSets {
         Pair<Type, Type> sub7 = new Pair<>(type6, type8);
         Pair<Type, Type> sub8 = new Pair<>(type7, type8);
 
-        subTransSet.add(sub1);
-        subTransSet.add(sub2);
-        subTransSet.add(sub3);
-        subTransSet.add(sub4);
-        subTransSet.add(sub5);
-        subTransSet.add(sub6);
-        subTransSet.add(sub7);
-        subTransSet.add(sub8);
+        transitiveSubSet.add(sub1);
+        transitiveSubSet.add(sub2);
+        transitiveSubSet.add(sub3);
+        transitiveSubSet.add(sub4);
+        transitiveSubSet.add(sub5);
+        transitiveSubSet.add(sub6);
+        transitiveSubSet.add(sub7);
+        transitiveSubSet.add(sub8);
 
         // transitive subs
         Pair<Type, Type> transSub1 = new Pair<>(type0, type2);
@@ -122,22 +120,22 @@ public class SemanticSets {
         Pair<Type, Type> transSub10 = new Pair<>(type4, type8);
         Pair<Type, Type> transSub12 = new Pair<>(type3, type8);
 
-        subTransSet.add(transSub1);
-        subTransSet.add(transSub2);
-        subTransSet.add(transSub3);
-        subTransSet.add(transSub4);
-        subTransSet.add(transSub5);
-        subTransSet.add(transSub6);
-        subTransSet.add(transSub8);
-        subTransSet.add(transSub10);
-        subTransSet.add(transSub12);
+        transitiveSubSet.add(transSub1);
+        transitiveSubSet.add(transSub2);
+        transitiveSubSet.add(transSub3);
+        transitiveSubSet.add(transSub4);
+        transitiveSubSet.add(transSub5);
+        transitiveSubSet.add(transSub6);
+        transitiveSubSet.add(transSub8);
+        transitiveSubSet.add(transSub10);
+        transitiveSubSet.add(transSub12);
 
-        subTransSet.validate();
+        transitiveSubSet.validate();
     }
 
     @Test
     public void subTransitiveSet_validatenMultipleMetaSuperTypes() {
-        SubTrans subTransSet = new SubTrans();
+        TransitiveSub transitiveSubSet = new TransitiveSub();
 
         SchemaConcept mockSchemaConcept0 = mock(SchemaConcept.class);
         when(mockSchemaConcept0.label()).thenReturn(Label.of("z"));
@@ -178,14 +176,14 @@ public class SemanticSets {
         Pair<Type, Type> sub7 = new Pair<>(type6, type8);
         Pair<Type, Type> sub8 = new Pair<>(type7, type8);
 
-        subTransSet.add(sub1);
-        subTransSet.add(sub2);
+        transitiveSubSet.add(sub1);
+        transitiveSubSet.add(sub2);
 //        subTransSet.add(sub3);
-        subTransSet.add(sub4);
-        subTransSet.add(sub5);
-        subTransSet.add(sub6);
-        subTransSet.add(sub7);
-        subTransSet.add(sub8);
+        transitiveSubSet.add(sub4);
+        transitiveSubSet.add(sub5);
+        transitiveSubSet.add(sub6);
+        transitiveSubSet.add(sub7);
+        transitiveSubSet.add(sub8);
 
         // transitive subs
         Pair<Type, Type> transSub1 = new Pair<>(type0, type2);
@@ -201,24 +199,24 @@ public class SemanticSets {
         Pair<Type, Type> transSub10 = new Pair<>(type4, type8);
         Pair<Type, Type> transSub12 = new Pair<>(type3, type8);
 
-        subTransSet.add(transSub1);
-        subTransSet.add(transSub2);
-        subTransSet.add(transSub3);
-        subTransSet.add(transSub4);
-        subTransSet.add(transSub5);
-        subTransSet.add(transSub6);
-        subTransSet.add(transSub8);
-        subTransSet.add(transSub10);
-        subTransSet.add(transSub12);
+        transitiveSubSet.add(transSub1);
+        transitiveSubSet.add(transSub2);
+        transitiveSubSet.add(transSub3);
+        transitiveSubSet.add(transSub4);
+        transitiveSubSet.add(transSub5);
+        transitiveSubSet.add(transSub6);
+        transitiveSubSet.add(transSub8);
+        transitiveSubSet.add(transSub10);
+        transitiveSubSet.add(transSub12);
 
         exception.expect(IntegrityException.class);
         exception.expectMessage("has 0 meta super types");
-        subTransSet.validate();
+        transitiveSubSet.validate();
     }
 
     @Test
     public void subTransitiveSet_throwOnNoThingMeta() {
-        SubTrans subTransSet = new SubTrans();
+        TransitiveSub transitiveSubSet = new TransitiveSub();
 
         SchemaConcept mockSchemaConcept0 = mock(SchemaConcept.class);
         when(mockSchemaConcept0.label()).thenReturn(Label.of("z"));
@@ -259,14 +257,14 @@ public class SemanticSets {
         Pair<Type, Type> sub7 = new Pair<>(type6, type8);
         Pair<Type, Type> sub8 = new Pair<>(type7, type8);
 
-        subTransSet.add(sub1);
-        subTransSet.add(sub2);
-        subTransSet.add(sub3);
-        subTransSet.add(sub4);
-        subTransSet.add(sub5);
-        subTransSet.add(sub6);
-        subTransSet.add(sub7);
-        subTransSet.add(sub8);
+        transitiveSubSet.add(sub1);
+        transitiveSubSet.add(sub2);
+        transitiveSubSet.add(sub3);
+        transitiveSubSet.add(sub4);
+        transitiveSubSet.add(sub5);
+        transitiveSubSet.add(sub6);
+        transitiveSubSet.add(sub7);
+        transitiveSubSet.add(sub8);
 
         // transitive subs
         Pair<Type, Type> transSub1 = new Pair<>(type0, type2);
@@ -282,19 +280,19 @@ public class SemanticSets {
         Pair<Type, Type> transSub10 = new Pair<>(type4, type8);
 //        Pair<Type, Type> transSub12 = new Pair<>(type3, type8);
 
-        subTransSet.add(transSub1);
-        subTransSet.add(transSub2);
-        subTransSet.add(transSub3);
-        subTransSet.add(transSub4);
-        subTransSet.add(transSub5);
-        subTransSet.add(transSub6);
-        subTransSet.add(transSub8);
-        subTransSet.add(transSub10);
+        transitiveSubSet.add(transSub1);
+        transitiveSubSet.add(transSub2);
+        transitiveSubSet.add(transSub3);
+        transitiveSubSet.add(transSub4);
+        transitiveSubSet.add(transSub5);
+        transitiveSubSet.add(transSub6);
+        transitiveSubSet.add(transSub8);
+        transitiveSubSet.add(transSub10);
 //        subTransSet.add(transSub12);
 
         exception.expect(IntegrityException.class);
         exception.expectMessage("has no Thing super");
-        subTransSet.validate();
+        transitiveSubSet.validate();
     }
 
 
