@@ -22,11 +22,14 @@ package grakn.verification.tools.integrity;
 import grakn.client.concept.Label;
 import grakn.client.concept.SchemaConcept;
 import grakn.common.util.Pair;
+import grakn.verification.tools.integrity.schema.Has;
 import grakn.verification.tools.integrity.schema.SubTrans;
 import org.hamcrest.CoreMatchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import java.util.HashMap;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -42,7 +45,8 @@ public class SemanticSets {
     public void noDuplicateSemanticSetThrowException() {
         RejectDuplicateSet<Integer> rejectDuplicateSet = new RejectDuplicateSet<Integer>() {
             @Override
-            public void validate() {}
+            public void validate() {
+            }
         };
 
         rejectDuplicateSet.add(1);
@@ -291,5 +295,50 @@ public class SemanticSets {
         exception.expect(IntegrityException.class);
         exception.expectMessage("has no Thing super");
         subTransSet.validate();
+    }
+
+
+    @Test
+    public void hasThrowsIfMetaHasAttribute() {
+        SchemaConcept mockSchemaConcept1 = mock(SchemaConcept.class);
+        when(mockSchemaConcept1.label()).thenReturn(Label.of("a"));
+        SchemaConcept mockSchemaConcept2 = mock(SchemaConcept.class);
+        when(mockSchemaConcept2.label()).thenReturn(Label.of("entity"));
+        SchemaConcept mockSchemaConcept3 = mock(SchemaConcept.class);
+        when(mockSchemaConcept3.label()).thenReturn(Label.of("relation"));
+        SchemaConcept mockSchemaConcept4 = mock(SchemaConcept.class);
+        when(mockSchemaConcept4.label()).thenReturn(Label.of("attribute"));
+        SchemaConcept mockSchemaConcept5 = mock(SchemaConcept.class);
+        when(mockSchemaConcept5.label()).thenReturn(Label.of("thing"));
+
+        Type type = new Type(mockSchemaConcept1);
+        Type entityMeta = new Type(mockSchemaConcept2);
+        Type relationMeta = new Type(mockSchemaConcept3);
+        Type attributeMeta = new Type(mockSchemaConcept3);
+        Type thingMeta = new Type(mockSchemaConcept3);
+
+        Has hasSet = new Has();
+        hasSet.add(new Pair<>(entityMeta, type));
+        exception.expect(IntegrityException.class);
+        exception.expectMessage("entity meta type may not own attributes");
+        hasSet.validate();
+
+        hasSet = new Has();
+        hasSet.add(new Pair<>(relationMeta, type));
+        exception.expect(IntegrityException.class);
+        exception.expectMessage("relation meta type may not own attributes");
+        hasSet.validate();
+
+        hasSet = new Has();
+        hasSet.add(new Pair<>(attributeMeta, type));
+        exception.expect(IntegrityException.class);
+        exception.expectMessage("attribute meta type may not own attributes");
+        hasSet.validate();
+
+        hasSet = new Has();
+        hasSet.add(new Pair<>(thingMeta, type));
+        exception.expect(IntegrityException.class);
+        exception.expectMessage("thing meta type may not own attributes");
+        hasSet.validate();
     }
 }

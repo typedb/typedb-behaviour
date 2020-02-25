@@ -36,4 +36,8 @@ public class IntegrityException extends RuntimeException {
     public static <T> IntegrityException duplicateSemanticSetItem(T duplicateItem, RejectDuplicateSet<T> rejectingSet) {
         return new IntegrityException(String.format("Duplicate insertion of item: %s into set: %s", duplicateItem, rejectingSet));
     }
+
+    public static IntegrityException metaTypeCannotOwnAttribute(Type metaType) {
+        return new IntegrityException(String.format("%s meta type may not own attributes", metaType.label()));
+    }
 }

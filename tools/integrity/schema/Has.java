@@ -19,5 +19,34 @@
 
 package grakn.verification.tools.integrity.schema;
 
-public class Has {
+import com.google.common.collect.Sets;
+import grakn.common.util.Pair;
+import grakn.verification.tools.integrity.IntegrityException;
+import grakn.verification.tools.integrity.RejectDuplicateSet;
+import grakn.verification.tools.integrity.Type;
+import grakn.verification.tools.integrity.Validator;
+
+import java.util.Set;
+
+public class Has extends RejectDuplicateSet<Pair<Type, Type>> {
+
+    @Override
+    public void validate() {
+        /*
+        Validate that none of the types having anything are a meta type
+        */
+
+        Set<String> metaTypes = Sets.newHashSet(
+                Validator.META_ENTITY,
+                Validator.META_RELATION,
+                Validator.META_ATTRIBUTE,
+                Validator.META_THING
+        );
+
+        for (Pair<Type, Type> has : set) {
+            if (metaTypes.contains(has.first().label())) {
+                throw IntegrityException.metaTypeCannotOwnAttribute(has.first());
+            }
+        }
+    }
 }

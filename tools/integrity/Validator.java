@@ -22,10 +22,12 @@ package grakn.verification.tools.integrity;
 import grakn.client.GraknClient;
 import grakn.client.answer.ConceptMap;
 import grakn.common.util.Pair;
+import grakn.verification.tools.integrity.schema.Has;
 import grakn.verification.tools.integrity.schema.Sub;
 import grakn.verification.tools.integrity.schema.SubTrans;
 import grakn.verification.tools.integrity.schema.Types;
 import graql.lang.Graql;
+import graql.lang.query.GraqlGet;
 
 import java.util.List;
 
@@ -51,6 +53,8 @@ public class Validator {
         Types relations = createRelationTypes(transitiveSub);
         Types attributes = createAttributeTypes(transitiveSub);
 
+        Has has = createAndValidateHas(types, attributes);
+
         return false;
     }
 
@@ -63,7 +67,6 @@ public class Validator {
                 types.add(new Type(answer.get("x").asSchemaConcept()));
             }
         }
-
         types.validate();
         return types;
     }
@@ -75,14 +78,13 @@ public class Validator {
             for (Type child : types) {
                 for (Type parent : types) {
                     List<ConceptMap> answers = tx.execute(
-                            Graql.parse(String.format("match $child type \"%s\"; $parent type \"%s\"; $child sub! $parent; get;", child, parent)).asGet());
+                            Graql.parse(String.format("match $child type %s; $parent type %s; $child sub! $parent; get;", child, parent)).asGet());
                     if (answers.size() == 1) {
                         sub.add(new Pair<>(child, parent));
                     }
                 }
             }
         }
-
         sub.validate();
         return sub;
     }
@@ -149,6 +151,29 @@ public class Validator {
             }
         }
         return entityTypes;
+    }
+
+    Has createAndValidateHas(Types types, Types attributes) {
+        Has has = new Has();
+
+        try (GraknClient.Transaction tx = session.transaction().read()) {
+            for (Type type : types) {
+                for (Type attribute : attributes) {
+                    GraqlGet query = Graql.parse(String.format("match $owner type %s; $owner has %s; get;", type, attribute)).asGet();
+                    boolean trueInGrakn = ask(tx, query);
+                    if (trueInGrakn) {
+                        has.add(new Pair<>(type, attribute));
+                    }
+                }
+            }
+        }
+
+        return has;
+    }
+
+    private boolean ask(GraknClient.Transaction tx, GraqlGet query) {
+        List<ConceptMap> answer = tx.execute(query);
+        return answer.size() == 1;
     }
 
 

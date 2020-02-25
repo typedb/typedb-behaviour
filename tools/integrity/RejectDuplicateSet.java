@@ -25,7 +25,7 @@ import java.util.Set;
 
 public abstract class RejectDuplicateSet<T> implements SemanticSet<T> {
 
-    private Set<T> set;
+    protected Set<T> set;
 
     public RejectDuplicateSet() {
         set = new HashSet<>();
