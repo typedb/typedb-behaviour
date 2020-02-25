@@ -54,4 +54,14 @@ public abstract class RejectDuplicateSet<T> implements SemanticSet<T> {
         }
         return stringBuilder.toString();
     }
+
+    @Override
+    public boolean contains(T item) {
+        return set.contains(item);
+    }
+
+    @Override
+    public int size() {
+        return set.size();
+    }
 }

@@ -44,10 +44,12 @@ public class Validator {
     }
 
     public boolean validate() {
-
         Types types = createAndValidateTypes();
         Sub sub = createAndValidateSub(types);
-        SubTrans subTrans = createAndValidateTransitiveSubWithoutIdentity(sub);
+        SubTrans transitiveSub = createAndValidateTransitiveSubWithoutIdentity(sub);
+        Types entities = createEntityTypes(transitiveSub);
+        Types relations = createRelationTypes(transitiveSub);
+        Types attributes = createAttributeTypes(transitiveSub);
 
         return false;
     }
@@ -118,6 +120,37 @@ public class Validator {
         updatedTransitiveSub.validate();
         return updatedTransitiveSub;
     }
+
+    Types createEntityTypes(SubTrans transitiveSub) {
+        Types entityTypes = new Types();
+        for (Pair<Type, Type> sub : transitiveSub) {
+            if (sub.second().label().equals("entity")) {
+                entityTypes.add(sub.first());
+            }
+        }
+        return entityTypes;
+    }
+
+    Types createRelationTypes(SubTrans transitiveSub) {
+        Types entityTypes = new Types();
+        for (Pair<Type, Type> sub : transitiveSub) {
+            if (sub.second().label().equals("relation")) {
+                entityTypes.add(sub.first());
+            }
+        }
+        return entityTypes;
+    }
+
+    Types createAttributeTypes(SubTrans transitiveSub) {
+        Types entityTypes = new Types();
+        for (Pair<Type, Type> sub : transitiveSub) {
+            if (sub.second().label().equals("attribute")) {
+                entityTypes.add(sub.first());
+            }
+        }
+        return entityTypes;
+    }
+
 
     /*
 

@@ -45,6 +45,10 @@ public class SubTrans implements SemanticSet<Pair<Type, Type>> {
         set = new HashSet<>();
     }
 
+    public boolean contains(Pair<Type, Type> item) {
+        return set.contains(item);
+    }
+
     @Override
     public void validate() {
         /*
@@ -100,10 +104,6 @@ public class SubTrans implements SemanticSet<Pair<Type, Type>> {
     @Override
     public void add(Pair<Type, Type> item) {
         set.add(item);
-    }
-
-    public boolean contains(Pair<Type, Type> item) {
-        return set.contains(item);
     }
 
     @Override

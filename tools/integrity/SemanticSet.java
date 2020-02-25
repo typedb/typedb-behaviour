@@ -21,4 +21,6 @@ package grakn.verification.tools.integrity;
 
 public interface SemanticSet<T> extends Validatable, Iterable<T> {
     void add(T item);
+    boolean contains(T item);
+    int size();
 }
