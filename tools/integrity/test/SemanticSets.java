@@ -115,12 +115,9 @@ public class SemanticSets {
         Pair<Type, Type> transSub5 = new Pair<>(type1, type5);
         Pair<Type, Type> transSub6 = new Pair<>(type1, type8);
 
-        Pair<Type, Type> transSub7 = new Pair<>(type2, type5);
         Pair<Type, Type> transSub8 = new Pair<>(type2, type8);
 
-        Pair<Type, Type> transSub9 = new Pair<>(type4, type6);
         Pair<Type, Type> transSub10 = new Pair<>(type4, type8);
-        Pair<Type, Type> transSub11 = new Pair<>(type3, type6);
         Pair<Type, Type> transSub12 = new Pair<>(type3, type8);
 
         subTransSet.add(transSub1);
@@ -129,11 +126,8 @@ public class SemanticSets {
         subTransSet.add(transSub4);
         subTransSet.add(transSub5);
         subTransSet.add(transSub6);
-        subTransSet.add(transSub7);
         subTransSet.add(transSub8);
-        subTransSet.add(transSub9);
         subTransSet.add(transSub10);
-        subTransSet.add(transSub11);
         subTransSet.add(transSub12);
 
         subTransSet.validate();

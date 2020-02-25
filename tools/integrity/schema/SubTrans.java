@@ -70,7 +70,12 @@ public class SubTrans implements SemanticSet<Pair<Type, Type>> {
             }
         }
 
-        for (Type type : set.stream().map(pair -> pair.first()).collect(Collectors.toList())) {
+        Set<Type> nonMetaTypes = set.stream()
+                .map(pair -> pair.first())
+                .filter(type -> !metaTypes.contains(type.label()))
+                .filter(type -> !type.label().equals("thing"))
+                .collect(Collectors.toSet());
+        for (Type type : nonMetaTypes) {
             int numMetaParents = typeMetaParentCount.getOrDefault(type, 0);
             if (numMetaParents != 1) {
                 throw IntegrityException.typeDoesNotHaveExactlyOneMetaSupertype(type, numMetaParents);
