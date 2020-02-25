@@ -53,7 +53,7 @@ public class Validator {
     }
 
 
-    private Types createAndValidateTypes() {
+    Types createAndValidateTypes() {
         Types types = new Types();
         try (GraknClient.Transaction tx = session.transaction().read()) {
             List<ConceptMap> answers = tx.execute(Graql.parse("match $x sub type; get;").asGet());
@@ -66,7 +66,7 @@ public class Validator {
         return types;
     }
 
-    private Sub createAndValidateSub(Types types) {
+    Sub createAndValidateSub(Types types) {
         Sub sub = new Sub();
 
         try (GraknClient.Transaction tx = session.transaction().read()) {
@@ -85,35 +85,38 @@ public class Validator {
         return sub;
     }
 
-    private SubTrans createAndValidateTransitiveSubWithoutIdentity(Sub sub) {
-        SubTrans subTrans = new SubTrans();
+    SubTrans createAndValidateTransitiveSubWithoutIdentity(Sub sub) {
+        SubTrans transitiveSub = new SubTrans();
 
         for (Pair<Type, Type> subEntry : sub) {
             // don't include (x,x) in the transitive sub closure
             if (subEntry.first() != subEntry.second()) {
-                subTrans.add(subEntry);
+                transitiveSub.add(subEntry);
             }
         }
 
         // note: inefficient!
+        // computes transitive closure, updating into `updatedTransitiveSub` from `transitiveSub`
+        SubTrans updatedTransitiveSub = transitiveSub.shallowCopy();
         boolean changed = true;
         while (changed) {
-            for (Pair<Type, Type> sub1 : subTrans) {
-                for (Pair<Type, Type> sub2 : subTrans) {
+            transitiveSub = updatedTransitiveSub.shallowCopy();
+            changed = false;
+            for (Pair<Type, Type> sub1 : transitiveSub) {
+                for (Pair<Type, Type> sub2 : transitiveSub) {
                     if (sub1.second() == sub2.first()) {
-                        Pair<Type, Type> transitiveSub = new Pair<>(sub1.first(), sub2.second());
-                        if (!subTrans.contains(transitiveSub)) {
-                            subTrans.add(transitiveSub);
+                        Pair<Type, Type> transitiveSubEntry = new Pair<>(sub1.first(), sub2.second());
+                        if (!transitiveSub.contains(transitiveSubEntry)) {
+                            updatedTransitiveSub.add(transitiveSubEntry);
                             changed = true;
                         }
                     }
                 }
             }
-            changed = false;
         }
 
-        subTrans.validate();
-        return null;
+        updatedTransitiveSub.validate();
+        return updatedTransitiveSub;
     }
 
     /*

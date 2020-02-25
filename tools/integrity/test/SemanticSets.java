@@ -17,19 +17,17 @@
  *
  */
 
-package grakn.verification.tools.integrity.test;
+package grakn.verification.tools.integrity;
 
 import grakn.client.concept.Label;
 import grakn.client.concept.SchemaConcept;
 import grakn.common.util.Pair;
-import grakn.verification.tools.integrity.IntegrityException;
-import grakn.verification.tools.integrity.RejectDuplicateSet;
-import grakn.verification.tools.integrity.Type;
 import grakn.verification.tools.integrity.schema.SubTrans;
 import org.hamcrest.CoreMatchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 

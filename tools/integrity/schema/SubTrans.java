@@ -110,4 +110,14 @@ public class SubTrans implements SemanticSet<Pair<Type, Type>> {
     public Iterator<Pair<Type, Type>> iterator() {
         return set.iterator();
     }
+
+    public SubTrans shallowCopy() {
+        SubTrans copy = new SubTrans();
+        set.forEach(copy::add);
+        return copy;
+    }
+
+    public int size() {
+        return set.size();
+    }
 }

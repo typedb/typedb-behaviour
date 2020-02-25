@@ -25,7 +25,23 @@ java_test(
     srcs = glob([
         "SemanticSets.java",
     ]),
-    test_class = "grakn.verification.tools.integrity.test.SemanticSets",
+    test_class = "grakn.verification.tools.integrity.SemanticSets",
+    deps = [
+        "//tools/integrity:integrity",
+        "@graknlabs_client_java//:client-java",
+        "@graknlabs_graql//java:graql",
+        "@graknlabs_common//:common",
+        "//dependencies/maven/artifacts/com/google/guava",
+        "//dependencies/maven/artifacts/org/mockito:mockito-core",
+    ],
+)
+
+java_test(
+    name = "validator-set-construction",
+    srcs = glob([
+        "ValidatorSetConstruction.java",
+    ]),
+    test_class = "grakn.verification.tools.integrity.ValidatorSetConstruction",
     deps = [
         "//tools/integrity:integrity",
         "@graknlabs_client_java//:client-java",
