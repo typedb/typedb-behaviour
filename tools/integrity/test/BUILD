@@ -20,23 +20,26 @@ package(default_visibility = ["//visibility:public"])
 
 load("@graknlabs_build_tools//checkstyle:rules.bzl", "checkstyle_test")
 
-java_library(
-    name = "integrity",
+java_test(
+    name = "semantic-set-validity",
     srcs = glob([
-        "*.java",
-        "schema/*.java"
+        "SemanticSets.java",
     ]),
+    test_class = "grakn.verification.tools.integrity.test.SemanticSets",
     deps = [
+        "//tools/integrity:integrity",
         "@graknlabs_client_java//:client-java",
         "@graknlabs_graql//java:graql",
         "@graknlabs_common//:common",
         "//dependencies/maven/artifacts/com/google/guava",
+        "//dependencies/maven/artifacts/org/mockito:mockito-core",
     ],
+
 )
 
 checkstyle_test(
     name = "checkstyle",
     targets = [
-        ":integrity",
+        ":semantic-set-validity",
     ],
 )

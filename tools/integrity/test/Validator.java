@@ -17,7 +17,20 @@
  *
  */
 
-package grakn.verification.tools.integrity;
+package grakn.verification.tools.integrity.test;
 
-public class NoDuplicateSet {
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
+/**
+ * Test the top level behaviors of the Validator
+ */
+public class Validator {
+    @Rule
+    public final ExpectedException exception = ExpectedException.none();
+
+    @Test
+    public void transitiveSubIsBuiltCorrectly() {
+    }
 }

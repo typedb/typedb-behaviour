@@ -1,0 +1,303 @@
+/*
+ * GRAKN.AI - THE KNOWLEDGE GRAPH
+ * Copyright (C) 2019 Grakn Labs Ltd
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ */
+
+package grakn.verification.tools.integrity.test;
+
+import grakn.client.concept.Label;
+import grakn.client.concept.SchemaConcept;
+import grakn.common.util.Pair;
+import grakn.verification.tools.integrity.IntegrityException;
+import grakn.verification.tools.integrity.RejectDuplicateSet;
+import grakn.verification.tools.integrity.Type;
+import grakn.verification.tools.integrity.schema.SubTrans;
+import org.hamcrest.CoreMatchers;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+/**
+ * Unit test the behaviors of the validation of the various types of semantic sets
+ */
+public class SemanticSets {
+    @Rule
+    public final ExpectedException exception = ExpectedException.none();
+
+    @Test
+    public void noDuplicateSemanticSetThrowException() {
+        RejectDuplicateSet<Integer> rejectDuplicateSet = new RejectDuplicateSet<Integer>() {
+            @Override
+            public void validate() {}
+        };
+
+        rejectDuplicateSet.add(1);
+        rejectDuplicateSet.add(2);
+        exception.expect(IntegrityException.class);
+        exception.expectMessage(CoreMatchers.containsString("Duplicate insertion of item: 1"));
+        rejectDuplicateSet.add(1);
+    }
+
+    @Test
+    public void subTransitiveSet_noExceptionWhenConstraintsSatisfied() {
+        SubTrans subTransSet = new SubTrans();
+
+        SchemaConcept mockSchemaConcept0 = mock(SchemaConcept.class);
+        when(mockSchemaConcept0.label()).thenReturn(Label.of("z"));
+        SchemaConcept mockSchemaConcept1 = mock(SchemaConcept.class);
+        when(mockSchemaConcept1.label()).thenReturn(Label.of("a"));
+        SchemaConcept mockSchemaConcept2 = mock(SchemaConcept.class);
+        when(mockSchemaConcept2.label()).thenReturn(Label.of("b"));
+        SchemaConcept mockSchemaConcept3 = mock(SchemaConcept.class);
+        when(mockSchemaConcept3.label()).thenReturn(Label.of("c"));
+        SchemaConcept mockSchemaConcept4 = mock(SchemaConcept.class);
+        when(mockSchemaConcept4.label()).thenReturn(Label.of("d"));
+        SchemaConcept mockSchemaConcept5 = mock(SchemaConcept.class);
+        when(mockSchemaConcept5.label()).thenReturn(Label.of("entity"));
+        SchemaConcept mockSchemaConcept6 = mock(SchemaConcept.class);
+        when(mockSchemaConcept6.label()).thenReturn(Label.of("relation"));
+        SchemaConcept mockSchemaConcept7 = mock(SchemaConcept.class);
+        when(mockSchemaConcept7.label()).thenReturn(Label.of("attribute"));
+        SchemaConcept mockSchemaConcept8 = mock(SchemaConcept.class);
+        when(mockSchemaConcept8.label()).thenReturn(Label.of("thing"));
+
+        Type type0 = new Type(mockSchemaConcept0);
+        Type type1 = new Type(mockSchemaConcept1);
+        Type type2 = new Type(mockSchemaConcept2);
+        Type type3 = new Type(mockSchemaConcept3);
+        Type type4 = new Type(mockSchemaConcept4);
+        Type type5 = new Type(mockSchemaConcept5);
+        Type type6 = new Type(mockSchemaConcept6);
+        Type type7 = new Type(mockSchemaConcept7);
+        Type type8 = new Type(mockSchemaConcept8);
+
+        Pair<Type, Type> sub1 = new Pair<>(type0, type1);
+        Pair<Type, Type> sub2 = new Pair<>(type1, type2);
+        Pair<Type, Type> sub3 = new Pair<>(type2, type5);
+        Pair<Type, Type> sub4 = new Pair<>(type3, type6);
+        Pair<Type, Type> sub5 = new Pair<>(type4, type6);
+        // meta schema subtyping
+        Pair<Type, Type> sub6 = new Pair<>(type5, type8);
+        Pair<Type, Type> sub7 = new Pair<>(type6, type8);
+        Pair<Type, Type> sub8 = new Pair<>(type7, type8);
+
+        subTransSet.add(sub1);
+        subTransSet.add(sub2);
+        subTransSet.add(sub3);
+        subTransSet.add(sub4);
+        subTransSet.add(sub5);
+        subTransSet.add(sub6);
+        subTransSet.add(sub7);
+        subTransSet.add(sub8);
+
+        // transitive subs
+        Pair<Type, Type> transSub1 = new Pair<>(type0, type2);
+        Pair<Type, Type> transSub2 = new Pair<>(type0, type5);
+        Pair<Type, Type> transSub3 = new Pair<>(type0, type8);
+
+        Pair<Type, Type> transSub4 = new Pair<>(type1, type2);
+        Pair<Type, Type> transSub5 = new Pair<>(type1, type5);
+        Pair<Type, Type> transSub6 = new Pair<>(type1, type8);
+
+        Pair<Type, Type> transSub7 = new Pair<>(type2, type5);
+        Pair<Type, Type> transSub8 = new Pair<>(type2, type8);
+
+        Pair<Type, Type> transSub9 = new Pair<>(type4, type6);
+        Pair<Type, Type> transSub10 = new Pair<>(type4, type8);
+        Pair<Type, Type> transSub11 = new Pair<>(type3, type6);
+        Pair<Type, Type> transSub12 = new Pair<>(type3, type8);
+
+        subTransSet.add(transSub1);
+        subTransSet.add(transSub2);
+        subTransSet.add(transSub3);
+        subTransSet.add(transSub4);
+        subTransSet.add(transSub5);
+        subTransSet.add(transSub6);
+        subTransSet.add(transSub7);
+        subTransSet.add(transSub8);
+        subTransSet.add(transSub9);
+        subTransSet.add(transSub10);
+        subTransSet.add(transSub11);
+        subTransSet.add(transSub12);
+
+        subTransSet.validate();
+    }
+
+    @Test
+    public void subTransitiveSet_validatenMultipleMetaSuperTypes() {
+        SubTrans subTransSet = new SubTrans();
+
+        SchemaConcept mockSchemaConcept0 = mock(SchemaConcept.class);
+        when(mockSchemaConcept0.label()).thenReturn(Label.of("z"));
+        SchemaConcept mockSchemaConcept1 = mock(SchemaConcept.class);
+        when(mockSchemaConcept1.label()).thenReturn(Label.of("a"));
+        SchemaConcept mockSchemaConcept2 = mock(SchemaConcept.class);
+        when(mockSchemaConcept2.label()).thenReturn(Label.of("b"));
+        SchemaConcept mockSchemaConcept3 = mock(SchemaConcept.class);
+        when(mockSchemaConcept3.label()).thenReturn(Label.of("c"));
+        SchemaConcept mockSchemaConcept4 = mock(SchemaConcept.class);
+        when(mockSchemaConcept4.label()).thenReturn(Label.of("d"));
+        SchemaConcept mockSchemaConcept5 = mock(SchemaConcept.class);
+        when(mockSchemaConcept5.label()).thenReturn(Label.of("entity"));
+        SchemaConcept mockSchemaConcept6 = mock(SchemaConcept.class);
+        when(mockSchemaConcept6.label()).thenReturn(Label.of("relation"));
+        SchemaConcept mockSchemaConcept7 = mock(SchemaConcept.class);
+        when(mockSchemaConcept7.label()).thenReturn(Label.of("attribute"));
+        SchemaConcept mockSchemaConcept8 = mock(SchemaConcept.class);
+        when(mockSchemaConcept8.label()).thenReturn(Label.of("thing"));
+
+        Type type0 = new Type(mockSchemaConcept0);
+        Type type1 = new Type(mockSchemaConcept1);
+        Type type2 = new Type(mockSchemaConcept2);
+        Type type3 = new Type(mockSchemaConcept3);
+        Type type4 = new Type(mockSchemaConcept4);
+        Type type5 = new Type(mockSchemaConcept5);
+        Type type6 = new Type(mockSchemaConcept6);
+        Type type7 = new Type(mockSchemaConcept7);
+        Type type8 = new Type(mockSchemaConcept8);
+
+        Pair<Type, Type> sub1 = new Pair<>(type0, type1);
+        Pair<Type, Type> sub2 = new Pair<>(type1, type2);
+//        Pair<Type, Type> sub3 = new Pair<>(type2, type5);
+        Pair<Type, Type> sub4 = new Pair<>(type3, type6);
+        Pair<Type, Type> sub5 = new Pair<>(type4, type6);
+        // meta schema subtyping
+        Pair<Type, Type> sub6 = new Pair<>(type5, type8);
+        Pair<Type, Type> sub7 = new Pair<>(type6, type8);
+        Pair<Type, Type> sub8 = new Pair<>(type7, type8);
+
+        subTransSet.add(sub1);
+        subTransSet.add(sub2);
+//        subTransSet.add(sub3);
+        subTransSet.add(sub4);
+        subTransSet.add(sub5);
+        subTransSet.add(sub6);
+        subTransSet.add(sub7);
+        subTransSet.add(sub8);
+
+        // transitive subs
+        Pair<Type, Type> transSub1 = new Pair<>(type0, type2);
+        Pair<Type, Type> transSub2 = new Pair<>(type0, type5);
+        Pair<Type, Type> transSub3 = new Pair<>(type0, type8);
+
+        Pair<Type, Type> transSub4 = new Pair<>(type1, type2);
+        Pair<Type, Type> transSub5 = new Pair<>(type1, type5);
+        Pair<Type, Type> transSub6 = new Pair<>(type1, type8);
+
+        Pair<Type, Type> transSub8 = new Pair<>(type2, type8);
+
+        Pair<Type, Type> transSub10 = new Pair<>(type4, type8);
+        Pair<Type, Type> transSub12 = new Pair<>(type3, type8);
+
+        subTransSet.add(transSub1);
+        subTransSet.add(transSub2);
+        subTransSet.add(transSub3);
+        subTransSet.add(transSub4);
+        subTransSet.add(transSub5);
+        subTransSet.add(transSub6);
+        subTransSet.add(transSub8);
+        subTransSet.add(transSub10);
+        subTransSet.add(transSub12);
+
+        exception.expect(IntegrityException.class);
+        exception.expectMessage("has 0 meta super types");
+        subTransSet.validate();
+    }
+
+    @Test
+    public void subTransitiveSet_throwOnNoThingMeta() {
+        SubTrans subTransSet = new SubTrans();
+
+        SchemaConcept mockSchemaConcept0 = mock(SchemaConcept.class);
+        when(mockSchemaConcept0.label()).thenReturn(Label.of("z"));
+        SchemaConcept mockSchemaConcept1 = mock(SchemaConcept.class);
+        when(mockSchemaConcept1.label()).thenReturn(Label.of("a"));
+        SchemaConcept mockSchemaConcept2 = mock(SchemaConcept.class);
+        when(mockSchemaConcept2.label()).thenReturn(Label.of("b"));
+        SchemaConcept mockSchemaConcept3 = mock(SchemaConcept.class);
+        when(mockSchemaConcept3.label()).thenReturn(Label.of("c"));
+        SchemaConcept mockSchemaConcept4 = mock(SchemaConcept.class);
+        when(mockSchemaConcept4.label()).thenReturn(Label.of("d"));
+        SchemaConcept mockSchemaConcept5 = mock(SchemaConcept.class);
+        when(mockSchemaConcept5.label()).thenReturn(Label.of("entity"));
+        SchemaConcept mockSchemaConcept6 = mock(SchemaConcept.class);
+        when(mockSchemaConcept6.label()).thenReturn(Label.of("relation"));
+        SchemaConcept mockSchemaConcept7 = mock(SchemaConcept.class);
+        when(mockSchemaConcept7.label()).thenReturn(Label.of("attribute"));
+        SchemaConcept mockSchemaConcept8 = mock(SchemaConcept.class);
+        when(mockSchemaConcept8.label()).thenReturn(Label.of("thing"));
+
+        Type type0 = new Type(mockSchemaConcept0);
+        Type type1 = new Type(mockSchemaConcept1);
+        Type type2 = new Type(mockSchemaConcept2);
+        Type type3 = new Type(mockSchemaConcept3);
+        Type type4 = new Type(mockSchemaConcept4);
+        Type type5 = new Type(mockSchemaConcept5);
+        Type type6 = new Type(mockSchemaConcept6);
+        Type type7 = new Type(mockSchemaConcept7);
+        Type type8 = new Type(mockSchemaConcept8);
+
+        Pair<Type, Type> sub1 = new Pair<>(type0, type1);
+        Pair<Type, Type> sub2 = new Pair<>(type1, type2);
+        Pair<Type, Type> sub3 = new Pair<>(type2, type5);
+        Pair<Type, Type> sub4 = new Pair<>(type3, type6);
+        Pair<Type, Type> sub5 = new Pair<>(type4, type6);
+        // meta schema subtyping
+        Pair<Type, Type> sub6 = new Pair<>(type5, type8);
+        Pair<Type, Type> sub7 = new Pair<>(type6, type8);
+        Pair<Type, Type> sub8 = new Pair<>(type7, type8);
+
+        subTransSet.add(sub1);
+        subTransSet.add(sub2);
+        subTransSet.add(sub3);
+        subTransSet.add(sub4);
+        subTransSet.add(sub5);
+        subTransSet.add(sub6);
+        subTransSet.add(sub7);
+        subTransSet.add(sub8);
+
+        // transitive subs
+        Pair<Type, Type> transSub1 = new Pair<>(type0, type2);
+        Pair<Type, Type> transSub2 = new Pair<>(type0, type5);
+        Pair<Type, Type> transSub3 = new Pair<>(type0, type8);
+
+        Pair<Type, Type> transSub4 = new Pair<>(type1, type2);
+        Pair<Type, Type> transSub5 = new Pair<>(type1, type5);
+        Pair<Type, Type> transSub6 = new Pair<>(type1, type8);
+
+        Pair<Type, Type> transSub8 = new Pair<>(type2, type8);
+
+        Pair<Type, Type> transSub10 = new Pair<>(type4, type8);
+//        Pair<Type, Type> transSub12 = new Pair<>(type3, type8);
+
+        subTransSet.add(transSub1);
+        subTransSet.add(transSub2);
+        subTransSet.add(transSub3);
+        subTransSet.add(transSub4);
+        subTransSet.add(transSub5);
+        subTransSet.add(transSub6);
+        subTransSet.add(transSub8);
+        subTransSet.add(transSub10);
+//        subTransSet.add(transSub12);
+
+        exception.expect(IntegrityException.class);
+        exception.expectMessage("has no Thing super");
+        subTransSet.validate();
+    }
+}

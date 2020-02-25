@@ -17,7 +17,7 @@
  *
  */
 
-package grakn.verification.tools.integrity;
+package grakn.verification.tools.integrity.schema;
 
-public class PartialFunction {
+public class Key {
 }

@@ -17,7 +17,16 @@
  *
  */
 
-package grakn.verification.tools.integrity;
+package grakn.verification.tools.integrity.schema;
 
-public class TotalFunction {
+import grakn.verification.tools.integrity.RejectDuplicateSet;
+import grakn.verification.tools.integrity.Type;
+import grakn.verification.tools.integrity.Validatable;
+
+public class Types extends RejectDuplicateSet<Type> implements Validatable {
+
+    @Override
+    public void validate() {
+        // always valid as long as the internal set construction errors on duplicate entry
+    }
 }

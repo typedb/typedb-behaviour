@@ -20,13 +20,101 @@
 package grakn.verification.tools.integrity;
 
 import grakn.client.GraknClient;
+import grakn.client.answer.ConceptMap;
+import grakn.common.util.Pair;
+import grakn.verification.tools.integrity.schema.Sub;
+import grakn.verification.tools.integrity.schema.SubTrans;
+import grakn.verification.tools.integrity.schema.Types;
+import graql.lang.Graql;
+
+import java.util.List;
 
 public class Validator {
 
-    public Validator(GraknClient.Session session) {
+    public static String META_THING = "thing";
+    public static String META_ENTITY = "entity";
+    public static String META_RELATION = "relation";
+    public static String META_ATTRIBUTE = "attribute";
+    public static String META_ROLE = "role";
 
+    private GraknClient.Session session;
+
+    public Validator(GraknClient.Session session) {
+        this.session = session;
     }
 
+    public boolean validate() {
+
+        Types types = createAndValidateTypes();
+        Sub sub = createAndValidateSub(types);
+        SubTrans subTrans = createAndValidateTransitiveSubWithoutIdentity(sub);
+
+        return false;
+    }
+
+
+    private Types createAndValidateTypes() {
+        Types types = new Types();
+        try (GraknClient.Transaction tx = session.transaction().read()) {
+            List<ConceptMap> answers = tx.execute(Graql.parse("match $x sub type; get;").asGet());
+            for (ConceptMap answer : answers) {
+                types.add(new Type(answer.get("x").asSchemaConcept()));
+            }
+        }
+
+        types.validate();
+        return types;
+    }
+
+    private Sub createAndValidateSub(Types types) {
+        Sub sub = new Sub();
+
+        try (GraknClient.Transaction tx = session.transaction().read()) {
+            for (Type child : types) {
+                for (Type parent : types) {
+                    List<ConceptMap> answers = tx.execute(
+                            Graql.parse(String.format("match $child type \"%s\"; $parent type \"%s\"; $child sub! $parent; get;", child, parent)).asGet());
+                    if (answers.size() == 1) {
+                        sub.add(new Pair<>(child, parent));
+                    }
+                }
+            }
+        }
+
+        sub.validate();
+        return sub;
+    }
+
+    private SubTrans createAndValidateTransitiveSubWithoutIdentity(Sub sub) {
+        SubTrans subTrans = new SubTrans();
+
+        for (Pair<Type, Type> subEntry : sub) {
+            // don't include (x,x) in the transitive sub closure
+            if (subEntry.first() != subEntry.second()) {
+                subTrans.add(subEntry);
+            }
+        }
+
+        // note: inefficient!
+        boolean changed = true;
+        while (changed) {
+            for (Pair<Type, Type> sub1 : subTrans) {
+                for (Pair<Type, Type> sub2 : subTrans) {
+                    if (sub1.second() == sub2.first()) {
+                        Pair<Type, Type> transitiveSub = new Pair<>(sub1.first(), sub2.second());
+                        if (!subTrans.contains(transitiveSub)) {
+                            subTrans.add(transitiveSub);
+                            changed = true;
+                        }
+                    }
+                }
+            }
+            changed = false;
+        }
+
+        subTrans.validate();
+        return null;
+    }
 
     /*
 
