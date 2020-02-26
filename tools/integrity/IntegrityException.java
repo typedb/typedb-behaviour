@@ -64,4 +64,8 @@ public class IntegrityException extends RuntimeException {
     public static IntegrityException playedRoleIsNotRelated(Type role, Type player) {
         return new IntegrityException(String.format("Role %s is played by %s but is not related", role, player));
     }
+
+    public static IntegrityException subHierarchyHasLoop(Type typeWithLoop) {
+        return new IntegrityException(String.format("Type %s is in a loop in the transitive closure of sub, implying a loop in the type hierarchy", typeWithLoop));
+    }
 }

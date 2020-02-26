@@ -59,6 +59,7 @@ public class Validator {
         Types roles = createAndValidateRoles(); // TODO figure out how we want to deal with roles, esp role inheritance
         Sub sub = createAndValidateSub(types);
         TransitiveSub transitiveSub = createAndValidateTransitiveSubWithoutIdentity(sub);
+
         Types entities = createEntityTypes(transitiveSub);
         Types relations = createRelationTypes(transitiveSub);
         Types attributes = createAttributeTypes(transitiveSub);
@@ -74,6 +75,7 @@ public class Validator {
 
         return false;
     }
+
 
     void validatePlaysAndRelatesOverlap(Plays plays, Relates relates) {
         // every role that is played must be related
@@ -140,6 +142,7 @@ public class Validator {
 
         for (Pair<Type, Type> subEntry : sub) {
             // don't include (x,x) in the transitive sub closure
+            // this is because if we do end up with (x,x) in the transitive closure, then we know there is a loop
             if (subEntry.first() != subEntry.second()) {
                 transitiveSub.add(subEntry);
             }

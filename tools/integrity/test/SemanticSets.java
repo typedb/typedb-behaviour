@@ -298,6 +298,8 @@ public class SemanticSets {
     }
 
 
+
+
     @Test
     public void hasThrowsIfMetaHasAttribute() {
         SchemaConcept mockSchemaConcept1 = mock(SchemaConcept.class);

@@ -27,5 +27,9 @@ public class Sub extends RejectDuplicateSet<Pair<Type, Type>> {
 
     @Override
     public void validate() {
+        /*
+        if (x,y) and (x,z) in sub, then y == z
+         */
+
     }
 }
