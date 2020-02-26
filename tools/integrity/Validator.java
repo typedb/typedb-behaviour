@@ -168,6 +168,16 @@ public class Validator {
             }
         }
 
+        // TODO create the same transitive sub set using Grakn
+//        TransitiveSub graknTransitiveSub = new TransitiveSub();
+//        try (GraknClient.Transaction tx = session.transaction().read()) {
+//            for (Pair<Type, Type> sub1 : sub) {
+//                for (Pair<Type, Type> sub2 : sub) {
+//                    GraqlGet query = Graql.parse(String.format("match $child type %s; $parent type %s; $x sub $y"))
+//                }
+//            }
+//        }
+
         updatedTransitiveSub.validate();
         return updatedTransitiveSub;
     }
