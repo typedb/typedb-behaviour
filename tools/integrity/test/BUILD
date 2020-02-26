@@ -55,5 +55,6 @@ checkstyle_test(
     name = "checkstyle",
     targets = [
         ":semantic-set-validity",
+        ":validator-set-construction"
     ],
 )
