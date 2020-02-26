@@ -68,7 +68,8 @@ Feature: Graql Insert Query
 
     Then get answers of graql query
       | match $r (employer: $c, employee: $p) isa employment; get; |
-    And answers have concepts with ref
+    Then answer concepts all have key: ref
+    Then answer keys are
       | p    | c    | r    |
       | 0    | 2    | 1    |
 
@@ -87,7 +88,8 @@ Feature: Graql Insert Query
 
     Then get answers of graql query
       | match $a "John"; get; |
-    And answers have concepts with ref
+    Then answer concepts all have key: ref
+    Then answer keys are
       | a    |
       | 0    |
 
@@ -107,47 +109,7 @@ Feature: Graql Insert Query
       | insert $a "john" isa name, has ref 1; |
 
 
-  Scenario: insert identical attributes in parallel transactions throws errors when inserted with different keys
-    Given graql define
-      | define                                        |
-      | name sub attribute, datatype string, key ref; |
-      | ref sub attribute, datatype long;           |
-    Given the integrity is validated
-
-    Given transactions
-      | tx1 |
-      | tx2 |
-    When graql insert in tx1
-      | insert $a "john" isa name, has ref 0; |
-    When graql insert in tx2
-      | insert $a "john" isa name, has ref 1; |
-    Then commit throws
-      | tx1 |
-      | tx2 |
-
-
-  Scenario: insert attributes in parallel triggers deduplication
-    Given graql define
-      | define                              |
-      | age sub attribute, datatype string; |
-    Given the integrity is validated
-
-    Given transactions
-      | tx1 |
-      | tx2 |
-    When graql insert in parallel
-      | tx1  | insert $a "john" isa name; |
-      | tx2  | insert $a "john" isa name; |
-    Then commit
-      | tx1 |
-      | tx2 |
-
-    Then get answers of graql query
-      | match $x isa name; get; |
-    Then answer size is: 1
-
-
-  Scenario: insert two owners of the same attribute creates two owners of the same attribute
+  Scenario: insert two owners of the same attribute links owners via attribute
     Given graql define
       | define                                  |
       | person sub attribute, has age, key ref; |
@@ -168,14 +130,14 @@ Feature: Graql Insert Query
       | $p1 isa person, has age $a;  |
       | $p2 isa person, has age $a;  |
       | get $p1, $p2;                |
-    Then answers have concepts with ref
-      | $p1  | $p2  |
+    Then answer concepts all have key: ref
+    Then answer keys are
+      | p1  | p2  |
       | 0    | 1    |
       | 1    | 0    |
 
 
   Scenario: insert a subtype of an attribute with same value creates a separate instance
-
 
   Scenario: insert a regex attribute throws error if not conforming to regex
     Given graql define

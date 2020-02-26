@@ -39,7 +39,7 @@ Feature: Graql Define Query
     When get answers of graql query
       | match $x type dog; get; |
     # do we want to also check the number of answers
-    Then answers have concepts labeled
+    Then answers are labeled
       | x   |
       | dog |
 
@@ -51,7 +51,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       | match $x sub person; get; |
-    Then answers have concepts labeled
+    Then answers are labeled
       | x      |
       | person |
       | child  |
@@ -65,7 +65,7 @@ Feature: Graql Define Query
     When get answers of graql query
       | match $x plays employee; get; |
 
-    Then answers have concepts labeled
+    Then answers are labeled
       | x      |
       | person |
       | child  |
@@ -79,7 +79,7 @@ Feature: Graql Define Query
     When get answers of graql query
       | match $x has name; get; |
 
-    Then answers have concepts labeled
+    Then answers are labeled
       | x      |
       | person |
       | child  |
@@ -93,7 +93,7 @@ Feature: Graql Define Query
     When get answers of graql query
       | match $x key email; get; |
 
-    Then answers have concepts labeled
+    Then answers are labeled
       | x      |
       | person |
       | child  |
@@ -109,7 +109,7 @@ Feature: Graql Define Query
     When get answers of graql query
       | match $x relates employee; get; |
 
-    Then answers have concepts labeled
+    Then answers are labeled
       | x                    |
       | employment           |
       | part-time-employment |
@@ -124,7 +124,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       | match $x relates employee; get; |
-    Then answers have concepts labeled
+    Then answers are labeled
       | x                    |
       | employment           |
       | part-time-employment |
@@ -147,7 +147,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       | match $x datatype string; get; |
-    Then answers have concepts labeled
+    Then answers are labeled
       | x          |
       | name       |
       | first-name |
@@ -173,7 +173,7 @@ Feature: Graql Define Query
     When get answers of graql query
       | match $x type child, plays $r; get; |
 
-    Then answers have concepts labeled
+    Then answers are labeled
       | x      | r                |
       | child  | employee         |
       | child  | employer         |
@@ -194,7 +194,7 @@ Feature: Graql Define Query
     When get answers of graql query
       | match $x type child, has $y; get; |
 
-    Then answers have concepts labeled
+    Then answers are labeled
       | x      | y            |
       | child  | name         |
       | child  | phone-number |
@@ -213,7 +213,7 @@ Feature: Graql Define Query
     When get answers of graql query
       | match $x type child, key $y; get; |
 
-    Then answers have concepts labeled
+    Then answers are labeled
       | x      | y      |
       | child  | email  |
       | child  | email  |
@@ -231,7 +231,7 @@ Feature: Graql Define Query
     When get answers of graql query
       | match $x type part-time-employment, relates $r; get; |
 
-    Then answers have concepts labeled
+    Then answers are labeled
       | x                     | r          |
       | part-time-employment  | employee   |
       | part-time-employment  | employer   |
@@ -252,7 +252,7 @@ Feature: Graql Define Query
   Scenario: defining an attribute key- and owner-ship creates the implicit attribute key/ownership relation types
     When get answers of graql query
       | match $x sub relation; get;  |
-    Then answers have concepts labeled
+    Then answers are labeled
       | x              |
       | relation       |
       | employment     |
@@ -269,7 +269,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       | match $child sub $super; $super sub @has-attribute; get;  |
-    Then answers have concepts labeled
+    Then answers are labeled
       | child           | super            |
       | @has-attribute  | @has-attribute   |
       | @has-name       | @has-attribute   |

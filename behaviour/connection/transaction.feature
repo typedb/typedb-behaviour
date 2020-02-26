@@ -572,3 +572,45 @@ Feature: Connection Transaction
 #  Scenario: one keyspace, many sessions in parallel, many transactions in parallel to read
 #
 #  Scenario: one keyspace, many sessions in parallel, many transactions in parallel to write
+
+
+# TODO - move these sort of transactional behavior tests into their own feature file
+#
+#  Scenario: insert identical attributes in parallel transactions throws errors when inserted with different keys
+#    Given graql define
+#      | define                                        |
+#      | name sub attribute, datatype string, key ref; |
+#      | ref sub attribute, datatype long;           |
+#    Given the integrity is validated
+#
+#    Given transactions
+#      | tx1 |
+#      | tx2 |
+#    When graql insert in tx1
+#      | insert $a "john" isa name, has ref 0; |
+#    When graql insert in tx2
+#      | insert $a "john" isa name, has ref 1; |
+#    Then commit throws
+#      | tx1 |
+#      | tx2 |
+#
+#
+#  Scenario: insert attributes in parallel triggers deduplication
+#    Given graql define
+#      | define                              |
+#      | age sub attribute, datatype string; |
+#    Given the integrity is validated
+#
+#    Given transactions
+#      | tx1 |
+#      | tx2 |
+#    When graql insert in parallel
+#      | tx1  | insert $a "john" isa name; |
+#      | tx2  | insert $a "john" isa name; |
+#    Then commit
+#      | tx1 |
+#      | tx2 |
+#
+#    Then get answers of graql query
+#      | match $x isa name; get; |
+#    Then answer size is: 1

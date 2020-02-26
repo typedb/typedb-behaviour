@@ -44,13 +44,15 @@ Feature: Graql Match Clause
 
     Then get answers of graql query
       | match $x isa person; $r ($x) isa relation; get; |
-    Then answers have concepts with ref
+    Then answer concepts all have key: ref
+    Then answer keys are
       | x    | r    |
       | 0    | 2    |
 
     Then get answers of graql query
       | match $y isa company; $r ($y) isa relation; get; |
-    Then answers have concepts with ref
+    Then answer concepts all have key: ref
+    Then answer keys are
       | y    | r    |
       | 1    | 2    |
 
@@ -80,7 +82,8 @@ Feature: Graql Match Clause
 
     Then get answers of graql query
       | match $r ($x, $y) isa employment; get; |
-    And answers have concepts with ref
+    Then answer concepts all have key: ref
+    Then answer keys are
       | x    | y    | r    |
       | 0    | 1    | 3    |
       | 1    | 0    | 3    |
