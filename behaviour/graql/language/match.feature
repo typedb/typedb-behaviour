@@ -16,3 +16,79 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 Feature: Graql Match Clause
+
+
+  Scenario: a relation is matchable from role players without specifying relation type
+    Given graql define
+      | define                               |
+      | person sub entity,                   |
+      |   plays employee,                    |
+      |   key ref;                           |
+      | company sub entity,                  |
+      |   plays employer,                    |
+      |   key ref;                           |
+      | employment sub relation,             |
+      |   relates employee,                  |
+      |   relates employee,                  |
+      |   key ref;                           |
+      | ref sub attribute, datatype long;    |
+    Given the integrity is validated
+
+    When graql insert
+      | insert                                            |
+      | $x isa person, has ref 0;                         |
+      | $y isa company, has ref 1;                        |
+      | $r (employee: $x, employer: $y) isa employment,   |
+      |    has ref 2;                                     |
+    When the integrity is validated
+
+    Then get answers of graql query
+      | match $x isa person; $r ($x) isa relation; get; |
+    Then answer concepts all have key: ref
+    Then answer keys are
+      | x    | r    |
+      | 0    | 2    |
+
+    Then get answers of graql query
+      | match $y isa company; $r ($y) isa relation; get; |
+    Then answer concepts all have key: ref
+    Then answer keys are
+      | y    | r    |
+      | 1    | 2    |
+
+
+  Scenario: inserting a relation with named role players is retrieved without role players in all combinations
+    Given graql define
+      | define                               |
+      | person sub entity,                   |
+      |   plays employee,                    |
+      |   key ref;                           |
+      | company sub entity,                  |
+      |   plays employer,                    |
+      |   key ref;                           |
+      | employment sub relation,             |
+      |   relates employee,                  |
+      |   relates employee,                  |
+      |   key ref;                           |
+      | ref sub attribute, datatype long;    |
+    Given the integrity is validated
+
+    When graql insert
+      | insert $p isa person, has ref 0;     |
+      | $c isa company, has ref 1;           |
+      | $c2 isa company, has ref 2;          |
+      | $r (employee: $p, employer: $c, employer: $c) isa employment, has ref 3; |
+    When the integrity is validated
+
+    Then get answers of graql query
+      | match $r ($x, $y) isa employment; get; |
+    Then answer concepts all have key: ref
+    Then answer keys are
+      | x    | y    | r    |
+      | 0    | 1    | 3    |
+      | 1    | 0    | 3    |
+      | 0    | 2    | 3    |
+      | 2    | 0    | 3    |
+      | 1    | 2    | 3    |
+      | 2    | 1    | 3    |
+
