@@ -56,4 +56,12 @@ public class IntegrityException extends RuntimeException {
     public static IntegrityException metaTypeNotAbstract(String metaLabel) {
         return new IntegrityException(String.format("Meta type %s is not labeled abstract", metaLabel));
     }
+
+    public static IntegrityException relationWithoutRole(Type relation) {
+        return new IntegrityException(String.format("Relation type %s has no linked roles", relation));
+    }
+
+    public static IntegrityException playedRoleIsNotRelated(Type role, Type player) {
+        return new IntegrityException(String.format("Role %s is played by %s but is not related", role, player));
+    }
 }

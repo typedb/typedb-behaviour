@@ -23,6 +23,8 @@ import grakn.client.GraknClient;
 import grakn.client.concept.Label;
 import grakn.client.concept.SchemaConcept;
 import grakn.common.util.Pair;
+import grakn.verification.tools.integrity.schema.Plays;
+import grakn.verification.tools.integrity.schema.Relates;
 import grakn.verification.tools.integrity.schema.Sub;
 import grakn.verification.tools.integrity.schema.TransitiveSub;
 import grakn.verification.tools.integrity.schema.Types;
@@ -171,5 +173,36 @@ public class ValidatorSetConstruction {
         }
         Types attributes = validator.createAttributeTypes(transitiveSub);
         assertEquals(attributes.size(), 0);
+    }
+
+    @Test
+    public void rolePlayedAndNotRelatedThrows() {
+        SchemaConcept mockSchemaConcept0 = mock(SchemaConcept.class);
+        when(mockSchemaConcept0.label()).thenReturn(Label.of("aRole"));
+        SchemaConcept mockSchemaConcept1 = mock(SchemaConcept.class);
+        when(mockSchemaConcept1.label()).thenReturn(Label.of("anotherRole"));
+        SchemaConcept mockSchemaConcept2 = mock(SchemaConcept.class);
+        when(mockSchemaConcept2.label()).thenReturn(Label.of("aEntity"));
+        SchemaConcept mockSchemaConcept3 = mock(SchemaConcept.class);
+        when(mockSchemaConcept3.label()).thenReturn(Label.of("aRelation"));
+
+        Type role = new Type(mockSchemaConcept0);
+        Type anotherRole = new Type(mockSchemaConcept1);
+        Type entity = new Type(mockSchemaConcept2);
+        Type relation = new Type(mockSchemaConcept3);
+
+        Plays plays = new Plays();
+        plays.add(new Pair<>(entity, role));
+
+        Relates relates = new Relates();
+        relates.add(new Pair<>(relation, anotherRole));
+
+        exception.expect(IntegrityException.class);
+        exception.expectMessage("Role aRole is played by aEntity but is not related");
+
+        GraknClient.Session mockSession = mock(GraknClient.Session.class);
+        Validator validator = new Validator(mockSession);
+        validator.validatePlaysAndRelatesOverlap(plays, relates);
+
     }
 }

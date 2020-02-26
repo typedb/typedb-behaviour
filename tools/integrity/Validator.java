@@ -68,14 +68,27 @@ public class Validator {
 
         Plays plays = createAndValidatePlays(types, roles);
         Relates relates = createAndValidateRelates(relations, roles);
-        validateRelatesAndPlays(relates, plays);
+        validatePlaysAndRelatesOverlap(plays, relates);
 
         Types abstractTypes = createAndValidateAbstractTypes(types);
 
         return false;
     }
 
-    private void validateRelatesAndPlays(Relates relates, Plays plays) {
+    void validatePlaysAndRelatesOverlap(Plays plays, Relates relates) {
+        // every role that is played must be related
+        for (Pair<Type, Type> playsRole : plays) {
+            boolean found = false;
+            for (Pair<Type, Type> relatesRole : relates) {
+                if (playsRole.second().equals(relatesRole.second())) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                throw IntegrityException.playedRoleIsNotRelated(playsRole.second(), playsRole.first());
+            }
+        }
 
     }
 
@@ -248,6 +261,20 @@ public class Validator {
             }
         }
         relates.validate();
+
+        // also validate that every relation has at least one role
+        for (Type relation : relations) {
+            boolean found = false;
+            for (Pair<Type, Type> relatesRole : relates) {
+                if (relatesRole.first().equals(relation)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                throw IntegrityException.relationWithoutRole(relation);
+            }
+        }
         return relates;
     }
 
