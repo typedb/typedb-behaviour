@@ -28,12 +28,12 @@ import grakn.verification.tools.integrity.Validator;
 
 import java.util.Set;
 
-public class Has extends RejectDuplicateSet<Pair<Type, Type>> {
+public class Plays extends RejectDuplicateSet<Pair<Type, Type>> {
 
     @Override
     public void validate() {
         /*
-        Validate that none of the types having anything are a meta type
+        Validate that none of the types playing a role are a meta type
         */
 
         Set<String> metaTypes = Sets.newHashSet(
@@ -43,9 +43,9 @@ public class Has extends RejectDuplicateSet<Pair<Type, Type>> {
                 Validator.META_THING
         );
 
-        for (Pair<Type, Type> has : set) {
-            if (metaTypes.contains(has.first().label())) {
-                throw IntegrityException.metaTypeCannotOwnAttribute(has.first(), has.second());
+        for (Pair<Type, Type> plays : set) {
+            if (metaTypes.contains(plays.first().label())) {
+                throw IntegrityException.metaTypeCannotPlayRole(plays.first(), plays.second());
             }
         }
     }

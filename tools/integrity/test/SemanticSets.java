@@ -23,6 +23,8 @@ import grakn.client.concept.Label;
 import grakn.client.concept.SchemaConcept;
 import grakn.common.util.Pair;
 import grakn.verification.tools.integrity.schema.Has;
+import grakn.verification.tools.integrity.schema.Plays;
+import grakn.verification.tools.integrity.schema.Relates;
 import grakn.verification.tools.integrity.schema.TransitiveSub;
 import org.hamcrest.CoreMatchers;
 import org.junit.Rule;
@@ -338,5 +340,93 @@ public class SemanticSets {
         exception.expect(IntegrityException.class);
         exception.expectMessage("thing meta type may not own attributes");
         hasSet.validate();
+    }
+
+    @Test
+    public void playsThrowsIfMetaPlaysRole() {
+        SchemaConcept mockSchemaConcept1 = mock(SchemaConcept.class);
+        when(mockSchemaConcept1.label()).thenReturn(Label.of("aRole"));
+        SchemaConcept mockSchemaConcept2 = mock(SchemaConcept.class);
+        when(mockSchemaConcept2.label()).thenReturn(Label.of("entity"));
+        SchemaConcept mockSchemaConcept3 = mock(SchemaConcept.class);
+        when(mockSchemaConcept3.label()).thenReturn(Label.of("relation"));
+        SchemaConcept mockSchemaConcept4 = mock(SchemaConcept.class);
+        when(mockSchemaConcept4.label()).thenReturn(Label.of("attribute"));
+        SchemaConcept mockSchemaConcept5 = mock(SchemaConcept.class);
+        when(mockSchemaConcept5.label()).thenReturn(Label.of("thing"));
+
+        Type aRole = new Type(mockSchemaConcept1);
+        Type entityMeta = new Type(mockSchemaConcept2);
+        Type relationMeta = new Type(mockSchemaConcept3);
+        Type attributeMeta = new Type(mockSchemaConcept3);
+        Type thingMeta = new Type(mockSchemaConcept3);
+
+        Plays playsSet = new Plays();
+        playsSet.add(new Pair<>(entityMeta, aRole));
+        exception.expect(IntegrityException.class);
+        exception.expectMessage("entity meta type may not play roles");
+        playsSet.validate();
+
+        playsSet = new Plays();
+        playsSet.add(new Pair<>(relationMeta, aRole));
+        exception.expect(IntegrityException.class);
+        exception.expectMessage("relation meta type may not play roles");
+        playsSet.validate();
+
+        playsSet = new Plays();
+        playsSet.add(new Pair<>(attributeMeta, aRole));
+        exception.expect(IntegrityException.class);
+        exception.expectMessage("attribute meta type may not play roles");
+        playsSet.validate();
+
+        playsSet = new Plays();
+        playsSet.add(new Pair<>(thingMeta, aRole));
+        exception.expect(IntegrityException.class);
+        exception.expectMessage("thing meta type may not play roles");
+        playsSet.validate();
+    }
+
+    @Test
+    public void relatesThrowsIfMetaRelatesRole() {
+        SchemaConcept mockSchemaConcept1 = mock(SchemaConcept.class);
+        when(mockSchemaConcept1.label()).thenReturn(Label.of("aRole"));
+        SchemaConcept mockSchemaConcept2 = mock(SchemaConcept.class);
+        when(mockSchemaConcept2.label()).thenReturn(Label.of("entity"));
+        SchemaConcept mockSchemaConcept3 = mock(SchemaConcept.class);
+        when(mockSchemaConcept3.label()).thenReturn(Label.of("relation"));
+        SchemaConcept mockSchemaConcept4 = mock(SchemaConcept.class);
+        when(mockSchemaConcept4.label()).thenReturn(Label.of("attribute"));
+        SchemaConcept mockSchemaConcept5 = mock(SchemaConcept.class);
+        when(mockSchemaConcept5.label()).thenReturn(Label.of("thing"));
+
+        Type aRole = new Type(mockSchemaConcept1);
+        Type entityMeta = new Type(mockSchemaConcept2);
+        Type relationMeta = new Type(mockSchemaConcept3);
+        Type attributeMeta = new Type(mockSchemaConcept3);
+        Type thingMeta = new Type(mockSchemaConcept3);
+
+        Relates relatesSet = new Relates();
+        relatesSet.add(new Pair<>(entityMeta, aRole));
+        exception.expect(IntegrityException.class);
+        exception.expectMessage("entity meta type may not relate roles");
+        relatesSet.validate();
+
+        relatesSet = new Relates();
+        relatesSet.add(new Pair<>(relationMeta, aRole));
+        exception.expect(IntegrityException.class);
+        exception.expectMessage("relation meta type may not relate roles");
+        relatesSet.validate();
+
+        relatesSet = new Relates();
+        relatesSet.add(new Pair<>(attributeMeta, aRole));
+        exception.expect(IntegrityException.class);
+        exception.expectMessage("attribute meta type may not relate roles");
+        relatesSet.validate();
+
+        relatesSet = new Relates();
+        relatesSet.add(new Pair<>(thingMeta, aRole));
+        exception.expect(IntegrityException.class);
+        exception.expectMessage("thing meta type may not relate roles");
+        relatesSet.validate();
     }
 }

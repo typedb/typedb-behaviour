@@ -37,8 +37,16 @@ public class IntegrityException extends RuntimeException {
         return new IntegrityException(String.format("Duplicate insertion of item: %s into set: %s", duplicateItem, rejectingSet));
     }
 
-    public static IntegrityException metaTypeCannotOwnAttribute(Type metaType) {
-        return new IntegrityException(String.format("%s meta type may not own attributes", metaType.label()));
+    public static IntegrityException metaTypeCannotOwnAttribute(Type metaType, Type attribute) {
+        return new IntegrityException(String.format("%s meta type may not own attributes, has: %s ", metaType.label(), attribute.label()));
+    }
+
+    public static IntegrityException metaTypeCannotPlayRole(Type metaType, Type role) {
+        return new IntegrityException(String.format("%s meta type may not play roles, plays: %s", metaType.label(), role.label()));
+    }
+
+    public static IntegrityException metaTypeCannotRelateRole(Type metaType, Type role) {
+        return new IntegrityException(String.format("%s meta type may not relate roles, relates: %s", metaType.label(), role.label()));
     }
 
     public static IntegrityException keyshipNotSubsetOfOwnership(Type owner, Type attribute) {

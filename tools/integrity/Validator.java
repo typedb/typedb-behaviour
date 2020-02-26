@@ -23,6 +23,8 @@ import grakn.client.GraknClient;
 import grakn.client.answer.ConceptMap;
 import grakn.common.util.Pair;
 import grakn.verification.tools.integrity.schema.Has;
+import grakn.verification.tools.integrity.schema.Plays;
+import grakn.verification.tools.integrity.schema.Relates;
 import grakn.verification.tools.integrity.schema.Sub;
 import grakn.verification.tools.integrity.schema.TransitiveSub;
 import grakn.verification.tools.integrity.schema.Types;
@@ -32,6 +34,13 @@ import graql.lang.query.GraqlGet;
 import java.util.List;
 
 public class Validator {
+
+    /*
+    TODO
+    In general, we have the issue of ignoring inherited pairs when trying to build the
+    non-transitive sets.
+    Transitive sets will be built up later
+     */
 
     public static String META_THING = "thing";
     public static String META_ENTITY = "entity";
@@ -47,6 +56,7 @@ public class Validator {
 
     public boolean validate() {
         Types types = createAndValidateTypes();
+        Types roles = createAndValidateRoles(); // TODO figure out how we want to deal with roles, esp role inheritance
         Sub sub = createAndValidateSub(types);
         TransitiveSub transitiveSub = createAndValidateTransitiveSubWithoutIdentity(sub);
         Types entities = createEntityTypes(transitiveSub);
@@ -56,11 +66,18 @@ public class Validator {
         Has has = createAndValidateHas(types, attributes);
         Has key = createAndValidateKey(types, attributes, has);
 
+        Plays plays = createAndValidatePlays(types, roles);
+        Relates relates = createAndValidateRelates(relations, roles);
+        validateRelatesAndPlays(relates, plays);
+
         Types abstractTypes = createAndValidateAbstractTypes(types);
 
         return false;
     }
 
+    private void validateRelatesAndPlays(Relates relates, Plays plays) {
+
+    }
 
     Types createAndValidateTypes() {
         Types types = new Types();
@@ -74,13 +91,26 @@ public class Validator {
         return types;
     }
 
+    Types createAndValidateRoles() {
+        Types roles = new Types();
+        try (GraknClient.Transaction tx = session.transaction().read()) {
+            List<ConceptMap> answers = tx.execute(Graql.parse("match $x sub role; get;").asGet());
+            for (ConceptMap answer : answers) {
+                roles.add(new Type(answer.get("x").asSchemaConcept()));
+            }
+        }
+        roles.validate();
+        return roles;
+    }
+
     Sub createAndValidateSub(Types types) {
         Sub sub = new Sub();
 
         try (GraknClient.Transaction tx = session.transaction().read()) {
             for (Type child : types) {
                 for (Type parent : types) {
-                    GraqlGet query = Graql.parse(String.format("match $child type %s; $parent type %s; $child sub! $parent; get;", child, parent)).asGet();
+                    // TODO we reject transitive sub using sub! but this is broken
+                    GraqlGet query = Graql.parse(String.format("match $child type %s; $parent type %s; $child sub! $parent; child != parent; get;", child, parent)).asGet();
                     boolean trueInGrakn = ask(tx, query);
                     if (trueInGrakn) {
                         sub.add(new Pair<>(child, parent));
@@ -162,6 +192,7 @@ public class Validator {
         try (GraknClient.Transaction tx = session.transaction().read()) {
             for (Type type : types) {
                 for (Type attribute : attributes) {
+                    // TODO - how to verify that the `has` is not inherited?
                     GraqlGet query = Graql.parse(String.format("match $owner type %s; $owner has %s; get;", type, attribute)).asGet();
                     boolean trueInGrakn = ask(tx, query);
                     if (trueInGrakn) {
@@ -180,6 +211,7 @@ public class Validator {
         try (GraknClient.Transaction tx = session.transaction().read()) {
             for (Type type : types) {
                 for (Type attribute : attributes) {
+                    // TODO - how to verify that the `key` is not inherited?
                     GraqlGet query = Graql.parse(String.format("match $owner type %s; $owner key %s; get;", type, attribute)).asGet();
                     boolean trueInGrakn = ask(tx, query);
                     if (trueInGrakn) {
@@ -199,6 +231,41 @@ public class Validator {
         }
 
         return key;
+    }
+
+
+    private Relates createAndValidateRelates(Types relations, Types roles) {
+        Relates relates = new Relates();
+        try (GraknClient.Transaction tx = session.transaction().read()) {
+            for (Type relation : relations) {
+                for (Type role : roles) {
+                    GraqlGet query = Graql.parse(String.format("match $type type %s; $type relates %s; get;", relation, role)).asGet();
+                    boolean trueInGrakn = ask(tx, query);
+                    if (trueInGrakn) {
+                        relates.add(new Pair<>(relation, role));
+                    }
+                }
+            }
+        }
+        relates.validate();
+        return relates;
+    }
+
+    private Plays createAndValidatePlays(Types types, Types roles) {
+        Plays plays = new Plays();
+        try (GraknClient.Transaction tx = session.transaction().read()) {
+            for (Type relation : types) {
+                for (Type role : roles) {
+                    GraqlGet query = Graql.parse(String.format("match $type relates %s; $type plays %s; get;", relation, role)).asGet();
+                    boolean trueInGrakn = ask(tx, query);
+                    if (trueInGrakn) {
+                        plays.add(new Pair<>(relation, role));
+                    }
+                }
+            }
+        }
+        plays.validate();
+        return plays;
     }
 
     private Types createAndValidateAbstractTypes(Types types) {
