@@ -29,7 +29,6 @@ java_test(
     deps = [
         "//tools/integrity:integrity",
         "@graknlabs_client_java//:client-java",
-        "@graknlabs_graql//java:graql",
         "@graknlabs_common//:common",
         "//dependencies/maven/artifacts/com/google/guava",
         "//dependencies/maven/artifacts/org/mockito:mockito-core",
@@ -45,7 +44,6 @@ java_test(
     deps = [
         "//tools/integrity:integrity",
         "@graknlabs_client_java//:client-java",
-        "@graknlabs_graql//java:graql",
         "@graknlabs_common//:common",
         "//dependencies/maven/artifacts/com/google/guava",
         "//dependencies/maven/artifacts/org/mockito:mockito-core",
