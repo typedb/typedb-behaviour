@@ -22,6 +22,7 @@ Feature: Graql Define Query
     Given connection delete all keyspaces
     Given connection open sessions for keyspaces:
       | test_define |
+    Given transaction is initialised
     Given the integrity is validated
     Given graql define
       | define                                                        |

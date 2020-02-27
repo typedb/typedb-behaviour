@@ -22,6 +22,7 @@ Feature: Graql Insert Query
     Given connection delete all keyspaces
     Given connection open sessions for keyspaces:
       | test_insert |
+    Given transaction is initialised
     Given the integrity is validated
 
   Scenario: insert an instance creates instance of that type

@@ -22,6 +22,7 @@ Feature: Graql Match Clause
     Given connection delete all keyspaces
     Given connection open sessions for keyspaces:
       | test_match |
+    Given transaction is initialised
     Given the integrity is validated
 
   Scenario: Disjunctions return the union of composing query statements
