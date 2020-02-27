@@ -17,6 +17,7 @@
 #
 Feature: Graql Match Clause
 
+  Scenario: Disjunctions return the union of composing query statements
 
   Scenario: a relation is matchable from role players without specifying relation type
     Given graql define

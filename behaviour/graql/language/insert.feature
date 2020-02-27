@@ -153,3 +153,11 @@ Feature: Graql Insert Query
       | insert                               |
       |   $x isa person, has value $a ;      |
       |   $a "10.maybe";                     |
+
+  Scenario: inserting duplicate keys throws on commit (? or at insert)
+  Scenario: inserting disallowed role being played throws on commit (? or at insert)
+  Scenario: inserting disallowed role being related throws on commit (? or at insert)
+  Scenario: inserting a relation with no role players throws on commit (? or at insert)
+
+
+  Scenario: match-insert includes all variable retrieved and created (?)

@@ -277,3 +277,12 @@ Feature: Graql Define Query
       | @has-name       | @has-name        |
       | @has-first-name | @has-name        |
       | @has-first-name | @has-first-name  |
+
+  Scenario: defining a relation with no related roles throws on commit
+  Scenario: defining a rule with nested negation throws on commit
+  Scenario: defining a rule with two conclusions throws on commit
+  Scenario: defining a rule with disjunction throws on commit
+  Scenario: defining rule with an unbound variable in the `then` throws on commit
+  Scenario: defining a non-insertable `then` throws on commit (eg. missing specific roles, or attribute value)
+
+
