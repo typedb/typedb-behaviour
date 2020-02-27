@@ -54,8 +54,8 @@ public class TransitiveSub implements SemanticSet<Pair<Type, Type>> {
         /*
         Conditions of validity:
         1. every type that isn't a meta type has exactly one parent in [entity, relation or attribute]
-        2. every type has an entry (x, thing)
-        3. (x,x) is not in the transitive closure, as this would mean there is a loop
+        2. (x,x) is not in the transitive closure, as this would mean there is a loop
+        3. every type has an entry (x, thing)
          */
 
         Set<String> metaTypes = Sets.newHashSet(
@@ -88,7 +88,14 @@ public class TransitiveSub implements SemanticSet<Pair<Type, Type>> {
             }
         }
 
-        // condition 2:
+        // condition 2: (x,x) not in the transitive closure
+        for (Pair<Type, Type> sub : set) {
+            if (sub.first().equals(sub.second())) {
+                throw IntegrityException.subHierarchyHasLoop(sub.first());
+            }
+        }
+
+        // condition 3:
         Set<Type> children = set.stream().map(pair -> pair.first()).collect(Collectors.toSet());
         for (Type child : children) {
             boolean hasThingSuper = false;
@@ -103,12 +110,6 @@ public class TransitiveSub implements SemanticSet<Pair<Type, Type>> {
             }
         }
 
-        // condition 3: (x,x) not in the transitive closure
-        for (Pair<Type, Type> sub : set) {
-            if (sub.first().equals(sub.second())) {
-                throw IntegrityException.subHierarchyHasLoop(sub.first());
-            }
-        }
 
     }
 

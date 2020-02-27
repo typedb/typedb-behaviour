@@ -68,4 +68,8 @@ public class IntegrityException extends RuntimeException {
     public static IntegrityException subHierarchyHasLoop(Type typeWithLoop) {
         return new IntegrityException(String.format("Type %s is in a loop in the transitive closure of sub, implying a loop in the type hierarchy", typeWithLoop));
     }
+
+    public static IntegrityException typeHasMultipleParentTypesInSub(Type type, Type parent1, Type parent2) {
+        return new IntegrityException(String.format("Type %s has two parent types in direct sub: %s and %s", type, parent1, parent2));
+    }
 }

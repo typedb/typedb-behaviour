@@ -91,7 +91,6 @@ public class Validator {
                 throw IntegrityException.playedRoleIsNotRelated(playsRole.second(), playsRole.first());
             }
         }
-
     }
 
     Types createAndValidateTypes() {
@@ -138,48 +137,26 @@ public class Validator {
     }
 
     TransitiveSub createAndValidateTransitiveSubWithoutIdentity(Sub sub) {
-        TransitiveSub transitiveSub = new TransitiveSub();
+        TransitiveSub graknTransitiveSub = new TransitiveSub();
 
-        for (Pair<Type, Type> subEntry : sub) {
-            // don't include (x,x) in the transitive sub closure
-            // this is because if we do end up with (x,x) in the transitive closure, then we know there is a loop
-            if (subEntry.first() != subEntry.second()) {
-                transitiveSub.add(subEntry);
-            }
-        }
-
-        // note: inefficient!
-        // computes transitive closure, updating into `updatedTransitiveSub` from `transitiveSub`
-        TransitiveSub updatedTransitiveSub = transitiveSub.shallowCopy();
-        boolean changed = true;
-        while (changed) {
-            transitiveSub = updatedTransitiveSub.shallowCopy();
-            changed = false;
-            for (Pair<Type, Type> sub1 : transitiveSub) {
-                for (Pair<Type, Type> sub2 : transitiveSub) {
-                    if (sub1.second() == sub2.first()) {
-                        Pair<Type, Type> transitiveSubEntry = new Pair<>(sub1.first(), sub2.second());
-                        if (!transitiveSub.contains(transitiveSubEntry)) {
-                            updatedTransitiveSub.add(transitiveSubEntry);
-                            changed = true;
+        try (GraknClient.Transaction tx = session.transaction().write()) {
+            for (Pair<Type, Type> sub1 : sub) {
+                for (Pair<Type, Type> sub2 : sub) {
+                    // don't include (x,x) in the transitive sub closure
+                    // this is because if we do end up with (x,x) in the transitive closure, then we know there is a loop
+                    if (!sub1.first().equals(sub2.second())) {
+                        GraqlGet query = Graql.parse(String.format("match $x type %s; $y type %s; $x sub $y; get;", sub1.first(), sub2.second())).asGet();
+                        boolean trueInGrakn = ask(tx, query);
+                        if (trueInGrakn) {
+                            graknTransitiveSub.add(new Pair<>(sub1.first(), sub2.second()));
                         }
                     }
                 }
             }
         }
 
-        // TODO create the same transitive sub set using Grakn
-//        TransitiveSub graknTransitiveSub = new TransitiveSub();
-//        try (GraknClient.Transaction tx = session.transaction().read()) {
-//            for (Pair<Type, Type> sub1 : sub) {
-//                for (Pair<Type, Type> sub2 : sub) {
-//                    GraqlGet query = Graql.parse(String.format("match $child type %s; $parent type %s; $x sub $y"))
-//                }
-//            }
-//        }
-
-        updatedTransitiveSub.validate();
-        return updatedTransitiveSub;
+        graknTransitiveSub.validate();
+        return graknTransitiveSub;
     }
 
     Types createEntityTypes(TransitiveSub transitiveSub) {

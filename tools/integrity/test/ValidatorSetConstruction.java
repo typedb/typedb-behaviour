@@ -98,11 +98,8 @@ public class ValidatorSetConstruction {
         semanticSub.add(sub7);
         semanticSub.add(sub8);
 
-        GraknClient.Session mockSession = mock(GraknClient.Session.class);
-        Validator validator = new Validator(mockSession);
-
         // this should not error
-        TransitiveSub transitiveSub = validator.createAndValidateTransitiveSubWithoutIdentity(semanticSub);
+        TransitiveSub transitiveSub = semanticSub.noIdentityTransitiveSub();
         assertNotNull(transitiveSub);
     }
 
@@ -144,7 +141,8 @@ public class ValidatorSetConstruction {
         Pair<Type, Type> sub4 = new Pair<>(type3, type6);
         Pair<Type, Type> sub5 = new Pair<>(type4, type6);
         // meta schema subtyping
-        Pair<Type, Type> sub6 = new Pair<>(type5, type8);
+//        Pair<Type, Type> sub6 = new Pair<>(type5, type8); // rewire this into a loop rather than to 'thing
+
         Pair<Type, Type> sub7 = new Pair<>(type6, type8);
         Pair<Type, Type> sub8 = new Pair<>(type7, type8);
 
@@ -156,18 +154,15 @@ public class ValidatorSetConstruction {
         semanticSub.add(sub3);
         semanticSub.add(sub4);
         semanticSub.add(sub5);
-        semanticSub.add(sub6);
+//        semanticSub.add(sub6);
         semanticSub.add(sub7);
         semanticSub.add(sub8);
         semanticSub.add(subLoop);
 
-        GraknClient.Session mockSession = mock(GraknClient.Session.class);
-        Validator validator = new Validator(mockSession);
-
         // this should not error
         exception.expect(IntegrityException.class);
         exception.expectMessage("is in a loop in the transitive closure of sub, implying a loop in the type hierarchy");
-        TransitiveSub transitiveSub = validator.createAndValidateTransitiveSubWithoutIdentity(semanticSub);
+        semanticSub.validate();
 
     }
 
@@ -227,7 +222,7 @@ public class ValidatorSetConstruction {
         Validator validator = new Validator(mockSession);
 
         // this should not error
-        TransitiveSub transitiveSub = validator.createAndValidateTransitiveSubWithoutIdentity(semanticSub);
+        TransitiveSub transitiveSub = semanticSub.noIdentityTransitiveSub();
 
         Types entities = validator.createEntityTypes(transitiveSub);
         for (Type type : Arrays.asList(type0, type1, type2)) {
