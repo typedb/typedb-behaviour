@@ -17,7 +17,16 @@
 #
 Feature: Graql Match Clause
 
+<<<<<<< Updated upstream
   Scenario: Disjunctions return the union of composing query statements
+=======
+  Background: Create a simple schema that is extensible for each scenario
+    Given connection has been opened
+    Given connection delete all keyspaces
+    Given connection open sessions for keyspaces:
+      | test_match |
+    Given the integrity is validated
+>>>>>>> Stashed changes
 
   Scenario: a relation is matchable from role players without specifying relation type
     Given graql define

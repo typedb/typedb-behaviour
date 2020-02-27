@@ -17,6 +17,13 @@
 #
 Feature: Graql Insert Query
 
+  Background: Create a simple schema that is extensible for each scenario
+    Given connection has been opened
+    Given connection delete all keyspaces
+    Given connection open sessions for keyspaces:
+      | test_insert |
+    Given the integrity is validated
+
   Scenario: insert an instance creates instance of that type
     Given graql define
       | define                               |
