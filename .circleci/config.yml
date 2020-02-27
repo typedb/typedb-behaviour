@@ -94,7 +94,7 @@ jobs:
       - checkout
       - run-grakn-server
       - run-bazel-rbe:
-          command: bazel test //tools/verification/... --test_output=errors
+          command: bazel test //tools/integrity/... --test_output=errors
 
 workflows:
   verification:
