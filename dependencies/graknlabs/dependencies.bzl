@@ -21,9 +21,9 @@ def graknlabs_graql():
         tag = "1.0.6",  # sync-marker: do not remove this comment, this is used for sync-dependencies by @graknlabs_graql
     )
 
-def graknlabs_grakn():
+def graknlabs_grakn_core():
     git_repository(
-        name = "graknlabs_graql",
+        name = "graknlabs_grakn_core",
         remote = "https://github.com/graknlabs/grakn",
         tag = "1.6.2",  # sync-marker: do not remove this comment, this is used for sync-dependencies by @graknlabs_graql
     )

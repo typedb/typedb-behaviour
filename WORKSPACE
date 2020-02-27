@@ -22,10 +22,11 @@ workspace(name = "graknlabs_verification")
 # Grakn Labs dependencies #
 ###########################
 
-load("//dependencies/graknlabs:dependencies.bzl", "graknlabs_build_tools", "graknlabs_common", "graknlabs_graql")
+load("//dependencies/graknlabs:dependencies.bzl", "graknlabs_build_tools", "graknlabs_common", "graknlabs_graql", "graknlabs_grakn_core")
+graknlabs_graql()
 graknlabs_build_tools()
 graknlabs_common()
-graknlabs_graql()
+graknlabs_grakn_core()
 
 load("@graknlabs_build_tools//distribution:dependencies.bzl", "graknlabs_bazel_distribution")
 graknlabs_bazel_distribution()
@@ -68,17 +69,18 @@ graknlabs_build_tools_ci_pip_install()
 # Load Graql dependencies #
 ###########################
 
-# Load ANTLR dependencies for Bazel
 load("@graknlabs_graql//dependencies/compilers:dependencies.bzl", "antlr_dependencies")
 antlr_dependencies()
 
-# Load ANTLR dependencies for ANTLR programs
 load("@rules_antlr//antlr:deps.bzl", "antlr_dependencies")
 antlr_dependencies()
 
 load("@graknlabs_graql//dependencies/maven:dependencies.bzl",
 graknlabs_graql_maven_dependencies = "maven_dependencies")
 graknlabs_graql_maven_dependencies()
+
+
+
 
 ##################################
 # Load Distribution dependencies #
