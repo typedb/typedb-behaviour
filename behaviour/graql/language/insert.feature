@@ -85,7 +85,7 @@ Feature: Graql Insert Query
   Scenario: insert an attribute with a value is retrievable by the value
     Given graql define
       | define                               |
-      | name sub attribute, datatype string; |
+      | name sub attribute, datatype string, |
       |   key ref;                           |
       | ref sub attribute, datatype long;    |
     Given the integrity is validated
@@ -104,9 +104,9 @@ Feature: Graql Insert Query
 
   Scenario: insert an attribute that already exists throws errors when inserted with different keys
     Given graql define
-      | define                                     |
-      | age sub attribute, datatype long, key ref; |
-      | ref sub attribute, datatype long;          |
+      | define                                        |
+      | name sub attribute, datatype string, key ref; |
+      | ref sub attribute, datatype long;             |
     Given the integrity is validated
 
     When graql insert
@@ -120,7 +120,7 @@ Feature: Graql Insert Query
   Scenario: insert two owners of the same attribute links owners via attribute
     Given graql define
       | define                                  |
-      | person sub attribute, has age, key ref; |
+      | person sub entity, has age, key ref; |
       | age sub attribute, datatype long;       |
       | ref sub attribute, datatype long;       |
     Given the integrity is validated
