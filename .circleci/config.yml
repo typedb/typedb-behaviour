@@ -84,7 +84,7 @@ jobs:
       - install-bazel-linux-rbe
       - checkout
       - run-bazel-rbe:
-          command: bazel test //tools/operator... --test_output=errors
+          command: bazel test //tools/operator/... --test_output=errors
 
   test-tools-verification:
     machine: true
@@ -94,7 +94,7 @@ jobs:
       - checkout
       - run-grakn-server
       - run-bazel-rbe:
-          command: bazel test //tools/verification... --test_output=errors
+          command: bazel test //tools/verification/... --test_output=errors
 
 workflows:
   verification:
@@ -103,4 +103,4 @@ workflows:
       - build-checkstyle
       - build-pdf
       - test-tools-operator
-      - test-tools-verification-it
+      - test-tools-verification
