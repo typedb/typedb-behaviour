@@ -137,10 +137,11 @@ Feature: Graql Insert Query
       | match                        |
       | $p1 isa person, has age $a;  |
       | $p2 isa person, has age $a;  |
+      | $p1 != $p2;                  |
       | get $p1, $p2;                |
     Then answer concepts all have key: ref
     Then answer keys are
-      | p1  | p2  |
+      | p1   | p2   |
       | 0    | 1    |
       | 1    | 0    |
 
