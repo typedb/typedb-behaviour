@@ -77,7 +77,7 @@ jobs:
           for f in `find semantics -name '*.md'`; do echo $f; pandoc -o $f.pdf $f; done;
           for f in `find subsumption -name '*.md'`; do echo $f; pandoc -o $f.pdf $f; done;
 
-  test-tools-operator:
+  operator-test:
     machine: true
     working_directory: ~/verification
     steps:
@@ -86,7 +86,7 @@ jobs:
       - run-bazel-rbe:
           command: bazel test //tools/operator/... --test_output=errors
 
-  test-tools-verification:
+  integrity-verification-test:
     machine: true
     working_directory: ~/verification
     steps:
@@ -102,5 +102,5 @@ workflows:
       - build
       - build-checkstyle
       - build-pdf
-      - test-tools-operator
-      - test-tools-verification
+      - operator-test
+      - integrity-verification-test
