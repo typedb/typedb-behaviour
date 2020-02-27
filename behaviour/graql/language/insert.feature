@@ -17,6 +17,14 @@
 #
 Feature: Graql Insert Query
 
+  Background: Create a simple schema that is extensible for each scenario
+    Given connection has been opened
+    Given connection delete all keyspaces
+    Given connection open sessions for keyspaces:
+      | test_insert |
+    Given transaction is initialised
+    Given the integrity is validated
+
   Scenario: insert an instance creates instance of that type
     Given graql define
       | define                               |
@@ -27,7 +35,7 @@ Feature: Graql Insert Query
       |   plays employer;                    |
       | employment sub relation,             |
       |   relates employee,                  |
-      |   relates employee;                  |
+      |   relates employer;                  |
       | name sub attribute,                  |
       |   datatype string;                   |
     Given the integrity is validated
@@ -55,7 +63,7 @@ Feature: Graql Insert Query
       |   key ref;                           |
       | employment sub relation,             |
       |   relates employee,                  |
-      |   relates employee,                  |
+      |   relates employer,                  |
       |   key ref;                           |
       | ref sub attribute, datatype long;    |
     Given the integrity is validated
@@ -77,7 +85,7 @@ Feature: Graql Insert Query
   Scenario: insert an attribute with a value is retrievable by the value
     Given graql define
       | define                               |
-      | name sub attribute, datatype string; |
+      | name sub attribute, datatype string, |
       |   key ref;                           |
       | ref sub attribute, datatype long;    |
     Given the integrity is validated
@@ -96,9 +104,9 @@ Feature: Graql Insert Query
 
   Scenario: insert an attribute that already exists throws errors when inserted with different keys
     Given graql define
-      | define                                     |
-      | age sub attribute, datatype long, key ref; |
-      | ref sub attribute, datatype long;          |
+      | define                                        |
+      | name sub attribute, datatype string, key ref; |
+      | ref sub attribute, datatype long;             |
     Given the integrity is validated
 
     When graql insert
@@ -109,10 +117,12 @@ Feature: Graql Insert Query
       | insert $a "john" isa name, has ref 1; |
 
 
+  # TODO - fix this; should fail but it does not!
+  @ignore
   Scenario: insert two owners of the same attribute links owners via attribute
     Given graql define
       | define                                  |
-      | person sub attribute, has age, key ref; |
+      | person sub entity, has age, key ref; |
       | age sub attribute, datatype long;       |
       | ref sub attribute, datatype long;       |
     Given the integrity is validated
@@ -129,10 +139,11 @@ Feature: Graql Insert Query
       | match                        |
       | $p1 isa person, has age $a;  |
       | $p2 isa person, has age $a;  |
+      | $p1 != $p2;                  |
       | get $p1, $p2;                |
     Then answer concepts all have key: ref
     Then answer keys are
-      | p1  | p2  |
+      | p1   | p2   |
       | 0    | 1    |
       | 1    | 0    |
 
@@ -153,3 +164,11 @@ Feature: Graql Insert Query
       | insert                               |
       |   $x isa person, has value $a ;      |
       |   $a "10.maybe";                     |
+
+  Scenario: inserting duplicate keys throws on commit (? or at insert)
+  Scenario: inserting disallowed role being played throws on commit (? or at insert)
+  Scenario: inserting disallowed role being related throws on commit (? or at insert)
+  Scenario: inserting a relation with no role players throws on commit (? or at insert)
+
+
+  Scenario: match-insert includes all variable retrieved and created (?)
