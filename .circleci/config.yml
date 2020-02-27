@@ -25,6 +25,14 @@ commands:
       - run: curl -OL https://raw.githubusercontent.com/graknlabs/build-tools/master/ci/install-bazel-rbe.sh
       - run: bash ./install-bazel-rbe.sh && rm ./install-bazel-rbe.sh
 
+  run-grakn-server:
+    steps:
+      - run-bazel-rbe:
+          command: bazel build @graknlabs_grakn_core//:assemble-linux-targz
+      - run: mkdir dist && tar -xvzf bazel-genfiles/external/graknlabs_grakn_core/grakn-core-all-linux.tar.gz -C ./dist/
+      - run: nohup ./dist/grakn-core-all-linux/grakn server start
+
+
   install-pandoc-latex:
     steps:
       - run: sudo apt-get update
@@ -69,15 +77,24 @@ jobs:
           for f in `find semantics -name '*.md'`; do echo $f; pandoc -o $f.pdf $f; done;
           for f in `find subsumption -name '*.md'`; do echo $f; pandoc -o $f.pdf $f; done;
 
-  test-tools:
+  operator-test:
     machine: true
     working_directory: ~/verification
     steps:
       - install-bazel-linux-rbe
       - checkout
-      - run: dependencies/maven/update.sh
       - run-bazel-rbe:
-          command: bazel test //tools/... --test_output=errors
+          command: bazel test //tools/operator/... --test_output=errors
+
+  integrity-verification-test:
+    machine: true
+    working_directory: ~/verification
+    steps:
+      - install-bazel-linux-rbe
+      - checkout
+      - run-grakn-server
+      - run-bazel-rbe:
+          command: bazel test //tools/verification/... --test_output=errors
 
 workflows:
   verification:
@@ -85,4 +102,5 @@ workflows:
       - build
       - build-checkstyle
       - build-pdf
-      - test-tools
+      - operator-test
+      - integrity-verification-test

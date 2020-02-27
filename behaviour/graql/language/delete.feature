@@ -16,3 +16,13 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 Feature: Graql Delete Query
+
+  Scenario: deleted instance no longer visible as instance of its type
+
+  Scenario: deleted role player is not part of relation
+
+  Scenario: deleted attribute not visible from any owner of attribute
+
+  Scenario: deleted attribute owning instance not visible from attributes
+
+  Scenario: deleting attribute ownership retains attribute and owner but no mutual visibility

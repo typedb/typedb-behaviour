@@ -27,6 +27,7 @@ import grakn.verification.tools.operator.Operators;
 import grakn.verification.tools.operator.TypeContext;
 import graql.lang.Graql;
 import graql.lang.pattern.Pattern;
+import graql.lang.property.IdProperty;
 import graql.lang.property.IsaProperty;
 import graql.lang.property.NeqProperty;
 import graql.lang.property.ValueProperty;
@@ -145,8 +146,6 @@ public class OperatorTest {
                 Operators.roleGeneralise().apply(input, ctx).collect(Collectors.toSet())
         );
         assertEquals(expectedOutput, output);
-
-
     }
 
     @Test
@@ -437,6 +436,27 @@ public class OperatorTest {
         assertNotEquals(transformedIsa.type().var(), new Variable("type"));
         assertNotEquals(transformedValue.operation().innerStatement().var(), new Variable("v2"));
         assertNotEquals(transformedNeq.statement().var(), new Variable("type2"));
+    }
+
+    @Test
+    public void whenApplyingVariableFuzzyingOperator_atLeastOneIdIsFuzzed(){
+        List<String> inputIds = Lists.newArrayList("V123", "V456");
+        Pattern input = and(
+                var("x").id(inputIds.get(0)),
+                var("y").id(inputIds.get(1))
+        );
+        Set<Pattern> output = Operators.fuzzIds().apply(input, ctx).collect(Collectors.toSet());
+        Set<Pattern> output2 = output.stream().flatMap(p -> Operators.fuzzIds().apply(p, ctx)).collect(Collectors.toSet());
+        Stream.concat(output.stream(), output2.stream()).forEach(o -> assertTrue(
+                o.statements().stream()
+                        .flatMap(s -> s.properties().stream())
+                        .filter(p -> p instanceof IdProperty)
+                        .map(IdProperty.class::cast)
+                        .map(IdProperty::id)
+                        .anyMatch(id -> !inputIds.contains(id))
+        ));
+        assertNotEquals(Sets.newHashSet(input), output);
+        assertNotEquals(output, output2);
     }
 
     private <T extends VarProperty> T getProperty(Pattern src, Class<T> type){

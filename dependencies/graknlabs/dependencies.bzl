@@ -34,3 +34,10 @@ def graknlabs_client_java():
         remote = "https://github.com/graknlabs/client-java",
         tag = "1.6.2", # sync-marker: do not remove this comment, this is used for sync-dependencies by @graknlabs_protocol
     )
+
+def graknlabs_grakn_core():
+    git_repository(
+        name = "graknlabs_grakn_core",
+        remote = "https://github.com/graknlabs/grakn",
+        tag = "1.6.2",  # sync-marker: do not remove this comment, this is used for sync-dependencies by @graknlabs_graql
+    )

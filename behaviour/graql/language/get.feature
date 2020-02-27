@@ -16,3 +16,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 Feature: Graql Get Query
+
+  Scenario: Disjunctions return the union of composing query statements
+
+  Scenario: Restricting variables in get removes variable from answer maps

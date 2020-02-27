@@ -21,7 +21,8 @@ Feature: Graql Define Query
     Given connection has been opened
     Given connection delete all keyspaces
     Given connection open sessions for keyspaces:
-      | test_define_keyspace |
+      | test_define |
+    Given transaction is initialised
     Given the integrity is validated
     Given graql define
       | define                                                        |
@@ -39,7 +40,7 @@ Feature: Graql Define Query
     When get answers of graql query
       | match $x type dog; get; |
     # do we want to also check the number of answers
-    Then answers have concepts labeled
+    Then answers are labeled
       | x   |
       | dog |
 
@@ -51,7 +52,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       | match $x sub person; get; |
-    Then answers have concepts labeled
+    Then answers are labeled
       | x      |
       | person |
       | child  |
@@ -65,7 +66,7 @@ Feature: Graql Define Query
     When get answers of graql query
       | match $x plays employee; get; |
 
-    Then answers have concepts labeled
+    Then answers are labeled
       | x      |
       | person |
       | child  |
@@ -79,7 +80,7 @@ Feature: Graql Define Query
     When get answers of graql query
       | match $x has name; get; |
 
-    Then answers have concepts labeled
+    Then answers are labeled
       | x      |
       | person |
       | child  |
@@ -93,7 +94,7 @@ Feature: Graql Define Query
     When get answers of graql query
       | match $x key email; get; |
 
-    Then answers have concepts labeled
+    Then answers are labeled
       | x      |
       | person |
       | child  |
@@ -109,7 +110,7 @@ Feature: Graql Define Query
     When get answers of graql query
       | match $x relates employee; get; |
 
-    Then answers have concepts labeled
+    Then answers are labeled
       | x                    |
       | employment           |
       | part-time-employment |
@@ -124,7 +125,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       | match $x relates employee; get; |
-    Then answers have concepts labeled
+    Then answers are labeled
       | x                    |
       | employment           |
       | part-time-employment |
@@ -147,7 +148,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       | match $x datatype string; get; |
-    Then answers have concepts labeled
+    Then answers are labeled
       | x          |
       | name       |
       | first-name |
@@ -173,7 +174,7 @@ Feature: Graql Define Query
     When get answers of graql query
       | match $x type child, plays $r; get; |
 
-    Then answers have concepts labeled
+    Then answers are labeled
       | x      | r                |
       | child  | employee         |
       | child  | employer         |
@@ -194,7 +195,7 @@ Feature: Graql Define Query
     When get answers of graql query
       | match $x type child, has $y; get; |
 
-    Then answers have concepts labeled
+    Then answers are labeled
       | x      | y            |
       | child  | name         |
       | child  | phone-number |
@@ -213,7 +214,7 @@ Feature: Graql Define Query
     When get answers of graql query
       | match $x type child, key $y; get; |
 
-    Then answers have concepts labeled
+    Then answers are labeled
       | x      | y      |
       | child  | email  |
       | child  | email  |
@@ -231,7 +232,7 @@ Feature: Graql Define Query
     When get answers of graql query
       | match $x type part-time-employment, relates $r; get; |
 
-    Then answers have concepts labeled
+    Then answers are labeled
       | x                     | r          |
       | part-time-employment  | employee   |
       | part-time-employment  | employer   |
@@ -252,7 +253,7 @@ Feature: Graql Define Query
   Scenario: defining an attribute key- and owner-ship creates the implicit attribute key/ownership relation types
     When get answers of graql query
       | match $x sub relation; get;  |
-    Then answers have concepts labeled
+    Then answers are labeled
       | x              |
       | relation       |
       | employment     |
@@ -269,7 +270,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       | match $child sub $super; $super sub @has-attribute; get;  |
-    Then answers have concepts labeled
+    Then answers are labeled
       | child           | super            |
       | @has-attribute  | @has-attribute   |
       | @has-name       | @has-attribute   |
@@ -277,3 +278,12 @@ Feature: Graql Define Query
       | @has-name       | @has-name        |
       | @has-first-name | @has-name        |
       | @has-first-name | @has-first-name  |
+
+  Scenario: defining a relation with no related roles throws on commit
+  Scenario: defining a rule with nested negation throws on commit
+  Scenario: defining a rule with two conclusions throws on commit
+  Scenario: defining a rule with disjunction throws on commit
+  Scenario: defining rule with an unbound variable in the `then` throws on commit
+  Scenario: defining a non-insertable `then` throws on commit (eg. missing specific roles, or attribute value)
+
+
