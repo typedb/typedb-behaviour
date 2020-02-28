@@ -39,7 +39,6 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       | match $x type dog; get; |
-    # do we want to also check the number of answers
     Then answers are labeled
       | x   |
       | dog |
