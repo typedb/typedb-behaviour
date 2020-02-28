@@ -192,6 +192,8 @@ Feature: Graql Undefine Query
     Then answers have size: 0
 
 
-  Scenario: undefine all attribute ownerships removes implicit ownership relation (?)
-
   Scenario: undefine a supertype errors if subtypes exist
+    Given graql define
+      | define child sub person;   |
+    Then graql undefine throws
+      | undefine person sub entity; |
