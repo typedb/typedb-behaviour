@@ -47,13 +47,46 @@ java_test(
         "@graknlabs_common//:common",
         "//dependencies/maven/artifacts/com/google/guava",
         "//dependencies/maven/artifacts/org/mockito:mockito-core",
+        "//dependencies/maven/artifacts/org/slf4j:slf4j-api",
+    ],
+    runtime_deps = [
+        "//dependencies/maven/artifacts/ch/qos/logback:logback-classic",
+        "//dependencies/maven/artifacts/ch/qos/logback:logback-core",
     ],
 )
+
+java_test(
+    name = "validator-it",
+    srcs = glob([
+        "ValidatorIT.java",
+    ]),
+    test_class = "grakn.verification.tools.integrity.ValidatorIT",
+    deps = [
+        "//tools/integrity:integrity",
+        "@graknlabs_client_java//:client-java",
+        "@graknlabs_graql//java:graql",
+        "//dependencies/maven/artifacts/com/google/guava",
+        "//dependencies/maven/artifacts/org/mockito:mockito-core",
+        "//dependencies/maven/artifacts/org/slf4j:slf4j-api",
+    ],
+    runtime_deps = [
+        "//dependencies/maven/artifacts/ch/qos/logback:logback-classic",
+        "//dependencies/maven/artifacts/ch/qos/logback:logback-core",
+    ],
+    classpath_resources = [
+        "//tools/integrity/test:logback.xml",
+    ],
+)
+
+exports_files([
+    "logback.xml"
+])
 
 checkstyle_test(
     name = "checkstyle",
     targets = [
         ":semantic-set-validity",
-        ":validator-set-construction"
+        ":validator-set-construction",
+        ":validator-it"
     ],
 )

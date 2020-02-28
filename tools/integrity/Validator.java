@@ -21,6 +21,8 @@ package grakn.verification.tools.integrity;
 
 import grakn.client.GraknClient;
 import grakn.client.answer.ConceptMap;
+import grakn.client.concept.Label;
+import grakn.client.concept.SchemaConcept;
 import grakn.common.util.Pair;
 import grakn.verification.tools.integrity.schema.Has;
 import grakn.verification.tools.integrity.schema.Plays;
@@ -30,10 +32,14 @@ import grakn.verification.tools.integrity.schema.TransitiveSub;
 import grakn.verification.tools.integrity.schema.Types;
 import graql.lang.Graql;
 import graql.lang.query.GraqlGet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 public class Validator {
+
+    private static final Logger LOG = LoggerFactory.getLogger(Validator.class);
 
     /*
     TODO
@@ -73,7 +79,7 @@ public class Validator {
 
         Types abstractTypes = createAndValidateAbstractTypes(types);
 
-        return false;
+        return true;
     }
 
 
@@ -94,18 +100,21 @@ public class Validator {
     }
 
     Types createAndValidateTypes() {
+        LOG.info("Retrieving types...");
         Types types = new Types();
         try (GraknClient.Transaction tx = session.transaction().read()) {
-            List<ConceptMap> answers = tx.execute(Graql.parse("match $x sub type; get;").asGet());
+            List<ConceptMap> answers = tx.execute(Graql.parse("match $x sub thing; get;").asGet());
             for (ConceptMap answer : answers) {
                 types.add(new Type(answer.get("x").asSchemaConcept()));
             }
         }
+        LOG.info("...validating types");
         types.validate();
         return types;
     }
 
     Types createAndValidateRoles() {
+        LOG.info("Retrieving roles...");
         Types roles = new Types();
         try (GraknClient.Transaction tx = session.transaction().read()) {
             List<ConceptMap> answers = tx.execute(Graql.parse("match $x sub role; get;").asGet());
@@ -113,30 +122,42 @@ public class Validator {
                 roles.add(new Type(answer.get("x").asSchemaConcept()));
             }
         }
+        LOG.info("...validating roles");
         roles.validate();
         return roles;
     }
 
     Sub createAndValidateSub(Types types) {
+        LOG.info("Constructing Sub...");
         Sub sub = new Sub();
-
         try (GraknClient.Transaction tx = session.transaction().read()) {
             for (Type child : types) {
                 for (Type parent : types) {
                     // TODO we reject transitive sub using sub! but this is broken
-                    GraqlGet query = Graql.parse(String.format("match $child type %s; $parent type %s; $child sub! $parent; child != parent; get;", child, parent)).asGet();
-                    boolean trueInGrakn = ask(tx, query);
+//                    GraqlGet query = Graql.parse(String.format("match $child ype %s; $parent type %s; $child sub! $parent; $child != $parent; get;", child, parent)).asGet();
+//                    boolean trueInGrakn = ask(tx, query);
+
+                    // TODO replace concept API  when we can
+                    boolean trueInGrakn = false;
+                    if (!child.equals(parent)) {
+                        SchemaConcept childType = tx.getSchemaConcept(Label.of(child.label()));
+                        trueInGrakn = childType.sup().label().toString().equals(parent.label());
+//                                .anyMatch(superType -> superType.label().toString().equals(parent.label()));
+                    }
+
                     if (trueInGrakn) {
                         sub.add(new Pair<>(child, parent));
                     }
                 }
             }
-            sub.validate();
-            return sub;
         }
+        LOG.info("..validating Sub");
+        sub.validate();
+        return sub;
     }
 
     TransitiveSub createAndValidateTransitiveSubWithoutIdentity(Sub sub) {
+        LOG.info("Constructing Transitive Sub...");
         TransitiveSub graknTransitiveSub = new TransitiveSub();
 
         try (GraknClient.Transaction tx = session.transaction().write()) {
@@ -154,42 +175,49 @@ public class Validator {
                 }
             }
         }
-
+        LOG.info("...validating Transitive Sub...");
         graknTransitiveSub.validate();
         return graknTransitiveSub;
     }
 
     Types createEntityTypes(TransitiveSub transitiveSub) {
+        LOG.info("Constructing entity types set");
         Types entityTypes = new Types();
         for (Pair<Type, Type> sub : transitiveSub) {
             if (sub.second().label().equals("entity")) {
                 entityTypes.add(sub.first());
             }
         }
+        // TODO validate against Grakn that these are agreed to be entity types
         return entityTypes;
     }
 
     Types createRelationTypes(TransitiveSub transitiveSub) {
+        LOG.info("Constructing relation types set");
         Types entityTypes = new Types();
         for (Pair<Type, Type> sub : transitiveSub) {
             if (sub.second().label().equals("relation")) {
                 entityTypes.add(sub.first());
             }
         }
+        // TODO validate against Grakn that these are agreed to be relation types
         return entityTypes;
     }
 
     Types createAttributeTypes(TransitiveSub transitiveSub) {
+        LOG.info("Constructing attribute types set");
         Types entityTypes = new Types();
         for (Pair<Type, Type> sub : transitiveSub) {
             if (sub.second().label().equals("attribute")) {
                 entityTypes.add(sub.first());
             }
         }
+        // TODO validate against Grakn that these are agreed to be attribute types
         return entityTypes;
     }
 
     Has createAndValidateHas(Types types, Types attributes) {
+        LOG.info("Constructing Has set...");
         Has has = new Has();
 
         try (GraknClient.Transaction tx = session.transaction().read()) {
@@ -204,11 +232,14 @@ public class Validator {
                 }
             }
         }
+
+        LOG.info("...validating Has set");
         has.validate();
         return has;
     }
 
     Has createAndValidateKey(Types types, Types attributes, Has has) {
+        LOG.info("Constructing Key set...");
         Has key = new Has();
 
         try (GraknClient.Transaction tx = session.transaction().read()) {
@@ -224,6 +255,7 @@ public class Validator {
             }
         }
 
+        LOG.info("...validating Key set");
         key.validate();
 
         // also validate key is a subset of has
@@ -238,6 +270,7 @@ public class Validator {
 
 
     private Relates createAndValidateRelates(Types relations, Types roles) {
+        LOG.info("Constructing Relates set...");
         Relates relates = new Relates();
         try (GraknClient.Transaction tx = session.transaction().read()) {
             for (Type relation : relations) {
@@ -250,6 +283,8 @@ public class Validator {
                 }
             }
         }
+
+        LOG.info("...validating Relates set");
         relates.validate();
 
         // also validate that every relation has at least one role
@@ -269,6 +304,7 @@ public class Validator {
     }
 
     private Plays createAndValidatePlays(Types types, Types roles) {
+        LOG.info("Constructing Relates set...");
         Plays plays = new Plays();
         try (GraknClient.Transaction tx = session.transaction().read()) {
             for (Type relation : types) {
@@ -281,11 +317,15 @@ public class Validator {
                 }
             }
         }
+
+        LOG.info("...validating Relates set");
         plays.validate();
         return plays;
     }
 
     private Types createAndValidateAbstractTypes(Types types) {
+        LOG.info("Constructing Abstract set...");
+
         Types abstractTypes = new Types();
         try (GraknClient.Transaction tx = session.transaction().read()) {
             for (Type type : types) {
@@ -296,6 +336,8 @@ public class Validator {
                 }
             }
         }
+
+        LOG.info("Validating Abstract set");
         abstractTypes.validate();
         return abstractTypes;
     }

@@ -30,6 +30,19 @@ options:
 
 
 dependencies:
+  ch.qos.logback:
+    logback-classic:
+      version: "1.2.3"
+      lang: java
+    logback-core:
+      version: "1.2.3"
+      lang: java
+
+  org.slf4j:
+    slf4j-api:
+      version: "1.7.20"
+      lang: java
+
 
   com.google.guava:
     guava:

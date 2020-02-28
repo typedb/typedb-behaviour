@@ -31,6 +31,7 @@ java_library(
         "@graknlabs_graql//java:graql",
         "@graknlabs_common//:common",
         "//dependencies/maven/artifacts/com/google/guava",
+        "//dependencies/maven/artifacts/org/slf4j:slf4j-api",
     ],
 )
 
