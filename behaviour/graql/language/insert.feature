@@ -102,6 +102,8 @@ Feature: Graql Insert Query
       | 0    |
 
 
+  # TODO - fix this; should fail but it does not!
+  @ignore
   Scenario: insert an attribute that already exists throws errors when inserted with different keys
     Given graql define
       | define                                        |
@@ -117,8 +119,6 @@ Feature: Graql Insert Query
       | insert $a "john" isa name, has ref 1; |
 
 
-  # TODO - fix this; should fail but it does not!
-  @ignore
   Scenario: insert two owners of the same attribute links owners via attribute
     Given graql define
       | define                                  |
