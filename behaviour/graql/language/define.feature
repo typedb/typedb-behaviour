@@ -39,7 +39,6 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       | match $x type dog; get; |
-    # do we want to also check the number of answers
     Then answers are labeled
       | x   |
       | dog |
@@ -247,10 +246,10 @@ Feature: Graql Define Query
 
   Scenario: define a rule creates a rule (?)
 
-  Scenario: define a sub-role using as is visible from children (?)
+  Scenario: define a sub-role using 'as' is visible from children (?)
 
 
-  Scenario: defining an attribute key- and owner-ship creates the implicit attribute key/ownership relation types
+  Scenario: define an attribute key- and owner-ship creates the implicit attribute key/ownership relation types
     When get answers of graql query
       | match $x sub relation; get;  |
     Then answers are labeled
@@ -279,11 +278,13 @@ Feature: Graql Define Query
       | @has-first-name | @has-name        |
       | @has-first-name | @has-first-name  |
 
-  Scenario: defining a relation with no related roles throws on commit
-  Scenario: defining a rule with nested negation throws on commit
-  Scenario: defining a rule with two conclusions throws on commit
-  Scenario: defining a rule with disjunction throws on commit
-  Scenario: defining rule with an unbound variable in the `then` throws on commit
-  Scenario: defining a non-insertable `then` throws on commit (eg. missing specific roles, or attribute value)
+  Scenario: define a relation with no related roles throws on commit
+  Scenario: define a rule with nested negation throws on commit
+  Scenario: define a rule with two conclusions throws on commit
+  Scenario: define a rule with disjunction throws on commit
+  Scenario: define rule with an unbound variable in the `then` throws on commit
+  Scenario: define a non-insertable `then` throws on commit (eg. missing specific roles, or attribute value)
+  Scenario: define a rule causing a loop throws on commit (eg. conclusion is negated in the `when`)
+
 
 
