@@ -139,7 +139,7 @@ public class Validator {
 
                     // TODO replace concept API  when we can
                     boolean trueInGrakn = false;
-                    if (!child.equals(parent)) {
+                    if (!child.equals(parent) && !child.label().equals(META_THING)) {
                         SchemaConcept childType = tx.getSchemaConcept(Label.of(child.label()));
                         trueInGrakn = childType.sup().label().toString().equals(parent.label());
 //                                .anyMatch(superType -> superType.label().toString().equals(parent.label()));

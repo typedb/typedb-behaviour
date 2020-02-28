@@ -116,8 +116,12 @@ graknlabs_graql_maven_dependencies()
 ###########################
 
 load("@graknlabs_client_java//dependencies/maven:dependencies.bzl",
-graknlabs_client_java_maven_dependencies = "maven_dependencies")
+graknlabs_client_java_maven_dependencies = "maven_dependencies",)
 graknlabs_client_java_maven_dependencies()
+
+load("@graknlabs_client_java//dependencies/graknlabs:dependencies.bzl",
+graknlabs_grabl_tracing = "graknlabs_grabl_tracing")
+graknlabs_grabl_tracing()
 
 ##############################
 # Load Protocol dependencies #
