@@ -86,7 +86,7 @@ Feature: Graql Undefine Query
     Given graql define
       | define child sub person;  |
     Given graql undefine
-      | undefine person sub entity, has name; |
+      | undefine person has name; |
     Then the integrity is validated
     When get answers of graql query
       | match $x type child; $x has $attribute; get;  |
@@ -178,7 +178,11 @@ Feature: Graql Undefine Query
 
   Scenario: undefine a rule removes a rule
     Given graql define
-      | define arule sub rule, when { $c isa company; $y isa person; }, then { (employer: $c, employee: $y) isa employment; }; |
+      | define company sub entity, plays employee;        |
+      | arule sub rule, when                              |
+      | { $c isa company; $y isa person; },               |
+      | then                                              |
+      | { (employer: $c, employee: $y) isa employment; }; |
     Given the integrity is validated
     When graql query
       | match $x sub rule; get; |
