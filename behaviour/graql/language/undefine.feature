@@ -63,7 +63,7 @@ Feature: Graql Undefine Query
       | define                  |
       |  first-name sub name;   |
       |  person has first-name; |
-    When graql query
+    When get answers of graql query
       | match $x sub @has-name; get; |
     When answers have labels
       | x               |
@@ -71,7 +71,7 @@ Feature: Graql Undefine Query
       | @has-first-name |
     Then graql undefine
       | undefine first-name sub name; |
-    Then graql query
+    Then get answers of graql query
       | match $x sub @has-name; get;  |
     Then answers have labels
       | x         |
