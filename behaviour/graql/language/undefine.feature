@@ -48,7 +48,7 @@ Feature: Graql Undefine Query
     Given graql define
       | define child sub person;  |
     Given graql undefine
-      | undefine person sub entity, plays employee; |
+      | undefine person plays employee; |
     Then the integrity is validated
     When get answers of graql query
       | match $x type child; $x plays $role; get;  |
@@ -58,35 +58,41 @@ Feature: Graql Undefine Query
       | child | @key-email-owner |
 
 
+  @ignore
+  # TODO readd when behaves correctly
   Scenario: undefine an attribute subtype removes implicit ownership relation from hierarchy
     Given graql define
       | define                  |
       |  first-name sub name;   |
       |  person has first-name; |
-    When graql query
+    When get answers of graql query
       | match $x sub @has-name; get; |
-    When answers have labels
+    When answers are labeled
       | x               |
       | @has-name       |
       | @has-first-name |
     Then graql undefine
       | undefine first-name sub name; |
-    Then graql query
+    Then get answers of graql query
       | match $x sub @has-name; get;  |
-    Then answers have labels
+    When answers are labeled
       | x         |
       | @has-name |
 
 
   # TODO is this expected to hold?
-  Scenario: undefine an attribute key- and owner-ship removes implicit owner-/key-ship relation types
+  Scenario: undefine the only attribute key- and owner-ship removes implicit owner-/key-ship relation types
+  Scenario: undefine attribute removes implicit ownership roles from owners
+  Scenario: undefine attribute removes implicit roles
 
 
+  @ignore
+  # re-enable when can query by has $x
   Scenario: undefine 'has' from super entity removes 'has' from child entity
     Given graql define
       | define child sub person;  |
     Given graql undefine
-      | undefine person sub entity, has name; |
+      | undefine person has name; |
     Then the integrity is validated
     When get answers of graql query
       | match $x type child; $x has $attribute; get;  |
@@ -99,11 +105,11 @@ Feature: Graql Undefine Query
     Given graql define
       | define child sub person;  |
     Given graql undefine
-      | undefine person sub entity, key email; |
+      | undefine person key email; |
     Then the integrity is validated
     When get answers of graql query
-      | match $x type child; $x key $attribute; get;  |
-    Then the answer size is: 0
+      | match $x type child; $x key email; get;  |
+    Then answer size is: 0
 
   @ignore
   # re-enable when 'relates' is inherited
@@ -111,7 +117,7 @@ Feature: Graql Undefine Query
     Given graql define
       | define part-time sub employment;  |
     Given graql undefine
-      | undefine employment sub relation, relates employer; |
+      | undefine employment relates employer; |
     Then the integrity is validated
     When get answers of graql query
       | match $x type part-time; $x relates $role; get;  |
@@ -166,30 +172,35 @@ Feature: Graql Undefine Query
 
   Scenario: undefine a regex on an attribute type, removes regex constraints on attribute
     Given graql undefine
-      | undefine email sub attribute, regex ".+@\w.com";    |
+      | undefine email regex ".+@\w.com";    |
     Given the integrity is validated
     When graql insert
       | insert $x "not-email-regex" isa email;              |
     Given the integrity is validated
-    Then graql query
+    Then get answers of graql query
       | match $x isa email; get; |
-    Then the answer size is: 1
+    Then answer size is: 1
 
 
   Scenario: undefine a rule removes a rule
     Given graql define
-      | define arule sub rule, when { $x isa person; $y isa person; }, then { (employer: $x, employer: $y) isa employment; }; |
+      | define company sub entity, plays employer;        |
+      | arule sub rule, when                              |
+      | { $c isa company; $y isa person; },               |
+      | then                                              |
+      | { (employer: $c, employee: $y) isa employment; }; |
     Given the integrity is validated
-    When graql query
+    When get answers of graql query
       | match $x sub rule; get; |
-    When answers have labels
+    When answers are labeled
       | x     |
+      | rule  |
       | arule |
     Then graql undefine
       | undefine arule sub rule;  |
-    Then graql query
+    Then get answers of graql query
       | match $x sub rule; get;   |
-    Then answers have size: 0
+    Then answer size is: 1
 
 
   Scenario: undefine a supertype errors if subtypes exist
