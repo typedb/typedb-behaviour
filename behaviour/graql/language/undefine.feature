@@ -65,7 +65,7 @@ Feature: Graql Undefine Query
       |  person has first-name; |
     When get answers of graql query
       | match $x sub @has-name; get; |
-    When answers have labels
+    When answers are labeled
       | x               |
       | @has-name       |
       | @has-first-name |
@@ -73,7 +73,7 @@ Feature: Graql Undefine Query
       | undefine first-name sub name; |
     Then get answers of graql query
       | match $x sub @has-name; get;  |
-    Then answers have labels
+    When answers are labeled
       | x         |
       | @has-name |
 
@@ -105,7 +105,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       | match $x type child; $x key email; get;  |
-    Then the answer size is: 0
+    Then answer size is: 0
 
   @ignore
   # re-enable when 'relates' is inherited
@@ -175,12 +175,12 @@ Feature: Graql Undefine Query
     Given the integrity is validated
     Then get answers of graql query
       | match $x isa email; get; |
-    Then the answer size is: 1
+    Then answer size is: 1
 
 
   Scenario: undefine a rule removes a rule
     Given graql define
-      | define company sub entity, plays employee;        |
+      | define company sub entity, plays employer;        |
       | arule sub rule, when                              |
       | { $c isa company; $y isa person; },               |
       | then                                              |
@@ -188,14 +188,14 @@ Feature: Graql Undefine Query
     Given the integrity is validated
     When get answers of graql query
       | match $x sub rule; get; |
-    When answers have labels
+    When answers are labeled
       | x     |
       | arule |
     Then graql undefine
       | undefine arule sub rule;  |
     Then get answers of graql query
       | match $x sub rule; get;   |
-    Then answers have size: 0
+    Then answer size is: 1
 
 
   Scenario: undefine a supertype errors if subtypes exist
