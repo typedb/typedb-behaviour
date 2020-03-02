@@ -59,7 +59,7 @@ Feature: Graql Match Clause
       | 0    | 2    |
 
     Then get answers of graql query
-      | match $y isa company; $r ($y) isa relation; get; |
+      | match $y isa company; $r (employer: $y) isa relation; get; |
     Then answer concepts all have key: ref
     Then answer keys are
       | y    | r    |
