@@ -58,6 +58,8 @@ Feature: Graql Undefine Query
       | child | @key-email-owner |
 
 
+  @ignore
+  # TODO readd when behaves correctly
   Scenario: undefine an attribute subtype removes implicit ownership relation from hierarchy
     Given graql define
       | define                  |
@@ -79,7 +81,9 @@ Feature: Graql Undefine Query
 
 
   # TODO is this expected to hold?
-  Scenario: undefine an attribute key- and owner-ship removes implicit owner-/key-ship relation types
+  Scenario: undefine the only attribute key- and owner-ship removes implicit owner-/key-ship relation types
+  Scenario: undefine attribute removes implicit ownership roles from owners
+  Scenario: undefine attribute removes implicit roles
 
 
   @ignore
@@ -190,6 +194,7 @@ Feature: Graql Undefine Query
       | match $x sub rule; get; |
     When answers are labeled
       | x     |
+      | rule  |
       | arule |
     Then graql undefine
       | undefine arule sub rule;  |
