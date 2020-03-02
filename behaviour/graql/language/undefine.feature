@@ -82,6 +82,8 @@ Feature: Graql Undefine Query
   Scenario: undefine an attribute key- and owner-ship removes implicit owner-/key-ship relation types
 
 
+  @ignore
+  # re-enable when can query by has $x
   Scenario: undefine 'has' from super entity removes 'has' from child entity
     Given graql define
       | define child sub person;  |
@@ -102,7 +104,7 @@ Feature: Graql Undefine Query
       | undefine person key email; |
     Then the integrity is validated
     When get answers of graql query
-      | match $x type child; $x key $attribute; get;  |
+      | match $x type child; $x key email; get;  |
     Then the answer size is: 0
 
   @ignore
@@ -171,7 +173,7 @@ Feature: Graql Undefine Query
     When graql insert
       | insert $x "not-email-regex" isa email;              |
     Given the integrity is validated
-    Then graql query
+    Then get answers of graql query
       | match $x isa email; get; |
     Then the answer size is: 1
 
@@ -184,14 +186,14 @@ Feature: Graql Undefine Query
       | then                                              |
       | { (employer: $c, employee: $y) isa employment; }; |
     Given the integrity is validated
-    When graql query
+    When get answers of graql query
       | match $x sub rule; get; |
     When answers have labels
       | x     |
       | arule |
     Then graql undefine
       | undefine arule sub rule;  |
-    Then graql query
+    Then get answers of graql query
       | match $x sub rule; get;   |
     Then answers have size: 0
 
