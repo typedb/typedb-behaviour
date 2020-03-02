@@ -48,7 +48,7 @@ Feature: Graql Undefine Query
     Given graql define
       | define child sub person;  |
     Given graql undefine
-      | undefine person sub entity, plays employee; |
+      | undefine person plays employee; |
     Then the integrity is validated
     When get answers of graql query
       | match $x type child; $x plays $role; get;  |
@@ -99,7 +99,7 @@ Feature: Graql Undefine Query
     Given graql define
       | define child sub person;  |
     Given graql undefine
-      | undefine person sub entity, key email; |
+      | undefine person key email; |
     Then the integrity is validated
     When get answers of graql query
       | match $x type child; $x key $attribute; get;  |
@@ -111,7 +111,7 @@ Feature: Graql Undefine Query
     Given graql define
       | define part-time sub employment;  |
     Given graql undefine
-      | undefine employment sub relation, relates employer; |
+      | undefine employment relates employer; |
     Then the integrity is validated
     When get answers of graql query
       | match $x type part-time; $x relates $role; get;  |
@@ -166,7 +166,7 @@ Feature: Graql Undefine Query
 
   Scenario: undefine a regex on an attribute type, removes regex constraints on attribute
     Given graql undefine
-      | undefine email sub attribute, regex ".+@\w.com";    |
+      | undefine email regex ".+@\w.com";    |
     Given the integrity is validated
     When graql insert
       | insert $x "not-email-regex" isa email;              |
@@ -178,7 +178,7 @@ Feature: Graql Undefine Query
 
   Scenario: undefine a rule removes a rule
     Given graql define
-      | define arule sub rule, when { $x isa person; $y isa person; }, then { (employer: $x, employer: $y) isa employment; }; |
+      | define arule sub rule, when { $c isa company; $y isa person; }, then { (employer: $c, employee: $y) isa employment; }; |
     Given the integrity is validated
     When graql query
       | match $x sub rule; get; |
