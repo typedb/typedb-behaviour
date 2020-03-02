@@ -52,7 +52,7 @@ Feature: Graql Match Clause
     When the integrity is validated
 
     Then get answers of graql query
-      | match $x isa person; $r ($x) isa relation; get; |
+      | match $x isa person; $r (employee: $x) isa relation; get; |
     Then answer concepts all have key: ref
     Then answer keys are
       | x    | r    |
@@ -86,7 +86,7 @@ Feature: Graql Match Clause
       | insert $p isa person, has ref 0;     |
       | $c isa company, has ref 1;           |
       | $c2 isa company, has ref 2;          |
-      | $r (employee: $p, employer: $c, employer: $c) isa employment, has ref 3; |
+      | $r (employee: $p, employer: $c, employer: $c2) isa employment, has ref 3; |
     When the integrity is validated
 
     Then get answers of graql query
@@ -100,4 +100,7 @@ Feature: Graql Match Clause
       | 2    | 0    | 3    |
       | 1    | 2    | 3    |
       | 2    | 1    | 3    |
+
+
+  Scenario: subtype hierarchy satisfies transitive sub assertions
 
