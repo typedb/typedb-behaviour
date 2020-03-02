@@ -38,7 +38,7 @@ Feature: Graql Match Clause
       |   key ref;                           |
       | employment sub relation,             |
       |   relates employee,                  |
-      |   relates employee,                  |
+      |   relates employer,                  |
       |   key ref;                           |
       | ref sub attribute, datatype long;    |
     Given the integrity is validated
@@ -77,7 +77,7 @@ Feature: Graql Match Clause
       |   key ref;                           |
       | employment sub relation,             |
       |   relates employee,                  |
-      |   relates employee,                  |
+      |   relates employer,                  |
       |   key ref;                           |
       | ref sub attribute, datatype long;    |
     Given the integrity is validated
