@@ -103,4 +103,17 @@ Feature: Graql Match Clause
 
 
   Scenario: subtype hierarchy satisfies transitive sub assertions
+    Given graql define
+      | define             |
+      | sub1 sub entity;   |
+      | sub2 sub sub1;     |
+      | sub3 sub sub1;     |
+      | sub4 sub sub2;     |
+      | sub5 sub sub4;     |
+      | sub6 sub sub5;     |
+    Given the integrity is validated
 
+    When get answers of graql query
+      | match $x sub $y; $y sub $z; get; |
+    Then each answer satisfies
+      | match $x sub $z; $x id <answer.x.id>; $z id <answer.z.id>; get; |
