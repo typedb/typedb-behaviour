@@ -29,30 +29,34 @@ Feature: Graql Match Clause
 
   Scenario: a relation is matchable from role players without specifying relation type
     Given graql define
-      | define                               |
-      | person sub entity,                   |
-      |   plays employee,                    |
-      |   key ref;                           |
-      | company sub entity,                  |
-      |   plays employer,                    |
-      |   key ref;                           |
-      | employment sub relation,             |
-      |   relates employee,                  |
-      |   relates employer,                  |
-      |   key ref;                           |
-      | ref sub attribute, datatype long;    |
+      """
+      define
+      person sub entity,
+        plays employee,
+        key ref;
+      company sub entity,
+        plays employer,
+        key ref;
+      employment sub relation,
+        relates employee,
+        relates employer,
+        key ref;
+      ref sub attribute, datatype long;
+      """
     Given the integrity is validated
 
     When graql insert
-      | insert                                            |
-      | $x isa person, has ref 0;                         |
-      | $y isa company, has ref 1;                        |
-      | $r (employee: $x, employer: $y) isa employment,   |
-      |    has ref 2;                                     |
+      """
+      insert
+      $x isa person, has ref 0;
+      $y isa company, has ref 1;
+      $r (employee: $x, employer: $y) isa employment,
+         has ref 2;
+      """
     When the integrity is validated
 
     Then get answers of graql query
-      | match $x isa person; $r (employee: $x) isa relation; get; |
+      """ match $x isa person; $r (employee: $x) isa relation; get; """
     Then answer concepts all have key: ref
     Then answer keys are
       | x    | r    |
@@ -68,29 +72,33 @@ Feature: Graql Match Clause
 
   Scenario: inserting a relation with named role players is retrieved without role players in all combinations
     Given graql define
-      | define                               |
-      | person sub entity,                   |
-      |   plays employee,                    |
-      |   key ref;                           |
-      | company sub entity,                  |
-      |   plays employer,                    |
-      |   key ref;                           |
-      | employment sub relation,             |
-      |   relates employee,                  |
-      |   relates employer,                  |
-      |   key ref;                           |
-      | ref sub attribute, datatype long;    |
+      """
+      define
+      person sub entity,
+        plays employee,
+        key ref;
+      company sub entity,
+        plays employer,
+        key ref;
+      employment sub relation,
+        relates employee,
+        relates employer,
+        key ref;
+      ref sub attribute, datatype long;
+      """
     Given the integrity is validated
 
     When graql insert
-      | insert $p isa person, has ref 0;     |
-      | $c isa company, has ref 1;           |
-      | $c2 isa company, has ref 2;          |
-      | $r (employee: $p, employer: $c, employer: $c2) isa employment, has ref 3; |
+      """
+      insert $p isa person, has ref 0;
+      $c isa company, has ref 1;
+      $c2 isa company, has ref 2;
+      $r (employee: $p, employer: $c, employer: $c2) isa employment, has ref 3;
+      """
     When the integrity is validated
 
     Then get answers of graql query
-      | match $r ($x, $y) isa employment; get; |
+      """ match $r ($x, $y) isa employment; get;  """
     Then answer concepts all have key: ref
     Then answer keys are
       | x    | y    | r    |
@@ -104,16 +112,18 @@ Feature: Graql Match Clause
 
   Scenario: subtype hierarchy satisfies transitive sub assertions
     Given graql define
-      | define             |
-      | sub1 sub entity;   |
-      | sub2 sub sub1;     |
-      | sub3 sub sub1;     |
-      | sub4 sub sub2;     |
-      | sub5 sub sub4;     |
-      | sub6 sub sub5;     |
+      """
+      define
+      sub1 sub entity;
+      sub2 sub sub1;
+      sub3 sub sub1;
+      sub4 sub sub2;
+      sub5 sub sub4;
+      sub6 sub sub5;
+      """
     Given the integrity is validated
 
     When get answers of graql query
-      | match $x sub $y; $y sub $z; get; |
+      """ match $x sub $y; $y sub $z; get; """
     Then each answer satisfies
-      | match $x sub $z; $x id <answer.x.id>; $z id <answer.z.id>; get; |
+      """ match $x sub $z; $x id <answer.x.id>; $z id <answer.z.id>; get; """

@@ -25,20 +25,22 @@ Feature: Graql Define Query
     Given transaction is initialised
     Given the integrity is validated
     Given graql define
-      | define                                                        |
-      | person sub entity, plays employee, has name, key email;       |
-      | employment sub relation, relates employee;                    |
-      | name sub attribute, datatype string;                          |
-      | email sub attribute, datatype string;                         |
+      """
+      define
+      person sub entity, plays employee, has name, key email;
+      employment sub relation, relates employee;
+      name sub attribute, datatype string;
+      email sub attribute, datatype string;
+      """
     Given the integrity is validated
 
 
   Scenario: define a subtype creates a type
     Given graql define
-      | define dog sub entity; |
+      """ define dog sub entity; """
     Given the integrity is validated
     When get answers of graql query
-      | match $x type dog; get; |
+      """ match $x type dog; get; """
     Then answers are labeled
       | x   |
       | dog |
@@ -46,11 +48,11 @@ Feature: Graql Define Query
 
   Scenario: define subtype creates child of supertype
     Given graql define
-      | define child sub person;  |
+      """ define child sub person;  """
     Given the integrity is validated
 
     When get answers of graql query
-      | match $x sub person; get; |
+      """ match $x sub person; get; """
     Then answers are labeled
       | x      |
       | person |
@@ -59,11 +61,11 @@ Feature: Graql Define Query
 
   Scenario: define entity subtype inherits 'plays' from supertypes
     Given graql define
-      | define child sub person; |
+      """ define child sub person; """
     Given the integrity is validated
 
     When get answers of graql query
-      | match $x plays employee; get; |
+      """ match $x plays employee; get; """
 
     Then answers are labeled
       | x      |
@@ -73,11 +75,11 @@ Feature: Graql Define Query
 
   Scenario: define entity subtype inherits 'has' from supertypes
     Given graql define
-      | define child sub person; |
+      """ define child sub person; """
     Given the integrity is validated
 
     When get answers of graql query
-      | match $x has name; get; |
+      """ match $x has name; get; """
 
     Then answers are labeled
       | x      |
@@ -87,11 +89,11 @@ Feature: Graql Define Query
 
   Scenario: define entity inherits 'key' from supertypes
     Given graql define
-      | define child sub person; |
+      """ define child sub person; """
     Given the integrity is validated
 
     When get answers of graql query
-      | match $x key email; get; |
+      """ match $x key email; get; """
 
     Then answers are labeled
       | x      |
@@ -103,11 +105,11 @@ Feature: Graql Define Query
   # re-enable when 'relates' is inherited
   Scenario: define relation subtype inherits 'relates' from supertypes without role subtyping
     Given graql define
-      | define part-time-employment sub employment; |
+      """ define part-time-employment sub employment; """
     Given the integrity is validated
 
     When get answers of graql query
-      | match $x relates employee; get; |
+      """ match $x relates employee; get; """
 
     Then answers are labeled
       | x                    |
@@ -119,11 +121,11 @@ Feature: Graql Define Query
   # re-enable when 'relates' is bound to a relation and blockable
   Scenario: define relation subtype with role subtyping blocks parent role
     Given graql define
-      | define part-time-employment sub employment, relates part-timer as employee; |
+      """ define part-time-employment sub employment, relates part-timer as employee; """
     Given the integrity is validated
 
     When get answers of graql query
-      | match $x relates employee; get; |
+      """ match $x relates employee; get; """
     Then answers are labeled
       | x                    |
       | employment           |
@@ -142,11 +144,11 @@ Feature: Graql Define Query
 
   Scenario: define attribute subtype has same datatype as supertype
     Given graql define
-      | define first-name sub name;   |
+      """ define first-name sub name; """
     Given the integrity is validated
 
     When get answers of graql query
-      | match $x datatype string; get; |
+      """ match $x datatype string; get; """
     Then answers are labeled
       | x          |
       | name       |
@@ -161,17 +163,19 @@ Feature: Graql Define Query
 
   Scenario: define additional 'plays' is visible from all children
     Given graql define
-      | define employment sub relation, relates employer; |
+      """ define employment sub relation, relates employer; """
     Given the integrity is validated
 
     Given graql define
-      | define                             |
-      | child sub person;                  |
-      | person sub entity, plays employer; |
+      """
+      define
+      child sub person;
+      person sub entity, plays employer;
+      """
     Given the integrity is validated
 
     When get answers of graql query
-      | match $x type child, plays $r; get; |
+      """ match $x type child, plays $r; get; """
 
     Then answers are labeled
       | x      | r                |
@@ -185,14 +189,16 @@ Feature: Graql Define Query
   # re-enable when we can query schema 'has' and 'key' with variables eg: 'match $x type ___, has key $a; get;'
   Scenario: define additional 'has' is visible from all children
     Given graql define
-      | define                                     |
-      | child sub person;                          |
-      | phone-number sub attribute, datatype long; |
-      | person sub entity, has phone-number;       |
+    """
+       define
+       child sub person;
+       phone-number sub attribute, datatype long;
+       person sub entity, has phone-number;
+      """
     Given the integrity is validated
 
     When get answers of graql query
-      | match $x type child, has $y; get; |
+      """ match $x type child, has $y; get; """
 
     Then answers are labeled
       | x      | y            |
@@ -204,14 +210,16 @@ Feature: Graql Define Query
   # re-enable when we can query schema 'has' and 'key' with variables eg: 'match $x type ___, has key $a; get;'
   Scenario: define additional 'key' is visible from all children
     Given graql define
-      | define                                     |
-      | child sub person;                          |
-      | phone-number sub attribute, datatype long; |
-      | person sub entity, key phone-number;       |
+      """
+      define
+      child sub person;
+      phone-number sub attribute, datatype long;
+      person sub entity, key phone-number;
+      """
     Given the integrity is validated
 
     When get answers of graql query
-      | match $x type child, key $y; get; |
+      """ match $x type child, key $y; get; """
 
     Then answers are labeled
       | x      | y      |
@@ -223,13 +231,15 @@ Feature: Graql Define Query
   # re-enable when we can inherit 'relates
   Scenario: define additional 'relates' is visible from all children
     Given graql define
-      | define                                       |
-      | part-time-employment sub employment;         |
-      | employment sub relation, relates employer; |
+      """
+      define
+      part-time-employment sub employment;
+      employment sub relation, relates employer;
+      """
     Given the integrity is validated
 
     When get answers of graql query
-      | match $x type part-time-employment, relates $r; get; |
+      """ match $x type part-time-employment, relates $r; get; """
 
     Then answers are labeled
       | x                     | r          |
@@ -251,7 +261,7 @@ Feature: Graql Define Query
 
   Scenario: define an attribute key- and owner-ship creates the implicit attribute key/ownership relation types
     When get answers of graql query
-      | match $x sub relation; get;  |
+      """ match $x sub relation; get;  """
     Then answers are labeled
       | x              |
       | relation       |
@@ -264,11 +274,11 @@ Feature: Graql Define Query
 
   Scenario: implicit attribute ownerships exist in a hierarchy matching attribute hierarchy
     Given graql define
-      | define first-name sub name; person sub entity, has first-name; |
+      """ define first-name sub name; person sub entity, has first-name; """
     Given the integrity is validated
 
     When get answers of graql query
-      | match $child sub $super; $super sub @has-attribute; get;  |
+      """ match $child sub $super; $super sub @has-attribute; get;  """
     Then answers are labeled
       | child           | super            |
       | @has-attribute  | @has-attribute   |
