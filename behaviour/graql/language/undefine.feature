@@ -36,10 +36,14 @@ Feature: Graql Undefine Query
 
   Scenario: undefine a subtype removes a type
     Given graql undefine
-      """ undefine email sub attribute; """
+      """
+      undefine email sub attribute;
+      """
     Given the integrity is validated
     When get answers of graql query
-      """ match $x sub attribute; get;  """
+      """
+      match $x sub attribute; get; 
+      """
     Then answers are labeled
       | x         |
       | attribute |
@@ -48,12 +52,18 @@ Feature: Graql Undefine Query
 
   Scenario: undefine 'plays' from super entity removes 'plays' from subtypes
     Given graql define
-      """ define child sub person;  """
+      """
+      define child sub person; 
+      """
     Given graql undefine
-      """ undefine person plays employee; """
+      """
+      undefine person plays employee;
+      """
     Then the integrity is validated
     When get answers of graql query
-      """ match $x type child; $x plays $role; get;  """
+      """
+      match $x type child; $x plays $role; get; 
+      """
     Then answers are labeled
       | x     | role             |
       | child | @has-name-owner  |
@@ -70,15 +80,21 @@ Feature: Graql Undefine Query
       person has first-name;
       """
     When get answers of graql query
-      """ match $x sub @has-name; get; """
+      """
+      match $x sub @has-name; get;
+      """
     When answers are labeled
       | x               |
       | @has-name       |
       | @has-first-name |
     Then graql undefine
-      """ undefine first-name sub name; """
+      """
+      undefine first-name sub name;
+      """
     Then get answers of graql query
-      """ match $x sub @has-name; get;  """
+      """
+      match $x sub @has-name; get; 
+      """
     When answers are labeled
       | x         |
       | @has-name |
@@ -94,12 +110,18 @@ Feature: Graql Undefine Query
   # re-enable when can query by has $x
   Scenario: undefine 'has' from super entity removes 'has' from child entity
     Given graql define
-      """ define child sub person;  """
+      """
+      define child sub person; 
+      """
     Given graql undefine
-      """ undefine person has name; """
+      """
+      undefine person has name;
+      """
     Then the integrity is validated
     When get answers of graql query
-      """ match $x type child; $x has $attribute; get;  """
+      """
+      match $x type child; $x has $attribute; get; 
+      """
     Then answers are labeled
       | x     | attribute |
       | child | email     |
@@ -107,24 +129,36 @@ Feature: Graql Undefine Query
 
   Scenario: undefine 'key' from super entity removes 'key' from child entity
     Given graql define
-      """ define child sub person;  """
+      """
+      define child sub person; 
+      """
     Given graql undefine
-      """ undefine person key email; """
+      """
+      undefine person key email;
+      """
     Then the integrity is validated
     When get answers of graql query
-      """ match $x type child; $x key email; get; """
+      """
+      match $x type child; $x key email; get;
+      """
     Then answer size is: 0
 
   @ignore
   # re-enable when 'relates' is inherited
   Scenario: undefine 'relates' from super relation removes 'relates' from child relation
     Given graql define
-      """ define part-time sub employment;  """
+      """
+      define part-time sub employment; 
+      """
     Given graql undefine
-      """ undefine employment relates employer; """
+      """
+      undefine employment relates employer;
+      """
     Then the integrity is validated
     When get answers of graql query
-      """ match $x type part-time; $x relates $role; get;  """
+      """
+      match $x type part-time; $x relates $role; get; 
+      """
     Then answers are labeled
       | x         | role     |
       | part-time | employee |
@@ -152,10 +186,14 @@ Feature: Graql Undefine Query
   # TODO fails since undefining an abstract removes the type fully
   Scenario: undefine a type as abstract converts an abstract to concrete type and can create instances
     Given graql undefine
-      """ undefine abstract-type abstract; """
+      """
+      undefine abstract-type abstract;
+      """
     Given the integrity is validated
     When get answers of graql query
-      """ match $x abstract; get;  """
+      """
+      match $x abstract; get; 
+      """
     Then answers are labeled
       | x         |
       | entity    |
@@ -168,21 +206,31 @@ Feature: Graql Undefine Query
   # TODO fails same as undefine abstract; then require sub-abstract type validation
   Scenario: undefine a type as abstract errors if has abstract child types (?)
     Given graql define
-      """ define sub-abstract-type sub abstract-type, abstract; """
+      """
+      define sub-abstract-type sub abstract-type, abstract;
+      """
     Given the integrity is validated
     Then graql undefine throws
-      """ undefine abstract-type abstract; """
+      """
+      undefine abstract-type abstract;
+      """
 
 
   Scenario: undefine a regex on an attribute type, removes regex constraints on attribute
     Given graql undefine
-      """ undefine email regex ".+@\w.com";    """
+      """
+      undefine email regex ".+@\w.com";   
+      """
     Given the integrity is validated
     When graql insert
-      """ insert $x "not-email-regex" isa email;  """
+      """
+      insert $x "not-email-regex" isa email; 
+      """
     Given the integrity is validated
     Then get answers of graql query
-      """ match $x isa email; get; """
+      """
+      match $x isa email; get;
+      """
     Then answer size is: 1
 
 
@@ -198,20 +246,30 @@ Feature: Graql Undefine Query
       """
     Given the integrity is validated
     When get answers of graql query
-      """ match $x sub rule; get; """
+      """
+      match $x sub rule; get;
+      """
     When answers are labeled
       | x     |
       | rule  |
       | arule |
     Then graql undefine
-      """ undefine arule sub rule;  """
+      """
+      undefine arule sub rule; 
+      """
     Then get answers of graql query
-      """ match $x sub rule; get;   """
+      """
+      match $x sub rule; get;  
+      """
     Then answer size is: 1
 
 
   Scenario: undefine a supertype errors if subtypes exist
     Given graql define
-      """ define child sub person;   """
+      """
+      define child sub person;  
+      """
     Then graql undefine throws
-      """ undefine person sub entity; """
+      """
+      undefine person sub entity;
+      """

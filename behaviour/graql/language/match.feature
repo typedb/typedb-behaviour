@@ -56,7 +56,9 @@ Feature: Graql Match Clause
     When the integrity is validated
 
     Then get answers of graql query
-      """ match $x isa person; $r (employee: $x) isa relation; get; """
+      """
+      match $x isa person; $r (employee: $x) isa relation; get;
+      """
     Then answer concepts all have key: ref
     Then answer keys are
       | x    | r    |
@@ -98,7 +100,9 @@ Feature: Graql Match Clause
     When the integrity is validated
 
     Then get answers of graql query
-      """ match $r ($x, $y) isa employment; get;  """
+      """
+      match $r ($x, $y) isa employment; get; 
+      """
     Then answer concepts all have key: ref
     Then answer keys are
       | x    | y    | r    |
@@ -124,6 +128,10 @@ Feature: Graql Match Clause
     Given the integrity is validated
 
     When get answers of graql query
-      """ match $x sub $y; $y sub $z; get; """
+      """
+      match $x sub $y; $y sub $z; get;
+      """
     Then each answer satisfies
-      """ match $x sub $z; $x id <answer.x.id>; $z id <answer.z.id>; get; """
+      """
+      match $x sub $z; $x id <answer.x.id>; $z id <answer.z.id>; get;
+      """

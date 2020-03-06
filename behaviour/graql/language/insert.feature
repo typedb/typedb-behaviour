@@ -52,7 +52,9 @@ Feature: Graql Insert Query
     When the integrity is validated
 
     Then get answers of graql query
-      """ match $x isa thing; get; """
+      """
+      match $x isa thing; get;
+      """
     Then answer size is: 4
 
 
@@ -75,13 +77,19 @@ Feature: Graql Insert Query
     Given the integrity is validated
 
     When graql insert
-      """ insert $p isa person, has ref 0; $r (employee: $p) isa employment, has ref 1; """
+      """
+      insert $p isa person, has ref 0; $r (employee: $p) isa employment, has ref 1;
+      """
     When graql insert
-      """ match $r isa employment; insert $r (employer: $c) isa employment; $c isa company, has ref 2; """
+      """
+      match $r isa employment; insert $r (employer: $c) isa employment; $c isa company, has ref 2;
+      """
     When the integrity is validated
 
     Then get answers of graql query
-      """ match $r (employer: $c, employee: $p) isa employment; get; """
+      """
+      match $r (employer: $c, employee: $p) isa employment; get;
+      """
     Then answer concepts all have key: ref
     Then answer keys are
       | p    | c    | r    |
@@ -99,11 +107,15 @@ Feature: Graql Insert Query
     Given the integrity is validated
 
     When graql insert
-      """ insert $n "John" isa name, has ref 0; """
+      """
+      insert $n "John" isa name, has ref 0;
+      """
     When the integrity is validated
 
     Then get answers of graql query
-      """ match $a "John"; get; """
+      """
+      match $a "John"; get;
+      """
     Then answer concepts all have key: ref
     Then answer keys are
       | a    |
@@ -122,11 +134,15 @@ Feature: Graql Insert Query
     Given the integrity is validated
 
     When graql insert
-      """ insert $a "john" isa name, has ref 0; """
+      """
+      insert $a "john" isa name, has ref 0;
+      """
     When the integrity is validated
 
     Then graql insert throws
-      """ insert $a "john" isa name, has ref 1; """
+      """
+      insert $a "john" isa name, has ref 1;
+      """
 
 
   Scenario: insert two owners of the same attribute links owners via attribute
@@ -140,11 +156,15 @@ Feature: Graql Insert Query
     Given the integrity is validated
 
     When graql insert
-      """ insert $p isa person, has age 10, has ref 0; """
+      """
+      insert $p isa person, has age 10, has ref 0;
+      """
     When the integrity is validated
 
     When graql insert
-      """ insert $p isa person, has age 10, has ref 1; """
+      """
+      insert $p isa person, has age 10, has ref 1;
+      """
     When the integrity is validated
 
     Then get answers of graql query
