@@ -23,13 +23,11 @@ workspace(name = "graknlabs_verification")
 ###########################
 
 load("//dependencies/graknlabs:dependencies.bzl", "graknlabs_build_tools", "graknlabs_common", "graknlabs_graql",
-    "graknlabs_protocol", "graknlabs_client_java", "graknlabs_grakn_core")
+     "graknlabs_client_java")
 graknlabs_build_tools()
 graknlabs_common()
-graknlabs_grakn_core()
 graknlabs_graql()
 graknlabs_client_java()
-graknlabs_protocol()
 
 load("@graknlabs_build_tools//distribution:dependencies.bzl", "graknlabs_bazel_distribution")
 graknlabs_bazel_distribution()
@@ -75,6 +73,23 @@ graknlabs_build_tools_ci_pip_install()
 load("//dependencies/maven:dependencies.bzl", "maven_dependencies")
 maven_dependencies()
 
+
+#################################
+# Load Client-Java dependencies #
+#################################
+
+load("@graknlabs_client_java//dependencies/maven:dependencies.bzl",
+graknlabs_client_java_maven_dependencies = "maven_dependencies",)
+graknlabs_client_java_maven_dependencies()
+
+load("@graknlabs_client_java//dependencies/graknlabs:dependencies.bzl",
+graknlabs_grabl_tracing = "graknlabs_grabl_tracing",
+graknlabs_protocol = "graknlabs_protocol",
+graknlabs_grakn_core = "graknlabs_grakn_core")
+graknlabs_grabl_tracing()
+graknlabs_protocol()
+graknlabs_grakn_core()
+
 ################################
 # Load Grakn Core dependencies #
 ################################
@@ -109,19 +124,6 @@ antlr_dependencies()
 load("@graknlabs_graql//dependencies/maven:dependencies.bzl",
 graknlabs_graql_maven_dependencies = "maven_dependencies")
 graknlabs_graql_maven_dependencies()
-
-
-###########################
-# Load Client-Java dependencies #
-###########################
-
-load("@graknlabs_client_java//dependencies/maven:dependencies.bzl",
-graknlabs_client_java_maven_dependencies = "maven_dependencies",)
-graknlabs_client_java_maven_dependencies()
-
-load("@graknlabs_client_java//dependencies/graknlabs:dependencies.bzl",
-graknlabs_grabl_tracing = "graknlabs_grabl_tracing")
-graknlabs_grabl_tracing()
 
 ##############################
 # Load Protocol dependencies #

@@ -23,12 +23,11 @@ import com.google.common.collect.Sets;
 import grakn.verification.tools.integrity.IntegrityException;
 import grakn.verification.tools.integrity.RejectDuplicateSet;
 import grakn.verification.tools.integrity.Type;
-import grakn.verification.tools.integrity.Validatable;
 import grakn.verification.tools.integrity.Validator;
 
 import java.util.Set;
 
-public class AbstractTypes extends RejectDuplicateSet<Type> implements Validatable {
+public class AbstractTypes extends RejectDuplicateSet<Type> {
 
     @Override
     public void validate() {
@@ -36,22 +35,15 @@ public class AbstractTypes extends RejectDuplicateSet<Type> implements Validatab
         Must contain all the meta types
          */
 
-        Set<String> metaTypes = Sets.newHashSet(
-                Validator.META_ENTITY,
-                Validator.META_RELATION,
-                Validator.META_ATTRIBUTE,
-                Validator.META_THING
-        );
-
-        for (String metaLabel : metaTypes) {
+        for (Validator.META_TYPES metaLabel : Validator.META_TYPES.values()) {
             boolean found = false;
             for (Type type : set) {
-                if (type.label().equals(metaLabel)) {
+                if (type.label().equals(metaLabel.toString())) {
                     found = true;
                 }
             }
             if (!found) {
-                throw IntegrityException.metaTypeNotAbstract(metaLabel);
+                throw IntegrityException.metaTypeNotAbstract(metaLabel.toString());
             }
         }
     }

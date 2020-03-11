@@ -26,6 +26,7 @@ import grakn.verification.tools.integrity.RejectDuplicateSet;
 import grakn.verification.tools.integrity.Type;
 import grakn.verification.tools.integrity.Validator;
 
+import java.util.Arrays;
 import java.util.Set;
 
 public class Has extends RejectDuplicateSet<Pair<Type, Type>> {
@@ -36,15 +37,8 @@ public class Has extends RejectDuplicateSet<Pair<Type, Type>> {
         Validate that none of the types having anything are a meta type
         */
 
-        Set<String> metaTypes = Sets.newHashSet(
-                Validator.META_ENTITY,
-                Validator.META_RELATION,
-                Validator.META_ATTRIBUTE,
-                Validator.META_THING
-        );
-
         for (Pair<Type, Type> has : set) {
-            if (metaTypes.contains(has.first().label())) {
+            if (Arrays.stream(Validator.META_TYPES.values()).anyMatch(meta -> meta.toString().equals(has.first().label()))) {
                 throw IntegrityException.metaTypeCannotOwnAttribute(has.first(), has.second());
             }
         }

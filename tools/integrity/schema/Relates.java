@@ -26,6 +26,7 @@ import grakn.verification.tools.integrity.RejectDuplicateSet;
 import grakn.verification.tools.integrity.Type;
 import grakn.verification.tools.integrity.Validator;
 
+import java.util.Arrays;
 import java.util.Set;
 
 public class Relates extends RejectDuplicateSet<Pair<Type, Type>> {
@@ -35,17 +36,10 @@ public class Relates extends RejectDuplicateSet<Pair<Type, Type>> {
     public void validate() {
         /*
         Validate that none of the types relating a role are a meta type
-        */
-
-        Set<String> metaTypes = Sets.newHashSet(
-                Validator.META_ENTITY,
-                Validator.META_RELATION,
-                Validator.META_ATTRIBUTE,
-                Validator.META_THING
-        );
+         */
 
         for (Pair<Type, Type> relates : set) {
-            if (metaTypes.contains(relates.first().label())) {
+            if (Arrays.stream(Validator.META_TYPES.values()).anyMatch(meta -> meta.toString().equals(relates.first().label()))) {
                 throw IntegrityException.metaTypeCannotRelateRole(relates.first(), relates.second());
             }
         }

@@ -29,7 +29,6 @@ import grakn.verification.tools.integrity.schema.Plays;
 import grakn.verification.tools.integrity.schema.Relates;
 import grakn.verification.tools.integrity.schema.Sub;
 import grakn.verification.tools.integrity.schema.TransitiveSub;
-import grakn.verification.tools.integrity.schema.Types;
 import graql.lang.Graql;
 import graql.lang.query.GraqlGet;
 import org.slf4j.Logger;
@@ -54,6 +53,13 @@ public class Validator {
     public static String META_ATTRIBUTE = "attribute";
     public static String META_ROLE = "role";
 
+    public static enum META_TYPES {
+        META_THING,
+        META_ENTITY,
+        META_RELATION,
+        META_ATTRIBUTE
+    }
+
     private GraknClient.Session session;
 
     public Validator(GraknClient.Session session) {
@@ -61,14 +67,14 @@ public class Validator {
     }
 
     public boolean validate() {
-        Types types = createAndValidateTypes();
-        Types roles = createAndValidateRoles(); // TODO figure out how we want to deal with roles, esp role inheritance
+        RejectDuplicateSet<Type> types = createAndValidateTypes();
+        RejectDuplicateSet<Type> roles = createAndValidateRoles(); // TODO figure out how we want to deal with roles, esp role inheritance
         Sub sub = createAndValidateSub(types);
         TransitiveSub transitiveSub = createAndValidateTransitiveSubWithoutIdentity(sub);
 
-        Types entities = createEntityTypes(transitiveSub);
-        Types relations = createRelationTypes(transitiveSub);
-        Types attributes = createAttributeTypes(transitiveSub);
+        RejectDuplicateSet<Type> entities = createEntityTypes(transitiveSub);
+        RejectDuplicateSet<Type> relations = createRelationTypes(transitiveSub);
+        RejectDuplicateSet<Type> attributes = createAttributeTypes(transitiveSub);
 
         Has has = createAndValidateHas(types, attributes);
         Has key = createAndValidateKey(types, attributes, has);
@@ -77,7 +83,7 @@ public class Validator {
         Relates relates = createAndValidateRelates(relations, roles);
         validatePlaysAndRelatesOverlap(plays, relates);
 
-        Types abstractTypes = createAndValidateAbstractTypes(types);
+        RejectDuplicateSet<Type>  abstractTypes = createAndValidateAbstractTypes(types);
 
         return true;
     }
@@ -99,23 +105,23 @@ public class Validator {
         }
     }
 
-    Types createAndValidateTypes() {
-        LOG.info("Retrieving types...");
-        Types types = new Types();
+    RejectDuplicateSet<Type> createAndValidateTypes() {
+        LOG.info("Retrieving RejectDuplicateSet<Type> ...");
+        RejectDuplicateSet<Type> types = new RejectDuplicateSet<Type> ();
         try (GraknClient.Transaction tx = session.transaction().read()) {
             List<ConceptMap> answers = tx.execute(Graql.parse("match $x sub thing; get;").asGet());
             for (ConceptMap answer : answers) {
                 types.add(new Type(answer.get("x").asSchemaConcept()));
             }
         }
-        LOG.info("...validating types");
+        LOG.info("...validating RejectDuplicateSet<Type> ");
         types.validate();
         return types;
     }
 
-    Types createAndValidateRoles() {
+    RejectDuplicateSet<Type> createAndValidateRoles() {
         LOG.info("Retrieving roles...");
-        Types roles = new Types();
+        RejectDuplicateSet<Type>  roles = new RejectDuplicateSet<Type> ();
         try (GraknClient.Transaction tx = session.transaction().read()) {
             List<ConceptMap> answers = tx.execute(Graql.parse("match $x sub role; get;").asGet());
             for (ConceptMap answer : answers) {
@@ -127,7 +133,7 @@ public class Validator {
         return roles;
     }
 
-    Sub createAndValidateSub(Types types) {
+    Sub createAndValidateSub(RejectDuplicateSet<Type> types) {
         LOG.info("Constructing Sub...");
         Sub sub = new Sub();
         try (GraknClient.Transaction tx = session.transaction().read()) {
@@ -180,43 +186,43 @@ public class Validator {
         return graknTransitiveSub;
     }
 
-    Types createEntityTypes(TransitiveSub transitiveSub) {
-        LOG.info("Constructing entity types set");
-        Types entityTypes = new Types();
+    RejectDuplicateSet<Type> createEntityTypes(TransitiveSub transitiveSub) {
+        LOG.info("Constructing entity RejectDuplicateSet<Type>  set");
+        RejectDuplicateSet<Type>  entityTypes = new RejectDuplicateSet<Type> ();
         for (Pair<Type, Type> sub : transitiveSub) {
             if (sub.second().label().equals("entity")) {
                 entityTypes.add(sub.first());
             }
         }
-        // TODO validate against Grakn that these are agreed to be entity types
+        // TODO validate against Grakn that these are agreed to be entity RejectDuplicateSet<Type> 
         return entityTypes;
     }
 
-    Types createRelationTypes(TransitiveSub transitiveSub) {
-        LOG.info("Constructing relation types set");
-        Types entityTypes = new Types();
+    RejectDuplicateSet<Type> createRelationTypes(TransitiveSub transitiveSub) {
+        LOG.info("Constructing relation RejectDuplicateSet<Type>  set");
+        RejectDuplicateSet<Type>  entityTypes = new RejectDuplicateSet<Type>();
         for (Pair<Type, Type> sub : transitiveSub) {
             if (sub.second().label().equals("relation")) {
                 entityTypes.add(sub.first());
             }
         }
-        // TODO validate against Grakn that these are agreed to be relation types
+        // TODO validate against Grakn that these are agreed to be relation RejectDuplicateSet<Type> 
         return entityTypes;
     }
 
-    Types createAttributeTypes(TransitiveSub transitiveSub) {
-        LOG.info("Constructing attribute types set");
-        Types entityTypes = new Types();
+    RejectDuplicateSet<Type> createAttributeTypes(TransitiveSub transitiveSub) {
+        LOG.info("Constructing attribute RejectDuplicateSet<Type>  set");
+        RejectDuplicateSet<Type>  entityTypes = new RejectDuplicateSet<Type> ();
         for (Pair<Type, Type> sub : transitiveSub) {
             if (sub.second().label().equals("attribute")) {
                 entityTypes.add(sub.first());
             }
         }
-        // TODO validate against Grakn that these are agreed to be attribute types
+        // TODO validate against Grakn that these are agreed to be attribute RejectDuplicateSet<Type> 
         return entityTypes;
     }
 
-    Has createAndValidateHas(Types types, Types attributes) {
+    Has createAndValidateHas(RejectDuplicateSet<Type> types, RejectDuplicateSet<Type> attributes) {
         LOG.info("Constructing Has set...");
         Has has = new Has();
 
@@ -238,7 +244,7 @@ public class Validator {
         return has;
     }
 
-    Has createAndValidateKey(Types types, Types attributes, Has has) {
+    Has createAndValidateKey(RejectDuplicateSet<Type> types, RejectDuplicateSet<Type> attributes, Has has) {
         LOG.info("Constructing Key set...");
         Has key = new Has();
 
@@ -269,7 +275,7 @@ public class Validator {
     }
 
 
-    private Relates createAndValidateRelates(Types relations, Types roles) {
+    private Relates createAndValidateRelates(RejectDuplicateSet<Type> relations, RejectDuplicateSet<Type> roles) {
         LOG.info("Constructing Relates set...");
         Relates relates = new Relates();
         try (GraknClient.Transaction tx = session.transaction().read()) {
@@ -303,7 +309,7 @@ public class Validator {
         return relates;
     }
 
-    private Plays createAndValidatePlays(Types types, Types roles) {
+    private Plays createAndValidatePlays(RejectDuplicateSet<Type> types, RejectDuplicateSet<Type> roles) {
         LOG.info("Constructing Relates set...");
         Plays plays = new Plays();
         try (GraknClient.Transaction tx = session.transaction().read()) {
@@ -323,10 +329,10 @@ public class Validator {
         return plays;
     }
 
-    private Types createAndValidateAbstractTypes(Types types) {
+    private RejectDuplicateSet<Type> createAndValidateAbstractTypes(RejectDuplicateSet<Type> types) {
         LOG.info("Constructing Abstract set...");
 
-        Types abstractTypes = new Types();
+        RejectDuplicateSet<Type> abstractTypes = new RejectDuplicateSet<Type>();
         try (GraknClient.Transaction tx = session.transaction().read()) {
             for (Type type : types) {
                 GraqlGet query = Graql.parse(String.format("match $owner type %s; $type abstract; get;", type)).asGet();

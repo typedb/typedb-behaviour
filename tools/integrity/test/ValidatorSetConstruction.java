@@ -27,7 +27,6 @@ import grakn.verification.tools.integrity.schema.Plays;
 import grakn.verification.tools.integrity.schema.Relates;
 import grakn.verification.tools.integrity.schema.Sub;
 import grakn.verification.tools.integrity.schema.TransitiveSub;
-import grakn.verification.tools.integrity.schema.Types;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -103,15 +102,15 @@ public class ValidatorSetConstruction {
         // this should not error
         TransitiveSub transitiveSub = semanticSub.noIdentityTransitiveSub();
 
-        Types entities = validator.createEntityTypes(transitiveSub);
+        RejectDuplicateSet<Type> entities = validator.createEntityTypes(transitiveSub);
         for (Type type : Arrays.asList(type0, type1, type2)) {
             assertTrue(entities.contains(type));
         }
-        Types relations = validator.createRelationTypes(transitiveSub);
+        RejectDuplicateSet<Type> relations = validator.createRelationTypes(transitiveSub);
         for (Type type : Arrays.asList(type3, type4)) {
             assertTrue(relations.contains(type));
         }
-        Types attributes = validator.createAttributeTypes(transitiveSub);
+        RejectDuplicateSet<Type> attributes = validator.createAttributeTypes(transitiveSub);
         assertEquals(attributes.size(), 0);
     }
 

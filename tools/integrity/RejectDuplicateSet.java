@@ -23,7 +23,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-public abstract class RejectDuplicateSet<T> implements SemanticSet<T> {
+public class RejectDuplicateSet<T> implements SemanticSet<T> {
 
     protected Set<T> set;
 
@@ -63,5 +63,10 @@ public abstract class RejectDuplicateSet<T> implements SemanticSet<T> {
     @Override
     public int size() {
         return set.size();
+    }
+
+    @Override
+    public void validate() {
+        // always valid if we don't error during 'add()'
     }
 }

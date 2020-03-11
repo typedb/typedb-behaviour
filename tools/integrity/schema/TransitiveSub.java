@@ -58,7 +58,7 @@ public class TransitiveSub implements SemanticSet<Pair<Type, Type>> {
         3. every type has an entry (x, thing)
          */
 
-        Set<String> metaTypes = Sets.newHashSet(
+        Set<String> metaTypesWithoutMetaThing = Sets.newHashSet(
                 Validator.META_ENTITY,
                 Validator.META_RELATION,
                 Validator.META_ATTRIBUTE,
@@ -70,7 +70,7 @@ public class TransitiveSub implements SemanticSet<Pair<Type, Type>> {
         for (Pair<Type, Type> item : set) {
             Type child = item.first();
             Type parent = item.second();
-            if (metaTypes.contains(parent.label())) {
+            if (metaTypesWithoutMetaThing.contains(parent.label())) {
                 typeMetaParentCount.putIfAbsent(child, 0);
                 typeMetaParentCount.compute(child, (childType, oldCount) -> oldCount + 1);
             }
@@ -78,7 +78,7 @@ public class TransitiveSub implements SemanticSet<Pair<Type, Type>> {
 
         Set<Type> nonMetaTypes = set.stream()
                 .map(pair -> pair.first())
-                .filter(type -> !metaTypes.contains(type.label()))
+                .filter(type -> !metaTypesWithoutMetaThing.contains(type.label()))
                 .filter(type -> !type.label().equals("thing"))
                 .collect(Collectors.toSet());
         for (Type type : nonMetaTypes) {
