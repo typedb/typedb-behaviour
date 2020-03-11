@@ -62,7 +62,8 @@ public class PropertyVariableTransform {
         RelationProperty relProp = (RelationProperty) prop;
 
         Set<RelationProperty.RolePlayer> transformedRPs = relProp.relationPlayers().stream().map(rp -> {
-            Variable player = rp.getPlayer().var();
+            Statement player = rp.getPlayer();
+            Variable playerVar = player.var();
             Statement role = rp.getRole().orElse(null);
             Statement transformedRole = role;
             if (role != null) {
@@ -73,7 +74,10 @@ public class PropertyVariableTransform {
                     if (type != null) transformedRole = transformedRole.type(type);
                 }
             }
-            return new RelationProperty.RolePlayer(transformedRole, Graql.var(vars.get(player)));
+
+            Variable newPlayerVar = vars.getOrDefault(playerVar, playerVar);
+            Statement transformedPlayer = Graql.var(newPlayerVar);
+            return new RelationProperty.RolePlayer(transformedRole, transformedPlayer);
         }).collect(Collectors.toSet());
         return Utils.relationProperty(transformedRPs);
     }
@@ -86,8 +90,9 @@ public class PropertyVariableTransform {
         String type = attribute.getProperty(IsaProperty.class).orElse(null)
                 .type().getType().orElse(null);
 
-        Statement newStatement = Graql.var(vars.get(attrVar)).isa(type);
-        return new HasAttributeProperty(type, newStatement);
+        Variable newAttrVar = vars.getOrDefault(attrVar, attrVar);
+        Statement isaStatement = Graql.var(newAttrVar).isa(type);
+        return new HasAttributeProperty(type, isaStatement);
     }
 
     static private VarProperty transformIsa(VarProperty prop, Map<Variable, Variable> vars){
@@ -96,7 +101,7 @@ public class PropertyVariableTransform {
         Variable typeVar = type.var();
         if (!typeVar.isReturned()) return prop;
 
-        Statement newStatement = Graql.var(vars.get(typeVar));
+        Statement newStatement = Graql.var(vars.getOrDefault(typeVar, typeVar));
         return new IsaProperty(newStatement);
     }
 
@@ -105,7 +110,8 @@ public class PropertyVariableTransform {
         Statement inner = valProp.operation().innerStatement();
         if(!valProp.operation().hasVariable()) return prop;
 
-        Statement varStatement = Graql.var(vars.get(inner.var()));
+        Variable innerVar = inner.var();
+        Statement varStatement = Graql.var(vars.getOrDefault(innerVar, innerVar));
         ValueProperty.Operation.Comparison.Variable operation = new ValueProperty.Operation.Comparison.Variable(Graql.Token.Comparator.NEQV, varStatement);
         return new ValueProperty<>(operation);
     }
@@ -113,6 +119,6 @@ public class PropertyVariableTransform {
     static private VarProperty transformNeq(VarProperty prop, Map<Variable, Variable> vars){
         NeqProperty neqProp = (NeqProperty) prop;
         Variable var = neqProp.statement().var();
-        return new NeqProperty(Graql.var(vars.get(var)));
+        return new NeqProperty(Graql.var(vars.getOrDefault(var, var)));
     }
 }
