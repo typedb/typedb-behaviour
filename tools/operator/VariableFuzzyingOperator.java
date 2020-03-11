@@ -19,6 +19,8 @@
 
 package grakn.verification.tools.operator;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 import graql.lang.Graql;
 import graql.lang.pattern.Pattern;
 import graql.lang.property.VarProperty;
@@ -27,9 +29,13 @@ import graql.lang.statement.Variable;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static grakn.verification.tools.operator.Utils.sanitise;
 
 /**
  * Introduces the variable fuzzying operator - it fuzzes each variable in the input pattern such that
@@ -44,27 +50,29 @@ public class VariableFuzzyingOperator implements Operator{
 
     @Override
     public Stream<Pattern> apply(Pattern src, TypeContext ctx) {
-        Map<Variable, Variable> varMap = new HashMap<>();
+        //generate new variables and how they map to existing variables
+        Map<Variable, Variable> varTransforms = new HashMap<>();
         src.statements().stream().flatMap(s -> s.variables().stream())
                 .forEach(v -> {
                     String newVarVal = Graql.var().var().name();
                     Variable newVar = Graql.var(newVarVal.substring(newVarVal.length() - varLength)).var();
                     if (v.isReturned()) newVar = newVar.asReturnedVar();
-                    varMap.put(v, newVar);
+                    varTransforms.put(v, newVar);
                 });
 
-        Pattern transformed = Graql.and(
-                src.statements().stream()
-                        .map(s -> transformStatement(s, varMap))
-                        .collect(Collectors.toSet())
-        );
-        return Stream.of(transformed);
+        return varTransforms.entrySet().stream()
+                .map(e -> src.statements().stream()
+                        .map(s -> transformStatement(s, ImmutableMap.of(e.getKey(), e.getValue())))
+                        .collect(Collectors.toList()))
+                .map(Graql::and);
+
     }
 
     private Statement transformStatement(Statement src, Map<Variable, Variable> vars){
         LinkedHashSet<VarProperty> transformedProperties = src.properties().stream()
                 .map(p -> PropertyVariableTransform.transform(p, vars))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
-        return Statement.create(vars.get(src.var()), transformedProperties);
+        Variable statementVar = vars.containsKey(src.var()) ? vars.get(src.var()) : src.var();
+        return Statement.create(statementVar, transformedProperties);
     }
 }

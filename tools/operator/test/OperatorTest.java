@@ -44,6 +44,7 @@ import static graql.lang.Graql.and;
 import static graql.lang.Graql.var;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 
 public class OperatorTest {
@@ -412,10 +413,12 @@ public class OperatorTest {
                 var("z").isa("subEntity"),
                 var("z").id("V789")
         );
-        Pattern output = Operators.fuzzVariables().apply(input, ctx).findFirst().orElse(null);
-        Pattern output2 = Operators.fuzzVariables().apply(output, ctx).findFirst().orElse(null);
-        assertNotEquals(input, output);
-        assertNotEquals(output, output2);
+        Set<Pattern> outputs = Operators.fuzzVariables().apply(input, ctx).collect(Collectors.toSet());
+        assertEquals(input.variables().size(), outputs.size());
+        outputs.forEach(output -> assertNotEquals(input, output));
+
+        outputs.forEach(output -> Operators.fuzzVariables().apply(output, ctx)
+                .forEach(output2 -> assertNotEquals(output, output2)));
     }
 
     @Test
@@ -426,16 +429,11 @@ public class OperatorTest {
                 Graql.var("v").neq(Graql.var("v2")),
                 Graql.var("type").not(Graql.var("type2").var())
         );
-        Pattern output = Operators.fuzzVariables().apply(input, ctx).findFirst().orElse(null);
-        assertNotEquals(input, output);
-
-        IsaProperty transformedIsa = getProperty(output, IsaProperty.class);
-        ValueProperty transformedValue = getProperty(output, ValueProperty.class);
-        NeqProperty transformedNeq = getProperty(output, NeqProperty.class);
-
-        assertNotEquals(transformedIsa.type().var(), new Variable("type"));
-        assertNotEquals(transformedValue.operation().innerStatement().var(), new Variable("v2"));
-        assertNotEquals(transformedNeq.statement().var(), new Variable("type2"));
+        Set<Pattern> outputs = Operators.fuzzVariables().apply(input, ctx).collect(Collectors.toSet());
+        outputs.forEach(output -> {
+            assertNotEquals(input, output);
+            assertFalse(Sets.difference(input.variables(), output.variables()).isEmpty());
+        });
     }
 
     @Test
