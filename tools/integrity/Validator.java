@@ -47,17 +47,15 @@ public class Validator {
     Transitive sets will be built up later
      */
 
-    public static String META_THING = "thing";
-    public static String META_ENTITY = "entity";
-    public static String META_RELATION = "relation";
-    public static String META_ATTRIBUTE = "attribute";
-    public static String META_ROLE = "role";
+    public enum META_TYPES {
+        THING("thing"),
+        ENTITY("entity"),
+        RELATION("relation"),
+        ATTRIBUTE("attribute");
 
-    public static enum META_TYPES {
-        META_THING,
-        META_ENTITY,
-        META_RELATION,
-        META_ATTRIBUTE
+        private String name;
+        META_TYPES(String name) { this.name = name; }
+        public String getName() { return name; }
     }
 
     private GraknClient.Session session;
@@ -145,7 +143,7 @@ public class Validator {
 
                     // TODO replace concept API  when we can
                     boolean trueInGrakn = false;
-                    if (!child.equals(parent) && !child.label().equals(META_THING)) {
+                    if (!child.equals(parent) && !child.label().equals(META_TYPES.THING.getName())) {
                         SchemaConcept childType = tx.getSchemaConcept(Label.of(child.label()));
                         trueInGrakn = childType.sup().label().toString().equals(parent.label());
 //                                .anyMatch(superType -> superType.label().toString().equals(parent.label()));

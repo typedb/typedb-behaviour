@@ -39,7 +39,7 @@ public class Relates extends RejectDuplicateSet<Pair<Type, Type>> {
          */
 
         for (Pair<Type, Type> relates : set) {
-            if (Arrays.stream(Validator.META_TYPES.values()).anyMatch(meta -> meta.toString().equals(relates.first().label()))) {
+            if (Arrays.stream(Validator.META_TYPES.values()).anyMatch(meta -> meta.getName().equals(relates.first().label()))) {
                 throw IntegrityException.metaTypeCannotRelateRole(relates.first(), relates.second());
             }
         }

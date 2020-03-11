@@ -38,7 +38,7 @@ public class AbstractTypes extends RejectDuplicateSet<Type> {
         for (Validator.META_TYPES metaLabel : Validator.META_TYPES.values()) {
             boolean found = false;
             for (Type type : set) {
-                if (type.label().equals(metaLabel.toString())) {
+                if (type.label().equals(metaLabel.getName())) {
                     found = true;
                 }
             }

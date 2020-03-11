@@ -59,10 +59,10 @@ public class TransitiveSub implements SemanticSet<Pair<Type, Type>> {
          */
 
         Set<String> metaTypesWithoutMetaThing = Sets.newHashSet(
-                Validator.META_ENTITY,
-                Validator.META_RELATION,
-                Validator.META_ATTRIBUTE,
-                Validator.META_ROLE
+                Validator.META_TYPES.ENTITY.getName(),
+                Validator.META_TYPES.RELATION.getName(),
+                Validator.META_TYPES.ATTRIBUTE.getName(),
+                "role"
         );
 
         // condition 1:
@@ -100,7 +100,7 @@ public class TransitiveSub implements SemanticSet<Pair<Type, Type>> {
         for (Type child : children) {
             boolean hasThingSuper = false;
             for (Pair<Type, Type> sub : set) {
-                if (sub.first() == child && sub.second().label().equals(Validator.META_THING)) {
+                if (sub.first() == child && sub.second().label().equals(Validator.META_TYPES.THING.getName())) {
                     hasThingSuper = true;
                     break;
                 }

@@ -138,7 +138,7 @@ public class SemanticSets {
     }
 
     @Test
-    public void subTransitiveSet_validatenMultipleMetaSuperTypes() {
+    public void subTransitiveSet_validateMultipleMetaSuperTypes() {
         TransitiveSub transitiveSubSet = new TransitiveSub();
 
         SchemaConcept mockSchemaConcept0 = mock(SchemaConcept.class);
@@ -437,7 +437,7 @@ public class SemanticSets {
         Type entityMeta = new Type(mockSchemaConcept2);
         Type relationMeta = new Type(mockSchemaConcept3);
         Type attributeMeta = new Type(mockSchemaConcept3);
-        Type thingMeta = new Type(mockSchemaConcept3);
+        Type thingMeta = new Type(mockSchemaConcept5);
 
         Has hasSet = new Has();
         hasSet.add(new Pair<>(entityMeta, type));
@@ -481,7 +481,7 @@ public class SemanticSets {
         Type entityMeta = new Type(mockSchemaConcept2);
         Type relationMeta = new Type(mockSchemaConcept3);
         Type attributeMeta = new Type(mockSchemaConcept3);
-        Type thingMeta = new Type(mockSchemaConcept3);
+        Type thingMeta = new Type(mockSchemaConcept5);
 
         Plays playsSet = new Plays();
         playsSet.add(new Pair<>(entityMeta, aRole));
@@ -525,7 +525,7 @@ public class SemanticSets {
         Type entityMeta = new Type(mockSchemaConcept2);
         Type relationMeta = new Type(mockSchemaConcept3);
         Type attributeMeta = new Type(mockSchemaConcept3);
-        Type thingMeta = new Type(mockSchemaConcept3);
+        Type thingMeta = new Type(mockSchemaConcept5);
 
         Relates relatesSet = new Relates();
         relatesSet.add(new Pair<>(entityMeta, aRole));

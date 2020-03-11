@@ -38,7 +38,7 @@ public class Has extends RejectDuplicateSet<Pair<Type, Type>> {
         */
 
         for (Pair<Type, Type> has : set) {
-            if (Arrays.stream(Validator.META_TYPES.values()).anyMatch(meta -> meta.toString().equals(has.first().label()))) {
+            if (Arrays.stream(Validator.META_TYPES.values()).anyMatch(meta -> meta.getName().equals(has.first().label()))) {
                 throw IntegrityException.metaTypeCannotOwnAttribute(has.first(), has.second());
             }
         }

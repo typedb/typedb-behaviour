@@ -38,7 +38,7 @@ public class Plays extends RejectDuplicateSet<Pair<Type, Type>> {
         */
 
         for (Pair<Type, Type> plays : set) {
-            if (Arrays.stream(Validator.META_TYPES.values()).anyMatch(meta -> meta.toString().equals(plays.first().label()))) {
+            if (Arrays.stream(Validator.META_TYPES.values()).anyMatch(meta -> meta.getName().equals(plays.first().label()))) {
                 throw IntegrityException.metaTypeCannotPlayRole(plays.first(), plays.second());
             }
         }
