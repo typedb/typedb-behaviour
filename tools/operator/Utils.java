@@ -34,6 +34,14 @@ import java.util.stream.Collectors;
 
 public class Utils {
 
+    /**
+     * Sanitise input pattern:
+     * - remove statements without properties
+     * - remove statements that are disconnected from the original pattern
+     * @param p transformed pattern
+     * @param src original Pattern
+     * @return
+     */
     static Pattern sanitise(Pattern p, Pattern src){
         Set<Variable> toRemove = Sets.difference(rolePlayerVariables(src), rolePlayerVariables(p));
         return Graql.and(
