@@ -41,7 +41,7 @@ import static grakn.verification.tools.operator.Utils.sanitise;
  * Introduces the variable fuzzying operator - it fuzzes each variable in the input pattern such that
  * the input and output patterns are alpha-equivalent (we preserve variable bindings).
  *
- * For an input pattern the application of the pattern returns a single pattern with all returned variables randomised.
+ * For an input pattern the application of the pattern returns a a stream of patterns each with a single variable randomised.
  *
  */
 public class VariableFuzzyingOperator implements Operator{
