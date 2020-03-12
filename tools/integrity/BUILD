@@ -1,6 +1,6 @@
 #
 # GRAKN.AI - THE KNOWLEDGE GRAPH
-# Copyright (C) 2018 Grakn Labs Ltd
+# Copyright (C) 2019 Grakn Labs Ltd
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -16,40 +16,28 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-options:
-  languages: ["java"]
-  resolverType: coursier
-  resolvers:
-  - id: mavencentral
-    type: default
-    url: https://repo.maven.apache.org/maven2/
-  strictVisibility: true
-  transitivity: runtime_deps
-  versionConflictPolicy: highest
-  thirdPartyDirectory: dependencies/maven/artifacts
+package(default_visibility = ["//visibility:public"])
 
+load("@graknlabs_build_tools//checkstyle:rules.bzl", "checkstyle_test")
 
-dependencies:
-  ch.qos.logback:
-    logback-classic:
-      version: "1.2.3"
-      lang: java
-    logback-core:
-      version: "1.2.3"
-      lang: java
+java_library(
+    name = "integrity",
+    srcs = glob([
+        "*.java",
+        "schema/*.java"
+    ]),
+    deps = [
+        "@graknlabs_client_java//:client-java",
+        "@graknlabs_graql//java:graql",
+        "@graknlabs_common//:common",
+        "//dependencies/maven/artifacts/com/google/guava",
+        "//dependencies/maven/artifacts/org/slf4j:slf4j-api",
+    ],
+)
 
-  org.slf4j:
-    slf4j-api:
-      version: "1.7.20"
-      lang: java
-
-
-  com.google.guava:
-    guava:
-      version: "23.0"
-      lang: java
-
-  org.mockito:
-    mockito-core:
-      version: "2.6.4"
-      lang: java
+checkstyle_test(
+    name = "checkstyle",
+    targets = [
+        ":integrity",
+    ],
+)
