@@ -25,20 +25,21 @@ public class ResolutionBuilder {
 
             ArrayList<GraqlGet> resolutionQueries = new ArrayList<>();
             for (ConceptMap answer : answers) {
-                resolutionQueries.add(match(resolutionStatements(answer)));
+                resolutionQueries.add(Graql.match(resolutionStatements(answer)).get());
             }
             return resolutionQueries;
-    }
-
-    private GraqlGet match(Set<Statement> s) {
-        GraqlGet query = Graql.match(s).get();
-        return query;
     }
 
     private Set<Statement> resolutionStatements(ConceptMap answer) {
 
         Pattern qp = answer.queryPattern();
-        Set<Statement> answerStatements = qp.statements();
+
+        if (qp == null) {
+            throw new RuntimeException("Answer is missing a pattern. Either patterns are broken or the initial query did not require inference.");
+        }
+
+        Set<Statement> answerStatements = removeIdStatements(qp.statements());
+        answerStatements.addAll(generateKeyStatements(answer.map()));
 
         if (answer.hasExplanation()) {
             for (ConceptMap explAns : answer.explanation().getAnswers()) {

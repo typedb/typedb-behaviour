@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -48,35 +49,35 @@ public class ResolutionBuilderIT {
             Set<Statement> expectedStatements = getStatements(Graql.parsePatternList(
 //                    From the initial answer:
                     "$transaction has currency $currency;\n" +
-                    "$transaction id V86232;\n" +
-                    "$currency id V36912;\n" +
+                    "$transaction has transaction-id 0;\n" +
+                    "$currency \"GBP\";\n" +
                     "$transaction isa transaction;\n" +
 
 //                    From the explained answers:
                     "$country has currency $currency;\n" +
                     "$country isa country;\n" +
-                    "$country id V40968;\n" +
-                    "$currency id V36912;\n" +
+                    "$country has country-name \"UK\";\n" +
+                    "$currency \"GBP\";\n" +
 
                     "$lh (location-hierarchy_superior: $country, location-hierarchy_subordinate: $city) isa location-hierarchy;\n" +
                     "$country isa country;\n" +
-                    "$city id V20688;\n" +
-                    "$country id V40968;\n" +
+                    "$city has city-name \"London\";\n" +
+                    "$country has country-name \"UK\";\n" +
                     "$city isa city;\n" +
-                    "$lh id V41080;\n" +
+                    "$lh has hierarchy-id 0;\n" +
 
-                    "$city id V20688;\n" +
-                    "$transaction id V86232;\n" +
+                    "$city has city-name \"London\";\n" +
+                    "$transaction has transaction-id 0;\n" +
                     "$l1 (locates_located: $transaction, locates_location: $city) isa locates;\n" +
-                    "$l1 id V90328;\n" +
+                    "$l1 has location-id 0;\n" +
                     "$city isa city;\n" +
                     "$transaction isa transaction;\n" +
 
                     "$country isa country;\n" +
-                    "$locates id V4224;\n" +
+//                    "$locates id V4224;\n" + //TODO inferred concept, so should have no id and no key
                     "$locates (locates_located: $transaction, locates_location: $country) isa locates;\n" +
-                    "$transaction id V86232;\n" +
-                    "$country id V40968;\n" +
+                    "$transaction has transaction-id 0;\n" +
+                    "$country has country-name \"UK\";\n" +
                     "$transaction isa transaction;"
             ));
 
@@ -85,6 +86,10 @@ public class ResolutionBuilderIT {
                 List<GraqlGet> kbCompleteQueries = qb.build(tx, inferenceQuery);
                 GraqlGet kbCompleteQuery = kbCompleteQueries.get(0);
                 Set<Statement> statements = kbCompleteQuery.match().getPatterns().statements();
+                Set<Statement> expectedStatementsCopy = new HashSet(expectedStatements);
+
+                System.out.print(expectedStatementsCopy.removeAll(statements));
+
                 assertEquals(expectedStatements, statements);
             }
         }
