@@ -2,6 +2,7 @@ package grakn.verification.resolution.kbtest;
 
 import grakn.client.GraknClient.Transaction;
 import grakn.client.answer.ConceptMap;
+import grakn.client.answer.Explanation;
 import grakn.client.concept.Concept;
 import graql.lang.Graql;
 import graql.lang.pattern.Pattern;
@@ -14,6 +15,7 @@ import graql.lang.statement.Variable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,7 +32,7 @@ public class ResolutionBuilder {
             return resolutionQueries;
     }
 
-    private Set<Statement> resolutionStatements(ConceptMap answer) {
+    private Set<Statement> resolutionStatements(ConceptMap answer) {  //TODO Make arg nullable
 
         Pattern qp = answer.queryPattern();
 
@@ -42,11 +44,41 @@ public class ResolutionBuilder {
         answerStatements.addAll(generateKeyStatements(answer.map()));
 
         if (answer.hasExplanation()) {
-            for (ConceptMap explAns : answer.explanation().getAnswers()) {
+            Set<Variable> thenVars = answer.map().keySet();
+            Set<Variable> whenVars = new LinkedHashSet<>();
+
+            Explanation explanation = answer.explanation();
+
+            for (ConceptMap explAns : explanation.getAnswers()) {
                 answerStatements.addAll(resolutionStatements(explAns));
+                whenVars.addAll(explAns.map().keySet());
             }
+
+            String ruleLabel = explanation.getRule().label().toString();
+
+            answerStatements.addAll(appliedRuleStatement(whenVars, thenVars, ruleLabel));
         }
         return answerStatements;
+    }
+
+    public static Set<Statement> appliedRuleStatement(Set<Variable> whenVars, Set<Variable> thenVars, String ruleLabel) {
+
+        String appliedRuleType = "applied-rule";
+        String appliedRuleLabelType = "rule-label";
+
+        Statement relation = Graql.var().isa(appliedRuleType).has(appliedRuleLabelType, ruleLabel);
+
+        for (Variable whenVar : whenVars) {
+            relation = relation.rel("where", new Statement(whenVar));
+        }
+
+        for (Variable thenVar : thenVars) {
+            relation = relation.rel("there", new Statement(thenVar));
+        }
+
+        HashSet<Statement> result = new HashSet<>();
+        result.add(relation);
+        return result;
     }
 
     /**
@@ -98,6 +130,7 @@ public class ResolutionBuilder {
                     s = statement.val((Boolean) attrValue);
                 }
                 statements.add(s);
+
             } else if (concept.isEntity() | concept.isRelation()){
 
                 concept.asThing().keys().forEach(attribute -> {

@@ -78,7 +78,29 @@ public class ResolutionBuilderIT {
                     "$locates (locates_located: $transaction, locates_location: $country) isa locates;\n" +
                     "$transaction has transaction-id 0;\n" +
                     "$country has country-name \"UK\";\n" +
-                    "$transaction isa transaction;"
+                    "$transaction isa transaction;\n" +
+
+                    "$_ (\n" +
+                    "    where: $country,\n" +
+                    "    where: $locates,\n" +
+                    "    where: $transaction,\n" +
+                    "    where: $currency,\n" +
+                    "    there: $currency,\n" +
+                    "    there: $transaction\n" +
+                    ") isa applied-rule, \n" +
+                    "has rule-label \"transaction-currency-is-that-of-the-country\";" +
+
+                    "$_ (\n" +
+                    "    where: $country,\n" +
+                    "    where: $city,\n" +
+                    "    where: $lh,\n" +
+                    "    where: $l1,\n" +
+                    "    where: $transaction,\n" +
+                    "    there: $country,\n" +
+                    "    there: $locates,\n" +
+                    "    there: $transaction\n" +
+                    ") isa applied-rule, \n" +
+                    "has rule-label \"locates-is-transitive\";\n"
             ));
 
             ResolutionBuilder qb = new ResolutionBuilder();
@@ -86,9 +108,9 @@ public class ResolutionBuilderIT {
                 List<GraqlGet> kbCompleteQueries = qb.build(tx, inferenceQuery);
                 GraqlGet kbCompleteQuery = kbCompleteQueries.get(0);
                 Set<Statement> statements = kbCompleteQuery.match().getPatterns().statements();
-                Set<Statement> expectedStatementsCopy = new HashSet(expectedStatements);
 
-                System.out.print(expectedStatementsCopy.removeAll(statements));
+                Set<Statement> expectedStatementsCopy = new HashSet<>(expectedStatements);// TODO remove
+                System.out.print(expectedStatementsCopy.removeAll(statements));// TODO remove
 
                 assertEquals(expectedStatements, statements);
             }
