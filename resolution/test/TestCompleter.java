@@ -3,7 +3,6 @@ package grakn.verification.resolution.test;
 import grakn.client.GraknClient;
 import grakn.client.answer.ConceptMap;
 import graql.lang.Graql;
-import graql.lang.query.GraqlGet;
 import graql.lang.statement.Statement;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -14,16 +13,12 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
 
 import static grakn.verification.resolution.common.Utils.getStatements;
 import static grakn.verification.resolution.common.Utils.loadGqlFile;
-import static grakn.verification.resolution.kbcomplete.Completer.addResolutionSchema;
-import static grakn.verification.resolution.kbcomplete.Completer.defineThatAllThingsCanBePartOfAClause;
 import static org.junit.Assert.assertEquals;
 
 public class TestCompleter {
@@ -135,65 +130,5 @@ public class TestCompleter {
                 assertEquals(answers.size(), 1);
             }
         }
-    }
-
-    @Test
-    public void testResolutionSchemaRolesPlayedAreCorrect() {
-
-        try (GraknClient.Session session = graknClient.session(GRAKN_KEYSPACE)) {
-            try (GraknClient.Transaction tx = session.transaction().write()) {
-
-                addResolutionSchema(tx);
-                defineThatAllThingsCanBePartOfAClause(tx);
-
-                GraqlGet roleplayersQuery = Graql.match(Graql.var("x").plays("clause-element")).get();
-
-                Set<String> roleplayers = tx.stream(roleplayersQuery).map(r -> r.get("x").asType().label().toString()).collect(Collectors.toSet());
-
-                HashSet<String> expectedRoleplayers = new HashSet<String>() {
-                    {
-                        add("transaction");
-                        add("locates");
-                        add("location-hierarchy");
-                        add("location");
-                        add("country");
-                        add("city");
-                    }
-                };
-
-                assertEquals(expectedRoleplayers, roleplayers);
-            }
-        }
-
-    }
-
-    @Test
-    public void testResolutionSchemaAttributesOwnedAreCorrect() {
-
-        try (GraknClient.Session session = graknClient.session(GRAKN_KEYSPACE)) {
-            try (GraknClient.Transaction tx = session.transaction().write()) {
-
-                addResolutionSchema(tx);
-                defineThatAllThingsCanBePartOfAClause(tx);
-
-                GraqlGet clauseAttributesQuery = Graql.match(Graql.var("x").sub("clause-containment")).get();
-
-                Set<String> attributeTypes = tx.execute(clauseAttributesQuery).get(0).get("x").asRelationType().attributes().map(a -> a.label().toString()).collect(Collectors.toSet());
-
-                HashSet<String> expectedAttributeTypes = new HashSet<String>() {
-                    {
-                        add("currency");
-                        add("location-id");
-                        add("transaction-id");
-                        add("hierarchy-id");
-                        add("country-name");
-                        add("city-name");
-                    }
-                };
-
-                assertEquals(expectedAttributeTypes, attributeTypes);
-            }
-        }
-
     }
 }

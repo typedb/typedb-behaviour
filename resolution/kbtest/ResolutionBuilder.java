@@ -32,7 +32,7 @@ public class ResolutionBuilder {
             return resolutionQueries;
     }
 
-    private Set<Statement> resolutionStatements(ConceptMap answer) {  //TODO Make arg nullable
+    private Set<Statement> resolutionStatements(ConceptMap answer) {
 
         Pattern qp = answer.queryPattern();
 

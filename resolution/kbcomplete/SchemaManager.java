@@ -13,7 +13,9 @@ import graql.lang.query.GraqlGet;
 import java.util.HashSet;
 import java.util.List;
 
-public class Completer {
+public class SchemaManager {
+
+//  TODO manage rules - reading and deleting before forward-chaining
 
     public static void addResolutionSchema(GraknClient.Transaction tx){
         GraqlDefine defineQuery = Graql.parse("define\n" +
