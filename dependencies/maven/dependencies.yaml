@@ -53,3 +53,8 @@ dependencies:
     mockito-core:
       version: "2.6.4"
       lang: java
+
+  org.zeroturnaround:
+    zt-exec:
+      version: "1.11"
+      lang: java

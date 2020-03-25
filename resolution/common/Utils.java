@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -29,7 +29,7 @@ public class Utils {
     }
 
     public static Set<Statement> getStatements(List<Pattern> patternList) {
-        HashSet<Pattern> patternSet = new java.util.HashSet<>(patternList);
+        LinkedHashSet<Pattern> patternSet = new LinkedHashSet<>(patternList);
         return new Conjunction<>(patternSet).statements();
     }
 }
