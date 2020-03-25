@@ -56,3 +56,28 @@ java_test(
     ],
     size="small"
 )
+
+java_test(
+    name = "TestCompleter",
+    srcs = [
+        "TestCompleter.java",
+    ],
+    test_class = "grakn.verification.resolution.test.TestCompleter",
+    deps = [
+        "//resolution/common",
+        "//resolution/kbcomplete",
+        "//resolution/test:grakn-for-test",
+
+        # External dependencies from @graknlabs
+        "@graknlabs_client_java//:client-java",
+        "@graknlabs_graql//java:graql",
+    ],
+    data = [
+                "@graknlabs_grakn_core//:assemble-linux-targz", # Make sure to pass the path in args below
+            ],
+            args = [ # The order of the arguments matter
+                "grakn-core", # Keep at index 0, will be accessible at args[1]
+                "$(location @graknlabs_grakn_core//:assemble-linux-targz)", # Keep at index 1, will be accessible at args[2]
+            ],
+    size="medium"
+)
