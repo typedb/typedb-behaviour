@@ -70,7 +70,7 @@ public class TestSchemaManager {
         try (GraknClient.Session session = graknClient.session(GRAKN_KEYSPACE)) {
             try (GraknClient.Transaction tx = session.transaction().write()) {
 
-                addResolutionSchema(tx);
+                addResolutionSchema(session);
                 defineThatAllThingsCanBePartOfAClause(tx);
 
                 GraqlGet roleplayersQuery = Graql.match(Graql.var("x").plays("clause-element")).get();
@@ -100,7 +100,7 @@ public class TestSchemaManager {
         try (GraknClient.Session session = graknClient.session(GRAKN_KEYSPACE)) {
             try (GraknClient.Transaction tx = session.transaction().write()) {
 
-                addResolutionSchema(tx);
+                addResolutionSchema(session);
                 defineThatAllThingsCanBePartOfAClause(tx);
 
                 GraqlGet clauseAttributesQuery = Graql.match(Graql.var("x").sub("clause-containment")).get();

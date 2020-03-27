@@ -4,6 +4,7 @@ import grakn.client.GraknClient;
 import grakn.client.GraknClient.Session;
 import grakn.client.GraknClient.Transaction;
 import grakn.client.answer.ConceptMap;
+import grakn.verification.resolution.kbtest.ResolutionBuilder;
 import graql.lang.Graql;
 import graql.lang.query.GraqlGet;
 
@@ -16,35 +17,76 @@ import static grakn.verification.resolution.common.Utils.loadGqlFile;
 
 public class Resolution {
 
-    private static Path SCHEMA_PATH = Paths.get("/Users/jamesfletcher/programming/verification/resolution/cases/case1/schema.gql");
-    private static Path DATA_PATH = Paths.get("/Users/jamesfletcher/programming/verification/resolution/cases/case1/data.gql");
-
+    private static final String GRAKN_URI = "localhost:48555";
+    private static final String COMPLETE_KEYSPACE = "complete";
+    private static final String TEST_KEYSPACE = "test";
+    private static GraknClient graknClient;
+    private final Path schemaPath;
+    private final Path dataPath;
+    private Session completeSession;
+    private Session testSession;
 
     public static void main(String[] args) {
-        String graknHostUri = "localhost:48555";
-        String graknKeyspace = "case1";
+        Path schemaPath = Paths.get("resolution", "cases", "case2", "schema.gql").toAbsolutePath();
+        Path dataPath = Paths.get("resolution", "cases", "case2", "data.gql").toAbsolutePath();
+        GraqlGet inferenceQuery = Graql.parse("match $transaction has currency $currency; get;").asGet();
 
-        String inferenceQuery = "match $ar isa area, has name $ar-name; $cont isa continent, has name $cont-name; $lh(location-hierarchy_superior: $cont, location-hierarchy_subordinate: $ar) isa location-hierarchy; get;";
+        Resolution resolution_test = new Resolution(schemaPath, dataPath);
+        resolution_test.testQuery(inferenceQuery);
+        resolution_test.close();
+    }
 
-        GraknClient grakn = new GraknClient(graknHostUri);
+    private Resolution(Path schemaPath, Path dataPath) {
+        this.schemaPath = schemaPath;
+        this.dataPath = dataPath;
+        graknClient = new GraknClient(GRAKN_URI);
 
-        try (Session session = grakn.session(graknKeyspace)) {
-            try {
-                // Load a schema incl. rules
-                loadGqlFile(session, SCHEMA_PATH);
-                // Load data
-                loadGqlFile(session, DATA_PATH);
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.exit(1);
+        testSession = graknClient.session(TEST_KEYSPACE);
+        completeSession = graknClient.session(COMPLETE_KEYSPACE);
+
+        initialiseKeyspace(testSession);
+        initialiseKeyspace(completeSession);
+        // Complete the KB-complete
+//        Completer.complete(completeSession); // Should read the rules, undefine them, add the completion schema
+    }
+
+    private void close() {
+        completeSession.close();
+        testSession.close();
+    }
+
+    private void testQuery(GraqlGet inferenceQuery) {
+        ResolutionBuilder rb = new ResolutionBuilder();
+        List<GraqlGet> queries;
+
+        try (Transaction tx = testSession.transaction().read()) {
+            queries = rb.build(tx, inferenceQuery);
+        }
+
+        try (Transaction tx = completeSession.transaction().read()) {
+            for (GraqlGet query: queries) {
+                checkResolution(tx, query);
             }
+        }
+    }
 
-            try (Transaction tx = session.transaction().read()) {
-                List<ConceptMap> answers = tx.execute((GraqlGet) Graql.parse(inferenceQuery));
-                for (ConceptMap answer : answers) {
-                    List<ConceptMap> explainable = answer.explanation().getAnswers();
-                }
-            }
+    private void checkResolution(Transaction tx, GraqlGet query) {
+        List<ConceptMap> answerStream = tx.execute(query);
+        if (answerStream.size() != 1) {
+            String msg = String.format("Resolution query had %d answers, it should have had 1. The query is:\n %s", answerStream.size(), query);
+            throw new RuntimeException(msg);
+        }
+    }
+
+    private void initialiseKeyspace(Session session) {
+        try {
+            // Load a schema incl. rules
+            loadGqlFile(session, schemaPath);
+            // Load data
+            loadGqlFile(session, dataPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
         }
     }
 }

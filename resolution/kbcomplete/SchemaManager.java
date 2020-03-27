@@ -7,37 +7,28 @@ import grakn.client.concept.RelationType;
 import grakn.client.concept.Role;
 import grakn.client.concept.Type;
 import graql.lang.Graql;
-import graql.lang.query.GraqlDefine;
 import graql.lang.query.GraqlGet;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.List;
 
+import static grakn.verification.resolution.common.Utils.loadGqlFile;
+
 public class SchemaManager {
+    private static final Path SCHEMA_PATH = Paths.get("resolution", "kbcomplete", "completion_schema.gql").toAbsolutePath();;
 
 //  TODO manage rules - reading and deleting before forward-chaining
 
-    public static void addResolutionSchema(GraknClient.Transaction tx){
-        GraqlDefine defineQuery = Graql.parse("define\n" +
-                "rule-label sub attribute, datatype string;\n" +
-
-                "rule-application sub entity,\n" +
-                "  has rule-label,\n" +
-                "  plays containing-rule;\n" +
-
-                "clause-containment sub relation,\n" +
-                "  relates containing-rule,\n" +
-                "  relates clause-element;\n" +
-
-                "then-clause-containment sub relation,\n" +
-                "  relates containing-rule,\n" +
-                "  relates clause-element;\n" +
-
-                "when-clause-containment sub relation,\n" +
-                "  relates containing-rule,\n" +
-                "  relates clause-element;");
-
-        tx.execute(defineQuery);
+    public static void addResolutionSchema(GraknClient.Session session){
+        try {
+            loadGqlFile(session, SCHEMA_PATH);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
     }
 
     public static void defineThatAllThingsCanBePartOfAClause(GraknClient.Transaction tx){

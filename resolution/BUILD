@@ -20,6 +20,10 @@ java_library(
         "@graknlabs_client_java//:client-java",
         "@graknlabs_graql//java:graql",
     ],
+    data = [
+        "//resolution/cases/case2:schema.gql",
+        "//resolution/cases/case2:data.gql",
+    ],
 )
 
 java_binary(
@@ -32,7 +36,7 @@ java_binary(
 #        "//data",
 #        "//schema",
 #    ],
-    main_class = "grakn.verification.resolution.ResolutionTest",
+    main_class = "grakn.verification.resolution.Resolution",
     runtime_deps = [":resolution-lib"],
 )
 
@@ -42,6 +46,6 @@ java_binary(
         "-Xdebug",
         "-Xrunjdwp:transport=dt_socket,server=y,address=5005",
     ],
-    main_class = "grakn.verification.resolution.ResolutionTest",
+    main_class = "grakn.verification.resolution.Resolution",
         runtime_deps = [":resolution-lib"],
 )
