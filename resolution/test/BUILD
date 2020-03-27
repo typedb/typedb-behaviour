@@ -31,12 +31,14 @@ java_test(
         "@graknlabs_graql//java:graql",
     ],
     data = [
-            "@graknlabs_grakn_core//:assemble-linux-targz", # Make sure to pass the path in args below
-        ],
-        args = [ # The order of the arguments matter
-            "grakn-core", # Keep at index 0, will be accessible at args[1]
-            "$(location @graknlabs_grakn_core//:assemble-linux-targz)", # Keep at index 1, will be accessible at args[2]
-        ],
+        "@graknlabs_grakn_core//:assemble-linux-targz", # Make sure to pass the path in args below
+        "//resolution/cases/case4:schema.gql",
+        "//resolution/cases/case4:data.gql",
+    ],
+    args = [ # The order of the arguments matter
+        "grakn-core", # Keep at index 0, will be accessible at args[1]
+        "$(location @graknlabs_grakn_core//:assemble-linux-targz)", # Keep at index 1, will be accessible at args[2]
+    ],
     size="medium"
 )
 
@@ -49,6 +51,7 @@ java_test(
     deps = [
         "//resolution/common",
         "//resolution/kbtest",
+        "//dependencies/maven/artifacts/com/google/guava",
 
         # External dependencies from @graknlabs
         "@graknlabs_client_java//:client-java",

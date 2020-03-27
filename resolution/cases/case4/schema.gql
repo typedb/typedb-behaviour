@@ -1,0 +1,29 @@
+define
+
+name sub attribute,
+    datatype string;
+
+is-liable sub attribute,
+    datatype boolean;
+
+company-id sub attribute,
+    datatype long;
+
+company sub entity,
+    key company-id,
+    has name,
+    has is-liable;
+
+company-has-name sub rule,
+when {
+    $c isa company;
+}, then {
+    $c has name "the-company";
+};
+
+company-is-liable sub rule,
+when {
+    $c isa company, has name "the-company";
+}, then {
+    $c has is-liable true;
+};
