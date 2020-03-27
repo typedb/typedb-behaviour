@@ -1,6 +1,5 @@
 #
-# GRAKN.AI - THE KNOWLEDGE GRAPH
-# Copyright (C) 2019 Grakn Labs Ltd
+# Copyright (C) 2020 Grakn Labs
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -57,7 +56,6 @@ Feature: Connection Keyspace
       | mike    |
       | neil    |
 
-  @ignore
   Scenario: create many keyspaces in parallel
     When  connection create keyspaces in parallel:
       | alice   |
@@ -139,7 +137,6 @@ Feature: Connection Keyspace
       | neil    |
     Then  connection does not have any keyspace
 
-  @ignore
   Scenario: delete many keyspaces in parallel
       # This step should be rewritten once we can create keypsaces without opening sessions
     Given connection create keyspaces in parallel:

@@ -1,6 +1,5 @@
 #
-# GRAKN.AI - THE KNOWLEDGE GRAPH
-# Copyright (C) 2019 Grakn Labs Ltd
+# Copyright (C) 2020 Grakn Labs
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -262,7 +261,7 @@ Feature: Connection Transaction
       | write   |
 
   Scenario: one keyspace, many sessions, one transaction to read
-    Given connection open session for keyspace:
+    Given connection open sessions for keyspace:
       | grakn   |
       | grakn   |
       | grakn   |
@@ -283,7 +282,7 @@ Feature: Connection Transaction
       | read    |
 
   Scenario: one keyspace, many sessions, one transaction to write
-    Given connection open session for keyspace:
+    Given connection open sessions for keyspace:
       | grakn   |
       | grakn   |
       | grakn   |
@@ -304,7 +303,7 @@ Feature: Connection Transaction
       | write   |
 
   Scenario: one keyspace, many sessions, many transactions to read
-    Given connection open session for keyspace:
+    Given connection open sessions for keyspace:
       | grakn   |
       | grakn   |
       | grakn   |
@@ -347,7 +346,7 @@ Feature: Connection Transaction
       | read    |
 
   Scenario: one keyspace, many sessions, many transactions to write
-    Given connection open session for keyspace:
+    Given connection open sessions for keyspace:
       | grakn   |
       | grakn   |
       | grakn   |
@@ -390,7 +389,7 @@ Feature: Connection Transaction
       | write   |
 
   Scenario: one keyspace, many sessions, many transactions to read and write
-    Given connection open session for keyspace:
+    Given connection open sessions for keyspace:
       | grakn   |
       | grakn   |
       | grakn   |
@@ -433,7 +432,7 @@ Feature: Connection Transaction
       | write   |
 
   Scenario: one keyspace, many sessions, many transactions in parallel to read
-    Given connection open session for keyspace:
+    Given connection open sessions for keyspace:
       | grakn   |
       | grakn   |
       | grakn   |
@@ -476,7 +475,7 @@ Feature: Connection Transaction
       | read    |
 
   Scenario: one keyspace, many sessions, many transactions in parallel to write
-    Given connection open session for keyspace:
+    Given connection open sessions for keyspace:
       | grakn   |
       | grakn   |
       | grakn   |
@@ -519,7 +518,7 @@ Feature: Connection Transaction
       | write   |
 
   Scenario: one keyspace, many sessions, many transactions in parallel to read and write
-    Given connection open session for keyspace:
+    Given connection open sessions for keyspace:
       | grakn   |
       | grakn   |
       | grakn   |
