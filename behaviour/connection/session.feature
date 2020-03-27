@@ -1,6 +1,5 @@
 #
-# GRAKN.AI - THE KNOWLEDGE GRAPH
-# Copyright (C) 2019 Grakn Labs Ltd
+# Copyright (C) 2020 Grakn Labs
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -24,6 +23,8 @@ Feature: Connection Session
     Given connection does not have any keyspace
 
   Scenario: for one keyspace, open one session
+    When connection create keyspace:
+      | grakn   |
     When connection open session for keyspace:
       | grakn   |
     Then session is null: false
@@ -32,6 +33,8 @@ Feature: Connection Session
       | grakn   |
 
   Scenario: for one keyspace, open many sessions
+    When connection create keyspace:
+      | grakn   |
     When connection open sessions for keyspaces:
       | grakn   |
       | grakn   |
@@ -62,6 +65,8 @@ Feature: Connection Session
       | grakn   |
 
   Scenario: for one keyspace, open many sessions in parallel
+    When connection create keyspace:
+      | grakn   |
     When connection open sessions in parallel for keyspaces:
       | grakn   |
       | grakn   |
@@ -92,6 +97,19 @@ Feature: Connection Session
       | grakn   |
 
   Scenario: for many keyspaces, open many sessions
+    When connection create keyspaces:
+      | alice   |
+      | bob     |
+      | charlie |
+      | dylan   |
+      | eve     |
+      | frank   |
+      | george  |
+      | heidi   |
+      | ivan    |
+      | judy    |
+      | mike    |
+      | neil    |
     When connection open sessions for keyspaces:
       | alice   |
       | bob     |
@@ -122,6 +140,19 @@ Feature: Connection Session
       | neil    |
 
   Scenario: for many keyspaces, open many sessions in parallel
+    When connection create keyspaces:
+      | alice   |
+      | bob     |
+      | charlie |
+      | dylan   |
+      | eve     |
+      | frank   |
+      | george  |
+      | heidi   |
+      | ivan    |
+      | judy    |
+      | mike    |
+      | neil    |
     When connection open sessions in parallel for keyspaces:
       | alice   |
       | bob     |
