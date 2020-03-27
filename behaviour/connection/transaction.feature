@@ -23,6 +23,8 @@ Feature: Connection Transaction
     Given connection does not have any keyspace
 
   Scenario: one keyspace, one session, one transaction to read
+    When connection create keyspace:
+      | grakn   |
     Given connection open session for keyspace:
       | grakn   |
     When for each session, open transaction of type:
@@ -33,6 +35,8 @@ Feature: Connection Transaction
       | read    |
 
   Scenario: one keyspace, one session, one transaction to write
+    When connection create keyspace:
+      | grakn   |
     Given connection open session for keyspace:
       | grakn   |
     When for each session, open transaction of type:
@@ -43,6 +47,8 @@ Feature: Connection Transaction
       | write   |
 
   Scenario: one keyspace, one session, one committed write transaction is closed
+    When connection create keyspace:
+      | grakn   |
     Given connection open session for keyspace:
       | grakn   |
     When for each session, open transaction of type:
@@ -51,6 +57,8 @@ Feature: Connection Transaction
     Then for each session, transaction is open: false
 
   Scenario: one keyspace, one session, re-committing transaction throws
+    When connection create keyspace:
+      | grakn   |
     Given connection open session for keyspace:
       | grakn   |
     When for each session, open transaction of type:
@@ -59,6 +67,8 @@ Feature: Connection Transaction
     Then for each session, transaction commits successfully: false
 
   Scenario: one keyspace, one session, transaction close is idempotent
+    When connection create keyspace:
+      | grakn   |
     Given connection open session for keyspace:
       | grakn   |
     When for each session, open transaction of type:
@@ -69,6 +79,8 @@ Feature: Connection Transaction
     Then for each session, transaction is open: false
 
   Scenario: one keyspace, one session, many transactions to read
+    When connection create keyspace:
+      | grakn   |
     Given connection open session for keyspace:
       | grakn   |
     When for each session, open transactions of type:
@@ -101,6 +113,8 @@ Feature: Connection Transaction
       | read    |
 
   Scenario: one keyspace, one session, many transactions to write
+    When connection create keyspace:
+      | grakn   |
     Given connection open session for keyspace:
       | grakn   |
     When for each session, open transactions of type:
@@ -133,6 +147,8 @@ Feature: Connection Transaction
       | write   |
 
   Scenario: one keyspace, one session, many transactions to read and write
+    When connection create keyspace:
+      | grakn   |
     Given connection open session for keyspace:
       | grakn   |
     When for each session, open transactions of type:
@@ -165,6 +181,8 @@ Feature: Connection Transaction
       | write   |
 
   Scenario: one keyspace, one session, many transactions in parallel to read
+    When connection create keyspace:
+      | grakn   |
     Given connection open session for keyspace:
       | grakn   |
     When for each session, open transactions in parallel of type:
@@ -197,6 +215,8 @@ Feature: Connection Transaction
       | read    |
 
   Scenario: one keyspace, one session, many transactions in parallel to write
+    When connection create keyspace:
+      | grakn   |
     Given connection open session for keyspace:
       | grakn   |
     When for each session, open transactions in parallel of type:
@@ -229,6 +249,8 @@ Feature: Connection Transaction
       | write   |
 
   Scenario: one keyspace, one session, many transactions in parallel to read and write
+    When connection create keyspace:
+      | grakn   |
     Given connection open session for keyspace:
       | grakn   |
     When for each session, open transactions in parallel of type:
@@ -261,6 +283,8 @@ Feature: Connection Transaction
       | write   |
 
   Scenario: one keyspace, many sessions, one transaction to read
+    When connection create keyspace:
+      | grakn   |
     Given connection open sessions for keyspace:
       | grakn   |
       | grakn   |
@@ -282,6 +306,8 @@ Feature: Connection Transaction
       | read    |
 
   Scenario: one keyspace, many sessions, one transaction to write
+    When connection create keyspace:
+      | grakn   |
     Given connection open sessions for keyspace:
       | grakn   |
       | grakn   |
@@ -303,6 +329,8 @@ Feature: Connection Transaction
       | write   |
 
   Scenario: one keyspace, many sessions, many transactions to read
+    When connection create keyspace:
+      | grakn   |
     Given connection open sessions for keyspace:
       | grakn   |
       | grakn   |
@@ -346,6 +374,8 @@ Feature: Connection Transaction
       | read    |
 
   Scenario: one keyspace, many sessions, many transactions to write
+    When connection create keyspace:
+      | grakn   |
     Given connection open sessions for keyspace:
       | grakn   |
       | grakn   |
@@ -389,6 +419,8 @@ Feature: Connection Transaction
       | write   |
 
   Scenario: one keyspace, many sessions, many transactions to read and write
+    When connection create keyspace:
+      | grakn   |
     Given connection open sessions for keyspace:
       | grakn   |
       | grakn   |
@@ -432,6 +464,8 @@ Feature: Connection Transaction
       | write   |
 
   Scenario: one keyspace, many sessions, many transactions in parallel to read
+    When connection create keyspace:
+      | grakn   |
     Given connection open sessions for keyspace:
       | grakn   |
       | grakn   |
@@ -475,6 +509,8 @@ Feature: Connection Transaction
       | read    |
 
   Scenario: one keyspace, many sessions, many transactions in parallel to write
+    When connection create keyspace:
+      | grakn   |
     Given connection open sessions for keyspace:
       | grakn   |
       | grakn   |
@@ -518,6 +554,8 @@ Feature: Connection Transaction
       | write   |
 
   Scenario: one keyspace, many sessions, many transactions in parallel to read and write
+    When connection create keyspace:
+      | grakn   |
     Given connection open sessions for keyspace:
       | grakn   |
       | grakn   |
