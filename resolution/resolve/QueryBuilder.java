@@ -1,4 +1,4 @@
-package grakn.verification.resolution.kbtest;
+package grakn.verification.resolution.resolve;
 
 import grakn.client.GraknClient.Transaction;
 import grakn.client.answer.ConceptMap;
@@ -29,11 +29,11 @@ import java.util.Set;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
 
-public class ResolutionBuilder {
+public class QueryBuilder {
 
     private int nextVarIndex = 0;
 
-    public List<GraqlGet> build(Transaction tx, GraqlGet query) {
+    public List<GraqlGet> buildMatchGet(Transaction tx, GraqlGet query) {
             List<ConceptMap> answers = tx.execute(query);
 
             ArrayList<GraqlGet> resolutionQueries = new ArrayList<>();

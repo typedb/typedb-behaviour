@@ -1,4 +1,4 @@
-package grakn.verification.resolution.kbcomplete;
+package grakn.verification.resolution.complete;
 
 import grakn.client.GraknClient;
 import grakn.client.answer.ConceptMap;
@@ -18,7 +18,7 @@ import java.util.List;
 import static grakn.verification.resolution.common.Utils.loadGqlFile;
 
 public class SchemaManager {
-    private static final Path SCHEMA_PATH = Paths.get("resolution", "kbcomplete", "completion_schema.gql").toAbsolutePath();;
+    private static final Path SCHEMA_PATH = Paths.get("resolution", "complete", "completion_schema.gql").toAbsolutePath();;
 
 //  TODO manage rules - reading and deleting before forward-chaining
 

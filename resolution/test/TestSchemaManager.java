@@ -18,8 +18,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import static grakn.verification.resolution.common.Utils.loadGqlFile;
-import static grakn.verification.resolution.kbcomplete.SchemaManager.addResolutionSchema;
-import static grakn.verification.resolution.kbcomplete.SchemaManager.defineThatAllThingsCanBePartOfAClause;
+import static grakn.verification.resolution.complete.SchemaManager.addResolutionSchema;
+import static grakn.verification.resolution.complete.SchemaManager.defineThatAllThingsCanBePartOfAClause;
 import static org.junit.Assert.assertEquals;
 
 public class TestSchemaManager {
@@ -46,8 +46,8 @@ public class TestSchemaManager {
     public void before() {
         try (GraknClient.Session session = graknClient.session(GRAKN_KEYSPACE)) {
             try {
-                Path schemaPath = Paths.get("resolution", "cases", "case2", "schema.gql").toAbsolutePath();
-                Path dataPath = Paths.get("resolution", "cases", "case2", "data.gql").toAbsolutePath();
+                Path schemaPath = Paths.get("resolution", "test", "cases", "case2", "schema.gql").toAbsolutePath();
+                Path dataPath = Paths.get("resolution", "test", "cases", "case2", "data.gql").toAbsolutePath();
                 // Load a schema incl. rules
                 loadGqlFile(session, schemaPath);
                 // Load data

@@ -14,15 +14,15 @@ java_library(
 #        "//dependencies/maven/artifacts/commons-cli",
 #        "//dependencies/maven/artifacts/org/slf4j:slf4j-api",
 #        "//yaml_tool",
-        "//resolution/kbcomplete",
-        "//resolution/kbtest",
+        "//resolution/complete",
+        "//resolution/resolve",
         "//resolution/common",
         "@graknlabs_client_java//:client-java",
         "@graknlabs_graql//java:graql",
     ],
     data = [
-        "//resolution/cases/case2:schema.gql",
-        "//resolution/cases/case2:data.gql",
+        "//resolution/test/cases/case2:schema.gql",
+        "//resolution/test/cases/case2:data.gql",
     ],
 )
 

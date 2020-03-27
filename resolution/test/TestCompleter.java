@@ -101,8 +101,8 @@ public class TestCompleter {
     public void before() {
         try (GraknClient.Session session = graknClient.session(GRAKN_KEYSPACE)) {
             try {
-                Path schemaPath = Paths.get("resolution", "cases", "case2", "schema.gql").toAbsolutePath();
-                Path dataPath = Paths.get("resolution", "cases", "case2", "data.gql").toAbsolutePath();
+                Path schemaPath = Paths.get("resolution", "test", "cases", "case2", "schema.gql").toAbsolutePath();
+                Path dataPath = Paths.get("resolution", "test", "cases", "case2", "data.gql").toAbsolutePath();
                 // Load a schema incl. rules
                 loadGqlFile(session, schemaPath);
                 // Load data

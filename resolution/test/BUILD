@@ -9,21 +9,21 @@ java_library(
     ],
     data = [
         "@graknlabs_grakn_core//:assemble-linux-targz",
-        "//resolution/cases/case2:schema.gql",
-        "//resolution/cases/case2:data.gql",
+        "//resolution/test/cases/case2:schema.gql",
+        "//resolution/test/cases/case2:data.gql",
     ],
     visibility = ["//visibility:public"]
 )
 
 java_test(
-    name = "ResolutionBuilderIT",
+    name = "QueryBuilderIT",
     srcs = [
-        "ResolutionBuilderIT.java",
+        "QueryBuilderIT.java",
     ],
-    test_class = "grakn.verification.resolution.test.ResolutionBuilderIT",
+    test_class = "grakn.verification.resolution.test.QueryBuilderIT",
     deps = [
         "//resolution/common",
-        "//resolution/kbtest",
+        "//resolution/resolve",
         "//resolution/test:grakn-for-test",
 
         # External dependencies from @graknlabs
@@ -32,8 +32,8 @@ java_test(
     ],
     data = [
         "@graknlabs_grakn_core//:assemble-linux-targz", # Make sure to pass the path in args below
-        "//resolution/cases/case4:schema.gql",
-        "//resolution/cases/case4:data.gql",
+        "//resolution/test/cases/case4:schema.gql",
+        "//resolution/test/cases/case4:data.gql",
     ],
     args = [ # The order of the arguments matter
         "grakn-core", # Keep at index 0, will be accessible at args[1]
@@ -43,14 +43,14 @@ java_test(
 )
 
 java_test(
-    name = "TestResolutionBuilder",
+    name = "TestQueryBuilder",
     srcs = [
-        "TestResolutionBuilder.java",
+        "TestQueryBuilder.java",
     ],
-    test_class = "grakn.verification.resolution.test.TestResolutionBuilder",
+    test_class = "grakn.verification.resolution.test.TestQueryBuilder",
     deps = [
         "//resolution/common",
-        "//resolution/kbtest",
+        "//resolution/resolve",
         "//dependencies/maven/artifacts/com/google/guava",
 
         # External dependencies from @graknlabs
@@ -68,7 +68,7 @@ java_test(
     test_class = "grakn.verification.resolution.test.TestSchemaManager",
     deps = [
         "//resolution/common",
-        "//resolution/kbcomplete",
+        "//resolution/complete",
         "//resolution/test:grakn-for-test",
 
         # External dependencies from @graknlabs

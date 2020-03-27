@@ -1,6 +1,6 @@
 package grakn.verification.resolution.test;
 
-import grakn.verification.resolution.kbtest.ResolutionBuilder;
+import grakn.verification.resolution.resolve.QueryBuilder;
 import graql.lang.Graql;
 import graql.lang.statement.Statement;
 import org.junit.Test;
@@ -12,7 +12,7 @@ import static com.google.common.collect.Iterables.getOnlyElement;
 import static grakn.verification.resolution.common.Utils.getStatements;
 import static org.junit.Assert.assertEquals;
 
-public class TestResolutionBuilder {
+public class TestQueryBuilder {
 
     @Test
     public void testIdStatementsAreRemovedCorrectly() {
@@ -28,7 +28,7 @@ public class TestResolutionBuilder {
                 "$transaction isa transaction;\n"
         ));
 
-        Set<Statement> statementsWithoutIds = ResolutionBuilder.removeIdStatements(statementsWithIds);
+        Set<Statement> statementsWithoutIds = QueryBuilder.removeIdStatements(statementsWithIds);
 
         assertEquals(expectedStatements, statementsWithoutIds);
     }
@@ -39,7 +39,7 @@ public class TestResolutionBuilder {
 
         Statement expectedPropsStatement = getOnlyElement(Graql.parsePattern("$x0 (owner: $transaction) isa has-attribute-property, has currency $currency;").statements());
 
-        Statement propsStatement = getOnlyElement(new ResolutionBuilder().statementToProperties(statement).values());
+        Statement propsStatement = getOnlyElement(new QueryBuilder().statementToProperties(statement).values());
 
         assertEquals(expectedPropsStatement, propsStatement);
     }
@@ -50,7 +50,7 @@ public class TestResolutionBuilder {
 
         Statement expectedPropsStatement = getOnlyElement(Graql.parsePattern("$x0 (owner: $transaction) isa has-attribute-property, has currency \"GBP\";").statements());
 
-        Statement propsStatement = getOnlyElement(new ResolutionBuilder().statementToProperties(statement).values());
+        Statement propsStatement = getOnlyElement(new QueryBuilder().statementToProperties(statement).values());
 
         assertEquals(expectedPropsStatement, propsStatement);
     }
@@ -64,7 +64,7 @@ public class TestResolutionBuilder {
                 "$x1 (rel: $locates, roleplayer: $country) isa relation-property, has role-label \"locates_location\";"
         ));
 
-        Set<Statement> propsStatements = new HashSet<>(new ResolutionBuilder().statementToProperties(statement).values());
+        Set<Statement> propsStatements = new HashSet<>(new QueryBuilder().statementToProperties(statement).values());
 
         assertEquals(expectedPropsStatements, propsStatements);
     }
@@ -72,7 +72,7 @@ public class TestResolutionBuilder {
     @Test
     public void testStatementToPropertiesForIsa() {
         Statement statement = getOnlyElement(Graql.parsePattern("$transaction isa transaction;").statements());
-        Statement propStatement = getOnlyElement(new ResolutionBuilder().statementToProperties(statement).values());
+        Statement propStatement = getOnlyElement(new QueryBuilder().statementToProperties(statement).values());
         Statement expectedPropStatement = getOnlyElement(Graql.parsePattern("$x0 (instance: $transaction) isa isa-property, has type-label \"transaction\";").statements());
         assertEquals(expectedPropStatement, propStatement);
     }
@@ -116,7 +116,7 @@ public class TestResolutionBuilder {
 
         Set<Statement> appliedRuleStatements;
 
-        appliedRuleStatements = new ResolutionBuilder().inferenceStatements(whenStatements, thenStatements, "transaction-currency-is-that-of-the-country");
+        appliedRuleStatements = new QueryBuilder().inferenceStatements(whenStatements, thenStatements, "transaction-currency-is-that-of-the-country");
         assertEquals(expectedStatements, appliedRuleStatements);
     }
 }

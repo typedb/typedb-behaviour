@@ -4,7 +4,7 @@ import grakn.client.GraknClient;
 import grakn.client.GraknClient.Session;
 import grakn.client.GraknClient.Transaction;
 import grakn.client.answer.ConceptMap;
-import grakn.verification.resolution.kbtest.ResolutionBuilder;
+import grakn.verification.resolution.resolve.QueryBuilder;
 import graql.lang.Graql;
 import graql.lang.query.GraqlGet;
 
@@ -27,8 +27,8 @@ public class Resolution {
     private Session testSession;
 
     public static void main(String[] args) {
-        Path schemaPath = Paths.get("resolution", "cases", "case2", "schema.gql").toAbsolutePath();
-        Path dataPath = Paths.get("resolution", "cases", "case2", "data.gql").toAbsolutePath();
+        Path schemaPath = Paths.get("resolution", "test", "cases", "case2", "schema.gql").toAbsolutePath();
+        Path dataPath = Paths.get("resolution", "test", "cases", "case2", "data.gql").toAbsolutePath();
         GraqlGet inferenceQuery = Graql.parse("match $transaction has currency $currency; get;").asGet();
 
         Resolution resolution_test = new Resolution(schemaPath, dataPath);
@@ -56,11 +56,11 @@ public class Resolution {
     }
 
     private void testQuery(GraqlGet inferenceQuery) {
-        ResolutionBuilder rb = new ResolutionBuilder();
+        QueryBuilder rb = new QueryBuilder();
         List<GraqlGet> queries;
 
         try (Transaction tx = testSession.transaction().read()) {
-            queries = rb.build(tx, inferenceQuery);
+            queries = rb.buildMatchGet(tx, inferenceQuery);
         }
 
         try (Transaction tx = completeSession.transaction().read()) {

@@ -1,13 +1,18 @@
+exports_files(["completion_schema.gql"])
+
 java_library(
-    name = "kbtest",
+    name = "complete",
     srcs = glob([
         "*.java",
         ]
     ),
     visibility = ["//visibility:public"],
     deps = [
-        "//dependencies/maven/artifacts/com/google/guava",
+        "//resolution/common:common",
         "@graknlabs_client_java//:client-java",
         "@graknlabs_graql//java:graql",
+    ],
+    data = [
+        "//resolution/complete:completion_schema.gql",
     ],
 )
