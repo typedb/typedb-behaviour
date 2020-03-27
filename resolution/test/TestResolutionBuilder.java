@@ -10,7 +10,6 @@ import java.util.Set;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static grakn.verification.resolution.common.Utils.getStatements;
-import static grakn.verification.resolution.kbtest.ResolutionBuilder.statementToProperties;
 import static org.junit.Assert.assertEquals;
 
 public class TestResolutionBuilder {
@@ -38,9 +37,9 @@ public class TestResolutionBuilder {
     public void testStatementToPropertiesForVariableAttributeOwnership() {
         Statement statement = getOnlyElement(Graql.parsePattern("$transaction has currency $currency;").statements());
 
-        Statement expectedPropsStatement = getOnlyElement(Graql.parsePattern("$a0 (owner: $transaction) isa has-attribute-property, has currency $currency;").statements());
+        Statement expectedPropsStatement = getOnlyElement(Graql.parsePattern("$x0 (owner: $transaction) isa has-attribute-property, has currency $currency;").statements());
 
-        Statement propsStatement = getOnlyElement(statementToProperties(statement, 'a').values());
+        Statement propsStatement = getOnlyElement(new ResolutionBuilder().statementToProperties(statement).values());
 
         assertEquals(expectedPropsStatement, propsStatement);
     }
@@ -49,9 +48,9 @@ public class TestResolutionBuilder {
     public void testStatementToPropertiesForAttributeOwnership() {
         Statement statement = getOnlyElement(Graql.parsePattern("$transaction has currency \"GBP\";").statements());
 
-        Statement expectedPropsStatement = getOnlyElement(Graql.parsePattern("$a0 (owner: $transaction) isa has-attribute-property, has currency \"GBP\";").statements());
+        Statement expectedPropsStatement = getOnlyElement(Graql.parsePattern("$x0 (owner: $transaction) isa has-attribute-property, has currency \"GBP\";").statements());
 
-        Statement propsStatement = getOnlyElement(statementToProperties(statement, 'a').values());
+        Statement propsStatement = getOnlyElement(new ResolutionBuilder().statementToProperties(statement).values());
 
         assertEquals(expectedPropsStatement, propsStatement);
     }
@@ -61,11 +60,11 @@ public class TestResolutionBuilder {
         Statement statement = getOnlyElement(Graql.parsePattern("$locates (locates_located: $transaction, locates_location: $country);").statements());
 
         Set<Statement> expectedPropsStatements = getStatements(Graql.parsePatternList("" +
-                "$a0 (rel: $locates, roleplayer: $transaction) isa relation-property, has role-label \"locates_located\";" +
-                "$a1 (rel: $locates, roleplayer: $country) isa relation-property, has role-label \"locates_location\";"
+                "$x0 (rel: $locates, roleplayer: $transaction) isa relation-property, has role-label \"locates_located\";" +
+                "$x1 (rel: $locates, roleplayer: $country) isa relation-property, has role-label \"locates_location\";"
         ));
 
-        Set<Statement> propsStatements = new HashSet<>(statementToProperties(statement, 'a').values());
+        Set<Statement> propsStatements = new HashSet<>(new ResolutionBuilder().statementToProperties(statement).values());
 
         assertEquals(expectedPropsStatements, propsStatements);
     }
@@ -73,8 +72,8 @@ public class TestResolutionBuilder {
     @Test
     public void testStatementToPropertiesForIsa() {
         Statement statement = getOnlyElement(Graql.parsePattern("$transaction isa transaction;").statements());
-        Statement propStatement = getOnlyElement(statementToProperties(statement, 'a').values());
-        Statement expectedPropStatement = getOnlyElement(Graql.parsePattern("$a0 (instance: $transaction) isa isa-property, has type-label \"transaction\";").statements());
+        Statement propStatement = getOnlyElement(new ResolutionBuilder().statementToProperties(statement).values());
+        Statement expectedPropStatement = getOnlyElement(Graql.parsePattern("$x0 (instance: $transaction) isa isa-property, has type-label \"transaction\";").statements());
         assertEquals(expectedPropStatement, propStatement);
     }
 
@@ -93,25 +92,25 @@ public class TestResolutionBuilder {
         ));
 
         Set<Statement> expectedStatements = getStatements(Graql.parsePatternList("" +
-                "$a0 (instance: $country) isa isa-property, has type-label \"country\";" +
-                "$b0 (instance: $transaction) isa isa-property, has type-label \"transaction\";" + //TODO When inserted, the supertype labels should be owned too
+                "$x0 (instance: $country) isa isa-property, has type-label \"country\";" +
+                "$x1 (instance: $transaction) isa isa-property, has type-label \"transaction\";" + //TODO When inserted, the supertype labels should be owned too
                 // TODO Should we also have an isa-property for $currency?
-                "$c0 (owner: $country) isa has-attribute-property, has currency $currency;" +
+                "$x2 (owner: $country) isa has-attribute-property, has currency $currency;" +
 
-                "$d0 (rel: $locates, roleplayer: $transaction) isa relation-property, has role-label \"locates_located\";" + //TODO When inserted, the role supertype labels should be owned too
-                "$d1 (rel: $locates, roleplayer: $country) isa relation-property, has role-label \"locates_location\";" +
-                "$d2 (instance: $locates) isa isa-property, has type-label \"locates\";" +
+                "$x3 (rel: $locates, roleplayer: $transaction) isa relation-property, has role-label \"locates_located\";" + //TODO When inserted, the role supertype labels should be owned too
+                "$x4 (rel: $locates, roleplayer: $country) isa relation-property, has role-label \"locates_location\";" +
+                "$x5 (instance: $locates) isa isa-property, has type-label \"locates\";" +
 
-                "$e0 (owner: $transaction) isa has-attribute-property, has currency $currency;" +
+                "$x6 (owner: $transaction) isa has-attribute-property, has currency $currency;" +
 
                 "$_ (\n" +
-                "    body: $a0,\n" +
-                "    body: $b0,\n" +
-                "    body: $c0,\n" +
-                "    body: $d0,\n" +
-                "    body: $d1,\n" +
-                "    body: $d2,\n" +
-                "    head: $e0\n" +
+                "    body: $x0,\n" +
+                "    body: $x1,\n" +
+                "    body: $x2,\n" +
+                "    body: $x3,\n" +
+                "    body: $x4,\n" +
+                "    body: $x5,\n" +
+                "    head: $x6\n" +
                 ") isa inference, \n" +
                 "has rule-label \"transaction-currency-is-that-of-the-country\";"));  //TODO can be split into conjunction
 

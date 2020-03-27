@@ -4,7 +4,6 @@ import grakn.client.GraknClient.Transaction;
 import grakn.client.answer.ConceptMap;
 import grakn.client.answer.Explanation;
 import grakn.client.concept.Concept;
-import grakn.verification.resolution.common.StatementContainer;
 import graql.lang.Graql;
 import graql.lang.pattern.Pattern;
 import graql.lang.property.HasAttributeProperty;
@@ -20,9 +19,6 @@ import graql.lang.statement.Variable;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -35,7 +31,7 @@ import static com.google.common.collect.Iterables.getOnlyElement;
 
 public class ResolutionBuilder {
 
-    private int alphabetIndex = 0;
+    private int nextVarIndex = 0;
 
     public List<GraqlGet> build(Transaction tx, GraqlGet query) {
             List<ConceptMap> answers = tx.execute(query);
@@ -77,10 +73,6 @@ public class ResolutionBuilder {
         return answerStatements;
     }
 
-    private int getNextVar(){
-        return 0;
-    }
-
     public Set<Statement> inferenceStatements(Set<Statement> whenStatements, Set<Statement> thenStatements, String ruleLabel) {
 
         String inferenceType = "inference";
@@ -88,13 +80,10 @@ public class ResolutionBuilder {
 
         Statement relation = Graql.var().isa(inferenceType).has(inferenceRuleLabelType, ruleLabel);
 
-        char[] alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
-
         LinkedHashMap<String, Statement> whenProps = new LinkedHashMap<>();
 
         for (Statement whenStatement : whenStatements) {
-            whenProps.putAll(statementToProperties(whenStatement, alphabet[alphabetIndex]));
-            alphabetIndex ++;
+            whenProps.putAll(statementToProperties(whenStatement));
         }
 
         for (String whenVar : whenProps.keySet()) {
@@ -106,8 +95,7 @@ public class ResolutionBuilder {
         LinkedHashMap<String, Statement> thenProps = new LinkedHashMap<>();
 
         for (Statement thenStatement : thenStatements) {
-            thenProps.putAll(statementToProperties(thenStatement, alphabet[alphabetIndex]));
-            alphabetIndex ++;
+            thenProps.putAll(statementToProperties(thenStatement));
         }
 
         for (String thenVar : thenProps.keySet()) {
@@ -121,31 +109,41 @@ public class ResolutionBuilder {
         return result;
     }
 
-    public static StatementContainer statementToProperties(Statement statement, char varBase) {
-        StatementContainer props = new StatementContainer(varBase);
+    private String getNextVar(){
+        String nextVar = "x" + nextVarIndex;
+        nextVarIndex ++;
+        return nextVar;
+    }
+
+    public LinkedHashMap<String, Statement> statementToProperties(Statement statement) {
+        LinkedHashMap<String, Statement> props = new LinkedHashMap<>();
 
         String statementVar = statement.var().name();
 
         for (VarProperty varProp : statement.properties()) {
 
             if (varProp instanceof HasAttributeProperty) {
-                StatementInstance propStatement = Graql.var(props.getNextVar()).isa("has-attribute-property").has((HasAttributeProperty) varProp).rel("owner", statementVar);
-                props.put(propStatement);
+                String nextVar = getNextVar();
+                StatementInstance propStatement = Graql.var(nextVar).isa("has-attribute-property").has((HasAttributeProperty) varProp).rel("owner", statementVar);
+                props.put(nextVar, propStatement);
 
             } else if (varProp instanceof RelationProperty){
                 for (RelationProperty.RolePlayer rolePlayer : ((RelationProperty)varProp).relationPlayers()) {
                     Optional<Statement> role = rolePlayer.getRole();
 
-                    StatementInstance propStatement = Graql.var(props.getNextVar()).isa("relation-property").rel("rel", statementVar).rel("roleplayer", Graql.var(rolePlayer.getPlayer().var()));
+                    String nextVar = getNextVar();
+
+                    StatementInstance propStatement = Graql.var(nextVar).isa("relation-property").rel("rel", statementVar).rel("roleplayer", Graql.var(rolePlayer.getPlayer().var()));
                     if(role.isPresent()) {
                         String roleLabel = ((TypeProperty) getOnlyElement(role.get().properties())).name();
                         propStatement = propStatement.has("role-label", roleLabel);
                     }
-                    props.put(propStatement);
+                    props.put(nextVar, propStatement);
                 }
             } else if (varProp instanceof IsaProperty){
-                StatementInstance propStatement = Graql.var(props.getNextVar()).isa("isa-property").rel("instance", statementVar).has("type-label", varProp.property());
-                props.put(propStatement);
+                String nextVar = getNextVar();
+                StatementInstance propStatement = Graql.var(nextVar).isa("isa-property").rel("instance", statementVar).has("type-label", varProp.property());
+                props.put(nextVar, propStatement);
             }
         }
         return props;
@@ -157,7 +155,7 @@ public class ResolutionBuilder {
      * @return set of statements without any referring to ConceptIds
      */
     public static Set<Statement> removeIdStatements(Set<Statement> statements) {
-        HashSet<Statement> withoutIds = new HashSet<>();
+        LinkedHashSet<Statement> withoutIds = new LinkedHashSet<>();
 
         for (Statement statement : statements) {
 //            statement.properties().forEach(varProperty -> varProperty.uniquelyIdentifiesConcept());
@@ -176,7 +174,7 @@ public class ResolutionBuilder {
      * @return Statements that check for the keys of the given concepts
      */
     public static Set<Statement> generateKeyStatements(Map<Variable, Concept> varMap) {
-        HashSet<Statement> statements = new HashSet<>();
+        LinkedHashSet<Statement> statements = new LinkedHashSet<>();
 
         for (Map.Entry<Variable, Concept> entry : varMap.entrySet()) {
             Variable var = entry.getKey();

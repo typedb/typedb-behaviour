@@ -6,7 +6,6 @@ java_library(
     ),
     visibility = ["//visibility:public"],
     deps = [
-        "//resolution/common",
         "//dependencies/maven/artifacts/com/google/guava",
         "@graknlabs_client_java//:client-java",
         "@graknlabs_graql//java:graql",
