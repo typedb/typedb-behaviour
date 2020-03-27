@@ -1,11 +1,9 @@
 package grakn.verification.resolution.complete;
 
 import grakn.client.GraknClient;
-import grakn.client.answer.ConceptMap;
 import grakn.client.concept.AttributeType;
 import grakn.client.concept.RelationType;
 import grakn.client.concept.Role;
-import grakn.client.concept.Type;
 import graql.lang.Graql;
 import graql.lang.query.GraqlGet;
 
@@ -13,16 +11,43 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
-import java.util.List;
 
 import static grakn.verification.resolution.common.Utils.loadGqlFile;
 
 public class SchemaManager {
-    private static final Path SCHEMA_PATH = Paths.get("resolution", "complete", "completion_schema.gql").toAbsolutePath();;
+    private static final Path SCHEMA_PATH = Paths.get("resolution", "complete", "completion_schema.gql").toAbsolutePath();
+    ;
+
+    private static HashSet<String> EXCLUDED_ENTITY_TYPES = new HashSet<String>() {
+        {
+            add("entity");
+        }
+    };
+
+    private static HashSet<String> EXCLUDED_RELATION_TYPES = new HashSet<String>() {
+        {
+            add("relation");
+            add("var-property");
+            add("isa-property");
+            add("has-attribute-property");
+            add("relation-property");
+            add("resolution");
+        }
+    };
+
+    private static HashSet<String> EXCLUDED_ATTRIBUTE_TYPES = new HashSet<String>() {
+        {
+            add("attribute");
+            add("label");
+            add("rule-label");
+            add("type-label");
+            add("role-label");
+        }
+    };
 
 //  TODO manage rules - reading and deleting before forward-chaining
 
-    public static void addResolutionSchema(GraknClient.Session session){
+    public static void addResolutionSchema(GraknClient.Session session) {
         try {
             loadGqlFile(session, SCHEMA_PATH);
         } catch (IOException e) {
@@ -31,76 +56,48 @@ public class SchemaManager {
         }
     }
 
-    public static void defineThatAllThingsCanBePartOfAClause(GraknClient.Transaction tx){
-        HashSet<String> excludedEntityTypes = new HashSet<String>() {
-            {
-                add("entity");
-                add("rule-application");
-            }
-        };
-        HashSet<String> excludedRelationTypes = new HashSet<String>() {
-            {
-                add("relation");
-                add("clause-containment");
-                add("then-clause-containment");
-                add("when-clause-containment");
-            }
-        };
-        HashSet<String> excludedAttributeTypes = new HashSet<String>() {
-            {
-                add("attribute");
-                add("rule-label");
-            }
-        };
-
-        GraqlGet roleQuery = Graql.match(Graql.var("x").sub("clause-element")).get();
-        Role role = tx.execute(roleQuery).get(0).get("x").asRole();
-
-        // Entities
-        GraqlGet entityTypesQuery = Graql.match(Graql.var("x").sub("entity")).get();
-
-        defineThatTypesPlayRoleFromQuery(tx, role, entityTypesQuery, excludedEntityTypes);
-
-        // Relations
-        GraqlGet relationTypesQuery = Graql.match(
-                Graql.var("x").sub("relation"),
-                Graql.not(Graql.var("x").sub("@has-attribute")),
-                Graql.not(Graql.var("x").sub("@key-attribute"))
-        ).get();
-
-        defineThatTypesPlayRoleFromQuery(tx, role, relationTypesQuery, excludedRelationTypes);
-
-        // Attributes
-        GraqlGet attributeTypesQuery = Graql.match(Graql.var("x").sub("attribute")).get();
-
-        defineThatAllAttributesCanBePartOfAClause(tx, attributeTypesQuery, excludedAttributeTypes);
+    private static Role getRole(GraknClient.Transaction tx, String roleLabel) {
+        GraqlGet roleQuery = Graql.match(Graql.var("x").sub(roleLabel)).get();
+        return tx.execute(roleQuery).get(0).get("x").asRole();
     }
 
-    private static void defineThatTypesPlayRoleFromQuery(GraknClient.Transaction tx, Role role, GraqlGet typesQuery, HashSet<String> excludedTypes) {
-        List<ConceptMap> typeAnswers = tx.execute(typesQuery);
+    public static void connectResolutionSchema(GraknClient.Session session) {
+        try (GraknClient.Transaction tx = session.transaction().write()) {
+            Role instanceRole = getRole(tx, "instance");
+            Role ownerRole = getRole(tx, "owner");
+            Role roleplayerRole = getRole(tx, "roleplayer");
+            Role relRole = getRole(tx, "rel");
 
-        for (ConceptMap typeAnswer: typeAnswers) {
+            RelationType attrPropRel = tx.execute(Graql.match(Graql.var("x").sub("has-attribute-property")).get()).get(0).get("x").asRelationType();
 
-            Type type = typeAnswer.get("x").asType();
 
-            if (!excludedTypes.contains(type.label().toString())) {
-                type.plays(role);
-            }
-        }
-    }
+            GraqlGet typesToConnectQuery = Graql.match(
+                    Graql.var("x").sub("thing"),
+                    Graql.not(Graql.var("x").sub("@has-attribute")),
+                    Graql.not(Graql.var("x").sub("@key-attribute"))
+            ).get();
+            tx.stream(typesToConnectQuery).map(ans -> ans.get("x").asType()).forEach(type -> {
+                if (type.isAttributeType()) {
+                    if (!EXCLUDED_ATTRIBUTE_TYPES.contains(type.label().toString())) {
+                        attrPropRel.has((AttributeType) type);
+                    }
+                } else if (type.isEntityType()) {
+                    if (!EXCLUDED_ENTITY_TYPES.contains(type.label().toString())) {
+                        type.plays(instanceRole);
+                        type.plays(ownerRole);
+                        type.plays(roleplayerRole);
+                    }
 
-    private static void defineThatAllAttributesCanBePartOfAClause(GraknClient.Transaction tx, GraqlGet typesQuery, HashSet<String> excludedTypes){
-        List<ConceptMap> typeAnswers = tx.execute(typesQuery);
-
-        RelationType rel = tx.execute(Graql.match(Graql.var("x").sub("clause-containment")).get()).get(0).get("x").asRelationType();
-
-        for (ConceptMap typeAnswer: typeAnswers) {
-
-            AttributeType type = typeAnswer.get("x").asAttributeType();
-
-            if (!excludedTypes.contains(type.label().toString())) {
-                rel.has(type);
-            }
+                } else if (type.isRelationType()) {
+                    if (!EXCLUDED_RELATION_TYPES.contains(type.label().toString())) {
+                        type.plays(instanceRole);
+                        type.plays(ownerRole);
+                        type.plays(roleplayerRole);
+                        type.plays(relRole);
+                    }
+                }
+            });
+            tx.commit();
         }
     }
 }

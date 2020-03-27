@@ -75,7 +75,7 @@ public class QueryBuilder {
 
     public Set<Statement> inferenceStatements(Set<Statement> whenStatements, Set<Statement> thenStatements, String ruleLabel) {
 
-        String inferenceType = "inference";
+        String inferenceType = "resolution";
         String inferenceRuleLabelType = "rule-label";
 
         Statement relation = Graql.var().isa(inferenceType).has(inferenceRuleLabelType, ruleLabel);

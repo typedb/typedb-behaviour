@@ -46,6 +46,10 @@ public class Resolution {
 
         initialiseKeyspace(testSession);
         initialiseKeyspace(completeSession);
+
+        // TODO Check that nothing in the given schema conflicts with the resolution schema
+        // TODO Also check that all of the data in the initial data given has keys/ is uniquely identifiable
+
         // Complete the KB-complete
 //        Completer.complete(completeSession); // Should read the rules, undefine them, add the completion schema
     }

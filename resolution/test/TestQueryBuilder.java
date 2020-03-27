@@ -111,7 +111,7 @@ public class TestQueryBuilder {
                 "    body: $x4,\n" +
                 "    body: $x5,\n" +
                 "    head: $x6\n" +
-                ") isa inference, \n" +
+                ") isa resolution, \n" +
                 "has rule-label \"transaction-currency-is-that-of-the-country\";"));  //TODO can be split into conjunction
 
         Set<Statement> appliedRuleStatements;

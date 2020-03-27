@@ -30,7 +30,7 @@ relation-property sub var-property,
 
 rule-label sub label;
 
-inference sub relation,
+resolution sub relation,
     relates body,
     relates head,
     has rule-label;

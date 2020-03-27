@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 import static grakn.verification.resolution.common.Utils.loadGqlFile;
 import static grakn.verification.resolution.complete.SchemaManager.addResolutionSchema;
-import static grakn.verification.resolution.complete.SchemaManager.defineThatAllThingsCanBePartOfAClause;
+import static grakn.verification.resolution.complete.SchemaManager.connectResolutionSchema;
 import static org.junit.Assert.assertEquals;
 
 public class TestSchemaManager {
@@ -47,11 +47,7 @@ public class TestSchemaManager {
         try (GraknClient.Session session = graknClient.session(GRAKN_KEYSPACE)) {
             try {
                 Path schemaPath = Paths.get("resolution", "test", "cases", "case2", "schema.gql").toAbsolutePath();
-                Path dataPath = Paths.get("resolution", "test", "cases", "case2", "data.gql").toAbsolutePath();
-                // Load a schema incl. rules
                 loadGqlFile(session, schemaPath);
-                // Load data
-                loadGqlFile(session, dataPath);
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(1);
@@ -68,12 +64,17 @@ public class TestSchemaManager {
     public void testResolutionSchemaRolesPlayedAreCorrect() {
 
         try (GraknClient.Session session = graknClient.session(GRAKN_KEYSPACE)) {
+
+            addResolutionSchema(session);
+            connectResolutionSchema(session);
+
             try (GraknClient.Transaction tx = session.transaction().write()) {
 
-                addResolutionSchema(session);
-                defineThatAllThingsCanBePartOfAClause(tx);
-
-                GraqlGet roleplayersQuery = Graql.match(Graql.var("x").plays("clause-element")).get();
+                GraqlGet roleplayersQuery = Graql.match(
+                        Graql.var("x").plays("instance"),
+                        Graql.var("x").plays("owner"),
+                        Graql.var("x").plays("roleplayer")
+                ).get();
 
                 Set<String> roleplayers = tx.stream(roleplayersQuery).map(r -> r.get("x").asType().label().toString()).collect(Collectors.toSet());
 
@@ -95,15 +96,44 @@ public class TestSchemaManager {
     }
 
     @Test
+    public void testResolutionSchemaRelationRolePlayedIsCorrect() {
+
+        try (GraknClient.Session session = graknClient.session(GRAKN_KEYSPACE)) {
+
+            addResolutionSchema(session);
+            connectResolutionSchema(session);
+
+            try (GraknClient.Transaction tx = session.transaction().write()) {
+
+                GraqlGet roleplayersQuery = Graql.match(
+                        Graql.var("x").plays("rel")
+                ).get();
+
+                Set<String> roleplayers = tx.stream(roleplayersQuery).map(r -> r.get("x").asType().label().toString()).collect(Collectors.toSet());
+
+                HashSet<String> expectedRoleplayers = new HashSet<String>() {
+                    {
+                        add("locates");
+                        add("location-hierarchy");
+                    }
+                };
+                assertEquals(expectedRoleplayers, roleplayers);
+            }
+        }
+
+    }
+
+    @Test
     public void testResolutionSchemaAttributesOwnedAreCorrect() {
 
         try (GraknClient.Session session = graknClient.session(GRAKN_KEYSPACE)) {
+
+            addResolutionSchema(session);
+            connectResolutionSchema(session);
+
             try (GraknClient.Transaction tx = session.transaction().write()) {
 
-                addResolutionSchema(session);
-                defineThatAllThingsCanBePartOfAClause(tx);
-
-                GraqlGet clauseAttributesQuery = Graql.match(Graql.var("x").sub("clause-containment")).get();
+                GraqlGet clauseAttributesQuery = Graql.match(Graql.var("x").sub("has-attribute-property")).get();
 
                 Set<String> attributeTypes = tx.execute(clauseAttributesQuery).get(0).get("x").asRelationType().attributes().map(a -> a.label().toString()).collect(Collectors.toSet());
 

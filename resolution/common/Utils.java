@@ -17,8 +17,8 @@ import java.util.Set;
 
 public class Utils {
 
-    public static void loadGqlFile(GraknClient.Session session, Path... schemaPath) throws IOException {
-        for (Path path : schemaPath) {
+    public static void loadGqlFile(GraknClient.Session session, Path... gqlPath) throws IOException {
+        for (Path path : gqlPath) {
             String query = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
 
             try (GraknClient.Transaction tx = session.transaction().write()) {

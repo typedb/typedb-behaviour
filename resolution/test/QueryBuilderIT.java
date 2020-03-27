@@ -76,7 +76,7 @@ public class QueryBuilderIT {
                 "$1585311102487159 \"the-company\";\n" +
                 "$x0 (owner: $c) isa has-attribute-property, has name $1585311102487185;\n" +
                 "$x1 (owner: $c) isa has-attribute-property, has is-liable $l;\n" +
-                "$_ (body: $x0, head: $x1) isa inference, has rule-label \"company-is-liable\";\n"
+                "$_ (body: $x0, head: $x1) isa resolution, has rule-label \"company-is-liable\";\n"
         ));
 
         GraqlGet inferenceQuery = Graql.parse("match $c has is-liable $l; get;");
