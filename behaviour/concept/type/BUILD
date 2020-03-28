@@ -18,7 +18,7 @@
 package(default_visibility = ["//visibility:public"])
 
 exports_files([
-    "attribute-type.feature",
-    "entity-type.feature",
-    "relation-type.feature"
+    "attributetype.feature",
+    "entitytype.feature",
+    "relationtype.feature"
 ])
