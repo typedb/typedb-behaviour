@@ -28,13 +28,13 @@ Feature: Concept Entity Type
   Scenario: put entity
     When put entity type: person
     Then entity(person) is null: false
-    Then entity(person) has super type: entity
+    Then entity(person) get supertype: entity
 
   Scenario: put entity subtyping another entity
     When put entity type: man
     When put entity type: person
-    When entity(man) subtypes: person
+    When entity(man) set supertype: person
     Then entity(man) is null: false
     Then entity(person) is null: false
-    Then entity(man) has super type: person
-    Then entity(person) has super type: entity
+    Then entity(man) get supertype: person
+    Then entity(person) get supertype: entity
