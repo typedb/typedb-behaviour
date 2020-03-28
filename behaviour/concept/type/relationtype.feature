@@ -15,4 +15,12 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-Feature: Concept Entity Type
+Feature: Concept Relation Type
+
+  Background:
+    Given connection has been opened
+    Given connection delete all keyspaces
+    Given connection does not have any keyspace
+    Given connection create keyspace: grakn
+    Given connection open session for keyspace: grakn
+    Given session open transaction of type: write
