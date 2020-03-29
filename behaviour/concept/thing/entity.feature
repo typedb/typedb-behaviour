@@ -16,10 +16,3 @@
 #
 
 Feature: Concept Entity
-
-  Scenario:
-    Given define:
-      | person sub entity;  |
-      | name sub attribute; |
-    When person has name
-    Then insert
