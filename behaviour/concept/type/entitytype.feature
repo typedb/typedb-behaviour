@@ -34,7 +34,7 @@ Feature: Concept Entity Type
     Then entity(person) is null: false
     Then entity(person) get supertype: entity
 
-  Scenario: put entity subtyping another entity
+  Scenario: entity subtyping another entity
     When put entity type: man
     When put entity type: person
     When entity(man) set supertype: person
@@ -48,3 +48,52 @@ Feature: Concept Entity Type
     Then entity(person) is null: false
     Then entity(man) get supertype: person
     Then entity(person) get supertype: entity
+
+  Scenario: entities creating a subtype hierarchy
+    When put entity type: man
+    When put entity type: woman
+    When put entity type: person
+    When put entity type: cat
+    When put entity type: animal
+    When entity(man) set supertype: person
+    When entity(woman) set supertype: person
+    When entity(person) set supertype: animal
+    When entity(cat) set supertype: animal
+    Then entity(man) get supertype: person
+    Then entity(woman) get supertype: person
+    Then entity(person) get supertype: animal
+    Then entity(cat) get supertype: animal
+    Then entity(man) get supertypes contain:
+      | man     |
+      | person  |
+      | animal  |
+    Then entity(woman) get supertypes contain:
+      | woman   |
+      | person  |
+      | animal  |
+    Then entity(person) get supertypes contain:
+      | person  |
+      | animal  |
+    Then entity(cat) get supertypes contain:
+      | cat     |
+      | animal  |
+    When transaction commits
+    When session opens transaction of type: read
+    Then entity(man) get supertype: person
+    Then entity(woman) get supertype: person
+    Then entity(person) get supertype: animal
+    Then entity(cat) get supertype: animal
+    Then entity(man) get supertypes contain:
+      | man     |
+      | person  |
+      | animal  |
+    Then entity(woman) get supertypes contain:
+      | woman   |
+      | person  |
+      | animal  |
+    Then entity(person) get supertypes contain:
+      | person  |
+      | animal  |
+    Then entity(cat) get supertypes contain:
+      | cat     |
+      | animal  |
