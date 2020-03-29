@@ -23,10 +23,14 @@ Feature: Concept Entity Type
     Given connection does not have any keyspace
     Given connection create keyspace: grakn
     Given connection open session for keyspace: grakn
-    Given session open transaction of type: write
+    Given session opens transaction of type: write
 
   Scenario: put entity
     When put entity type: person
+    Then entity(person) is null: false
+    Then entity(person) get supertype: entity
+    When transaction commits
+    When session opens transaction of type: read
     Then entity(person) is null: false
     Then entity(person) get supertype: entity
 
@@ -34,6 +38,12 @@ Feature: Concept Entity Type
     When put entity type: man
     When put entity type: person
     When entity(man) set supertype: person
+    Then entity(man) is null: false
+    Then entity(person) is null: false
+    Then entity(man) get supertype: person
+    Then entity(person) get supertype: entity
+    When transaction commits
+    When session opens transaction of type: read
     Then entity(man) is null: false
     Then entity(person) is null: false
     Then entity(man) get supertype: person
