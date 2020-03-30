@@ -2,7 +2,10 @@ package grakn.verification.resolution.test;
 
 import grakn.client.GraknClient;
 import grakn.client.answer.ConceptMap;
+import grakn.verification.resolution.complete.Completer;
+import grakn.verification.resolution.complete.SchemaManager;
 import graql.lang.Graql;
+import graql.lang.query.GraqlGet;
 import graql.lang.statement.Statement;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -25,7 +28,7 @@ public class TestCompleter {
 
     static Set<Statement> expectedResolutionStatements = getStatements(Graql.parsePatternList(
 //                    From the initial answer:
-                    "$transaction has currency $currency;\n" +
+            "$transaction has currency $currency;\n" +
                     "$transaction has transaction-id 0;\n" +
                     "$currency \"GBP\";\n" +
                     "$transaction isa transaction;\n" +
@@ -79,8 +82,9 @@ public class TestCompleter {
                     "has rule-label \"locates-is-transitive\";\n"
     ));
 
+    private static final String TEST_CASE = "case1";
     private static final String GRAKN_URI = "localhost:48555";
-    private static final String GRAKN_KEYSPACE = "case2";
+    private static final String GRAKN_KEYSPACE = TEST_CASE;
     private static GraknForTest graknForTest;
     private static GraknClient graknClient;
 
@@ -101,8 +105,8 @@ public class TestCompleter {
     public void before() {
         try (GraknClient.Session session = graknClient.session(GRAKN_KEYSPACE)) {
             try {
-                Path schemaPath = Paths.get("resolution", "test", "cases", "case2", "schema.gql").toAbsolutePath();
-                Path dataPath = Paths.get("resolution", "test", "cases", "case2", "data.gql").toAbsolutePath();
+                Path schemaPath = Paths.get("resolution", "test", "cases", TEST_CASE, "schema.gql").toAbsolutePath();
+                Path dataPath = Paths.get("resolution", "test", "cases", TEST_CASE, "data.gql").toAbsolutePath();
                 // Load a schema incl. rules
                 loadGqlFile(session, schemaPath);
                 // Load data
@@ -119,15 +123,41 @@ public class TestCompleter {
         graknClient.keyspaces().delete(GRAKN_KEYSPACE);
     }
 
-    @Test
-    public void testValidResolutionHasExactlyOneAnswer() {
+//    @Test
+//    public void testValidResolutionHasExactlyOneAnswer() {
+//
+//        try (GraknClient.Session session = graknClient.session(GRAKN_KEYSPACE)) {
+//
+//            try (GraknClient.Transaction tx = session.transaction().read()) {
+//                List<ConceptMap> answers = tx.execute(Graql.match(expectedResolutionStatements).get());
+//
+//                assertEquals(answers.size(), 1);
+//            }
+//        }
+//    }
 
+    @Test
+    public void testCompletionInferredTheCorrectNumberOfConcepts() {
         try (GraknClient.Session session = graknClient.session(GRAKN_KEYSPACE)) {
+            Completer completer = new Completer(session);
+            try (GraknClient.Transaction tx = session.transaction().write()) {
+                completer.loadRules(SchemaManager.getAllRules(tx));
+            }
+
+            SchemaManager.undefineAllRules(session);
+            SchemaManager.addResolutionSchema(session);
+            SchemaManager.connectResolutionSchema(session);
+            completer.complete();
 
             try (GraknClient.Transaction tx = session.transaction().read()) {
-                List<ConceptMap> answers = tx.execute(Graql.match(expectedResolutionStatements).get());
 
-                assertEquals(answers.size(), 1);
+                GraqlGet inferredAnswersQuery = Graql.match(Graql.var("lh").isa("location-hierarchy")).get();
+                List<ConceptMap> inferredAnswers = tx.execute(inferredAnswersQuery);
+                assertEquals(6, inferredAnswers.size());
+
+                GraqlGet resolutionsQuery = Graql.match(Graql.var("res").isa("resolution")).get();
+                List<ConceptMap> resolutionAnswers = tx.execute(resolutionsQuery);
+                assertEquals(4, resolutionAnswers.size());
             }
         }
     }

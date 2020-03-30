@@ -4,6 +4,8 @@ import grakn.client.GraknClient;
 import grakn.client.GraknClient.Session;
 import grakn.client.GraknClient.Transaction;
 import grakn.client.answer.ConceptMap;
+import grakn.verification.resolution.complete.Completer;
+import grakn.verification.resolution.complete.SchemaManager;
 import grakn.verification.resolution.resolve.QueryBuilder;
 import graql.lang.Graql;
 import graql.lang.query.GraqlGet;
@@ -50,8 +52,20 @@ public class Resolution {
         // TODO Check that nothing in the given schema conflicts with the resolution schema
         // TODO Also check that all of the data in the initial data given has keys/ is uniquely identifiable
 
-        // Complete the KB-complete
+//        // Complete the KB-complete
 //        Completer.complete(completeSession); // Should read the rules, undefine them, add the completion schema
+//
+//        SchemaManager completeSchemaManager = new SchemaManager(completeSession);
+//
+//        Completer completer = new Completer(completeSession);
+//
+//        SchemaManager.addResolutionSchema(completeSession);
+//        try (Transaction tx = completeSession.transaction().read()) {
+//            completer.loadRules(SchemaManager.getRules(tx));
+//        }
+//        SchemaManager.deleteRules(completeSession);
+//
+//        completer.complete();
     }
 
     private void close() {

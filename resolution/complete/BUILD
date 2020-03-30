@@ -9,6 +9,7 @@ java_library(
     visibility = ["//visibility:public"],
     deps = [
         "//resolution/common:common",
+        "//resolution/resolve:resolve",
         "@graknlabs_client_java//:client-java",
         "@graknlabs_graql//java:graql",
     ],

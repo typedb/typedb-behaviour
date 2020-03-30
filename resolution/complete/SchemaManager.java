@@ -1,5 +1,6 @@
 package grakn.verification.resolution.complete;
 
+import grakn.client.GraknClient;
 import grakn.client.GraknClient.Session;
 import grakn.client.GraknClient.Transaction;
 import grakn.client.concept.AttributeType;
@@ -48,10 +49,13 @@ public class SchemaManager {
         }
     };
 
-    public static void undefineAllRules(Transaction tx) {
-        Set<String> ruleLabels = getAllRules(tx).stream().map(rule -> rule.label().toString()).collect(Collectors.toSet());
-        for (String ruleLabel : ruleLabels) {
-            tx.execute(Graql.undefine(Graql.type(ruleLabel).sub("rule")));
+    public static void undefineAllRules(Session session) {
+        try (GraknClient.Transaction tx = session.transaction().write()) {
+            Set<String> ruleLabels = getAllRules(tx).stream().map(rule -> rule.label().toString()).collect(Collectors.toSet());
+            for (String ruleLabel : ruleLabels) {
+                tx.execute(Graql.undefine(Graql.type(ruleLabel).sub("rule")));
+            }
+            tx.commit();
         }
     }
 

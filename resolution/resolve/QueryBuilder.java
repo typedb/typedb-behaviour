@@ -5,6 +5,7 @@ import grakn.client.answer.ConceptMap;
 import grakn.client.answer.Explanation;
 import grakn.client.concept.Concept;
 import graql.lang.Graql;
+import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Pattern;
 import graql.lang.property.HasAttributeProperty;
 import graql.lang.property.IsaProperty;
@@ -26,6 +27,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
 
@@ -147,6 +149,19 @@ public class QueryBuilder {
             }
         }
         return props;
+    }
+
+    public static Pattern makeAnonVarsExplicit(Pattern pattern) {
+        return new Conjunction<>(pattern.statements().stream().map(QueryBuilder::makeAnonVarExplicit).collect(Collectors.toSet()));
+    }
+
+    private static Statement makeAnonVarExplicit(Statement statement) {
+
+        if (statement.var().isReturned()) {
+            return statement;
+        } else {
+            return Statement.create(statement.var().asReturnedVar(), statement.properties());
+        }
     }
 
     /**

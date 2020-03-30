@@ -24,8 +24,8 @@ location-hierarchy sub relation,
 
 location-hierarchy-transitivity sub rule,
 when {
-    $lh1(location-hierarchy_superior: $a, location-hierarchy_subordinate: $b) isa location-hierarchy;
-    $lh2(location-hierarchy_superior: $b, location-hierarchy_subordinate: $c) isa location-hierarchy;
+    (location-hierarchy_superior: $a, location-hierarchy_subordinate: $b) isa location-hierarchy;
+    (location-hierarchy_superior: $b, location-hierarchy_subordinate: $c) isa location-hierarchy;
 }, then {
     (location-hierarchy_superior: $a, location-hierarchy_subordinate: $c) isa location-hierarchy;
 };
