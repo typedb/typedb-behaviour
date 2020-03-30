@@ -1,6 +1,8 @@
 package grakn.verification.resolution.test;
 
 import grakn.client.GraknClient;
+import grakn.client.concept.Rule;
+import grakn.verification.resolution.complete.SchemaManager;
 import graql.lang.Graql;
 import graql.lang.query.GraqlGet;
 import org.junit.After;
@@ -13,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
@@ -151,6 +154,38 @@ public class TestSchemaManager {
                 assertEquals(expectedAttributeTypes, attributeTypes);
             }
         }
+    }
 
+    @Test
+    public void testGetAllRulesReturnsExpectedRules() {
+        try (GraknClient.Session session = graknClient.session(GRAKN_KEYSPACE)) {
+            try (GraknClient.Transaction tx = session.transaction().write()) {
+                Set<Rule> rules = SchemaManager.getAllRules(tx);
+                assertEquals(2, rules.size());
+
+                HashSet<String> expectedRuleLabels = new HashSet<String>(){
+                    {
+                        add("transaction-currency-is-that-of-the-country");
+                        add("locates-is-transitive");
+                    }
+                };
+                assertEquals(expectedRuleLabels, rules.stream().map(rule -> rule.label().toString()).collect(Collectors.toSet()));
+            }
+        }
+    }
+
+    @Test
+    public void testUndefineAllRulesSuccessfullyUndefinesAllRules() {
+        try (GraknClient.Session session = graknClient.session(GRAKN_KEYSPACE)) {
+            try (GraknClient.Transaction tx = session.transaction().write()) {
+                SchemaManager.undefineAllRules(tx);
+                tx.commit();
+            }
+            try (GraknClient.Transaction tx = session.transaction().write()) {
+                List<String> ruleLabels = tx.stream(Graql.match(Graql.var("x").sub("rule")).get("x")).map(ans -> ans.get("x").asRule().label().toString()).collect(Collectors.toList());
+                assertEquals(1, ruleLabels.size());
+                assertEquals("rule", ruleLabels.get(0));
+            }
+        }
     }
 }
