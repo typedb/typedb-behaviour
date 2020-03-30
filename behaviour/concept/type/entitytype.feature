@@ -77,6 +77,22 @@ Feature: Concept Entity Type
     Then entity(cat) get supertypes contain:
       | cat     |
       | animal  |
+    Then entity(man) get subtypes contain:
+      | man     |
+    Then entity(woman) get subtypes contain:
+      | woman   |
+    Then entity(person) get subtypes contain:
+      | person  |
+      | man     |
+      | woman   |
+    Then entity(cat) get subtypes contain:
+      | cat     |
+    Then entity(animal) get subtypes contain:
+      | animal  |
+      | cat     |
+      | person  |
+      | man     |
+      | woman   |
     When transaction commits
     When session opens transaction of type: read
     Then entity(man) get supertype: person
@@ -97,3 +113,19 @@ Feature: Concept Entity Type
     Then entity(cat) get supertypes contain:
       | cat     |
       | animal  |
+    Then entity(man) get subtypes contain:
+      | man     |
+    Then entity(woman) get subtypes contain:
+      | woman   |
+    Then entity(person) get subtypes contain:
+      | person  |
+      | man     |
+      | woman   |
+    Then entity(cat) get subtypes contain:
+      | cat     |
+    Then entity(animal) get subtypes contain:
+      | animal  |
+      | cat     |
+      | person  |
+      | man     |
+      | woman   |
