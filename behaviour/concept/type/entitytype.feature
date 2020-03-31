@@ -25,7 +25,7 @@ Feature: Concept Entity Type
     Given connection open session for keyspace: grakn
     Given session opens transaction of type: write
 
-  Scenario: put entity
+  Scenario: Create a new entity type
     When put entity type: person
     Then entity(person) is null: false
     Then entity(person) get supertype: entity
@@ -34,7 +34,7 @@ Feature: Concept Entity Type
     Then entity(person) is null: false
     Then entity(person) get supertype: entity
 
-  Scenario: entities set a new label
+  Scenario: Change the label of an entity type
     When put entity type: person
     Then entity(person) is null: false
     Then entity(person) get label: person
@@ -53,7 +53,17 @@ Feature: Concept Entity Type
     Then entity(animal) is null: false
     Then entity(animal) get label: animal
 
-  Scenario: entity subtyping another entity
+  Scenario: Set an entity type to be abstract
+    When put entity type: person
+    When entity(person) set abstract: true
+    Then entity(person) get abstract: true
+    Then entity(person) creates instance successfully: false
+    When transaction commits
+    When session opens transaction of type: read
+    Then entity(person) get abstract: true
+    Then entity(person) creates instance successfully: false
+
+  Scenario: Make an entity type subtype another entity type
     When put entity type: man
     When put entity type: person
     When entity(man) set supertype: person
@@ -68,7 +78,7 @@ Feature: Concept Entity Type
     Then entity(man) get supertype: person
     Then entity(person) get supertype: entity
 
-  Scenario: entities creating a subtype hierarchy
+  Scenario: Create a hierarchy of entity types subtyping each other
     When put entity type: man
     When put entity type: woman
     When put entity type: person
