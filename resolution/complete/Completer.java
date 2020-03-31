@@ -6,8 +6,6 @@ import grakn.client.answer.ConceptMap;
 import grakn.client.concept.Concept;
 import grakn.verification.resolution.resolve.QueryBuilder;
 import graql.lang.Graql;
-import graql.lang.pattern.Conjunction;
-import graql.lang.pattern.Disjunction;
 import graql.lang.pattern.Pattern;
 import graql.lang.query.GraqlGet;
 import graql.lang.query.GraqlInsert;
@@ -23,7 +21,6 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static grakn.verification.resolution.resolve.QueryBuilder.generateKeyStatements;
-import static grakn.verification.resolution.resolve.QueryBuilder.makeAnonVarsExplicit;
 
 public class Completer {
 
@@ -42,10 +39,6 @@ public class Completer {
             try (GraknClient.Transaction tx = session.transaction().write()) {
 
                 for (Rule rule : rules) {
-//                    List<ConceptMap> answers = tx.execute(rule.matchInsertQuery());
-//                    if (answers.size() > 0) {
-//                        allRulesRerun = true;
-//                    }
                     allRulesRerun = allRulesRerun | completeRule(tx, rule);
                 }
                 tx.commit();
@@ -53,26 +46,28 @@ public class Completer {
         }
     }
 
-    public static boolean completeRule(Transaction tx, Rule rule) {
-        boolean allRulesRerun = false;
-//        Stream<ConceptMap> answerStream = tx.stream(rule.matchQuery());
-        List<ConceptMap> answers = tx.execute(rule.matchQuery());
-        Iterator<ConceptMap> it = answers.iterator();
+    private static boolean completeRule(Transaction tx, Rule rule) {
 
-//        if (answers.size() > 0) {
-        if (it.hasNext()) {
-            allRulesRerun = true;
+        boolean foundResult = false;
 
+        Stream<ConceptMap> answerStream2 = rule.matchBodyAndHead(tx);
+        Iterator<ConceptMap> answerIt2 = answerStream2.iterator();
 
-            it.forEachRemaining(answer -> {
-//                                ConceptMap answer = it.next();
-                        tx.execute(rule.matchInsertQuery(answer.map()));
-//                                allRulesRerun = true;
-//                        ruleRerun = true;
-                    }
-            );
+        while (answerIt2.hasNext()) {
+            foundResult = foundResult | rule.matchBodyAndHeadAndKeysAndNotResolution_insertResolution(tx, answerIt2.next().map());
         }
-        return allRulesRerun;
+
+        Stream<ConceptMap> answerStream = rule.matchBodyAndNotHead(tx);
+        Iterator<ConceptMap> answerIt = answerStream.iterator();
+        while (answerIt.hasNext()) {
+            boolean insertedHeadAndResolution = rule.matchBodyAndKeys_insertHeadAndResolution(tx, answerIt.next().map());
+            if (insertedHeadAndResolution) {
+                foundResult = true;
+            } else {
+                throw new RuntimeException("Something has gone wrong - based on a previous query, this query should have made an insertion!");
+            }
+        }
+        return foundResult;
     }
 
     public void loadRules(Set<grakn.client.concept.Rule> graknRules) {
@@ -83,47 +78,56 @@ public class Completer {
         this.rules = rules;
     }
 
-    private class Rule {
-        private final Pattern when;
-        private final Pattern then;
-        private final String label;
-        private final Disjunction<Pattern> dis;
-        private Pattern conjInferenceStatementsThen;
+    private static class Rule {
+        private final Pattern body;
+        private final Pattern head;
+        private Set<Statement> resolution;
 
         Rule(Pattern when, Pattern then, String label) {
-            this.when = QueryBuilder.makeAnonVarsExplicit(when);
-            this.then = QueryBuilder.makeAnonVarsExplicit(then);
-            this.label = label;
+            body = QueryBuilder.makeAnonVarsExplicit(when);
+            head = QueryBuilder.makeAnonVarsExplicit(then);
             QueryBuilder qb = new QueryBuilder();
-            Set<Statement> inferenceStatements = qb.inferenceStatements(this.when.statements(), this.then.statements(), this.label);
 
-            HashSet<Pattern> h = new HashSet<>();
-            h.add(new Conjunction<>(inferenceStatements));
-            h.add(this.then);
-            conjInferenceStatementsThen = new Conjunction<>(h);
-
-            HashSet<Pattern> h2 = new HashSet<>();
-            h2.add(Graql.not(conjInferenceStatementsThen));
-            h2.add(Graql.not(this.then));
-
-            dis = new Disjunction<>(h2);
+            resolution = qb.inferenceStatements(this.body.statements(), this.head.statements(), label);
         }
 
-        GraqlGet matchQuery() {
-            return Graql.match(when, Graql.not(this.then)).get().limit(1); // when; not {inference statements; then;}
+        private Map<Variable, Concept> oneAnswerFromConceptMap(List<ConceptMap> answers) {
+            if (answers.size() == 1) {
+                return answers.get(0).map();
+            } else if (answers.size() == 0) {
+                return null;
+            } else {
+                throw new RuntimeException("Found more than one answer in the given answers");
+            }
         }
 
-//        GraqlInsert matchInsertQuery() {
-//            return Graql.match(when, Graql.not(conjInferenceStatementsThen)).insert(conjInferenceStatementsThen.statements());
-//        }
-        GraqlInsert matchInsertQuery(Map<Variable, Concept> matchAnswerMap) {
+        Stream<ConceptMap> matchBodyAndNotHead(Transaction tx) {
+            GraqlGet.Unfiltered query = Graql.match(body, Graql.not(head)).get();
+            return tx.stream(query);
+        }
+
+        Stream<ConceptMap> matchBodyAndHead(Transaction tx) {
+            GraqlGet.Unfiltered query = Graql.match(body, head).get();
+            return tx.stream(query);
+        }
+
+        boolean matchBodyAndHeadAndKeysAndNotResolution_insertResolution(Transaction tx, Map<Variable, Concept> matchAnswerMap) {
             Set<Statement> keyStatements = generateKeyStatements(matchAnswerMap);
-            Conjunction<Statement> keyPattern = new Conjunction<>(keyStatements);
-            return Graql.match(when, keyPattern).insert(conjInferenceStatementsThen.statements()); // when; keys; insert inference statements; then;
+            GraqlInsert query = Graql.match(body, head, Graql.and(keyStatements), Graql.not(Graql.and(resolution))).insert(resolution);
+            Map<Variable, Concept> answerMap = oneAnswerFromConceptMap(tx.execute(query));
+            return answerMap != null;
         }
 
-        String label() {
-            return label;
+        boolean matchBodyAndKeys_insertHeadAndResolution(Transaction tx, Map<Variable, Concept> matchAnswerMap) {
+            Set<Statement> keyStatements = generateKeyStatements(matchAnswerMap);
+
+            HashSet<Statement> toInsert = new HashSet<>(resolution);
+            toInsert.addAll(head.statements());
+
+            GraqlInsert query = Graql.match(body, Graql.and(keyStatements)).insert(toInsert);
+            Map<Variable, Concept> answerMap = oneAnswerFromConceptMap(tx.execute(query));
+
+            return answerMap != null;
         }
     }
 }
