@@ -56,11 +56,11 @@ Feature: Concept Entity Type
   Scenario: Set an entity type to be abstract
     When put entity type: person
     When entity(person) set abstract: true
-    Then entity(person) get abstract: true
+    Then entity(person) is abstract: true
     Then entity(person) creates instance successfully: false
     When transaction commits
     When session opens transaction of type: read
-    Then entity(person) get abstract: true
+    Then entity(person) is abstract: true
     Then entity(person) creates instance successfully: false
 
   Scenario: Make an entity type subtype another entity type
