@@ -34,6 +34,25 @@ Feature: Concept Entity Type
     Then entity(person) is null: false
     Then entity(person) get supertype: entity
 
+  Scenario: entities set a new label
+    When put entity type: person
+    Then entity(person) is null: false
+    Then entity(person) get label: person
+    When entity(person) set label: horse
+    Then entity(horse) is null: false
+    Then entity(horse) get label: horse
+    When transaction commits
+    When session opens transaction of type: write
+    Then entity(horse) is null: false
+    Then entity(horse) get label: horse
+    When entity(horse) set label: animal
+    Then entity(animal) is null: false
+    Then entity(animal) get label: animal
+    When transaction commits
+    When session opens transaction of type: read
+    Then entity(animal) is null: false
+    Then entity(animal) get label: animal
+
   Scenario: entity subtyping another entity
     When put entity type: man
     When put entity type: person
@@ -64,35 +83,35 @@ Feature: Concept Entity Type
     Then entity(person) get supertype: animal
     Then entity(cat) get supertype: animal
     Then entity(man) get supertypes contain:
-      | man     |
-      | person  |
-      | animal  |
+      | man    |
+      | person |
+      | animal |
     Then entity(woman) get supertypes contain:
-      | woman   |
-      | person  |
-      | animal  |
+      | woman  |
+      | person |
+      | animal |
     Then entity(person) get supertypes contain:
-      | person  |
-      | animal  |
+      | person |
+      | animal |
     Then entity(cat) get supertypes contain:
-      | cat     |
-      | animal  |
+      | cat    |
+      | animal |
     Then entity(man) get subtypes contain:
-      | man     |
+      | man |
     Then entity(woman) get subtypes contain:
-      | woman   |
+      | woman |
     Then entity(person) get subtypes contain:
-      | person  |
-      | man     |
-      | woman   |
+      | person |
+      | man    |
+      | woman  |
     Then entity(cat) get subtypes contain:
-      | cat     |
+      | cat |
     Then entity(animal) get subtypes contain:
-      | animal  |
-      | cat     |
-      | person  |
-      | man     |
-      | woman   |
+      | animal |
+      | cat    |
+      | person |
+      | man    |
+      | woman  |
     When transaction commits
     When session opens transaction of type: read
     Then entity(man) get supertype: person
@@ -100,32 +119,32 @@ Feature: Concept Entity Type
     Then entity(person) get supertype: animal
     Then entity(cat) get supertype: animal
     Then entity(man) get supertypes contain:
-      | man     |
-      | person  |
-      | animal  |
+      | man    |
+      | person |
+      | animal |
     Then entity(woman) get supertypes contain:
-      | woman   |
-      | person  |
-      | animal  |
+      | woman  |
+      | person |
+      | animal |
     Then entity(person) get supertypes contain:
-      | person  |
-      | animal  |
+      | person |
+      | animal |
     Then entity(cat) get supertypes contain:
-      | cat     |
-      | animal  |
+      | cat    |
+      | animal |
     Then entity(man) get subtypes contain:
-      | man     |
+      | man |
     Then entity(woman) get subtypes contain:
-      | woman   |
+      | woman |
     Then entity(person) get subtypes contain:
-      | person  |
-      | man     |
-      | woman   |
+      | person |
+      | man    |
+      | woman  |
     Then entity(cat) get subtypes contain:
-      | cat     |
+      | cat |
     Then entity(animal) get subtypes contain:
-      | animal  |
-      | cat     |
-      | person  |
-      | man     |
-      | woman   |
+      | animal |
+      | cat    |
+      | person |
+      | man    |
+      | woman  |
