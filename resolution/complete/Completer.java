@@ -42,38 +42,38 @@ public class Completer {
             try (GraknClient.Transaction tx = session.transaction().write()) {
 
                 for (Rule rule : rules) {
-                    List<ConceptMap> answers = tx.execute(rule.matchInsertQuery());
-                    if (answers.size() > 0) {
-                        allRulesRerun = true;
-                    }
-//                    allRulesRerun = allRulesRerun | completeRule(tx, rule);
+//                    List<ConceptMap> answers = tx.execute(rule.matchInsertQuery());
+//                    if (answers.size() > 0) {
+//                        allRulesRerun = true;
+//                    }
+                    allRulesRerun = allRulesRerun | completeRule(tx, rule);
                 }
                 tx.commit();
             }
         }
     }
 
-//    public static boolean completeRule(Transaction tx, Rule rule) {
-//        boolean allRulesRerun = false;
-////        Stream<ConceptMap> answerStream = tx.stream(rule.matchQuery());
-//        List<ConceptMap> answers = tx.execute(rule.matchQuery());
-//        Iterator<ConceptMap> it = answers.iterator();
-//
-////        if (answers.size() > 0) {
-//        if (it.hasNext()) {
-//            allRulesRerun = true;
-//
-//
-//            it.forEachRemaining(answer -> {
-////                                ConceptMap answer = it.next();
-//                        tx.execute(rule.matchInsertQuery(answer.map()));
-////                                allRulesRerun = true;
-////                        ruleRerun = true;
-//                    }
-//            );
-//        }
-//        return allRulesRerun;
-//    }
+    public static boolean completeRule(Transaction tx, Rule rule) {
+        boolean allRulesRerun = false;
+//        Stream<ConceptMap> answerStream = tx.stream(rule.matchQuery());
+        List<ConceptMap> answers = tx.execute(rule.matchQuery());
+        Iterator<ConceptMap> it = answers.iterator();
+
+//        if (answers.size() > 0) {
+        if (it.hasNext()) {
+            allRulesRerun = true;
+
+
+            it.forEachRemaining(answer -> {
+//                                ConceptMap answer = it.next();
+                        tx.execute(rule.matchInsertQuery(answer.map()));
+//                                allRulesRerun = true;
+//                        ruleRerun = true;
+                    }
+            );
+        }
+        return allRulesRerun;
+    }
 
     public void loadRules(Set<grakn.client.concept.Rule> graknRules) {
         Set<Rule> rules = new HashSet<>();
@@ -109,18 +109,18 @@ public class Completer {
             dis = new Disjunction<>(h2);
         }
 
-//        GraqlGet matchQuery() {
-//            return Graql.match(when, Graql.not(this.then)).get().limit(1); // when; not {inference statements; then;}
-//        }
-
-        GraqlInsert matchInsertQuery() {
-            return Graql.match(when, Graql.not(conjInferenceStatementsThen)).insert(conjInferenceStatementsThen.statements());
+        GraqlGet matchQuery() {
+            return Graql.match(when, Graql.not(this.then)).get().limit(1); // when; not {inference statements; then;}
         }
-//        GraqlInsert matchInsertQuery(Map<Variable, Concept> matchAnswerMap) {
-//            Set<Statement> keyStatements = generateKeyStatements(matchAnswerMap);
-//            Conjunction<Statement> keyPattern = new Conjunction<>(keyStatements);
-//            return Graql.match(when, keyPattern).insert(conjInferenceStatementsThen.statements()); // when; keys; insert inference statements; then;
+
+//        GraqlInsert matchInsertQuery() {
+//            return Graql.match(when, Graql.not(conjInferenceStatementsThen)).insert(conjInferenceStatementsThen.statements());
 //        }
+        GraqlInsert matchInsertQuery(Map<Variable, Concept> matchAnswerMap) {
+            Set<Statement> keyStatements = generateKeyStatements(matchAnswerMap);
+            Conjunction<Statement> keyPattern = new Conjunction<>(keyStatements);
+            return Graql.match(when, keyPattern).insert(conjInferenceStatementsThen.statements()); // when; keys; insert inference statements; then;
+        }
 
         String label() {
             return label;
