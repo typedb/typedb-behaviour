@@ -7,19 +7,16 @@ import grakn.client.answer.ConceptMap;
 import grakn.verification.resolution.complete.Completer;
 import grakn.verification.resolution.complete.SchemaManager;
 import grakn.verification.resolution.resolve.QueryBuilder;
-import graql.lang.Graql;
 import graql.lang.query.GraqlGet;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 import static grakn.verification.resolution.common.Utils.loadGqlFile;
 
 public class Resolution {
 
-    private static final String GRAKN_URI = "localhost:48555";
     private static final String COMPLETE_KEYSPACE = "complete";
     private static final String TEST_KEYSPACE = "test";
     private static GraknClient graknClient;
@@ -28,20 +25,10 @@ public class Resolution {
     private Session completeSession;
     private Session testSession;
 
-    public static void main(String[] args) {
-        Path schemaPath = Paths.get("resolution", "test", "cases", "case2", "schema.gql").toAbsolutePath();
-        Path dataPath = Paths.get("resolution", "test", "cases", "case2", "data.gql").toAbsolutePath();
-        GraqlGet inferenceQuery = Graql.parse("match $transaction has currency $currency; get;").asGet();
-
-        Resolution resolution_test = new Resolution(schemaPath, dataPath);
-        resolution_test.testQuery(inferenceQuery);
-        resolution_test.close();
-    }
-
-    private Resolution(Path schemaPath, Path dataPath) {
+    public Resolution(String graknUri, Path schemaPath, Path dataPath) {
         this.schemaPath = schemaPath;
         this.dataPath = dataPath;
-        graknClient = new GraknClient(GRAKN_URI);
+        graknClient = new GraknClient(graknUri);
 
         testSession = graknClient.session(TEST_KEYSPACE);
         completeSession = graknClient.session(COMPLETE_KEYSPACE);
@@ -52,28 +39,26 @@ public class Resolution {
         // TODO Check that nothing in the given schema conflicts with the resolution schema
         // TODO Also check that all of the data in the initial data given has keys/ is uniquely identifiable
 
-//        // Complete the KB-complete
-//        Completer.complete(completeSession); // Should read the rules, undefine them, add the completion schema
-//
-//        SchemaManager completeSchemaManager = new SchemaManager(completeSession);
-//
-//        Completer completer = new Completer(completeSession);
-//
-//        SchemaManager.addResolutionSchema(completeSession);
-//        try (Transaction tx = completeSession.transaction().read()) {
-//            completer.loadRules(SchemaManager.getRules(tx));
-//        }
-//        SchemaManager.deleteRules(completeSession);
-//
-//        completer.complete();
+        // Complete the KB-complete
+        Completer completer = new Completer(completeSession);
+        try (GraknClient.Transaction tx = completeSession.transaction().write()) {
+            completer.loadRules(SchemaManager.getAllRules(tx));
+        }
+
+        SchemaManager.undefineAllRules(completeSession);
+        SchemaManager.addResolutionSchema(completeSession);
+        SchemaManager.connectResolutionSchema(completeSession);
+        completer.complete();
     }
 
-    private void close() {
+    public void close() {
         completeSession.close();
         testSession.close();
+        graknClient.keyspaces().delete(COMPLETE_KEYSPACE);
+        graknClient.keyspaces().delete(TEST_KEYSPACE);
     }
 
-    private void testQuery(GraqlGet inferenceQuery) {
+    public void testQuery(GraqlGet inferenceQuery) {
         QueryBuilder rb = new QueryBuilder();
         List<GraqlGet> queries;
 

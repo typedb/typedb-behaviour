@@ -177,10 +177,7 @@ public class TestSchemaManager {
     @Test
     public void testUndefineAllRulesSuccessfullyUndefinesAllRules() {
         try (GraknClient.Session session = graknClient.session(GRAKN_KEYSPACE)) {
-            try (GraknClient.Transaction tx = session.transaction().write()) {
-                SchemaManager.undefineAllRules(tx);
-                tx.commit();
-            }
+            SchemaManager.undefineAllRules(session);
             try (GraknClient.Transaction tx = session.transaction().write()) {
                 List<String> ruleLabels = tx.stream(Graql.match(Graql.var("x").sub("rule")).get("x")).map(ans -> ans.get("x").asRule().label().toString()).collect(Collectors.toList());
                 assertEquals(1, ruleLabels.size());

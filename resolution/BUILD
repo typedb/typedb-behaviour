@@ -20,10 +20,6 @@ java_library(
         "@graknlabs_client_java//:client-java",
         "@graknlabs_graql//java:graql",
     ],
-    data = [
-        "//resolution/test/cases/case2:schema.gql",
-        "//resolution/test/cases/case2:data.gql",
-    ],
 )
 
 java_binary(

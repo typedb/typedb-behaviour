@@ -112,3 +112,36 @@ java_test(
     ],
     size="medium"
 )
+
+java_test(
+    name = "TestResolution",
+    srcs = [
+        "TestResolution.java",
+    ],
+    test_class = "grakn.verification.resolution.test.TestResolution",
+    deps = [
+        "//resolution:resolution-lib",
+        "//resolution/test:grakn-for-test",
+
+        # External dependencies from @graknlabs
+        "@graknlabs_graql//java:graql",
+    ],
+    data = [
+        "//resolution/test/cases/case1:schema.gql",
+        "//resolution/test/cases/case1:data.gql",
+        "//resolution/test/cases/case2:schema.gql",
+        "//resolution/test/cases/case2:data.gql",
+        "//resolution/test/cases/case3:schema.gql",
+        "//resolution/test/cases/case3:data.gql",
+        "//resolution/test/cases/case4:schema.gql",
+        "//resolution/test/cases/case4:data.gql",
+        "//resolution/test/cases/case5:schema.gql",
+        "//resolution/test/cases/case5:data.gql",
+        "@graknlabs_grakn_core//:assemble-linux-targz", # Make sure to pass the path in args below
+    ],
+    args = [ # The order of the arguments matter
+        "grakn-core", # Keep at index 0, will be accessible at args[1]
+        "$(location @graknlabs_grakn_core//:assemble-linux-targz)", # Keep at index 1, will be accessible at args[2]
+    ],
+    size="medium"
+)
