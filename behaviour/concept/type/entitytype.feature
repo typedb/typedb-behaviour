@@ -178,8 +178,8 @@ Feature: Concept Entity Type
     When put attribute type: name
     When put attribute type: age
     When put entity type: person
-    When entity(person) set key attribute: name
-    When entity(person) set key attribute: age
+    When entity(person) set has attribute: name
+    When entity(person) set has attribute: age
     Then entity(person) get has attributes contain:
       | name  |
       | age   |
@@ -188,3 +188,32 @@ Feature: Concept Entity Type
     Then entity(person) get has attributes contain:
       | name  |
       | age   |
+
+  Scenario: Entity types can have keys and attributes
+    When put attribute type: email
+    When put attribute type: username
+    When put attribute type: name
+    When put attribute type: age
+    When put entity type: person
+    When entity(person) set key attribute: email
+    When entity(person) set key attribute: username
+    When entity(person) set has attribute: name
+    When entity(person) set has attribute: age
+    Then entity(person) get key attributes contain:
+      | email     |
+      | username  |
+    Then entity(person) get has attributes contain:
+      | email     |
+      | username  |
+      | name      |
+      | age       |
+    When transaction commits
+    When session opens transaction of type: read
+    Then entity(person) get key attributes contain:
+      | email     |
+      | username  |
+    Then entity(person) get has attributes contain:
+      | email     |
+      | username  |
+      | name      |
+      | age       |
