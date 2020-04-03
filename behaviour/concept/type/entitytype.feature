@@ -174,6 +174,21 @@ Feature: Concept Entity Type
       | email     |
       | username  |
 
+  Scenario: Entity types can remove keys
+    When put attribute type: email
+    When put attribute type: username
+    When put entity type: person
+    When entity(person) set key attribute: email
+    When entity(person) set key attribute: username
+    When entity(person) remove key attribute: email
+    Then entity(person) get key attributes does not contain: email
+    When transaction commits
+    When session opens transaction of type: write
+    When entity(person) remove key attribute: username
+    Then entity(person) get key attributes does not contain:
+      | email     |
+      | username  |
+
   Scenario: Entity types can have attributes
     When put attribute type: name
     When put attribute type: age
@@ -186,6 +201,21 @@ Feature: Concept Entity Type
     When transaction commits
     When session opens transaction of type: read
     Then entity(person) get has attributes contain:
+      | name  |
+      | age   |
+
+  Scenario: Entity types can remove attributes
+    When put attribute type: name
+    When put attribute type: age
+    When put entity type: person
+    When entity(person) set has attribute: name
+    When entity(person) set has attribute: age
+    When entity(person) remove key attribute: age
+    Then entity(person) get key attributes does not contain: age
+    When transaction commits
+    When session opens transaction of type: write
+    When entity(person) remove key attribute: name
+    Then entity(person) get key attributes does not contain:
       | name  |
       | age   |
 
