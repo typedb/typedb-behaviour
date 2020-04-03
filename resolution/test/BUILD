@@ -6,6 +6,11 @@ java_library(
         "//dependencies/maven/artifacts/com/google/guava:guava",
         "//dependencies/maven/artifacts/org/slf4j:slf4j-api",
         "//dependencies/maven/artifacts/org/zeroturnaround:zt-exec",
+
+        "//resolution/common",
+
+        # External dependencies from @graknlabs
+        "@graknlabs_client_java//:client-java",
     ],
     data = [
         "@graknlabs_grakn_core//:assemble-linux-targz",
@@ -32,8 +37,16 @@ java_test(
     ],
     data = [
         "@graknlabs_grakn_core//:assemble-linux-targz", # Make sure to pass the path in args below
+        "//resolution/test/cases/case1:schema.gql",
+        "//resolution/test/cases/case1:data.gql",
+        "//resolution/test/cases/case2:schema.gql",
+        "//resolution/test/cases/case2:data.gql",
+        "//resolution/test/cases/case3:schema.gql",
+        "//resolution/test/cases/case3:data.gql",
         "//resolution/test/cases/case4:schema.gql",
         "//resolution/test/cases/case4:data.gql",
+        "//resolution/test/cases/case5:schema.gql",
+        "//resolution/test/cases/case5:data.gql",
     ],
     args = [ # The order of the arguments matter
         "grakn-core", # Keep at index 0, will be accessible at args[1]

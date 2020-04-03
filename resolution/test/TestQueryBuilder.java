@@ -97,7 +97,7 @@ public class TestQueryBuilder {
                 // TODO Should we also have an isa-property for $currency?
                 "$x2 (owner: $country) isa has-attribute-property, has currency $currency;" +
 
-                "$x3 (rel: $locates, roleplayer: $transaction) isa relation-property, has role-label \"locates_located\";" + //TODO When inserted, the role supertype labels should be owned too
+                "$x3 (rel: $locates, roleplayer: $transaction) isa relation-property, has role-label \"locates_located\";" + //TODO When inserted, the role supertype labels should be owned too, solved if this is done as a role rather than attribute ownership
                 "$x4 (rel: $locates, roleplayer: $country) isa relation-property, has role-label \"locates_location\";" +
                 "$x5 (instance: $locates) isa isa-property, has type-label \"locates\";" +
 
@@ -114,9 +114,9 @@ public class TestQueryBuilder {
                 ") isa resolution, \n" +
                 "has rule-label \"transaction-currency-is-that-of-the-country\";"));  //TODO can be split into conjunction
 
-        Set<Statement> appliedRuleStatements;
+        Set<Statement> resolutionStatements;
 
-        appliedRuleStatements = new QueryBuilder().inferenceStatements(whenStatements, thenStatements, "transaction-currency-is-that-of-the-country");
-        assertEquals(expectedStatements, appliedRuleStatements);
+        resolutionStatements = new QueryBuilder().inferenceStatements(whenStatements, thenStatements, "transaction-currency-is-that-of-the-country");
+        assertEquals(expectedStatements, resolutionStatements);
     }
 }
