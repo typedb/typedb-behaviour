@@ -19,7 +19,7 @@ import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
 import static grakn.verification.resolution.common.Utils.getStatements;
-import static grakn.verification.resolution.test.GraknForTest.loadTestCase;
+import static grakn.verification.resolution.test.LoadTest.loadTestCase;
 import static org.junit.Assert.assertEquals;
 
 public class QueryBuilderIT {

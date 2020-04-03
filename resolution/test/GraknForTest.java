@@ -2,7 +2,6 @@ package grakn.verification.resolution.test;
 
 import com.google.common.io.MoreFiles;
 import com.google.common.io.RecursiveDeleteOption;
-import grakn.client.GraknClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zeroturnaround.exec.ProcessExecutor;
@@ -14,8 +13,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.TimeoutException;
-
-import static grakn.verification.resolution.common.Utils.loadGqlFile;
 
 // Taken from Grabl
 public class GraknForTest {
@@ -64,20 +61,6 @@ public class GraknForTest {
             return true;
         } catch (IOException e) {
             return false;
-        }
-    }
-
-    public static void loadTestCase(GraknClient.Session session, String testCase) {
-        try {
-            Path schemaPath = Paths.get("resolution", "test", "cases", testCase, "schema.gql").toAbsolutePath();
-            Path dataPath = Paths.get("resolution", "test", "cases", testCase, "data.gql").toAbsolutePath();
-            // Load a schema incl. rules
-            loadGqlFile(session, schemaPath);
-            // Load data
-            loadGqlFile(session, dataPath);
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
         }
     }
 }

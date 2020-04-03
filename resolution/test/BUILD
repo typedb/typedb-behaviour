@@ -6,16 +6,20 @@ java_library(
         "//dependencies/maven/artifacts/com/google/guava:guava",
         "//dependencies/maven/artifacts/org/slf4j:slf4j-api",
         "//dependencies/maven/artifacts/org/zeroturnaround:zt-exec",
-
-        "//resolution/common",
-
-        # External dependencies from @graknlabs
-        "@graknlabs_client_java//:client-java",
     ],
     data = [
         "@graknlabs_grakn_core//:assemble-linux-targz",
-        "//resolution/test/cases/case2:schema.gql",
-        "//resolution/test/cases/case2:data.gql",
+    ],
+    visibility = ["//visibility:public"]
+)
+
+java_library(
+    name = "load-test",
+    srcs = ["LoadTest.java"],
+    deps = [
+        "//resolution/common:common",
+        # External dependencies from @graknlabs
+        "@graknlabs_client_java//:client-java",
     ],
     visibility = ["//visibility:public"]
 )
@@ -30,6 +34,7 @@ java_test(
         "//resolution/common",
         "//resolution/resolve",
         "//resolution/test:grakn-for-test",
+        "//resolution/test:load-test",
 
         # External dependencies from @graknlabs
         "@graknlabs_client_java//:client-java",
