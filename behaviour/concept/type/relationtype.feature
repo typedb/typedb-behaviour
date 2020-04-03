@@ -23,4 +23,13 @@ Feature: Concept Relation Type
     Given connection does not have any keyspace
     Given connection create keyspace: grakn
     Given connection open session for keyspace: grakn
-    Given session open transaction of type: write
+    Given session opens transaction of type: write
+
+  Scenario: Create a new relation type
+    When put relation type: marriage
+    Then relation(marriage) is null: false
+    Then relation(marriage) get supertype: relation
+    When transaction commits
+    When session opens transaction of type: read
+    Then relation(marriage) is null: false
+    Then relation(marriage) get supertype: relation

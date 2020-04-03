@@ -166,13 +166,13 @@ Feature: Concept Entity Type
     When entity(person) set key attribute: email
     When entity(person) set key attribute: username
     Then entity(person) get key attributes contain:
-      | email     |
-      | username  |
+      | email    |
+      | username |
     When transaction commits
     When session opens transaction of type: read
     Then entity(person) get key attributes contain:
-      | email     |
-      | username  |
+      | email    |
+      | username |
 
   Scenario: Entity types can remove keys
     When put attribute type: email
@@ -186,8 +186,8 @@ Feature: Concept Entity Type
     When session opens transaction of type: write
     When entity(person) remove key attribute: username
     Then entity(person) get key attributes does not contain:
-      | email     |
-      | username  |
+      | email    |
+      | username |
 
   Scenario: Entity types can have attributes
     When put attribute type: name
@@ -196,13 +196,13 @@ Feature: Concept Entity Type
     When entity(person) set has attribute: name
     When entity(person) set has attribute: age
     Then entity(person) get has attributes contain:
-      | name  |
-      | age   |
+      | name |
+      | age  |
     When transaction commits
     When session opens transaction of type: read
     Then entity(person) get has attributes contain:
-      | name  |
-      | age   |
+      | name |
+      | age  |
 
   Scenario: Entity types can remove attributes
     When put attribute type: name
@@ -216,8 +216,8 @@ Feature: Concept Entity Type
     When session opens transaction of type: write
     When entity(person) remove key attribute: name
     Then entity(person) get key attributes does not contain:
-      | name  |
-      | age   |
+      | name |
+      | age  |
 
   Scenario: Entity types can have keys and attributes
     When put attribute type: email
@@ -230,20 +230,20 @@ Feature: Concept Entity Type
     When entity(person) set has attribute: name
     When entity(person) set has attribute: age
     Then entity(person) get key attributes contain:
-      | email     |
-      | username  |
+      | email    |
+      | username |
     Then entity(person) get has attributes contain:
-      | email     |
-      | username  |
-      | name      |
-      | age       |
+      | email    |
+      | username |
+      | name     |
+      | age      |
     When transaction commits
     When session opens transaction of type: read
     Then entity(person) get key attributes contain:
-      | email     |
-      | username  |
+      | email    |
+      | username |
     Then entity(person) get has attributes contain:
-      | email     |
-      | username  |
-      | name      |
-      | age       |
+      | email    |
+      | username |
+      | name     |
+      | age      |
