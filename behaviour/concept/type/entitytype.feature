@@ -158,3 +158,18 @@ Feature: Concept Entity Type
       | person |
       | man    |
       | woman  |
+
+  Scenario: Entity types can have key attributes
+    When put attribute type: email
+    When put attribute type: username
+    When put entity type: person
+    When entity(person) set key attribute: email
+    When entity(person) set key attribute: username
+    Then entity(person) get key attributes contain:
+      | email     |
+      | username  |
+    When transaction commits
+    When session opens transaction of type: read
+    Then entity(person) get key attributes contain:
+      | email     |
+      | username  |
