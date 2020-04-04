@@ -34,6 +34,34 @@ Feature: Concept Entity Type
     Then entity(person) is null: false
     Then entity(person) get supertype: entity
 
+  Scenario: Delete an entity type
+    When put entity type: person
+    Then entity(person) is null: false
+    When put entity type: company
+    Then entity(company) is null: false
+    When delete entity type: company
+    Then entity(company) is null: true
+    Then entity(entity) get subtypes do not contain:
+      | company |
+    When transaction commits
+    When session opens transaction of type: write
+    Then entity(person) is null: false
+    Then entity(company) is null: true
+    Then entity(entity) get subtypes do not contain:
+      | company |
+    When delete entity type: person
+    Then entity(person) is null: true
+    Then entity(entity) get subtypes do not contain:
+      | person  |
+      | company |
+    When transaction commits
+    When session opens transaction of type: read
+    Then entity(person) is null: true
+    Then entity(company) is null: true
+    Then entity(entity) get subtypes do not contain:
+      | person  |
+      | company |
+
   Scenario: Change the label of an entity type
     When put entity type: person
     Then entity(person) is null: false
@@ -181,11 +209,11 @@ Feature: Concept Entity Type
     When entity(person) set key attribute: email
     When entity(person) set key attribute: username
     When entity(person) remove key attribute: email
-    Then entity(person) get key attributes does not contain: email
+    Then entity(person) get key attributes do not contain: email
     When transaction commits
     When session opens transaction of type: write
     When entity(person) remove key attribute: username
-    Then entity(person) get key attributes does not contain:
+    Then entity(person) get key attributes do not contain:
       | email    |
       | username |
 
@@ -211,11 +239,11 @@ Feature: Concept Entity Type
     When entity(person) set has attribute: name
     When entity(person) set has attribute: age
     When entity(person) remove key attribute: age
-    Then entity(person) get key attributes does not contain: age
+    Then entity(person) get key attributes do not contain: age
     When transaction commits
     When session opens transaction of type: write
     When entity(person) remove key attribute: name
-    Then entity(person) get key attributes does not contain:
+    Then entity(person) get key attributes do not contain:
       | name |
       | age  |
 

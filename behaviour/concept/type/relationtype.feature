@@ -27,9 +27,25 @@ Feature: Concept Relation Type
 
   Scenario: Create a new relation type
     When put relation type: marriage
+#    When relation(marriage) set relates role: husband
+#    When relation(marriage) set relates role: wife
     Then relation(marriage) is null: false
     Then relation(marriage) get supertype: relation
+#    Then role(marriage:husband) is null: false
+#    Then role(marriage:wife) is null: false
+#    Then role(marriage:husband) get supertype: role
+#    Then role(marriage:wife) get supertype: role
+#    Then relation(marriage) get related roles contain:
+#      | husband |
+#      | wife    |
     When transaction commits
     When session opens transaction of type: read
     Then relation(marriage) is null: false
     Then relation(marriage) get supertype: relation
+#    Then role(marriage:husband) is null: false
+#    Then role(marriage:wife) is null: false
+#    Then role(marriage:husband) get supertype: role
+#    Then role(marriage:wife) get supertype: role
+#    Then relation(marriage) get related roles contain:
+#      | husband |
+#      | wife    |
