@@ -25,27 +25,27 @@ Feature: Concept Relation Type
     Given connection open session for keyspace: grakn
     Given session opens transaction of type: write
 
-  Scenario: Create a new relation type
+  Scenario: Create a new relation type with role types
     When put relation type: marriage
-#    When relation(marriage) set relates role: husband
-#    When relation(marriage) set relates role: wife
+    When relation(marriage) set relates role: husband
+    When relation(marriage) set relates role: wife
     Then relation(marriage) is null: false
     Then relation(marriage) get supertype: relation
-#    Then role(marriage:husband) is null: false
-#    Then role(marriage:wife) is null: false
-#    Then role(marriage:husband) get supertype: role
-#    Then role(marriage:wife) get supertype: role
-#    Then relation(marriage) get related roles contain:
-#      | husband |
-#      | wife    |
+    Then relation(marriage) get role(husband) is null: false
+    Then relation(marriage) get role(wife) is null: false
+    Then relation(marriage) get role(husband) get supertype: relation:role
+    Then relation(marriage) get role(wife) get supertype: relation:role
+    Then relation(marriage) get related roles contain:
+      | husband |
+      | wife    |
     When transaction commits
     When session opens transaction of type: read
     Then relation(marriage) is null: false
     Then relation(marriage) get supertype: relation
-#    Then role(marriage:husband) is null: false
-#    Then role(marriage:wife) is null: false
-#    Then role(marriage:husband) get supertype: role
-#    Then role(marriage:wife) get supertype: role
-#    Then relation(marriage) get related roles contain:
-#      | husband |
-#      | wife    |
+    Then relation(marriage) get role(husband) is null: false
+    Then relation(marriage) get role(wife) is null: false
+    Then relation(marriage) get role(husband) get supertype: relation:role
+    Then relation(marriage) get role(wife) get supertype: relation:role
+    Then relation(marriage) get related roles contain:
+      | husband |
+      | wife    |
