@@ -95,6 +95,44 @@ Feature: Graql Insert Query
       | 0    | 2    | 1    |
 
 
+  Scenario: insert an additional duplicate role player
+    Given graql define
+      """
+      define
+      person sub entity,
+        plays employee,
+        key ref;
+      company sub entity,
+        plays employer,
+        key ref;
+      employment sub relation,
+        relates employee,
+        relates employer,
+        key ref;
+      ref sub attribute, datatype long;
+      """
+    Given the integrity is validated
+
+    When graql insert
+      """
+      insert $p isa person, has ref 0; $r (employee: $p) isa employment, has ref 1;
+      """
+    When graql insert
+      """
+      match $r isa employment; $p isa person; insert $r (employee: $p) isa employment;
+      """
+    When the integrity is validated
+
+    Then get answers of graql query
+      """
+      match $r (employee: $p, employee: $p) isa employment; get;
+      """
+    Then answer concepts all have key: ref
+    Then answer keys are
+      | p    | r    |
+      | 0    | 1    |
+
+
   Scenario: insert an attribute with a value is retrievable by the value
     Given graql define
       """
@@ -201,6 +239,9 @@ Feature: Graql Insert Query
         $x isa person, has value $a ;
         $a "10.maybe";
       """
+
+  Scenario: extend relation with duplicate role player
+
 
   Scenario: inserting duplicate keys throws on commit (? or at insert)
   Scenario: inserting disallowed role being played throws on commit (? or at insert)

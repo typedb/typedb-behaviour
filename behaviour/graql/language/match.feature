@@ -71,7 +71,7 @@ Feature: Graql Match Clause
       | 1    | 2    |
 
 
-  Scenario: inserting a relation with named role players is retrieved without role players in all combinations
+  Scenario: retrieve all combinations of players in a relation
     Given graql define
       """
       define
@@ -134,3 +134,53 @@ Feature: Graql Match Clause
       """
       match $x sub $z; $x id <answer.x.id>; $z id <answer.z.id>; get;
       """
+
+  Scenario: duplicate role players are retrieved singly when queried doubly
+    Given graql define
+      """
+      define
+        some-entity sub entity, plays player, key ref;
+        symmetric sub relation, relates player, key ref;
+        ref sub attribute, datatype long;
+      """
+    Given the integrity is validated
+
+    Given graql insert
+      """
+      insert $x isa some-entity, has ref 0; (player: $x, player: $x) isa symmetric, has ref 1;
+      """
+    Given the integrity is validated
+
+    When get answers of graql query
+      """
+      match $r (player: $x, player: $x) isa relation; get;
+      """
+    Then answer concepts all have key: ref
+    Then answer keys are
+      | x    |  r    |
+      | 0    |  1    |
+
+  Scenario: duplicate role players are retrieved singly when queried singly
+    Given graql define
+      """
+      define
+        some-entity sub entity, plays player, key ref;
+        symmetric sub relation, relates player, key ref;
+        ref sub attribute, datatype long;
+      """
+    Given the integrity is validated
+
+    Given graql insert
+      """
+      insert $x isa some-entity, has ref 0; (player: $x, player: $x) isa symmetric, has ref 1;
+      """
+    Given the integrity is validated
+
+    When get answers of graql query
+      """
+      match $r (player: $x) isa relation; get;
+      """
+    Then answer concepts all have key: ref
+    Then answer keys are
+      | x    |  r    |
+      | 0    |  1    |
