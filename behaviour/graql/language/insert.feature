@@ -119,7 +119,7 @@ Feature: Graql Insert Query
       """
     When graql insert
       """
-      match $r isa employment; $p isa person; insert $r (employer: $p) isa employment;
+      match $r isa employment; $p isa person; insert $r (employee: $p) isa employment;
       """
     When the integrity is validated
 
