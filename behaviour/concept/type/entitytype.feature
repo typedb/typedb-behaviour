@@ -238,12 +238,12 @@ Feature: Concept Entity Type
     When put entity type: person
     When entity(person) set has attribute: name
     When entity(person) set has attribute: age
-    When entity(person) remove key attribute: age
-    Then entity(person) get key attributes do not contain: age
+    When entity(person) remove has attribute: age
+    Then entity(person) get has attributes do not contain: age
     When transaction commits
     When session opens transaction of type: write
-    When entity(person) remove key attribute: name
-    Then entity(person) get key attributes do not contain:
+    When entity(person) remove has attribute: name
+    Then entity(person) get has attributes do not contain:
       | name |
       | age  |
 
