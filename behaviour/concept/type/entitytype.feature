@@ -275,3 +275,61 @@ Feature: Concept Entity Type
       | username |
       | name     |
       | age      |
+
+  Scenario: Entity types can inherit keys and attributes
+    When put attribute type: email
+    When put attribute type: name
+    When put attribute type: reference
+    When put attribute type: rating
+    When put entity type: person
+    When entity(person) set key attribute: email
+    When entity(person) set has attribute: name
+    When put entity type: customer
+    When entity(customer) set supertype: person
+    When entity(customer) set key attribute: reference
+    When entity(customer) set has attribute: rating
+    Then entity(customer) get key attributes contain:
+      | email     |
+      | reference |
+    Then entity(customer) get has attributes contain:
+      | email     |
+      | reference |
+      | name      |
+      | rating    |
+    When transaction commits
+    When session opens transaction of type: write
+    Then entity(customer) get key attributes contain:
+      | email     |
+      | reference |
+    Then entity(customer) get has attributes contain:
+      | email     |
+      | reference |
+      | name      |
+      | rating    |
+    When put attribute type: license
+    When put attribute type: points
+    When put entity type: subscriber
+    When entity(subscriber) set supertype: customer
+    When entity(subscriber) set key attribute: license
+    When entity(subscriber) set has attribute: points
+    When transaction commits
+    When session opens transaction of type: read
+    Then entity(customer) get key attributes contain:
+      | email     |
+      | reference |
+    Then entity(customer) get has attributes contain:
+      | email     |
+      | reference |
+      | name      |
+      | rating    |
+    Then entity(subscriber) get key attributes contain:
+      | email     |
+      | reference |
+      | license   |
+    Then entity(subscriber) get has attributes contain:
+      | email     |
+      | reference |
+      | license   |
+      | name      |
+      | rating    |
+      | points    |
