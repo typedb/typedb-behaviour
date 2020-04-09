@@ -333,3 +333,101 @@ Feature: Concept Entity Type
       | name      |
       | rating    |
       | points    |
+
+  Scenario: Entity types can override inherited keys and attributes
+    When put attribute type: username
+    When put attribute type: email
+    When put attribute type: name
+    When put attribute type: age
+    When put attribute type: reference
+    When put attribute type: work-email
+    When put attribute type: nick-name
+    When put attribute type: rating
+    When put entity type: person
+    When entity(person) set key attribute: username
+    When entity(person) set key attribute: email
+    When entity(person) set has attribute: name
+    When entity(person) set has attribute: age
+    When put entity type: customer
+    When entity(customer) set supertype: person
+    When entity(customer) set key attribute: reference
+    When entity(customer) set key attribute: work-email as email
+    When entity(customer) set has attribute: rating
+    When entity(customer) set has attribute: nick-name as name
+    Then entity(customer) get key attributes contain:
+      | username   |
+      | reference  |
+      | work-email |
+    Then entity(customer) get key attributes do not contain:
+      | email |
+    Then entity(customer) get has attributes contain:
+      | username   |
+      | reference  |
+      | work-email |
+      | age        |
+      | rating     |
+      | nick-name  |
+    Then entity(customer) get has attributes do not contain:
+      | email |
+      | name  |
+    When transaction commits
+    When session opens transaction of type: write
+    Then entity(customer) get key attributes contain:
+      | username   |
+      | reference  |
+      | work-email |
+    Then entity(customer) get key attributes do not contain:
+      | email |
+    Then entity(customer) get has attributes contain:
+      | username   |
+      | reference  |
+      | work-email |
+      | age        |
+      | rating     |
+      | nick-name  |
+    Then entity(customer) get has attributes do not contain:
+      | email |
+      | name  |
+    When put attribute type: license
+    When put attribute type: points
+    When put entity type: subscriber
+    When entity(subscriber) set supertype: customer
+    When entity(subscriber) set key attribute: license as reference
+    When entity(subscriber) set has attribute: points as rating
+    When transaction commits
+    When session opens transaction of type: read
+    Then entity(customer) get key attributes contain:
+      | username   |
+      | reference  |
+      | work-email |
+    Then entity(customer) get key attributes do not contain:
+      | email |
+    Then entity(customer) get has attributes contain:
+      | username   |
+      | reference  |
+      | work-email |
+      | age        |
+      | rating     |
+      | nick-name  |
+    Then entity(customer) get has attributes do not contain:
+      | email |
+      | name  |
+    Then entity(subscriber) get key attributes contain:
+      | username   |
+      | license    |
+      | work-email |
+    Then entity(subscriber) get key attributes do not contain:
+      | email     |
+      | reference |
+    Then entity(subscriber) get has attributes contain:
+      | username   |
+      | license    |
+      | work-email |
+      | age        |
+      | points     |
+      | nick-name  |
+    Then entity(subscriber) get has attributes do not contain:
+      | email      |
+      | references |
+      | name       |
+      | rating     |
