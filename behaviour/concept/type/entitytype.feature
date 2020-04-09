@@ -439,7 +439,7 @@ Feature: Concept Entity Type
     When entity(person) set has attribute: name
     When put entity type: customer
     When entity(customer) set supertype: person
-    When entity(customer) set key attribute: username
+    When entity(customer) set key attribute: username as name
     Then entity(customer) get key attributes contain:
       | username |
     Then entity(customer) get key attributes do not contain:
