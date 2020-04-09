@@ -431,3 +431,20 @@ Feature: Concept Entity Type
       | references |
       | name       |
       | rating     |
+
+  Scenario: Entity types can override inherited attribute as a key
+    When put attribute type: username
+    When put attribute type: name
+    When put entity type: person
+    When entity(person) set has attribute: name
+    When put entity type: customer
+    When entity(customer) set supertype: person
+    When entity(customer) set key attribute: username
+    Then entity(customer) get key attributes contain:
+      | username |
+    Then entity(customer) get key attributes do not contain:
+      | name |
+    Then entity(customer) get has attributes contain:
+      | username |
+    Then entity(customer) get has attributes do not contain:
+      | name |
