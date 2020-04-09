@@ -478,3 +478,25 @@ Feature: Concept Entity Type
     Then entity(person) get playing roles contain:
       | marriage:husband |
       | marriage:wife    |
+
+  Scenario: Entity types can remove role types
+    When put relation type: marriage
+    When relation(marriage) set relates role: husband
+    When relation(marriage) set relates role: wife
+    When put entity type: person
+    When entity(person) set plays role: marriage:husband
+    When entity(person) set plays role: marriage:wife
+    Then entity(person) remove plays role: marriage:husband
+    Then entity(person) get playing roles do not contain:
+      | marriage:husband |
+    When transaction commits
+    When session opens transaction of type: write
+    Then entity(person) remove plays role: marriage:wife
+    Then entity(person) get playing roles do not contain:
+      | marriage:husband |
+      | marriage:wife    |
+    When transaction commits
+    When session opens transaction of type: read
+    Then entity(person) get playing roles do not contain:
+      | marriage:husband |
+      | marriage:wife    |
