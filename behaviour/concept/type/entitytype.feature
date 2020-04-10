@@ -507,3 +507,57 @@ Feature: Concept Entity Type
     Then entity(person) get playing roles do not contain:
       | marriage:husband |
       | marriage:wife    |
+
+  Scenario: Entity types can inherit role types
+    When put relation type: parentship
+    When relation(parentship) set relates role: parent
+    When relation(parentship) set relates role: child
+    When put relation type: marriage
+    When relation(marriage) set relates role: husband
+    When relation(marriage) set relates role: wife
+    When put entity type: animal
+    When entity(animal) set plays role: parentship:parent
+    When entity(animal) set plays role: parentship:child
+    When put entity type: person
+    When entity(person) set supertype: animal
+    When entity(person) set plays role: marriage:husband
+    When entity(person) set plays role: marriage:wife
+    Then entity(person) get playing roles contain:
+      | parentship:parent |
+      | parentship:child  |
+      | marriage:husband  |
+      | marriage:wife     |
+    When transaction commits
+    When session opens transaction of type: write
+    Then entity(person) get playing roles contain:
+      | parentship:parent |
+      | parentship:child  |
+      | marriage:husband  |
+      | marriage:wife     |
+    When put relation type: sales
+    When relation(sales) set relates role: buyer
+    When put entity type: customer
+    When entity(customer) set supertype: person
+    When entity(customer) set plays role: sales:buyer
+    Then entity(customer) get playing roles contain:
+      | parentship:parent |
+      | parentship:child  |
+      | marriage:husband  |
+      | marriage:wife     |
+      | sales:buyer       |
+    When transaction commits
+    When session opens transaction of type: read
+    Then entity(animal) get playing roles contain:
+      | parentship:parent |
+      | parentship:child  |
+    Then entity(person) get playing roles contain:
+      | parentship:parent |
+      | parentship:child  |
+      | marriage:husband  |
+      | marriage:wife     |
+    Then entity(customer) get playing roles contain:
+      | parentship:parent |
+      | parentship:child  |
+      | marriage:husband  |
+      | marriage:wife     |
+      | sales:buyer       |
