@@ -345,6 +345,8 @@ Feature: Concept Entity Type
     When put attribute type: work-email
     When put attribute type: nick-name
     When put attribute type: rating
+    When attribute(work-email) set supertype: email
+    When attribute(nick-name) set supertype: name
     When put entity type: person
     When entity(person) set key attribute: username
     When entity(person) set key attribute: email
@@ -392,6 +394,8 @@ Feature: Concept Entity Type
       | name  |
     When put attribute type: license
     When put attribute type: points
+    When attribute(license) set supertype: reference
+    When attribute(points) set supertype: rating
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
     When entity(subscriber) set key attribute: license as reference
@@ -435,8 +439,9 @@ Feature: Concept Entity Type
       | rating     |
 
   Scenario: Entity types can override inherited attribute as a key
-    When put attribute type: username
     When put attribute type: name
+    When put attribute type: username
+    When attribute(username) set supertype: name
     When put entity type: person
     When entity(person) set has attribute: name
     When put entity type: customer
