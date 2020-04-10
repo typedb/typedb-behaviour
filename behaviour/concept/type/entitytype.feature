@@ -561,3 +561,55 @@ Feature: Concept Entity Type
       | marriage:husband  |
       | marriage:wife     |
       | sales:buyer       |
+
+  Scenario: Entity types can override inherited role types
+    When put relation type: parentship
+    When relation(parentship) set relates role: parent
+    When relation(parentship) set relates role: child
+    When put relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) set relates role: father as parent
+    When put entity type: person
+    When entity(person) set plays role: parentship:parent
+    When entity(person) set plays role: parentship:child
+    When put entity type: man
+    When entity(man) set supertype: person
+    When entity(man) set plays role: fathership:father as parent
+    Then entity(man) get playing roles contain:
+      | fathership:father |
+      | parentship:child  |
+    Then entity(man) get playing roles do not contain:
+      | parentship:parent |
+    When transaction commits
+    When session opens transaction of type: write
+    Then entity(man) get playing roles contain:
+      | fathership:father |
+      | parentship:child  |
+    Then entity(man) get playing roles do not contain:
+      | parentship:parent |
+    When put relation type: mothership
+    When relation(mothership) set supertype: parentship
+    When relation(mothership) set relates role: mother as parent
+    When put entity type: woman
+    When entity(woman) set supertype: person
+    When entity(woman) set plays role: mothership:mother as parent
+    Then entity(woman) get playing roles contain:
+      | mothership:mother |
+      | parentship:child  |
+    Then entity(woman) get playing roles do not contain:
+      | parentship:parent |
+    When transaction commits
+    When session opens transaction of type: read
+    Then entity(person) get playing roles contain:
+      | parentship:parent |
+      | parentship:child  |
+    Then entity(man) get playing roles contain:
+      | fathership:father |
+      | parentship:child  |
+    Then entity(man) get playing roles do not contain:
+      | parentship:parent |
+    Then entity(woman) get playing roles contain:
+      | mothership:mother |
+      | parentship:child  |
+    Then entity(woman) get playing roles do not contain:
+      | parentship:parent |
