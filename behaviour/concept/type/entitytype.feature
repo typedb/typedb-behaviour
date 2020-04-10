@@ -209,7 +209,8 @@ Feature: Concept Entity Type
     When entity(person) set key attribute: email
     When entity(person) set key attribute: username
     When entity(person) remove key attribute: email
-    Then entity(person) get key attributes do not contain: email
+    Then entity(person) get key attributes do not contain:
+      | email |
     When transaction commits
     When session opens transaction of type: write
     When entity(person) remove key attribute: username
@@ -239,7 +240,8 @@ Feature: Concept Entity Type
     When entity(person) set has attribute: name
     When entity(person) set has attribute: age
     When entity(person) remove has attribute: age
-    Then entity(person) get has attributes do not contain: age
+    Then entity(person) get has attributes do not contain:
+      | age |
     When transaction commits
     When session opens transaction of type: write
     When entity(person) remove has attribute: name
