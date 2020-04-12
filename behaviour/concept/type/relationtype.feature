@@ -49,3 +49,46 @@ Feature: Concept Relation Type
     Then relation(marriage) get related roles contain:
       | husband |
       | wife    |
+
+  Scenario: Delete a relation type and its role types
+    When put relation type: marriage
+    When relation(marriage) set relates role: spouse
+    When put relation type: parentship
+    When relation(parentship) set relates role: parent
+    When relation(parentship) set relates role: child
+    When relation(parentship) remove related role: parent
+    Then relation(parentship) get related roles do not contain:
+      | parent |
+    Then relation(relation) get role(role) get subtypes do not contain:
+      | parentship:parent |
+    When transaction commits
+    When session opens transaction of type: write
+    When delete relation type: parentship
+    Then relation(parentship) is null: true
+    Then relation(relation) get role(role) get subtypes do not contain:
+      | parentship:parent |
+      | parentship:child  |
+    When relation(marriage) remove related role: spouse
+    Then relation(marriage) get related roles do not contain:
+      | spouse |
+    When relation(marriage) set relates role: husband
+    When relation(marriage) set relates role: wife
+    When transaction commits
+    When session opens transaction of type: write
+    When delete relation type: marriage
+    Then relation(marriage) is null: true
+    Then relation(relation) get role(role) get subtypes do not contain:
+      | parentship:parent |
+      | parentship:child  |
+      | marriage:husband  |
+      | marriage:wife     |
+    When transaction commits
+    When session opens transaction of type: read
+    Then relation(parentship) is null: true
+    Then relation(marriage) is null: true
+    Then relation(relation) get role(role) get subtypes do not contain:
+      | parentship:parent |
+      | parentship:child  |
+      | marriage:husband  |
+      | marriage:wife     |
+
