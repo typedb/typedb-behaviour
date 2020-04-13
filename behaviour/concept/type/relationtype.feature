@@ -121,3 +121,21 @@ Feature: Concept Relation Type
     Then relation(employment) get label: employment
     Then relation(employment) get role(employee) get label: employee
     Then relation(employment) get role(employer) get label: employer
+
+  Scenario: Set an relation type and its role types to be abstract
+    When put relation type: marriage
+    When relation(marriage) set relates role: husband
+    When relation(marriage) set relates role: wife
+    When relation(marriage) set abstract: true
+    When relation(marriage) get role(husband) set abstract: true
+    When relation(marriage) get role(wife) set abstract: true
+    Then relation(marriage) is abstract: true
+    Then relation(marriage) get role(husband) is abstract: true
+    Then relation(marriage) get role(wife) is abstract: true
+    # Then relation(marriage) creates instance successfully: false
+    When transaction commits
+    When session opens transaction of type: read
+    Then relation(marriage) is abstract: true
+    Then relation(marriage) get role(husband) is abstract: true
+    Then relation(marriage) get role(wife) is abstract: true
+    # Then relation(person) creates instance successfully: false
