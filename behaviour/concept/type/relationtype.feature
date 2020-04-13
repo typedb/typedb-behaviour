@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-Feature: Concept Relation Type
+Feature: Concept Relation Type and Role Type
 
   Background:
     Given connection has been opened
@@ -25,7 +25,7 @@ Feature: Concept Relation Type
     Given connection open session for keyspace: grakn
     Given session opens transaction of type: write
 
-  Scenario: Create a new relation type with role types
+  Scenario: Relation and role types can be created
     When put relation type: marriage
     When relation(marriage) set relates role: husband
     When relation(marriage) set relates role: wife
@@ -50,7 +50,7 @@ Feature: Concept Relation Type
       | husband |
       | wife    |
 
-  Scenario: Delete a relation type and its role types
+  Scenario: Relation and role types can be deleted
     When put relation type: marriage
     When relation(marriage) set relates role: spouse
     When put relation type: parentship
@@ -92,7 +92,7 @@ Feature: Concept Relation Type
       | marriage:husband  |
       | marriage:wife     |
 
-  Scenario: Change the label of a relation type and its role types
+  Scenario: Relation and role types can change labels
     When put relation type: parentship
     When relation(parentship) set relates role: parent
     When relation(parentship) set relates role: child
@@ -122,7 +122,7 @@ Feature: Concept Relation Type
     Then relation(employment) get role(employee) get label: employee
     Then relation(employment) get role(employer) get label: employer
 
-  Scenario: Set an relation type and its role types to be abstract
+  Scenario: Relation and role types can be set to abstract
     When put relation type: marriage
     When relation(marriage) set relates role: husband
     When relation(marriage) set relates role: wife

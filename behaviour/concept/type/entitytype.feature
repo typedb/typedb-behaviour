@@ -25,7 +25,7 @@ Feature: Concept Entity Type
     Given connection open session for keyspace: grakn
     Given session opens transaction of type: write
 
-  Scenario: Create a new entity type
+  Scenario: Entity types can be created
     When put entity type: person
     Then entity(person) is null: false
     Then entity(person) get supertype: entity
@@ -34,7 +34,7 @@ Feature: Concept Entity Type
     Then entity(person) is null: false
     Then entity(person) get supertype: entity
 
-  Scenario: Delete an entity type
+  Scenario: Entity types can be deleted
     When put entity type: person
     Then entity(person) is null: false
     When put entity type: company
@@ -62,7 +62,7 @@ Feature: Concept Entity Type
       | person  |
       | company |
 
-  Scenario: Change the label of an entity type
+  Scenario: Entity types can change labels
     When put entity type: person
     Then entity(person) get label: person
     When entity(person) set label: horse
@@ -76,7 +76,7 @@ Feature: Concept Entity Type
     When session opens transaction of type: read
     Then entity(animal) get label: animal
 
-  Scenario: Set an entity type to be abstract
+  Scenario: Entity types can be set to abstract
     When put entity type: person
     When entity(person) set abstract: true
     Then entity(person) is abstract: true
@@ -86,22 +86,7 @@ Feature: Concept Entity Type
     Then entity(person) is abstract: true
     # Then entity(person) creates instance successfully: false
 
-  Scenario: Make an entity type subtype another entity type
-    When put entity type: man
-    When put entity type: person
-    When entity(man) set supertype: person
-    Then entity(man) is null: false
-    Then entity(person) is null: false
-    Then entity(man) get supertype: person
-    Then entity(person) get supertype: entity
-    When transaction commits
-    When session opens transaction of type: read
-    Then entity(man) is null: false
-    Then entity(person) is null: false
-    Then entity(man) get supertype: person
-    Then entity(person) get supertype: entity
-
-  Scenario: Create a hierarchy of entity types subtyping each other
+  Scenario: Entity types can be subtypes of other entity types
     When put entity type: man
     When put entity type: woman
     When put entity type: person
