@@ -253,3 +253,30 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(child) get subtypes contain:
       | parentship:child |
       | father-son:son   |
+
+  Scenario: Relation types can inherit role types
+    When put relation type: parentship
+    When relation(parentship) set relates role: parent
+    When relation(parentship) set relates role: child
+    When put relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) set relates role: father as parent
+    Then relation(fathership) get related roles contain:
+      | fathership:father |
+      | parentship:child  |
+    When transaction commits
+    When session opens transaction of type: write
+    When put relation type: mothership
+    When relation(mothership) set supertype: parentship
+    When relation(mothership) set relates role: mother as parent
+    Then relation(mothership) get related roles contain:
+      | mothership:mother |
+      | parentship:child  |
+    When transaction commits
+    When session opens transaction of type: read
+    Then relation(fathership) get related roles contain:
+      | fathership:father |
+      | parentship:child  |
+    Then relation(mothership) get related roles contain:
+      | mothership:mother |
+      | parentship:child  |
