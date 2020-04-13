@@ -127,8 +127,6 @@ Feature: Concept Relation Type
     When relation(marriage) set relates role: husband
     When relation(marriage) set relates role: wife
     When relation(marriage) set abstract: true
-    When relation(marriage) get role(husband) set abstract: true
-    When relation(marriage) get role(wife) set abstract: true
     Then relation(marriage) is abstract: true
     Then relation(marriage) get role(husband) is abstract: true
     Then relation(marriage) get role(wife) is abstract: true
