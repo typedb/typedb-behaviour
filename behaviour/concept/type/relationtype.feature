@@ -280,3 +280,26 @@ Feature: Concept Relation Type and Role Type
     Then relation(mothership) get related roles contain:
       | mothership:mother |
       | parentship:child  |
+
+  Scenario: Relation types can override inherited role types
+    When put relation type: parentship
+    When relation(parentship) set relates role: parent
+    When relation(parentship) set relates role: child
+    When put relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) set relates role: father as parent
+    Then relation(fathership) get related roles do not contain:
+      | parentship:parent |
+    When transaction commits
+    When session opens transaction of type: write
+    When put relation type: mothership
+    When relation(mothership) set supertype: parentship
+    When relation(mothership) set relates role: mother as parent
+    Then relation(mothership) get related roles do not contain:
+      | parentship:parent |
+    When transaction commits
+    When session opens transaction of type: read
+    Then relation(fathership) get related roles do not contain:
+      | parentship:parent |
+    Then relation(mothership) get related roles do not contain:
+      | parentship:parent |
