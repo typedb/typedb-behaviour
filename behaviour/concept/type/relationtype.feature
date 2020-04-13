@@ -92,21 +92,32 @@ Feature: Concept Relation Type
       | marriage:husband  |
       | marriage:wife     |
 
-  Scenario: Change the label of a relation type
+  Scenario: Change the label of a relation type and its role types
     When put relation type: parentship
-    Then relation(parentship) is null: false
+    When relation(parentship) set relates role: parent
+    When relation(parentship) set relates role: child
     Then relation(parentship) get label: parentship
+    Then relation(parentship) get role(parent) get label: parent
+    Then relation(parentship) get role(child) get label: child
     When relation(parentship) set label: marriage
-    Then relation(marriage) is null: false
+    When relation(marriage) get role(parent) set label: husband
+    When relation(marriage) get role(child) set label: wife
     Then relation(marriage) get label: marriage
+    Then relation(marriage) get role(husband) get label: husband
+    Then relation(marriage) get role(wife) get label: wife
     When transaction commits
     When session opens transaction of type: write
-    Then relation(marriage) is null: false
     Then relation(marriage) get label: marriage
+    Then relation(marriage) get role(husband) get label: husband
+    Then relation(marriage) get role(wife) get label: wife
     When relation(marriage) set label: employment
-    Then relation(employment) is null: false
+    When relation(employment) get role(husband) set label: employee
+    When relation(employment) get role(wife) set label: employer
     Then relation(employment) get label: employment
+    Then relation(employment) get role(employee) get label: employee
+    Then relation(employment) get role(employer) get label: employer
     When transaction commits
     When session opens transaction of type: read
-    Then relation(employment) is null: false
     Then relation(employment) get label: employment
+    Then relation(employment) get role(employee) get label: employee
+    Then relation(employment) get role(employer) get label: employer
