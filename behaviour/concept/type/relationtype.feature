@@ -92,3 +92,21 @@ Feature: Concept Relation Type
       | marriage:husband  |
       | marriage:wife     |
 
+  Scenario: Change the label of a relation type
+    When put relation type: parentship
+    Then relation(parentship) is null: false
+    Then relation(parentship) get label: parentship
+    When relation(parentship) set label: marriage
+    Then relation(marriage) is null: false
+    Then relation(marriage) get label: marriage
+    When transaction commits
+    When session opens transaction of type: write
+    Then relation(marriage) is null: false
+    Then relation(marriage) get label: marriage
+    When relation(marriage) set label: employment
+    Then relation(employment) is null: false
+    Then relation(employment) get label: employment
+    When transaction commits
+    When session opens transaction of type: read
+    Then relation(employment) is null: false
+    Then relation(employment) get label: employment
