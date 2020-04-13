@@ -82,9 +82,7 @@ graknlabs_client_java_maven_dependencies = "maven_dependencies",)
 graknlabs_client_java_maven_dependencies()
 
 load("@graknlabs_client_java//dependencies/graknlabs:dependencies.bzl",
-graknlabs_grabl_tracing = "graknlabs_grabl_tracing",
-graknlabs_protocol = "graknlabs_protocol",
-graknlabs_grakn_core = "graknlabs_grakn_core")
+"graknlabs_grabl_tracing", "graknlabs_protocol", "graknlabs_grakn_core")
 graknlabs_grabl_tracing()
 graknlabs_protocol()
 graknlabs_grakn_core()
