@@ -542,3 +542,28 @@ Feature: Concept Relation Type and Role Type
       | contractor-reference |
       | employment-hours     |
       | contractor-hours     |
+
+  Scenario: Relation types can play role types
+    When put relation type: locates
+    When relation(locates) set relates role: location
+    When relation(locates) set relates role: located
+    When put relation type: marriage
+    When relation(marriage) set relates role: husband
+    When relation(marriage) set relates role: wife
+    When relation(marriage) set plays role: locates:located
+    Then relation(marriage) get playing roles contain:
+      | locates:located |
+    When transaction commits
+    When session opens transaction of type: write
+    When put relation type: organises
+    When relation(organises) set relates role: organiser
+    When relation(organises) set relates role: organised
+    When relation(marriage) set plays role: organises:organised
+    Then relation(marriage) get playing roles contain:
+      | locates:located     |
+      | organises:organised |
+    When transaction commits
+    When session opens transaction of type: read
+    Then relation(marriage) get playing roles contain:
+      | locates:located     |
+      | organises:organised |
