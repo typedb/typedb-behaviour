@@ -323,10 +323,10 @@ Feature: Concept Entity Type
     When put attribute type: age
     When put attribute type: reference
     When put attribute type: work-email
-    When put attribute type: nick-name
-    When put attribute type: rating
     When attribute(work-email) set supertype: email
+    When put attribute type: nick-name
     When attribute(nick-name) set supertype: name
+    When put attribute type: rating
     When put entity type: person
     When entity(person) set key attribute: username
     When entity(person) set key attribute: email
@@ -373,8 +373,8 @@ Feature: Concept Entity Type
       | email |
       | name  |
     When put attribute type: license
-    When put attribute type: points
     When attribute(license) set supertype: reference
+    When put attribute type: points
     When attribute(points) set supertype: rating
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
