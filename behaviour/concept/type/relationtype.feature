@@ -365,3 +365,32 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) get has attributes do not contain:
       | date     |
       | religion |
+
+  Scenario: Relation types can have keys and attributes
+    When put attribute type: license
+    When put attribute type: certificate
+    When put attribute type: date
+    When put attribute type: religion
+    When put relation type: marriage
+    When relation(marriage) set key attribute: license
+    When relation(marriage) set key attribute: certificate
+    When relation(marriage) set has attribute: date
+    When relation(marriage) set has attribute: religion
+    Then relation(marriage) get key attributes contain:
+      | license     |
+      | certificate |
+    Then relation(marriage) get has attributes contain:
+      | license     |
+      | certificate |
+      | date        |
+      | religion    |
+    When transaction commits
+    When session opens transaction of type: read
+    Then relation(marriage) get key attributes contain:
+      | license     |
+      | certificate |
+    Then relation(marriage) get has attributes contain:
+      | license     |
+      | certificate |
+      | date        |
+      | religion    |
