@@ -281,7 +281,7 @@ Feature: Concept Relation Type and Role Type
       | mothership:mother |
       | parentship:child  |
 
-  Scenario: Relation types can override inherited relate role types
+  Scenario: Relation types can override inherited related role types
     When put relation type: parentship
     When relation(parentship) set relates role: parent
     When relation(parentship) set relates role: child
@@ -394,3 +394,68 @@ Feature: Concept Relation Type and Role Type
       | certificate |
       | date        |
       | religion    |
+
+  Scenario: Relation types can inherit keys and attributes
+    When put attribute type: reference-number
+    When put attribute type: status
+    When put attribute type: insurance-number
+    When put attribute type: start-date
+    When put relation type: employment
+    When relation(employment) set relates role: employee
+    When relation(employment) set relates role: employer
+    When relation(employment) set key attribute: reference-number
+    When relation(employment) set has attribute: status
+    When put relation type: permanent-employment
+    When relation(permanent-employment) set supertype: employment
+    When relation(permanent-employment) set key attribute: insurance-number
+    When relation(permanent-employment) set has attribute: start-date
+    Then relation(permanent-employment) get key attributes contain:
+      | reference-number |
+      | insurance-number |
+    Then relation(permanent-employment) get has attributes contain:
+      | reference-number |
+      | insurance-number |
+      | status           |
+      | start-date       |
+    When transaction commits
+    When session opens transaction of type: write
+    Then relation(permanent-employment) get key attributes contain:
+      | reference-number |
+      | insurance-number |
+    Then relation(permanent-employment) get has attributes contain:
+      | reference-number |
+      | insurance-number |
+      | status           |
+      | start-date       |
+    When put attribute type: contractor-number
+    When put attribute type: hours
+    When put relation type: contractor-employment
+    When relation(contractor-employment) set supertype: employment
+    When relation(contractor-employment) set key attribute: contractor-number
+    When relation(contractor-employment) set has attribute: hours
+    Then relation(contractor-employment) get key attributes contain:
+      | reference-number  |
+      | contractor-number |
+    Then relation(contractor-employment) get has attributes contain:
+      | reference-number  |
+      | contractor-number |
+      | status            |
+      | hours             |
+    When transaction commits
+    When session opens transaction of type: read
+    Then relation(permanent-employment) get key attributes contain:
+      | reference-number |
+      | insurance-number |
+    Then relation(permanent-employment) get has attributes contain:
+      | reference-number |
+      | insurance-number |
+      | status           |
+      | start-date       |
+    Then relation(contractor-employment) get key attributes contain:
+      | reference-number  |
+      | contractor-number |
+    Then relation(contractor-employment) get has attributes contain:
+      | reference-number  |
+      | contractor-number |
+      | status            |
+      | hours             |
