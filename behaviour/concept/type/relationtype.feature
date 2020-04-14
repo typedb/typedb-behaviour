@@ -320,6 +320,7 @@ Feature: Concept Relation Type and Role Type
     When put attribute type: license
     When put attribute type: certificate
     When put relation type: marriage
+    When relation(marriage) set relates role: spouse
     When relation(marriage) set key attribute: license
     When relation(marriage) set key attribute: certificate
     When relation(marriage) remove key attribute: license
@@ -331,3 +332,36 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) get key attributes do not contain:
       | license     |
       | certificate |
+
+  Scenario: Relation types can have attributes
+    When put attribute type: date
+    When put attribute type: religion
+    When put relation type: marriage
+    When relation(marriage) set relates role: spouse
+    When relation(marriage) set has attribute: date
+    When relation(marriage) set has attribute: religion
+    Then relation(marriage) get has attributes contain:
+      | date     |
+      | religion |
+    When transaction commits
+    When session opens transaction of type: read
+    Then relation(marriage) get has attributes contain:
+      | date     |
+      | religion |
+
+  Scenario: Relation types can remove attributes
+    When put attribute type: date
+    When put attribute type: religion
+    When put relation type: marriage
+    When relation(marriage) set relates role: spouse
+    When relation(marriage) set has attribute: date
+    When relation(marriage) set has attribute: religion
+    When relation(marriage) remove has attribute: religion
+    Then relation(marriage) get has attributes do not contain:
+      | religion |
+    When transaction commits
+    When session opens transaction of type: write
+    When relation(marriage) remove has attribute: date
+    Then relation(marriage) get has attributes do not contain:
+      | date     |
+      | religion |
