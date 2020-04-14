@@ -254,7 +254,7 @@ Feature: Concept Relation Type and Role Type
       | parentship:child |
       | father-son:son   |
 
-  Scenario: Relation types can inherit role types
+  Scenario: Relation types can inherit related role types
     When put relation type: parentship
     When relation(parentship) set relates role: parent
     When relation(parentship) set relates role: child
@@ -281,7 +281,7 @@ Feature: Concept Relation Type and Role Type
       | mothership:mother |
       | parentship:child  |
 
-  Scenario: Relation types can override inherited role types
+  Scenario: Relation types can override inherited relate role types
     When put relation type: parentship
     When relation(parentship) set relates role: parent
     When relation(parentship) set relates role: child
@@ -303,3 +303,31 @@ Feature: Concept Relation Type and Role Type
       | parentship:parent |
     Then relation(mothership) get related roles do not contain:
       | parentship:parent |
+
+  Scenario: Relation types can have keys
+    When put attribute type: license
+    When put relation type: marriage
+    When relation(marriage) set relates role: spouse
+    When relation(marriage) set key attribute: license
+    Then relation(marriage) get key attributes contain:
+      | license |
+    When transaction commits
+    When session opens transaction of type: read
+    Then relation(marriage) get key attributes contain:
+      | license |
+
+  Scenario: Relation types can remove keys
+    When put attribute type: license
+    When put attribute type: certificate
+    When put relation type: marriage
+    When relation(marriage) set key attribute: license
+    When relation(marriage) set key attribute: certificate
+    When relation(marriage) remove key attribute: license
+    Then relation(marriage) get key attributes do not contain:
+      | license |
+    When transaction commits
+    When session opens transaction of type: write
+    When relation(marriage) remove key attribute: certificate
+    Then relation(marriage) get key attributes do not contain:
+      | license     |
+      | certificate |
