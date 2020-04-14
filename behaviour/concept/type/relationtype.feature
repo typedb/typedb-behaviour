@@ -396,66 +396,75 @@ Feature: Concept Relation Type and Role Type
       | religion    |
 
   Scenario: Relation types can inherit keys and attributes
-    When put attribute type: reference-number
-    When put attribute type: status
-    When put attribute type: insurance-number
-    When put attribute type: start-date
+    When put attribute type: employment-reference
+    When put attribute type: employment-hours
+    When put attribute type: contractor-reference
+    When put attribute type: contractor-hours
     When put relation type: employment
     When relation(employment) set relates role: employee
     When relation(employment) set relates role: employer
-    When relation(employment) set key attribute: reference-number
-    When relation(employment) set has attribute: status
-    When put relation type: permanent-employment
-    When relation(permanent-employment) set supertype: employment
-    When relation(permanent-employment) set key attribute: insurance-number
-    When relation(permanent-employment) set has attribute: start-date
-    Then relation(permanent-employment) get key attributes contain:
-      | reference-number |
-      | insurance-number |
-    Then relation(permanent-employment) get has attributes contain:
-      | reference-number |
-      | insurance-number |
-      | status           |
-      | start-date       |
-    When transaction commits
-    When session opens transaction of type: write
-    Then relation(permanent-employment) get key attributes contain:
-      | reference-number |
-      | insurance-number |
-    Then relation(permanent-employment) get has attributes contain:
-      | reference-number |
-      | insurance-number |
-      | status           |
-      | start-date       |
-    When put attribute type: contractor-number
-    When put attribute type: hours
+    When relation(employment) set key attribute: employment-reference
+    When relation(employment) set has attribute: employment-hours
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    When relation(contractor-employment) set key attribute: contractor-number
-    When relation(contractor-employment) set has attribute: hours
+    When relation(contractor-employment) set key attribute: contractor-reference
+    When relation(contractor-employment) set has attribute: contractor-hours
     Then relation(contractor-employment) get key attributes contain:
-      | reference-number  |
-      | contractor-number |
+      | employment-reference |
+      | contractor-reference |
     Then relation(contractor-employment) get has attributes contain:
-      | reference-number  |
-      | contractor-number |
-      | status            |
-      | hours             |
+      | employment-reference |
+      | contractor-reference |
+      | employment-hours     |
+      | contractor-hours     |
+    When transaction commits
+    When session opens transaction of type: write
+    Then relation(contractor-employment) get key attributes contain:
+      | employment-reference |
+      | contractor-reference |
+    Then relation(contractor-employment) get has attributes contain:
+      | employment-reference |
+      | contractor-reference |
+      | employment-hours     |
+      | contractor-hours     |
+    When put attribute type: parttime-reference
+    When put attribute type: parttime-hours
+    When put relation type: parttime-employment
+    When relation(parttime-employment) set supertype: contractor-employment
+    When relation(parttime-employment) set key attribute: parttime-reference
+    When relation(parttime-employment) set has attribute: parttime-hours
+    Then relation(parttime-employment) get key attributes contain:
+      | employment-reference |
+      | contractor-reference |
+      | parttime-reference   |
+    Then relation(parttime-employment) get has attributes contain:
+      | employment-reference |
+      | contractor-reference |
+      | parttime-reference   |
+      | employment-hours     |
+      | contractor-hours     |
+      | parttime-hours       |
     When transaction commits
     When session opens transaction of type: read
-    Then relation(permanent-employment) get key attributes contain:
-      | reference-number |
-      | insurance-number |
-    Then relation(permanent-employment) get has attributes contain:
-      | reference-number |
-      | insurance-number |
-      | status           |
-      | start-date       |
     Then relation(contractor-employment) get key attributes contain:
-      | reference-number  |
-      | contractor-number |
+      | employment-reference |
+      | contractor-reference |
     Then relation(contractor-employment) get has attributes contain:
-      | reference-number  |
-      | contractor-number |
-      | status            |
-      | hours             |
+      | employment-reference |
+      | contractor-reference |
+      | employment-hours     |
+      | contractor-hours     |
+    Then relation(parttime-employment) get key attributes contain:
+      | employment-reference |
+      | contractor-reference |
+      | parttime-reference   |
+    Then relation(parttime-employment) get has attributes contain:
+      | employment-reference |
+      | contractor-reference |
+      | parttime-reference   |
+      | employment-hours     |
+      | contractor-hours     |
+      | parttime-hours       |
+
+#  Scenario: Relation types can override inherited keys and attributes
+    
