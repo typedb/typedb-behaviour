@@ -600,7 +600,6 @@ Feature: Concept Relation Type and Role Type
     When relation(locates) set relates role: locating
     When relation(locates) set relates role: located
     When put relation type: contractor-locates
-    When relation(contractor-locates) set supertype: locates
     When relation(contractor-locates) set relates role: contractor-locating
     When relation(contractor-locates) set relates role: contractor-located
     When put relation type: employment
@@ -618,6 +617,49 @@ Feature: Concept Relation Type and Role Type
     When put relation type: parttime-locates
     When relation(parttime-locates) set relates role: parttime-locating
     When relation(parttime-locates) set relates role: parttime-located
+    When put relation type: parttime-employment
+    When relation(parttime-employment) set supertype: contractor-employment
+    When relation(parttime-employment) set relates role: parttime-employer
+    When relation(parttime-employment) set relates role: parttime-employee
+    When relation(parttime-employment) set plays role: parttime-locates:parttime-located
+    Then relation(parttime-employment) get playing roles contain:
+      | locates:located                       |
+      | contractor-locates:contractor-located |
+      | parttime-locates:parttime-located     |
+    When transaction commits
+    When session opens transaction of type: read
+    Then relation(contractor-employment) get playing roles contain:
+      | locates:located                       |
+      | contractor-locates:contractor-located |
+    Then relation(parttime-employment) get playing roles contain:
+      | locates:located                       |
+      | contractor-locates:contractor-located |
+      | parttime-locates:parttime-located     |
+
+  Scenario: Relation types can inherit playing role types that are subtypes of each other
+    When put relation type: locates
+    When relation(locates) set relates role: locating
+    When relation(locates) set relates role: located
+    When put relation type: contractor-locates
+    When relation(contractor-locates) set supertype: locates
+    When relation(contractor-locates) set relates role: contractor-locating as locating
+    When relation(contractor-locates) set relates role: contractor-located as located
+    When put relation type: employment
+    When relation(employment) set relates role: employer
+    When relation(employment) set relates role: employee
+    When relation(employment) set plays role: locates:located
+    When put relation type: contractor-employment
+    When relation(contractor-employment) set supertype: employment
+    When relation(contractor-employment) set plays role: contractor-locates:contractor-located
+    Then relation(contractor-employment) get playing roles contain:
+      | locates:located                       |
+      | contractor-locates:contractor-located |
+    When transaction commits
+    When session opens transaction of type: write
+    When put relation type: parttime-locates
+    When relation(parttime-locates) set supertype: contractor-locates
+    When relation(parttime-locates) set relates role: parttime-locating as contractor-locating
+    When relation(parttime-locates) set relates role: parttime-located as contractor-located
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
     When relation(parttime-employment) set relates role: parttime-employer
