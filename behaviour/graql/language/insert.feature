@@ -89,10 +89,16 @@ Feature: Graql Insert Query
       """
       match $r (employer: $c, employee: $p) isa employment; get;
       """
-    Then answer concepts all have key: ref
-    Then answer keys are
-      | p    | c    | r    |
-      | 0    | 2    | 1    |
+
+    Then concept identifiers are
+      |       | check | value |
+      | REF0  | key   | ref:0 |
+      | REF1  | key   | ref:1 |
+      | REF2  | key   | ref:2 |
+
+    Then uniquely identify answer concepts
+      | p     | c     | r     |
+      | REF0  | REF2  | REF1  |
 
 
   Scenario: insert an additional duplicate role player
@@ -127,10 +133,13 @@ Feature: Graql Insert Query
       """
       match $r (employee: $p, employee: $p) isa employment; get;
       """
-    Then answer concepts all have key: ref
-    Then answer keys are
-      | p    | r    |
-      | 0    | 1    |
+    Then concept identifiers are
+      |       | check | value |
+      | REF0  | key   | ref:0 |
+      | REF1  | key   | ref:1 |
+    Then uniquely identify answer concepts
+      | p     | r     |
+      | REF0  | REF1  |
 
 
   Scenario: insert an attribute with a value is retrievable by the value
@@ -153,10 +162,14 @@ Feature: Graql Insert Query
       """
       match $a "John"; get;
       """
-    Then answer concepts all have key: ref
-    Then answer keys are
-      | a    |
-      | 0    |
+
+    Then concept identifiers are
+      |       | check | value |
+      | REF0  | key   | ref:0 |
+
+    Then uniquely identify answer concepts
+      | a     |
+      | REF0  |
 
 
   # TODO - fix this; should fail but it does not!
@@ -212,11 +225,16 @@ Feature: Graql Insert Query
       $p1 != $p2;
       get $p1, $p2;
       """
-    Then answer concepts all have key: ref
-    Then answer keys are
-      | p1   | p2   |
-      | 0    | 1    |
-      | 1    | 0    |
+
+    Then concept identifiers are
+      |       | check | value |
+      | REF0  | key   | ref:0 |
+      | REF1  | key   | ref:1 |
+
+    Then uniquely identify answer concepts
+      | p1    | p2    |
+      | REF0  | REF1  |
+      | REF1  | REF0  |
 
 
   Scenario: insert a subtype of an attribute with same value creates a separate instance

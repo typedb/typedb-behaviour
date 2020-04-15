@@ -58,18 +58,24 @@ Feature: Graql Match Clause
       """
       match $x isa person; $r (employee: $x) isa relation; get;
       """
-    Then answer concepts all have key: ref
-    Then answer keys are
-      | x    | r    |
-      | 0    | 2    |
+    Then concept identifiers are
+      |       | check | value |
+      | REF0  | key   | ref:0 |
+      | REF1  | key   | ref:1 |
+      | REF2  | key   | ref:2 |
+
+    Then uniquely identify answer concepts
+      | x     | r     |
+      | REF0  | REF2  |
 
     Then get answers of graql query
-      | match $y isa company; $r (employer: $y) isa relation; get; |
-    Then answer concepts all have key: ref
-    Then answer keys are
-      | y    | r    |
-      | 1    | 2    |
+      """
+      match $y isa company; $r (employer: $y) isa relation; get;
+      """
 
+    Then uniquely identify answer concepts
+      | y     | r     |
+      | REF1  | REF2  |
 
   Scenario: retrieve all combinations of players in a relation
     Given graql define
@@ -102,15 +108,22 @@ Feature: Graql Match Clause
       """
       match $r ($x, $y) isa employment; get; 
       """
-    Then answer concepts all have key: ref
-    Then answer keys are
-      | x    | y    | r    |
-      | 0    | 1    | 3    |
-      | 1    | 0    | 3    |
-      | 0    | 2    | 3    |
-      | 2    | 0    | 3    |
-      | 1    | 2    | 3    |
-      | 2    | 1    | 3    |
+
+    Then concept identifiers are
+      |       | check | value |
+      | REF0  | key   | ref:0 |
+      | REF1  | key   | ref:1 |
+      | REF2  | key   | ref:2 |
+      | REF3  | key   | ref:3 |
+
+    Then uniquely identify answer concepts
+      | x     | y     | r     |
+      | REF0  | REF1  | REF3  |
+      | REF1  | REF0  | REF3  |
+      | REF0  | REF2  | REF3  |
+      | REF2  | REF0  | REF3  |
+      | REF1  | REF2  | REF3  |
+      | REF2  | REF1  | REF3  |
 
 
   Scenario: subtype hierarchy satisfies transitive sub assertions
@@ -155,10 +168,13 @@ Feature: Graql Match Clause
       """
       match $r (player: $x, player: $x) isa relation; get;
       """
-    Then answer concepts all have key: ref
-    Then answer keys are
-      | x    |  r    |
-      | 0    |  1    |
+    Then concept identifiers are
+      |       | check | value |
+      | REF0  | key   | ref:0 |
+      | REF1  | key   | ref:1 |
+    Then uniquely identify answer concepts
+      | x     | r     |
+      | REF0  | REF1  |
 
   Scenario: duplicate role players are retrieved singly when queried singly
     Given graql define
@@ -180,7 +196,10 @@ Feature: Graql Match Clause
       """
       match $r (player: $x) isa relation; get;
       """
-    Then answer concepts all have key: ref
-    Then answer keys are
-      | x    |  r    |
-      | 0    |  1    |
+    Then concept identifiers are
+      |       | check | value |
+      | REF0  | key   | ref:0 |
+      | REF1  | key   | ref:1 |
+    Then uniquely identify answer concepts
+      | x     | r     |
+      | REF0  | REF1  |

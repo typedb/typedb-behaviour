@@ -43,10 +43,14 @@ Feature: Graql Undefine Query
       """
       match $x sub attribute; get; 
       """
-    Then answers are labeled
-      | x         |
-      | attribute |
-      | name      |
+    Then concept identifiers are
+      |       | check | value     |
+      | ATTR  | label | attribute |
+      | NAME  | label | name      |
+    Then uniquely identify answer concepts
+      | x     |
+      | ATTR  |
+      | NAME  |
 
 
   Scenario: undefine 'plays' from super entity removes 'plays' from subtypes
@@ -63,10 +67,15 @@ Feature: Graql Undefine Query
       """
       match $x type child; $x plays $role; get; 
       """
-    Then answers are labeled
-      | x     | role             |
-      | child | @has-name-owner  |
-      | child | @key-email-owner |
+    Then concept identifiers are
+      |             | check | value             |
+      | NAME_OWNER  | label | @has-name-owner   |
+      | EMAIL_OWNER | label | @key-email-owner  |
+      | CHILD       | label | child             |
+    Then uniquely identify answer concepts
+      | x     | role        |
+      | CHILD | NAME_OWNER  |
+      | CHILD | EMAIL_OWNER |
 
 
   @ignore
@@ -82,7 +91,7 @@ Feature: Graql Undefine Query
       """
       match $x sub @has-name; get;
       """
-    When answers are labeled
+    When uniquely identify answer concepts
       | x               |
       | @has-name       |
       | @has-first-name |
@@ -94,9 +103,13 @@ Feature: Graql Undefine Query
       """
       match $x sub @has-name; get; 
       """
-    When answers are labeled
+    Then concept identifiers are
+      |           | check | value     |
+      | HAS_NAME  | label | @has-name |
+    When uniquely identify answer concepts
       | x         |
-      | @has-name |
+      | HAS_NAME  |
+
 
 
   # TODO is this expected to hold?
@@ -121,9 +134,13 @@ Feature: Graql Undefine Query
       """
       match $x type child; $x has $attribute; get; 
       """
-    Then answers are labeled
+    Then concept identifiers are
+      |       | check | value |
+      | CHILD | label | child |
+      | EMAIL | label | email |
+    Then uniquely identify answer concepts
       | x     | attribute |
-      | child | email     |
+      | CHILD | EMAIL     |
 
 
   Scenario: undefine 'key' from super entity removes 'key' from child entity
@@ -158,9 +175,13 @@ Feature: Graql Undefine Query
       """
       match $x type part-time; $x relates $role; get; 
       """
-    Then answers are labeled
+    Then concept identifiers are
+      |           | check | value     |
+      | EMPLOYEE  | label | employee  |
+      | PART_TIME | label | part-time |
+    Then uniquely identify answer concepts
       | x         | role     |
-      | part-time | employee |
+      | PART_TIME | EMPLOYEE |
 
   @ignore
   # re-enable when 'relates' is bound to a relation and blockable
@@ -193,12 +214,18 @@ Feature: Graql Undefine Query
       """
       match $x abstract; get; 
       """
-    Then answers are labeled
+    Then concept identifiers are
+      |           | check | value     |
+      | ENTITY    | label | entity    |
+      | RELATION  | label | relation  |
+      | ATTRIBUTE | label | attribute |
+      | THING     | label | thing     |
+    Then uniquely identify answer concepts
       | x         |
-      | entity    |
-      | relation  |
-      | attribute |
-      | thing     |
+      | ENTITY    |
+      | RELATION  |
+      | ATTRIBUTE |
+      | THING     |
 
 
   @ignore
@@ -238,7 +265,7 @@ Feature: Graql Undefine Query
       """
       define
       company sub entity, plays employer;
-      arule sub rule, when
+      a-rule sub rule, when
       { $c isa company; $y isa person; },
       then
       { (employer: $c, employee: $y) isa employment; };
@@ -248,13 +275,17 @@ Feature: Graql Undefine Query
       """
       match $x sub rule; get;
       """
-    When answers are labeled
-      | x     |
-      | rule  |
-      | arule |
+    Then concept identifiers are
+      |         | check | value   |
+      | RULE    | label | rule    |
+      | A_RULE  | label | a-rule  |
+    When uniquely identify answer concepts
+      | x       |
+      | RULE    |
+      | a_RULE  |
     Then graql undefine
       """
-      undefine arule sub rule; 
+      undefine a-rule sub rule;
       """
     Then get answers of graql query
       """
