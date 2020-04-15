@@ -398,7 +398,7 @@ Feature: Concept Entity Type
       | username   |
       | email      |
       | name       |
-      | references |
+      | reference  |
       | rating     |
       | license    |
       | work-email |

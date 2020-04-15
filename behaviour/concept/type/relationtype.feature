@@ -543,6 +543,36 @@ Feature: Concept Relation Type and Role Type
       | employment-hours     |
       | contractor-hours     |
 
+  Scenario: Relation types can override inherited attribute as a key
+    When put attribute type: employment-reference
+    When put attribute type: contractor-reference
+    When attribute(contractor-reference) set supertype: employment-reference
+    When put relation type: employment
+    When relation(employment) set relates role: employer
+    When relation(employment) set relates role: employee
+    When relation(employment) set has attribute: employment-reference
+    When put relation type: contractor-employment
+    When relation(contractor-employment) set supertype: employment
+    When relation(contractor-employment) set key attribute: contractor-reference as employment-reference
+    Then relation(contractor-employment) get key attributes contain:
+      | contractor-reference |
+    Then relation(contractor-employment) get key attributes do not contain:
+      | employment-reference |
+    Then relation(contractor-employment) get has attributes contain:
+      | contractor-reference |
+    Then relation(contractor-employment) get has attributes do not contain:
+      | employment-reference |
+    When transaction commits
+    When session opens transaction of type: read
+    Then relation(contractor-employment) get key attributes contain:
+      | contractor-reference |
+    Then relation(contractor-employment) get key attributes do not contain:
+      | employment-reference |
+    Then relation(contractor-employment) get has attributes contain:
+      | contractor-reference |
+    Then relation(contractor-employment) get has attributes do not contain:
+      | employment-reference |
+
   Scenario: Relation types can play role types
     When put relation type: locates
     When relation(locates) set relates role: location
@@ -695,7 +725,7 @@ Feature: Concept Relation Type and Role Type
     When relation(contractor-employment) set supertype: employment
     When relation(contractor-employment) set plays role: contractor-locates:contractor-located as located
     Then relation(contractor-employment) get playing roles do not contain:
-      | locates:located                       |
+      | locates:located |
     When transaction commits
     When session opens transaction of type: write
     When put relation type: parttime-locates
@@ -713,7 +743,7 @@ Feature: Concept Relation Type and Role Type
     When transaction commits
     When session opens transaction of type: read
     Then relation(contractor-employment) get playing roles do not contain:
-      | locates:located                       |
+      | locates:located |
     Then relation(parttime-employment) get playing roles do not contain:
       | locates:located                       |
       | contractor-locates:contractor-located |
