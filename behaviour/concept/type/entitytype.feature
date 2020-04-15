@@ -466,7 +466,7 @@ Feature: Concept Entity Type
       | marriage:husband |
       | marriage:wife    |
 
-  Scenario: Entity types can remove role types
+  Scenario: Entity types can remove playing role types
     When put relation type: marriage
     When relation(marriage) set relates role: husband
     When relation(marriage) set relates role: wife
@@ -488,7 +488,7 @@ Feature: Concept Entity Type
       | marriage:husband |
       | marriage:wife    |
 
-  Scenario: Entity types can inherit role types
+  Scenario: Entity types can inherit playing role types
     When put relation type: parentship
     When relation(parentship) set relates role: parent
     When relation(parentship) set relates role: child
@@ -542,7 +542,7 @@ Feature: Concept Entity Type
       | marriage:wife     |
       | sales:buyer       |
 
-  Scenario: Entity types can override inherited role types
+  Scenario: Entity types can override inherited playing role types
     When put relation type: parentship
     When relation(parentship) set relates role: parent
     When relation(parentship) set relates role: child
