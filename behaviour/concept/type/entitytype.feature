@@ -542,6 +542,53 @@ Feature: Concept Entity Type
       | marriage:wife     |
       | sales:buyer       |
 
+  Scenario: Entity types can inherit playing role types that are subtypes of each other
+    When put relation type: parentship
+    When relation(parentship) set relates role: parent
+    When relation(parentship) set relates role: child
+    When put relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) set relates role: father as parent
+    When put entity type: person
+    When entity(person) set plays role: parentship:parent
+    When entity(person) set plays role: parentship:child
+    When put entity type: man
+    When entity(man) set supertype: person
+    When entity(man) set plays role: fathership:father
+    Then entity(man) get playing roles contain:
+      | parentship:parent |
+      | fathership:father |
+      | parentship:child  |
+    When transaction commits
+    When session opens transaction of type: write
+    Then entity(man) get playing roles contain:
+      | parentship:parent |
+      | fathership:father |
+      | parentship:child  |
+    When put relation type: mothership
+    When relation(mothership) set supertype: parentship
+    When relation(mothership) set relates role: mother as parent
+    When put entity type: woman
+    When entity(woman) set supertype: person
+    When entity(woman) set plays role: mothership:mother
+    Then entity(woman) get playing roles contain:
+      | parentship:parent |
+      | mothership:mother |
+      | parentship:child  |
+    When transaction commits
+    When session opens transaction of type: read
+    Then entity(person) get playing roles contain:
+      | parentship:parent |
+      | parentship:child  |
+    Then entity(man) get playing roles contain:
+      | parentship:parent |
+      | fathership:father |
+      | parentship:child  |
+    Then entity(woman) get playing roles contain:
+      | parentship:parent |
+      | mothership:mother |
+      | parentship:child  |
+
   Scenario: Entity types can override inherited playing role types
     When put relation type: parentship
     When relation(parentship) set relates role: parent
