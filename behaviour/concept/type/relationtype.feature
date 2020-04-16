@@ -663,6 +663,21 @@ Feature: Concept Relation Type and Role Type
     When relation(contractor-employment) fails at setting key attribute: contractor-reference as employment-reference
     When relation(contractor-employment) fails at setting has attribute: contractor-hours as employment-hours
 
+  Scenario: Relation types cannot declare and override a key/has attribute at the same time
+    When put attribute type: reference
+    When put attribute type: number
+    When attribute(number) set supertype: reference
+    When put attribute type: hours
+    When put attribute type: max-hours
+    When attribute(max-hours) set supertype: hours
+    When put relation type: employment
+    When relation(employment) set relates role: employee
+    When relation(employment) set relates role: employer
+    When relation(employment) set key attribute: reference
+    When relation(employment) fails at setting key attribute: number as reference
+    When relation(employment) set has attribute: hours
+    When relation(employment) fails at setting has attribute: max-hours as hours
+
   Scenario: Relation types can play role types
     When put relation type: locates
     When relation(locates) set relates role: location
