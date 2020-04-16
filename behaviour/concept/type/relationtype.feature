@@ -466,7 +466,82 @@ Feature: Concept Relation Type and Role Type
       | contractor-hours     |
       | parttime-hours       |
 
-  Scenario: Relation types can override inherited keys and attributes with their subtypes
+  Scenario: Relation types can inherit keys and attributes that are subtypes of each other
+    When put attribute type: employment-reference
+    When put attribute type: employment-hours
+    When put attribute type: contractor-reference
+    When attribute(contractor-reference) set supertype: employment-reference
+    When put attribute type: contractor-hours
+    When attribute(contractor-hours) set supertype: employment-hours
+    When put relation type: employment
+    When relation(employment) set relates role: employee
+    When relation(employment) set relates role: employer
+    When relation(employment) set key attribute: employment-reference
+    When relation(employment) set has attribute: employment-hours
+    When put relation type: contractor-employment
+    When relation(contractor-employment) set supertype: employment
+    When relation(contractor-employment) set key attribute: contractor-reference
+    When relation(contractor-employment) set has attribute: contractor-hours
+    Then relation(contractor-employment) get key attributes contain:
+      | employment-reference |
+      | contractor-reference |
+    Then relation(contractor-employment) get has attributes contain:
+      | employment-reference |
+      | contractor-reference |
+      | employment-hours     |
+      | contractor-hours     |
+    When transaction commits
+    When session opens transaction of type: write
+    Then relation(contractor-employment) get key attributes contain:
+      | employment-reference |
+      | contractor-reference |
+    Then relation(contractor-employment) get has attributes contain:
+      | employment-reference |
+      | contractor-reference |
+      | employment-hours     |
+      | contractor-hours     |
+    When put attribute type: parttime-reference
+    When attribute(parttime-reference) set supertype: contractor-reference
+    When put attribute type: parttime-hours
+    When attribute(parttime-hours) set supertype: contractor-hours
+    When put relation type: parttime-employment
+    When relation(parttime-employment) set supertype: contractor-employment
+    When relation(parttime-employment) set key attribute: parttime-reference
+    When relation(parttime-employment) set has attribute: parttime-hours
+    Then relation(parttime-employment) get key attributes contain:
+      | employment-reference |
+      | contractor-reference |
+      | parttime-reference   |
+    Then relation(parttime-employment) get has attributes contain:
+      | employment-reference |
+      | contractor-reference |
+      | parttime-reference   |
+      | employment-hours     |
+      | contractor-hours     |
+      | parttime-hours       |
+    When transaction commits
+    When session opens transaction of type: read
+    Then relation(contractor-employment) get key attributes contain:
+      | employment-reference |
+      | contractor-reference |
+    Then relation(contractor-employment) get has attributes contain:
+      | employment-reference |
+      | contractor-reference |
+      | employment-hours     |
+      | contractor-hours     |
+    Then relation(parttime-employment) get key attributes contain:
+      | employment-reference |
+      | contractor-reference |
+      | parttime-reference   |
+    Then relation(parttime-employment) get has attributes contain:
+      | employment-reference |
+      | contractor-reference |
+      | parttime-reference   |
+      | employment-hours     |
+      | contractor-hours     |
+      | parttime-hours       |
+
+  Scenario: Relation types can override inherited keys and attributes
     When put attribute type: employment-reference
     When put attribute type: employment-hours
     When put attribute type: contractor-reference

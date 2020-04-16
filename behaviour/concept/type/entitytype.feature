@@ -316,38 +316,42 @@ Feature: Concept Entity Type
       | rating    |
       | points    |
 
-  Scenario: Entity types can override inherited keys and attributes with their subtypes
+  Scenario: Entity types can inherited keys and attributes that are subtypes of each other
     When put attribute type: username
-    When put attribute type: name
+    When put attribute type: score
     When put attribute type: reference
+    When attribute(reference) set supertype: username
     When put attribute type: rating
+    When attribute(rating) set supertype: score
     When put entity type: person
     When entity(person) set key attribute: username
-    When entity(person) set has attribute: name
+    When entity(person) set has attribute: score
     When put entity type: customer
     When entity(customer) set supertype: person
     When entity(customer) set key attribute: reference
     When entity(customer) set has attribute: rating
     Then entity(customer) get key attributes contain:
-      | username   |
-      | reference  |
+      | username  |
+      | reference |
     Then entity(customer) get has attributes contain:
-      | username   |
-      | reference  |
-      | name       |
-      | rating     |
+      | username  |
+      | reference |
+      | score     |
+      | rating    |
     When transaction commits
     When session opens transaction of type: write
     Then entity(customer) get key attributes contain:
-      | username   |
-      | reference  |
+      | username  |
+      | reference |
     Then entity(customer) get has attributes contain:
-      | username   |
-      | reference  |
-      | name       |
-      | rating     |
+      | username  |
+      | reference |
+      | score     |
+      | rating    |
     When put attribute type: license
+    When attribute(license) set supertype: reference
     When put attribute type: points
+    When attribute(points) set supertype: rating
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
     When entity(subscriber) set key attribute: license
@@ -355,37 +359,24 @@ Feature: Concept Entity Type
     When transaction commits
     When session opens transaction of type: read
     Then entity(customer) get key attributes contain:
-      | username   |
-      | reference  |
+      | username  |
+      | reference |
     Then entity(customer) get has attributes contain:
-      | username   |
-      | reference  |
-      | name       |
-      | rating     |
+      | username  |
+      | reference |
+      | score     |
+      | rating    |
     Then entity(subscriber) get key attributes contain:
-      | username   |
-      | reference  |
-      | license    |
+      | username  |
+      | reference |
+      | license   |
     Then entity(subscriber) get has attributes contain:
-      | username   |
-      | reference  |
-      | license    |
-      | name       |
-      | rating     |
-      | points     |
-
-  Scenario: Entity types cannot override inherited keys and attributes other than with their subtypes
-    When put attribute type: username
-    When put attribute type: name
-    When put attribute type: reference
-    When put attribute type: rating
-    When put entity type: person
-    When entity(person) set key attribute: username
-    When entity(person) set has attribute: name
-    When put entity type: customer
-    When entity(customer) set supertype: person
-    Then entity(customer) fails at setting key attribute: reference as username
-    Then entity(customer) fails at setting has attribute: rating as name
+      | username  |
+      | reference |
+      | license   |
+      | score     |
+      | rating    |
+      | points    |
 
   Scenario: Entity types can override inherited keys and attributes
     When put attribute type: username
@@ -488,6 +479,19 @@ Feature: Concept Entity Type
       | references |
       | name       |
       | rating     |
+
+  Scenario: Entity types cannot override inherited keys and attributes other than with their subtypes
+    When put attribute type: username
+    When put attribute type: name
+    When put attribute type: reference
+    When put attribute type: rating
+    When put entity type: person
+    When entity(person) set key attribute: username
+    When entity(person) set has attribute: name
+    When put entity type: customer
+    When entity(customer) set supertype: person
+    Then entity(customer) fails at setting key attribute: reference as username
+    Then entity(customer) fails at setting has attribute: rating as name
 
   Scenario: Entity types can override inherited attribute as a key
     When put attribute type: name
@@ -613,7 +617,7 @@ Feature: Concept Entity Type
       | marriage:wife     |
       | sales:buyer       |
 
-  Scenario: Entity types can inherit playing role types with their subtypes
+  Scenario: Entity types can inherit playing role types that are subtypes of each other
     When put relation type: parentship
     When relation(parentship) set relates role: parent
     When relation(parentship) set relates role: child
