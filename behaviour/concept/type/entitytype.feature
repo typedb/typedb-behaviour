@@ -480,19 +480,6 @@ Feature: Concept Entity Type
       | name       |
       | rating     |
 
-  Scenario: Entity types cannot override inherited keys and attributes other than with their subtypes
-    When put attribute type: username
-    When put attribute type: name
-    When put attribute type: reference
-    When put attribute type: rating
-    When put entity type: person
-    When entity(person) set key attribute: username
-    When entity(person) set has attribute: name
-    When put entity type: customer
-    When entity(customer) set supertype: person
-    Then entity(customer) fails at setting key attribute: reference as username
-    Then entity(customer) fails at setting has attribute: rating as name
-
   Scenario: Entity types can override inherited attribute as a key
     When put attribute type: name
     When put attribute type: username
@@ -520,6 +507,32 @@ Feature: Concept Entity Type
       | username |
     Then entity(customer) get has attributes do not contain:
       | name |
+
+  Scenario: Entity types cannot override inherited keys and attributes other than with their subtypes
+    When put attribute type: username
+    When put attribute type: name
+    When put attribute type: reference
+    When put attribute type: rating
+    When put entity type: person
+    When entity(person) set key attribute: username
+    When entity(person) set has attribute: name
+    When put entity type: customer
+    When entity(customer) set supertype: person
+    Then entity(customer) fails at setting key attribute: reference as username
+    Then entity(customer) fails at setting has attribute: rating as name
+
+  Scenario: Entity types cannot declare and override a key/has attribute at the same time
+    When put attribute type: username
+    When put attribute type: email
+    When attribute(email) set supertype: username
+    When put attribute type: name
+    When put attribute type: first-name
+    When attribute(first-name) set supertype: name
+    When put entity type: person
+    When entity(person) set key attribute: username
+    When entity(person) fails at setting key attribute: email as username
+    When entity(person) set has attribute: name
+    When entity(person) fails at setting has attribute: first-name as name
 
   Scenario: Entity types can play role types
     When put relation type: marriage
