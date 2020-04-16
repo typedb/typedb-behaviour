@@ -316,56 +316,36 @@ Feature: Concept Entity Type
       | rating    |
       | points    |
 
-  Scenario: Entity types can override inherited keys and attributes that are subtypes of each other
+  Scenario: Entity types can override inherited keys and attributes with their subtypes
     When put attribute type: username
-    When put attribute type: email
     When put attribute type: name
-    When put attribute type: age
     When put attribute type: reference
-    When put attribute type: work-email
-    When put attribute type: nick-name
     When put attribute type: rating
     When put entity type: person
     When entity(person) set key attribute: username
-    When entity(person) set key attribute: email
     When entity(person) set has attribute: name
-    When entity(person) set has attribute: age
     When put entity type: customer
     When entity(customer) set supertype: person
     When entity(customer) set key attribute: reference
-    When entity(customer) set key attribute: work-email
     When entity(customer) set has attribute: rating
-    When entity(customer) set has attribute: nick-name
     Then entity(customer) get key attributes contain:
       | username   |
-      | email      |
       | reference  |
-      | work-email |
     Then entity(customer) get has attributes contain:
       | username   |
-      | email      |
-      | name       |
       | reference  |
-      | work-email |
-      | age        |
+      | name       |
       | rating     |
-      | nick-name  |
     When transaction commits
     When session opens transaction of type: write
     Then entity(customer) get key attributes contain:
       | username   |
-      | email      |
       | reference  |
-      | work-email |
     Then entity(customer) get has attributes contain:
       | username   |
-      | email      |
-      | name       |
       | reference  |
-      | work-email |
-      | age        |
+      | name       |
       | rating     |
-      | nick-name  |
     When put attribute type: license
     When put attribute type: points
     When put entity type: subscriber
@@ -376,35 +356,36 @@ Feature: Concept Entity Type
     When session opens transaction of type: read
     Then entity(customer) get key attributes contain:
       | username   |
-      | email      |
       | reference  |
-      | work-email |
     Then entity(customer) get has attributes contain:
       | username   |
-      | email      |
-      | name       |
       | reference  |
-      | work-email |
-      | age        |
+      | name       |
       | rating     |
-      | nick-name  |
     Then entity(subscriber) get key attributes contain:
       | username   |
-      | email      |
       | reference  |
       | license    |
-      | work-email |
     Then entity(subscriber) get has attributes contain:
       | username   |
-      | email      |
-      | name       |
       | reference  |
-      | rating     |
       | license    |
-      | work-email |
-      | age        |
+      | name       |
+      | rating     |
       | points     |
-      | nick-name  |
+
+  Scenario: Entity types cannot override inherited keys and attributes other than with their subtypes
+    When put attribute type: username
+    When put attribute type: name
+    When put attribute type: reference
+    When put attribute type: rating
+    When put entity type: person
+    When entity(person) set key attribute: username
+    When entity(person) set has attribute: name
+    When put entity type: customer
+    When entity(customer) set supertype: person
+    Then entity(customer) fails at setting key attribute: reference as username
+    Then entity(customer) fails at setting has attribute: rating as name
 
   Scenario: Entity types can override inherited keys and attributes
     When put attribute type: username
@@ -632,7 +613,7 @@ Feature: Concept Entity Type
       | marriage:wife     |
       | sales:buyer       |
 
-  Scenario: Entity types can inherit playing role types that are subtypes of each other
+  Scenario: Entity types can inherit playing role types with their subtypes
     When put relation type: parentship
     When relation(parentship) set relates role: parent
     When relation(parentship) set relates role: child
