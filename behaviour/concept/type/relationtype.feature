@@ -618,7 +618,7 @@ Feature: Concept Relation Type and Role Type
       | employment-hours     |
       | contractor-hours     |
 
-  Scenario: Relation types can override inherited attribute as a key
+  Scenario: Relation types can override inherited attributes as keys
     When put attribute type: employment-reference
     When put attribute type: contractor-reference
     When attribute(contractor-reference) set supertype: employment-reference
@@ -648,7 +648,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(contractor-employment) get has attributes do not contain:
       | employment-reference |
 
-  Scenario: Relation types cannot override inherited key as an attribute
+  Scenario: Relation types cannot override inherited keys as attributes
     When put attribute type: employment-reference
     When put attribute type: contractor-reference
     When attribute(contractor-reference) set supertype: employment-reference

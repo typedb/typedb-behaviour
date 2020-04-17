@@ -480,7 +480,7 @@ Feature: Concept Entity Type
       | name       |
       | rating     |
 
-  Scenario: Entity types can override inherited attribute as a key
+  Scenario: Entity types can override inherited attributes as keys
     When put attribute type: name
     When put attribute type: username
     When attribute(username) set supertype: name
@@ -508,7 +508,7 @@ Feature: Concept Entity Type
     Then entity(customer) get has attributes do not contain:
       | name |
 
-  Scenario: Entity types cannot override inherited key as an attribute
+  Scenario: Entity types cannot override inherited keys as attributes
     When put attribute type: username
     When put attribute type: email
     When attribute(email) set supertype: username
