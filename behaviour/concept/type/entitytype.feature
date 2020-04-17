@@ -534,6 +534,17 @@ Feature: Concept Entity Type
     When entity(person) set has attribute: name
     When entity(person) fails at setting has attribute: first-name as name
 
+  Scenario: Entity types cannot redeclare inherited keys and attributes
+    When put attribute type: email
+    When put attribute type: name
+    When put entity type: person
+    When entity(person) set key attribute: email
+    When entity(person) set has attribute: name
+    When put entity type: customer
+    When entity(customer) set supertype: person
+    When entity(customer) fails at setting key attribute: email
+    When entity(customer) fails at setting has attribute: name
+
   Scenario: Entity types can play role types
     When put relation type: marriage
     When relation(marriage) set relates role: husband
