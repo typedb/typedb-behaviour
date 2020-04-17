@@ -762,14 +762,21 @@ Feature: Concept Entity Type
     Then entity(woman) get playing roles do not contain:
       | parentship:parent |
 
-  Scenario: Entity types cannot redeclare inherited playing role types
+  Scenario: Entity types cannot redeclare inherited/overridden playing role types
     When put relation type: parentship
     When relation(parentship) set relates role: parent
+    When put relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) set relates role: father as parent
     When put entity type: person
     When entity(person) set plays role: parentship:parent
     When put entity type: man
     When entity(man) set supertype: person
-    When entity(man) fails at setting plays role: parentship:parent
+    When entity(man) set plays role: fathership:father as parent
+    When put entity type: boy
+    When entity(boy) set supertype: man
+    Then entity(boy) fails at setting plays role: parentship:parent
+    Then entity(boy) fails at setting plays role: fathership:father
 
   Scenario: Entity types cannot override declared playing role types
     When put relation type: parentship
