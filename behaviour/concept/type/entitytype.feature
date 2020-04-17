@@ -508,6 +508,16 @@ Feature: Concept Entity Type
     Then entity(customer) get has attributes do not contain:
       | name |
 
+  Scenario: Entity types cannot override inherited key as an attribute
+    When put attribute type: username
+    When put attribute type: email
+    When attribute(email) set supertype: username
+    When put entity type: person
+    When entity(person) set key attribute: username
+    When put entity type: customer
+    When entity(customer) set supertype: person
+    When entity(customer) fails at setting has attribute: email as username
+
   Scenario: Entity types cannot override inherited keys and attributes other than with their subtypes
     When put attribute type: username
     When put attribute type: name
