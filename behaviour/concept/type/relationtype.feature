@@ -648,6 +648,19 @@ Feature: Concept Relation Type and Role Type
     Then relation(contractor-employment) get has attributes do not contain:
       | employment-reference |
 
+  Scenario: Relation types cannot redeclare inherited keys and attributes
+    When put attribute type: employment-reference
+    When put attribute type: employment-hours
+    When put relation type: employment
+    When relation(employment) set relates role: employee
+    When relation(employment) set relates role: employer
+    When relation(employment) set key attribute: employment-reference
+    When relation(employment) set has attribute: employment-hours
+    When put relation type: contractor-employment
+    When relation(contractor-employment) set supertype: employment
+    When relation(contractor-employment) fails at setting key attribute: employment-reference
+    When relation(contractor-employment) fails at setting has attribute: employment-hours
+
   Scenario: Relation types cannot override inherited keys and attributes other than with their subtypes
     When put attribute type: employment-reference
     When put attribute type: employment-hours
