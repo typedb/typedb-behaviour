@@ -648,6 +648,13 @@ Feature: Concept Relation Type and Role Type
     Then relation(contractor-employment) get has attributes do not contain:
       | employment-reference |
 
+  Scenario: Relation types cannot redeclare attributes as keys
+    When put attribute type: license
+    When put relation type: marriage
+    When relation(marriage) set relates role: spouse
+    When relation(marriage) set key attribute: license
+    When relation(marriage) fails at setting has attribute: license
+
   Scenario: Relation types cannot override inherited keys as attributes
     When put attribute type: employment-reference
     When put attribute type: contractor-reference
