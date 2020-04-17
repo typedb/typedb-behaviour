@@ -514,6 +514,12 @@ Feature: Concept Entity Type
     When entity(person) set key attribute: username
     When entity(person) fails at setting has attribute: username
 
+  Scenario: Entity types cannot redeclare attributes as keys
+    When put attribute type: name
+    When put entity type: person
+    When entity(person) set has attribute: name
+    When entity(person) fails at setting key attribute: name
+
   Scenario: Entity types cannot override inherited keys as attributes
     When put attribute type: username
     When put attribute type: email
