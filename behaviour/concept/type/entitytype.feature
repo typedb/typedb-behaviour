@@ -508,6 +508,12 @@ Feature: Concept Entity Type
     Then entity(customer) get has attributes do not contain:
       | name |
 
+  Scenario: Entity types cannot redeclare keys as attributes
+    When put attribute type: username
+    When put entity type: person
+    When entity(person) set key attribute: username
+    When entity(person) fails at setting has attribute: username
+
   Scenario: Entity types cannot override inherited keys as attributes
     When put attribute type: username
     When put attribute type: email
