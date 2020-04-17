@@ -892,6 +892,18 @@ Feature: Concept Relation Type and Role Type
       | locates:located                       |
       | contractor-locates:contractor-located |
 
+  Scenario: Relation types cannot redeclare inherited playing role types
+    When put relation type: locates
+    When relation(locates) set relates role: locating
+    When relation(locates) set relates role: located
+    When put relation type: employment
+    When relation(employment) set relates role: employer
+    When relation(employment) set relates role: employee
+    When relation(employment) set plays role: locates:located
+    When put relation type: contractor-employment
+    When relation(contractor-employment) set supertype: employment
+    When relation(contractor-employment) fails at setting plays role: locates:located
+
   Scenario: Relation types cannot override declared playing role types
     When put relation type: locates
     When relation(locates) set relates role: locating
