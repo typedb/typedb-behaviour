@@ -520,6 +520,30 @@ Feature: Concept Entity Type
     When entity(person) set has attribute: name
     When entity(person) fails at setting key attribute: name
 
+  Scenario: Entity types cannot redeclare inherited keys and attributes
+    When put attribute type: email
+    When put attribute type: name
+    When put entity type: person
+    When entity(person) set key attribute: email
+    When entity(person) set has attribute: name
+    When put entity type: customer
+    When entity(customer) set supertype: person
+    When entity(customer) fails at setting key attribute: email
+    When entity(customer) fails at setting has attribute: name
+
+  Scenario: Entity types cannot override declared keys and attributes
+    When put attribute type: username
+    When put attribute type: email
+    When attribute(email) set supertype: username
+    When put attribute type: name
+    When put attribute type: first-name
+    When attribute(first-name) set supertype: name
+    When put entity type: person
+    When entity(person) set key attribute: username
+    When entity(person) fails at setting key attribute: email as username
+    When entity(person) set has attribute: name
+    When entity(person) fails at setting has attribute: first-name as name
+
   Scenario: Entity types cannot override inherited keys as attributes
     When put attribute type: username
     When put attribute type: email
@@ -542,30 +566,6 @@ Feature: Concept Entity Type
     When entity(customer) set supertype: person
     Then entity(customer) fails at setting key attribute: reference as username
     Then entity(customer) fails at setting has attribute: rating as name
-
-  Scenario: Entity types cannot declare and override a key/has attribute at the same time
-    When put attribute type: username
-    When put attribute type: email
-    When attribute(email) set supertype: username
-    When put attribute type: name
-    When put attribute type: first-name
-    When attribute(first-name) set supertype: name
-    When put entity type: person
-    When entity(person) set key attribute: username
-    When entity(person) fails at setting key attribute: email as username
-    When entity(person) set has attribute: name
-    When entity(person) fails at setting has attribute: first-name as name
-
-  Scenario: Entity types cannot redeclare inherited keys and attributes
-    When put attribute type: email
-    When put attribute type: name
-    When put entity type: person
-    When entity(person) set key attribute: email
-    When entity(person) set has attribute: name
-    When put entity type: customer
-    When entity(customer) set supertype: person
-    When entity(customer) fails at setting key attribute: email
-    When entity(customer) fails at setting has attribute: name
 
   Scenario: Entity types can play role types
     When put relation type: marriage
