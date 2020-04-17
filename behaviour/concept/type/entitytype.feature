@@ -762,7 +762,7 @@ Feature: Concept Entity Type
     Then entity(woman) get playing roles do not contain:
       | parentship:parent |
 
-  Scenario: Entity types cannot override inherited playing role types other than with a subtype
+  Scenario: Entity types cannot override inherited playing role types other than with their subtypes
     When put relation type: parentship
     When relation(parentship) set relates role: parent
     When relation(parentship) set relates role: child
