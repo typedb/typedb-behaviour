@@ -762,6 +762,16 @@ Feature: Concept Entity Type
     Then entity(woman) get playing roles do not contain:
       | parentship:parent |
 
+  Scenario: Entity types cannot override declared playing role types
+    When put relation type: parentship
+    When relation(parentship) set relates role: parent
+    When put relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) set relates role: father as parent
+    When put entity type: person
+    When entity(person) set plays role: parentship:parent
+    When entity(person) fails at setting plays role: fathership:father as parentship:parent
+
   Scenario: Entity types cannot override inherited playing role types other than with their subtypes
     When put relation type: parentship
     When relation(parentship) set relates role: parent
