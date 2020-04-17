@@ -675,7 +675,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(contractor-employment) fails at setting key attribute: employment-reference
     Then relation(contractor-employment) fails at setting has attribute: employment-hours
 
-  Scenario: Relation types cannot redeclare inherited/overridden playing role types
+  Scenario: Relation types cannot redeclare inherited/overridden key/has attribute types
     When put attribute type: employment-reference
     When put attribute type: employment-hours
     When put attribute type: contractor-reference

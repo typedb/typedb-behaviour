@@ -531,6 +531,27 @@ Feature: Concept Entity Type
     Then entity(customer) fails at setting key attribute: email
     Then entity(customer) fails at setting has attribute: name
 
+  Scenario: Entity types cannot redeclare inherited/overridden key/has attribute types
+    When put attribute type: email
+    When put attribute type: name
+    When put attribute type: customer-email
+    When attribute(customer-email) set supertype: email
+    When put attribute type: customer-name
+    When attribute(customer-name) set supertype: name
+    When put entity type: person
+    When entity(person) set key attribute: email
+    When entity(person) set has attribute: name
+    When put entity type: customer
+    When entity(customer) set supertype: person
+    When entity(customer) set key attribute: customer-email
+    When entity(customer) set has attribute: customer-name
+    When put entity type: subscriber
+    When entity(subscriber) set supertype: customer
+    Then entity(subscriber) fails at setting key attribute: email
+    Then entity(subscriber) fails at setting key attribute: customer-email
+    Then entity(subscriber) fails at setting has attribute: name
+    Then entity(subscriber) fails at setting has attribute: customer-name
+
   Scenario: Entity types cannot override declared keys and attributes
     When put attribute type: username
     When put attribute type: email
