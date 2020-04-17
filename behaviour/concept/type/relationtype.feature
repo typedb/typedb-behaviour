@@ -653,14 +653,14 @@ Feature: Concept Relation Type and Role Type
     When put relation type: marriage
     When relation(marriage) set relates role: spouse
     When relation(marriage) set key attribute: license
-    When relation(marriage) fails at setting has attribute: license
+    Then relation(marriage) fails at setting has attribute: license
 
   Scenario: Relation types cannot redeclare attributes as keys
     When put attribute type: date
     When put relation type: marriage
     When relation(marriage) set relates role: spouse
     When relation(marriage) set has attribute: date
-    When relation(marriage) fails at setting key attribute: date
+    Then relation(marriage) fails at setting key attribute: date
 
   Scenario: Relation types cannot redeclare inherited keys and attributes
     When put attribute type: employment-reference
@@ -672,8 +672,8 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set has attribute: employment-hours
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    When relation(contractor-employment) fails at setting key attribute: employment-reference
-    When relation(contractor-employment) fails at setting has attribute: employment-hours
+    Then relation(contractor-employment) fails at setting key attribute: employment-reference
+    Then relation(contractor-employment) fails at setting has attribute: employment-hours
 
   Scenario: Relation types cannot override declared keys and attributes
     When put attribute type: reference
@@ -686,9 +686,9 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set relates role: employee
     When relation(employment) set relates role: employer
     When relation(employment) set key attribute: reference
-    When relation(employment) fails at setting key attribute: number as reference
     When relation(employment) set has attribute: hours
-    When relation(employment) fails at setting has attribute: max-hours as hours
+    Then relation(employment) fails at setting key attribute: number as reference
+    Then relation(employment) fails at setting has attribute: max-hours as hours
 
   Scenario: Relation types cannot override inherited keys as attributes
     When put attribute type: employment-reference
@@ -700,7 +700,7 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set key attribute: employment-reference
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    When relation(contractor-employment) fails at setting has attribute: contractor-reference as employment-reference
+    Then relation(contractor-employment) fails at setting has attribute: contractor-reference as employment-reference
 
   Scenario: Relation types cannot override inherited keys and attributes other than with their subtypes
     When put attribute type: employment-reference
@@ -714,8 +714,8 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set has attribute: employment-hours
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    When relation(contractor-employment) fails at setting key attribute: contractor-reference as employment-reference
-    When relation(contractor-employment) fails at setting has attribute: contractor-hours as employment-hours
+    Then relation(contractor-employment) fails at setting key attribute: contractor-reference as employment-reference
+    Then relation(contractor-employment) fails at setting has attribute: contractor-hours as employment-hours
 
   Scenario: Relation types can play role types
     When put relation type: locates
@@ -921,7 +921,7 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set relates role: employer
     When relation(employment) set relates role: employee
     When relation(employment) set plays role: locates:located
-    When relation(employment) fails at setting plays role: employment-locates:employment-located as locates:located
+    Then relation(employment) fails at setting plays role: employment-locates:employment-located as locates:located
 
   Scenario: Relation types cannot override inherited playing role types other than with their subtypes
     When put relation type: locates
@@ -936,4 +936,4 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set plays role: locates:located
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    When relation(contractor-employment) fails at setting plays role: contractor-locates:contractor-located as locates:located
+    Then relation(contractor-employment) fails at setting plays role: contractor-locates:contractor-located as locates:located

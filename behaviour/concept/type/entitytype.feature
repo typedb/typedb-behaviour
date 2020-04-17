@@ -512,13 +512,13 @@ Feature: Concept Entity Type
     When put attribute type: username
     When put entity type: person
     When entity(person) set key attribute: username
-    When entity(person) fails at setting has attribute: username
+    Then entity(person) fails at setting has attribute: username
 
   Scenario: Entity types cannot redeclare attributes as keys
     When put attribute type: name
     When put entity type: person
     When entity(person) set has attribute: name
-    When entity(person) fails at setting key attribute: name
+    Then entity(person) fails at setting key attribute: name
 
   Scenario: Entity types cannot redeclare inherited keys and attributes
     When put attribute type: email
@@ -528,8 +528,8 @@ Feature: Concept Entity Type
     When entity(person) set has attribute: name
     When put entity type: customer
     When entity(customer) set supertype: person
-    When entity(customer) fails at setting key attribute: email
-    When entity(customer) fails at setting has attribute: name
+    Then entity(customer) fails at setting key attribute: email
+    Then entity(customer) fails at setting has attribute: name
 
   Scenario: Entity types cannot override declared keys and attributes
     When put attribute type: username
@@ -540,9 +540,9 @@ Feature: Concept Entity Type
     When attribute(first-name) set supertype: name
     When put entity type: person
     When entity(person) set key attribute: username
-    When entity(person) fails at setting key attribute: email as username
     When entity(person) set has attribute: name
-    When entity(person) fails at setting has attribute: first-name as name
+    Then entity(person) fails at setting key attribute: email as username
+    Then entity(person) fails at setting has attribute: first-name as name
 
   Scenario: Entity types cannot override inherited keys as attributes
     When put attribute type: username
@@ -552,7 +552,7 @@ Feature: Concept Entity Type
     When entity(person) set key attribute: username
     When put entity type: customer
     When entity(customer) set supertype: person
-    When entity(customer) fails at setting has attribute: email as username
+    Then entity(customer) fails at setting has attribute: email as username
 
   Scenario: Entity types cannot override inherited keys and attributes other than with their subtypes
     When put attribute type: username
@@ -786,7 +786,7 @@ Feature: Concept Entity Type
     When relation(fathership) set relates role: father as parent
     When put entity type: person
     When entity(person) set plays role: parentship:parent
-    When entity(person) fails at setting plays role: fathership:father as parentship:parent
+    Then entity(person) fails at setting plays role: fathership:father as parentship:parent
 
   Scenario: Entity types cannot override inherited playing role types other than with their subtypes
     When put relation type: parentship
@@ -799,4 +799,4 @@ Feature: Concept Entity Type
     When entity(person) set plays role: parentship:child
     When put entity type: man
     When entity(man) set supertype: person
-    When entity(man) fails at setting plays role: fathership:father as parentship:parent
+    Then entity(man) fails at setting plays role: fathership:father as parentship:parent
