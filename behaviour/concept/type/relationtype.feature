@@ -655,6 +655,13 @@ Feature: Concept Relation Type and Role Type
     When relation(marriage) set key attribute: license
     When relation(marriage) fails at setting has attribute: license
 
+  Scenario: Relation types cannot redeclare attributes as keys
+    When put attribute type: date
+    When put relation type: marriage
+    When relation(marriage) set relates role: spouse
+    When relation(marriage) set has attribute: date
+    When relation(marriage) fails at setting key attribute: date
+
   Scenario: Relation types cannot override inherited keys as attributes
     When put attribute type: employment-reference
     When put attribute type: contractor-reference
