@@ -675,6 +675,28 @@ Feature: Concept Relation Type and Role Type
     Then relation(contractor-employment) fails at setting key attribute: employment-reference
     Then relation(contractor-employment) fails at setting has attribute: employment-hours
 
+  Scenario: Relation types cannot redeclare inherited/overridden playing role types
+    When put attribute type: employment-reference
+    When put attribute type: employment-hours
+    When put attribute type: contractor-reference
+    When attribute(contractor-reference) set supertype: employment-reference
+    When put attribute type: contractor-hours
+    When attribute(contractor-hours) set supertype: employment-hours
+    When put relation type: employment
+    When relation(employment) set relates role: employee
+    When relation(employment) set key attribute: employment-reference
+    When relation(employment) set has attribute: employment-hours
+    When put relation type: contractor-employment
+    When relation(contractor-employment) set supertype: employment
+    When relation(contractor-employment) set key attribute: contractor-reference as employment-reference
+    When relation(contractor-employment) set has attribute: contractor-hours as employment-hours
+    When put relation type: parttime-employment
+    When relation(parttime-employment) set supertype: contractor-employment
+    Then relation(parttime-employment) fails at setting key attribute: employment-reference
+    Then relation(parttime-employment) fails at setting key attribute: contractor-reference
+    Then relation(parttime-employment) fails at setting has attribute: employment-hours
+    Then relation(parttime-employment) fails at setting has attribute: contractor-hours
+
   Scenario: Relation types cannot override declared keys and attributes
     When put attribute type: reference
     When put attribute type: number
