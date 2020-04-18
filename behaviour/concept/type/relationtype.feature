@@ -304,13 +304,18 @@ Feature: Concept Relation Type and Role Type
     Then relation(mothership) get related roles do not contain:
       | parentship:parent |
 
-  Scenario: Relation types cannot redeclare related inherited role types
+  Scenario: Relation types cannot redeclare inherited related role types
     When put relation type: parentship
     When relation(parentship) set relates role: parent
     When relation(parentship) set relates role: child
     When put relation type: fathership
     When relation(fathership) set supertype: parentship
     Then relation(fathership) fails at setting relates role: parent
+
+  Scenario: Relation types cannot override declared related role types
+    When put relation type: parentship
+    When relation(parentship) set relates role: parent
+    Then relation(parentship) fails at setting relates role: father as parent
 
   Scenario: Relation types can have keys
     When put attribute type: license
