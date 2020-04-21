@@ -127,16 +127,34 @@ Feature: Concept Relation Type and Role Type
     When relation(marriage) set relates role: husband
     When relation(marriage) set relates role: wife
     When relation(marriage) set abstract: true
+    When put relation type: parentship
+    When relation(parentship) set relates role: parent
+    When relation(parentship) set relates role: child
     Then relation(marriage) is abstract: true
     Then relation(marriage) get role(husband) is abstract: true
     Then relation(marriage) get role(wife) is abstract: true
     # Then relation(marriage) creates instance successfully: false
+    Then relation(parentship) is abstract: false
+    Then relation(parentship) get role(parent) is abstract: false
+    Then relation(parentship) get role(child) is abstract: false
     When transaction commits
-    When session opens transaction of type: read
+    When session opens transaction of type: write
     Then relation(marriage) is abstract: true
     Then relation(marriage) get role(husband) is abstract: true
     Then relation(marriage) get role(wife) is abstract: true
     # Then relation(person) creates instance successfully: false
+    Then relation(parentship) is abstract: false
+    Then relation(parentship) get role(parent) is abstract: false
+    Then relation(parentship) get role(child) is abstract: false
+    Then relation(parentship) set abstract: true
+    Then relation(parentship) is abstract: true
+    Then relation(parentship) get role(parent) is abstract: true
+    Then relation(parentship) get role(child) is abstract: true
+    When transaction commits
+    When session opens transaction of type: read
+    Then relation(parentship) is abstract: true
+    Then relation(parentship) get role(parent) is abstract: true
+    Then relation(parentship) get role(child) is abstract: true
 
   Scenario: Relation and role types can be subtypes of other relation and role types
     When put relation type: parentship

@@ -79,12 +79,20 @@ Feature: Concept Entity Type
   Scenario: Entity types can be set to abstract
     When put entity type: person
     When entity(person) set abstract: true
+    When put entity type: company
     Then entity(person) is abstract: true
     # Then entity(person) creates instance successfully: false
+    Then entity(company) is abstract: false
     When transaction commits
-    When session opens transaction of type: read
+    When session opens transaction of type: write
     Then entity(person) is abstract: true
     # Then entity(person) creates instance successfully: false
+    Then entity(company) is abstract: false
+    When entity(company) set abstract: true
+    Then entity(company) is abstract: true
+    When transaction commits
+    When session opens transaction of type: write
+    Then entity(company) is abstract: true
 
   Scenario: Entity types can be subtypes of other entity types
     When put entity type: man
