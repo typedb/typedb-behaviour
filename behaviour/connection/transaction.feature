@@ -78,6 +78,7 @@ Feature: Connection Transaction
     Then for each session, transaction close
     Then for each session, transaction is open: false
 
+  @ignore-grakn-core
   Scenario: one keyspace, one session, many transactions to read
     When connection create keyspace:
       | grakn   |
@@ -112,6 +113,7 @@ Feature: Connection Transaction
       | read    |
       | read    |
 
+  @ignore-grakn-core
   Scenario: one keyspace, one session, many transactions to write
     When connection create keyspace:
       | grakn   |
@@ -146,6 +148,7 @@ Feature: Connection Transaction
       | write   |
       | write   |
 
+  @ignore-grakn-core
   Scenario: one keyspace, one session, many transactions to read and write
     When connection create keyspace:
       | grakn   |
@@ -328,6 +331,7 @@ Feature: Connection Transaction
     Then for each session, transaction has type:
       | write   |
 
+  @ignore-grakn-core
   Scenario: one keyspace, many sessions, many transactions to read
     When connection create keyspace:
       | grakn   |
@@ -373,6 +377,7 @@ Feature: Connection Transaction
       | read    |
       | read    |
 
+  @ignore-grakn-core
   Scenario: one keyspace, many sessions, many transactions to write
     When connection create keyspace:
       | grakn   |
@@ -418,6 +423,7 @@ Feature: Connection Transaction
       | write   |
       | write   |
 
+  @ignore-grakn-core
   Scenario: one keyspace, many sessions, many transactions to read and write
     When connection create keyspace:
       | grakn   |
