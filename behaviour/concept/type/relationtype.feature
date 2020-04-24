@@ -162,7 +162,7 @@ Feature: Concept Relation Type and Role Type
     When relation(parentship) set relates role: child
     When put relation type: fathership
     When relation(fathership) set supertype: parentship
-    When relation(fathership) set relates role: father as parent
+    When relation(fathership) set relates role: father, as parent
     Then relation(fathership) get supertype: parentship
     Then relation(fathership) get role(father) get supertype: parentship:parent
     Then relation(fathership) get role(child) get supertype: relation:role
@@ -205,7 +205,7 @@ Feature: Concept Relation Type and Role Type
       | parentship:child |
     When put relation type: father-son
     When relation(father-son) set supertype: fathership
-    When relation(father-son) set relates role: son as child
+    When relation(father-son) set relates role: son, as child
     Then relation(father-son) get supertype: fathership
     Then relation(father-son) get role(father) get supertype: parentship:parent
     Then relation(father-son) get role(son) get supertype: parentship:child
@@ -278,7 +278,7 @@ Feature: Concept Relation Type and Role Type
     When relation(parentship) set relates role: child
     When put relation type: fathership
     When relation(fathership) set supertype: parentship
-    When relation(fathership) set relates role: father as parent
+    When relation(fathership) set relates role: father, as parent
     Then relation(fathership) get related roles contain:
       | fathership:father |
       | parentship:child  |
@@ -286,7 +286,7 @@ Feature: Concept Relation Type and Role Type
     When session opens transaction of type: write
     When put relation type: mothership
     When relation(mothership) set supertype: parentship
-    When relation(mothership) set relates role: mother as parent
+    When relation(mothership) set relates role: mother, as parent
     Then relation(mothership) get related roles contain:
       | mothership:mother |
       | parentship:child  |
@@ -305,14 +305,14 @@ Feature: Concept Relation Type and Role Type
     When relation(parentship) set relates role: child
     When put relation type: fathership
     When relation(fathership) set supertype: parentship
-    When relation(fathership) set relates role: father as parent
+    When relation(fathership) set relates role: father, as parent
     Then relation(fathership) get related roles do not contain:
       | parentship:parent |
     When transaction commits
     When session opens transaction of type: write
     When put relation type: mothership
     When relation(mothership) set supertype: parentship
-    When relation(mothership) set relates role: mother as parent
+    When relation(mothership) set relates role: mother, as parent
     Then relation(mothership) get related roles do not contain:
       | parentship:parent |
     When transaction commits
@@ -333,7 +333,7 @@ Feature: Concept Relation Type and Role Type
   Scenario: Relation types cannot override declared related role types
     When put relation type: parentship
     When relation(parentship) set relates role: parent
-    Then relation(parentship) fails at setting relates role: father as parent
+    Then relation(parentship) fails at setting relates role: father, as parent
 
   Scenario: Relation types can have keys
     When put attribute type: license
@@ -586,8 +586,8 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set has attribute: employment-hours
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    When relation(contractor-employment) set key attribute: contractor-reference as employment-reference
-    When relation(contractor-employment) set has attribute: contractor-hours as employment-hours
+    When relation(contractor-employment) set key attribute: contractor-reference, as employment-reference
+    When relation(contractor-employment) set has attribute: contractor-hours, as employment-hours
     Then relation(contractor-employment) get key attributes contain:
       | contractor-reference |
     Then relation(contractor-employment) get key attributes do not contain:
@@ -616,8 +616,8 @@ Feature: Concept Relation Type and Role Type
     When attribute(parttime-hours) set supertype: contractor-hours
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
-    When relation(parttime-employment) set key attribute: parttime-reference as contractor-reference
-    When relation(parttime-employment) set has attribute: parttime-hours as contractor-hours
+    When relation(parttime-employment) set key attribute: parttime-reference, as contractor-reference
+    When relation(parttime-employment) set has attribute: parttime-hours, as contractor-hours
     Then relation(parttime-employment) get key attributes contain:
       | parttime-reference |
     Then relation(parttime-employment) get has attributes contain:
@@ -649,7 +649,7 @@ Feature: Concept Relation Type and Role Type
       | employment-hours     |
       | contractor-hours     |
 
-  Scenario: Relation types can override inherited attributes as keys
+  Scenario: Relation types can override inherited attributes, as keys
     When put attribute type: employment-reference
     When put attribute type: contractor-reference
     When attribute(contractor-reference) set supertype: employment-reference
@@ -659,7 +659,7 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set has attribute: employment-reference
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    When relation(contractor-employment) set key attribute: contractor-reference as employment-reference
+    When relation(contractor-employment) set key attribute: contractor-reference, as employment-reference
     Then relation(contractor-employment) get key attributes contain:
       | contractor-reference |
     Then relation(contractor-employment) get key attributes do not contain:
@@ -679,14 +679,14 @@ Feature: Concept Relation Type and Role Type
     Then relation(contractor-employment) get has attributes do not contain:
       | employment-reference |
 
-  Scenario: Relation types cannot redeclare keys as attributes
+  Scenario: Relation types cannot redeclare keys, as attributes
     When put attribute type: license
     When put relation type: marriage
     When relation(marriage) set relates role: spouse
     When relation(marriage) set key attribute: license
     Then relation(marriage) fails at setting has attribute: license
 
-  Scenario: Relation types cannot redeclare attributes as keys
+  Scenario: Relation types cannot redeclare attributes, as keys
     When put attribute type: date
     When put relation type: marriage
     When relation(marriage) set relates role: spouse
@@ -719,8 +719,8 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set has attribute: employment-hours
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    When relation(contractor-employment) set key attribute: contractor-reference as employment-reference
-    When relation(contractor-employment) set has attribute: contractor-hours as employment-hours
+    When relation(contractor-employment) set key attribute: contractor-reference, as employment-reference
+    When relation(contractor-employment) set has attribute: contractor-hours, as employment-hours
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
     Then relation(parttime-employment) fails at setting key attribute: employment-reference
@@ -740,10 +740,10 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set relates role: employer
     When relation(employment) set key attribute: reference
     When relation(employment) set has attribute: hours
-    Then relation(employment) fails at setting key attribute: number as reference
-    Then relation(employment) fails at setting has attribute: max-hours as hours
+    Then relation(employment) fails at setting key attribute: number, as reference
+    Then relation(employment) fails at setting has attribute: max-hours, as hours
 
-  Scenario: Relation types cannot override inherited keys as attributes
+  Scenario: Relation types cannot override inherited keys, as attributes
     When put attribute type: employment-reference
     When put attribute type: contractor-reference
     When attribute(contractor-reference) set supertype: employment-reference
@@ -753,7 +753,7 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set key attribute: employment-reference
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    Then relation(contractor-employment) fails at setting has attribute: contractor-reference as employment-reference
+    Then relation(contractor-employment) fails at setting has attribute: contractor-reference, as employment-reference
 
   Scenario: Relation types cannot override inherited keys and attributes other than with their subtypes
     When put attribute type: employment-reference
@@ -767,8 +767,8 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set has attribute: employment-hours
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    Then relation(contractor-employment) fails at setting key attribute: contractor-reference as employment-reference
-    Then relation(contractor-employment) fails at setting has attribute: contractor-hours as employment-hours
+    Then relation(contractor-employment) fails at setting key attribute: contractor-reference, as employment-reference
+    Then relation(contractor-employment) fails at setting has attribute: contractor-hours, as employment-hours
 
   Scenario: Relation types can play role types
     When put relation type: locates
@@ -869,8 +869,8 @@ Feature: Concept Relation Type and Role Type
     When relation(locates) set relates role: located
     When put relation type: contractor-locates
     When relation(contractor-locates) set supertype: locates
-    When relation(contractor-locates) set relates role: contractor-locating as locating
-    When relation(contractor-locates) set relates role: contractor-located as located
+    When relation(contractor-locates) set relates role: contractor-locating, as locating
+    When relation(contractor-locates) set relates role: contractor-located, as located
     When put relation type: employment
     When relation(employment) set relates role: employer
     When relation(employment) set relates role: employee
@@ -885,8 +885,8 @@ Feature: Concept Relation Type and Role Type
     When session opens transaction of type: write
     When put relation type: parttime-locates
     When relation(parttime-locates) set supertype: contractor-locates
-    When relation(parttime-locates) set relates role: parttime-locating as contractor-locating
-    When relation(parttime-locates) set relates role: parttime-located as contractor-located
+    When relation(parttime-locates) set relates role: parttime-locating, as contractor-locating
+    When relation(parttime-locates) set relates role: parttime-located, as contractor-located
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
     When relation(parttime-employment) set relates role: parttime-employer
@@ -912,28 +912,28 @@ Feature: Concept Relation Type and Role Type
     When relation(locates) set relates role: located
     When put relation type: contractor-locates
     When relation(contractor-locates) set supertype: locates
-    When relation(contractor-locates) set relates role: contractor-locating as locating
-    When relation(contractor-locates) set relates role: contractor-located as located
+    When relation(contractor-locates) set relates role: contractor-locating, as locating
+    When relation(contractor-locates) set relates role: contractor-located, as located
     When put relation type: employment
     When relation(employment) set relates role: employer
     When relation(employment) set relates role: employee
     When relation(employment) set plays role: locates:located
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    When relation(contractor-employment) set plays role: contractor-locates:contractor-located as located
+    When relation(contractor-employment) set plays role: contractor-locates:contractor-located, as located
     Then relation(contractor-employment) get playing roles do not contain:
       | locates:located |
     When transaction commits
     When session opens transaction of type: write
     When put relation type: parttime-locates
     When relation(parttime-locates) set supertype: contractor-locates
-    When relation(parttime-locates) set relates role: parttime-locating as contractor-locating
-    When relation(parttime-locates) set relates role: parttime-located as contractor-located
+    When relation(parttime-locates) set relates role: parttime-locating, as contractor-locating
+    When relation(parttime-locates) set relates role: parttime-located, as contractor-located
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
     When relation(parttime-employment) set relates role: parttime-employer
     When relation(parttime-employment) set relates role: parttime-employee
-    When relation(parttime-employment) set plays role: parttime-locates:parttime-located as contractor-located
+    When relation(parttime-employment) set plays role: parttime-locates:parttime-located, as contractor-located
     Then relation(parttime-employment) get playing roles do not contain:
       | locates:located                       |
       | contractor-locates:contractor-located |
@@ -950,13 +950,13 @@ Feature: Concept Relation Type and Role Type
     When relation(locates) set relates role: located
     When put relation type: contractor-locates
     When relation(contractor-locates) set supertype: locates
-    When relation(contractor-locates) set relates role: contractor-located as located
+    When relation(contractor-locates) set relates role: contractor-located, as located
     When put relation type: employment
     When relation(employment) set relates role: employee
     When relation(employment) set plays role: locates:located
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    When relation(contractor-employment) set plays role: contractor-locates:contractor-located as located
+    When relation(contractor-employment) set plays role: contractor-locates:contractor-located, as located
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
     Then relation(parttime-employment) fails at setting plays role: locates:located
@@ -968,13 +968,13 @@ Feature: Concept Relation Type and Role Type
     When relation(locates) set relates role: located
     When put relation type: employment-locates
     When relation(employment-locates) set supertype: locates
-    When relation(employment-locates) set relates role: employment-locating as locating
-    When relation(employment-locates) set relates role: employment-located as located
+    When relation(employment-locates) set relates role: employment-locating, as locating
+    When relation(employment-locates) set relates role: employment-located, as located
     When put relation type: employment
     When relation(employment) set relates role: employer
     When relation(employment) set relates role: employee
     When relation(employment) set plays role: locates:located
-    Then relation(employment) fails at setting plays role: employment-locates:employment-located as locates:located
+    Then relation(employment) fails at setting plays role: employment-locates:employment-located, as locates:located
 
   Scenario: Relation types cannot override inherited playing role types other than with their subtypes
     When put relation type: locates
@@ -989,4 +989,4 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set plays role: locates:located
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    Then relation(contractor-employment) fails at setting plays role: contractor-locates:contractor-located as locates:located
+    Then relation(contractor-employment) fails at setting plays role: contractor-locates:contractor-located, as locates:located
