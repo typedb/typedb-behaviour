@@ -43,22 +43,22 @@ Feature: Graql Reasoning Explanation
       """
 
     Then concept identifiers are
-      |     | check |  value            |
-      | CO  | key   |  company-id:0     |
-      | CON | value |  name:the-company |
+      |     | check | value            |
+      | CO  | key   | company-id:0     |
+      | CON | value | name:the-company |
 
     Then uniquely identify answer concepts
-      | co  | n   |
-      | CO  | CON |
+      | co | n   |
+      | CO | CON |
 
     Then rules are
-      |                   | when                  | then                            |
-      | company-has-name  | { $c isa company; };  | { $c has name "the-company"; }; |
+      |                  | when                 | then                            |
+      | company-has-name | { $c isa company; }; | { $c has name "the-company"; }; |
 
     Then answers contain explanation tree
-      |         | children  | vars    | identifiers  | rule             | pattern                                                       |
-      | 0       | 1         | co, n   | CO, CON      | company-has-name | $co id <answer.co.id>; $co has name $n; $n id <answer.n.id>;  |
-      | 1       | -         | c       | CO           | lookup           | $c isa company; $c id <answer.c.id>;                          |
+      |   | children | vars  | identifiers | rule             | pattern                                                      |
+      | 0 | 1        | co, n | CO, CON     | company-has-name | $co id <answer.co.id>; $co has name $n; $n id <answer.n.id>; |
+      | 1 | -        | c     | CO          | lookup           | $c isa company; $c id <answer.c.id>;                         |
 
 
   @ignore
@@ -108,25 +108,25 @@ Feature: Graql Reasoning Explanation
       """
 
     Then concept identifiers are
-      |     | check |  value            |
-      | CO  | key   |  company-id:0     |
-      | CON | value |  name:the-company |
-      | LIA | value |  is-liable:true   |
+      |     | check | value            |
+      | CO  | key   | company-id:0     |
+      | CON | value | name:the-company |
+      | LIA | value | is-liable:true   |
 
     Then uniquely identify answer concepts
-      | co  | l   |
-      | CO  | LIA |
+      | co | l   |
+      | CO | LIA |
 
     Then rules are
-      |                   | when                                                        | then                              |
-      | company-has-name  | { $c1 isa company; };                                       | { $c1 has name "the-company"; };  |
-      | company-is-liable | { $c2 isa company, has name $name; $name "the-company"; };  | { $c2 has is-liable true; };      |
+      |                   | when                                                       | then                             |
+      | company-has-name  | { $c1 isa company; };                                      | { $c1 has name "the-company"; }; |
+      | company-is-liable | { $c2 isa company, has name $name; $name "the-company"; }; | { $c2 has is-liable true; };     |
 
     Then answers contain explanation tree
-      |         | children  | vars      | identifiers  | rule               | pattern                                                               |
-      | 0       | 1         | co, l     | CO, LIA      | company-is-liable  | $co id <answer.co.id>; $co has is-liable $l; $l id <answer.l.id>;     |
-      | 1       | 2         | c2, name  | CO, CON      | company-has-name   | $c2 id <answer.c2.id>; $c2 has name $name; $name id <answer.name.id>; |
-      | 2       | -         | c1        | CO           | lookup             | $c1 isa company; $c1 id <answer.c.id>;                                |
+      |   | children | vars     | identifiers | rule              | pattern                                                               |
+      | 0 | 1        | co, l    | CO, LIA     | company-is-liable | $co id <answer.co.id>; $co has is-liable $l; $l id <answer.l.id>;     |
+      | 1 | 2        | c2, name | CO, CON     | company-has-name  | $c2 id <answer.c2.id>; $c2 has name $name; $name id <answer.name.id>; |
+      | 2 | -        | c1       | CO          | lookup            | $c1 isa company; $c1 id <answer.c.id>;                                |
 
 
   Scenario: relation is explained as expected when there is no inference
@@ -168,18 +168,18 @@ Feature: Graql Reasoning Explanation
       """
 
     Then concept identifiers are
-      |     | check           |  value               |
-      | KC  | key             |  name:King's Cross   |
-      | LDN | key             |  name:London         |
-      | KCn | value           |  name:King's Cross   |
+      |     | check | value             |
+      | KC  | key   | name:King's Cross |
+      | LDN | key   | name:London       |
+      | KCn | value | name:King's Cross |
 
     Then uniquely identify answer concepts
-      | k   | l   | n   |
-      | KC  | LDN | KCn |
+      | k  | l   | n   |
+      | KC | LDN | KCn |
 
     Then answers contain explanation tree
-      |         | children  | vars    | identifiers   | rule    | pattern                                                                                                                                             |
-      | 0       | -         | k, l, n | KC, LDN, KCn  | lookup  | $k isa area; $k has name $n; (superior: $l, subordinate: $k) isa location-hierarchy; $k id <answer.k.id>; $n id <answer.n.id>; $l id <answer.l.id>; |
+      |   | children | vars    | identifiers  | rule   | pattern                                                                                                                                             |
+      | 0 | -        | k, l, n | KC, LDN, KCn | lookup | $k isa area; $k has name $n; (superior: $l, subordinate: $k) isa location-hierarchy; $k id <answer.k.id>; $n id <answer.n.id>; $l id <answer.l.id>; |
 
 
   Scenario: transitive relation is explained as expected for one hop
@@ -231,38 +231,38 @@ Feature: Graql Reasoning Explanation
       """
 
     Then concept identifiers are
-      |     | check           |  value               |
-      | KC  | key             |  name:King's Cross   |
-      | UK  | key             |  name:UK             |
-      | LDN | key             |  name:London         |
-      | KCN | value           |  name:King's Cross   |
+      |     | check | value             |
+      | KC  | key   | name:King's Cross |
+      | UK  | key   | name:UK           |
+      | LDN | key   | name:London       |
+      | KCN | value | name:King's Cross |
 
     Then uniquely identify answer concepts
-      | k   | l   | n   |
-      | KC  | UK  | KCN |
-      | KC  | LDN | KCN |
+      | k  | l   | n   |
+      | KC | UK  | KCN |
+      | KC | LDN | KCN |
 
     Then rules are
-      |                                   | when                                                                                                                  | then                                                          |
-      | location-hierarchy-transitivity   | { (superior: $a, subordinate: $b) isa location-hierarchy; (superior: $b, subordinate: $c) isa location-hierarchy; };  | { (superior: $a, subordinate: $c) isa location-hierarchy; };  |
+      |                                 | when                                                                                                                 | then                                                         |
+      | location-hierarchy-transitivity | { (superior: $a, subordinate: $b) isa location-hierarchy; (superior: $b, subordinate: $c) isa location-hierarchy; }; | { (superior: $a, subordinate: $c) isa location-hierarchy; }; |
 
     Then answers contain explanation tree
-      |         | children  | vars    | identifiers   | rule                            | pattern                                                                                                                                             |
-      | 0       | 1, 2      | k, l, n | KC, UK, KCN   | join                            | $k isa area; $k has name $n; (superior: $l, subordinate: $k) isa location-hierarchy; $k id <answer.k.id>; $n id <answer.n.id>; $l id <answer.l.id>; |
-      | 1       | -         | k, n    | KC, KCN       | lookup                          | $k isa area; $k has name $n; $n id <answer.n.id>; $k id <answer.k.id>;                                                                              |
-      | 2       | 3, 4      | k, l    | KC, UK        | location-hierarchy-transitivity | (superior: $l, subordinate: $k) isa location-hierarchy; $k isa area; $k id <answer.k.id>; $l id <answer.l.id>;                                      |
-      | 3       | -         | b, c    | LDN, KC       | lookup                          | (superior: $b, subordinate: $c) isa location-hierarchy; $c isa area; $b id <answer.b.id>; $c id <answer.c.id>;                                      |
-      | 4       | -         | a, b    | UK, LDN       | lookup                          | (superior: $a, subordinate: $b) isa location-hierarchy; $b id <answer.b.id>; $a id <answer.a.id>;                                                   |
+      |   | children | vars    | identifiers | rule                            | pattern                                                                                                                                             |
+      | 0 | 1, 2     | k, l, n | KC, UK, KCN | join                            | $k isa area; $k has name $n; (superior: $l, subordinate: $k) isa location-hierarchy; $k id <answer.k.id>; $n id <answer.n.id>; $l id <answer.l.id>; |
+      | 1 | -        | k, n    | KC, KCN     | lookup                          | $k isa area; $k has name $n; $n id <answer.n.id>; $k id <answer.k.id>;                                                                              |
+      | 2 | 3, 4     | k, l    | KC, UK      | location-hierarchy-transitivity | (superior: $l, subordinate: $k) isa location-hierarchy; $k isa area; $k id <answer.k.id>; $l id <answer.l.id>;                                      |
+      | 3 | -        | b, c    | LDN, KC     | lookup                          | (superior: $b, subordinate: $c) isa location-hierarchy; $c isa area; $b id <answer.b.id>; $c id <answer.c.id>;                                      |
+      | 4 | -        | a, b    | UK, LDN     | lookup                          | (superior: $a, subordinate: $b) isa location-hierarchy; $b id <answer.b.id>; $a id <answer.a.id>;                                                   |
 
 #   TODO Non-deterministically getting this error:
 #   Expected :{ (superior: $b, subordinate: $c) isa location-hierarchy; $c isa area; $b id V8240; $c id V20656; };
 #   Actual   :{ $c id V20656; $b id V8240; (superior: $b, subordinate: $c) isa location-hierarchy; };
 
     Then answers contain explanation tree
-      |         | children  | vars    | identifiers   | rule    | pattern                                                                                                                                             |
-      | 0       | 1, 2      | k, l, n | KC, LDN, KCN  | join    | $k isa area; $k has name $n; (superior: $l, subordinate: $k) isa location-hierarchy; $k id <answer.k.id>; $n id <answer.n.id>; $l id <answer.l.id>; |
-      | 1       | -         | k, n    | KC, KCN       | lookup  | $k isa area; $k has name $n; $n id <answer.n.id>; $k id <answer.k.id>;                                                                              |
-      | 2       | -         | k, l    | KC, LDN       | lookup  | (superior: $l, subordinate: $k) isa location-hierarchy; $k isa area; $k id <answer.k.id>; $l id <answer.l.id>;                                      |
+      |   | children | vars    | identifiers  | rule   | pattern                                                                                                                                             |
+      | 0 | 1, 2     | k, l, n | KC, LDN, KCN | join   | $k isa area; $k has name $n; (superior: $l, subordinate: $k) isa location-hierarchy; $k id <answer.k.id>; $n id <answer.n.id>; $l id <answer.l.id>; |
+      | 1 | -        | k, n    | KC, KCN      | lookup | $k isa area; $k has name $n; $n id <answer.n.id>; $k id <answer.k.id>;                                                                              |
+      | 2 | -        | k, l    | KC, LDN      | lookup | (superior: $l, subordinate: $k) isa location-hierarchy; $k isa area; $k id <answer.k.id>; $l id <answer.l.id>;                                      |
 
 
   @ignore
@@ -315,26 +315,26 @@ Feature: Graql Reasoning Explanation
       """
 
     Then concept identifiers are
-      |       | check |  value        |
-      | ALI   | key   |  person-id:0  |
-      | ALIN  | value |  name:Alice   |
-      | BOB   | key   |  person-id:1  |
-      | BOBN  | value |  name:Bob     |
+      |      | check | value       |
+      | ALI  | key   | person-id:0 |
+      | ALIN | value | name:Alice  |
+      | BOB  | key   | person-id:1 |
+      | BOBN | value | name:Bob    |
 
     Then uniquely identify answer concepts
       | w   | m   |
       | ALI | BOB |
 
     Then rules are
-      |                       | when                                                                                | then                                              |
-      | a-man-is-called-bob   | { $man isa man; };                                                                  | { $man has name "Bob"; };                         |
+      |                      | when                                                                                | then                                              |
+      | a-man-is-called-bob  | { $man isa man; };                                                                  | { $man has name "Bob"; };                         |
 #      | bobs-sister-is-alice  | { $p isa man, has name "Bob"; $p1 isa woman, has name "Alice"; };                   | { (sibling: $p, sibling: $p1) isa siblingship; }; |
 #      TODO Expected the above as the response, but the rule body was customised to the pattern of the explanation's answer(s), as below
-      | bobs-sister-is-alice  | { $p isa man, has name $nb; $nb "Bob"; $p1 isa woman, has name $na; $na "Alice"; }; | { (sibling: $p, sibling: $p1) isa siblingship; }; |
+      | bobs-sister-is-alice | { $p isa man, has name $nb; $nb "Bob"; $p1 isa woman, has name $na; $na "Alice"; }; | { (sibling: $p, sibling: $p1) isa siblingship; }; |
 
     Then answers contain explanation tree
-      |         | children  | vars    | identifiers  | rule                 | pattern                                                                                             |
-      | 0       | 1, 2      | w, m    | ALI, BOB     | bobs-sister-is-alice | (sibling: $m, sibling: $w) isa siblingship; $w isa woman; $w id <answer.w.id>; $m id <answer.m.id>; |
-      | 1       | 3         | p, nb   | BOB, BOBN    | a-man-is-called-bob  | $p isa man; $p has name $nb; $nb == "Bob"; $p id <answer.p.id>; $nb id <answer.nb.id>;              |
-      | 2       | -         | p1, na  | ALI, ALIN    | lookup               | $p1 isa woman, has name $na; $na "Alice"; $p1 id <answer.p1.id>; $na id <answer.na.id>;             |
-      | 3       | -         | man     | BOB          | lookup               | $man isa man; $man id <answer.man.id>;                                                              |
+      |   | children | vars   | identifiers | rule                 | pattern                                                                                             |
+      | 0 | 1, 2     | w, m   | ALI, BOB    | bobs-sister-is-alice | (sibling: $m, sibling: $w) isa siblingship; $w isa woman; $w id <answer.w.id>; $m id <answer.m.id>; |
+      | 1 | 3        | p, nb  | BOB, BOBN   | a-man-is-called-bob  | $p isa man; $p has name $nb; $nb == "Bob"; $p id <answer.p.id>; $nb id <answer.nb.id>;              |
+      | 2 | -        | p1, na | ALI, ALIN   | lookup               | $p1 isa woman, has name $na; $na "Alice"; $p1 id <answer.p1.id>; $na id <answer.na.id>;             |
+      | 3 | -        | man    | BOB         | lookup               | $man isa man; $man id <answer.man.id>;                                                              |

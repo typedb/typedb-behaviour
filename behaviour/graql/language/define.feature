@@ -45,8 +45,8 @@ Feature: Graql Define Query
       match $x type dog; get;
       """
     Then concept identifiers are
-      |     | check |  value  |
-      | DOG | label |  dog    |
+      |     | check | value |
+      | DOG | label | dog   |
     Then uniquely identify answer concepts
       | x   |
       | DOG |
@@ -64,9 +64,9 @@ Feature: Graql Define Query
       match $x sub person; get;
       """
     Then concept identifiers are
-      |     | check |  value  |
-      | PER | label |  person |
-      | CHD | label |  child  |
+      |     | check | value  |
+      | PER | label | person |
+      | CHD | label | child  |
     Then uniquely identify answer concepts
       | x   |
       | PER |
@@ -85,9 +85,9 @@ Feature: Graql Define Query
       match $x plays employee; get;
       """
     Then concept identifiers are
-      |     | check |  value  |
-      | PER | label |  person |
-      | CHD | label |  child  |
+      |     | check | value  |
+      | PER | label | person |
+      | CHD | label | child  |
     Then uniquely identify answer concepts
       | x   |
       | PER |
@@ -106,9 +106,9 @@ Feature: Graql Define Query
       match $x has name; get;
       """
     Then concept identifiers are
-      |     | check |  value  |
-      | PER | label |  person |
-      | CHD | label |  child  |
+      |     | check | value  |
+      | PER | label | person |
+      | CHD | label | child  |
     Then uniquely identify answer concepts
       | x   |
       | PER |
@@ -128,9 +128,9 @@ Feature: Graql Define Query
       """
 
     Then concept identifiers are
-      |     | check |  value  |
-      | PER | label |  person |
-      | CHD | label |  child  |
+      |     | check | value  |
+      | PER | label | person |
+      | CHD | label | child  |
     Then uniquely identify answer concepts
       | x   |
       | PER |
@@ -151,9 +151,9 @@ Feature: Graql Define Query
       match $x relates employee; get;
       """
     Then concept identifiers are
-      |     | check |  value                |
-      | EMP | label |  employment           |
-      | PTT | label |  part-time-employment |
+      |     | check | value                |
+      | EMP | label | employment           |
+      | PTT | label | part-time-employment |
     Then uniquely identify answer concepts
       | x   |
       | EMP |
@@ -174,9 +174,9 @@ Feature: Graql Define Query
       match $x relates employee; get;
       """
     Then concept identifiers are
-      |     | check |  value                |
-      | EMP | label |  employment           |
-      | PTT | label |  part-time-employment |
+      |     | check | value                |
+      | EMP | label | employment           |
+      | PTT | label | part-time-employment |
     Then uniquely identify answer concepts
       | x   |
       | EMP |
@@ -189,7 +189,9 @@ Feature: Graql Define Query
 
 
   Scenario: define relation subtype inherits 'plays' from supertypes
+
   Scenario: define relation subtype inherits 'has' from supertypes
+
   Scenario: define relation subtype inherits 'key' from supertypes
 
 
@@ -205,19 +207,21 @@ Feature: Graql Define Query
       match $x value string; get;
       """
     Then concept identifiers are
-      |         | check |  value      |
-      | NAME    | label |  name       |
-      | F_NAME  | label |  first-name |
-      | EMAIL   | label |  email      |
+      |        | check | value      |
+      | NAME   | label | name       |
+      | F_NAME | label | first-name |
+      | EMAIL  | label | email      |
     Then uniquely identify answer concepts
-      | x       |
-      | NAME    |
-      | F_NAME  |
-      | EMAIL   |
+      | x      |
+      | NAME   |
+      | F_NAME |
+      | EMAIL  |
 
 
   Scenario: define attribute subtype inherits 'plays' from supertypes
+
   Scenario: define attribute subtype inherits 'has' from supertypes
+
   Scenario: define attribute subtype inherits 'key' from supertypes
 
 
@@ -241,18 +245,18 @@ Feature: Graql Define Query
       match $x type child, plays $r; get;
       """
     Then concept identifiers are
-      |             | check |  value            |
-      | EMPLOYEE    | label |  employee         |
-      | EMPLOYER    | label |  employer         |
-      | NAME_OWNER  | label |  @has-name-owner  |
-      | EMAIL_OWNER | label |  @key-email-owner |
-      | CHILD       | label |  child            |
+      |             | check | value            |
+      | EMPLOYEE    | label | employee         |
+      | EMPLOYER    | label | employer         |
+      | NAME_OWNER  | label | @has-name-owner  |
+      | EMAIL_OWNER | label | @key-email-owner |
+      | CHILD       | label | child            |
     Then uniquely identify answer concepts
-      | x      | r            |
-      | CHILD  | EMPLOYEE     |
-      | CHILD  | EMPLOYER     |
-      | CHILD  | NAME_OWNER   |
-      | CHILD  | EMAIL_OWNER  |
+      | x     | r           |
+      | CHILD | EMPLOYEE    |
+      | CHILD | EMPLOYER    |
+      | CHILD | NAME_OWNER  |
+      | CHILD | EMAIL_OWNER |
 
 
   @ignore
@@ -272,14 +276,14 @@ Feature: Graql Define Query
       match $x type child, has $y; get;
       """
     Then concept identifiers are
-      |       | check | value         |
-      | CHILD | label | child         |
-      | NAME  | label | name          |
-      | PHONE | label | phone-number  |
+      |       | check | value        |
+      | CHILD | label | child        |
+      | NAME  | label | name         |
+      | PHONE | label | phone-number |
     Then uniquely identify answer concepts
-      | x      | y      |
-      | CHILD  | NAME   |
-      | CHILD  | PHONE  |
+      | x     | y     |
+      | CHILD | NAME  |
+      | CHILD | PHONE |
 
 
   @ignore
@@ -303,9 +307,9 @@ Feature: Graql Define Query
       | CHILD | label | child |
       | EMAIL | label | email |
     Then uniquely identify answer concepts
-      | x      | y      |
-      | CHILD  | EMAIL  |
-      | CHILD  | EMAIL  |
+      | x     | y     |
+      | CHILD | EMAIL |
+      | CHILD | EMAIL |
 
 
   @ignore
@@ -324,15 +328,14 @@ Feature: Graql Define Query
       match $x type part-time-employment, relates $r; get;
       """
     Then concept identifiers are
-      |           | check |  value                |
-      | EMPLOYEE  | label |  employee             |
-      | EMPLOYER  | label |  employer             |
-      | PART_TIME | label |  part-time-employment |
+      |           | check | value                |
+      | EMPLOYEE  | label | employee             |
+      | EMPLOYER  | label | employer             |
+      | PART_TIME | label | part-time-employment |
     Then uniquely identify answer concepts
       | x         | r        |
       | PART_TIME | EMPLOYEE |
       | PART_TIME | EMPLOYER |
-
 
 
   Scenario: define a type as abstract errors if has non-abstract parent types (?)
@@ -352,13 +355,13 @@ Feature: Graql Define Query
       match $x sub relation; get; 
       """
     Then concept identifiers are
-      |           | check |  value          |
-      | REL       | label |  relation       |
-      | EMP       | label |  employment     |
-      | HAS_ATTR  | label |  @has-attribute |
-      | HAS_NAME  | label |  @has-name      |
-      | KEY_ATTR  | label |  @key-attribute |
-      | KEY_EMAIL | label |  @key-email     |
+      |           | check | value          |
+      | REL       | label | relation       |
+      | EMP       | label | employment     |
+      | HAS_ATTR  | label | @has-attribute |
+      | HAS_NAME  | label | @has-name      |
+      | KEY_ATTR  | label | @key-attribute |
+      | KEY_EMAIL | label | @key-email     |
     Then uniquely identify answer concepts
       | x         |
       | REL       |
@@ -381,25 +384,31 @@ Feature: Graql Define Query
       match $child sub $super; $super sub @has-attribute; get; 
       """
     Then concept identifiers are
-      |         | check | value           |
-      | ATTR    | label | @has-attribute  |
-      | NAME    | label | @has-name       |
-      | F_NAME  | label | @has-first-name |
+      |        | check | value           |
+      | ATTR   | label | @has-attribute  |
+      | NAME   | label | @has-name       |
+      | F_NAME | label | @has-first-name |
     Then uniquely identify answer concepts
-      | child   | super   |
-      | ATTR    | ATTR    |
-      | NAME    | ATTR    |
-      | F_NAME  | ATTR    |
-      | NAME    | NAME    |
-      | F_NAME  | NAME    |
-      | F_NAME  | F_NAME  |
+      | child  | super  |
+      | ATTR   | ATTR   |
+      | NAME   | ATTR   |
+      | F_NAME | ATTR   |
+      | NAME   | NAME   |
+      | F_NAME | NAME   |
+      | F_NAME | F_NAME |
 
   Scenario: define a relation with no related roles throws on commit
+
   Scenario: define a rule with nested negation throws on commit
+
   Scenario: define a rule with two conclusions throws on commit
+
   Scenario: define a rule with disjunction throws on commit
+
   Scenario: define rule with an unbound variable in the `then` throws on commit
+
   Scenario: define a non-insertable `then` throws on commit (eg. missing specific roles, or attribute value)
+
   Scenario: define a rule causing a loop throws on commit (eg. conclusion is negated in the `when`)
 
 

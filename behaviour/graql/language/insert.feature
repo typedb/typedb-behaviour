@@ -91,14 +91,14 @@ Feature: Graql Insert Query
       """
 
     Then concept identifiers are
-      |       | check | value |
-      | REF0  | key   | ref:0 |
-      | REF1  | key   | ref:1 |
-      | REF2  | key   | ref:2 |
+      |      | check | value |
+      | REF0 | key   | ref:0 |
+      | REF1 | key   | ref:1 |
+      | REF2 | key   | ref:2 |
 
     Then uniquely identify answer concepts
-      | p     | c     | r     |
-      | REF0  | REF2  | REF1  |
+      | p    | c    | r    |
+      | REF0 | REF2 | REF1 |
 
 
   Scenario: insert an additional duplicate role player
@@ -134,12 +134,12 @@ Feature: Graql Insert Query
       match $r (employee: $p, employee: $p) isa employment; get;
       """
     Then concept identifiers are
-      |       | check | value |
-      | REF0  | key   | ref:0 |
-      | REF1  | key   | ref:1 |
+      |      | check | value |
+      | REF0 | key   | ref:0 |
+      | REF1 | key   | ref:1 |
     Then uniquely identify answer concepts
-      | p     | r     |
-      | REF0  | REF1  |
+      | p    | r    |
+      | REF0 | REF1 |
 
 
   Scenario: insert an attribute with a value is retrievable by the value
@@ -164,12 +164,12 @@ Feature: Graql Insert Query
       """
 
     Then concept identifiers are
-      |       | check | value |
-      | REF0  | key   | ref:0 |
+      |      | check | value |
+      | REF0 | key   | ref:0 |
 
     Then uniquely identify answer concepts
-      | a     |
-      | REF0  |
+      | a    |
+      | REF0 |
 
 
   # TODO - fix this; should fail but it does not!
@@ -227,14 +227,14 @@ Feature: Graql Insert Query
       """
 
     Then concept identifiers are
-      |       | check | value |
-      | REF0  | key   | ref:0 |
-      | REF1  | key   | ref:1 |
+      |      | check | value |
+      | REF0 | key   | ref:0 |
+      | REF1 | key   | ref:1 |
 
     Then uniquely identify answer concepts
-      | p1    | p2    |
-      | REF0  | REF1  |
-      | REF1  | REF0  |
+      | p1   | p2   |
+      | REF0 | REF1 |
+      | REF1 | REF0 |
 
 
   Scenario: insert a subtype of an attribute with same value creates a separate instance
@@ -262,8 +262,11 @@ Feature: Graql Insert Query
 
 
   Scenario: inserting duplicate keys throws on commit (? or at insert)
+
   Scenario: inserting disallowed role being played throws on commit (? or at insert)
+
   Scenario: inserting disallowed role being related throws on commit (? or at insert)
+
   Scenario: inserting a relation with no role players throws on commit (? or at insert)
 
 

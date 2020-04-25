@@ -15,6 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 Feature: Graql Undefine Query
+
   Background: Create a simple schema that is extensible for each scenario
     Given connection has been opened
     Given connection delete all keyspaces
@@ -44,13 +45,13 @@ Feature: Graql Undefine Query
       match $x sub attribute; get; 
       """
     Then concept identifiers are
-      |       | check | value     |
-      | ATTR  | label | attribute |
-      | NAME  | label | name      |
+      |      | check | value     |
+      | ATTR | label | attribute |
+      | NAME | label | name      |
     Then uniquely identify answer concepts
-      | x     |
-      | ATTR  |
-      | NAME  |
+      | x    |
+      | ATTR |
+      | NAME |
 
 
   Scenario: undefine 'plays' from super entity removes 'plays' from subtypes
@@ -68,10 +69,10 @@ Feature: Graql Undefine Query
       match $x type child; $x plays $role; get; 
       """
     Then concept identifiers are
-      |             | check | value             |
-      | NAME_OWNER  | label | @has-name-owner   |
-      | EMAIL_OWNER | label | @key-email-owner  |
-      | CHILD       | label | child             |
+      |             | check | value            |
+      | NAME_OWNER  | label | @has-name-owner  |
+      | EMAIL_OWNER | label | @key-email-owner |
+      | CHILD       | label | child            |
     Then uniquely identify answer concepts
       | x     | role        |
       | CHILD | NAME_OWNER  |
@@ -104,17 +105,19 @@ Feature: Graql Undefine Query
       match $x sub @has-name; get; 
       """
     Then concept identifiers are
-      |           | check | value     |
-      | HAS_NAME  | label | @has-name |
+      |          | check | value     |
+      | HAS_NAME | label | @has-name |
     When uniquely identify answer concepts
-      | x         |
-      | HAS_NAME  |
+      | x        |
+      | HAS_NAME |
 
 
 
   # TODO is this expected to hold?
   Scenario: undefine the only attribute key- and owner-ship removes implicit owner-/key-ship relation types
+
   Scenario: undefine attribute removes implicit ownership roles from owners
+
   Scenario: undefine attribute removes implicit roles
 
 
@@ -194,11 +197,15 @@ Feature: Graql Undefine Query
 
   # TODO these are repetitions of analogous scenarios but not using entity
   Scenario: undefine 'plays' from super relation removes 'plays' from child relation
+
   Scenario: undefine 'has' from super relation removes 'has' from child relation
+
   Scenario: undefine 'key' from super relation removes 'key' from child relation
 
   Scenario: undefine 'plays' from super attribute removes 'plays' from child attribute
+
   Scenario: undefine 'has' from super attribute removes 'has' from child attribute
+
   Scenario: undefine 'key' from super attribute removes 'key' from child attribute
 
 
@@ -276,13 +283,13 @@ Feature: Graql Undefine Query
       match $x sub rule; get;
       """
     Then concept identifiers are
-      |         | check | value   |
-      | RULE    | label | rule    |
-      | A_RULE  | label | a-rule  |
+      |        | check | value  |
+      | RULE   | label | rule   |
+      | A_RULE | label | a-rule |
     When uniquely identify answer concepts
-      | x       |
-      | RULE    |
-      | a_RULE  |
+      | x      |
+      | RULE   |
+      | a_RULE |
     Then graql undefine
       """
       undefine a-rule sub rule;
