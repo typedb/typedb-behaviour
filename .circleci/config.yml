@@ -27,9 +27,9 @@ commands:
   run-grakn-server:
     steps:
       - run-bazel-rbe:
-          command: bazel build @graknlabs_grakn_core//:assemble-linux-targz
-      - run: mkdir dist && tar -xvzf bazel-bin/external/graknlabs_grakn_core/grakn-core-all-linux.tar.gz -C ./dist/
-      - run: nohup ./dist/grakn-core-all-linux/grakn server start
+          command: bazel build @graknlabs_grakn_core//server:assemble-linux-targz
+      - run: mkdir dist && tar -xvzf bazel-bin/external/graknlabs_grakn_core/server/grakn-core-server-linux.tar.gz -C ./dist/
+      - run: nohup ./dist/grakn-core-server-linux/grakn server start
 
 
   install-pandoc-latex:
@@ -76,7 +76,7 @@ jobs:
           for f in `find semantics -name '*.md'`; do echo $f; pandoc -o $f.pdf $f; done;
           for f in `find subsumption -name '*.md'`; do echo $f; pandoc -o $f.pdf $f; done;
 
-  operator-test:
+  tools-operator-test:
     machine: true
     working_directory: ~/verification
     steps:
@@ -85,7 +85,7 @@ jobs:
       - run-bazel-rbe:
           command: bazel test //tools/operator/... --test_output=errors
 
-  integrity-verification-test:
+  tools-integrity-test:
     machine: true
     working_directory: ~/verification
     steps:
@@ -100,5 +100,5 @@ workflows:
       - build
       - build-checkstyle
       - build-pdf
-      - operator-test
-      - integrity-verification-test
+      - tools-operator-test
+      - tools-integrity-test

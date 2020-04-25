@@ -143,7 +143,7 @@ public class Validator {
                     // TODO replace concept API  when we can
                     boolean trueInGrakn = false;
                     if (!child.equals(parent) && !child.label().equals(META_TYPES.THING.getName())) {
-                        SchemaConcept childType = tx.getSchemaConcept(Label.of(child.label()));
+                        SchemaConcept.Remote childType = tx.getSchemaConcept(Label.of(child.label()));
                         trueInGrakn = childType.sup().label().toString().equals(parent.label());
 //                                .anyMatch(superType -> superType.label().toString().equals(parent.label()));
                     }
@@ -370,7 +370,7 @@ public class Validator {
          * relates: (Type_relation, Role)
          * abstract: Type
        * functions (?)
-         * label, datatype, regex
+         * label, valuetype, regex
 
        *The goal is to create and verify these from the simplest building blocks, asking every possible combination at each
        step to create a valid pair for a set. The sets are then created and checked for validity.

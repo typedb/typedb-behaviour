@@ -37,7 +37,7 @@ Feature: Graql Insert Query
         relates employee,
         relates employer;
       name sub attribute,
-        datatype string;
+        value string;
       """
     Given the integrity is validated
 
@@ -71,7 +71,7 @@ Feature: Graql Insert Query
         relates employee,
         relates employer,
         key ref;
-      ref sub attribute, datatype long;
+      ref sub attribute, value long;
       """
     Given the integrity is validated
 
@@ -115,7 +115,7 @@ Feature: Graql Insert Query
         relates employee,
         relates employer,
         key ref;
-      ref sub attribute, datatype long;
+      ref sub attribute, value long;
       """
     Given the integrity is validated
 
@@ -146,9 +146,9 @@ Feature: Graql Insert Query
     Given graql define
       """
       define
-      name sub attribute, datatype string,
+      name sub attribute, value string,
         key ref;
-      ref sub attribute, datatype long;
+      ref sub attribute, value long;
       """
     Given the integrity is validated
 
@@ -178,8 +178,8 @@ Feature: Graql Insert Query
     Given graql define
       """
       define
-      name sub attribute, datatype string, key ref;
-      ref sub attribute, datatype long;
+      name sub attribute, value string, key ref;
+      ref sub attribute, value long;
       """
     Given the integrity is validated
 
@@ -200,8 +200,8 @@ Feature: Graql Insert Query
       """
       define
       person sub entity, has age, key ref;
-      age sub attribute, datatype long;
-      ref sub attribute, datatype long;
+      age sub attribute, value long;
+      ref sub attribute, value long;
       """
     Given the integrity is validated
 
@@ -246,7 +246,7 @@ Feature: Graql Insert Query
       person sub entity,
         has value;
       value sub attribute,
-        datatype string,
+        value string,
         regex "\d{2}\.[true][false]";
       """
     Given the integrity is validated

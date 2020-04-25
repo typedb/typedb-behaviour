@@ -10,7 +10,7 @@ java_test(
     visibility = ["//visibility:public"],
     deps = [
         "//dependencies/maven/artifacts/com/google/guava",
-        "//tools:operator",
+        "//tools/operator:operator",
         "@graknlabs_graql//java:graql",
     ],
 )

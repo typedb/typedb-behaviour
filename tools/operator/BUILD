@@ -22,8 +22,8 @@ load("@graknlabs_build_tools//checkstyle:rules.bzl", "checkstyle_test")
 java_library(
     name = "operator",
     srcs = glob([
-        "operator/*.java",
-        "operator/range/*.java",
+        "*.java",
+        "range/*.java",
     ]),
     visibility = ["//visibility:public"],
     deps = [

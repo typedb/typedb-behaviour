@@ -40,7 +40,7 @@ Feature: Graql Match Clause
         relates employee,
         relates employer,
         key ref;
-      ref sub attribute, datatype long;
+      ref sub attribute, value long;
       """
     Given the integrity is validated
 
@@ -91,7 +91,7 @@ Feature: Graql Match Clause
         relates employee,
         relates employer,
         key ref;
-      ref sub attribute, datatype long;
+      ref sub attribute, value long;
       """
     Given the integrity is validated
 
@@ -154,7 +154,7 @@ Feature: Graql Match Clause
       define
         some-entity sub entity, plays player, key ref;
         symmetric sub relation, relates player, key ref;
-        ref sub attribute, datatype long;
+        ref sub attribute, value long;
       """
     Given the integrity is validated
 
@@ -182,7 +182,7 @@ Feature: Graql Match Clause
       define
         some-entity sub entity, plays player, key ref;
         symmetric sub relation, relates player, key ref;
-        ref sub attribute, datatype long;
+        ref sub attribute, value long;
       """
     Given the integrity is validated
 

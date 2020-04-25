@@ -16,8 +16,8 @@ Feature: Graql Reasoning Explanation
       """
       define
 
-      name sub attribute, datatype string;
-      company-id sub attribute, datatype long;
+      name sub attribute, value string;
+      company-id sub attribute, value long;
 
       company sub entity,
         has name,
@@ -68,13 +68,13 @@ Feature: Graql Reasoning Explanation
       define
 
       name sub attribute,
-          datatype string;
+          value string;
 
       is-liable sub attribute,
-          datatype boolean;
+          value boolean;
 
       company-id sub attribute,
-          datatype long;
+          value long;
 
       company sub entity,
           key company-id,
@@ -134,7 +134,7 @@ Feature: Graql Reasoning Explanation
       """
       define
       name sub attribute,
-          datatype string;
+          value string;
 
       location sub entity,
           abstract,
@@ -187,7 +187,7 @@ Feature: Graql Reasoning Explanation
       """
       define
       name sub attribute,
-          datatype string;
+          value string;
 
       location sub entity,
           abstract,
@@ -271,9 +271,9 @@ Feature: Graql Reasoning Explanation
       """
       define
 
-      name sub attribute, datatype string;
+      name sub attribute, value string;
 
-      person-id sub attribute, datatype long;
+      person-id sub attribute, value long;
 
       person sub entity,
           key person-id,

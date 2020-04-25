@@ -53,8 +53,8 @@ public class ValidatorIT {
                     "person sub entity, has name, plays employee, plays employer;" +
                     "company sub entity, key email, plays employer;" +
                     "employment sub relation, relates employer, relates employee;" +
-                    "name sub attribute, datatype string;" +
-                    "email sub attribute, datatype string, regex \".+@.+\\.com\" ;").asDefine());
+                    "name sub attribute, value string;" +
+                    "email sub attribute, value string, regex \".+@.+\\.com\" ;").asDefine());
             tx.commit();
         }
     }

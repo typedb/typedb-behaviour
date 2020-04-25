@@ -27,8 +27,8 @@ Feature: Graql Undefine Query
       define
       person sub entity, plays employee, has name, key email;
       employment sub relation, relates employee, relates employer;
-      name sub attribute, datatype string;
-      email sub attribute, datatype string, regex ".+@\w.com";
+      name sub attribute, value string;
+      email sub attribute, value string, regex ".+@\w.com";
       abstract-type sub entity, abstract;
       """
     Given the integrity is validated

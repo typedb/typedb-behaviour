@@ -28,8 +28,8 @@ Feature: Graql Define Query
       define
       person sub entity, plays employee, has name, key email;
       employment sub relation, relates employee;
-      name sub attribute, datatype string;
-      email sub attribute, datatype string;
+      name sub attribute, value string;
+      email sub attribute, value string;
       """
     Given the integrity is validated
 
@@ -193,7 +193,7 @@ Feature: Graql Define Query
   Scenario: define relation subtype inherits 'key' from supertypes
 
 
-  Scenario: define attribute subtype has same datatype as supertype
+  Scenario: define attribute subtype has same value as supertype
     Given graql define
       """
       define first-name sub name;
@@ -202,7 +202,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x datatype string; get;
+      match $x value string; get;
       """
     Then concept identifiers are
       |         | check |  value      |
@@ -262,7 +262,7 @@ Feature: Graql Define Query
     """
        define
        child sub person;
-       phone-number sub attribute, datatype long;
+       phone-number sub attribute, value long;
        person sub entity, has phone-number;
       """
     Given the integrity is validated
@@ -289,7 +289,7 @@ Feature: Graql Define Query
       """
       define
       child sub person;
-      phone-number sub attribute, datatype long;
+      phone-number sub attribute, value long;
       person sub entity, key phone-number;
       """
     Given the integrity is validated
