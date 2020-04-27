@@ -182,6 +182,7 @@ Feature: Graql Reasoning Explanation
       | 0 | -        | k, l, n | KC, LDN, KCn | lookup | $k isa area; $k has name $n; (superior: $l, subordinate: $k) isa location-hierarchy; $k id <answer.k.id>; $n id <answer.n.id>; $l id <answer.l.id>; |
 
 
+  @ignore
   Scenario: transitive relation is explained as expected for one hop
     Given graql define
       """
