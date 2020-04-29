@@ -123,11 +123,10 @@ Feature: Graql Reasoning Explanation
       | company-is-liable | { $c2 isa company, has name $name; $name "the-company"; }; | { $c2 has is-liable true; };     |
 
     Then answers contain explanation tree
-      |   | children | vars     | identifiers | rule              | pattern                                                               |
-      | 0 | 1        | co, l    | CO, LIA     | company-is-liable | $co id <answer.co.id>; $co has is-liable $l; $l id <answer.l.id>;     |
-      | 1 | 2        | c2, name | CO, CON     | company-has-name  | $c2 id <answer.c2.id>; $c2 has name $name; $name id <answer.name.id>; |
-#      | 1 | 2        | c2, name | CO, CON     | company-has-name  | $c2 isa company; $c2 has name $name; $name == "the-company";    |
-      | 2 | -        | c1       | CO          | lookup            | $c1 isa company; $c1 id <answer.c.id>;                                |
+      |   | children | vars     | identifiers | rule              | pattern                                                                                                         |
+      | 0 | 1        | co, l    | CO, LIA     | company-is-liable | $co id <answer.co.id>; $co has is-liable $l; $l id <answer.l.id>;                                               |
+      | 1 | 2        | c2, name | CO, CON     | company-has-name  | $c2 isa company; $c2 has name $name; $name == "the-company"; $c2 id <answer.c2.id>; $name id <answer.name.id>;  |
+      | 2 | -        | c1       | CO          | lookup            | $c1 isa company; $c1 id <answer.c1.id>;                                                                         |
 
 
   Scenario: relation is explained as expected when there is no inference
@@ -336,9 +335,9 @@ Feature: Graql Reasoning Explanation
       | bobs-sister-is-alice | { $p isa man, has name $nb; $nb "Bob"; $p1 isa woman, has name $na; $na "Alice"; }; | { (sibling: $p, sibling: $p1) isa siblingship; }; |
 
     Then answers contain explanation tree
-      |   | children  | vars          | identifiers           | rule                 | pattern                                                                                                                                                                        |
-      | 0 | 1         | w, m          | ALI, BOB              | bobs-sister-is-alice | (sibling: $m, sibling: $w) isa siblingship; $w isa woman; $w id <answer.w.id>; $m id <answer.m.id>;                                                                            |
-      | 1 | 2, 3      | p, nb, p1, na | BOB, BOBN, ALI, ALIN  | join                 | $p isa man; $p has name $nb; $nb == "Bob"; $p id <answer.p.id>; $nb id <answer.nb.id>; $p1 isa woman, has name $na; $na "Alice"; $p1 id <answer.p1.id>; $na id <answer.na.id>; |
-      | 2 | 4         | p, nb         | BOB, BOBN             | a-man-is-called-bob  | $p isa man; $p has name $nb; $nb == "Bob"; $p id <answer.p.id>; $nb id <answer.nb.id>;                                                                                         |
-      | 3 | -         | p1, na        | ALI, ALIN             | lookup               | $p1 isa woman, has name $na; $na "Alice"; $p1 id <answer.p1.id>; $na id <answer.na.id>;                                                                                        |
-      | 4 | -         | man           | BOB                   | lookup               | $man isa man; $man id <answer.man.id>;                                                                                                                                         |
+      |   | children  | vars          | identifiers           | rule                 | pattern                                                                                                                                                                                |
+      | 0 | 1         | w, m          | ALI, BOB              | bobs-sister-is-alice | (sibling: $m, sibling: $w) isa siblingship; $w isa woman; $w id <answer.w.id>; $m id <answer.m.id>;                                                                                    |
+      | 1 | 2, 3      | p, nb, p1, na | BOB, BOBN, ALI, ALIN  | join                 | $p isa man; $p has name $nb; $nb == "Bob"; $p id <answer.p.id>; $nb id <answer.nb.id>; $p1 isa woman; $p1 has name $na; $na == "Alice"; $p1 id <answer.p1.id>; $na id <answer.na.id>;  |
+      | 2 | 4         | p, nb         | BOB, BOBN             | a-man-is-called-bob  | $p isa man; $p has name $nb; $nb == "Bob"; $p id <answer.p.id>; $nb id <answer.nb.id>;                                                                                                 |
+      | 3 | -         | p1, na        | ALI, ALIN             | lookup               | $p1 isa woman; $p1 has name $na; $na == "Alice"; $p1 id <answer.p1.id>; $na id <answer.na.id>;                                                                                         |
+      | 4 | -         | man           | BOB                   | lookup               | $man isa man; $man id <answer.man.id>;                                                                                                                                                 |
