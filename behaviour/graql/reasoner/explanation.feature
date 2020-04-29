@@ -268,7 +268,7 @@ Feature: Graql Reasoning Explanation
 
 
   @ignore
-  Scenario: an attribute's existence and ownership can be inferred and used to infer a relation
+  Scenario: an attribute's existence and ownership can be inferred and used to infer a relation and a more specific answer is retrieved from the cache
     Given graql define
       """
       define
@@ -285,7 +285,10 @@ Feature: Graql Reasoning Explanation
       man sub person;
       woman sub person;
 
-      siblingship sub relation,
+      family-relation sub relation,
+        abstract;
+
+      siblingship sub family-relation,
           relates sibling;
 
       a-man-is-called-bob sub rule,
@@ -311,11 +314,6 @@ Feature: Graql Reasoning Explanation
       $b isa man, has person-id 1;
       """
 
-    Then get answers of graql query
-      """
-      match (sibling: $w, sibling: $m) isa siblingship; $w isa woman; get;
-      """
-
     Then concept identifiers are
       |      | check | value       |
       | ALI  | key   | person-id:0 |
@@ -323,16 +321,36 @@ Feature: Graql Reasoning Explanation
       | BOB  | key   | person-id:1 |
       | BOBN | value | name:Bob    |
 
+    Then rules are
+      |                      | when                                                                                | then                                              |
+      | a-man-is-called-bob  | { $man isa man; };                                                                  | { $man has name "Bob"; };                         |
+      | bobs-sister-is-alice | { $p isa man, has name $nb; $nb "Bob"; $p1 isa woman, has name $na; $na "Alice"; }; | { (sibling: $p, sibling: $p1) isa siblingship; }; |
+
+    Then get answers of graql query
+      """
+      match ($w, $m) isa family-relation; $w isa woman; get;
+      """
+
     Then uniquely identify answer concepts
       | w   | m   |
       | ALI | BOB |
 
-    Then rules are
-      |                      | when                                                                                | then                                              |
-      | a-man-is-called-bob  | { $man isa man; };                                                                  | { $man has name "Bob"; };                         |
-#      | bobs-sister-is-alice  | { $p isa man, has name "Bob"; $p1 isa woman, has name "Alice"; };                   | { (sibling: $p, sibling: $p1) isa siblingship; }; |
-#      TODO Expected the above as the response, but the rule body was customised to the pattern of the explanation's answer(s), as below
-      | bobs-sister-is-alice | { $p isa man, has name $nb; $nb "Bob"; $p1 isa woman, has name $na; $na "Alice"; }; | { (sibling: $p, sibling: $p1) isa siblingship; }; |
+    Then answers contain explanation tree
+      |   | children  | vars          | identifiers           | rule                 | pattern                                                                                                                                                                                |
+      | 0 | 1         | w, m          | ALI, BOB              | bobs-sister-is-alice | (role: $m, role: $w) isa family-relation; $w isa woman; $w id <answer.w.id>; $m id <answer.m.id>;                                                                                    |
+      | 1 | 2, 3      | p, nb, p1, na | BOB, BOBN, ALI, ALIN  | join                 | $p isa man; $p has name $nb; $nb == "Bob"; $p id <answer.p.id>; $nb id <answer.nb.id>; $p1 isa woman; $p1 has name $na; $na == "Alice"; $p1 id <answer.p1.id>; $na id <answer.na.id>;  |
+      | 2 | 4         | p, nb         | BOB, BOBN             | a-man-is-called-bob  | $p isa man; $p has name $nb; $nb == "Bob"; $p id <answer.p.id>; $nb id <answer.nb.id>;                                                                                                 |
+      | 3 | -         | p1, na        | ALI, ALIN             | lookup               | $p1 isa woman; $p1 has name $na; $na == "Alice"; $p1 id <answer.p1.id>; $na id <answer.na.id>;                                                                                         |
+      | 4 | -         | man           | BOB                   | lookup               | $man isa man; $man id <answer.man.id>;                                                                                                                                                 |
+
+    Then get answers of graql query
+      """
+      match (sibling: $w, sibling: $m) isa siblingship; $w isa woman; get;
+      """
+
+    Then uniquely identify answer concepts
+      | w   | m   |
+      | ALI | BOB |
 
     Then answers contain explanation tree
       |   | children  | vars          | identifiers           | rule                 | pattern                                                                                                                                                                                |
