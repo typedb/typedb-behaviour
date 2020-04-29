@@ -289,7 +289,7 @@ Feature: Graql Undefine Query
     When uniquely identify answer concepts
       | x      |
       | RULE   |
-      | a_RULE |
+      | A_RULE |
     Then graql undefine
       """
       undefine a-rule sub rule;
