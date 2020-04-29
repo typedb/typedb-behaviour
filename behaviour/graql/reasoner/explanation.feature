@@ -126,6 +126,7 @@ Feature: Graql Reasoning Explanation
       |   | children | vars     | identifiers | rule              | pattern                                                               |
       | 0 | 1        | co, l    | CO, LIA     | company-is-liable | $co id <answer.co.id>; $co has is-liable $l; $l id <answer.l.id>;     |
       | 1 | 2        | c2, name | CO, CON     | company-has-name  | $c2 id <answer.c2.id>; $c2 has name $name; $name id <answer.name.id>; |
+#      | 1 | 2        | c2, name | CO, CON     | company-has-name  | $c2 isa company; $c2 has name $name; $name == "the-company";    |
       | 2 | -        | c1       | CO          | lookup            | $c1 isa company; $c1 id <answer.c.id>;                                |
 
 
@@ -248,12 +249,13 @@ Feature: Graql Reasoning Explanation
       | location-hierarchy-transitivity | { (superior: $a, subordinate: $b) isa location-hierarchy; (superior: $b, subordinate: $c) isa location-hierarchy; }; | { (superior: $a, subordinate: $c) isa location-hierarchy; }; |
 
     Then answers contain explanation tree
-      |   | children | vars    | identifiers | rule                            | pattern                                                                                                                                             |
-      | 0 | 1, 2     | k, l, n | KC, UK, KCN | join                            | $k isa area; $k has name $n; (superior: $l, subordinate: $k) isa location-hierarchy; $k id <answer.k.id>; $n id <answer.n.id>; $l id <answer.l.id>; |
-      | 1 | -        | k, n    | KC, KCN     | lookup                          | $k isa area; $k has name $n; $n id <answer.n.id>; $k id <answer.k.id>;                                                                              |
-      | 2 | 3, 4     | k, l    | KC, UK      | location-hierarchy-transitivity | (superior: $l, subordinate: $k) isa location-hierarchy; $k isa area; $k id <answer.k.id>; $l id <answer.l.id>;                                      |
-      | 3 | -        | b, c    | LDN, KC     | lookup                          | (superior: $b, subordinate: $c) isa location-hierarchy; $c isa area; $b id <answer.b.id>; $c id <answer.c.id>;                                      |
-      | 4 | -        | a, b    | UK, LDN     | lookup                          | (superior: $a, subordinate: $b) isa location-hierarchy; $b id <answer.b.id>; $a id <answer.a.id>;                                                   |
+      |   | children | vars    | identifiers | rule                            | pattern                                                                                                                                                                                      |
+      | 0 | 1, 2     | k, l, n | KC, UK, KCN | join                            | $k isa area; $k has name $n; (superior: $l, subordinate: $k) isa location-hierarchy; $k id <answer.k.id>; $n id <answer.n.id>; $l id <answer.l.id>;                                          |
+      | 1 | -        | k, n    | KC, KCN     | lookup                          | $k isa area; $k has name $n; $n id <answer.n.id>; $k id <answer.k.id>;                                                                                                                       |
+      | 2 | 3        | k, l    | KC, UK      | location-hierarchy-transitivity | (superior: $l, subordinate: $k) isa location-hierarchy; $k isa area; $k id <answer.k.id>; $l id <answer.l.id>;                                                                               |
+      | 3 | 4, 5     | a, b, c | UK, LDN, KC | join                            | (superior: $a, subordinate: $b) isa location-hierarchy; (superior: $b, subordinate: $c) isa location-hierarchy; $c isa area; $a id <answer.a.id>; $b id <answer.b.id>; $c id <answer.c.id>;  |
+      | 4 | -        | b, c    | LDN, KC     | lookup                          | (superior: $b, subordinate: $c) isa location-hierarchy; $c isa area; $b id <answer.b.id>; $c id <answer.c.id>;                                                                               |
+      | 5 | -        | a, b    | UK, LDN     | lookup                          | (superior: $a, subordinate: $b) isa location-hierarchy; $b id <answer.b.id>; $a id <answer.a.id>;                                                                                            |
 
 #   TODO Non-deterministically getting this error:
 #   Expected :{ (superior: $b, subordinate: $c) isa location-hierarchy; $c isa area; $b id V8240; $c id V20656; };
@@ -334,8 +336,9 @@ Feature: Graql Reasoning Explanation
       | bobs-sister-is-alice | { $p isa man, has name $nb; $nb "Bob"; $p1 isa woman, has name $na; $na "Alice"; }; | { (sibling: $p, sibling: $p1) isa siblingship; }; |
 
     Then answers contain explanation tree
-      |   | children | vars   | identifiers | rule                 | pattern                                                                                             |
-      | 0 | 1, 2     | w, m   | ALI, BOB    | bobs-sister-is-alice | (sibling: $m, sibling: $w) isa siblingship; $w isa woman; $w id <answer.w.id>; $m id <answer.m.id>; |
-      | 1 | 3        | p, nb  | BOB, BOBN   | a-man-is-called-bob  | $p isa man; $p has name $nb; $nb == "Bob"; $p id <answer.p.id>; $nb id <answer.nb.id>;              |
-      | 2 | -        | p1, na | ALI, ALIN   | lookup               | $p1 isa woman, has name $na; $na "Alice"; $p1 id <answer.p1.id>; $na id <answer.na.id>;             |
-      | 3 | -        | man    | BOB         | lookup               | $man isa man; $man id <answer.man.id>;                                                              |
+      |   | children  | vars          | identifiers           | rule                 | pattern                                                                                                                                                                        |
+      | 0 | 1         | w, m          | ALI, BOB              | bobs-sister-is-alice | (sibling: $m, sibling: $w) isa siblingship; $w isa woman; $w id <answer.w.id>; $m id <answer.m.id>;                                                                            |
+      | 1 | 2, 3      | p, nb, p1, na | BOB, BOBN, ALI, ALIN  | join                 | $p isa man; $p has name $nb; $nb == "Bob"; $p id <answer.p.id>; $nb id <answer.nb.id>; $p1 isa woman, has name $na; $na "Alice"; $p1 id <answer.p1.id>; $na id <answer.na.id>; |
+      | 2 | 4         | p, nb         | BOB, BOBN             | a-man-is-called-bob  | $p isa man; $p has name $nb; $nb == "Bob"; $p id <answer.p.id>; $nb id <answer.nb.id>;                                                                                         |
+      | 3 | -         | p1, na        | ALI, ALIN             | lookup               | $p1 isa woman, has name $na; $na "Alice"; $p1 id <answer.p1.id>; $na id <answer.na.id>;                                                                                        |
+      | 4 | -         | man           | BOB                   | lookup               | $man isa man; $man id <answer.man.id>;                                                                                                                                         |
