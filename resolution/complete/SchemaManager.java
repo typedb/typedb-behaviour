@@ -3,10 +3,10 @@ package grakn.verification.resolution.complete;
 import grakn.client.GraknClient;
 import grakn.client.GraknClient.Session;
 import grakn.client.GraknClient.Transaction;
-import grakn.client.concept.AttributeType;
-import grakn.client.concept.RelationType;
-import grakn.client.concept.Role;
 import grakn.client.concept.Rule;
+import grakn.client.concept.type.AttributeType;
+import grakn.client.concept.type.RelationType;
+import grakn.client.concept.type.Role;
 import graql.lang.Graql;
 import graql.lang.query.GraqlGet;
 
@@ -85,8 +85,7 @@ public class SchemaManager {
             Role relRole = getRole(tx, "rel");
 
             RelationType attrPropRel = tx.execute(Graql.match(Graql.var("x").sub("has-attribute-property")).get()).get(0).get("x").asRelationType();
-
-
+            
             GraqlGet typesToConnectQuery = Graql.match(
                     Graql.var("x").sub("thing"),
                     Graql.not(Graql.var("x").sub("@has-attribute")),
@@ -95,21 +94,21 @@ public class SchemaManager {
             tx.stream(typesToConnectQuery).map(ans -> ans.get("x").asType()).forEach(type -> {
                 if (type.isAttributeType()) {
                     if (!EXCLUDED_ATTRIBUTE_TYPES.contains(type.label().toString())) {
-                        attrPropRel.has((AttributeType) type);
+                        attrPropRel.asRemote(tx).has((AttributeType) type);
                     }
                 } else if (type.isEntityType()) {
                     if (!EXCLUDED_ENTITY_TYPES.contains(type.label().toString())) {
-                        type.plays(instanceRole);
-                        type.plays(ownerRole);
-                        type.plays(roleplayerRole);
+                        type.asRemote(tx).plays(instanceRole);
+                        type.asRemote(tx).plays(ownerRole);
+                        type.asRemote(tx).plays(roleplayerRole);
                     }
 
                 } else if (type.isRelationType()) {
                     if (!EXCLUDED_RELATION_TYPES.contains(type.label().toString())) {
-                        type.plays(instanceRole);
-                        type.plays(ownerRole);
-                        type.plays(roleplayerRole);
-                        type.plays(relRole);
+                        type.asRemote(tx).plays(instanceRole);
+                        type.asRemote(tx).plays(ownerRole);
+                        type.asRemote(tx).plays(roleplayerRole);
+                        type.asRemote(tx).plays(relRole);
                     }
                 }
             });

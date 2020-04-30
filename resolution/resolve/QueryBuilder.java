@@ -40,12 +40,12 @@ public class QueryBuilder {
 
             ArrayList<GraqlGet> resolutionQueries = new ArrayList<>();
             for (ConceptMap answer : answers) {
-                resolutionQueries.add(Graql.match(resolutionStatements(answer)).get());
+                resolutionQueries.add(Graql.match(resolutionStatements(tx, answer)).get());
             }
             return resolutionQueries;
     }
 
-    private Set<Statement> resolutionStatements(ConceptMap answer) {
+    private Set<Statement> resolutionStatements(Transaction tx, ConceptMap answer) {
 
         Pattern qp = answer.queryPattern();
 
@@ -54,7 +54,7 @@ public class QueryBuilder {
         }
 
         Set<Statement> answerStatements = removeIdStatements(qp.statements());
-        answerStatements.addAll(generateKeyStatements(answer.map()));
+        answerStatements.addAll(generateKeyStatements(tx, answer.map()));
 
         if (answer.hasExplanation()) {
 
@@ -64,7 +64,7 @@ public class QueryBuilder {
             Explanation explanation = answer.explanation();
 
             for (ConceptMap explAns : explanation.getAnswers()) {
-                answerStatements.addAll(resolutionStatements(explAns));
+                answerStatements.addAll(resolutionStatements(tx, explAns));
                 whenStatements.addAll(Objects.requireNonNull(explAns.queryPattern()).statements());
             }
 
@@ -188,12 +188,12 @@ public class QueryBuilder {
      * @param varMap variable map of concepts
      * @return Statements that check for the keys of the given concepts
      */
-    public static Set<Statement> generateKeyStatements(Map<Variable, Concept> varMap) {
+    public static Set<Statement> generateKeyStatements(Transaction tx, Map<Variable, Concept<?>> varMap) {
         LinkedHashSet<Statement> statements = new LinkedHashSet<>();
 
-        for (Map.Entry<Variable, Concept> entry : varMap.entrySet()) {
+        for (Map.Entry<Variable, Concept<?>> entry : varMap.entrySet()) {
             Variable var = entry.getKey();
-            Concept concept = entry.getValue();
+            Concept<?> concept = entry.getValue();
 
             if (concept.isAttribute()) {
 
@@ -216,7 +216,7 @@ public class QueryBuilder {
 
             } else if (concept.isEntity() | concept.isRelation()){
 
-                concept.asThing().keys().forEach(attribute -> {
+                concept.asThing().asRemote(tx).keys().forEach(attribute -> {
 
                     String typeLabel = attribute.type().label().toString();
                     Statement statement = Graql.var(var);

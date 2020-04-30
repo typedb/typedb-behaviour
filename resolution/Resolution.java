@@ -42,7 +42,7 @@ public class Resolution {
         // Complete the KB-complete
         Completer completer = new Completer(completeSession);
         try (GraknClient.Transaction tx = completeSession.transaction().write()) {
-            completer.loadRules(SchemaManager.getAllRules(tx));
+            completer.loadRules(tx, SchemaManager.getAllRules(tx));
         }
 
         SchemaManager.undefineAllRules(completeSession);

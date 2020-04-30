@@ -141,7 +141,7 @@ public class TestCompleter {
         try (GraknClient.Session session = graknClient.session(GRAKN_KEYSPACE)) {
             Completer completer = new Completer(session);
             try (GraknClient.Transaction tx = session.transaction().write()) {
-                completer.loadRules(SchemaManager.getAllRules(tx));
+                completer.loadRules(tx, SchemaManager.getAllRules(tx));
             }
 
             SchemaManager.undefineAllRules(session);

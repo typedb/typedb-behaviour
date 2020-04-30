@@ -70,10 +70,11 @@ public class Completer {
         return foundResult;
     }
 
-    public void loadRules(Set<grakn.client.concept.Rule> graknRules) {
+    public void loadRules(Transaction tx, Set<grakn.client.concept.Rule> graknRules) {
         Set<Rule> rules = new HashSet<>();
         for (grakn.client.concept.Rule graknRule : graknRules) {
-            rules.add(new Rule(Objects.requireNonNull(graknRule.when()), Objects.requireNonNull(graknRule.then()), graknRule.label().toString()));
+            grakn.client.concept.Rule.Remote remoteRule = graknRule.asRemote(tx);
+            rules.add(new Rule(Objects.requireNonNull(remoteRule.when()), Objects.requireNonNull(remoteRule.then()), graknRule.label().toString()));
         }
         this.rules = rules;
     }
@@ -91,7 +92,7 @@ public class Completer {
             resolution = qb.inferenceStatements(this.body.statements(), this.head.statements(), label);
         }
 
-        private Map<Variable, Concept> oneAnswerFromConceptMap(List<ConceptMap> answers) {
+        private Map<Variable, Concept<?>> oneAnswerFromConceptMap(List<ConceptMap> answers) {
             if (answers.size() == 1) {
                 return answers.get(0).map();
             } else if (answers.size() == 0) {
@@ -111,21 +112,21 @@ public class Completer {
             return tx.stream(query);
         }
 
-        boolean matchBodyAndHeadAndKeysAndNotResolution_insertResolution(Transaction tx, Map<Variable, Concept> matchAnswerMap) {
-            Set<Statement> keyStatements = generateKeyStatements(matchAnswerMap);
+        boolean matchBodyAndHeadAndKeysAndNotResolution_insertResolution(Transaction tx, Map<Variable, Concept<?>> matchAnswerMap) {
+            Set<Statement> keyStatements = generateKeyStatements(tx, matchAnswerMap);
             GraqlInsert query = Graql.match(body, head, Graql.and(keyStatements), Graql.not(Graql.and(resolution))).insert(resolution);
-            Map<Variable, Concept> answerMap = oneAnswerFromConceptMap(tx.execute(query));
+            Map<Variable, Concept<?>> answerMap = oneAnswerFromConceptMap(tx.execute(query));
             return answerMap != null;
         }
 
-        boolean matchBodyAndKeys_insertHeadAndResolution(Transaction tx, Map<Variable, Concept> matchAnswerMap) {
-            Set<Statement> keyStatements = generateKeyStatements(matchAnswerMap);
+        boolean matchBodyAndKeys_insertHeadAndResolution(Transaction tx, Map<Variable, Concept<?>> matchAnswerMap) {
+            Set<Statement> keyStatements = generateKeyStatements(tx, matchAnswerMap);
 
             HashSet<Statement> toInsert = new HashSet<>(resolution);
             toInsert.addAll(head.statements());
 
             GraqlInsert query = Graql.match(body, Graql.and(keyStatements)).insert(toInsert);
-            Map<Variable, Concept> answerMap = oneAnswerFromConceptMap(tx.execute(query));
+            Map<Variable, Concept<?>> answerMap = oneAnswerFromConceptMap(tx.execute(query));
 
             return answerMap != null;
         }
