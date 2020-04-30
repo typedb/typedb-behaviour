@@ -15,13 +15,17 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 Feature: Graql Delete Query
-
-  Scenario: deleted instance no longer visible as instance of its type
-
-  Scenario: deleted role player is not part of relation
-
-  Scenario: deleted attribute not visible from any owner of attribute
-
-  Scenario: deleted attribute owning instance not visible from attributes
-
-  Scenario: deleting attribute ownership retains attribute and owner but no mutual visibility
+  Scenario: delete an instance using 'thing' meta label succeeds
+  Scenario: delete an relation instance using 'relation' meta label succeeds
+  Scenario: delete an entity instance using 'entity' meta label succeeds
+  Scenario: delete an attribute instance using 'attribute' meta label succeeds
+  Scenario: delete a role player from a relation removes the player from the relation
+  Scenario: delete an instance the instance not a player in any relation anymore
+  Scenario: delete duplicate role players from a relation removes duplicate player from relation
+  Scenario: delete attribute ownership makes attribute invisible to owner
+  Scenario: delete role players in multiple statements are all deleted
+  Scenario: delete all role players of relation cleans up relation instance
+  Scenario: delete more role players than exist throws
+  Scenario: delete a role player with too-specific (downcasting) role label throws
+  Scenario: delete an instance using wrong type throws
+  Scenario: delete an instance using too-specific (downcasting) type throws
