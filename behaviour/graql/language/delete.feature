@@ -14,6 +14,23 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+
+#
+# Copyright (C) 2020 Grakn Labs
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
 Feature: Graql Delete Query
 
   Background: Open connection and create a simple extensible schema
@@ -32,6 +49,7 @@ Feature: Graql Delete Query
       friendship sub relation,
         relates friend,
         key ref;
+      name sub attribute, value string;
       ref sub attribute, value long;
       """
     Given the integrity is validated
@@ -69,7 +87,7 @@ Feature: Graql Delete Query
       """
       match $x isa person; get;
       """
-    Then unique identify answer concepts
+    Then uniquely identify answer concepts
       | x  |
       | P2 |
 
@@ -117,7 +135,7 @@ Feature: Graql Delete Query
       """
       match $x isa person; get;
       """
-    Then unique identify answer concepts
+    Then uniquely identify answer concepts
       | x  |
       | P2 |
 
@@ -273,14 +291,14 @@ Feature: Graql Delete Query
 
     Then get answers of graql query
       """
-      match (friend: $x, friend: $y) isa friendship;
+      match (friend: $x, friend: $y) isa friendship; get;
       """
     Then uniquely identify answer concepts
       | x    | y    |
-      | P1   | P2   |
-      | P2   | P1   |
+      | P2   | P3   |
+      | P3   | P2   |
 
-    
+
   Scenario: delete a role player from a relation using meta role removes the player from the relation
     When graql insert
       """
@@ -313,12 +331,12 @@ Feature: Graql Delete Query
 
     Then get answers of graql query
       """
-      match (friend: $x, friend: $y) isa friendship;
+      match (friend: $x, friend: $y) isa friendship; get;
       """
     Then uniquely identify answer concepts
       | x    | y    |
-      | P1   | P2   |
-      | P2   | P1   |
+      | P2   | P3   |
+      | P3   | P2   |
 
 
   Scenario: delete an instance removes it from all relations
@@ -329,7 +347,7 @@ Feature: Graql Delete Query
       $y isa person, has ref 1;
       $z isa person, has ref 2;
       $r (friend: $x, friend: $y) isa friendship, has ref 3;
-      $r (friend: $x, friend: $z) isa friendship, has ref 4;
+      $r2 (friend: $x, friend: $z) isa friendship, has ref 4;
       """
     When the integrity is validated
 
@@ -351,7 +369,7 @@ Feature: Graql Delete Query
 
     Then get answers of graql query
       """
-      match $r (friend: $x) isa friendship;
+      match $r (friend: $x) isa friendship; get;
       """
     Then uniquely identify answer concepts
       | r     | x    |
@@ -385,11 +403,11 @@ Feature: Graql Delete Query
 
     Then get answers of graql query
       """
-      match $r (friend: $x) isa friendship;
+      match $r (friend: $x) isa friendship; get;
       """
     Then uniquely identify answer concepts
       | r     | x    |
-      | FR1   | P2   |
+      | FR    | P2   |
 
 
   Scenario: delete role players in multiple statements are all deleted
@@ -414,6 +432,9 @@ Feature: Graql Delete Query
       """
       match
         $r (friend: $x, friend: $y, friend: $z) isa friendship;
+        $x isa person, has ref 0;
+        $y isa person, has ref 1;
+        $z isa person, has ref 2;
       delete
         $r (friend: $x);
         $r (friend: $y);
@@ -421,11 +442,11 @@ Feature: Graql Delete Query
 
     Then get answers of graql query
       """
-      match $r (friend: $x) isa friendship;
+      match $r (friend: $x) isa friendship; get;
       """
     Then uniquely identify answer concepts
       | r     | x    |
-      | FR1   | P3   |
+      | FR    | P3   |
 
 
   Scenario: delete more role players than exist throws
@@ -483,7 +504,7 @@ Feature: Graql Delete Query
 
     Then get answers of graql query
       """
-      match $r isa friendship;
+      match $r isa friendship; get;
       """
     Then answer size is: 0
 
@@ -567,7 +588,7 @@ Feature: Graql Delete Query
       """
       match $x isa person, has name $n; get;
       """
-    Then the answer size is: 0
+    Then answer size is: 0
 
 
   Scenario: using unmatched variable in delete throws even without data
