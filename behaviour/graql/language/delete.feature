@@ -16,15 +16,12 @@
 #
 Feature: Graql Delete Query
 
-  Background: Open connection
+  Background: Open connection and create a simple extensible schema
     Given connection has been opened
     Given connection delete all keyspaces
     Given connection open sessions for keyspaces:
       | test_delete |
     Given transaction is initialised
-    Given the integrity is validated
-
-  Scenario: delete an instance using 'thing' meta label succeeds
     Given graql define
       """
       define
@@ -35,11 +32,11 @@ Feature: Graql Delete Query
       friendship sub relation,
         relates friend,
         key ref;
-      name sub attribute, datatype string;
       ref sub attribute, value long;
       """
     Given the integrity is validated
 
+  Scenario: delete an instance using 'thing' meta label succeeds
     When graql insert
       """
       insert
@@ -90,21 +87,6 @@ Feature: Graql Delete Query
 
 
   Scenario: delete an entity instance using 'entity' meta label succeeds
-    Given graql define
-      """
-      define
-      person sub entity,
-        plays friend,
-        has name,
-        key ref;
-      friendship sub relation,
-        relates friend,
-        key ref;
-      name sub attribute, datatype string;
-      ref sub attribute, value long;
-      """
-    Given the integrity is validated
-
     When graql insert
       """
       insert
@@ -139,22 +121,8 @@ Feature: Graql Delete Query
       | x  |
       | P2 |
 
-  Scenario: delete an relation instance using 'relation' meta label succeeds
-    Given graql define
-      """
-      define
-      person sub entity,
-        plays friend,
-        has name,
-        key ref;
-      friendship sub relation,
-        relates friend,
-        key ref;
-      name sub attribute, datatype string;
-      ref sub attribute, value long;
-      """
-    Given the integrity is validated
 
+  Scenario: delete an relation instance using 'relation' meta label succeeds
     When graql insert
       """
       insert
@@ -189,28 +157,9 @@ Feature: Graql Delete Query
 
 
   Scenario: delete an attribute instance using 'attribute' meta label succeeds
-    Given graql define
-      """
-      define
-      person sub entity,
-        plays friend,
-        has name,
-        key ref;
-      friendship sub relation,
-        relates friend,
-        key ref;
-      name sub attribute, datatype string;
-      ref sub attribute, value long;
-      """
-    Given the integrity is validated
-
     When graql insert
       """
       insert
-      $x isa person, has ref 0;
-      $y isa person, has ref 1;
-      $r (friend: $x, friend: $y) isa employment,
-         has ref 2;
       $n "john" isa name;
       """
     When the integrity is validated
@@ -225,7 +174,7 @@ Feature: Graql Delete Query
     Then graql delete
       """
       match
-        $r isa name; $r "john";
+        $r "john" isa name;
       delete
         $r isa attribute;
       """
@@ -237,22 +186,62 @@ Feature: Graql Delete Query
     Then answer size is: 0
 
 
-  Scenario: delete a role player from a relation removes the player from the relation
-    Given graql define
+  Scenario: delete an instance using wrong type throws
+    When graql insert
+      """
+      insert
+      $x isa person, has ref 0;
+      $n "john" isa name;
+      """
+    When the integrity is validated
+
+    Then concept identifiers are
+      |      | check | value     |
+      | P1   | key   | ref:0     |
+      | JOHN | value | name:john |
+
+    Then graql delete throws
+      """
+      match
+        $x isa person;
+        $r isa name; $r "john";
+      delete
+        $r isa person;
+      """
+
+
+  Scenario: delete an instance using too-specific (downcasting) type throws
+    When graql define
       """
       define
-      person sub entity,
-        plays friend,
-        has name,
-        key ref;
-      friendship sub relation,
-        relates friend,
-        key ref;
-      name sub attribute, datatype string;
-      ref sub attribute, value long;
+      special-friendship sub friendship,
+        relates friend;
       """
-    Given the integrity is validated
+    When graql insert
+      """
+      insert
+      $x isa person, has ref 0;
+      $y isa person, has ref 1;
+      $r (friend: $x, friend: $y) isa friendship, has ref 2;
+      """
+    When the integrity is validated
 
+    Then concept identifiers are
+      |      | check | value     |
+      | P1   | key   | ref:0     |
+      | P2   | key   | ref:1     |
+      | FR   | key   | ref:2     |
+
+    Then graql delete throws
+      """
+      match
+        $r ($x, $y) isa friendship;
+      delete
+        $r isa special-friendship;
+      """
+
+
+  Scenario: delete a role player from a relation removes the player from the relation
     When graql insert
       """
       insert
@@ -293,21 +282,6 @@ Feature: Graql Delete Query
 
     
   Scenario: delete a role player from a relation using meta role removes the player from the relation
-    Given graql define
-      """
-      define
-      person sub entity,
-        plays friend,
-        has name,
-        key ref;
-      friendship sub relation,
-        relates friend,
-        key ref;
-      name sub attribute, datatype string;
-      ref sub attribute, value long;
-      """
-    Given the integrity is validated
-
     When graql insert
       """
       insert
@@ -348,20 +322,6 @@ Feature: Graql Delete Query
 
 
   Scenario: delete an instance removes it from all relations
-    Given graql define
-      """
-      define
-      person sub entity,
-        plays friend,
-        has name,
-        key ref;
-      friendship sub relation,
-        relates friend,
-        key ref;
-      ref sub attribute, value long;
-      """
-    Given the integrity is validated
-
     When graql insert
       """
       insert
@@ -400,20 +360,6 @@ Feature: Graql Delete Query
 
 
   Scenario: delete duplicate role players from a relation removes duplicate player from relation
-    Given graql define
-      """
-      define
-      person sub entity,
-        plays friend,
-        has name,
-        key ref;
-      friendship sub relation,
-        relates friend,
-        key ref;
-      ref sub attribute, value long;
-      """
-    Given the integrity is validated
-
     When graql insert
       """
       insert
@@ -447,20 +393,6 @@ Feature: Graql Delete Query
 
 
   Scenario: delete role players in multiple statements are all deleted
-    Given graql define
-      """
-      define
-      person sub entity,
-        plays friend,
-        has name,
-        key ref;
-      friendship sub relation,
-        relates friend,
-        key ref;
-      ref sub attribute, value long;
-      """
-    Given the integrity is validated
-
     When graql insert
       """
       insert
@@ -497,20 +429,6 @@ Feature: Graql Delete Query
 
 
   Scenario: delete more role players than exist throws
-    Given graql define
-      """
-      define
-      person sub entity,
-        plays friend,
-        has name,
-        key ref;
-      friendship sub relation,
-        relates friend,
-        key ref;
-      ref sub attribute, value long;
-      """
-    Given the integrity is validated
-
     When graql insert
       """
       insert
@@ -538,20 +456,6 @@ Feature: Graql Delete Query
 
 
   Scenario: delete all role players of relation cleans up relation instance
-    Given graql define
-      """
-      define
-      person sub entity,
-        plays friend,
-        has name,
-        key ref;
-      friendship sub relation,
-        relates friend,
-        key ref;
-      ref sub attribute, value long;
-      """
-    Given the integrity is validated
-
     When graql insert
       """
       insert
@@ -584,8 +488,90 @@ Feature: Graql Delete Query
     Then answer size is: 0
 
 
+  Scenario: delete a role player with too-specific (downcasting) role throws
+    Given graql define
+      """
+      define
+      special-friendship sub friendship,
+        relates special-friend as friend;
+      """
+    Given the integrity is validated
+
+    When graql insert
+      """
+      insert
+      $x isa person, has ref 0;
+      $y isa person, has ref 1;
+      $r (friend: $x, friend: $y) isa friendship, has ref 2;
+      """
+    When the integrity is validated
+
+    Then concept identifiers are
+      |      | check | value     |
+      | P1   | key   | ref:0     |
+      | P2   | key   | ref:1     |
+      | FR   | key   | ref:2     |
+
+    Then graql delete throws
+      """
+      match
+        $x isa person, has ref 0;
+        $y isa person, has ref 1;
+        $r (friend: $x, friend: $y) isa friendship;
+      delete
+        $r (special-friend: $x);
+      """
+
+
   Scenario: delete attribute ownership makes attribute invisible to owner
-  Scenario: delete a role player with too-specific (downcasting) role label throws
-  Scenario: delete an instance using wrong type throws
-  Scenario: delete an instance using too-specific (downcasting) type throws
-  Scenario: using unmatched variable in delete throws
+    When graql insert
+      """
+      insert
+      $x isa person,
+        has name "john",
+        has ref 0;
+      """
+    When the integrity is validated
+
+    Then concept identifiers are
+      |      | check | value      |
+      | P1   | key   | ref:0      |
+      | JOHN | value | name:john  |
+
+    Then graql delete
+      """
+      match
+        $x isa person, has name $n;
+        $n "john";
+      delete
+        $x has name $n;
+      """
+
+    Then get answers of graql query
+      """
+      match $x isa person; get;
+      """
+    Then uniquely identify answer concepts
+      | x   |
+      | P1  |
+
+    Then get answers of graql query
+      """
+      match $n isa name; get;
+      """
+    Then uniquely identify answer concepts
+      | n     |
+      | JOHN  |
+
+    Then get answers of graql query
+      """
+      match $x isa person, has name $n; get;
+      """
+    Then the answer size is: 0
+
+
+  Scenario: using unmatched variable in delete throws even without data
+    Then graql delete throws
+      """
+      match $x isa person; delete $n isa name;
+      """
