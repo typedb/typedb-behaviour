@@ -45,7 +45,7 @@ Feature: Graql Delete Query
       insert
       $x isa person, has ref 0;
       $y isa person, has ref 1;
-      $r (friend: $x, friend: $y) isa employment,
+      $r (friend: $x, friend: $y) isa friendship,
          has ref 2;
       $n "john" isa name;
       """
@@ -110,7 +110,7 @@ Feature: Graql Delete Query
       insert
       $x isa person, has ref 0;
       $y isa person, has ref 1;
-      $r (friend: $x, friend: $y) isa employment,
+      $r (friend: $x, friend: $y) isa friendship,
          has ref 2;
       $n "john" isa name;
       """
@@ -160,7 +160,7 @@ Feature: Graql Delete Query
       insert
       $x isa person, has ref 0;
       $y isa person, has ref 1;
-      $r (friend: $x, friend: $y) isa employment,
+      $r (friend: $x, friend: $y) isa friendship,
          has ref 2;
       $n "john" isa name;
       """
@@ -238,12 +238,354 @@ Feature: Graql Delete Query
 
 
   Scenario: delete a role player from a relation removes the player from the relation
-  Scenario: delete an instance the instance not a player in any relation anymore
+    Given graql define
+      """
+      define
+      person sub entity,
+        plays friend,
+        has name,
+        key ref;
+      friendship sub relation,
+        relates friend,
+        key ref;
+      name sub attribute, datatype string;
+      ref sub attribute, value long;
+      """
+    Given the integrity is validated
+
+    When graql insert
+      """
+      insert
+      $x isa person, has ref 0;
+      $y isa person, has ref 1;
+      $z isa person, has ref 2;
+      $r (friend: $x, friend: $y, friend: $z) isa friendship,
+         has ref 3;
+      """
+    When the integrity is validated
+
+    Then concept identifiers are
+      |      | check | value     |
+      | P1   | key   | ref:0     |
+      | P2   | key   | ref:1     |
+      | P3   | key   | ref:2     |
+      | FR   | key   | ref:3     |
+
+    Then graql delete
+      """
+      match
+        $r (friend: $x, friend: $y, friend: $z) isa friendship;
+        $x isa person, has ref 0;
+        $y isa person, has ref 1;
+        $z isa person, has ref 2;
+      delete
+        $r (friend: $x);
+      """
+
+    Then get answers of graql query
+      """
+      match (friend: $x, friend: $y) isa friendship;
+      """
+    Then uniquely identify answer concepts
+      | x    | y    |
+      | P1   | P2   |
+      | P2   | P1   |
+
+    
+  Scenario: delete a role player from a relation using meta role removes the player from the relation
+    Given graql define
+      """
+      define
+      person sub entity,
+        plays friend,
+        has name,
+        key ref;
+      friendship sub relation,
+        relates friend,
+        key ref;
+      name sub attribute, datatype string;
+      ref sub attribute, value long;
+      """
+    Given the integrity is validated
+
+    When graql insert
+      """
+      insert
+      $x isa person, has ref 0;
+      $y isa person, has ref 1;
+      $z isa person, has ref 2;
+      $r (friend: $x, friend: $y, friend: $z) isa friendship,
+         has ref 3;
+      """
+    When the integrity is validated
+
+    Then concept identifiers are
+      |      | check | value     |
+      | P1   | key   | ref:0     |
+      | P2   | key   | ref:1     |
+      | P3   | key   | ref:2     |
+      | FR   | key   | ref:3     |
+
+    Then graql delete
+      """
+      match
+        $r (friend: $x, friend: $y, friend: $z) isa friendship;
+        $x isa person, has ref 0;
+        $y isa person, has ref 1;
+        $z isa person, has ref 2;
+      delete
+        $r (role: $x);
+      """
+
+    Then get answers of graql query
+      """
+      match (friend: $x, friend: $y) isa friendship;
+      """
+    Then uniquely identify answer concepts
+      | x    | y    |
+      | P1   | P2   |
+      | P2   | P1   |
+
+
+  Scenario: delete an instance removes it from all relations
+    Given graql define
+      """
+      define
+      person sub entity,
+        plays friend,
+        has name,
+        key ref;
+      friendship sub relation,
+        relates friend,
+        key ref;
+      ref sub attribute, value long;
+      """
+    Given the integrity is validated
+
+    When graql insert
+      """
+      insert
+      $x isa person, has ref 0;
+      $y isa person, has ref 1;
+      $z isa person, has ref 2;
+      $r (friend: $x, friend: $y) isa friendship, has ref 3;
+      $r (friend: $x, friend: $z) isa friendship, has ref 4;
+      """
+    When the integrity is validated
+
+    Then concept identifiers are
+      |      | check | value     |
+      | P1   | key   | ref:0     |
+      | P2   | key   | ref:1     |
+      | P3   | key   | ref:2     |
+      | FR1  | key   | ref:3     |
+      | FR2  | key   | ref:4     |
+
+    Then graql delete
+      """
+      match
+        $x isa person, has ref 0;
+      delete
+        $x isa person;
+      """
+
+    Then get answers of graql query
+      """
+      match $r (friend: $x) isa friendship;
+      """
+    Then uniquely identify answer concepts
+      | r     | x    |
+      | FR1   | P2   |
+      | FR2   | P3   |
+
+
   Scenario: delete duplicate role players from a relation removes duplicate player from relation
-  Scenario: delete attribute ownership makes attribute invisible to owner
+    Given graql define
+      """
+      define
+      person sub entity,
+        plays friend,
+        has name,
+        key ref;
+      friendship sub relation,
+        relates friend,
+        key ref;
+      ref sub attribute, value long;
+      """
+    Given the integrity is validated
+
+    When graql insert
+      """
+      insert
+      $x isa person, has ref 0;
+      $y isa person, has ref 1;
+      $r (friend: $x, friend: $x, friend: $y) isa friendship, has ref 2;
+      """
+    When the integrity is validated
+
+    Then concept identifiers are
+      |      | check | value     |
+      | P1   | key   | ref:0     |
+      | P2   | key   | ref:1     |
+      | FR   | key   | ref:2     |
+
+    Then graql delete
+      """
+      match
+        $r (friend: $x, friend: $x) isa friendship;
+      delete
+        $r (friend: $x, friend: $x);
+      """
+
+    Then get answers of graql query
+      """
+      match $r (friend: $x) isa friendship;
+      """
+    Then uniquely identify answer concepts
+      | r     | x    |
+      | FR1   | P2   |
+
+
   Scenario: delete role players in multiple statements are all deleted
-  Scenario: delete all role players of relation cleans up relation instance
+    Given graql define
+      """
+      define
+      person sub entity,
+        plays friend,
+        has name,
+        key ref;
+      friendship sub relation,
+        relates friend,
+        key ref;
+      ref sub attribute, value long;
+      """
+    Given the integrity is validated
+
+    When graql insert
+      """
+      insert
+      $x isa person, has ref 0;
+      $y isa person, has ref 1;
+      $z isa person, has ref 2;
+      $r (friend: $x, friend: $y, friend: $z) isa friendship, has ref 3;
+      """
+    When the integrity is validated
+
+    Then concept identifiers are
+      |      | check | value     |
+      | P1   | key   | ref:0     |
+      | P2   | key   | ref:1     |
+      | P3   | key   | ref:2     |
+      | FR   | key   | ref:3     |
+
+    Then graql delete
+      """
+      match
+        $r (friend: $x, friend: $y, friend: $z) isa friendship;
+      delete
+        $r (friend: $x);
+        $r (friend: $y);
+      """
+
+    Then get answers of graql query
+      """
+      match $r (friend: $x) isa friendship;
+      """
+    Then uniquely identify answer concepts
+      | r     | x    |
+      | FR1   | P3   |
+
+
   Scenario: delete more role players than exist throws
+    Given graql define
+      """
+      define
+      person sub entity,
+        plays friend,
+        has name,
+        key ref;
+      friendship sub relation,
+        relates friend,
+        key ref;
+      ref sub attribute, value long;
+      """
+    Given the integrity is validated
+
+    When graql insert
+      """
+      insert
+      $x isa person, has ref 0;
+      $y isa person, has ref 1;
+      $r (friend: $x, friend: $y) isa friendship, has ref 2;
+      """
+    When the integrity is validated
+
+    Then concept identifiers are
+      |      | check | value     |
+      | P1   | key   | ref:0     |
+      | P2   | key   | ref:1     |
+      | FR   | key   | ref:2     |
+
+    Then graql delete throws
+      """
+      match
+        $x isa person, has ref 0;
+        $y isa person, has ref 1;
+        $r (friend: $x, friend: $y) isa friendship;
+      delete
+        $r (friend: $x, friend: $x);
+      """
+
+
+  Scenario: delete all role players of relation cleans up relation instance
+    Given graql define
+      """
+      define
+      person sub entity,
+        plays friend,
+        has name,
+        key ref;
+      friendship sub relation,
+        relates friend,
+        key ref;
+      ref sub attribute, value long;
+      """
+    Given the integrity is validated
+
+    When graql insert
+      """
+      insert
+      $x isa person, has ref 0;
+      $y isa person, has ref 1;
+      $r (friend: $x, friend: $y) isa friendship, has ref 2;
+      """
+    When the integrity is validated
+
+    Then concept identifiers are
+      |      | check | value     |
+      | P1   | key   | ref:0     |
+      | P2   | key   | ref:1     |
+      | FR   | key   | ref:2     |
+
+    Then graql delete
+      """
+      match
+        $x isa person, has ref 0;
+        $y isa person, has ref 1;
+      delete
+        $x isa person;
+        $y isa person;
+      """
+
+    Then get answers of graql query
+      """
+      match $r isa friendship;
+      """
+    Then answer size is: 0
+
+
+  Scenario: delete attribute ownership makes attribute invisible to owner
   Scenario: delete a role player with too-specific (downcasting) role label throws
   Scenario: delete an instance using wrong type throws
   Scenario: delete an instance using too-specific (downcasting) type throws
+  Scenario: using unmatched variable in delete throws
