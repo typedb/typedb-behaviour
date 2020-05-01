@@ -1,5 +1,6 @@
-/*              @haikalpribadi
-/dependencies   @haikalpribadi
-/behaviour      @haikalpribadi
-/theory         @flyingsilverfin
-WORKSPACE       @haikalpribadi
+/*                  @haikalpribadi
+/dependencies       @haikalpribadi
+/tools              @flyingsilverfin
+/behaviour          @haikalpribadi
+/behaviour/graql    @flyningsilverfin
+WORKSPACE           @haikalpribadi
