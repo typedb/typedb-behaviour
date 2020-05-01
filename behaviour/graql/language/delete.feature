@@ -55,6 +55,8 @@ Feature: Graql Delete Query
       | BOB  | key   | name:Bob  |
       | FR   | key   | ref:0     |
       | JOHN | value | name:John |
+      | nALX | value | name:Alex |
+      | nBOB | value | name:Bob  |
 
     Then graql delete
       """
@@ -84,8 +86,10 @@ Feature: Graql Delete Query
       """
       match $x isa name; get;
       """
-    Then answer size is: 0
-
+    Then uniquely identify answer concepts
+      | x    |
+      | nALX |
+      | nBob |
 
   Scenario: delete an entity instance using 'entity' meta label succeeds
     When graql insert
@@ -167,9 +171,6 @@ Feature: Graql Delete Query
 
     Then concept identifiers are
       |      | check | value     |
-      | ALEX | key   | name:Alex |
-      | BOB  | key   | name:Bob  |
-      | FR   | key   | ref:0     |
       | JOHN | value | name:John |
 
     Then graql delete
@@ -446,6 +447,7 @@ Feature: Graql Delete Query
       """
       match
         $r (friend: $x) isa friendship;
+        $x isa person, has name "Alex";
       delete
         $r (friend: $x);
       """
@@ -456,8 +458,9 @@ Feature: Graql Delete Query
       """
     Then uniquely identify answer concepts
       | r     | x    | y    |
-      | FR    | BOB  | Alex |
+      | FR    | BOB  | ALEX |
       | FR    | ALEX | BOB  |
+
 
   Scenario: delete role players in multiple statements are all deleted
     When graql insert
@@ -582,25 +585,32 @@ Feature: Graql Delete Query
 
 
   Scenario: delete attribute ownership makes attribute invisible to owner
+    When graql define
+      """
+      define
+      lastname sub attribute, value string;
+      person sub entity, has lastname;
+      """
     When graql insert
       """
       insert
       $x isa person,
+        has lastname "Smith",
         has name "Alex";
-      $n isa name "John";
       """
     When the integrity is validated
 
     Then concept identifiers are
-      |      | check | value      |
-      | ALEX | key   | name:Alex  |
-      | JOHN | value | name:John  |
+      |      | check | value          |
+      | ALEX | key   | name:Alex      |
+      | SMTH | value | lastname:Smith |
+      | nALX | value | name:John      |
 
     Then graql delete
       """
       match
-        $x isa person, has name $n;
-        $n "John";
+        $x isa person, has lastname $n;
+        $n "Smith";
       delete
         $x has name $n;
       """
@@ -620,6 +630,7 @@ Feature: Graql Delete Query
     Then uniquely identify answer concepts
       | n     |
       | JOHN  |
+      | nALX  |
 
     Then get answers of graql query
       """
