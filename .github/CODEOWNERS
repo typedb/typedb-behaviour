@@ -2,5 +2,6 @@
 /dependencies       @haikalpribadi
 /tools              @flyingsilverfin
 /behaviour          @haikalpribadi
-/behaviour/graql    @flyningsilverfin
+/behaviour/graql    @flyingsilverfin
+/behaviour/graql/reasoner   @jmsfltchr
 WORKSPACE           @haikalpribadi
