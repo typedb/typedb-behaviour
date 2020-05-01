@@ -122,7 +122,7 @@ public class QueryBuilderIT {
 
             try (GraknClient.Transaction tx = session.transaction().read()) {
                 ConceptMap answer = tx.execute(inferenceQuery).get(0);
-                keyStatements = QueryBuilder.generateKeyStatements(answer.map());
+                keyStatements = QueryBuilder.generateKeyStatements(tx, answer.map());
             }
         }
 
