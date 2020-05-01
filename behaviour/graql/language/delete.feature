@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 Feature: Graql Delete Query
 
   Background: Open connection and create a simple extensible schema
@@ -72,7 +71,7 @@ Feature: Graql Delete Query
       """
       match $x isa person; get;
       """
-    Then uniquely identify answer concepts
+    Then uniquely identify answer concept
       | x   |
       | BOB |
 
@@ -89,7 +88,7 @@ Feature: Graql Delete Query
     Then uniquely identify answer concepts
       | x    |
       | nALX |
-      | nBob |
+      | nBOB |
 
   Scenario: delete an entity instance using 'entity' meta label succeeds
     When graql insert
@@ -604,7 +603,7 @@ Feature: Graql Delete Query
       |      | check | value          |
       | ALEX | key   | name:Alex      |
       | SMTH | value | lastname:Smith |
-      | nALX | value | name:John      |
+      | nALX | value | name:Alex      |
 
     Then graql delete
       """
@@ -612,7 +611,7 @@ Feature: Graql Delete Query
         $x isa person, has lastname $n;
         $n "Smith";
       delete
-        $x has name $n;
+        $x has lastname $n;
       """
 
     Then get answers of graql query
@@ -625,16 +624,15 @@ Feature: Graql Delete Query
 
     Then get answers of graql query
       """
-      match $n isa name; get;
+      match $n isa lastname; get;
       """
     Then uniquely identify answer concepts
       | n     |
-      | JOHN  |
-      | nALX  |
+      | SMTH  |
 
     Then get answers of graql query
       """
-      match $x isa person, has name $n; get;
+      match $x isa person, has lastname $n; get;
       """
     Then answer size is: 0
 
@@ -643,4 +641,95 @@ Feature: Graql Delete Query
     Then graql delete throws
       """
       match $x isa person; delete $n isa name;
+      """
+
+  Scenario: delete complex pattern
+    When graql define
+      """
+      define
+      lastname sub attribute, value string;
+      person sub entity, has lastname;
+      """
+    When graql insert
+      """
+      insert
+      $x isa person,
+        has lastname "Smith",
+        has name "Alex";
+      $y isa person,
+        has lastname "Smith",
+        has name "John";
+      $r (friend: $x, friend: $y) isa friendship, has ref 1;
+      $r1 (friend: $x, friend: $y) isa friendship, has ref 2;
+      $reflexive (friend: $x, friend: $x) isa friendship, has ref 3;
+      """
+    When the integrity is validated
+
+    Then concept identifiers are
+      |      | check | value          |
+      | ALEX | key   | name:Alex      |
+      | JOHN | key   | name:John      |
+      | SMTH | value | lastname:Smith |
+      | nALX | value | name:Alex      |
+      | nJHN | value | name:John      |
+      | F1   | key   | ref:1          |
+      | F2   | key   | ref:2          |
+      | REFL | key   | ref:3          |
+
+    Then graql delete
+      """
+      match
+        $x isa person, has name "Alex", has lastname $n;
+        $y isa person, has name "John", has lastname $n;
+        $refl (friend: $x, friend: $x) isa friendship, has ref 3;
+        $f1 (friend: $x, friend: $y) isa friendship, has ref 1;
+      delete
+        $x has lastname $n;
+        $refl (friend: $x);
+        $f1 isa friendship;
+      """
+
+    Then get answers of graql query
+      """
+      match $f (friend: $x) isa friendship; get;
+      """
+    Then uniquely identify answer concepts
+      | f     | x     |
+      | F2    | ALEX  |
+      | F2    | JOHN  |
+      | REFL  | ALEX  |
+
+    Then get answers of graql query
+      """
+      match $n isa name; get;
+      """
+    Then uniquely identify answer concepts
+      | n     |
+      | nJHN  |
+      | nALX  |
+
+    Then get answers of graql query
+      """
+      match $x isa person, has lastname $n; get;
+      """
+    Then uniquely identify answer concepts
+      | x     | n     |
+      | JOHN  | SMTH |
+
+
+  Scenario: delete key ownership throws exception
+    When graql insert
+      """
+      insert
+      $x isa person, has name "Alex";
+      """
+    When the integrity is validated
+
+    Then graql delete throws
+      """
+      match
+        $x isa person, has name $n;
+        $n "Alex";
+      delete
+        $x has name $n;
       """
