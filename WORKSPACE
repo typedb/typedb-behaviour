@@ -22,12 +22,13 @@ workspace(name = "graknlabs_verification")
 ###########################
 
 load("//dependencies/graknlabs:dependencies.bzl", "graknlabs_build_tools", "graknlabs_common",
-"graknlabs_graql", "graknlabs_client_java", "graknlabs_grakn_core")
+"graknlabs_graql", "graknlabs_client_java", "graknlabs_grakn_core", "graknlabs_console")
 graknlabs_build_tools()
 graknlabs_common()
 graknlabs_graql()
 graknlabs_client_java()
 graknlabs_grakn_core()
+graknlabs_console()
 
 load("@graknlabs_build_tools//distribution:dependencies.bzl", "graknlabs_bazel_distribution")
 graknlabs_bazel_distribution()
