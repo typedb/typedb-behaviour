@@ -10,7 +10,6 @@ Feature: Graql Reasoning Explanation
       | test_explanation |
     Given transaction is initialised
 
-  @ignore
   Scenario: an attribute's existence and ownership can be inferred
     Given graql define
       """
@@ -61,7 +60,6 @@ Feature: Graql Reasoning Explanation
       | 1 | -        | c     | CO          | lookup           | $c isa company; $c id <answer.c.id>;                         |
 
 
-  @ignore
   Scenario: an attribute's existence, and ownership can be inferred recursively
     Given graql define
       """
@@ -182,7 +180,6 @@ Feature: Graql Reasoning Explanation
       | 0 | -        | k, l, n | KC, LDN, KCn | lookup | $k isa area; $k has name $n; (superior: $l, subordinate: $k) isa location-hierarchy; $k id <answer.k.id>; $n id <answer.n.id>; $l id <answer.l.id>; |
 
 
-  @ignore
   Scenario: transitive relation is explained as expected for one hop
     Given graql define
       """
@@ -267,7 +264,6 @@ Feature: Graql Reasoning Explanation
       | 2 | -        | k, l    | KC, LDN      | lookup | (superior: $l, subordinate: $k) isa location-hierarchy; $k isa area; $k id <answer.k.id>; $l id <answer.l.id>;                                      |
 
 
-  @ignore
   Scenario: an attribute's existence and ownership can be inferred and used to infer a relation and a more specific answer is retrieved from the cache
     Given graql define
       """
