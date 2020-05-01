@@ -1,7 +1,7 @@
 define
 
 name sub attribute,
-    datatype string;
+    value string;
 
 person sub entity,
     has name,

@@ -5,7 +5,7 @@ define
 # --------------------------------------------------------
 
 name sub attribute,
-    datatype string;
+    value string;
 
 location sub entity,
     abstract,

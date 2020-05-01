@@ -1,7 +1,7 @@
 define
 
 label sub attribute,
-    datatype string;
+    value string;
 
 # ===== Properties =====
 

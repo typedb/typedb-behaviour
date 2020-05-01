@@ -1,22 +1,22 @@
 define
 
 currency sub attribute,
-    datatype string;
+    value string;
 
 location-id sub attribute,
-    datatype long;
+    value long;
 
 transaction-id sub attribute,
-    datatype long;
+    value long;
 
 hierarchy-id sub attribute,
-    datatype long;
+    value long;
 
 country-name sub attribute,
-    datatype string;
+    value string;
 
 city-name sub attribute,
-    datatype string;
+    value string;
 
 transaction sub entity,
     key transaction-id,

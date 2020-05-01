@@ -1,13 +1,13 @@
 define
 
 name sub attribute,
-    datatype string;
+    value string;
 
 is-liable sub attribute,
-    datatype boolean;
+    value boolean;
 
 company-id sub attribute,
-    datatype long;
+    value long;
 
 company sub entity,
     key company-id,

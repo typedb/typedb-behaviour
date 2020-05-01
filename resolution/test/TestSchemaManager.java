@@ -138,7 +138,7 @@ public class TestSchemaManager {
 
                 GraqlGet clauseAttributesQuery = Graql.match(Graql.var("x").sub("has-attribute-property")).get();
 
-                Set<String> attributeTypes = tx.execute(clauseAttributesQuery).get(0).get("x").asRelationType().attributes().map(a -> a.label().toString()).collect(Collectors.toSet());
+                Set<String> attributeTypes = tx.execute(clauseAttributesQuery).get(0).get("x").asRelationType().asRemote(tx).attributes().map(a -> a.label().toString()).collect(Collectors.toSet());
 
                 HashSet<String> expectedAttributeTypes = new HashSet<String>() {
                     {
