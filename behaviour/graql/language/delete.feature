@@ -596,19 +596,24 @@ Feature: Graql Delete Query
       $x isa person,
         has lastname "Smith",
         has name "Alex";
+      $y isa person,
+        has lastname "Smith",
+        has name "John";
       """
     When the integrity is validated
 
     Then concept identifiers are
       |      | check | value          |
       | ALEX | key   | name:Alex      |
-      | SMTH | value | lastname:Smith |
+      | JOHN | key   | name:John      |
+      | lnST | value | lastname:Smith |
       | nALX | value | name:Alex      |
+      | nJHN | value | name:John      |
 
     Then graql delete
       """
       match
-        $x isa person, has lastname $n;
+        $x isa person, has lastname $n, has name "Alex";
         $n "Smith";
       delete
         $x has lastname $n;
@@ -621,6 +626,7 @@ Feature: Graql Delete Query
     Then uniquely identify answer concepts
       | x     |
       | ALEX  |
+      | JOHN  |
 
     Then get answers of graql query
       """
@@ -628,13 +634,15 @@ Feature: Graql Delete Query
       """
     Then uniquely identify answer concepts
       | n     |
-      | SMTH  |
+      | lnST  |
 
     Then get answers of graql query
       """
       match $x isa person, has lastname $n; get;
       """
-    Then answer size is: 0
+    Then uniquely identify answer concepts
+      | x     | n      |
+      | JOHN  | lnST   |
 
 
   Scenario: using unmatched variable in delete throws even without data
