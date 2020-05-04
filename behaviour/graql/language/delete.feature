@@ -71,7 +71,7 @@ Feature: Graql Delete Query
       """
       match $x isa person; get;
       """
-    Then uniquely identify answer concept
+    Then uniquely identify answer concepts
       | x   |
       | BOB |
 
