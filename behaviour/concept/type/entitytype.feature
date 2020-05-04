@@ -176,8 +176,8 @@ Feature: Concept Entity Type
       | woman  |
 
   Scenario: Entity types can have keys
-    When put attribute type: email
-    When put attribute type: username
+    When put attribute type: email, value class: string
+    When put attribute type: username, value class: string
     When put entity type: person
     When entity(person) set key attribute: email
     When entity(person) set key attribute: username
@@ -191,8 +191,8 @@ Feature: Concept Entity Type
       | username |
 
   Scenario: Entity types can remove keys
-    When put attribute type: email
-    When put attribute type: username
+    When put attribute type: email, value class: string
+    When put attribute type: username, value class: string
     When put entity type: person
     When entity(person) set key attribute: email
     When entity(person) set key attribute: username
@@ -207,8 +207,8 @@ Feature: Concept Entity Type
       | username |
 
   Scenario: Entity types can have attributes
-    When put attribute type: name
-    When put attribute type: age
+    When put attribute type: name, value class: string
+    When put attribute type: age, value class: long
     When put entity type: person
     When entity(person) set has attribute: name
     When entity(person) set has attribute: age
@@ -222,8 +222,8 @@ Feature: Concept Entity Type
       | age  |
 
   Scenario: Entity types can remove attributes
-    When put attribute type: name
-    When put attribute type: age
+    When put attribute type: name, value class: string
+    When put attribute type: age, value class: long
     When put entity type: person
     When entity(person) set has attribute: name
     When entity(person) set has attribute: age
@@ -238,10 +238,10 @@ Feature: Concept Entity Type
       | age  |
 
   Scenario: Entity types can have keys and attributes
-    When put attribute type: email
-    When put attribute type: username
-    When put attribute type: name
-    When put attribute type: age
+    When put attribute type: email, value class: string
+    When put attribute type: username, value class: string
+    When put attribute type: name, value class: string
+    When put attribute type: age, value class: long
     When put entity type: person
     When entity(person) set key attribute: email
     When entity(person) set key attribute: username
@@ -267,10 +267,10 @@ Feature: Concept Entity Type
       | age      |
 
   Scenario: Entity types can inherit keys and attributes
-    When put attribute type: email
-    When put attribute type: name
-    When put attribute type: reference
-    When put attribute type: rating
+    When put attribute type: email, value class: string
+    When put attribute type: name, value class: string
+    When put attribute type: reference, value class: string
+    When put attribute type: rating, value class: double
     When put entity type: person
     When entity(person) set key attribute: email
     When entity(person) set has attribute: name
@@ -296,8 +296,8 @@ Feature: Concept Entity Type
       | reference |
       | name      |
       | rating    |
-    When put attribute type: license
-    When put attribute type: points
+    When put attribute type: license, value class: string
+    When put attribute type: points, value class: double
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
     When entity(subscriber) set key attribute: license
@@ -325,11 +325,11 @@ Feature: Concept Entity Type
       | points    |
 
   Scenario: Entity types can inherited keys and attributes that are subtypes of each other
-    When put attribute type: username
-    When put attribute type: score
-    When put attribute type: reference
+    When put attribute type: username, value class: string
+    When put attribute type: score, value class: double
+    When put attribute type: reference, value class: string
     When attribute(reference) set supertype: username
-    When put attribute type: rating
+    When put attribute type: rating, value class: double
     When attribute(rating) set supertype: score
     When put entity type: person
     When entity(person) set key attribute: username
@@ -356,9 +356,9 @@ Feature: Concept Entity Type
       | reference |
       | score     |
       | rating    |
-    When put attribute type: license
+    When put attribute type: license, value class: string
     When attribute(license) set supertype: reference
-    When put attribute type: points
+    When put attribute type: points, value class: double
     When attribute(points) set supertype: rating
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
@@ -387,16 +387,16 @@ Feature: Concept Entity Type
       | points    |
 
   Scenario: Entity types can override inherited keys and attributes
-    When put attribute type: username
-    When put attribute type: email
-    When put attribute type: name
-    When put attribute type: age
-    When put attribute type: reference
-    When put attribute type: work-email
+    When put attribute type: username, value class: string
+    When put attribute type: email, value class: string
+    When put attribute type: name, value class: string
+    When put attribute type: age, value class: long
+    When put attribute type: reference, value class: string
+    When put attribute type: work-email, value class: string
     When attribute(work-email) set supertype: email
-    When put attribute type: nick-name
+    When put attribute type: nick-name, value class: string
     When attribute(nick-name) set supertype: name
-    When put attribute type: rating
+    When put attribute type: rating, value class: double
     When put entity type: person
     When entity(person) set key attribute: username
     When entity(person) set key attribute: email
@@ -405,9 +405,9 @@ Feature: Concept Entity Type
     When put entity type: customer
     When entity(customer) set supertype: person
     When entity(customer) set key attribute: reference
-    When entity(customer) set key attribute: work-email, as email
+    When entity(customer) set key attribute: work-email as email
     When entity(customer) set has attribute: rating
-    When entity(customer) set has attribute: nick-name, as name
+    When entity(customer) set has attribute: nick-name as name
     Then entity(customer) get key attributes contain:
       | username   |
       | reference  |
@@ -442,14 +442,14 @@ Feature: Concept Entity Type
     Then entity(customer) get has attributes do not contain:
       | email |
       | name  |
-    When put attribute type: license
+    When put attribute type: license, value class: string
     When attribute(license) set supertype: reference
-    When put attribute type: points
+    When put attribute type: points, value class: double
     When attribute(points) set supertype: rating
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
-    When entity(subscriber) set key attribute: license, as reference
-    When entity(subscriber) set has attribute: points, as rating
+    When entity(subscriber) set key attribute: license as reference
+    When entity(subscriber) set has attribute: points as rating
     When transaction commits
     When session opens transaction of type: read
     Then entity(customer) get key attributes contain:
@@ -488,15 +488,15 @@ Feature: Concept Entity Type
       | name       |
       | rating     |
 
-  Scenario: Entity types can override inherited attributes, as keys
-    When put attribute type: name
-    When put attribute type: username
+  Scenario: Entity types can override inherited attributes as keys
+    When put attribute type: name, value class: string
+    When put attribute type: username, value class: string
     When attribute(username) set supertype: name
     When put entity type: person
     When entity(person) set has attribute: name
     When put entity type: customer
     When entity(customer) set supertype: person
-    When entity(customer) set key attribute: username, as name
+    When entity(customer) set key attribute: username as name
     Then entity(customer) get key attributes contain:
       | username |
     Then entity(customer) get key attributes do not contain:
@@ -516,21 +516,21 @@ Feature: Concept Entity Type
     Then entity(customer) get has attributes do not contain:
       | name |
 
-  Scenario: Entity types cannot redeclare keys, as attributes
-    When put attribute type: username
+  Scenario: Entity types cannot redeclare keys as attributes
+    When put attribute type: username, value class: string
     When put entity type: person
     When entity(person) set key attribute: username
     Then entity(person) fails at setting has attribute: username
 
-  Scenario: Entity types cannot redeclare attributes, as keys
-    When put attribute type: name
+  Scenario: Entity types cannot redeclare attributes as keys
+    When put attribute type: name, value class: string
     When put entity type: person
     When entity(person) set has attribute: name
     Then entity(person) fails at setting key attribute: name
 
   Scenario: Entity types cannot redeclare inherited keys and attributes
-    When put attribute type: email
-    When put attribute type: name
+    When put attribute type: email, value class: string
+    When put attribute type: name, value class: string
     When put entity type: person
     When entity(person) set key attribute: email
     When entity(person) set has attribute: name
@@ -540,11 +540,11 @@ Feature: Concept Entity Type
     Then entity(customer) fails at setting has attribute: name
 
   Scenario: Entity types cannot redeclare inherited/overridden key/has attribute types
-    When put attribute type: email
-    When put attribute type: name
-    When put attribute type: customer-email
+    When put attribute type: email, value class: string
+    When put attribute type: name, value class: string
+    When put attribute type: customer-email, value class: string
     When attribute(customer-email) set supertype: email
-    When put attribute type: customer-name
+    When put attribute type: customer-name, value class: string
     When attribute(customer-name) set supertype: name
     When put entity type: person
     When entity(person) set key attribute: email
@@ -561,40 +561,40 @@ Feature: Concept Entity Type
     Then entity(subscriber) fails at setting has attribute: customer-name
 
   Scenario: Entity types cannot override declared keys and attributes
-    When put attribute type: username
-    When put attribute type: email
+    When put attribute type: username, value class: string
+    When put attribute type: email, value class: string
     When attribute(email) set supertype: username
-    When put attribute type: name
-    When put attribute type: first-name
+    When put attribute type: name, value class: string
+    When put attribute type: first-name, value class: string
     When attribute(first-name) set supertype: name
     When put entity type: person
     When entity(person) set key attribute: username
     When entity(person) set has attribute: name
-    Then entity(person) fails at setting key attribute: email, as username
-    Then entity(person) fails at setting has attribute: first-name, as name
+    Then entity(person) fails at setting key attribute: email as username
+    Then entity(person) fails at setting has attribute: first-name as name
 
-  Scenario: Entity types cannot override inherited keys, as attributes
-    When put attribute type: username
-    When put attribute type: email
+  Scenario: Entity types cannot override inherited keys as attributes
+    When put attribute type: username, value class: string
+    When put attribute type: email, value class: string
     When attribute(email) set supertype: username
     When put entity type: person
     When entity(person) set key attribute: username
     When put entity type: customer
     When entity(customer) set supertype: person
-    Then entity(customer) fails at setting has attribute: email, as username
+    Then entity(customer) fails at setting has attribute: email as username
 
   Scenario: Entity types cannot override inherited keys and attributes other than with their subtypes
-    When put attribute type: username
-    When put attribute type: name
-    When put attribute type: reference
-    When put attribute type: rating
+    When put attribute type: username, value class: string
+    When put attribute type: name, value class: string
+    When put attribute type: reference, value class: string
+    When put attribute type: rating, value class: double
     When put entity type: person
     When entity(person) set key attribute: username
     When entity(person) set has attribute: name
     When put entity type: customer
     When entity(customer) set supertype: person
-    Then entity(customer) fails at setting key attribute: reference, as username
-    Then entity(customer) fails at setting has attribute: rating, as name
+    Then entity(customer) fails at setting key attribute: reference as username
+    Then entity(customer) fails at setting has attribute: rating as name
 
   Scenario: Entity types can play role types
     When put relation type: marriage
@@ -698,7 +698,7 @@ Feature: Concept Entity Type
     When relation(parentship) set relates role: child
     When put relation type: fathership
     When relation(fathership) set supertype: parentship
-    When relation(fathership) set relates role: father, as parent
+    When relation(fathership) set relates role: father as parent
     When put entity type: person
     When entity(person) set plays role: parentship:parent
     When entity(person) set plays role: parentship:child
@@ -717,7 +717,7 @@ Feature: Concept Entity Type
       | parentship:child  |
     When put relation type: mothership
     When relation(mothership) set supertype: parentship
-    When relation(mothership) set relates role: mother, as parent
+    When relation(mothership) set relates role: mother as parent
     When put entity type: woman
     When entity(woman) set supertype: person
     When entity(woman) set plays role: mothership:mother
@@ -745,13 +745,13 @@ Feature: Concept Entity Type
     When relation(parentship) set relates role: child
     When put relation type: fathership
     When relation(fathership) set supertype: parentship
-    When relation(fathership) set relates role: father, as parent
+    When relation(fathership) set relates role: father as parent
     When put entity type: person
     When entity(person) set plays role: parentship:parent
     When entity(person) set plays role: parentship:child
     When put entity type: man
     When entity(man) set supertype: person
-    When entity(man) set plays role: fathership:father, as parent
+    When entity(man) set plays role: fathership:father as parent
     Then entity(man) get playing roles contain:
       | fathership:father |
       | parentship:child  |
@@ -766,10 +766,10 @@ Feature: Concept Entity Type
       | parentship:parent |
     When put relation type: mothership
     When relation(mothership) set supertype: parentship
-    When relation(mothership) set relates role: mother, as parent
+    When relation(mothership) set relates role: mother as parent
     When put entity type: woman
     When entity(woman) set supertype: person
-    When entity(woman) set plays role: mothership:mother, as parent
+    When entity(woman) set plays role: mothership:mother as parent
     Then entity(woman) get playing roles contain:
       | mothership:mother |
       | parentship:child  |
@@ -796,12 +796,12 @@ Feature: Concept Entity Type
     When relation(parentship) set relates role: parent
     When put relation type: fathership
     When relation(fathership) set supertype: parentship
-    When relation(fathership) set relates role: father, as parent
+    When relation(fathership) set relates role: father as parent
     When put entity type: person
     When entity(person) set plays role: parentship:parent
     When put entity type: man
     When entity(man) set supertype: person
-    When entity(man) set plays role: fathership:father, as parent
+    When entity(man) set plays role: fathership:father as parent
     When put entity type: boy
     When entity(boy) set supertype: man
     Then entity(boy) fails at setting plays role: parentship:parent
@@ -812,10 +812,10 @@ Feature: Concept Entity Type
     When relation(parentship) set relates role: parent
     When put relation type: fathership
     When relation(fathership) set supertype: parentship
-    When relation(fathership) set relates role: father, as parent
+    When relation(fathership) set relates role: father as parent
     When put entity type: person
     When entity(person) set plays role: parentship:parent
-    Then entity(person) fails at setting plays role: fathership:father, as parentship:parent
+    Then entity(person) fails at setting plays role: fathership:father as parentship:parent
 
   Scenario: Entity types cannot override inherited playing role types other than with their subtypes
     When put relation type: parentship
@@ -828,4 +828,4 @@ Feature: Concept Entity Type
     When entity(person) set plays role: parentship:child
     When put entity type: man
     When entity(man) set supertype: person
-    Then entity(man) fails at setting plays role: fathership:father, as parentship:parent
+    Then entity(man) fails at setting plays role: fathership:father as parentship:parent

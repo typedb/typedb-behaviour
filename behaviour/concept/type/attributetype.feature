@@ -23,4 +23,13 @@ Feature: Concept Attribute Type
     Given connection does not have any keyspace
     Given connection create keyspace: grakn
     Given connection open session for keyspace: grakn
-    Given session open transaction of type: write
+    Given session opens transaction of type: write
+
+  Scenario: Attribute types can be created with data type
+    When put attribute type: name, value class: string
+    Then attribute(name) is null: false
+    Then attribute(name) get supertype: attribute
+    When transaction commits
+    When session opens transaction of type: read
+    Then attribute(name) is null: false
+    Then attribute(name) get supertype: attribute
