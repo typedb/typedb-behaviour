@@ -230,19 +230,19 @@ Feature: Concept Attribute Type
     Then attribute(age) fails at setting supertype: is-open
     Then attribute(age) fails at setting supertype: rating
     Then attribute(age) fails at setting supertype: name
-    Then attribute(age) fails at setting supertype: datetime
+    Then attribute(age) fails at setting supertype: timestamp
     Then attribute(rating) fails at setting supertype: is-open
     Then attribute(rating) fails at setting supertype: age
     Then attribute(rating) fails at setting supertype: name
-    Then attribute(rating) fails at setting supertype: datetime
+    Then attribute(rating) fails at setting supertype: timestamp
     Then attribute(name) fails at setting supertype: is-open
     Then attribute(name) fails at setting supertype: age
     Then attribute(name) fails at setting supertype: rating
-    Then attribute(name) fails at setting supertype: datetime
-    Then attribute(datetime) fails at setting supertype: is-open
-    Then attribute(datetime) fails at setting supertype: age
-    Then attribute(datetime) fails at setting supertype: rating
-    Then attribute(datetime) fails at setting supertype: name
+    Then attribute(name) fails at setting supertype: timestamp
+    Then attribute(timestamp) fails at setting supertype: is-open
+    Then attribute(timestamp) fails at setting supertype: age
+    Then attribute(timestamp) fails at setting supertype: rating
+    Then attribute(timestamp) fails at setting supertype: name
 
   Scenario: Attribute types can have keys
     When put attribute type: country-code, value class: string
