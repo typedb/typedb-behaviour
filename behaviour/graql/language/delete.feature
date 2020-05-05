@@ -266,7 +266,7 @@ Feature: Graql Delete Query
       match (friend: $x, friend: $y) isa friendship; get;
       """
     Then uniquely identify answer concepts
-      | x    | y    |
+      | x    | y     |
       | BOB  | CAR   |
       | CAR  | BOB   |
 
@@ -771,24 +771,6 @@ Feature: Graql Delete Query
         $refl (friend: $x, friend: $x) isa friendship, has ref $r1;
         $f1 (friend: $x, friend: $y) isa friendship, has ref $r2;
       """
-
-    Then get answers of graql query
-      """
-      match $f (friend: $x) isa friendship; get;
-      """
-    Then uniquely identify answer concepts
-      | f     | x     |
-      | F2    | ALEX  |
-      | F2    | JOHN  |
-
-    Then get answers of graql query
-      """
-      match $n isa name; get;
-      """
-    Then uniquely identify answer concepts
-      | n     |
-      | nJHN  |
-      | nALX  |
 
     Then get answers of graql query
       """
