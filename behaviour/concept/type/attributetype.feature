@@ -33,3 +33,31 @@ Feature: Concept Attribute Type
     When session opens transaction of type: read
     Then attribute(name) is null: false
     Then attribute(name) get supertype: attribute
+
+  Scenario: Attribute types can be deleted
+    When put attribute type: name, value class: string
+    Then attribute(name) is null: false
+    When put attribute type: age, value class: long
+    Then attribute(age) is null: false
+    When delete attribute type: age
+    Then attribute(age) is null: true
+    Then attribute(attribute) get subtypes do not contain:
+      | age |
+    When transaction commits
+    When session opens transaction of type: write
+    Then attribute(name) is null: false
+    Then attribute(age) is null: true
+    Then attribute(attribute) get subtypes do not contain:
+      | age |
+    When delete attribute type: name
+    Then attribute(name) is null: true
+    Then attribute(attribute) get subtypes do not contain:
+      | name |
+      | age  |
+    When transaction commits
+    When session opens transaction of type: read
+    Then attribute(name) is null: true
+    Then attribute(age) is null: true
+    Then attribute(attribute) get subtypes do not contain:
+      | name |
+      | age  |
