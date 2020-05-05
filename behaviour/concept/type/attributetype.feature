@@ -239,3 +239,22 @@ Feature: Concept Attribute Type
     Then attribute(timestamp) get has attributes do not contain:
       | utc-zone-code |
       | utc-zone-hour |
+
+  Scenario: Attribute types can have keys and attributes
+    When put attribute type: country-code, value class: string
+    When put attribute type: country-abbreviation, value class: string
+    When put attribute type: country-name, value class: string
+    When attribute(country-name) set key attribute: country-code
+    When attribute(country-name) set has attribute: country-abbreviation
+    Then attribute(country-name) get key attributes contain:
+      | country-code |
+    Then attribute(country-name) get has attributes contain:
+      | country-code         |
+      | country-abbreviation |
+    When transaction commits
+    When session opens transaction of type: read
+    Then attribute(country-name) get key attributes contain:
+      | country-code |
+    Then attribute(country-name) get has attributes contain:
+      | country-code         |
+      | country-abbreviation |
