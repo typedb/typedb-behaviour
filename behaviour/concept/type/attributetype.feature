@@ -208,3 +208,34 @@ Feature: Concept Attribute Type
     Then attribute(country-name) get key attributes do not contain:
       | country-code-1 |
       | country-code-2 |
+
+  Scenario: Attribute types can have attributes
+    When put attribute type: utc-zone-code, value class: string
+    When put attribute type: utc-zone-hour, value class: double
+    When put attribute type: timestamp, value class: datetime
+    When attribute(timestamp) set has attribute: utc-zone-code
+    When attribute(timestamp) set has attribute: utc-zone-hour
+    Then attribute(timestamp) get has attributes contain:
+      | utc-zone-code |
+      | utc-zone-hour |
+    When transaction commits
+    When session opens transaction of type: read
+    Then attribute(timestamp) get has attributes contain:
+      | utc-zone-code |
+      | utc-zone-hour |
+
+  Scenario: Attribute types can remove attributes
+    When put attribute type: utc-zone-code, value class: string
+    When put attribute type: utc-zone-hour, value class: double
+    When put attribute type: timestamp, value class: datetime
+    When attribute(timestamp) set has attribute: utc-zone-code
+    When attribute(timestamp) set has attribute: utc-zone-hour
+    When attribute(timestamp) remove has attribute: utc-zone-hour
+    Then attribute(timestamp) get has attributes do not contain:
+      | utc-zone-hour |
+    When transaction commits
+    When session opens transaction of type: write
+    When attribute(timestamp) remove has attribute: utc-zone-code
+    Then attribute(timestamp) get has attributes do not contain:
+      | utc-zone-code |
+      | utc-zone-hour |
