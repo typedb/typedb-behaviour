@@ -82,9 +82,9 @@ Feature: Concept Attribute Type
     Then attribute(email) get label: email
 
   Scenario: Attribute types can be set to abstract
-    When put attribute type: name
+    When put attribute type: name, value class: string
     When attribute(name) set abstract: true
-    When put attribute type: email
+    When put attribute type: email, value class: string
     Then attribute(name) is abstract: true
     # Then attribute(name) creates instance successfully: false
     Then attribute(email) is abstract: false
