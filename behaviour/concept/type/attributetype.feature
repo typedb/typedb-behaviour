@@ -61,3 +61,22 @@ Feature: Concept Attribute Type
     Then attribute(attribute) get subtypes do not contain:
       | name |
       | age  |
+
+  Scenario: Attribute types can change labels
+    When put attribute type: name, value class: string
+    Then attribute(name) get label: name
+    When attribute(name) set label: username
+    Then attribute(name) is null: true
+    Then attribute(username) is null: false
+    Then attribute(username) get label: username
+    When transaction commits
+    When session opens transaction of type: write
+    Then attribute(username) get label: username
+    When attribute(username) set label: email
+    Then attribute(username) is null: true
+    Then attribute(email) is null: false
+    Then attribute(email) get label: email
+    When transaction commits
+    When session opens transaction of type: read
+    Then attribute(email) is null: false
+    Then attribute(email) get label: email
