@@ -258,3 +258,38 @@ Feature: Concept Attribute Type
     Then attribute(country-name) get has attributes contain:
       | country-code         |
       | country-abbreviation |
+
+  Scenario: Attribute types can inherit keys and attributes
+    When put attribute type: hash, value class: string
+    When put attribute type: abbreviation, value class: string
+    When put attribute type: name, value class: string
+    When attribute(name) set key attribute: hash
+    When attribute(name) set has attribute: abbreviation
+    When put attribute type: real-name, value class: string
+    When attribute(real-name) set supertype: name
+    Then attribute(real-name) get key attributes contain:
+      | hash |
+    Then attribute(real-name) get has attributes contain:
+      | hash         |
+      | abbreviation |
+    When transaction commits
+    When session opens transaction of type: write
+    Then attribute(real-name) get key attributes contain:
+      | hash |
+    Then attribute(real-name) get has attributes contain:
+      | hash         |
+      | abbreviation |
+    When put attribute type: last-name, value class: string
+    When attribute(last-name) set supertype: real-name
+    When transaction commits
+    When session opens transaction of type: read
+    Then attribute(real-name) get key attributes contain:
+      | hash |
+    Then attribute(real-name) get has attributes contain:
+      | hash         |
+      | abbreviation |
+    Then attribute(last-name) get key attributes contain:
+      | hash |
+    Then attribute(last-name) get has attributes contain:
+      | hash         |
+      | abbreviation |
