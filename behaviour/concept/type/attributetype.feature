@@ -80,3 +80,23 @@ Feature: Concept Attribute Type
     When session opens transaction of type: read
     Then attribute(email) is null: false
     Then attribute(email) get label: email
+
+  Scenario: Attribute types can be set to abstract
+    When put attribute type: name
+    When attribute(name) set abstract: true
+    When put attribute type: email
+    Then attribute(name) is abstract: true
+    # Then attribute(name) creates instance successfully: false
+    Then attribute(email) is abstract: false
+    When transaction commits
+    When session opens transaction of type: write
+    Then attribute(name) is abstract: true
+    # Then attribute(name) creates instance successfully: false
+    Then attribute(email) is abstract: false
+    When attribute(email) set abstract: true
+    Then attribute(email) is abstract: true
+    # Then attribute(email) creates instance successfully: false
+    When transaction commits
+    When session opens transaction of type: write
+    Then attribute(email) is abstract: true
+    # Then attribute(email) creates instance successfully: false

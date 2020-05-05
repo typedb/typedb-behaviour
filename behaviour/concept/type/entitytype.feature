@@ -95,9 +95,11 @@ Feature: Concept Entity Type
     Then entity(company) is abstract: false
     When entity(company) set abstract: true
     Then entity(company) is abstract: true
+    # Then entity(company) creates instance successfully: false
     When transaction commits
     When session opens transaction of type: write
     Then entity(company) is abstract: true
+    # Then entity(company) creates instance successfully: false
 
   Scenario: Entity types can be subtypes of other entity types
     When put entity type: man
