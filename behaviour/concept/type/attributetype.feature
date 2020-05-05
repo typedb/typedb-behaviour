@@ -217,6 +217,33 @@ Feature: Concept Attribute Type
       | first-name |
       | last-name  |
 
+  Scenario: Attribute types cannot subtype another attribute type of different value class
+    When put attribute type: is-open, value class: boolean
+    When put attribute type: age, value class: long
+    When put attribute type: rating, value class: double
+    When put attribute type: name, value class: string
+    When put attribute type: timestamp, value class: datetime
+    Then attribute(is-open) fails at setting supertype: age
+    Then attribute(is-open) fails at setting supertype: rating
+    Then attribute(is-open) fails at setting supertype: name
+    Then attribute(is-open) fails at setting supertype: timestamp
+    Then attribute(age) fails at setting supertype: is-open
+    Then attribute(age) fails at setting supertype: rating
+    Then attribute(age) fails at setting supertype: name
+    Then attribute(age) fails at setting supertype: datetime
+    Then attribute(rating) fails at setting supertype: is-open
+    Then attribute(rating) fails at setting supertype: age
+    Then attribute(rating) fails at setting supertype: name
+    Then attribute(rating) fails at setting supertype: datetime
+    Then attribute(name) fails at setting supertype: is-open
+    Then attribute(name) fails at setting supertype: age
+    Then attribute(name) fails at setting supertype: rating
+    Then attribute(name) fails at setting supertype: datetime
+    Then attribute(datetime) fails at setting supertype: is-open
+    Then attribute(datetime) fails at setting supertype: age
+    Then attribute(datetime) fails at setting supertype: rating
+    Then attribute(datetime) fails at setting supertype: name
+
   Scenario: Attribute types can have keys
     When put attribute type: country-code, value class: string
     When put attribute type: country-name, value class: string
