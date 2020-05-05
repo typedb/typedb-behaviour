@@ -66,14 +66,19 @@ Feature: Concept Entity Type
     When put entity type: person
     Then entity(person) get label: person
     When entity(person) set label: horse
+    Then entity(person) is null: true
+    Then entity(horse) is null: false
     Then entity(horse) get label: horse
     When transaction commits
     When session opens transaction of type: write
     Then entity(horse) get label: horse
     When entity(horse) set label: animal
+    Then entity(horse) is null: true
+    Then entity(animal) is null: false
     Then entity(animal) get label: animal
     When transaction commits
     When session opens transaction of type: read
+    Then entity(animal) is null: false
     Then entity(animal) get label: animal
 
   Scenario: Entity types can be set to abstract
