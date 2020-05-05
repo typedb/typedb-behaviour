@@ -181,3 +181,30 @@ Feature: Concept Attribute Type
       | real-name  |
       | first-name |
       | last-name  |
+
+  Scenario: Attribute types can have keys
+    When put attribute type: country-code, value class: string
+    When put attribute type: country-name, value class: string
+    When attribute(country-name) set key attribute: country-code
+    Then attribute(country-name) get key attributes contain:
+      | country-code |
+    When transaction commits
+    When session opens transaction of type: read
+    Then attribute(country-name) get key attributes contain:
+      | country-code |
+
+  Scenario: Attribute types can remove keys
+    When put attribute type: country-code-1, value class: string
+    When put attribute type: country-code-2, value class: string
+    When put attribute type: country-name, value class: string
+    When attribute(country-name) set key attribute: country-code-1
+    When attribute(country-name) set key attribute: country-code-2
+    When attribute(country-name) remove key attribute: country-code-1
+    Then attribute(country-name) get key attributes do not contain:
+      | country-code-1 |
+    When transaction commits
+    When session opens transaction of type: write
+    When attribute(country-name) remove key attribute: country-code-2
+    Then attribute(country-name) get key attributes do not contain:
+      | country-code-1 |
+      | country-code-2 |
