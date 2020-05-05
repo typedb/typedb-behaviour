@@ -100,3 +100,84 @@ Feature: Concept Attribute Type
     When session opens transaction of type: write
     Then attribute(email) is abstract: true
     # Then attribute(email) creates instance successfully: false
+
+  Scenario: Attribute types can be subtypes of other attribute types
+    When put attribute type: first-name, value class: string
+    When put attribute type: last-name, value class: string
+    When put attribute type: real-name, value class: string
+    When put attribute type: username, value class: string
+    When put attribute type: name, value class: string
+    When attribute(first-name) set supertype: real-name
+    When attribute(last-name) set supertype: real-name
+    When attribute(real-name) set supertype: name
+    When attribute(username) set supertype: name
+    Then attribute(first-name) get supertype: real-name
+    Then attribute(last-name) get supertype: real-name
+    Then attribute(real-name) get supertype: name
+    Then attribute(username) get supertype: name
+    Then attribute(first-name) get supertypes contain:
+      | first-name |
+      | real-name  |
+      | name       |
+    Then attribute(last-name) get supertypes contain:
+      | last-name |
+      | real-name |
+      | name      |
+    Then attribute(real-name) get supertypes contain:
+      | real-name |
+      | name      |
+    Then attribute(username) get supertypes contain:
+      | username |
+      | name     |
+    Then attribute(first-name) get subtypes contain:
+      | first-name |
+    Then attribute(last-name) get subtypes contain:
+      | last-name |
+    Then attribute(real-name) get subtypes contain:
+      | real-name  |
+      | first-name |
+      | last-name  |
+    Then attribute(username) get subtypes contain:
+      | username |
+    Then attribute(name) get subtypes contain:
+      | name       |
+      | username   |
+      | real-name  |
+      | first-name |
+      | last-name  |
+    When transaction commits
+    When session opens transaction of type: read
+    Then attribute(first-name) get supertype: real-name
+    Then attribute(last-name) get supertype: real-name
+    Then attribute(real-name) get supertype: name
+    Then attribute(username) get supertype: name
+    Then attribute(first-name) get supertypes contain:
+      | first-name |
+      | real-name  |
+      | name       |
+    Then attribute(last-name) get supertypes contain:
+      | last-name |
+      | real-name |
+      | name      |
+    Then attribute(real-name) get supertypes contain:
+      | real-name |
+      | name      |
+    Then attribute(username) get supertypes contain:
+      | username |
+      | name     |
+    Then attribute(first-name) get subtypes contain:
+      | first-name |
+    Then attribute(last-name) get subtypes contain:
+      | last-name |
+    Then attribute(real-name) get subtypes contain:
+      | real-name  |
+      | first-name |
+      | last-name  |
+    Then attribute(username) get subtypes contain:
+      | username |
+    Then attribute(name) get subtypes contain:
+      | name       |
+      | username   |
+      | real-name  |
+      | first-name |
+      | last-name  |
