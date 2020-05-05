@@ -25,7 +25,7 @@ Feature: Concept Attribute Type
     Given connection open session for keyspace: grakn
     Given session opens transaction of type: write
 
-  Scenario: Attribute types can be created with data type
+  Scenario: Attribute types can be created
     When put attribute type: name, value class: string
     Then attribute(name) is null: false
     Then attribute(name) get supertype: attribute
@@ -33,6 +33,41 @@ Feature: Concept Attribute Type
     When session opens transaction of type: read
     Then attribute(name) is null: false
     Then attribute(name) get supertype: attribute
+
+  Scenario: Attribute types can be created with value class boolean
+    When put attribute type: is-open, value class: boolean
+    Then attribute(is-open) get value class: boolean
+    When transaction commits
+    When session opens transaction of type: read
+    Then attribute(is-open) get value class: boolean
+
+  Scenario: Attribute types can be created with value class long
+    When put attribute type: age, value class: long
+    Then attribute(age) get value class: long
+    When transaction commits
+    When session opens transaction of type: read
+    Then attribute(age) get value class: long
+
+  Scenario: Attribute types can be created with value class double
+    When put attribute type: rating, value class: double
+    Then attribute(rating) get value class: double
+    When transaction commits
+    When session opens transaction of type: read
+    Then attribute(rating) get value class: double
+
+  Scenario: Attribute types can be created with value class string
+    When put attribute type: name, value class: string
+    Then attribute(name) get value class: string
+    When transaction commits
+    When session opens transaction of type: read
+    Then attribute(name) get value class: string
+
+  Scenario: Attribute types can be created with value class datetime
+    When put attribute type: timestamp, value class: datetime
+    Then attribute(timestamp) get value class: datetime
+    When transaction commits
+    When session opens transaction of type: read
+    Then attribute(timestamp) get value class: datetime
 
   Scenario: Attribute types can be deleted
     When put attribute type: name, value class: string
