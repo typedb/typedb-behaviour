@@ -722,7 +722,79 @@ Feature: Graql Delete Query
       """
     Then uniquely identify answer concepts
       | x     | n     |
-      | JOHN  | SMTH |
+      | JOHN  | SMTH  |
+
+
+  Scenario: delete everything in a complex pattern
+    When graql define
+      """
+      define
+      lastname sub attribute, value string;
+      person sub entity, has lastname;
+      """
+    When graql insert
+      """
+      insert
+      $x isa person,
+        has lastname "Smith",
+        has name "Alex";
+      $y isa person,
+        has lastname "Smith",
+        has name "John";
+      $r (friend: $x, friend: $y) isa friendship, has ref 1;
+      $r1 (friend: $x, friend: $y) isa friendship, has ref 2;
+      $reflexive (friend: $x, friend: $x) isa friendship, has ref 3;
+      """
+    When the integrity is validated
+
+    Then concept identifiers are
+      |      | check | value          |
+      | ALEX | key   | name:Alex      |
+      | JOHN | key   | name:John      |
+      | SMTH | value | lastname:Smith |
+      | nALX | value | name:Alex      |
+      | nJHN | value | name:John      |
+      | F1   | key   | ref:1          |
+      | F2   | key   | ref:2          |
+      | REFL | key   | ref:3          |
+
+    Then graql delete
+      """
+      match
+        $x isa person, has name "Alex", has lastname $n;
+        $y isa person, has name "John", has lastname $n;
+        $refl (friend: $x, friend: $x) isa friendship, has ref $r1; $r1 3;
+        $f1 (friend: $x, friend: $y) isa friendship, has ref $r2; $r2 1;
+      delete
+        $x isa person, has lastname $n;
+        $y isa person, has lastname $n;
+        $refl (friend: $x, friend: $x) isa friendship, has ref $r1;
+        $f1 (friend: $x, friend: $y) isa friendship, has ref $r2;
+      """
+
+    Then get answers of graql query
+      """
+      match $f (friend: $x) isa friendship; get;
+      """
+    Then uniquely identify answer concepts
+      | f     | x     |
+      | F2    | ALEX  |
+      | F2    | JOHN  |
+
+    Then get answers of graql query
+      """
+      match $n isa name; get;
+      """
+    Then uniquely identify answer concepts
+      | n     |
+      | nJHN  |
+      | nALX  |
+
+    Then get answers of graql query
+      """
+      match $x isa person, has lastname $n; get;
+      """
+    Then answer size is: 0
 
 
   Scenario: delete key ownership throws exception
@@ -740,4 +812,14 @@ Feature: Graql Delete Query
         $n "Alex";
       delete
         $x has name $n;
+      """
+
+
+  Scenario: delete a type throws
+    Then graql delete throws
+      """
+      match
+        $x type person;
+      delete
+        $x sub type;
       """
