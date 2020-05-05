@@ -70,7 +70,7 @@ public class TestResolution {
     public void testCase4HappyPath() {
         Path schemaPath = Paths.get("resolution", "test", "cases", "case4", "schema.gql").toAbsolutePath();
         Path dataPath = Paths.get("resolution", "test", "cases", "case4", "data.gql").toAbsolutePath();
-        GraqlGet inferenceQuery = Graql.parse("match $c isa company, has is-liable $l; get;").asGet();
+        GraqlGet inferenceQuery = Graql.parse("match $com isa company, has is-liable $lia; get;").asGet();
 
         Resolution resolution_test = new Resolution(GRAKN_URI, schemaPath, dataPath);
         resolution_test.testQuery(inferenceQuery);

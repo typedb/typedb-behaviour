@@ -16,14 +16,14 @@ company sub entity,
 
 company-has-name sub rule,
 when {
-    $c isa company;
+    $c1 isa company;
 }, then {
-    $c has name "the-company";
+    $c1 has name "the-company";
 };
 
 company-is-liable sub rule,
 when {
-    $c isa company, has name "the-company";
+    $c2 isa company, has name "the-company";
 }, then {
-    $c has is-liable true;
+    $c2 has is-liable true;
 };

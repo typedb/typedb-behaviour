@@ -58,19 +58,18 @@ public class QueryBuilder {
 
         if (answer.hasExplanation()) {
 
-            Set<Statement> thenStatements = qp.statements();
-
             Explanation explanation = answer.explanation();
 
             if (explanation.getAnswers().size() == 1) {
 
                 ConceptMap explAns = getOnlyElement(explanation.getAnswers());
 
-                answerStatements.addAll(resolutionStatements(tx, explAns));
                 Set<Statement> whenStatements = new LinkedHashSet<>(Objects.requireNonNull(explAns.queryPattern()).statements());
+                Set<Statement> thenStatements = Objects.requireNonNull(explanation.getRule().then()).statements();
 
                 String ruleLabel = explanation.getRule().label().toString();
                 answerStatements.addAll(inferenceStatements(whenStatements, thenStatements, ruleLabel));
+                answerStatements.addAll(resolutionStatements(tx, explAns));
             } else {
                 for (ConceptMap explAns : explanation.getAnswers()) {
                     answerStatements.addAll(resolutionStatements(tx, explAns));
