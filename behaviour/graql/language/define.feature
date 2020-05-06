@@ -16,7 +16,7 @@
 #
 Feature: Graql Define Query
 
-  Background: Create a simple schema that is extensible for each scenario
+  Background: Open connection and create a simple extensible schema
     Given connection has been opened
     Given connection delete all keyspaces
     Given connection open sessions for keyspaces:

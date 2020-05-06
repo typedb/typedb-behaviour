@@ -16,7 +16,7 @@
 #
 Feature: Graql Insert Query
 
-  Background: Create a simple schema that is extensible for each scenario
+  Background: Open connection
     Given connection has been opened
     Given connection delete all keyspaces
     Given connection open sessions for keyspaces:
