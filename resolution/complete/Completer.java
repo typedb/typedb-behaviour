@@ -4,9 +4,12 @@ import grakn.client.GraknClient;
 import grakn.client.GraknClient.Transaction;
 import grakn.client.answer.ConceptMap;
 import grakn.client.concept.Concept;
+import grakn.client.concept.ValueType;
+import grakn.client.concept.type.AttributeType;
 import grakn.verification.resolution.resolve.QueryBuilder;
 import graql.lang.Graql;
 import graql.lang.pattern.Pattern;
+import graql.lang.property.IsaProperty;
 import graql.lang.query.GraqlGet;
 import graql.lang.query.GraqlInsert;
 import graql.lang.statement.Statement;
@@ -18,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static grakn.verification.resolution.resolve.QueryBuilder.generateKeyStatements;
@@ -121,12 +126,44 @@ public class Completer {
             return answerMap != null;
         }
 
+        HashSet<Statement> getHeadKeyStatements(Transaction tx) {
+            HashSet<Statement> keyStatements = new HashSet<>();
+            head.statements().forEach(s -> {
+                s.properties().forEach(p -> {
+                    if (p instanceof IsaProperty) {
+                        // Get the relevant type(s)
+                        GraqlGet query = Graql.match(Graql.var("x").sub(((IsaProperty) p).type())).get();
+                        List<ConceptMap> ans = tx.execute(query);
+                        ans.forEach(a -> {
+                            Set<? extends AttributeType.Remote<?>> keys = a.get("x").asType().asRemote(tx).keys().collect(Collectors.toSet());
+                            keys.forEach(k -> {
+                                String keyTypeLabel = k.label().toString();
+                                ValueType<?> v = k.valueType();
+                                String randomKeyValue = UUID.randomUUID().toString();
+
+                                assert v != null;
+                                if (v.valueClass().equals(Long.class)) {
+
+                                    keyStatements.add(Graql.var(s.var()).has(keyTypeLabel, randomKeyValue.hashCode()));
+                                } else if (v.valueClass().equals(String.class)) {
+
+                                    keyStatements.add(Graql.var(s.var()).has(keyTypeLabel, randomKeyValue));
+                                }
+                            });
+                        });
+                    }
+                });
+            });
+            return keyStatements;
+        }
+
         boolean matchBodyAndKeys_insertHeadAndResolution(Transaction tx, Map<Variable, Concept<?>> matchAnswerMap) {
             Set<Statement> keyStatements = generateKeyStatements(tx, matchAnswerMap);
 
             HashSet<Statement> toInsert = new HashSet<>(resolution);
-            // TODO figure out the necessary keys for the elements in the head and add statements to insert them
+            HashSet<Statement> headKeyStatements = getHeadKeyStatements(tx);
             toInsert.addAll(head.statements());
+            toInsert.addAll(headKeyStatements);
 
             GraqlInsert query = Graql.match(body, Graql.and(keyStatements)).insert(toInsert);
             System.out.print("\n----");
