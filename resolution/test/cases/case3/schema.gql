@@ -3,8 +3,11 @@ define
 name sub attribute,
     value string;
 
+last-name sub name;
+
 person sub entity,
-    has name,
+    key name,
+    has last-name,
     plays sibling;
 
 man sub person;
@@ -16,14 +19,13 @@ siblingship sub relation,
 a-man-is-called-bob sub rule,
 when {
     $p isa man;
-#    not{ $p has name "Susan"; };
 }, then {
-    $p has name "Bob";
+    $p has last-name "Smith";
 };
 
 bobs-sister-is-susan sub rule,
 when {
-    $p isa man, has name "Bob";
+    $p isa man, has last-name "Smith";
     $p1 isa woman, has name "Susan";
 }, then {
     (sibling: $p, sibling: $p1) isa siblingship;
