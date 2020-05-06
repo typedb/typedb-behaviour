@@ -120,8 +120,8 @@ java_test(
         "@graknlabs_graql//java:graql",
     ],
     data = [
-        "//resolution/test/cases/case1:schema.gql",
-        "//resolution/test/cases/case1:data.gql",
+        "//resolution/test/cases/case4:schema.gql",
+        "//resolution/test/cases/case4:data.gql",
         "@graknlabs_grakn_core//:assemble-linux-targz", # Make sure to pass the path in args below
     ],
     args = [ # The order of the arguments matter

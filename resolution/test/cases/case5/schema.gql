@@ -14,5 +14,5 @@ company-has-name sub rule,
 when {
     $c isa company;
 }, then {
-    $c has name "the-company";
+    $c has name $n; $n "the-company";
 };

@@ -26,63 +26,7 @@ import static org.junit.Assert.assertEquals;
 
 public class TestCompleter {
 
-    static Set<Statement> expectedResolutionStatements = getStatements(Graql.parsePatternList(
-//                    From the initial answer:
-            "$transaction has currency $currency;\n" +
-                    "$transaction has transaction-id 0;\n" +
-                    "$currency \"GBP\";\n" +
-                    "$transaction isa transaction;\n" +
-
-//                    From the explained answers:
-                    "$country has currency $currency;\n" +
-                    "$country isa country;\n" +
-                    "$country has country-name \"UK\";\n" +
-                    "$currency \"GBP\";\n" +
-
-                    "$lh (location-hierarchy_superior: $country, location-hierarchy_subordinate: $city) isa location-hierarchy;\n" +
-                    "$country isa country;\n" +
-                    "$city has city-name \"London\";\n" +
-                    "$country has country-name \"UK\";\n" +
-                    "$city isa city;\n" +
-                    "$lh has hierarchy-id 0;\n" +
-
-                    "$city has city-name \"London\";\n" +
-                    "$transaction has transaction-id 0;\n" +
-                    "$l1 (locates_located: $transaction, locates_location: $city) isa locates;\n" +
-                    "$l1 has location-id 0;\n" +
-                    "$city isa city;\n" +
-                    "$transaction isa transaction;\n" +
-
-                    "$country isa country;\n" +
-                    "$locates (locates_located: $transaction, locates_location: $country) isa locates;\n" +
-                    "$transaction has transaction-id 0;\n" +
-                    "$country has country-name \"UK\";\n" +
-                    "$transaction isa transaction;\n" +
-
-                    "$_ (\n" +
-                    "    where: $country,\n" +
-                    "    where: $locates,\n" +
-                    "    where: $transaction,\n" +
-                    "    where: $currency,\n" +
-                    "    there: $currency,\n" +
-                    "    there: $transaction\n" +
-                    ") isa applied-rule, \n" +
-                    "has rule-label \"transaction-currency-is-that-of-the-country\";" +
-
-                    "$_ (\n" +
-                    "    where: $country,\n" +
-                    "    where: $city,\n" +
-                    "    where: $lh,\n" +
-                    "    where: $l1,\n" +
-                    "    where: $transaction,\n" +
-                    "    there: $country,\n" +
-                    "    there: $locates,\n" +
-                    "    there: $transaction\n" +
-                    ") isa applied-rule, \n" +
-                    "has rule-label \"locates-is-transitive\";\n"
-    ));
-
-    private static final String TEST_CASE = "case1";
+    private static final String TEST_CASE = "case4";
     private static final String GRAKN_URI = "localhost:48555";
     private static final String GRAKN_KEYSPACE = TEST_CASE;
     private static GraknForTest graknForTest;
@@ -123,21 +67,34 @@ public class TestCompleter {
         graknClient.keyspaces().delete(GRAKN_KEYSPACE);
     }
 
-//    @Test
-//    public void testValidResolutionHasExactlyOneAnswer() {
-//
-//        try (GraknClient.Session session = graknClient.session(GRAKN_KEYSPACE)) {
-//
-//            try (GraknClient.Transaction tx = session.transaction().read()) {
-//                List<ConceptMap> answers = tx.execute(Graql.match(expectedResolutionStatements).get());
-//
-//                assertEquals(answers.size(), 1);
-//            }
-//        }
-//    }
-
     @Test
-    public void testCompletionInferredTheCorrectNumberOfConcepts() {
+    public void testValidResolutionHasExactlyOneAnswer() {
+        Set<Statement> expectedResolutionStatements = getStatements(Graql.parsePatternList("" +
+                "$r0-com isa company;" +
+                "$r0-com has is-liable $r0-lia;" +
+                "$r0-com has company-id 0;" +
+                "$r0-lia true;" +
+                "$r1-c2 isa company, has name $r1-n2;" +
+                "$r1-n2 \"the-company\";" +
+                "$r1-l2 true;" +
+                "$r1-c2 has is-liable $r1-l2;" +
+                "$x0 (instance: $r1-c2) isa isa-property, has type-label \"company\";" +
+                "$x1 (owner: $r1-c2) isa has-attribute-property, has name $r1-n2;" +
+                "$x2 (owner: $r1-c2) isa has-attribute-property, has is-liable $r1-l2;" +
+                "$_ (body: $x0, body: $x1, head: $x2) isa resolution, has rule-label \"company-is-liable\";" +
+                "$r1-n2 == \"the-company\";" +
+                "$r1-c2 has name $r1-n2;" +
+                "$r1-c2 isa company;" +
+                "$r1-c2 has company-id 0;" +
+                "$r2-c1 isa company;" +
+                "$r2-n1 \"the-company\";" +
+                "$r2-c1 has name $r2-n1;" +
+                "$x3 (instance: $r2-c1) isa isa-property, has type-label \"company\";" +
+                "$x4 (owner: $r2-c1) isa has-attribute-property, has name $r2-n1;" +
+                "$_ (body: $x3, head: $x4) isa resolution, has rule-label \"company-has-name\";" +
+                "$r2-c1 has company-id 0;"
+        ));
+
         try (GraknClient.Session session = graknClient.session(GRAKN_KEYSPACE)) {
             Completer completer = new Completer(session);
             try (GraknClient.Transaction tx = session.transaction().write()) {
@@ -150,14 +107,9 @@ public class TestCompleter {
             completer.complete();
 
             try (GraknClient.Transaction tx = session.transaction().read()) {
+                List<ConceptMap> answers = tx.execute(Graql.match(expectedResolutionStatements).get());
 
-                GraqlGet inferredAnswersQuery = Graql.match(Graql.var("lh").isa("location-hierarchy")).get();
-                List<ConceptMap> inferredAnswers = tx.execute(inferredAnswersQuery);
-                assertEquals(6, inferredAnswers.size());
-
-                GraqlGet resolutionsQuery = Graql.match(Graql.var("res").isa("resolution")).get();
-                List<ConceptMap> resolutionAnswers = tx.execute(resolutionsQuery);
-                assertEquals(4, resolutionAnswers.size());
+                assertEquals(answers.size(), 1);
             }
         }
     }
