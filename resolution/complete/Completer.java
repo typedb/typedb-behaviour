@@ -49,13 +49,15 @@ public class Completer {
     private static boolean completeRule(Transaction tx, Rule rule) {
 
         boolean foundResult = false;
-
-        Stream<ConceptMap> answerStream2 = rule.matchBodyAndHead(tx);
-        Iterator<ConceptMap> answerIt2 = answerStream2.iterator();
-
-        while (answerIt2.hasNext()) {
-            foundResult = foundResult | rule.matchBodyAndHeadAndKeysAndNotResolution_insertResolution(tx, answerIt2.next().map());
-        }
+//
+//        Stream<ConceptMap> answerStream2 = rule.matchBodyAndHead(tx);
+//        Iterator<ConceptMap> answerIt2 = answerStream2.iterator();
+//
+//        while (answerIt2.hasNext()) {
+//            foundResult = foundResult | rule.matchBodyAndHeadAndKeysAndNotResolution_insertResolution(tx, answerIt2.next().map());
+        // TODO When making match queries be careful that user-provided rules could trigger due to elements of the
+        //  completion schema. These results should be filtered out.
+//        }
 
         Stream<ConceptMap> answerStream = rule.matchBodyAndNotHead(tx);
         Iterator<ConceptMap> answerIt = answerStream.iterator();
@@ -123,9 +125,14 @@ public class Completer {
             Set<Statement> keyStatements = generateKeyStatements(tx, matchAnswerMap);
 
             HashSet<Statement> toInsert = new HashSet<>(resolution);
+            // TODO figure out the necessary keys for the elements in the head and add statements to insert them
             toInsert.addAll(head.statements());
 
             GraqlInsert query = Graql.match(body, Graql.and(keyStatements)).insert(toInsert);
+            System.out.print("\n----");
+            System.out.print("\nmaking matchBodyAndKeys_insertHeadAndResolution query:");
+            System.out.print(query);
+            System.out.print("\n----");
             Map<Variable, Concept<?>> answerMap = oneAnswerFromConceptMap(tx.execute(query));
 
             return answerMap != null;

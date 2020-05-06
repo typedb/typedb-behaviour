@@ -40,12 +40,13 @@ public class QueryBuilder {
 
             ArrayList<GraqlGet> resolutionQueries = new ArrayList<>();
             for (ConceptMap answer : answers) {
-                resolutionQueries.add(Graql.match(resolutionStatements(tx, answer)).get());
+                resolutionQueries.add(Graql.match(resolutionStatements(tx, answer, 0)).get());
             }
+            System.out.print(resolutionQueries);
             return resolutionQueries;
     }
 
-    private Set<Statement> resolutionStatements(Transaction tx, ConceptMap answer) {
+    private LinkedHashSet<Statement> resolutionStatements(Transaction tx, ConceptMap answer, Integer ruleResolutionIndex) {
 
         Pattern qp = answer.queryPattern();
 
@@ -53,8 +54,10 @@ public class QueryBuilder {
             throw new RuntimeException("Answer is missing a pattern. Either patterns are broken or the initial query did not require inference.");
         }
 
-        Set<Statement> answerStatements = removeIdStatements(qp.statements());
-        answerStatements.addAll(generateKeyStatements(tx, answer.map()));
+        qp = makeAnonVarsExplicit(qp);
+
+        LinkedHashSet<Statement> answerStatements = new LinkedHashSet<>(prefixVars(removeIdStatements(qp.statements()), ruleResolutionIndex));
+        answerStatements.addAll(prefixVars(generateKeyStatements(tx, answer.map()), ruleResolutionIndex));
 
         if (answer.hasExplanation()) {
 
@@ -64,19 +67,61 @@ public class QueryBuilder {
 
                 ConceptMap explAns = getOnlyElement(explanation.getAnswers());
 
-                Set<Statement> whenStatements = new LinkedHashSet<>(Objects.requireNonNull(explAns.queryPattern()).statements());
-                Set<Statement> thenStatements = Objects.requireNonNull(explanation.getRule().then()).statements();
+                ruleResolutionIndex += 1;
+
+                Set<Statement> whenStatements = new LinkedHashSet<>(prefixVars(makeAnonVarsExplicit(Objects.requireNonNull(explanation.getRule().when())).statements(), ruleResolutionIndex));
+                answerStatements.addAll(whenStatements);
+                Set<Statement> thenStatements = new LinkedHashSet<>(prefixVars(makeAnonVarsExplicit(Objects.requireNonNull(explanation.getRule().then())).statements(), ruleResolutionIndex));
+                answerStatements.addAll(thenStatements);
 
                 String ruleLabel = explanation.getRule().label().toString();
                 answerStatements.addAll(inferenceStatements(whenStatements, thenStatements, ruleLabel));
-                answerStatements.addAll(resolutionStatements(tx, explAns));
+                answerStatements.addAll(resolutionStatements(tx, explAns, ruleResolutionIndex));
             } else {
                 for (ConceptMap explAns : explanation.getAnswers()) {
-                    answerStatements.addAll(resolutionStatements(tx, explAns));
+                    answerStatements.addAll(resolutionStatements(tx, explAns, ruleResolutionIndex));
                 }
             }
         }
         return answerStatements;
+    }
+
+    private Set<Statement> prefixVars(Set<Statement> statements, Integer ruleResolutionIndex) {
+        return statements.stream().map(s -> {
+            String prefix = "r" + ruleResolutionIndex + "-";
+            String newVarName = prefix + s.var().name();
+
+            LinkedHashSet<VarProperty> newProperties = new LinkedHashSet<>();
+            for (VarProperty prop : s.properties()) {
+
+                // TODO implement the rest of these replacements
+                if (prop instanceof RelationProperty) {
+
+                    List<RelationProperty.RolePlayer> roleplayers = ((RelationProperty) prop).relationPlayers();
+                    List<RelationProperty.RolePlayer> newRps = roleplayers.stream().map(rp -> {
+
+                        String rpVarName = prefix + rp.getPlayer().var().name();
+                        Statement newPlayerStatement = new Statement(new Variable(rpVarName));
+                        return new RelationProperty.RolePlayer(rp.getRole().orElse(null), newPlayerStatement);
+                    }).collect(Collectors.toList());
+
+                    newProperties.add(new RelationProperty(newRps));
+                } else if (prop instanceof HasAttributeProperty) {
+
+                    HasAttributeProperty hasProp = (HasAttributeProperty) prop;
+                    if (hasProp.attribute().var().isVisible()) {
+                        // If the attribute has a variable, rather than a value
+                        String newAttributeName = prefix + ((HasAttributeProperty) prop).attribute().var().name();
+                        newProperties.add(new HasAttributeProperty(hasProp.type(), new Statement(new Variable(newAttributeName))));
+                    } else {
+                        newProperties.add(hasProp);
+                    }
+                } else {
+                    newProperties.add(prop);
+                }
+            }
+            return Statement.create(new Variable(newVarName), newProperties);
+        }).collect(Collectors.toSet());
     }
 
     public Set<Statement> inferenceStatements(Set<Statement> whenStatements, Set<Statement> thenStatements, String ruleLabel) {
@@ -95,8 +140,6 @@ public class QueryBuilder {
         for (String whenVar : whenProps.keySet()) {
             relation = relation.rel("body", Graql.var(whenVar));
         }
-
-//        ==================
 
         LinkedHashMap<String, Statement> thenProps = new LinkedHashMap<>();
 

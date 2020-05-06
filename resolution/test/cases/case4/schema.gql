@@ -18,12 +18,12 @@ company-has-name sub rule,
 when {
     $c1 isa company;
 }, then {
-    $c1 has name "the-company";
+    $c1 has name $n1; $n1 "the-company";
 };
 
 company-is-liable sub rule,
 when {
-    $c2 isa company, has name "the-company";
+    $c2 isa company, has name $n2; $n2 "the-company";
 }, then {
-    $c2 has is-liable true;
+    $c2 has is-liable $l2; $l2 true;
 };
