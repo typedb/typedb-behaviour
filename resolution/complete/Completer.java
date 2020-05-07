@@ -92,12 +92,17 @@ public class Completer {
 
             if (thenAnswers.size() == 0) {
                 // We've found somewhere the rule can be applied
+                HashSet<Statement> matchWhenStatements = new HashSet<>();
+                matchWhenStatements.addAll(generateKeyStatements(tx, whenMap));
+                matchWhenStatements.addAll(rule.when.statements());
+
                 Set<Statement> insertNewThenStatements = new HashSet<>();
                 insertNewThenStatements.addAll(rule.then.statements());
                 insertNewThenStatements.addAll(getThenKeyStatements(tx, rule.then));
+                insertNewThenStatements.addAll(ruleInferenceStatements);
 
                 // Apply the rule, with the records of how the inference was made
-                tx.execute(Graql.match(Graql.and(connectingKeyStatements)).insert(insertNewThenStatements));
+                tx.execute(Graql.match(Graql.and(matchWhenStatements)).insert(insertNewThenStatements));
                 foundResult.set(true);
             } else {
                 thenAnswers.forEach(thenAnswer -> {
@@ -117,7 +122,7 @@ public class Completer {
                         assert ans.size() <= 1;
 
                         if (ans.size() == 0) {
-                            // This then has been previously inferred, but not in this exact scenario, so we add this resolution to the previously inserted inference
+                            // This `then` has been previously inferred, but not in this exact scenario, so we add this resolution to the previously inserted inference
                             Set<Statement> matchStatements = new HashSet<>();
                             matchStatements.addAll(generateKeyStatements(tx, whenMap));
                             matchStatements.addAll(generateKeyStatements(tx, thenAnswer.map()));
