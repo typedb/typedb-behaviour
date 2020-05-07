@@ -55,20 +55,20 @@ public class Completer {
 
         boolean foundResult = false;
 //
-//        Stream<ConceptMap> answerStream2 = rule.matchBodyAndHead(tx);
+//        Stream<ConceptMap> answerStream2 = rule.matchWhenAndThen(tx);
 //        Iterator<ConceptMap> answerIt2 = answerStream2.iterator();
 //
 //        while (answerIt2.hasNext()) {
-//            foundResult = foundResult | rule.matchBodyAndHeadAndKeysAndNotResolution_insertResolution(tx, answerIt2.next().map());
+//            foundResult = foundResult | rule.matchWhenAndThenAndKeysAndNotResolution_insertResolution(tx, answerIt2.next().map());
         // TODO When making match queries be careful that user-provided rules could trigger due to elements of the
         //  completion schema. These results should be filtered out.
 //        }
 
-        Stream<ConceptMap> answerStream = rule.matchBodyAndNotHead(tx);
+        Stream<ConceptMap> answerStream = rule.matchWhenAndNotThen(tx);
         Iterator<ConceptMap> answerIt = answerStream.iterator();
         while (answerIt.hasNext()) {
-            boolean insertedHeadAndResolution = rule.matchBodyAndKeys_insertHeadAndResolution(tx, answerIt.next().map());
-            if (insertedHeadAndResolution) {
+            boolean insertedThenAndResolution = rule.matchWhenAndKeys_insertThenAndResolution(tx, answerIt.next().map());
+            if (insertedThenAndResolution) {
                 foundResult = true;
             } else {
                 throw new RuntimeException("Something has gone wrong - based on a previous query, this query should have made an insertion!");
@@ -87,16 +87,16 @@ public class Completer {
     }
 
     private static class Rule {
-        private final Pattern body;
-        private final Pattern head;
+        private final Pattern when;
+        private final Pattern then;
         private Set<Statement> resolution;
 
         Rule(Pattern when, Pattern then, String label) {
-            body = QueryBuilder.makeAnonVarsExplicit(when);
-            head = QueryBuilder.makeAnonVarsExplicit(then);
+            this.when = QueryBuilder.makeAnonVarsExplicit(when);
+            this.then = QueryBuilder.makeAnonVarsExplicit(then);
             QueryBuilder qb = new QueryBuilder();
 
-            resolution = qb.inferenceStatements(this.body.statements(), this.head.statements(), label);
+            resolution = qb.inferenceStatements(this.when.statements(), this.then.statements(), label);
         }
 
         private Map<Variable, Concept<?>> oneAnswerFromConceptMap(List<ConceptMap> answers) {
@@ -109,26 +109,26 @@ public class Completer {
             }
         }
 
-        Stream<ConceptMap> matchBodyAndNotHead(Transaction tx) {
-            GraqlGet.Unfiltered query = Graql.match(body, Graql.not(head)).get();
+        Stream<ConceptMap> matchWhenAndNotThen(Transaction tx) {
+            GraqlGet.Unfiltered query = Graql.match(when, Graql.not(then)).get();
             return tx.stream(query);
         }
 
-        Stream<ConceptMap> matchBodyAndHead(Transaction tx) {
-            GraqlGet.Unfiltered query = Graql.match(body, head).get();
+        Stream<ConceptMap> matchWhenAndThen(Transaction tx) {
+            GraqlGet.Unfiltered query = Graql.match(when, then).get();
             return tx.stream(query);
         }
 
-        boolean matchBodyAndHeadAndKeysAndNotResolution_insertResolution(Transaction tx, Map<Variable, Concept<?>> matchAnswerMap) {
+        boolean matchWhenAndThenAndKeysAndNotResolution_insertResolution(Transaction tx, Map<Variable, Concept<?>> matchAnswerMap) {
             Set<Statement> keyStatements = generateKeyStatements(tx, matchAnswerMap);
-            GraqlInsert query = Graql.match(body, head, Graql.and(keyStatements), Graql.not(Graql.and(resolution))).insert(resolution);
+            GraqlInsert query = Graql.match(when, then, Graql.and(keyStatements), Graql.not(Graql.and(resolution))).insert(resolution);
             Map<Variable, Concept<?>> answerMap = oneAnswerFromConceptMap(tx.execute(query));
             return answerMap != null;
         }
 
-        HashSet<Statement> getHeadKeyStatements(Transaction tx) {
+        HashSet<Statement> getThenKeyStatements(Transaction tx) {
             HashSet<Statement> keyStatements = new HashSet<>();
-            head.statements().forEach(s -> {
+            then.statements().forEach(s -> {
                 s.properties().forEach(p -> {
                     if (p instanceof IsaProperty) {
                         // Get the relevant type(s)
@@ -157,17 +157,17 @@ public class Completer {
             return keyStatements;
         }
 
-        boolean matchBodyAndKeys_insertHeadAndResolution(Transaction tx, Map<Variable, Concept<?>> matchAnswerMap) {
+        boolean matchWhenAndKeys_insertThenAndResolution(Transaction tx, Map<Variable, Concept<?>> matchAnswerMap) {
             Set<Statement> keyStatements = generateKeyStatements(tx, matchAnswerMap);
 
             HashSet<Statement> toInsert = new HashSet<>(resolution);
-            HashSet<Statement> headKeyStatements = getHeadKeyStatements(tx);
-            toInsert.addAll(head.statements());
-            toInsert.addAll(headKeyStatements);
+            HashSet<Statement> thenKeyStatements = getThenKeyStatements(tx);
+            toInsert.addAll(then.statements());
+            toInsert.addAll(thenKeyStatements);
 
-            GraqlInsert query = Graql.match(body, Graql.and(keyStatements)).insert(toInsert);
+            GraqlInsert query = Graql.match(when, Graql.and(keyStatements)).insert(toInsert);
             System.out.print("\n----");
-            System.out.print("\nmaking matchBodyAndKeys_insertHeadAndResolution query:");
+            System.out.print("\nmaking matchWhenAndKeys_insertThenAndResolution query:");
             System.out.print(query);
             System.out.print("\n----");
             Map<Variable, Concept<?>> answerMap = oneAnswerFromConceptMap(tx.execute(query));
