@@ -114,12 +114,15 @@ java_test(
         "//resolution/common",
         "//resolution/complete",
         "//resolution/test:grakn-for-test",
+        "//resolution/test:load-test",
 
         # External dependencies from @graknlabs
         "@graknlabs_client_java//:client-java",
         "@graknlabs_graql//java:graql",
     ],
     data = [
+        "//resolution/test/cases/case1:schema.gql",
+        "//resolution/test/cases/case1:data.gql",
         "//resolution/test/cases/case4:schema.gql",
         "//resolution/test/cases/case4:data.gql",
         "@graknlabs_grakn_core//:assemble-linux-targz", # Make sure to pass the path in args below

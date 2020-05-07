@@ -9,7 +9,6 @@ import graql.lang.query.GraqlGet;
 import graql.lang.statement.Statement;
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -21,14 +20,13 @@ import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
 import static grakn.verification.resolution.common.Utils.getStatements;
-import static grakn.verification.resolution.common.Utils.loadGqlFile;
+import static grakn.verification.resolution.test.LoadTest.loadTestCase;
 import static org.junit.Assert.assertEquals;
 
 public class TestCompleter {
 
-    private static final String TEST_CASE = "case4";
     private static final String GRAKN_URI = "localhost:48555";
-    private static final String GRAKN_KEYSPACE = TEST_CASE;
+    private static final String GRAKN_KEYSPACE = "query_completer";
     private static GraknForTest graknForTest;
     private static GraknClient graknClient;
 
@@ -43,23 +41,6 @@ public class TestCompleter {
     @AfterClass
     public static void afterClass() throws InterruptedException, IOException, TimeoutException {
         graknForTest.stop();
-    }
-
-    @Before
-    public void before() {
-        try (GraknClient.Session session = graknClient.session(GRAKN_KEYSPACE)) {
-            try {
-                Path schemaPath = Paths.get("resolution", "test", "cases", TEST_CASE, "schema.gql").toAbsolutePath();
-                Path dataPath = Paths.get("resolution", "test", "cases", TEST_CASE, "data.gql").toAbsolutePath();
-                // Load a schema incl. rules
-                loadGqlFile(session, schemaPath);
-                // Load data
-                loadGqlFile(session, dataPath);
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.exit(1);
-            }
-        }
     }
 
     @After
@@ -96,6 +77,9 @@ public class TestCompleter {
         ));
 
         try (GraknClient.Session session = graknClient.session(GRAKN_KEYSPACE)) {
+
+            loadTestCase(session, "case4");
+
             Completer completer = new Completer(session);
             try (GraknClient.Transaction tx = session.transaction().write()) {
                 completer.loadRules(tx, SchemaManager.getAllRules(tx));
@@ -110,6 +94,34 @@ public class TestCompleter {
                 List<ConceptMap> answers = tx.execute(Graql.match(expectedResolutionStatements).get());
 
                 assertEquals(answers.size(), 1);
+            }
+        }
+    }
+
+    @Test
+    public void testDeduplicationOfInferredConcepts() {
+        try (GraknClient.Session session = graknClient.session(GRAKN_KEYSPACE)) {
+
+            loadTestCase(session, "case1");
+
+            Completer completer = new Completer(session);
+            try (GraknClient.Transaction tx = session.transaction().write()) {
+                completer.loadRules(tx, SchemaManager.getAllRules(tx));
+            }
+
+            SchemaManager.undefineAllRules(session);
+            SchemaManager.addResolutionSchema(session);
+            SchemaManager.connectResolutionSchema(session);
+            completer.complete();
+
+            try (GraknClient.Transaction tx = session.transaction().read()) {
+                GraqlGet inferredAnswersQuery = Graql.match(Graql.var("lh").isa("location-hierarchy")).get();
+                List<ConceptMap> inferredAnswers = tx.execute(inferredAnswersQuery);
+                assertEquals(6, inferredAnswers.size());
+
+                GraqlGet resolutionsQuery = Graql.match(Graql.var("res").isa("resolution")).get();
+                List<ConceptMap> resolutionAnswers = tx.execute(resolutionsQuery);
+                assertEquals(4, resolutionAnswers.size());
             }
         }
     }
