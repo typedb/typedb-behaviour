@@ -244,6 +244,35 @@ Feature: Concept Attribute Type
     Then attribute(timestamp) fails at setting supertype: rating
     Then attribute(timestamp) fails at setting supertype: name
 
+  Scenario: Attribute types can get the root type as the same value class
+    When put attribute type: is-open, value class: boolean
+    When put attribute type: age, value class: long
+    When put attribute type: rating, value class: double
+    When put attribute type: name, value class: string
+    When put attribute type: timestamp, value class: datetime
+    Then attribute(is-open) get supertype: attribute
+    Then attribute(is-open) get supertype value class: boolean
+    Then attribute(age) get supertype: attribute
+    Then attribute(age) get supertype value class: long
+    Then attribute(rating) get supertype: attribute
+    Then attribute(rating) get supertype value class: double
+    Then attribute(name) get supertype: attribute
+    Then attribute(name) get supertype value class: string
+    Then attribute(timestamp) get supertype: attribute
+    Then attribute(timestamp) get supertype value class: datetime
+    When transaction commits
+    When session opens transaction of type: read
+    Then attribute(is-open) get supertype: attribute
+    Then attribute(is-open) get supertype value class: boolean
+    Then attribute(age) get supertype: attribute
+    Then attribute(age) get supertype value class: long
+    Then attribute(rating) get supertype: attribute
+    Then attribute(rating) get supertype value class: double
+    Then attribute(name) get supertype: attribute
+    Then attribute(name) get supertype value class: string
+    Then attribute(timestamp) get supertype: attribute
+    Then attribute(timestamp) get supertype value class: datetime
+
   Scenario: Attribute types can have keys
     When put attribute type: country-code, value class: string
     When put attribute type: country-name, value class: string
