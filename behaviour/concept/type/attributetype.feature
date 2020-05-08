@@ -319,6 +319,48 @@ Feature: Concept Attribute Type
       | age     |
       | rating  |
       | name    |
+    When transaction commits
+    When session opens transaction of type: read
+    Then attribute(attribute) as(boolean) get subtypes contain:
+      | attribute |
+      | is-open   |
+    Then attribute(attribute) as(boolean) get subtypes do not contain:
+      | age       |
+      | rating    |
+      | name      |
+      | timestamp |
+    Then attribute(attribute) as(long) get subtypes contain:
+      | attribute |
+      | age       |
+    Then attribute(attribute) as(long) get subtypes do not contain:
+      | is-open   |
+      | rating    |
+      | name      |
+      | timestamp |
+    Then attribute(attribute) as(double) get subtypes contain:
+      | attribute |
+      | rating    |
+    Then attribute(attribute) as(double) get subtypes do not contain:
+      | is-open   |
+      | age       |
+      | name      |
+      | timestamp |
+    Then attribute(attribute) as(string) get subtypes contain:
+      | attribute |
+      | name      |
+    Then attribute(attribute) as(string) get subtypes do not contain:
+      | is-open   |
+      | age       |
+      | rating    |
+      | timestamp |
+    Then attribute(attribute) as(datetime) get subtypes contain:
+      | attribute |
+      | timestamp |
+    Then attribute(attribute) as(datetime) get subtypes do not contain:
+      | is-open |
+      | age     |
+      | rating  |
+      | name    |
 
   Scenario: Attribute types can have keys
     When put attribute type: country-code, value class: string
