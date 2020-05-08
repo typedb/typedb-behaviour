@@ -362,6 +362,29 @@ Feature: Concept Attribute Type
       | rating  |
       | name    |
 
+  Scenario: Attribute type root can get attribute types of any value class
+    When put attribute type: is-open, value class: boolean
+    When put attribute type: age, value class: long
+    When put attribute type: rating, value class: double
+    When put attribute type: name, value class: string
+    When put attribute type: timestamp, value class: datetime
+    Then attribute(attribute) get subtypes contain:
+      | attribute |
+      | is-open   |
+      | age       |
+      | rating    |
+      | name      |
+      | timestamp |
+    When transaction commits
+    When session opens transaction of type: read
+    Then attribute(attribute) get subtypes contain:
+      | attribute |
+      | is-open   |
+      | age       |
+      | rating    |
+      | name      |
+      | timestamp |
+
   Scenario: Attribute types can have keys
     When put attribute type: country-code, value class: string
     When put attribute type: country-name, value class: string
