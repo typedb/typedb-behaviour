@@ -151,19 +151,23 @@ Feature: Concept Attribute Type
     Then attribute(real-name) get supertype: name
     Then attribute(username) get supertype: name
     Then attribute(first-name) get supertypes contain:
+      | attribute  |
       | first-name |
       | real-name  |
       | name       |
     Then attribute(last-name) get supertypes contain:
+      | attribute |
       | last-name |
       | real-name |
       | name      |
     Then attribute(real-name) get supertypes contain:
+      | attribute |
       | real-name |
       | name      |
     Then attribute(username) get supertypes contain:
-      | username |
-      | name     |
+      | attribute |
+      | username  |
+      | name      |
     Then attribute(first-name) get subtypes contain:
       | first-name |
     Then attribute(last-name) get subtypes contain:
@@ -180,6 +184,13 @@ Feature: Concept Attribute Type
       | real-name  |
       | first-name |
       | last-name  |
+    Then attribute(attribute) get subtypes contain:
+      | attribute  |
+      | name       |
+      | username   |
+      | real-name  |
+      | first-name |
+      | last-name  |
     When transaction commits
     When session opens transaction of type: read
     Then attribute(first-name) get supertype: real-name
@@ -187,19 +198,23 @@ Feature: Concept Attribute Type
     Then attribute(real-name) get supertype: name
     Then attribute(username) get supertype: name
     Then attribute(first-name) get supertypes contain:
+      | attribute  |
       | first-name |
       | real-name  |
       | name       |
     Then attribute(last-name) get supertypes contain:
+      | attribute |
       | last-name |
       | real-name |
       | name      |
     Then attribute(real-name) get supertypes contain:
+      | attribute |
       | real-name |
       | name      |
     Then attribute(username) get supertypes contain:
-      | username |
-      | name     |
+      | attribute |
+      | username  |
+      | name      |
     Then attribute(first-name) get subtypes contain:
       | first-name |
     Then attribute(last-name) get subtypes contain:
@@ -211,6 +226,13 @@ Feature: Concept Attribute Type
     Then attribute(username) get subtypes contain:
       | username |
     Then attribute(name) get subtypes contain:
+      | name       |
+      | username   |
+      | real-name  |
+      | first-name |
+      | last-name  |
+    Then attribute(attribute) get subtypes contain:
+      | attribute  |
       | name       |
       | username   |
       | real-name  |
