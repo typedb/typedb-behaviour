@@ -178,12 +178,15 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get role(father) get supertype: parentship:parent
     Then relation(fathership) get role(child) get supertype: relation:role
     Then relation(fathership) get supertypes contain:
+      | relation   |
       | parentship |
       | fathership |
     Then relation(fathership) get role(father) get supertypes contain:
+      | relation:role     |
       | parentship:parent |
       | fathership:father |
     Then relation(fathership) get role(child) get supertypes contain:
+      | relation:role    |
       | parentship:child |
     Then relation(parentship) get subtypes contain:
       | parentship |
@@ -193,18 +196,30 @@ Feature: Concept Relation Type and Role Type
       | fathership:father |
     Then relation(parentship) get role(child) get subtypes contain:
       | parentship:child |
+    Then relation(relation) get subtypes contain:
+      | relation   |
+      | parentship |
+      | fathership |
+    Then relation(relation) get role(role) get subtypes contain:
+      | relation:role     |
+      | parentship:parent |
+      | parentship:child  |
+      | fathership:father |
     When transaction commits
     When session opens transaction of type: write
     Then relation(fathership) get supertype: parentship
     Then relation(fathership) get role(father) get supertype: parentship:parent
     Then relation(fathership) get role(child) get supertype: relation:role
     Then relation(fathership) get supertypes contain:
+      | relation   |
       | parentship |
       | fathership |
     Then relation(fathership) get role(father) get supertypes contain:
+      | relation:role     |
       | parentship:parent |
       | fathership:father |
     Then relation(fathership) get role(child) get supertypes contain:
+      | relation:role    |
       | parentship:child |
     Then relation(parentship) get subtypes contain:
       | parentship |
@@ -214,6 +229,15 @@ Feature: Concept Relation Type and Role Type
       | fathership:father |
     Then relation(parentship) get role(child) get subtypes contain:
       | parentship:child |
+    Then relation(relation) get subtypes contain:
+      | relation   |
+      | parentship |
+      | fathership |
+    Then relation(relation) get role(role) get subtypes contain:
+      | relation:role     |
+      | parentship:parent |
+      | parentship:child  |
+      | fathership:father |
     When put relation type: father-son
     When relation(father-son) set supertype: fathership
     When relation(father-son) set relates role: son as child
@@ -221,13 +245,16 @@ Feature: Concept Relation Type and Role Type
     Then relation(father-son) get role(father) get supertype: parentship:parent
     Then relation(father-son) get role(son) get supertype: parentship:child
     Then relation(father-son) get supertypes contain:
+      | relation   |
       | parentship |
       | fathership |
       | father-son |
     Then relation(father-son) get role(father) get supertypes contain:
+      | relation:role     |
       | parentship:parent |
       | fathership:father |
     Then relation(father-son) get role(son) get supertypes contain:
+      | relation:role    |
       | parentship:child |
       | father-son:son   |
     Then relation(fathership) get subtypes contain:
@@ -243,31 +270,47 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(child) get subtypes contain:
       | parentship:child |
       | father-son:son   |
+    Then relation(relation) get subtypes contain:
+      | relation   |
+      | parentship |
+      | fathership |
+    Then relation(relation) get role(role) get subtypes contain:
+      | relation:role     |
+      | parentship:parent |
+      | parentship:child  |
+      | fathership:father |
+      | father-son:son    |
     When transaction commits
     When session opens transaction of type: read
     Then relation(father-son) get supertype: fathership
     Then relation(father-son) get role(father) get supertype: parentship:parent
     Then relation(father-son) get role(son) get supertype: parentship:child
     Then relation(father-son) get supertypes contain:
+      | relation   |
       | parentship |
       | fathership |
       | father-son |
     Then relation(father-son) get role(father) get supertypes contain:
+      | relation:role     |
       | parentship:parent |
       | fathership:father |
     Then relation(father-son) get role(son) get supertypes contain:
+      | relation:role    |
       | parentship:child |
       | father-son:son   |
     Then relation(fathership) get supertype: parentship
     Then relation(fathership) get role(father) get supertype: parentship:parent
     Then relation(fathership) get role(child) get supertype: relation:role
     Then relation(fathership) get supertypes contain:
+      | relation   |
       | parentship |
       | fathership |
     Then relation(fathership) get role(father) get supertypes contain:
+      | relation:role     |
       | parentship:parent |
       | fathership:father |
     Then relation(fathership) get role(child) get supertypes contain:
+      | relation:role    |
       | parentship:child |
     Then relation(fathership) get subtypes contain:
       | fathership |
@@ -282,6 +325,16 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(child) get subtypes contain:
       | parentship:child |
       | father-son:son   |
+    Then relation(relation) get subtypes contain:
+      | relation   |
+      | parentship |
+      | fathership |
+    Then relation(relation) get role(role) get subtypes contain:
+      | relation:role     |
+      | parentship:parent |
+      | parentship:child  |
+      | fathership:father |
+      | father-son:son    |
 
   Scenario: Relation types can inherit related role types
     When put relation type: parentship
