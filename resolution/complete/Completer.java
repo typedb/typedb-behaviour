@@ -29,6 +29,7 @@ import static grakn.verification.resolution.resolve.QueryBuilder.generateKeyStat
 
 public class Completer {
 
+    private static int numInferredConcepts;
     private final GraknClient.Session session;
     private Set<Rule> rules;
 
@@ -45,7 +46,7 @@ public class Completer {
         this.rules = rules;
     }
 
-    public void complete() {
+    public int complete() {
         boolean allRulesRerun = true;
 
         while (allRulesRerun) {
@@ -58,6 +59,7 @@ public class Completer {
                 tx.commit();
             }
         }
+        return numInferredConcepts;
     }
 
     private static boolean completeRule(Transaction tx, Rule rule) {
@@ -100,9 +102,13 @@ public class Completer {
                 insertNewThenStatements.addAll(rule.then.statements());
                 insertNewThenStatements.addAll(getThenKeyStatements(tx, rule.then));
                 insertNewThenStatements.addAll(ruleInferenceStatements);
+                HashSet<Variable> insertedVars = new HashSet<>(rule.then.variables());
+                insertedVars.removeAll(rule.when.variables());
+                numInferredConcepts += insertedVars.size();
 
                 // Apply the rule, with the records of how the inference was made
-                tx.execute(Graql.match(Graql.and(matchWhenStatements)).insert(insertNewThenStatements));
+                List<ConceptMap> inserted = tx.execute(Graql.match(Graql.and(matchWhenStatements)).insert(insertNewThenStatements));
+                assert inserted.size() == 1;
                 foundResult.set(true);
             } else {
                 thenAnswers.forEach(thenAnswer -> {
@@ -129,7 +135,8 @@ public class Completer {
                             matchStatements.addAll(rule.when.statements());
                             matchStatements.addAll(rule.then.statements());
 
-                            tx.execute(Graql.match(matchStatements).insert(ruleInferenceStatements));
+                            List<ConceptMap> inserted = tx.execute(Graql.match(matchStatements).insert(ruleInferenceStatements));
+                            assert inserted.size() == 1;
                             foundResult.set(true);
                         }
 //                    }

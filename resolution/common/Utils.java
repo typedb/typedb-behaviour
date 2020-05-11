@@ -15,6 +15,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.collect.Iterables.getOnlyElement;
+
 public class Utils {
 
     public static void loadGqlFile(GraknClient.Session session, Path... gqlPath) throws IOException {
@@ -25,6 +27,17 @@ public class Utils {
                 tx.execute((GraqlQuery) Graql.parse(query));
                 tx.commit();
             }
+        }
+    }
+
+    /**
+     * Get a count of the number of instances in the KB
+     * @param session Grakn Session
+     * @return number of instances
+     */
+    public static int thingCount(GraknClient.Session session) {
+        try (GraknClient.Transaction tx = session.transaction().read()) {
+            return getOnlyElement(tx.execute(Graql.match(Graql.var("x").isa("thing")).get().count())).number().intValue();
         }
     }
 

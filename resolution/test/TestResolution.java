@@ -41,6 +41,7 @@ public class TestResolution {
 
         Resolution resolution_test = new Resolution(GRAKN_URI, schemaPath, dataPath);
         resolution_test.testQuery(inferenceQuery);
+        resolution_test.testCompleteness();
         resolution_test.close();
     }
 
@@ -52,6 +53,7 @@ public class TestResolution {
 
         Resolution resolution_test = new Resolution(GRAKN_URI, schemaPath, dataPath);
         resolution_test.testQuery(inferenceQuery);
+        resolution_test.testCompleteness();
         resolution_test.close();
     }
 
@@ -63,6 +65,7 @@ public class TestResolution {
 
         Resolution resolution_test = new Resolution(GRAKN_URI, schemaPath, dataPath);
         resolution_test.testQuery(inferenceQuery);
+        resolution_test.testCompleteness();
         resolution_test.close();
     }
 
@@ -74,6 +77,7 @@ public class TestResolution {
 
         Resolution resolution_test = new Resolution(GRAKN_URI, schemaPath, dataPath);
         resolution_test.testQuery(inferenceQuery);
+        resolution_test.testCompleteness();
         resolution_test.close();
     }
 
@@ -85,6 +89,7 @@ public class TestResolution {
 
         Resolution resolution_test = new Resolution(GRAKN_URI, schemaPath, dataPath);
         resolution_test.testQuery(inferenceQuery);
+        resolution_test.testCompleteness();
         resolution_test.close();
     }
 }
