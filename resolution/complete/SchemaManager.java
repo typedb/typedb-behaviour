@@ -3,10 +3,13 @@ package grakn.verification.resolution.complete;
 import grakn.client.GraknClient;
 import grakn.client.GraknClient.Session;
 import grakn.client.GraknClient.Transaction;
+import grakn.client.answer.ConceptMap;
 import grakn.client.concept.Rule;
+import grakn.client.concept.thing.Thing;
 import grakn.client.concept.type.AttributeType;
 import grakn.client.concept.type.RelationType;
 import grakn.client.concept.type.Role;
+import grakn.client.concept.type.Type;
 import graql.lang.Graql;
 import graql.lang.query.GraqlGet;
 
@@ -16,6 +19,7 @@ import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static grakn.verification.resolution.common.Utils.loadGqlFile;
 
@@ -114,5 +118,29 @@ public class SchemaManager {
             });
             tx.commit();
         }
+    }
+
+    public static void enforceAllTypesHaveKeys(Session session) {
+        Transaction tx = session.transaction().read();
+
+        GraqlGet instancesQuery = Graql.match(Graql.var("x").sub("thing"),
+                Graql.not(Graql.var("x").sub("@has-attribute")),
+                Graql.not(Graql.var("x").sub("@key-attribute")),
+                Graql.not(Graql.var("x").sub("attribute")),
+                Graql.not(Graql.var("x").type("entity")),
+                Graql.not(Graql.var("x").type("relation")),
+                Graql.not(Graql.var("x").type("thing"))
+        ).get();
+        Stream<ConceptMap> answers = tx.stream(instancesQuery);
+
+        answers.forEach(ans -> {
+            Type<?, ?> type = ans.get("x").asType();
+            Type.Remote<?, ?> remoteType = type.asRemote(tx);
+            if (!remoteType.isAbstract() && remoteType.keys().collect(Collectors.toSet()).isEmpty()) {
+                throw new RuntimeException(String.format("Type \"%s\" doesn't have any keys declared. Keys are required " +
+                        "for all entity types and relation types for resolution testing", type.label().toString()));
+            }
+        });
+        tx.close();
     }
 }

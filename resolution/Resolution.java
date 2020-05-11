@@ -5,7 +5,6 @@ import grakn.client.GraknClient.Session;
 import grakn.client.GraknClient.Transaction;
 import grakn.client.answer.ConceptMap;
 import grakn.verification.resolution.complete.Completer;
-import grakn.verification.resolution.complete.InstanceManager;
 import grakn.verification.resolution.complete.SchemaManager;
 import grakn.verification.resolution.resolve.QueryBuilder;
 import graql.lang.query.GraqlGet;
@@ -50,7 +49,7 @@ public class Resolution {
         }
 
         SchemaManager.undefineAllRules(completeSession);
-        InstanceManager.enforceAllInstancesHaveKeys(completeSession);
+        SchemaManager.enforceAllTypesHaveKeys(completeSession);
         SchemaManager.addResolutionSchema(completeSession);
         SchemaManager.connectResolutionSchema(completeSession);
         initialThingCount = thingCount(completeSession);

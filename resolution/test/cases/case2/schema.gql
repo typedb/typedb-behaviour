@@ -34,6 +34,7 @@ location-hierarchy sub relation,
     relates location-hierarchy_subordinate;
 
 location sub entity,
+    abstract,
     plays location-hierarchy_superior,
     plays location-hierarchy_subordinate;
 
