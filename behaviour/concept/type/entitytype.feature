@@ -235,6 +235,20 @@ Feature: Concept Entity Type
       | email    |
       | username |
 
+  Scenario: Entity types cannot have keys of attributes that are not keyable
+    When put attribute type: is-open, value class: boolean
+    When put attribute type: age, value class: long
+    When put attribute type: rating, value class: double
+    When put attribute type: name, value class: string
+    When put attribute type: timestamp, value class: datetime
+    When put entity type: person
+    When entity(person) set key attribute: age
+    When entity(person) set key attribute: name
+    When entity(person) set key attribute: timestamp
+    When entity(person) set key attribute: timestamp
+    When entity(person) fails at setting key attribute: is-open
+    When entity(person) fails at setting key attribute: rating
+
   Scenario: Entity types can have attributes
     When put attribute type: name, value class: string
     When put attribute type: age, value class: long

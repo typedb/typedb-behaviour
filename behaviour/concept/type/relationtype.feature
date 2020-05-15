@@ -428,6 +428,19 @@ Feature: Concept Relation Type and Role Type
       | license     |
       | certificate |
 
+  Scenario: Relation types cannot have keys of attributes that are not keyable
+    When put attribute type: is-permanent, value class: boolean
+    When put attribute type: contract-years, value class: long
+    When put attribute type: salary, value class: double
+    When put attribute type: reference, value class: string
+    When put attribute type: start-date, value class: datetime
+    When put relation type: employment
+    When relation(employment) set key attribute: contract-years
+    When relation(employment) set key attribute: reference
+    When relation(employment) set key attribute: start-date
+    When relation(employment) fails at setting key attribute: is-permanent
+    When relation(employment) fails at setting key attribute: salary
+
   Scenario: Relation types can have attributes
     When put attribute type: date, value class: datetime
     When put attribute type: religion, value class: string
