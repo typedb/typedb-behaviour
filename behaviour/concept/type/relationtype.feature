@@ -400,7 +400,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) fails at setting relates role: father as parent
 
   Scenario: Relation types can have keys
-    When put attribute type: license, value class: string
+    When put attribute type: license, value type: string
     When put relation type: marriage
     When relation(marriage) set relates role: spouse
     When relation(marriage) set key attribute: license
@@ -412,8 +412,8 @@ Feature: Concept Relation Type and Role Type
       | license |
 
   Scenario: Relation types can remove keys
-    When put attribute type: license, value class: string
-    When put attribute type: certificate, value class: string
+    When put attribute type: license, value type: string
+    When put attribute type: certificate, value type: string
     When put relation type: marriage
     When relation(marriage) set relates role: spouse
     When relation(marriage) set key attribute: license
@@ -429,11 +429,11 @@ Feature: Concept Relation Type and Role Type
       | certificate |
 
   Scenario: Relation types cannot have keys of attributes that are not keyable
-    When put attribute type: is-permanent, value class: boolean
-    When put attribute type: contract-years, value class: long
-    When put attribute type: salary, value class: double
-    When put attribute type: reference, value class: string
-    When put attribute type: start-date, value class: datetime
+    When put attribute type: is-permanent, value type: boolean
+    When put attribute type: contract-years, value type: long
+    When put attribute type: salary, value type: double
+    When put attribute type: reference, value type: string
+    When put attribute type: start-date, value type: datetime
     When put relation type: employment
     When relation(employment) set key attribute: contract-years
     When relation(employment) set key attribute: reference
@@ -442,8 +442,8 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) fails at setting key attribute: salary
 
   Scenario: Relation types can have attributes
-    When put attribute type: date, value class: datetime
-    When put attribute type: religion, value class: string
+    When put attribute type: date, value type: datetime
+    When put attribute type: religion, value type: string
     When put relation type: marriage
     When relation(marriage) set relates role: spouse
     When relation(marriage) set has attribute: date
@@ -458,8 +458,8 @@ Feature: Concept Relation Type and Role Type
       | religion |
 
   Scenario: Relation types can remove attributes
-    When put attribute type: date, value class: datetime
-    When put attribute type: religion, value class: string
+    When put attribute type: date, value type: datetime
+    When put attribute type: religion, value type: string
     When put relation type: marriage
     When relation(marriage) set relates role: spouse
     When relation(marriage) set has attribute: date
@@ -475,10 +475,10 @@ Feature: Concept Relation Type and Role Type
       | religion |
 
   Scenario: Relation types can have keys and attributes
-    When put attribute type: license, value class: string
-    When put attribute type: certificate, value class: string
-    When put attribute type: date, value class: datetime
-    When put attribute type: religion, value class: string
+    When put attribute type: license, value type: string
+    When put attribute type: certificate, value type: string
+    When put attribute type: date, value type: datetime
+    When put attribute type: religion, value type: string
     When put relation type: marriage
     When relation(marriage) set key attribute: license
     When relation(marriage) set key attribute: certificate
@@ -504,10 +504,10 @@ Feature: Concept Relation Type and Role Type
       | religion    |
 
   Scenario: Relation types can inherit keys and attributes
-    When put attribute type: employment-reference, value class: string
-    When put attribute type: employment-hours, value class: long
-    When put attribute type: contractor-reference, value class: string
-    When put attribute type: contractor-hours, value class: long
+    When put attribute type: employment-reference, value type: string
+    When put attribute type: employment-hours, value type: long
+    When put attribute type: contractor-reference, value type: string
+    When put attribute type: contractor-hours, value type: long
     When put relation type: employment
     When relation(employment) set relates role: employee
     When relation(employment) set relates role: employer
@@ -535,8 +535,8 @@ Feature: Concept Relation Type and Role Type
       | contractor-reference |
       | employment-hours     |
       | contractor-hours     |
-    When put attribute type: parttime-reference, value class: string
-    When put attribute type: parttime-hours, value class: long
+    When put attribute type: parttime-reference, value type: string
+    When put attribute type: parttime-hours, value type: long
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
     When relation(parttime-employment) set key attribute: parttime-reference
@@ -575,11 +575,11 @@ Feature: Concept Relation Type and Role Type
       | parttime-hours       |
 
   Scenario: Relation types can inherit keys and attributes that are subtypes of each other
-    When put attribute type: employment-reference, value class: string
-    When put attribute type: employment-hours, value class: long
-    When put attribute type: contractor-reference, value class: string
+    When put attribute type: employment-reference, value type: string
+    When put attribute type: employment-hours, value type: long
+    When put attribute type: contractor-reference, value type: string
     When attribute(contractor-reference) set supertype: employment-reference
-    When put attribute type: contractor-hours, value class: long
+    When put attribute type: contractor-hours, value type: long
     When attribute(contractor-hours) set supertype: employment-hours
     When put relation type: employment
     When relation(employment) set relates role: employee
@@ -608,9 +608,9 @@ Feature: Concept Relation Type and Role Type
       | contractor-reference |
       | employment-hours     |
       | contractor-hours     |
-    When put attribute type: parttime-reference, value class: string
+    When put attribute type: parttime-reference, value type: string
     When attribute(parttime-reference) set supertype: contractor-reference
-    When put attribute type: parttime-hours, value class: long
+    When put attribute type: parttime-hours, value type: long
     When attribute(parttime-hours) set supertype: contractor-hours
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
@@ -650,11 +650,11 @@ Feature: Concept Relation Type and Role Type
       | parttime-hours       |
 
   Scenario: Relation types can override inherited keys and attributes
-    When put attribute type: employment-reference, value class: string
-    When put attribute type: employment-hours, value class: long
-    When put attribute type: contractor-reference, value class: string
+    When put attribute type: employment-reference, value type: string
+    When put attribute type: employment-hours, value type: long
+    When put attribute type: contractor-reference, value type: string
     When attribute(contractor-reference) set supertype: employment-reference
-    When put attribute type: contractor-hours, value class: long
+    When put attribute type: contractor-hours, value type: long
     When attribute(contractor-hours) set supertype: employment-hours
     When put relation type: employment
     When relation(employment) set relates role: employee
@@ -687,9 +687,9 @@ Feature: Concept Relation Type and Role Type
     Then relation(contractor-employment) get has attributes do not contain:
       | employment-reference |
       | employment-hours     |
-    When put attribute type: parttime-reference, value class: string
+    When put attribute type: parttime-reference, value type: string
     When attribute(parttime-reference) set supertype: contractor-reference
-    When put attribute type: parttime-hours, value class: long
+    When put attribute type: parttime-hours, value type: long
     When attribute(parttime-hours) set supertype: contractor-hours
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
@@ -727,8 +727,8 @@ Feature: Concept Relation Type and Role Type
       | contractor-hours     |
 
   Scenario: Relation types can override inherited attributes as keys
-    When put attribute type: employment-reference, value class: string
-    When put attribute type: contractor-reference, value class: string
+    When put attribute type: employment-reference, value type: string
+    When put attribute type: contractor-reference, value type: string
     When attribute(contractor-reference) set supertype: employment-reference
     When put relation type: employment
     When relation(employment) set relates role: employer
@@ -757,22 +757,22 @@ Feature: Concept Relation Type and Role Type
       | employment-reference |
 
   Scenario: Relation types cannot redeclare keys as attributes
-    When put attribute type: license, value class: string
+    When put attribute type: license, value type: string
     When put relation type: marriage
     When relation(marriage) set relates role: spouse
     When relation(marriage) set key attribute: license
     Then relation(marriage) fails at setting has attribute: license
 
   Scenario: Relation types cannot redeclare attributes as keys
-    When put attribute type: date, value class: datetime
+    When put attribute type: date, value type: datetime
     When put relation type: marriage
     When relation(marriage) set relates role: spouse
     When relation(marriage) set has attribute: date
     Then relation(marriage) fails at setting key attribute: date
 
   Scenario: Relation types cannot redeclare inherited keys and attributes
-    When put attribute type: employment-reference, value class: string
-    When put attribute type: employment-hours, value class: long
+    When put attribute type: employment-reference, value type: string
+    When put attribute type: employment-hours, value type: long
     When put relation type: employment
     When relation(employment) set relates role: employee
     When relation(employment) set relates role: employer
@@ -784,11 +784,11 @@ Feature: Concept Relation Type and Role Type
     Then relation(contractor-employment) fails at setting has attribute: employment-hours
 
   Scenario: Relation types cannot redeclare inherited/overridden key/has attribute types
-    When put attribute type: employment-reference, value class: string
-    When put attribute type: employment-hours, value class: long
-    When put attribute type: contractor-reference, value class: string
+    When put attribute type: employment-reference, value type: string
+    When put attribute type: employment-hours, value type: long
+    When put attribute type: contractor-reference, value type: string
     When attribute(contractor-reference) set supertype: employment-reference
-    When put attribute type: contractor-hours, value class: long
+    When put attribute type: contractor-hours, value type: long
     When attribute(contractor-hours) set supertype: employment-hours
     When put relation type: employment
     When relation(employment) set relates role: employee
@@ -806,11 +806,11 @@ Feature: Concept Relation Type and Role Type
     Then relation(parttime-employment) fails at setting has attribute: contractor-hours
 
   Scenario: Relation types cannot override declared keys and attributes
-    When put attribute type: reference, value class: string
-    When put attribute type: social-security-number, value class: string
+    When put attribute type: reference, value type: string
+    When put attribute type: social-security-number, value type: string
     When attribute(social-security-number) set supertype: reference
-    When put attribute type: hours, value class: long
-    When put attribute type: max-hours, value class: long
+    When put attribute type: hours, value type: long
+    When put attribute type: max-hours, value type: long
     When attribute(max-hours) set supertype: hours
     When put relation type: employment
     When relation(employment) set relates role: employee
@@ -821,8 +821,8 @@ Feature: Concept Relation Type and Role Type
     Then relation(employment) fails at setting has attribute: max-hours as hours
 
   Scenario: Relation types cannot override inherited keys as attributes
-    When put attribute type: employment-reference, value class: string
-    When put attribute type: contractor-reference, value class: string
+    When put attribute type: employment-reference, value type: string
+    When put attribute type: contractor-reference, value type: string
     When attribute(contractor-reference) set supertype: employment-reference
     When put relation type: employment
     When relation(employment) set relates role: employer
@@ -833,10 +833,10 @@ Feature: Concept Relation Type and Role Type
     Then relation(contractor-employment) fails at setting has attribute: contractor-reference as employment-reference
 
   Scenario: Relation types cannot override inherited keys and attributes other than with their subtypes
-    When put attribute type: employment-reference, value class: string
-    When put attribute type: employment-hours, value class: long
-    When put attribute type: contractor-reference, value class: string
-    When put attribute type: contractor-hours, value class: long
+    When put attribute type: employment-reference, value type: string
+    When put attribute type: employment-hours, value type: long
+    When put attribute type: contractor-reference, value type: string
+    When put attribute type: contractor-hours, value type: long
     When put relation type: employment
     When relation(employment) set relates role: employee
     When relation(employment) set relates role: employer
