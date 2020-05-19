@@ -253,8 +253,6 @@ Feature: Graql Define Query
       | x     | r           |
       | CHILD | EMPLOYEE    |
       | CHILD | EMPLOYER    |
-      | CHILD | NAME_OWNER  |
-      | CHILD | EMAIL_OWNER |
 
 
   @ignore
