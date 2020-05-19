@@ -68,49 +68,7 @@ Feature: Graql Undefine Query
       """
       match $x type child; $x plays $role; get; 
       """
-    Then concept identifiers are
-      |             | check | value            |
-      | NAME_OWNER  | label | @has-name-owner  |
-      | EMAIL_OWNER | label | @key-email-owner |
-      | CHILD       | label | child            |
-    Then uniquely identify answer concepts
-      | x     | role        |
-      | CHILD | NAME_OWNER  |
-      | CHILD | EMAIL_OWNER |
-
-
-  @ignore
-  # TODO readd when behaves correctly
-  Scenario: undefine an attribute subtype removes implicit ownership relation from hierarchy
-    Given graql define
-      """
-      define
-      first-name sub name;
-      person has first-name;
-      """
-    When get answers of graql query
-      """
-      match $x sub @has-name; get;
-      """
-    When uniquely identify answer concepts
-      | x               |
-      | @has-name       |
-      | @has-first-name |
-    Then graql undefine
-      """
-      undefine first-name sub name;
-      """
-    Then get answers of graql query
-      """
-      match $x sub @has-name; get; 
-      """
-    Then concept identifiers are
-      |          | check | value     |
-      | HAS_NAME | label | @has-name |
-    When uniquely identify answer concepts
-      | x        |
-      | HAS_NAME |
-
+    Then answer size is: 0
 
 
   # TODO is this expected to hold?

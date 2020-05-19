@@ -248,8 +248,6 @@ Feature: Graql Define Query
       |             | check | value            |
       | EMPLOYEE    | label | employee         |
       | EMPLOYER    | label | employer         |
-      | NAME_OWNER  | label | @has-name-owner  |
-      | EMAIL_OWNER | label | @key-email-owner |
       | CHILD       | label | child            |
     Then uniquely identify answer concepts
       | x     | r           |
@@ -347,55 +345,6 @@ Feature: Graql Define Query
   Scenario: define a rule creates a rule (?)
 
   Scenario: define a sub-role using 'as' is visible from children (?)
-
-
-  Scenario: define an attribute key- and owner-ship creates the implicit attribute key/ownership relation types
-    When get answers of graql query
-      """
-      match $x sub relation; get; 
-      """
-    Then concept identifiers are
-      |           | check | value          |
-      | REL       | label | relation       |
-      | EMP       | label | employment     |
-      | HAS_ATTR  | label | @has-attribute |
-      | HAS_NAME  | label | @has-name      |
-      | KEY_ATTR  | label | @key-attribute |
-      | KEY_EMAIL | label | @key-email     |
-    Then uniquely identify answer concepts
-      | x         |
-      | REL       |
-      | EMP       |
-      | HAS_ATTR  |
-      | HAS_NAME  |
-      | KEY_ATTR  |
-      | KEY_EMAIL |
-
-
-  Scenario: implicit attribute ownerships exist in a hierarchy matching attribute hierarchy
-    Given graql define
-      """
-      define first-name sub name; person sub entity, has first-name;
-      """
-    Given the integrity is validated
-
-    When get answers of graql query
-      """
-      match $child sub $super; $super sub @has-attribute; get; 
-      """
-    Then concept identifiers are
-      |        | check | value           |
-      | ATTR   | label | @has-attribute  |
-      | NAME   | label | @has-name       |
-      | F_NAME | label | @has-first-name |
-    Then uniquely identify answer concepts
-      | child  | super  |
-      | ATTR   | ATTR   |
-      | NAME   | ATTR   |
-      | F_NAME | ATTR   |
-      | NAME   | NAME   |
-      | F_NAME | NAME   |
-      | F_NAME | F_NAME |
 
   Scenario: define a relation with no related roles throws on commit
 
