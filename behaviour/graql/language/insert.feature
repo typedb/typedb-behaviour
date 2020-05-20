@@ -260,7 +260,6 @@ Feature: Graql Insert Query
 
   Scenario: extend relation with duplicate role player
 
-
   Scenario: inserting duplicate keys throws on commit (? or at insert)
 
   Scenario: inserting disallowed role being played throws on commit (? or at insert)
