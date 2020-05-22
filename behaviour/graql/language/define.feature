@@ -479,10 +479,14 @@ Feature: Graql Define Query
       | EMP |
       | PTT |
 
-    # TODO - should employee role be retrieving part-timer as well?
+    # TODO - should employee role be retrieving part-timer as well? yes
 
     # Then query 1 has 2 answers
     # And answers of query 1 satisfy: match $x sub employment; get;
+
+
+  # @ignore
+  Scenario: define a sub-role using 'as' is visible from children (?)
 
 
   Scenario: define relation subtype inherits 'plays' from its parent type
@@ -650,7 +654,7 @@ Feature: Graql Define Query
       | MEM |
 
 
-  Scenario: define concrete subtype of abstract entity creates child of its parent type
+  Scenario: define concrete subtype of abstract relation creates child of its parent type
     Given graql define
       """
       define
@@ -1080,68 +1084,12 @@ Feature: Graql Define Query
 
   Scenario: define a type as abstract errors if has non-abstract parent types (?)
 
-  Scenario: define a rule creates a rule (?)
 
-  Scenario: define a sub-role using 'as' is visible from children (?)
+  #########
+  # RULES #
+  #########
 
-
-  Scenario: define an attribute key- and owner-ship creates the implicit attribute key/ownership relation types
-    When get answers of graql query
-      """
-      match $x sub relation; get; 
-      """
-    Then concept identifiers are
-      |           | check | value                          |
-      | REL       | label | relation                       |
-      | EMP       | label | employment                     |
-      | INC       | label | income                         |
-      | HAS_ATTR  | label | @has-attribute                 |
-      | HAS_NAME  | label | @has-name                      |
-      | HAS_SDATE | label | @has-start-date                |
-      | KEY_ATTR  | label | @key-attribute                 |
-      | KEY_EMAIL | label | @key-email                     |
-      | KEY_EMREF | label | @key-employment-reference-code |
-    Then uniquely identify answer concepts
-      | x         |
-      | REL       |
-      | EMP       |
-      | INC       |
-      | HAS_ATTR  |
-      | HAS_NAME  |
-      | HAS_SDATE |
-      | KEY_ATTR  |
-      | KEY_EMAIL |
-      | KEY_EMREF |
-
-
-  Scenario: implicit attribute ownerships exist in a hierarchy matching attribute hierarchy
-    Given graql define
-      """
-      define first-name sub name; person sub entity, has first-name;
-      """
-    Given the integrity is validated
-
-    When get answers of graql query
-      """
-      match $child sub $super; $super sub @has-attribute; get; 
-      """
-    Then concept identifiers are
-      |        | check | value           |
-      | ATTR   | label | @has-attribute  |
-      | NAME   | label | @has-name       |
-      | F_NAME | label | @has-first-name |
-      | S_DATE | label | @has-start-date |
-    Then uniquely identify answer concepts
-      | child  | super  |
-      | ATTR   | ATTR   |
-      | NAME   | ATTR   |
-      | F_NAME | ATTR   |
-      | S_DATE | ATTR   |
-      | NAME   | NAME   |
-      | F_NAME | NAME   |
-      | F_NAME | F_NAME |
-      | S_DATE | S_DATE |
-
+  Scenario: define a rule creates a rule
 
   Scenario: define a rule with nested negation throws on commit
 
@@ -1154,4 +1102,8 @@ Feature: Graql Define Query
   Scenario: define a non-insertable `then` throws on commit (eg. missing specific roles, or attribute value)
 
   Scenario: define a rule causing a loop throws on commit (eg. conclusion is negated in the `when`)
+
+  #########################
+  # TODO: SCHEMA MUTATION #
+  #########################
 
