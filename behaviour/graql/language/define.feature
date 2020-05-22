@@ -673,7 +673,7 @@ Feature: Graql Define Query
       | GYM |
 
 
-  Scenario: define abstract subtype of abstract entity creates child of its parent type
+  Scenario: define abstract subtype of abstract relation creates child of its parent type
     Given graql define
       """
       define
@@ -817,7 +817,7 @@ Feature: Graql Define Query
       """
 
 
-  @Ignore
+  @ignore
   # re-enable when overriding an attribute's 'value' is forbidden
   Scenario: define attribute subtype throws if you try to override 'value'
     Then graql define throws
@@ -850,16 +850,235 @@ Feature: Graql Define Query
       define name-in-binary sub attribute, value long, regex "^(0|1)+$";
       """
 
+  Scenario: define attribute subtype inherits 'plays' from its parent type
+    Given graql define
+      """
+      define
+      car sub entity, plays listed-car;
+      car-sales-listing sub relation, relates listed-car, relates available-colour;
+      colour sub attribute, value string, plays available-colour;
+      grayscale-colour sub colour;
+      """
+    Given the integrity is validated
 
-  Scenario: define attribute subtype inherits 'plays' from supertypes
+    When get answers of graql query
+      """
+      match $x plays available-colour; get;
+      """
+    Then concept identifiers are
+      |     | check | value            |
+      | COL | label | colour           |
+      | GRC | label | grayscale-colour |
+    Then uniquely identify answer concepts
+      | x   |
+      | COL |
+      | GRC |
 
-  Scenario: define attribute subtype inherits 'has' from supertypes
 
-  Scenario: define attribute subtype inherits 'key' from supertypes
+  Scenario: define attribute subtype inherits 'plays' from all of its supertypes
+    Given graql define
+      """
+      define
+      person plays contact-person;
+      phone-contact sub relation, relates contact-person, relates contact-phone-number;
+      phone-number sub attribute, value string, plays contact-phone-number;
+      uk-phone-number sub phone-number;
+      uk-landline-number sub uk-phone-number;
+      uk-premium-landline-number sub uk-landline-number;
+      """
+    Given the integrity is validated
+
+    When get answers of graql query
+      """
+      match $x plays contact-phone-number; get;
+      """
+    Then concept identifiers are
+      |     | check | value                      |
+      | PHN | label | phone-number               |
+      | UKP | label | uk-phone-number            |
+      | UKL | label | uk-landline-number         |
+      | UPM | label | uk-premium-landline-number |
+    Then uniquely identify answer concepts
+      | x   |
+      | PHN |
+      | UKP |
+      | UKL |
+      | UPM |
+
+
+  Scenario: define attribute subtype inherits 'has' from its parent type
+    Given graql define
+      """
+      define
+      brightness sub attribute, value double;
+      colour sub attribute, value string, has brightness;
+      grayscale-colour sub colour;
+      """
+    Given the integrity is validated
+
+    When get answers of graql query
+      """
+      match $x has brightness; get;
+      """
+    Then concept identifiers are
+      |     | check | value            |
+      | COL | label | colour           |
+      | GRC | label | grayscale-colour |
+    Then uniquely identify answer concepts
+      | x   |
+      | COL |
+      | GRC |
+
+
+  Scenario: define attribute subtype inherits 'has' from all of its supertypes
+    Given graql define
+      """
+      define
+      country-calling-code sub attribute, value string;
+      phone-number sub attribute, value string, has country-calling-code;
+      uk-phone-number sub phone-number;
+      uk-landline-number sub uk-phone-number;
+      uk-premium-landline-number sub uk-landline-number;
+      """
+    Given the integrity is validated
+
+    When get answers of graql query
+      """
+      match $x has country-calling-code; get;
+      """
+    Then concept identifiers are
+      |     | check | value                      |
+      | PHN | label | phone-number               |
+      | UKP | label | uk-phone-number            |
+      | UKL | label | uk-landline-number         |
+      | UPM | label | uk-premium-landline-number |
+    Then uniquely identify answer concepts
+      | x   |
+      | PHN |
+      | UKP |
+      | UKL |
+      | UPM |
+
+
+  Scenario: define attribute subtype inherits 'key' from its parent type
+    Given graql define
+      """
+      define
+      hex-value sub attribute, value string;
+      colour sub attribute, value string, key hex-value;
+      grayscale-colour sub colour;
+      """
+    Given the integrity is validated
+
+    When get answers of graql query
+      """
+      match $x key hex-value; get;
+      """
+    Then concept identifiers are
+      |     | check | value            |
+      | COL | label | colour           |
+      | GRC | label | grayscale-colour |
+    Then uniquely identify answer concepts
+      | x   |
+      | COL |
+      | GRC |
+
+
+  Scenario: define attribute subtype inherits 'key' from all of its supertypes
+    Given graql define
+      """
+      define
+      hex-value sub attribute, value string;
+      colour sub attribute, value string, key hex-value;
+      dark-colour sub colour;
+      dark-red-colour sub dark-colour;
+      very-dark-red-colour sub dark-red-colour;
+      """
+    Given the integrity is validated
+
+    When get answers of graql query
+      """
+      match $x key hex-value; get;
+      """
+    Then concept identifiers are
+      |     | check | value                |
+      | COL | label | colour               |
+      | DRK | label | dark-colour          |
+      | DKR | label | dark-red-colour      |
+      | VDR | label | very-dark-red-colour |
+    Then uniquely identify answer concepts
+      | x   |
+      | COL |
+      | DRK |
+      | DKR |
+      | VDR |
+
+
+  Scenario: define abstract attribute type creates a type
+    Given graql define
+      """
+      define number-of-limbs sub attribute, abstract, value long;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x type number-of-limbs; get;
+      """
+    Then concept identifiers are
+      |     | check | value           |
+      | NOL | label | number-of-limbs |
+    Then uniquely identify answer concepts
+      | x   |
+      | NOL |
+
+
+  Scenario: define concrete subtype of abstract attribute creates child of its parent type
+    Given graql define
+      """
+      define
+      number-of-limbs sub attribute, abstract, value long;
+      number-of-legs sub number-of-limbs;
+      """
+    Given the integrity is validated
+
+    When get answers of graql query
+      """
+      match $x sub number-of-limbs; get;
+      """
+    Then concept identifiers are
+      |     | check | value           |
+      | NOL | label | number-of-limbs |
+      | NLE | label | number-of-legs  |
+    Then uniquely identify answer concepts
+      | x   |
+      | NOL |
+      | NLE |
+
+
+  Scenario: define abstract subtype of abstract attribute creates child of its parent type
+    Given graql define
+      """
+      define
+      number-of-limbs sub attribute, abstract, value long;
+      number-of-artificial-limbs sub number-of-limbs, abstract;
+      """
+    Given the integrity is validated
+
+    When get answers of graql query
+      """
+      match $x sub number-of-limbs; get;
+      """
+    Then concept identifiers are
+      |     | check | value                      |
+      | NOL | label | number-of-limbs            |
+      | NAL | label | number-of-artificial-limbs |
+    Then uniquely identify answer concepts
+      | x   |
+      | NOL |
+      | NAL |
+
 
   Scenario: define a type as abstract errors if has non-abstract parent types (?)
-
-  Scenario: define a type as abstract creates an abstract type
 
   Scenario: define a rule creates a rule (?)
 
