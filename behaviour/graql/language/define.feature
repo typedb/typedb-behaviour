@@ -32,7 +32,7 @@ Feature: Graql Define Query
 
       name sub attribute, value string;
       email sub attribute, value string;
-      start-date sub attribute, value date;
+      start-date sub attribute, value datetime;
       employment-reference-code sub attribute, value string;
       """
     Given the integrity is validated
@@ -1078,12 +1078,10 @@ Feature: Graql Define Query
       | NAL |
 
 
-  Scenario: define a type as abstract errors if has non-abstract parent types (?)
-
-
   #########
   # RULES #
   #########
+
 
   Scenario: define a rule creates a rule
 
@@ -1098,6 +1096,23 @@ Feature: Graql Define Query
   Scenario: define a non-insertable `then` throws on commit (eg. missing specific roles, or attribute value)
 
   Scenario: define a rule causing a loop throws on commit (eg. conclusion is negated in the `when`)
+
+
+  ##################
+  # ABSTRACT TYPES #
+  ##################
+
+
+  @ignore
+  # re-enable when concrete types are not allowed to have abstract subtypes
+  Scenario: define abstract subtype of concrete entity throws an error
+    Then graql define throws
+      """
+      define
+      exception sub entity;
+      grakn-exception sub exception, abstract;
+      """
+
 
   #########################
   # TODO: SCHEMA MUTATION #
