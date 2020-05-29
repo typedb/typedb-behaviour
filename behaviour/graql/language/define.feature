@@ -1086,20 +1086,344 @@ Feature: Graql Define Query
   # RULES #
   #########
 
-
   Scenario: define a rule creates a rule
+    Given graql define
+      """
+      define
+      nickname sub name;
+      person has nickname;
+      robert-has-nickname-bob sub rule,
+      when {
+        $p isa person, has name "Robert";
+      }, then {
+        $p has nickname "Bob";
+      };
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x sub rule; get;
+      """
+    Then concept identifiers are
+      |     | check | value                   |
+      | BOB | label | robert-has-nickname-bob |
+      | RUL | label | rule                    |
+    Then uniquely identify answer concepts
+      | x   |
+      | BOB |
+      | RUL |
 
+
+  Scenario: define a rule with no `when` clause throws
+    Then graql define throws
+      """
+      define
+      nickname sub name;
+      person has nickname;
+      has-nickname-bob sub rule,
+      then {
+        $p has nickname "Bob";
+      };
+      """
+
+
+  Scenario: define a rule with no `then` clause throws
+    Then graql define throws
+      """
+      define
+      nickname sub name;
+      person has nickname;
+      robert sub rule,
+      when {
+        $p has name "Robert";
+      };
+      """
+
+
+  Scenario: define a rule with an empty `when` clause throws
+    Then graql define throws
+      """
+      define
+      nickname sub name;
+      person has nickname;
+      has-nickname-bob sub rule,
+      when {
+      }, then {
+        $p has nickname "Bob";
+      };
+      """
+
+
+  Scenario: define a rule with an empty `then` clause throws
+    Then graql define throws
+      """
+      define
+      nickname sub name;
+      person has nickname;
+      robert sub rule,
+      when {
+        $p has name "Robert";
+      }, then {
+      };
+      """
+
+
+  Scenario: define rule with negation using a bound variable creates a rule
+    Given graql define
+      """
+      define
+      only-child sub attribute, value boolean;
+      siblings sub relation, relates sibling;
+      person plays sibling, has only-child;
+      only-child-rule sub rule,
+      when {
+        $p isa person;
+        not {
+          (sibling: $p, sibling: $p2) isa siblings;
+        };
+      }, then {
+        $p has only-child true;
+      };
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x sub rule; get;
+      """
+    Then concept identifiers are
+      |     | check | value           |
+      | ONL | label | only-child-rule |
+      | RUL | label | rule            |
+    Then uniquely identify answer concepts
+      | x   |
+      | ONL |
+      | RUL |
+
+
+  # TODO: better scenario description? what exactly does 'unbound negated pattern variable' mean?
+  Scenario: define a rule with unbound negated pattern variables throws
+    Then graql define throws
+      """
+      define
+      has-robert sub attribute, value boolean;
+      register sub entity, has has-robert;
+      register-has-no-robert sub rule,
+      when {
+        $register isa register;
+        not {
+          $p isa person, has name "Robert";
+        };
+      }, then {
+        $register has has-robert false;
+      };
+      """
+
+
+  @ignore
+  # re-enable when all rules with nested negations throw on commit
   Scenario: define a rule with nested negation throws on commit
+    Given graql define
+      """
+      define
+      nickname sub name;
+      person has nickname;
+      """
+    Given the integrity is validated
+    Then graql define throws
+      """
+      define
+      robert-doesnt-not-have-nickname-bob sub rule,
+      when {
+        not {
+          not {
+            $p has name "Robert";
+          };
+        };
+      }, then {
+        $p has nickname "Bob";
+      };
+      """
+
 
   Scenario: define a rule with two conclusions throws on commit
+    Given graql define
+      """
+      define
+      nickname sub name;
+      person has nickname;
+      """
+    Given the integrity is validated
+    Then graql define throws
+      """
+      define
+      robert-has-nicknames-bob-and-bobby sub rule,
+      when {
+        $p has name "Robert";
+      }, then {
+        $p has nickname "Bob";
+        $p has nickname "Bobby";
+      };
+      """
+
+
+  Scenario: define a rule with conjunction creates a rule
+    Given graql define
+      """
+      define
+      person plays named-robert;
+      both-named-robert sub relation, relates named-robert;
+      two-roberts-are-both-named-robert sub rule,
+      when {
+        $p isa person, has name "Robert";
+        $p2 isa person, has name "Robert";
+      }, then {
+        (named-robert: $p, named-robert: $p2) isa both-named-robert;
+      };
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x sub rule; get;
+      """
+    Then concept identifiers are
+      |     | check | value                             |
+      | BOB | label | two-roberts-are-both-named-robert |
+      | RUL | label | rule                              |
+    Then uniquely identify answer concepts
+      | x   |
+      | BOB |
+      | RUL |
+
 
   Scenario: define a rule with disjunction throws on commit
+    Given graql define
+      """
+      define
+      nickname sub name;
+      person has nickname;
+      """
+    Given the integrity is validated
+    Then graql define throws
+      """
+      define
+      sophie-and-fiona-have-nickname-fi sub rule,
+      when {
+        {$p has name "Sophie";} or {$p has name "Fiona";};
+      }, then {
+        $p has nickname "Fi";
+      };
+      """
+
 
   Scenario: define rule with an unbound variable in the `then` throws on commit
+    Given graql define
+      """
+      define
+      nickname sub name;
+      person has nickname;
+      """
+    Given the integrity is validated
+    Then graql define throws
+      """
+      define
+      i-did-a-bad-typo sub rule,
+      when {
+        $p has name "I am a person";
+      }, then {
+        $q has nickname "Who am I?";
+      };
+      """
 
-  Scenario: define a non-insertable `then` throws on commit (eg. missing specific roles, or attribute value)
 
+  @ignore
+  # re-enable when rules with attribute values set in `then` that don't match their type throw on commit
+  Scenario: define rule with an attribute value set in `then` that doesn't match its type throws on commit
+    Given graql define
+      """
+      define
+      nickname sub name;
+      person has nickname;
+      """
+    Given the integrity is validated
+    Then graql define throws
+      """
+      define
+      may-has-nickname-5 sub rule,
+      when {
+        $p has name "May";
+      }, then {
+        $p has nickname 5;
+      };
+      """
+
+
+  Scenario: define rule that infers a relation whose type is undefined throws on commit
+    Then graql define throws
+      """
+      define
+      bonnie-and-clyde-are-partners-in-crime sub rule,
+      when {
+        $bonnie isa person, has name "Bonnie";
+        $clyde isa person, has name "Clyde";
+      }, then {
+        (criminal: $bonnie, sidekick: $clyde) isa partners-in-crime;
+      };
+      """
+
+
+  @ignore
+  # re-enable if this is a desired behaviour and is fixed
   Scenario: define a rule causing a loop throws on commit (eg. conclusion is negated in the `when`)
+    Then graql define throws
+    """
+    define
+    alive sub attribute, value boolean;
+    person has alive;
+    schrodinger sub rule,
+    when {
+      $p isa person, has alive true;
+    }, then {
+      $p has alive false;
+    };
+    """
+
+
+  @ignore
+  # re-enable if this is a desired behaviour and is fixed
+  Scenario: define a subrule throws on commit
+    Then graql define throws
+    """
+    define
+    nickname sub name;
+    person has nickname;
+    robert-has-nickname-bob sub rule,
+    when {
+      $p isa person, has name "Robert";
+    }, then {
+      $p has nickname "Bob";
+    };
+    robert-has-nickname-bobby sub robert-has-nickname-bob,
+    when {
+      $p isa person, has name "Robert";
+    }, then {
+      $p has nickname "Bobby";
+    };
+    """
+
+
+  Scenario: define a rule as abstract throws
+    Then graql define throws
+    """
+    define
+    nickname sub name;
+    person has nickname;
+    robert-has-nickname-bob sub rule, abstract,
+    when {
+      $p isa person, has name "Robert";
+    }, then {
+      $p has nickname "Bob";
+    };
+    """
 
 
   ##################
@@ -1118,7 +1442,10 @@ Feature: Graql Define Query
       """
 
 
+
+
   #########################
   # TODO: SCHEMA MUTATION #
   #########################
 
+  Scenario: attribute value types should not be modifiable
