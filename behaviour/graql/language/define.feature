@@ -82,6 +82,48 @@ Feature: Graql Define Query
       | CHD |
 
 
+  Scenario: define that a type 'has' something undefined throws
+    Then graql define throws
+      """
+      define book sub entity, has pages;
+      """
+
+
+  Scenario: define that a type 'has' an entity type throws
+    Then graql define throws
+      """
+      define house sub entity, has person;
+      """
+
+
+  Scenario: define that a type 'has' a relation type throws
+    Then graql define throws
+      """
+      define company sub entity, has employment;
+      """
+
+
+  Scenario: define that a type 'plays' an undefined role throws
+    Then graql define throws
+      """
+      define house sub entity, plays constructed-thing;
+      """
+
+
+  Scenario: define that a type 'plays' another type throws
+    Then graql define throws
+      """
+      define parrot sub entity, plays person;
+      """
+
+
+  Scenario: define that a type 'key' an entity type throws
+    Then graql define throws
+      """
+      define passport sub entity, key person;
+      """
+
+
   Scenario: define entity subtype inherits 'plays' from its parent type
     Given graql define
       """
@@ -230,153 +272,79 @@ Feature: Graql Define Query
       | SPR |
 
 
-  Scenario: define abstract entity type creates a type
+  Scenario: define that a type is a subtype of itself throws
+    Then graql define throws
+      """
+      define dog sub dog;
+      """
+
+
+  Scenario: define multiple copies of the same 'plays' creates a type that plays that role
     Given graql define
       """
-      define animal sub entity, abstract;
+      define
+      house sub entity, plays home, plays home, plays home;
+      home-ownership sub relation, relates home, relates home-owner;
+      person plays home-owner;
       """
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x type animal; get;
+      match $x plays home; get;
       """
     Then concept identifiers are
-      |     | check | value  |
-      | ANI | label | animal |
+      |     | check | value |
+      | HOU | label | house |
     Then uniquely identify answer concepts
       | x   |
-      | ANI |
+      | HOU |
 
 
-  Scenario: define concrete subtype of abstract entity creates child of its parent type
+  Scenario: define multiple copies of the same 'has' creates a type that has that attribute
     Given graql define
       """
       define
-      animal sub entity, abstract;
-      horse sub animal;
+      price sub attribute, value double;
+      house sub entity, has price, has price, has price;
       """
     Given the integrity is validated
-
     When get answers of graql query
       """
-      match $x sub animal; get;
+      match $x has price; get;
       """
     Then concept identifiers are
-      |     | check | value  |
-      | ANI | label | animal |
-      | HOR | label | horse  |
+      |     | check | value |
+      | HOU | label | house |
     Then uniquely identify answer concepts
       | x   |
-      | ANI |
-      | HOR |
+      | HOU |
 
 
-  Scenario: define abstract subtype of abstract entity creates child of its parent type
+  Scenario: define multiple copies of the same 'key' creates a type that has that key
     Given graql define
       """
       define
-      animal sub entity, abstract;
-      fish sub animal, abstract;
+      address sub attribute, value string;
+      house sub entity, key address, key address, key address;
       """
     Given the integrity is validated
-
     When get answers of graql query
       """
-      match $x sub animal; get;
+      match $x key address; get;
       """
     Then concept identifiers are
-      |     | check | value  |
-      | ANI | label | animal |
-      | FSH | label | fish   |
+      |     | check | value |
+      | HOU | label | house |
     Then uniquely identify answer concepts
       | x   |
-      | ANI |
-      | FSH |
+      | HOU |
 
 
-  Scenario: define additional 'plays' is visible from all children
-    Given graql define
+  Scenario: define concept without 'sub' throws
+    Then graql define throws
       """
-      define employment sub relation, relates employer;
+      define flying-spaghetti-monster;
       """
-    Given the integrity is validated
-
-    Given graql define
-      """
-      define
-      child sub person;
-      person sub entity, plays employer;
-      """
-    Given the integrity is validated
-
-    When get answers of graql query
-      """
-      match $x type child, plays $r; get;
-      """
-    Then concept identifiers are
-      |             | check | value            |
-      | EMPLOYEE    | label | employee         |
-      | EMPLOYER    | label | employer         |
-      | EARNER      | label | earner           |
-      | CHILD       | label | child            |
-    Then uniquely identify answer concepts
-      | x     | r           |
-      | CHILD | EMPLOYEE    |
-      | CHILD | EMPLOYER    |
-      | CHILD | EARNER      |
-
-
-  @ignore
-  # re-enable when we can query schema 'has' and 'key' with variables eg: 'match $x type ___, has key $a; get;'
-  Scenario: define additional 'has' is visible from all children
-    Given graql define
-    """
-       define
-       child sub person;
-       phone-number sub attribute, value long;
-       person sub entity, has phone-number;
-      """
-    Given the integrity is validated
-
-    When get answers of graql query
-      """
-      match $x type child, has $y; get;
-      """
-    Then concept identifiers are
-      |       | check | value        |
-      | CHILD | label | child        |
-      | NAME  | label | name         |
-      | PHONE | label | phone-number |
-    Then uniquely identify answer concepts
-      | x     | y     |
-      | CHILD | NAME  |
-      | CHILD | PHONE |
-
-
-  @ignore
-  # re-enable when we can query schema 'has' and 'key' with variables eg: 'match $x type ___, has key $a; get;'
-  Scenario: define additional 'key' is visible from all children
-    Given graql define
-      """
-      define
-      child sub person;
-      phone-number sub attribute, value long;
-      person sub entity, key phone-number;
-      """
-    Given the integrity is validated
-
-    When get answers of graql query
-      """
-      match $x type child, key $y; get;
-      """
-    Then concept identifiers are
-      |       | check | value |
-      | CHILD | label | child |
-      | EMAIL | label | email |
-    Then uniquely identify answer concepts
-      | x     | y     |
-      | CHILD | EMAIL |
-      | CHILD | EMAIL |
 
 
   #############
@@ -454,7 +422,7 @@ Feature: Graql Define Query
 
 
   @ignore
-  # re-enable when 'relates' is bound to a relation and blockable
+  # TODO: re-enable when 'relates' is bound to a relation and blockable
   Scenario: define relation subtype with role subtyping blocks parent role
     Given graql define
       """
@@ -475,8 +443,7 @@ Feature: Graql Define Query
       | EMP |
       | PTT |
 
-    # TODO - should employee role be retrieving part-timer as well? yes
-
+    # TODO - employee role should be retrieving part-timer as well
     # Then query 1 has 2 answers
     # And answers of query 1 satisfy: match $x sub employment; get;
 
@@ -632,70 +599,6 @@ Feature: Graql Define Query
       | FAA |
 
 
-  Scenario: define abstract relation type creates a type
-    Given graql define
-      """
-      define membership sub relation, abstract, relates member;
-      """
-    Given the integrity is validated
-    When get answers of graql query
-      """
-      match $x type membership; get;
-      """
-    Then concept identifiers are
-      |     | check | value      |
-      | MEM | label | membership |
-    Then uniquely identify answer concepts
-      | x   |
-      | MEM |
-
-
-  Scenario: define concrete subtype of abstract relation creates child of its parent type
-    Given graql define
-      """
-      define
-      membership sub relation, abstract, relates member;
-      gym-membership sub membership, relates gym-with-members, relates gym-member as member;
-      """
-    Given the integrity is validated
-
-    When get answers of graql query
-      """
-      match $x sub membership; get;
-      """
-    Then concept identifiers are
-      |     | check | value          |
-      | MEM | label | membership     |
-      | GYM | label | gym-membership |
-    Then uniquely identify answer concepts
-      | x   |
-      | MEM |
-      | GYM |
-
-
-  Scenario: define abstract subtype of abstract relation creates child of its parent type
-    Given graql define
-      """
-      define
-      requirement sub relation, abstract, relates prerequisite, relates outcome;
-      tool-requirement sub requirement, abstract, relates required-tool as prerequisite;
-      """
-    Given the integrity is validated
-
-    When get answers of graql query
-      """
-      match $x sub requirement; get;
-      """
-    Then concept identifiers are
-      |     | check | value            |
-      | REQ | label | requirement      |
-      | TLR | label | tool-requirement |
-    Then uniquely identify answer concepts
-      | x   |
-      | REQ |
-      | TLR |
-
-
   Scenario: define abstract relation type with no roleplayers creates a type
     Given graql define
       """
@@ -714,30 +617,43 @@ Feature: Graql Define Query
       | CON |
 
 
-  @ignore
-  # re-enable when we can inherit 'relates
-  Scenario: define additional 'relates' is visible from all children
+  Scenario: define relation type with multiple copies of the same 'relates' creates a relation type with all distinct roleplayers
     Given graql define
       """
       define
-      part-time-employment sub employment;
-      employment sub relation, relates employer;
+      parenthood sub relation, relates parent, relates child, relates child, relates parent, relates child;
+      person plays parent, plays child;
       """
     Given the integrity is validated
-
     When get answers of graql query
       """
-      match $x type part-time-employment, relates $r; get;
+      match $x relates parent; $x relates child; get;
       """
     Then concept identifiers are
-      |           | check | value                |
-      | EMPLOYEE  | label | employee             |
-      | EMPLOYER  | label | employer             |
-      | PART_TIME | label | part-time-employment |
+      |     | check | value      |
+      | PAR | label | parenthood |
     Then uniquely identify answer concepts
-      | x         | r        |
-      | PART_TIME | EMPLOYEE |
-      | PART_TIME | EMPLOYER |
+      | x   |
+      | PAR |
+
+
+  Scenario: define relation type 'relates' to a role it plays itself creates a relation type
+    Given graql define
+      """
+      define
+      recursive-function sub relation, relates function, plays function;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x relates function; $x plays function; get;
+      """
+    Then concept identifiers are
+      |     | check | value              |
+      | REC | label | recursive-function |
+    Then uniquely identify answer concepts
+      | x   |
+      | REC |
 
 
   ##############
@@ -818,7 +734,7 @@ Feature: Graql Define Query
 
 
   @ignore
-  # re-enable when overriding an attribute's 'value' is forbidden
+  # TODO: re-enable when overriding an attribute's 'value' is forbidden
   Scenario: define attribute subtype throws if you try to override 'value'
     Then graql define throws
       """
@@ -1014,75 +930,18 @@ Feature: Graql Define Query
       | VDR |
 
 
-  Scenario: define abstract attribute type creates a type
-    Given graql define
+  Scenario: define attribute type throws if it 'has' itself
+    Then graql define throws
       """
-      define number-of-limbs sub attribute, abstract, value long;
+      define number-of-letters sub attribute, value long, has number-of-letters;
       """
-    Given the integrity is validated
-    When get answers of graql query
-      """
-      match $x type number-of-limbs; get;
-      """
-    Then concept identifiers are
-      |     | check | value           |
-      | NOL | label | number-of-limbs |
-    Then uniquely identify answer concepts
-      | x   |
-      | NOL |
-
-
-  Scenario: define concrete subtype of abstract attribute creates child of its parent type
-    Given graql define
-      """
-      define
-      number-of-limbs sub attribute, abstract, value long;
-      number-of-legs sub number-of-limbs;
-      """
-    Given the integrity is validated
-
-    When get answers of graql query
-      """
-      match $x sub number-of-limbs; get;
-      """
-    Then concept identifiers are
-      |     | check | value           |
-      | NOL | label | number-of-limbs |
-      | NLE | label | number-of-legs  |
-    Then uniquely identify answer concepts
-      | x   |
-      | NOL |
-      | NLE |
-
-
-  Scenario: define abstract subtype of abstract attribute creates child of its parent type
-    Given graql define
-      """
-      define
-      number-of-limbs sub attribute, abstract, value long;
-      number-of-artificial-limbs sub number-of-limbs, abstract;
-      """
-    Given the integrity is validated
-
-    When get answers of graql query
-      """
-      match $x sub number-of-limbs; get;
-      """
-    Then concept identifiers are
-      |     | check | value                      |
-      | NOL | label | number-of-limbs            |
-      | NAL | label | number-of-artificial-limbs |
-    Then uniquely identify answer concepts
-      | x   |
-      | NOL |
-      | NAL |
 
 
   #########
   # RULES #
   #########
 
-  Scenario: define a rule creates a rule
+  Scenario: define a rule that infers an attribute value creates a rule
     Given graql define
       """
       define
@@ -1107,6 +966,58 @@ Feature: Graql Define Query
     Then uniquely identify answer concepts
       | x   |
       | BOB |
+      | RUL |
+
+
+  Scenario: define a rule that infers a relation creates a rule
+    Given graql define
+      """
+      define
+      haikal-is-employed sub rule,
+      when {
+        $p isa person, has name "Haikal";
+      }, then {
+        (employee: $p) isa employment;
+      };
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x sub rule; get;
+      """
+    Then concept identifiers are
+      |     | check | value              |
+      | HAI | label | haikal-is-employed |
+      | RUL | label | rule               |
+    Then uniquely identify answer concepts
+      | x   |
+      | HAI |
+      | RUL |
+
+
+  Scenario: define rule that infers a `key` creates a rule
+    Given graql define
+      """
+      define
+      john-smiths-email sub rule,
+      when {
+        $p has name "John Smith";
+      }, then {
+        $p has email "john.smith@gmail.com";
+      };
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x sub rule; get;
+      """
+    Then concept identifiers are
+      |     | check | value             |
+      | JSE | label | john-smiths-email |
+      | RUL | label | rule              |
+    Then uniquely identify answer concepts
+      | x   |
+      | JSE |
       | RUL |
 
 
@@ -1164,7 +1075,7 @@ Feature: Graql Define Query
       """
 
 
-  Scenario: define rule with negation using a bound variable creates a rule
+  Scenario: define a rule with negation creates a rule
     Given graql define
       """
       define
@@ -1216,7 +1127,7 @@ Feature: Graql Define Query
 
 
   @ignore
-  # re-enable when all rules with nested negations throw on commit
+  # TODO: re-enable when all rules with nested negations throw on commit
   Scenario: define a rule with nested negation throws on commit
     Given graql define
       """
@@ -1331,9 +1242,36 @@ Feature: Graql Define Query
       """
 
 
+  Scenario: define rule with an undefined attribute set in `then` throws on commit
+    Given graql define throws
+      """
+      define
+      boudicca-is-1960-years-old sub rule,
+      when {
+        $person isa person, has name "Boudicca";
+      }, then {
+        $person has age 1960;
+      };
+      """
+
+
+  Scenario: define rule with an attribute set in `then` on a type that can't have that attribute throws on commit
+    Given graql define throws
+      """
+      define
+      age sub attribute, value long;
+      boudicca-is-1960-years-old sub rule,
+      when {
+        $person isa person, has name "Boudicca";
+      }, then {
+        $person has age 1960;
+      };
+      """
+
+
   @ignore
-  # re-enable when rules with attribute values set in `then` that don't match their type throw on commit
-  Scenario: define rule with an attribute value set in `then` that doesn't match its type throws on commit
+  # TODO: re-enable when rules with attribute values set in `then` that don't match their type throw on commit
+  Scenario: define rule with an attribute value set in `then` that doesn't match the attribute's type throws on commit
     Given graql define
       """
       define
@@ -1367,25 +1305,58 @@ Feature: Graql Define Query
       """
 
 
-  @ignore
-  # re-enable if this is a desired behaviour and is fixed
-  Scenario: define a rule causing a loop throws on commit (eg. conclusion is negated in the `when`)
+  Scenario: define rule that infers a relation with an incorrect roleplayer throws on commit
     Then graql define throws
-    """
-    define
-    alive sub attribute, value boolean;
-    person has alive;
-    schrodinger sub rule,
-    when {
-      $p isa person, has alive true;
-    }, then {
-      $p has alive false;
-    };
-    """
+      """
+      define
+      partners-in-crime sub relation, relates criminal, relates sidekick;
+      person plays criminal;
+      bonnie-and-clyde-are-partners-in-crime sub rule,
+      when {
+        $bonnie isa person, has name "Bonnie";
+        $clyde isa person, has name "Clyde";
+      }, then {
+        (criminal: $bonnie, sidekick: $clyde) isa partners-in-crime;
+      };
+      """
+
+  @ignore
+  # TODO: re-enable when rules cannot infer abstract relations
+  Scenario: define rule that infers an abstract relation throws on commit
+    Then graql define throws
+      """
+      define
+      partners-in-crime sub relation, abstract, relates criminal, relates sidekick;
+      person plays criminal, plays sidekick;
+      bonnie-and-clyde-are-partners-in-crime sub rule,
+      when {
+        $bonnie isa person, has name "Bonnie";
+        $clyde isa person, has name "Clyde";
+      }, then {
+        (criminal: $bonnie, sidekick: $clyde) isa partners-in-crime;
+      };
+      """
+
+  Scenario: define rule that infers an abstract attribute throws on commit (?)
+
+  Scenario: define a rule that negates its conclusion in the `when`, causing a loop, throws on commit
+    Then graql define throws
+      """
+      define
+      there-are-no-unemployed sub rule,
+      when {
+        $person isa person;
+        not {
+          (employee: $person) isa employment;
+        };
+      }, then {
+        (employee: $person) isa employment;
+      };
+      """
 
 
   @ignore
-  # re-enable if this is a desired behaviour and is fixed
+  # TODO: re-enable when subrules are not allowed
   Scenario: define a subrule throws on commit
     Then graql define throws
     """
@@ -1407,28 +1378,219 @@ Feature: Graql Define Query
     """
 
 
-  Scenario: define a rule as abstract throws
-    Then graql define throws
-    """
-    define
-    nickname sub name;
-    person has nickname;
-    robert-has-nickname-bob sub rule, abstract,
-    when {
-      $p isa person, has name "Robert";
-    }, then {
-      $p has nickname "Bob";
-    };
-    """
-
-
   ##################
   # ABSTRACT TYPES #
   ##################
 
+  Scenario: define abstract entity type creates an abstract type
+    Given graql define
+      """
+      define animal sub entity, abstract;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x type animal; $x abstract; get;
+      """
+    Then concept identifiers are
+      |     | check | value  |
+      | ANI | label | animal |
+    Then uniquely identify answer concepts
+      | x   |
+      | ANI |
+
+
+  Scenario: define concrete subtype of abstract entity creates child of its parent type
+    Given graql define
+      """
+      define
+      animal sub entity, abstract;
+      horse sub animal;
+      """
+    Given the integrity is validated
+
+    When get answers of graql query
+      """
+      match $x sub animal; get;
+      """
+    Then concept identifiers are
+      |     | check | value  |
+      | ANI | label | animal |
+      | HOR | label | horse  |
+    Then uniquely identify answer concepts
+      | x   |
+      | ANI |
+      | HOR |
+
+
+  Scenario: define abstract subtype of abstract entity creates child of its parent type
+    Given graql define
+      """
+      define
+      animal sub entity, abstract;
+      fish sub animal, abstract;
+      """
+    Given the integrity is validated
+
+    When get answers of graql query
+      """
+      match $x sub animal; get;
+      """
+    Then concept identifiers are
+      |     | check | value  |
+      | ANI | label | animal |
+      | FSH | label | fish   |
+    Then uniquely identify answer concepts
+      | x   |
+      | ANI |
+      | FSH |
+
+
+  Scenario: define abstract relation type creates an abstract type
+    Given graql define
+      """
+      define membership sub relation, abstract, relates member;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x type membership; $x abstract; get;
+      """
+    Then concept identifiers are
+      |     | check | value      |
+      | MEM | label | membership |
+    Then uniquely identify answer concepts
+      | x   |
+      | MEM |
+
+
+  Scenario: define concrete subtype of abstract relation creates child of its parent type
+    Given graql define
+      """
+      define
+      membership sub relation, abstract, relates member;
+      gym-membership sub membership, relates gym-with-members, relates gym-member as member;
+      """
+    Given the integrity is validated
+
+    When get answers of graql query
+      """
+      match $x sub membership; get;
+      """
+    Then concept identifiers are
+      |     | check | value          |
+      | MEM | label | membership     |
+      | GYM | label | gym-membership |
+    Then uniquely identify answer concepts
+      | x   |
+      | MEM |
+      | GYM |
+
+
+  Scenario: define abstract subtype of abstract relation creates child of its parent type
+    Given graql define
+      """
+      define
+      requirement sub relation, abstract, relates prerequisite, relates outcome;
+      tool-requirement sub requirement, abstract, relates required-tool as prerequisite;
+      """
+    Given the integrity is validated
+
+    When get answers of graql query
+      """
+      match $x sub requirement; get;
+      """
+    Then concept identifiers are
+      |     | check | value            |
+      | REQ | label | requirement      |
+      | TLR | label | tool-requirement |
+    Then uniquely identify answer concepts
+      | x   |
+      | REQ |
+      | TLR |
+
+
+  Scenario: define abstract attribute type creates an abstract type
+    Given graql define
+      """
+      define number-of-limbs sub attribute, abstract, value long;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x type number-of-limbs; $x abstract; get;
+      """
+    Then concept identifiers are
+      |     | check | value           |
+      | NOL | label | number-of-limbs |
+    Then uniquely identify answer concepts
+      | x   |
+      | NOL |
+
+
+  Scenario: define concrete subtype of abstract attribute creates child of its parent type
+    Given graql define
+      """
+      define
+      number-of-limbs sub attribute, abstract, value long;
+      number-of-legs sub number-of-limbs;
+      """
+    Given the integrity is validated
+
+    When get answers of graql query
+      """
+      match $x sub number-of-limbs; get;
+      """
+    Then concept identifiers are
+      |     | check | value           |
+      | NOL | label | number-of-limbs |
+      | NLE | label | number-of-legs  |
+    Then uniquely identify answer concepts
+      | x   |
+      | NOL |
+      | NLE |
+
+
+  Scenario: define abstract subtype of abstract attribute creates child of its parent type
+    Given graql define
+      """
+      define
+      number-of-limbs sub attribute, abstract, value long;
+      number-of-artificial-limbs sub number-of-limbs, abstract;
+      """
+    Given the integrity is validated
+
+    When get answers of graql query
+      """
+      match $x sub number-of-limbs; get;
+      """
+    Then concept identifiers are
+      |     | check | value                      |
+      | NOL | label | number-of-limbs            |
+      | NAL | label | number-of-artificial-limbs |
+    Then uniquely identify answer concepts
+      | x   |
+      | NOL |
+      | NAL |
+
+
+  Scenario: define a rule as abstract throws
+    Then graql define throws
+      """
+      define
+      nickname sub name;
+      person has nickname;
+      robert-has-nickname-bob sub rule, abstract,
+      when {
+        $p isa person, has name "Robert";
+      }, then {
+        $p has nickname "Bob";
+      };
+      """
+
 
   @ignore
-  # re-enable when concrete types are not allowed to have abstract subtypes
+  # TODO: re-enable when concrete types are not allowed to have abstract subtypes
   Scenario: define abstract subtype of concrete entity throws an error
     Then graql define throws
       """
@@ -1438,10 +1600,470 @@ Feature: Graql Define Query
       """
 
 
+  Scenario: repeatedly define type as abstract creates an abstract type
+    Given graql define
+      """
+      define animal sub entity, abstract, abstract, abstract;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x type animal; $x abstract; get;
+      """
+    Then concept identifiers are
+      |     | check | value  |
+      | ANI | label | animal |
+    Then uniquely identify answer concepts
+      | x   |
+      | ANI |
 
 
-  #########################
-  # TODO: SCHEMA MUTATION #
-  #########################
+  ###################
+  # SCHEMA MUTATION #
+  ###################
 
-  Scenario: attribute value types should not be modifiable
+  Scenario: repeatedly defining existing type keeps its properties intact
+    Given graql define
+      """
+      define
+      person sub entity, has name;
+      person sub entity, has name;
+      person sub entity, has name;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x type person; $x has email; get;
+      """
+    Then concept identifiers are
+      |     | check | value  |
+      | PER | label | person |
+    Then uniquely identify answer concepts
+      | x   |
+      | PER |
+
+
+  Scenario: change entity type to relation type throws
+    Then graql define throws
+      """
+      define
+      person sub relation, relates body-part;
+      arm sub entity, plays body-part;
+      """
+
+
+  Scenario: change relation type to attribute type throws
+    Then graql define throws
+      """
+      define employment sub attribute, value string;
+      """
+
+
+  Scenario: change attribute type to entity type throws
+    Then graql define throws
+      """
+      define name sub entity;
+      """
+
+
+  Scenario: define additional 'has' on a type adds attribute to it
+    Given graql define
+      """
+      define employment has name;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x has name; get;
+      """
+    Then concept identifiers are
+      |     | check | value      |
+      | PER | label | person     |
+      | EMP | label | employment |
+    Then uniquely identify answer concepts
+      | x   |
+      | PER |
+      | EMP |
+
+
+  Scenario: define additional 'plays' on a type adds role to it
+    Given graql define
+      """
+      define employment plays employee;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x plays employee; get;
+      """
+    Then concept identifiers are
+      |     | check | value      |
+      | PER | label | person     |
+      | EMP | label | employment |
+    Then uniquely identify answer concepts
+      | x   |
+      | PER |
+      | EMP |
+
+
+  Scenario: define additional 'key' on a type adds key to it
+    Given graql define
+      """
+      define employment key email;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x has email; get;
+      """
+    Then concept identifiers are
+      |     | check | value      |
+      | PER | label | person     |
+      | EMP | label | employment |
+    Then uniquely identify answer concepts
+      | x   |
+      | PER |
+      | EMP |
+
+
+  Scenario: define additional 'key' on a type adds key to it even if it has existing instances
+    Given graql define
+      """
+      define
+      barcode sub attribute, value string;
+      product sub entity, has name;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $x isa product, has name "Cheese";
+      $y isa product, has name "Ham";
+      """
+    Given the integrity is validated
+    When graql define
+      """
+      define
+      product key barcode;
+      """
+    When the integrity is validated
+    When get answers of graql query
+      """
+      match $x has barcode; get;
+      """
+    Then concept identifiers are
+      |     | check | value      |
+      | PRD | label | product    |
+    Then uniquely identify answer concepts
+      | x   |
+      | PRD |
+
+
+  Scenario: define additional 'relates' on a relation type adds roleplayer to it
+    Given graql define
+      """
+      define
+      company sub entity, plays employer;
+      employment relates employer;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x relates employer; get;
+      """
+    Then concept identifiers are
+      |     | check | value      |
+      | EMP | label | employment |
+    Then uniquely identify answer concepts
+      | x   |
+      | EMP |
+
+
+  Scenario: define additional 'regex' on attribute type adds regex to it if all existing instances match the regex
+    Given graql insert
+      """
+      insert
+      $x isa person, has name "Alice", has email "alice@grakn.ai";
+      """
+    Given the integrity is validated
+    When graql define
+      """
+      define name regex "^A.*$";
+      """
+    When the integrity is validated
+    When get answers of graql query
+      """
+      match $x regex "^A.*$"; get;
+      """
+    Then concept identifiers are
+      |     | check | value |
+      | NAM | label | name  |
+    Then uniquely identify answer concepts
+      | x   |
+      | NAM |
+
+
+  Scenario: define additional 'regex' on attribute type throws on commit if an existing instance doesn't match the regex
+    Given graql insert
+      """
+      insert
+      $x isa person, has name "Maria", has email "maria@grakn.ai";
+      """
+    Given the integrity is validated
+    Then graql define throws
+      """
+      define name regex "^A.*$";
+      """
+
+
+  Scenario: define additional 'regex' on a long-valued attribute type throws
+    Given graql define
+      """
+      define house-number sub attribute, value long;
+      """
+    Given the integrity is validated
+    Then graql define throws
+      """
+      define house-number regex "^A.*$";
+      """
+
+
+  Scenario: add 'relates' to entity type throws
+    Then graql define throws
+      """
+      define person relates employee;
+      """
+
+
+  Scenario: add 'relates' to attribute type throws
+    Then graql define throws
+      """
+      define name relates employee;
+      """
+
+
+  Scenario: modify attribute value type throws
+    Then graql define throws
+      """
+      define name value long;
+      """
+
+
+  Scenario: modify rule definition throws
+    Given graql define
+      """
+      define
+      nickname sub name;
+      person has nickname;
+      robert-has-nickname-bob sub rule,
+      when {
+        $p isa person, has name "Robert";
+      }, then {
+        $p has nickname "Bob";
+      };
+      """
+    Given the integrity is validated
+    Then graql define throws
+      """
+      define
+      robert-has-nickname-bob sub rule,
+      when {
+        $p isa person, has name "robert";
+      }, then {
+        $p has nickname "bob";
+      };
+      """
+
+
+  ###################################
+  # SCHEMA MUTATION: ABSTRACT TYPES #
+  ###################################
+
+  Scenario: change concrete entity type to abstract creates an abstract entity type
+
+  Scenario: change concrete relation type to abstract creates an abstract relation type
+
+  Scenario: change concrete attribute type to abstract creates an abstract attribute type
+
+  Scenario: change concrete entity type to abstract throws on commit if it has an existing instance
+
+  Scenario: change concrete relation type to abstract throws on commit if it has an existing instance
+
+  Scenario: change concrete attribute type to abstract throws on commit if it has an existing instance
+
+  @ignore
+  # TODO: re-enable when concrete types cannot have abstract subtypes
+  Scenario: change concrete type to abstract throws on commit if it has a concrete supertype
+
+  @ignore
+  # TODO: re-enable when rules cannot infer abstract relations
+  Scenario: change concrete relation type to abstract throws on commit if it is the conclusion of any rule
+
+  @ignore
+  # TODO: check if rules can infer abstract attributes
+  Scenario: change concrete attribute type to abstract throws on commit if it is the conclusion of any rule
+
+  ################################
+  # SCHEMA MUTATION: INHERITANCE #
+  ################################
+
+  Scenario: modify entity type to have a new super-entity makes it a subtype of that entity
+    Given graql define
+      """
+      define
+      apple-product sub entity;
+      genius sub person;
+      """
+    Given the integrity is validated
+    When graql define
+      """
+      define
+      genius sub apple-product;
+      """
+    When the integrity is validated
+    When get answers of graql query
+      """
+      match $x sub apple-product; get;
+      """
+    Then concept identifiers are
+      |     | check | value         |
+      | APL | label | apple-product |
+      | GEN | label | genius        |
+    Then uniquely identify answer concepts
+      | x   |
+      | APL |
+      | GEN |
+
+
+  Scenario: modify relation type to have a new super-relation makes it a subtype of that relation
+
+  Scenario: modify attribute type to have a new super-attribute makes it a subtype of that attribute
+
+  Scenario: modify type to have a new supertype throws if it has existing data (?)
+
+  Scenario: modify type to have a new supertype throws if existing data has attributes not present on the new supertype (?)
+
+  Scenario: modify type to have a new supertype throws if that supertype has a key not present in the existing data (?)
+
+  Scenario: modify relation type to have a new supertype throws if existing data has roleplayers not present on the new supertype (?)
+
+  Scenario: modify attribute type to have a new supertype throws if it has a different value type to the current one (?)
+
+  Scenario: modify attribute type to have a new supertype throws if it has existing data and a different value type to the new supertype (?)
+
+  Scenario: modify attribute type to have a new supertype throws if new supertype has a regex and existing data doesn't match it (?)
+
+
+  Scenario: define additional 'plays' is visible from all children
+    Given graql define
+      """
+      define employment sub relation, relates employer;
+      """
+    Given the integrity is validated
+
+    Given graql define
+      """
+      define
+      child sub person;
+      person sub entity, plays employer;
+      """
+    Given the integrity is validated
+
+    When get answers of graql query
+      """
+      match $x type child, plays $r; get;
+      """
+    Then concept identifiers are
+      |             | check | value            |
+      | EMPLOYEE    | label | employee         |
+      | EMPLOYER    | label | employer         |
+      | EARNER      | label | earner           |
+      | NAME_OWNER  | label | @has-name-owner  |
+      | EMAIL_OWNER | label | @key-email-owner |
+      | CHILD       | label | child            |
+    Then uniquely identify answer concepts
+      | x     | r           |
+      | CHILD | EMPLOYEE    |
+      | CHILD | EMPLOYER    |
+      | CHILD | EARNER      |
+      | CHILD | NAME_OWNER  |
+      | CHILD | EMAIL_OWNER |
+
+
+  @ignore
+  # TODO: re-enable when we can query schema 'has' and 'key' with variables eg: 'match $x type ___, has key $a; get;'
+  Scenario: define additional 'has' is visible from all children
+    Given graql define
+    """
+       define
+       child sub person;
+       phone-number sub attribute, value long;
+       person sub entity, has phone-number;
+      """
+    Given the integrity is validated
+
+    When get answers of graql query
+      """
+      match $x type child, has $y; get;
+      """
+    Then concept identifiers are
+      |       | check | value        |
+      | CHILD | label | child        |
+      | NAME  | label | name         |
+      | PHONE | label | phone-number |
+    Then uniquely identify answer concepts
+      | x     | y     |
+      | CHILD | NAME  |
+      | CHILD | PHONE |
+
+
+  @ignore
+  # TODO: re-enable when we can query schema 'has' and 'key' with variables eg: 'match $x type ___, has key $a; get;'
+  Scenario: define additional 'key' is visible from all children
+    Given graql define
+      """
+      define
+      child sub person;
+      phone-number sub attribute, value long;
+      person sub entity, key phone-number;
+      """
+    Given the integrity is validated
+
+    When get answers of graql query
+      """
+      match $x type child, key $y; get;
+      """
+    Then concept identifiers are
+      |       | check | value |
+      | CHILD | label | child |
+      | EMAIL | label | email |
+    Then uniquely identify answer concepts
+      | x     | y     |
+      | CHILD | EMAIL |
+      | CHILD | EMAIL |
+
+
+  @ignore
+  # TODO: re-enable when we can inherit 'relates'
+  Scenario: define additional 'relates' is visible from all children
+    Given graql define
+      """
+      define
+      part-time-employment sub employment;
+      employment sub relation, relates employer;
+      """
+    Given the integrity is validated
+
+    When get answers of graql query
+      """
+      match $x type part-time-employment, relates $r; get;
+      """
+    Then concept identifiers are
+      |           | check | value                |
+      | EMPLOYEE  | label | employee             |
+      | EMPLOYER  | label | employer             |
+      | PART_TIME | label | part-time-employment |
+    Then uniquely identify answer concepts
+      | x         | r        |
+      | PART_TIME | EMPLOYEE |
+      | PART_TIME | EMPLOYER |
