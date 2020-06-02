@@ -911,7 +911,6 @@ Feature: Graql Define Query
       very-dark-red-colour sub dark-red-colour;
       """
     Given the integrity is validated
-
     When get answers of graql query
       """
       match $x key hex-value; get;
@@ -930,11 +929,22 @@ Feature: Graql Define Query
       | VDR |
 
 
-  Scenario: define attribute type throws if it 'has' itself
-    Then graql define throws
+  Scenario: define attribute type that has itself creates an attribute
+    Given graql define
       """
       define number-of-letters sub attribute, value long, has number-of-letters;
       """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x has number-of-letters; get;
+      """
+    Then concept identifiers are
+      |     | check | value                |
+      | NOL | label | number-of-letters    |
+    Then uniquely identify answer concepts
+      | x   |
+      | NOL |
 
 
   #########
@@ -1879,17 +1889,88 @@ Feature: Graql Define Query
   # SCHEMA MUTATION: ABSTRACT TYPES #
   ###################################
 
-  Scenario: change concrete entity type to abstract creates an abstract entity type
+  Scenario: add abstract to existing entity type makes it abstract
+    Given graql define
+      """
+      define person abstract;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x sub person; $x abstract; get;
+      """
+    Then concept identifiers are
+      |     | check | value  |
+      | PER | label | person |
+    Then uniquely identify answer concepts
+      | x   |
+      | PER |
 
-  Scenario: change concrete relation type to abstract creates an abstract relation type
 
-  Scenario: change concrete attribute type to abstract creates an abstract attribute type
+  Scenario: add abstract to existing relation type makes it abstract
+    Given graql define
+      """
+      define employment abstract;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x sub employment; $x abstract; get;
+      """
+    Then concept identifiers are
+      |     | check | value      |
+      | EMP | label | employment |
+    Then uniquely identify answer concepts
+      | x   |
+      | EMP |
 
-  Scenario: change concrete entity type to abstract throws on commit if it has an existing instance
 
-  Scenario: change concrete relation type to abstract throws on commit if it has an existing instance
+  Scenario: add abstract to existing attribute type makes it abstract
+    Given graql define
+      """
+      define name abstract;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x sub name; $x abstract; get;
+      """
+    Then concept identifiers are
+      |     | check | value |
+      | NAM | label | name  |
+    Then uniquely identify answer concepts
+      | x   |
+      | NAM |
 
-  Scenario: change concrete attribute type to abstract throws on commit if it has an existing instance
+
+  Scenario: add abstract to existing entity type throws on commit if it has an existing instance
+    Given graql insert
+      """
+      insert
+      $x isa person, has name "Jeremy", has email "jeremy@grakn.ai";
+      """
+    Given the integrity is validated
+    Then graql define throws
+      """
+      define person abstract;
+      """
+
+
+  Scenario: add abstract to existing relation type throws on commit if it has an existing instance
+
+
+  Scenario: add abstract to existing attribute type throws on commit if it has an existing instance
+    Given graql insert
+      """
+      insert
+      $x isa person, has name "Jeremy", has email "jeremy@grakn.ai";
+      """
+    Given the integrity is validated
+    Then graql define throws
+      """
+      define name abstract;
+      """
+
 
   @ignore
   # TODO: re-enable when concrete types cannot have abstract subtypes
@@ -1907,7 +1988,7 @@ Feature: Graql Define Query
   # SCHEMA MUTATION: INHERITANCE #
   ################################
 
-  Scenario: modify entity type to have a new super-entity makes it a subtype of that entity
+  Scenario: define new `sub` on entity type changes its supertype
     Given graql define
       """
       define
@@ -1935,23 +2016,162 @@ Feature: Graql Define Query
       | GEN |
 
 
-  Scenario: modify relation type to have a new super-relation makes it a subtype of that relation
+  Scenario: define new `sub` on relation type changes its supertype
 
-  Scenario: modify attribute type to have a new super-attribute makes it a subtype of that attribute
 
-  Scenario: modify type to have a new supertype throws if it has existing data (?)
+  @ignore
+  # TODO: re-enable when we can switch attributes to new supertypes
+  Scenario: define new `sub` on attribute type changes its supertype
+    Given graql define
+      """
+      define
+      measure sub attribute, value double;
+      shoe-size sub measure;
+      shoe sub entity, has shoe-size;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert $s isa shoe, has shoe-size 9;
+      """
+    Given the integrity is validated
+    Given graql define
+      """
+      define
+      size sub attribute, value double;
+      shoe-size sub size;
+      """
+    When get answers of graql query
+      """
+      match $x sub shoe-size; get;
+      """
+    Then concept identifiers are
+      |     | check | value     |
+      | SHS | label | shoe-size |
+    Then uniquely identify answer concepts
+      | x   |
+      | SHS |
 
-  Scenario: modify type to have a new supertype throws if existing data has attributes not present on the new supertype (?)
 
-  Scenario: modify type to have a new supertype throws if that supertype has a key not present in the existing data (?)
+  Scenario: assign new supertype with existing data succeeds if the supertypes have no properties
+    Given graql define
+      """
+      define
+      bird sub entity;
+      pigeon sub bird;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert $p isa pigeon;
+      """
+    Given the integrity is validated
+    Given graql define
+      """
+      define
+      animal sub entity;
+      pigeon sub animal;
+      """
+    When get answers of graql query
+      """
+      match $x sub pigeon; get;
+      """
+    Then concept identifiers are
+      |     | check | value  |
+      | PIG | label | pigeon |
+    Then uniquely identify answer concepts
+      | x   |
+      | PIG |
 
-  Scenario: modify relation type to have a new supertype throws if existing data has roleplayers not present on the new supertype (?)
 
-  Scenario: modify attribute type to have a new supertype throws if it has a different value type to the current one (?)
+  @ignore
+  # TODO: re-enable when roles are correctly checked when switching supertypes
+  Scenario: assign new supertype with existing data succeeds if the supertypes play the same roles
+    Given graql define
+      """
+      define
+      bird sub entity, plays flier;
+      pigeon sub bird;
+      flying sub relation, relates flier;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert $p isa pigeon;
+      """
+    Given the integrity is validated
+    Given graql define
+      """
+      define
+      animal sub entity, plays flier;
+      pigeon sub animal;
+      """
+    When get answers of graql query
+      """
+      match $x sub pigeon; get;
+      """
+    Then concept identifiers are
+      |     | check | value  |
+      | PIG | label | pigeon |
+    Then uniquely identify answer concepts
+      | x   |
+      | PIG |
 
-  Scenario: modify attribute type to have a new supertype throws if it has existing data and a different value type to the new supertype (?)
 
-  Scenario: modify attribute type to have a new supertype throws if new supertype has a regex and existing data doesn't match it (?)
+  @ignore
+  # TODO: re-enable when attribute ownerships are correctly checked when switching supertypes
+  Scenario: assign new supertype with existing data succeeds if the supertypes have the same attributes
+    Given graql define
+      """
+      define
+      name sub attribute, value string;
+      bird sub entity, has name;
+      pigeon sub bird;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert $p isa pigeon;
+      """
+    Given the integrity is validated
+    Given graql define
+      """
+      define
+      animal sub entity, has name;
+      pigeon sub animal;
+      """
+    When get answers of graql query
+      """
+      match $x sub pigeon; get;
+      """
+    Then concept identifiers are
+      |     | check | value  |
+      | PIG | label | pigeon |
+    Then uniquely identify answer concepts
+      | x   |
+      | PIG |
+
+
+  # TODO: write this once 'assign new supertype .. with existing data' succeeds if the supertypes have the same attributes
+  Scenario: assign new supertype throws if existing data has attributes not present on the new supertype
+
+  # TODO: write this once 'assign new supertype .. with existing data' succeeds if the supertypes play the same roles
+  Scenario: assign new supertype throws if existing data plays a role that it can't with the new supertype
+
+  # TODO: write this once 'assign new supertype throws if .. data has attributes not present on the new supertype' is written
+  Scenario: assign new supertype throws if that supertype has a key not present in the existing data (?)
+
+  # TODO: write this once 'define new `sub` on relation type changes its supertype' is written
+  Scenario: assign new super-relation throws if existing data has roleplayers not present on the new supertype (?)
+
+  # TODO: write this once 'define new `sub` on attribute type changes its supertype' passes
+  Scenario: assign new super-attribute throws if it has a different value type to the current one (?)
+
+  # TODO: write this if 'assign new super-attribute throws if it has a different value type ..' turns out to not throw
+  Scenario: assign new super-attribute throws if it has existing data and a different value type to the new supertype (?)
+
+  # TODO: write this once 'define new `sub` on attribute type changes its supertype' passes
+  Scenario: assign new super-attribute throws if new supertype has a regex and existing data doesn't match it (?)
 
 
   Scenario: define additional 'plays' is visible from all children
