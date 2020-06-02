@@ -36,11 +36,11 @@ Feature: Graql Mutate Schema Query
     Given the integrity is validated
 
 
-  ##############
-  # PRIMITIVES #
-  ##############
+  ############
+  # CONCEPTS #
+  ############
 
-  Scenario: repeatedly defining existing type keeps its properties intact
+  Scenario: re-define existing type keeps its properties intact and is idempotent
     Given graql define
       """
       define
@@ -392,9 +392,9 @@ Feature: Graql Mutate Schema Query
   # TODO: check if rules can infer abstract attributes
   Scenario: change concrete attribute type to abstract throws on commit if it is the conclusion of any rule
 
-  ###############
-  # INHERITANCE #
-  ###############
+  ######################
+  # HIERARCHY MUTATION #
+  ######################
 
   Scenario: define new `sub` on entity type changes its supertype
     Given graql define
@@ -581,6 +581,9 @@ Feature: Graql Mutate Schema Query
   # TODO: write this once 'define new `sub` on attribute type changes its supertype' passes
   Scenario: assign new super-attribute throws if new supertype has a regex and existing data doesn't match it (?)
 
+  ###############
+  # INHERITANCE #
+  ###############
 
   Scenario: define additional 'plays' is visible from all children
     Given graql define

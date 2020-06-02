@@ -278,7 +278,7 @@ Feature: Graql Define Query
       """
 
 
-  Scenario: define multiple copies of the same 'plays' creates a type that plays that role
+  Scenario: define 'plays' is idempotent
     Given graql define
       """
       define
@@ -299,7 +299,7 @@ Feature: Graql Define Query
       | HOU |
 
 
-  Scenario: define multiple copies of the same 'has' creates a type that has that attribute
+  Scenario: define 'has' is idempotent
     Given graql define
       """
       define
@@ -319,7 +319,7 @@ Feature: Graql Define Query
       | HOU |
 
 
-  Scenario: define multiple copies of the same 'key' creates a type that has that key
+  Scenario: define 'key' is idempotent
     Given graql define
       """
       define
@@ -598,7 +598,7 @@ Feature: Graql Define Query
       | FAA |
 
 
-  Scenario: define abstract relation type with no roleplayers creates a type
+  Scenario: define relation type with no roleplayers is valid when marked as abstract
     Given graql define
       """
       define connection sub relation, abstract;
@@ -616,7 +616,7 @@ Feature: Graql Define Query
       | CON |
 
 
-  Scenario: define relation type with multiple copies of the same 'relates' creates a relation type with all distinct roleplayers
+  Scenario: when defining a relation type, duplicate 'relates' are idempotent
     Given graql define
       """
       define
@@ -636,7 +636,7 @@ Feature: Graql Define Query
       | PAR |
 
 
-  Scenario: define relation type 'relates' to a role it plays itself creates a relation type
+  Scenario: when defining a relation type, it can 'relates' to a role it plays itself
     Given graql define
       """
       define
@@ -741,7 +741,7 @@ Feature: Graql Define Query
       """
 
 
-  Scenario: define attribute regex creates a regex
+  Scenario: define attribute regex creates a regex constraint
     Given graql define
       """
       define response sub attribute, value string, regex "^(yes|no|maybe)$";
@@ -928,7 +928,7 @@ Feature: Graql Define Query
       | VDR |
 
 
-  Scenario: define attribute type that has itself creates an attribute
+  Scenario: when defining an attribute type, it can 'has' itself, creating an attribute with self-ownership
     Given graql define
       """
       define number-of-letters sub attribute, value long, has number-of-letters;
@@ -950,7 +950,7 @@ Feature: Graql Define Query
   # RULES #
   #########
 
-  Scenario: define a rule that infers an attribute value creates a rule
+  Scenario: a rule can infer an attribute value
     Given graql define
       """
       define
@@ -978,7 +978,7 @@ Feature: Graql Define Query
       | RUL |
 
 
-  Scenario: define a rule that infers a relation creates a rule
+  Scenario: a rule can infer a relation
     Given graql define
       """
       define
@@ -1004,7 +1004,7 @@ Feature: Graql Define Query
       | RUL |
 
 
-  Scenario: define rule that infers a `key` creates a rule
+  Scenario: a rule can infer a `key`
     Given graql define
       """
       define
@@ -1084,7 +1084,7 @@ Feature: Graql Define Query
       """
 
 
-  Scenario: define a rule with negation creates a rule
+  Scenario: a rule can have negation in its `when` clause
     Given graql define
       """
       define
@@ -1135,22 +1135,17 @@ Feature: Graql Define Query
       """
 
 
-  @ignore
-  # TODO: re-enable when all rules with nested negations throw on commit
   Scenario: define a rule with nested negation throws on commit
-    Given graql define
+    Then graql define throws
       """
       define
       nickname sub name;
       person has nickname;
-      """
-    Given the integrity is validated
-    Then graql define throws
-      """
-      define
-      robert-doesnt-not-have-nickname-bob sub rule,
+      unemployed-robert-maybe-doesnt-not-have-nickname-bob sub rule,
       when {
+        $p isa person;
         not {
+          (employee: $p) isa employment;
           not {
             $p has name "Robert";
           };
@@ -1182,7 +1177,7 @@ Feature: Graql Define Query
       """
 
 
-  Scenario: define a rule with conjunction creates a rule
+  Scenario: a rule can use conjunction in its `when` clause
     Given graql define
       """
       define
