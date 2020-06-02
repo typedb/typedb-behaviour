@@ -20,7 +20,7 @@ Feature: Graql Undefine Query
     Given connection has been opened
     Given connection delete all keyspaces
     Given connection open sessions for keyspaces:
-      | test_define |
+      | test_undefine |
     Given transaction is initialised
     Given the integrity is validated
     Given graql define
