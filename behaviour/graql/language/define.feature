@@ -1116,8 +1116,7 @@ Feature: Graql Define Query
       | RUL |
 
 
-  # TODO: better scenario description? what exactly does 'unbound negated pattern variable' mean?
-  Scenario: define a rule with unbound negated pattern variables throws
+  Scenario: define a rule with a negation block whose pattern variables are all unbound outside the negation block throws
     Then graql define throws
       """
       define
@@ -1139,7 +1138,7 @@ Feature: Graql Define Query
     Then graql define throws
       """
       define
-      nickname sub name;
+      nickname sub attribute, value string;
       person has nickname;
       unemployed-robert-maybe-doesnt-not-have-nickname-bob sub rule,
       when {

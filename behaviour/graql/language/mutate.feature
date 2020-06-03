@@ -124,27 +124,7 @@ Feature: Graql Mutate Schema Query
       | EMP |
 
 
-  Scenario: define additional 'key' on a type adds key to it
-    Given graql define
-      """
-      define employment key email;
-      """
-    Given the integrity is validated
-    When get answers of graql query
-      """
-      match $x has email; get;
-      """
-    Then concept identifiers are
-      |     | check | value      |
-      | PER | label | person     |
-      | EMP | label | employment |
-    Then uniquely identify answer concepts
-      | x   |
-      | PER |
-      | EMP |
-
-
-  Scenario: define additional 'key' on a type adds key to it even if it has existing instances
+  Scenario: additional 'key' can be defined on a type, as long as existing instances have correct keys prior to commit
     Given graql define
       """
       define
@@ -159,10 +139,19 @@ Feature: Graql Mutate Schema Query
       $y isa product, has name "Ham";
       """
     Given the integrity is validated
-    When graql define
+    When graql define without commit
       """
       define
       product key barcode;
+      """
+    When graql insert
+      """
+      match
+      $cheese isa product, has name "Cheese";
+      $ham isa product, has name "Ham";
+      insert
+      $cheese has barcode "643353";
+      $ham has barcode "448";
       """
     When the integrity is validated
     When get answers of graql query
@@ -175,6 +164,30 @@ Feature: Graql Mutate Schema Query
     Then uniquely identify answer concepts
       | x   |
       | PRD |
+
+
+  @ignore
+  # TODO: re-enable when defining additional 'key' on a type throws if it is not added to existing instances prior to commit
+  Scenario: define additional 'key' on a type throws if it is not added to existing instances prior to commit
+    Given graql define
+      """
+      define
+      barcode sub attribute, value string;
+      product sub entity, has name;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $x isa product, has name "Cheese";
+      $y isa product, has name "Ham";
+      """
+    Given the integrity is validated
+    Then graql define throws
+      """
+      define
+      product key barcode;
+      """
 
 
   Scenario: define additional 'relates' on a relation type adds roleplayer to it
