@@ -1176,6 +1176,7 @@ Feature: Graql Define Query
       | RUL |
 
 
+  # Keys are validated at commit time, so integrity will not be harmed by writing one in a rule.
   Scenario: a rule can infer a `key`
     Given graql define
       """
