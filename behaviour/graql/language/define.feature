@@ -598,7 +598,7 @@ Feature: Graql Define Query
       | FAA |
 
 
-  Scenario: define relation type with no roleplayers is valid when marked as abstract
+  Scenario: a relation type can be defined with no roleplayers when it is marked as abstract
     Given graql define
       """
       define connection sub relation, abstract;
@@ -660,7 +660,7 @@ Feature: Graql Define Query
   ##############
 
 
-  Scenario: define attribute creates a type
+  Scenario: an attribute with type `string` can be defined
     Given graql define
       """
       define favourite-food sub attribute, value string;
@@ -676,6 +676,92 @@ Feature: Graql Define Query
     Then uniquely identify answer concepts
       | x   |
       | FAV |
+
+
+  Scenario: an attribute with type `long` can be defined
+    Given graql define
+      """
+      define number-of-cows sub attribute, value long;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x type number-of-cows; get;
+      """
+    Then concept identifiers are
+      |     | check | value          |
+      | NOC | label | number-of-cows |
+    Then uniquely identify answer concepts
+      | x   |
+      | NOC |
+
+
+  Scenario: an attribute with type `double` can be defined
+    Given graql define
+      """
+      define density sub attribute, value double;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x type density; get;
+      """
+    Then concept identifiers are
+      |     | check | value   |
+      | DEN | label | density |
+    Then uniquely identify answer concepts
+      | x   |
+      | DEN |
+
+
+  Scenario: an attribute with type `boolean` can be defined
+    Given graql define
+      """
+      define can-fly sub attribute, value boolean;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x type can-fly; get;
+      """
+    Then concept identifiers are
+      |     | check | value   |
+      | CFL | label | can-fly |
+    Then uniquely identify answer concepts
+      | x   |
+      | CFL |
+
+
+  Scenario: an attribute with type `datetime` can be defined
+    Given graql define
+      """
+      define flight-date sub attribute, value datetime;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x type flight-date; get;
+      """
+    Then concept identifiers are
+      |     | check | value       |
+      | FLD | label | flight-date |
+    Then uniquely identify answer concepts
+      | x   |
+      | FLD |
+
+
+  Scenario: define attribute type throws if you don't specify 'value'
+    Then graql define throws
+      """
+      define colour sub attribute;
+      """
+
+
+  Scenario: define attribute type throws if 'value' is invalid
+    Then graql define throws
+      """
+      define colour sub attribute, value rgba;
+      """
 
 
   Scenario: define attribute subtype creates child of its parent type
@@ -716,20 +802,6 @@ Feature: Graql Define Query
     Then uniquely identify answer concepts
       | x      |
       | F_NAME |
-
-
-  Scenario: define attribute type throws if you don't specify 'value'
-    Then graql define throws
-      """
-      define colour sub attribute;
-      """
-
-
-  Scenario: define attribute type throws if 'value' is invalid
-    Then graql define throws
-      """
-      define colour sub attribute, value rgba;
-      """
 
 
   @ignore
@@ -926,6 +998,106 @@ Feature: Graql Define Query
       | DRK |
       | DKR |
       | VDR |
+
+
+  Scenario: a type can `has` an attribute of type `string`
+    Given graql define
+      """
+      define
+      first-word sub attribute, value string;
+      person has first-word;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x has first-word; get;
+      """
+    Then concept identifiers are
+      |     | check | value  |
+      | PER | label | person |
+    Then uniquely identify answer concepts
+      | x   |
+      | PER |
+
+
+  Scenario: a type can `has` an attribute of type `long`
+    Given graql define
+      """
+      define
+      number-of-fingers sub attribute, value long;
+      person has number-of-fingers;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x has number-of-fingers; get;
+      """
+    Then concept identifiers are
+      |     | check | value  |
+      | PER | label | person |
+    Then uniquely identify answer concepts
+      | x   |
+      | PER |
+
+
+  Scenario: a type can `has` an attribute of type `double`
+    Given graql define
+      """
+      define
+      height sub attribute, value double;
+      person has height;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x has height; get;
+      """
+    Then concept identifiers are
+      |     | check | value  |
+      | PER | label | person |
+    Then uniquely identify answer concepts
+      | x   |
+      | PER |
+
+
+  Scenario: a type can `has` an attribute of type `boolean`
+    Given graql define
+      """
+      define
+      is-sleeping sub attribute, value boolean;
+      person has is-sleeping;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x has is-sleeping; get;
+      """
+    Then concept identifiers are
+      |     | check | value  |
+      | PER | label | person |
+    Then uniquely identify answer concepts
+      | x   |
+      | PER |
+
+
+  Scenario: a type can `has` an attribute of type `datetime`
+    Given graql define
+      """
+      define
+      graduation-date sub attribute, value datetime;
+      person has graduation-date;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x has graduation-date; get;
+      """
+    Then concept identifiers are
+      |     | check | value  |
+      | PER | label | person |
+    Then uniquely identify answer concepts
+      | x   |
+      | PER |
 
 
   Scenario: when defining an attribute type, it can 'has' itself, creating an attribute with self-ownership
@@ -1155,6 +1327,28 @@ Feature: Graql Define Query
       """
 
 
+  Scenario: define a rule with two negations throws on commit
+    Then graql define throws
+      """
+      define
+      nickname sub attribute, value string;
+      residence sub relation, relates resident;
+      person has nickname, plays resident;
+      unemployed-homeless-robert-has-nickname-bob sub rule,
+      when {
+        $p isa person, has name "Robert";
+        not {
+          (employee: $p) isa employment;
+        };
+        not {
+          (resident: $p) isa residence;
+        };
+      }, then {
+        $p has nickname "Bob";
+      };
+      """
+
+
   Scenario: define a rule with two conclusions throws on commit
     Given graql define
       """
@@ -1218,6 +1412,7 @@ Feature: Graql Define Query
       define
       sophie-and-fiona-have-nickname-fi sub rule,
       when {
+        $p isa person;
         {$p has name "Sophie";} or {$p has name "Fiona";};
       }, then {
         $p has nickname "Fi";
@@ -1323,6 +1518,7 @@ Feature: Graql Define Query
       };
       """
 
+
   @ignore
   # TODO: re-enable when rules cannot infer abstract relations
   Scenario: define rule that infers an abstract relation throws on commit
@@ -1340,7 +1536,23 @@ Feature: Graql Define Query
       };
       """
 
-  Scenario: define rule that infers an abstract attribute throws on commit (?)
+
+  @ignore
+  # TODO: re-enable when rules cannot infer abstract attribute values
+  Scenario: define rule that infers an abstract attribute value throws on commit
+    Then graql define throws
+      """
+      define
+      number-of-devices sub attribute, value long, abstract;
+      person has number-of-devices;
+      karl-is-allergic-to-technology sub rule,
+      when {
+        $karl isa person, has name "Karl";
+      }, then {
+        $karl has number-of-devices 0;
+      };
+      """
+
 
   Scenario: define a rule that negates its conclusion in the `when`, causing a loop, throws on commit
     Then graql define throws
@@ -1603,7 +1815,7 @@ Feature: Graql Define Query
       """
 
 
-  Scenario: repeatedly define type as abstract creates an abstract type
+  Scenario: defining a type as abstract is idempotent
     Given graql define
       """
       define animal sub entity, abstract, abstract, abstract;
