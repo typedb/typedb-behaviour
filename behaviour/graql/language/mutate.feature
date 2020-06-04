@@ -638,18 +638,14 @@ Feature: Graql Mutate Schema Query
       match $x type child, plays $r; get;
       """
     Then concept identifiers are
-      |             | check | value            |
-      | EMPLOYEE    | label | employee         |
-      | EMPLOYER    | label | employer         |
-      | NAME_OWNER  | label | @has-name-owner  |
-      | EMAIL_OWNER | label | @key-email-owner |
-      | CHILD       | label | child            |
+      |             | check | value       |
+      | EMPLOYEE    | label | employee    |
+      | EMPLOYER    | label | employer    |
+      | CHILD       | label | child       |
     Then uniquely identify answer concepts
       | x     | r           |
       | CHILD | EMPLOYEE    |
       | CHILD | EMPLOYER    |
-      | CHILD | NAME_OWNER  |
-      | CHILD | EMAIL_OWNER |
 
 
   @ignore
