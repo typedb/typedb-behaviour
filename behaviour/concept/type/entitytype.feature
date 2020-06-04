@@ -22,7 +22,7 @@ Feature: Concept Entity Type
     Given connection delete all keyspaces
     Given connection does not have any keyspace
     Given connection create keyspace: grakn
-    Given connection open session for keyspace: grakn
+    Given connection open schema session for keyspace: grakn
     Given session opens transaction of type: write
 
   Scenario: Entity types can be created
