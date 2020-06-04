@@ -318,16 +318,12 @@ Feature: Graql Define Query
       | EMPLOYEE    | label | employee         |
       | EMPLOYER    | label | employer         |
       | EARNER      | label | earner           |
-      | NAME_OWNER  | label | @has-name-owner  |
-      | EMAIL_OWNER | label | @key-email-owner |
       | CHILD       | label | child            |
     Then uniquely identify answer concepts
       | x     | r           |
       | CHILD | EMPLOYEE    |
       | CHILD | EMPLOYER    |
       | CHILD | EARNER      |
-      | CHILD | NAME_OWNER  |
-      | CHILD | EMAIL_OWNER |
 
 
   @ignore
