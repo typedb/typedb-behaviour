@@ -86,6 +86,7 @@ Feature: Graql Define Query
       """
       define book sub entity, has pages;
       """
+    Then the integrity is validated
 
 
   Scenario: define that a type 'has' an entity type throws
@@ -93,6 +94,7 @@ Feature: Graql Define Query
       """
       define house sub entity, has person;
       """
+    Then the integrity is validated
 
 
   Scenario: define that a type 'has' a relation type throws
@@ -100,6 +102,7 @@ Feature: Graql Define Query
       """
       define company sub entity, has employment;
       """
+    Then the integrity is validated
 
 
   Scenario: define that a type 'plays' an undefined role throws
@@ -107,6 +110,7 @@ Feature: Graql Define Query
       """
       define house sub entity, plays constructed-thing;
       """
+    Then the integrity is validated
 
 
   Scenario: define that a type 'plays' another type throws
@@ -114,6 +118,7 @@ Feature: Graql Define Query
       """
       define parrot sub entity, plays person;
       """
+    Then the integrity is validated
 
 
   Scenario: define that a type 'key' an entity type throws
@@ -121,6 +126,7 @@ Feature: Graql Define Query
       """
       define passport sub entity, key person;
       """
+    Then the integrity is validated
 
 
   Scenario: define entity subtype inherits 'plays' from its parent type
@@ -276,6 +282,7 @@ Feature: Graql Define Query
       """
       define dog sub dog;
       """
+    Then the integrity is validated
 
 
   Scenario: define 'plays' is idempotent
@@ -344,6 +351,7 @@ Feature: Graql Define Query
       """
       define flying-spaghetti-monster;
       """
+    Then the integrity is validated
 
 
   #############
@@ -395,6 +403,7 @@ Feature: Graql Define Query
       """
       define useless-relation sub relation;
       """
+    Then the integrity is validated
 
 
   @ignore
@@ -755,6 +764,7 @@ Feature: Graql Define Query
       """
       define colour sub attribute;
       """
+    Then the integrity is validated
 
 
   Scenario: define attribute type throws if 'value' is invalid
@@ -762,6 +772,7 @@ Feature: Graql Define Query
       """
       define colour sub attribute, value rgba;
       """
+    Then the integrity is validated
 
 
   Scenario: define attribute subtype creates child of its parent type
@@ -811,6 +822,7 @@ Feature: Graql Define Query
       """
       define code-name sub name, value long;
       """
+    Then the integrity is validated
 
 
   Scenario: define attribute regex creates a regex constraint
@@ -836,6 +848,8 @@ Feature: Graql Define Query
       """
       define name-in-binary sub attribute, value long, regex "^(0|1)+$";
       """
+    Then the integrity is validated
+
 
   Scenario: define attribute subtype inherits 'plays' from its parent type
     Given graql define
@@ -1214,6 +1228,7 @@ Feature: Graql Define Query
         $p has nickname "Bob";
       };
       """
+    Then the integrity is validated
 
 
   Scenario: define a rule with no `then` clause throws
@@ -1227,6 +1242,7 @@ Feature: Graql Define Query
         $p has name "Robert";
       };
       """
+    Then the integrity is validated
 
 
   Scenario: define a rule with an empty `when` clause throws
@@ -1241,6 +1257,7 @@ Feature: Graql Define Query
         $p has nickname "Bob";
       };
       """
+    Then the integrity is validated
 
 
   Scenario: define a rule with an empty `then` clause throws
@@ -1255,6 +1272,7 @@ Feature: Graql Define Query
       }, then {
       };
       """
+    Then the integrity is validated
 
 
   Scenario: a rule can have negation in its `when` clause
@@ -1305,6 +1323,7 @@ Feature: Graql Define Query
         $register has has-robert false;
       };
       """
+    Then the integrity is validated
 
 
   Scenario: define a rule with nested negation throws on commit
@@ -1326,6 +1345,7 @@ Feature: Graql Define Query
         $p has nickname "Bob";
       };
       """
+    Then the integrity is validated
 
 
   Scenario: define a rule with two negations throws on commit
@@ -1348,6 +1368,7 @@ Feature: Graql Define Query
         $p has nickname "Bob";
       };
       """
+    Then the integrity is validated
 
 
   Scenario: define a rule with two conclusions throws on commit
@@ -1369,6 +1390,7 @@ Feature: Graql Define Query
         $p has nickname "Bobby";
       };
       """
+    Then the integrity is validated
 
 
   Scenario: a rule can use conjunction in its `when` clause
@@ -1419,6 +1441,7 @@ Feature: Graql Define Query
         $p has nickname "Fi";
       };
       """
+    Then the integrity is validated
 
 
   Scenario: define rule with an unbound variable in the `then` throws on commit
@@ -1439,6 +1462,7 @@ Feature: Graql Define Query
         $q has nickname "Who am I?";
       };
       """
+    Then the integrity is validated
 
 
   Scenario: define rule with an undefined attribute set in `then` throws on commit
@@ -1452,6 +1476,7 @@ Feature: Graql Define Query
         $person has age 1960;
       };
       """
+    Then the integrity is validated
 
 
   Scenario: define rule with an attribute set in `then` on a type that can't have that attribute throws on commit
@@ -1466,6 +1491,7 @@ Feature: Graql Define Query
         $person has age 1960;
       };
       """
+    Then the integrity is validated
 
 
   @ignore
@@ -1488,6 +1514,7 @@ Feature: Graql Define Query
         $p has nickname 5;
       };
       """
+    Then the integrity is validated
 
 
   Scenario: define rule that infers a relation whose type is undefined throws on commit
@@ -1502,6 +1529,7 @@ Feature: Graql Define Query
         (criminal: $bonnie, sidekick: $clyde) isa partners-in-crime;
       };
       """
+    Then the integrity is validated
 
 
   Scenario: define rule that infers a relation with an incorrect roleplayer throws on commit
@@ -1518,6 +1546,7 @@ Feature: Graql Define Query
         (criminal: $bonnie, sidekick: $clyde) isa partners-in-crime;
       };
       """
+    Then the integrity is validated
 
 
   @ignore
@@ -1536,6 +1565,7 @@ Feature: Graql Define Query
         (criminal: $bonnie, sidekick: $clyde) isa partners-in-crime;
       };
       """
+    Then the integrity is validated
 
 
   @ignore
@@ -1553,6 +1583,7 @@ Feature: Graql Define Query
         $karl has number-of-devices 0;
       };
       """
+    Then the integrity is validated
 
 
   Scenario: define a rule that negates its conclusion in the `when`, causing a loop, throws on commit
@@ -1569,6 +1600,7 @@ Feature: Graql Define Query
         (employee: $person) isa employment;
       };
       """
+    Then the integrity is validated
 
 
   @ignore
@@ -1592,6 +1624,7 @@ Feature: Graql Define Query
       $p has nickname "Bobby";
     };
     """
+    Then the integrity is validated
 
 
   ##################
@@ -1803,6 +1836,7 @@ Feature: Graql Define Query
         $p has nickname "Bob";
       };
       """
+    Then the integrity is validated
 
 
   @ignore
@@ -1814,6 +1848,7 @@ Feature: Graql Define Query
       exception sub entity;
       grakn-exception sub exception, abstract;
       """
+    Then the integrity is validated
 
 
   Scenario: defining a type as abstract is idempotent

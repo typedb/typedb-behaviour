@@ -68,6 +68,7 @@ Feature: Graql Mutate Schema Query
       person sub relation, relates body-part;
       arm sub entity, plays body-part;
       """
+    Then the integrity is validated
 
 
   Scenario: change relation type to attribute type throws
@@ -75,6 +76,7 @@ Feature: Graql Mutate Schema Query
       """
       define employment sub attribute, value string;
       """
+    Then the integrity is validated
 
 
   Scenario: change attribute type to entity type throws
@@ -82,6 +84,7 @@ Feature: Graql Mutate Schema Query
       """
       define name sub entity;
       """
+    Then the integrity is validated
 
 
   Scenario: define additional 'has' on a type adds attribute to it
@@ -188,6 +191,7 @@ Feature: Graql Mutate Schema Query
       define
       product key barcode;
       """
+    Then the integrity is validated
 
 
   Scenario: define additional 'relates' on a relation type adds roleplayer to it
@@ -245,6 +249,7 @@ Feature: Graql Mutate Schema Query
       """
       define name regex "^A.*$";
       """
+    Then the integrity is validated
 
 
   Scenario: define additional 'regex' on a long-valued attribute type throws
@@ -257,6 +262,7 @@ Feature: Graql Mutate Schema Query
       """
       define house-number regex "^A.*$";
       """
+    Then the integrity is validated
 
 
   Scenario: add 'relates' to entity type throws
@@ -264,6 +270,7 @@ Feature: Graql Mutate Schema Query
       """
       define person relates employee;
       """
+    Then the integrity is validated
 
 
   Scenario: add 'relates' to attribute type throws
@@ -271,6 +278,7 @@ Feature: Graql Mutate Schema Query
       """
       define name relates employee;
       """
+    Then the integrity is validated
 
 
   Scenario: modify attribute value type throws
@@ -278,6 +286,7 @@ Feature: Graql Mutate Schema Query
       """
       define name value long;
       """
+    Then the integrity is validated
 
 
   Scenario: modify rule definition throws
@@ -304,6 +313,7 @@ Feature: Graql Mutate Schema Query
         $p has nickname "bob";
       };
       """
+    Then the integrity is validated
 
 
   ##################
@@ -375,6 +385,7 @@ Feature: Graql Mutate Schema Query
       """
       define person abstract;
       """
+    Then the integrity is validated
 
 
   Scenario: add abstract to existing relation type throws on commit if it has an existing instance
@@ -391,6 +402,7 @@ Feature: Graql Mutate Schema Query
       """
       define name abstract;
       """
+    Then the integrity is validated
 
 
   @ignore

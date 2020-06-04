@@ -205,6 +205,7 @@ Feature: Graql Undefine Query
       """
       undefine abstract-type abstract;
       """
+    Then the integrity is validated
 
 
   Scenario: undefine a regex on an attribute type, removes regex constraints on attribute
@@ -268,3 +269,4 @@ Feature: Graql Undefine Query
       """
       undefine person sub entity;
       """
+    Then the integrity is validated
