@@ -20,7 +20,7 @@ Feature: Graql Undefine Query
     Given connection has been opened
     Given connection delete all keyspaces
     Given connection open sessions for keyspaces:
-      | test_define |
+      | test_undefine |
     Given transaction is initialised
     Given the integrity is validated
     Given graql define
@@ -66,7 +66,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x type child; $x plays $role; get; 
+      match $x type child; $x plays employee; get;
       """
     Then answer size is: 0
 
@@ -205,6 +205,7 @@ Feature: Graql Undefine Query
       """
       undefine abstract-type abstract;
       """
+    Then the integrity is validated
 
 
   Scenario: undefine a regex on an attribute type, removes regex constraints on attribute
@@ -268,3 +269,4 @@ Feature: Graql Undefine Query
       """
       undefine person sub entity;
       """
+    Then the integrity is validated
