@@ -40,26 +40,32 @@ Feature: Graql Insert Query
       name sub attribute,
         value string,
         key ref;
+      ref sub attribute,
+        value long;
       """
     Given the integrity is validated
 
 
-  # TODO: split into 3 tests: entity, attribute, relation
+  # TODO: make 3 tests: entity, attribute, relation
   Scenario: insert an instance creates instance of that type
     When graql insert
       """
       insert
-        $x isa person, has name $a via $imp, has ref 0;
-        $r (employee: $x) isa employment, has ref 1;
-        $a "John" isa name, has ref 2;
+      $name "John" isa name, has ref 0;
+      $x isa person, has name $name, has ref 1;
       """
     When the integrity is validated
 
-    Then get answers of graql query
+    When get answers of graql query
       """
-      match $x isa thing; get;
+      match $x isa thing; $x has name "John"; get;
       """
-    Then answer size is: 3
+    Then concept identifiers are
+      |     | check | value |
+      | JHN | key   | ref:1 |
+    Then uniquely identify answer concepts
+      | x   |
+      | JHN |
 
 
   Scenario: an attribute value can be set on insert when its value type is `string`
