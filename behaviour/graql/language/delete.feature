@@ -204,6 +204,7 @@ Feature: Graql Delete Query
       delete
         $r isa person;
       """
+    Then the integrity is validated
 
 
   Scenario: delete an instance using too-specific (downcasting) type throws
@@ -229,6 +230,7 @@ Feature: Graql Delete Query
       delete
         $r isa special-friendship;
       """
+    Then the integrity is validated
 
 
   Scenario: delete a role player from a relation removes the player from the relation
@@ -519,6 +521,7 @@ Feature: Graql Delete Query
       delete
         $r (friend: $x, friend: $x);
       """
+    Then the integrity is validated
 
 
   Scenario: delete all role players of relation cleans up relation instance
@@ -581,6 +584,7 @@ Feature: Graql Delete Query
       delete
         $r (special-friend: $x);
       """
+    Then the integrity is validated
 
 
   Scenario: delete attribute ownership makes attribute invisible to owner
@@ -650,6 +654,8 @@ Feature: Graql Delete Query
       """
       match $x isa person; delete $n isa name;
       """
+    Then the integrity is validated
+
 
   Scenario: delete complex pattern
     When graql define
@@ -795,6 +801,7 @@ Feature: Graql Delete Query
       delete
         $x has name $n;
       """
+    Then the integrity is validated
 
 
   Scenario: delete a type throws
@@ -805,3 +812,4 @@ Feature: Graql Delete Query
       delete
         $x sub type;
       """
+    Then the integrity is validated
