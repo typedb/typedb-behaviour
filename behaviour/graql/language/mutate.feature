@@ -289,6 +289,14 @@ Feature: Graql Mutate Schema Query
     Then the integrity is validated
 
 
+  Scenario: add attribute as `key` to a type that already `has` that attribute throws
+    Then graql define throws
+      """
+      define person key name;
+      """
+    Then the integrity is validated
+
+
   Scenario: modify rule definition throws
     Given graql define
       """
