@@ -66,7 +66,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x type child; $x plays $role; get; 
+      match $x type child; $x plays employee; get;
       """
     Then answer size is: 0
 
