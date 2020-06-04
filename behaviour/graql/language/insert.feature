@@ -44,7 +44,7 @@ Feature: Graql Insert Query
     When graql insert
       """
       insert
-        $x isa person, has name $a via $imp;
+        $x isa person, has name $a;
         $r (employee: $x) isa employment;
         $a "John" isa name;
       """
@@ -54,7 +54,7 @@ Feature: Graql Insert Query
       """
       match $x isa thing; get;
       """
-    Then answer size is: 4
+    Then answer size is: 3
 
 
   Scenario: insert an additional role player is visible in the relation
