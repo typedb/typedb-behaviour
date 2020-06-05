@@ -23,6 +23,5 @@ exports_files([
     "delete.feature",
     "insert.feature",
     "match.feature",
-    "mutate.feature",
     "undefine.feature",
 ])
