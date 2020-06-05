@@ -2471,14 +2471,16 @@ Feature: Graql Define Query
       match $x type child, plays $r; get;
       """
     Then concept identifiers are
-      |             | check | value       |
-      | EMPLOYEE    | label | employee    |
-      | EMPLOYER    | label | employer    |
-      | CHILD       | label | child       |
+      |             | check | value     |
+      | EMPLOYEE    | label | employee  |
+      | EMPLOYER    | label | employer  |
+      | EARNER      | label | earner    |
+      | CHILD       | label | child     |
     Then uniquely identify answer concepts
       | x     | r           |
       | CHILD | EMPLOYEE    |
       | CHILD | EMPLOYER    |
+      | CHILD | EARNER      |
 
 
   @ignore
