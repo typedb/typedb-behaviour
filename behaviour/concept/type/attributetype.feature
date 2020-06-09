@@ -121,20 +121,20 @@ Feature: Concept Attribute Type
     When attribute(name) set abstract: true
     When put attribute type: email, value type: string
     Then attribute(name) is abstract: true
-    # Then attribute(name) creates instance successfully: false
+    Then attribute(name) as(string) fails at putting an instance
     Then attribute(email) is abstract: false
     When transaction commits
     When session opens transaction of type: write
     Then attribute(name) is abstract: true
-    # Then attribute(name) creates instance successfully: false
+    Then attribute(name) as(string) fails at putting an instance
     Then attribute(email) is abstract: false
     When attribute(email) set abstract: true
     Then attribute(email) is abstract: true
-    # Then attribute(email) creates instance successfully: false
+    Then attribute(email) as(string) fails at putting an instance
     When transaction commits
     When session opens transaction of type: write
     Then attribute(email) is abstract: true
-    # Then attribute(email) creates instance successfully: false
+    Then attribute(email) as(string) fails at putting an instance
 
   Scenario: Attribute types can be subtypes of other attribute types
     When put attribute type: first-name, value type: string

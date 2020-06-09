@@ -142,7 +142,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) is abstract: true
     Then relation(marriage) get role(husband) is abstract: true
     Then relation(marriage) get role(wife) is abstract: true
-    # Then relation(marriage) creates instance successfully: false
+    Then relation(marriage) fails at creating an instance
     Then relation(parentship) is abstract: false
     Then relation(parentship) get role(parent) is abstract: false
     Then relation(parentship) get role(child) is abstract: false
@@ -151,7 +151,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) is abstract: true
     Then relation(marriage) get role(husband) is abstract: true
     Then relation(marriage) get role(wife) is abstract: true
-    # Then relation(marriage) creates instance successfully: false
+    Then relation(marriage) fails at creating an instance
     Then relation(parentship) is abstract: false
     Then relation(parentship) get role(parent) is abstract: false
     Then relation(parentship) get role(child) is abstract: false
@@ -159,13 +159,13 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) is abstract: true
     Then relation(parentship) get role(parent) is abstract: true
     Then relation(parentship) get role(child) is abstract: true
-    # Then relation(parentship) creates instance successfully: false
+    Then relation(parentship) fails at creating an instance
     When transaction commits
     When session opens transaction of type: read
     Then relation(parentship) is abstract: true
     Then relation(parentship) get role(parent) is abstract: true
     Then relation(parentship) get role(child) is abstract: true
-    # Then relation(parentship) creates instance successfully: false
+    Then relation(parentship) fails at creating an instance
 
   Scenario: Relation and role types can be subtypes of other relation and role types
     When put relation type: parentship
