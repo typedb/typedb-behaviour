@@ -383,6 +383,11 @@ Feature: Graql Define Query
 
 
   Scenario: add attribute instance to thing in 'define' query throws
+    Then graql define throws
+      """
+      define $p has name "Loch Ness Monster";
+      """
+
 
   @ignore
   # TODO: re-enable when writing a variable in a 'define' is forbidden
@@ -1320,9 +1325,6 @@ Feature: Graql Define Query
       | x   |
       | JSE |
       | RUL |
-
-
-  Scenario: `sub rule` can be omitted when defining a rule
 
 
   Scenario: define a rule with no `when` clause throws
