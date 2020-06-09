@@ -354,6 +354,41 @@ Feature: Graql Define Query
     Then the integrity is validated
 
 
+  Scenario: define entity type with 'value' throws
+    Then graql define throws
+      """
+      define cream sub entity, value double;
+      """
+
+
+  Scenario: define type with a 'when' block throws
+    Then graql define throws
+      """
+      define gorilla sub entity, when { $x isa gorilla; };
+      """
+
+
+  Scenario: define type with a 'then' block throws
+    Then graql define throws
+      """
+      define godzilla sub entity, then { $x isa godzilla; };
+      """
+
+
+  Scenario: attempt to define a thing with 'isa' throws
+    Then graql define throws
+      """
+      define $p isa person;
+      """
+
+
+  Scenario: add attribute instance to thing in 'define' query throws
+
+  @ignore
+  # TODO: re-enable when writing a variable in a 'define' is forbidden
+  Scenario: write a variable in a 'define' throws
+
+
   #############
   # RELATIONS #
   #############
@@ -427,6 +462,27 @@ Feature: Graql Define Query
       | x   |
       | EMP |
       | PTT |
+
+
+  Scenario: define a subrole using 'as' creates child of parent role
+    Given graql define
+      """
+      define
+      parenthood sub relation, relates parent, relates child;
+      father-sonhood sub parenthood, relates father as parent, relates son as child;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match
+      $x sub parent; $y sub child; get $x, $y;
+      """
+    Then concept identifiers are
+      |     | check | value  |
+      | PAR | label | parent |
+      | FAT | label | father |
+      | CHI | label | child  |
+      | SON | label | son    |
 
 
   @ignore
@@ -662,6 +718,55 @@ Feature: Graql Define Query
     Then uniquely identify answer concepts
       | x   |
       | REC |
+
+
+  Scenario: define `sub role` creates a role, provided it is used in a relation
+    Given graql define
+      """
+      define
+      team-member sub role;
+      team sub relation, relates team-member;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x type team-member; get;
+      """
+    Then concept identifiers are
+      |     | check | value       |
+      | TMM | label | team-member |
+    Then uniquely identify answer concepts
+      | x   |
+      | TMM |
+
+
+  Scenario: define a role throws if it is not used in any relation
+    Given graql define throws
+      """
+      define
+      lonely-team-member sub role;
+      """
+
+
+  Scenario: define a subrole using `sub` creates child of parent role
+    Given graql define
+      """
+      define
+      team-member sub role;
+      team-leader sub team-member;
+      team sub relation, relates team-member, relates team-leader;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x type team-leader; get;
+      """
+    Then concept identifiers are
+      |     | check | value       |
+      | TML | label | team-leader |
+    Then uniquely identify answer concepts
+      | x   |
+      | TML |
 
 
   ##############
@@ -1215,6 +1320,9 @@ Feature: Graql Define Query
       | x   |
       | JSE |
       | RUL |
+
+
+  Scenario: `sub rule` can be omitted when defining a rule
 
 
   Scenario: define a rule with no `when` clause throws
@@ -2293,8 +2401,6 @@ Feature: Graql Define Query
   Scenario: define new `sub` on relation type changes its supertype
 
 
-  @ignore
-  # TODO: re-enable when we can switch attributes to new supertypes
   Scenario: define new `sub` on attribute type changes its supertype
     Given graql define
       """
