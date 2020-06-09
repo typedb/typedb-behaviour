@@ -354,6 +354,12 @@ Feature: Graql Define Query
     Then the integrity is validated
 
 
+
+  @ignore
+  # TODO: re-enable when writing a variable in a 'define' is forbidden
+  Scenario: write a variable in a 'define' throws
+
+
   #############
   # RELATIONS #
   #############
