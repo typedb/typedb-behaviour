@@ -36,7 +36,15 @@ Feature: Graql Delete Query
       """
     Given the integrity is validated
 
-  Scenario: delete an instance using 'thing' meta label succeeds
+
+  Scenario: entities can be deleted
+
+  Scenario: relations can be deleted
+
+  Scenario: attributes can be deleted
+
+
+  Scenario: when deleting multiple variables, they all get deleted
     When graql insert
       """
       insert
