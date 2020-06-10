@@ -498,10 +498,10 @@ Feature: Graql Reasoning Explanation
       | company-is-liable | { $c2 isa company, has name $n2; $n2 "the-company"; };  | { $c2 has is-liable $l; $l true; }; |
 
     Then answers contain explanation tree
-      |   | children  | vars    | identifiers | rule        | pattern                                                                                                                                                                                                                                       |
-      | 0 | 1         | com     | ACO         | disjunction | { $com isa company; $com has name $n1; $n1 == "the-company"; $com id <answer.com.id>; not { $com has is-liable $liability; }; } or {$com isa company; $com has name $n2; $n2 == "another-company"; not {$com has is-liable $liability; }; };  |
-      | 1 | 2         | com, n2 | ACO, N2     | negation    | { $com isa company; $com has name $n2; $n2 == "another-company"; $com id <answer.com.id>; $n2 id <answer.n2.id>; not {$com has is-liable $liability; $com id <answer.com.id>;}; };                                                            |
-      | 2 | -         | com, n2 | ACO, N2     | lookup      | { $com isa company; $com has name $n2; $n2 == "another-company"; $com id <answer.com.id>; $n2 id <answer.n2.id>; };                                                                                                                           |
+      |   | children  | vars    | identifiers | rule        | pattern                                                                                                                                                                                                                                           |
+      | 0 | 1         | com     | ACO         | disjunction | { $com id <answer.com.id>; { $com isa company; $com has name $n1; $n1 == "the-company"; not { $com has is-liable $liability; }; } or {$com isa company; $com has name $n2; $n2 == "another-company"; not {$com has is-liable $liability; }; }; }; |
+      | 1 | 2         | com, n2 | ACO, N2     | negation    | { $com isa company; $com has name $n2; $n2 == "another-company"; $com id <answer.com.id>; $n2 id <answer.n2.id>; not {$com has is-liable $liability; }; };                                                                                        |
+      | 2 | -         | com, n2 | ACO, N2     | lookup      | { $com isa company; $com has name $n2; $n2 == "another-company"; $com id <answer.com.id>; $n2 id <answer.n2.id>; };                                                                                                                               |
 
   Scenario: a rule containing a negation has explanation as expected
     Given graql define
@@ -561,10 +561,10 @@ Feature: Graql Reasoning Explanation
       | company-is-liable | { $c2 isa company; not { $c2 has name $n2; $n2 "the-company"; }; }; | { $c2 has is-liable $l; $l true; }; |
 
     Then answers contain explanation tree
-      |   | children  | vars      | identifiers | rule              | pattern                                                                                                       |
-      | 0 | 1         | com, lia  | ACO, LIA    | company-is-liable | { $com isa company; $com has is-liable $lia; $lia true; $com id <answer.com.id>; $lia id <answer.lia.id>; };  |
-      | 1 | 2         | c2        | ACO         | negation          | { $c2 isa company; $c2 id <answer.c2.id>; not { $c2 has name $n2; $n2 == "the-company"; }; };                 |
-      | 2 | -         | c2        | ACO         | lookup            | { $c2 isa company; $c2 id <answer.c2.id>; };                                                                  |
+      |   | children  | vars      | identifiers | rule              | pattern                                                                                                         |
+      | 0 | 1         | com, lia  | ACO, LIA    | company-is-liable | { $com isa company; $com has is-liable $lia; $lia == true; $com id <answer.com.id>; $lia id <answer.lia.id>; }; |
+      | 1 | 2         | c2        | ACO         | negation          | { $c2 isa company; $c2 id <answer.c2.id>; not { $c2 has name $n2; $n2 == "the-company"; }; };                   |
+      | 2 | -         | c2        | ACO         | lookup            | { $c2 isa company; $c2 id <answer.c2.id>; };                                                                    |
 
   Scenario: a query containing multiple negations with conjunctions inside has explanation as expected
     Given graql define
@@ -621,8 +621,8 @@ Feature: Graql Reasoning Explanation
       | company-is-liable | { $c2 isa company; $c2 has name $n2; $n2 "the-company"; } | { $c2 has is-liable $l; $l true; }; |
 
     Then answers contain explanation tree
-      |   | children  | vars  | identifiers | rule      | pattern                                                                                                                                     |
-      | 0 | 1         | com   | ACO         | negation  | { $com isa company; $com id <answer.com.id>; not{ $com has is-liable $lia; $lia true; }; not{ $com has name $n; $n == "the-company"; }; };  |
-      | 1 | -         | com   | ACO         | lookup    | { $com isa company; $com id <answer.com.id>; };                                                                                             |
+      |   | children  | vars  | identifiers | rule      | pattern                                                                                                                                       |
+      | 0 | 1         | com   | ACO         | negation  | { $com isa company; $com id <answer.com.id>; not{ $com has is-liable $lia; $lia == true; }; not{ $com has name $n; $n == "the-company"; }; }; |
+      | 1 | -         | com   | ACO         | lookup    | { $com isa company; $com id <answer.com.id>; };                                                                                               |
 
 
