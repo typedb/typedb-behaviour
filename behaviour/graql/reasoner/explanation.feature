@@ -10,6 +10,40 @@ Feature: Graql Reasoning Explanation
       | test_explanation |
     Given transaction is initialised
 
+  Scenario: atomic query is explained as expected when there is no inference
+    Given graql define
+      """
+      define
+      name sub attribute,
+          value string;
+
+      person sub entity,
+        key name;
+      """
+
+    When graql insert
+      """
+      insert
+      $p isa person, has name "Alice";
+      """
+
+    Then get answers of graql query
+      """
+      match $p isa person; get;
+      """
+
+    Then concept identifiers are
+      |     | check | value       |
+      | AL  | key   | name:Alice  |
+
+    Then uniquely identify answer concepts
+      | p  |
+      | AL |
+
+    Then answers contain explanation tree
+      |   | children | vars | identifiers | rule   | pattern                                  |
+      | 0 | -        | p    | AL          | lookup | { $p isa person; $p id <answer.p.id>; }; |
+
   Scenario: relation is explained as expected when there is no inference
     Given graql define
       """
@@ -61,6 +95,62 @@ Feature: Graql Reasoning Explanation
     Then answers contain explanation tree
       |   | children | vars    | identifiers  | rule   | pattern                                                                                                                                                  |
       | 0 | -        | k, l, n | KC, LDN, KCn | lookup | { $k isa area; $k has name $n; (superior: $l, subordinate: $k) isa location-hierarchy; $k id <answer.k.id>; $n id <answer.n.id>; $l id <answer.l.id>; }; |
+
+  Scenario: non-atomic query is explained as expected when there is no inference
+    Given graql define
+      """
+      define
+      name sub attribute,
+          value string;
+
+      location sub entity,
+          abstract,
+          key name,
+          plays superior,
+          plays subordinate;
+
+      area sub location;
+      city sub location;
+      country sub location;
+
+      location-hierarchy sub relation,
+          relates superior,
+          relates subordinate;
+      """
+
+    When graql insert
+      """
+      insert
+      $ar isa area, has name "King's Cross";
+      $cit isa city, has name "London";
+      $cou isa country, has name "UK";
+      (superior: $cit, subordinate: $ar) isa location-hierarchy;
+      (superior: $cou, subordinate: $cit) isa location-hierarchy;
+      """
+
+    Then get answers of graql query
+      """
+      match
+      $k isa area, has name $n;
+      (superior: $l, subordinate: $k) isa location-hierarchy;
+      (superior: $u, subordinate: $l) isa location-hierarchy;
+      get;
+      """
+
+    Then concept identifiers are
+      |     | check | value             |
+      | KC  | key   | name:King's Cross |
+      | LDN | key   | name:London       |
+      | UK  | key   | name:UK           |
+      | KCn | value | name:King's Cross |
+
+    Then uniquely identify answer concepts
+      | k  | l   | u  | n   |
+      | KC | LDN | UK | KCn |
+
+    Then answers contain explanation tree
+      |   | children | vars       | identifiers       | rule   | pattern                                                                                                                                                                                                                                |
+      | 0 | -        | k, l, u, n | KC, LDN, UK, KCn  | lookup | { $k isa area; $k has name $n; (superior: $l, subordinate: $k) isa location-hierarchy; (superior: $u, subordinate: $l) isa location-hierarchy; $u id <answer.u.id>; $l id <answer.l.id>; $k id <answer.k.id>; $n id <answer.n.id>; };  |
 
   Scenario: a query containing a negation has an explanation as expected
     Given graql define
