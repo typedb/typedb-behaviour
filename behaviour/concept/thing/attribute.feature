@@ -47,6 +47,13 @@ Feature: Concept Attribute
     Then attribute $x has type: is-alive
     Then attribute $x has value type: boolean
     Then attribute $x has boolean value: true
+    When transaction commits
+    When session opens transaction of type: read
+    When $x = attribute(is-alive) as(boolean) get: true
+    Then attribute $x is null: false
+    Then attribute $x has type: is-alive
+    Then attribute $x has value type: boolean
+    Then attribute $x has boolean value: true
 
   Scenario: Attribute with value type long can be created
     When $x = attribute(age) as(long) put: 21
@@ -54,16 +61,37 @@ Feature: Concept Attribute
     Then attribute $x has type: age
     Then attribute $x has value type: long
     Then attribute $x has long value: 21
+    When transaction commits
+    When session opens transaction of type: read
+    When $x = attribute(age) as(long) get: 21
+    Then attribute $x is null: false
+    Then attribute $x has type: age
+    Then attribute $x has value type: long
+    Then attribute $x has long value: 21
 
   Scenario: Attribute with value type double can be created
-    When $x = attribute(score) as(double) put: 95.67
+    When $x = attribute(score) as(double) put: 123.456
     Then attribute $x is null: false
     Then attribute $x has type: score
     Then attribute $x has value type: double
-    Then attribute $x has double value: 95.67
+    Then attribute $x has double value: 123.456
+    When transaction commits
+    When session opens transaction of type: read
+    When $x = attribute(score) as(double) get: 123.456
+    Then attribute $x is null: false
+    Then attribute $x has type: score
+    Then attribute $x has value type: double
+    Then attribute $x has double value: 123.456
 
   Scenario: Attribute with value type string can be created
     When $x = attribute(name) as(string) put: alice
+    Then attribute $x is null: false
+    Then attribute $x has type: name
+    Then attribute $x has value type: string
+    Then attribute $x has string value: alice
+    When transaction commits
+    When session opens transaction of type: read
+    When $x = attribute(name) as(string) get: alice
     Then attribute $x is null: false
     Then attribute $x has type: name
     Then attribute $x has value type: string
@@ -75,33 +103,88 @@ Feature: Concept Attribute
     Then attribute $x has type: birth-date
     Then attribute $x has value type: datetime
     Then attribute $x has datetime value: 1990-01-01 11:22:33
+    When transaction commits
+    When session opens transaction of type: read
+    When $x = attribute(birth-date) as(datetime) get: 1990-01-01 11:22:33
+    Then attribute $x is null: false
+    Then attribute $x has type: birth-date
+    Then attribute $x has value type: datetime
+    Then attribute $x has datetime value: 1990-01-01 11:22:33
+
+  Scenario: Attribute with value type boolean can be retrieved from its type
+    When $x = attribute(is-alive) as(boolean) put: true
+    Then attribute(is-alive) instances contain: $x
+    When transaction commits
+    When session opens transaction of type: read
+    When $x = attribute(is-alive) as(boolean) get: true
+    Then attribute(is-alive) instances contain: $x
+
+  Scenario: Attribute with value type long can be retrieved from its type
+    When $x = attribute(age) as(long) put: 21
+    Then attribute(age) instances contain: $x
+    When transaction commits
+    When session opens transaction of type: read
+    When $x = attribute(age) as(long) get: 21
+    Then attribute(age) instances contain: $x
+
+  Scenario: Attribute with value type double can be retrieved from its type
+    When $x = attribute(score) as(double) put: 123.456
+    Then attribute(score) instances contain: $x
+    When transaction commits
+    When session opens transaction of type: read
+    When $x = attribute(score) as(double) get: 123.456
+    Then attribute(score) instances contain: $x
+
+  Scenario: Attribute with value type string can be retrieved from its type
+    When $x = attribute(name) as(string) put: alice
+    Then attribute(name) instances contain: $x
+    When transaction commits
+    When session opens transaction of type: read
+    When $x = attribute(name) as(string) get: alice
+    Then attribute(name) instances contain: $x
+
+  Scenario: Attribute with value type datetime can be retrieved from its type
+    When $x = attribute(birth-date) as(datetime) put: 1990-01-01 11:22:33
+    Then attribute(birth-date) instances contain: $x
+    When transaction commits
+    When session opens transaction of type: read
+    When $x = attribute(birth-date) as(datetime) get: 1990-01-01 11:22:33
+    Then attribute(birth-date) instances contain: $x
 
   Scenario: Attribute with value type boolean can be deleted
     When $x = attribute(is-alive) as(boolean) put: true
     When attribute $x is deleted
     When $x = attribute(is-alive) as(boolean) get: true
     Then attribute $x is null: true
+    When transaction commits
+    When session opens transaction of type: read
 
   Scenario: Attribute with value type long can be deleted
     When $x = attribute(age) as(long) put: 21
-    Then attribute $x is deleted
+    When attribute $x is deleted
     When $x = attribute(age) as(long) get: 21
     Then attribute $x is null: true
+    When transaction commits
+    When session opens transaction of type: read
 
   Scenario: Attribute with value type double can be deleted
-    When $x = attribute(score) as(double) put: 95.67
-    Then attribute $x is deleted
-    When $x = attribute(score) as(double) get: 95.67
+    When $x = attribute(score) as(double) put: 123.456
+    When attribute $x is deleted
+    When $x = attribute(score) as(double) get: 123.456
     Then attribute $x is null: true
 
   Scenario: Attribute with value type string can be deleted
     When $x = attribute(name) as(string) put: alice
-    Then attribute $x is deleted
+    When attribute $x is deleted
     When $x = attribute(name) as(string) get: alice
     Then attribute $x is null: true
+    When transaction commits
+    When session opens transaction of type: read
 
   Scenario: Attribute with value type datetime can be deleted
     When $x = attribute(birth-date) as(datetime) put: 1990-01-01 11:22:33
-    Then attribute $x is deleted
+    When attribute $x is deleted
     When $x = attribute(birth-date) as(datetime) get: 1990-01-01 11:22:33
     Then attribute $x is null: true
+    When transaction commits
+    When session opens transaction of type: read
