@@ -16,3 +16,39 @@
 #
 
 Feature: Concept Entity
+
+  Background:
+    Given connection has been opened
+    Given connection delete all keyspaces
+    Given connection does not have any keyspace
+    Given connection create keyspace: grakn
+    Given connection open schema session for keyspace: grakn
+    Given session opens transaction of type: write
+    # Write schema for the test scenarios
+    Given put attribute type: email, value type: string
+    Given put attribute type: name, value type: string
+    Given put entity type: person
+    Given entity(person) set key attribute: email
+    Given entity(person) set has attribute: name
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open data session for keyspace: grakn
+    Given session opens transaction of type: write
+
+  Scenario: Entity can be created
+
+  Scenario: Entity can be retrieved from its type
+
+  Scenario: Entity can be deleted
+
+  Scenario: Entity can have key
+
+  Scenario: Entity can get keys
+
+  Scenario: Entity can remove key
+
+  Scenario: Entity can have attribute
+
+  Scenario: Entity can get attributes
+
+  Scenario: Entity can remove attribute
