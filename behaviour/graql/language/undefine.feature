@@ -297,8 +297,8 @@ Feature: Graql Undefine Query
 
   Scenario: undefine 'relates' from relation type throws if there is an existing instance with that roleplayer
 
-  Scenario: 'has' can be undefined when there are existing instances, but none of them have that attribute
+  Scenario: attribute ownership can be undefined when there are instances of the owner, but none of them own that attribute
 
-  Scenario: undefine 'has' from type throws if any instance of that type has that attribute
+  Scenario: undefine attribute ownership throws if any instance of the owner currently owns that attribute
 
   Scenario: undefine 'key' from a type throws if there are existing instances

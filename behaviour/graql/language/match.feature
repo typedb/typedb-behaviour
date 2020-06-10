@@ -28,8 +28,7 @@ Feature: Graql Match Clause
 
   Scenario: `sub` matches the specified type and all its subtypes
 
-  # TODO: ????
-  Scenario: `sub!` matches ??? (?)
+  Scenario: `sub!` matches the specified type and its direct subtypes
 
   # TODO: ensure there are types that don't have the specified attribute, as well, so we know it's a precise match
   Scenario: `has` matches types that have the specified attribute type
