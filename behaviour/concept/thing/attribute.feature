@@ -255,3 +255,13 @@ Feature: Concept Attribute
     When session opens transaction of type: read
     When $x = attribute(birth-date) as(datetime) get: 1990-01-01 11:22:33
     Then attribute $x is null: true
+
+  Scenario: Attribute with value type boolean can be owned
+
+  Scenario: Attribute with value type long can be owned
+
+  Scenario: Attribute with value type double can be owned
+
+  Scenario: Attribute with value type string can be owned
+
+  Scenario: Attribute with value type datetime can be owned
