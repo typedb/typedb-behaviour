@@ -36,6 +36,10 @@ Feature: Concept Entity
     Given session opens transaction of type: write
 
   Scenario: Entity can be created
+    When $x = entity(person) create new instance
+    Then entity $x is null: false
+    Then entity $x has type: person
+    Then transaction commits
 
   Scenario: Entity can be retrieved from its type
 
@@ -52,3 +56,4 @@ Feature: Concept Entity
   Scenario: Entity can get attributes
 
   Scenario: Entity can remove attribute
+
