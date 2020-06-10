@@ -25,11 +25,11 @@ Feature: Concept Attribute
     Given connection open schema session for keyspace: grakn
     Given session opens transaction of type: write
     # Write schema for the test scenarios
-    Given put attribute type: is-alive, value type: boolean
-    Given put attribute type: age, value type: long
-    Given put attribute type: score, value type: double
-    Given put attribute type: name, value type: string
-    Given put attribute type: birth-date, value type: datetime
+    Given put attribute type: is-alive, with value type: boolean
+    Given put attribute type: age, with value type: long
+    Given put attribute type: score, with value type: double
+    Given put attribute type: name, with value type: string
+    Given put attribute type: birth-date, with value type: datetime
     Given put entity type: person
     Given entity(person) set has attribute: is-alive
     Given entity(person) set has attribute: age

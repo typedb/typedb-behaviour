@@ -25,8 +25,8 @@ Feature: Concept Entity
     Given connection open schema session for keyspace: grakn
     Given session opens transaction of type: write
     # Write schema for the test scenarios
-    Given put attribute type: email, value type: string
-    Given put attribute type: name, value type: string
+    Given put attribute type: email, with value type: string
+    Given put attribute type: name, with value type: string
     Given put entity type: person
     Given entity(person) set key attribute: email
     Given entity(person) set has attribute: name

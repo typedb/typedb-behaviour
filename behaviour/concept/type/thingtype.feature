@@ -27,11 +27,11 @@ Feature: Concept Thing Type
 
   Scenario: Thing type root can retrieve all the subtypes
     When put entity type: person
-    When put attribute type: is-alive, value type: boolean
-    When put attribute type: age, value type: long
-    When put attribute type: rating, value type: double
-    When put attribute type: name, value type: string
-    When put attribute type: birth-date, value type: datetime
+    When put attribute type: is-alive, with value type: boolean
+    When put attribute type: age, with value type: long
+    When put attribute type: rating, with value type: double
+    When put attribute type: name, with value type: string
+    When put attribute type: birth-date, with value type: datetime
     When put relation type: marriage
     When relation(marriage) set relates role: husband
     When relation(marriage) set relates role: wife
