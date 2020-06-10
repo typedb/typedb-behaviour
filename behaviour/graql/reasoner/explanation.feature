@@ -62,6 +62,50 @@ Feature: Graql Reasoning Explanation
       |   | children | vars    | identifiers  | rule   | pattern                                                                                                                                                  |
       | 0 | -        | k, l, n | KC, LDN, KCn | lookup | { $k isa area; $k has name $n; (superior: $l, subordinate: $k) isa location-hierarchy; $k id <answer.k.id>; $n id <answer.n.id>; $l id <answer.l.id>; }; |
 
+  Scenario: a query containing a negation has an explanation as expected
+    Given graql define
+      """
+      define
+
+      name sub attribute,
+          value string;
+
+      company-id sub attribute,
+          value long;
+
+      company sub entity,
+          key company-id,
+          has name;
+      """
+
+    When graql insert
+      """
+      insert
+      $c1 isa company, has company-id 0;
+      $c1 has name $n1; $n1 "the-company";
+      $c2 isa company, has company-id 1;
+      $c2 has name $n2; $n2 "another-company";
+      """
+
+    Then get answers of graql query
+      """
+      match $com isa company, has name $n; not {$n "the-company";}; get;
+      """
+
+    Then concept identifiers are
+      |      | check | value                |
+      | ACO  | key   | company-id:1         |
+      | N    | value | name:another-company |
+
+    Then uniquely identify answer concepts
+      | com | n |
+      | ACO | N |
+
+    Then answers contain explanation tree
+      |   | children  | vars    | identifiers | rule        | pattern                                                                                                               |
+      | 0 | 1         | com, n  | ACO, N      | negation    | { $com isa company; $com has name $n; $com id <answer.com.id>; $n id <answer.n.id>; not { $n == "the-company"; }; };  |
+      | 1 | -         | com, n  | ACO, N      | lookup      | { $com isa company; $com has name $n; $com id <answer.com.id>; $n id <answer.n.id>; };                                |
+
   Scenario: a query containing a disjunction has an explanation as expected
     Given graql define
       """
