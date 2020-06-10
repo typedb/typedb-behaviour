@@ -274,7 +274,7 @@ Feature: Graql Delete Query
   Scenario: delete an attribute ownership using too-specific (downcasting) type throws
 
 
-  Scenario: delete a role player from a relation keeps the relation and removes the role player from it
+  Scenario: delete a role player from a relation using its role keeps the relation and removes the role player from it
     When graql insert
       """
       insert
@@ -352,6 +352,9 @@ Feature: Graql Delete Query
       | x     | y     |
       | BOB   | CAR   |
       | CAR   | BOB   |
+
+
+  Scenario: delete a role player from a relation using a super-role removes the player from the relation
 
 
   Scenario: delete an instance removes it from all relations
@@ -434,13 +437,13 @@ Feature: Graql Delete Query
       | FR    | BOB  |
 
 
-  Scenario: delete one of matched duplicate role players from a relation removes only one playing
+  Scenario: when deleting multiple duplicate role players from a relation, it removes the number you asked to delete
     When graql insert
       """
       insert
       $x isa person, has name "Alex";
       $y isa person, has name "Bob";
-      $r (friend: $x, friend: $x, friend: $y) isa friendship, has ref 0;
+      $r (friend: $x, friend: $x, friend: $x, friend: $y) isa friendship, has ref 0;
       """
     When the integrity is validated
 
@@ -453,8 +456,43 @@ Feature: Graql Delete Query
     Then graql delete
       """
       match
-        $r (friend: $x, friend: $x) isa friendship;
+        $r (friend: $x, friend: $x, friend: $x) isa friendship;
       delete
+        $r (friend: $x, friend: $x);
+      """
+
+    Then get answers of graql query
+      """
+      match $r (friend: $x, friend: $y) isa friendship; get;
+      """
+    Then uniquely identify answer concepts
+      | r     | x    | y    |
+      | FR    | BOB  | ALEX |
+      | FR    | ALEX | BOB  |
+
+
+  Scenario: when deleting duplicate role players in multiple statements, it still removes the total number you asked to delete
+    When graql insert
+      """
+      insert
+      $x isa person, has name "Alex";
+      $y isa person, has name "Bob";
+      $r (friend: $x, friend: $x, friend: $x, friend: $y) isa friendship, has ref 0;
+      """
+    When the integrity is validated
+
+    Then concept identifiers are
+      |      | check | value     |
+      | ALEX | key   | name:Alex |
+      | BOB  | key   | name:Bob  |
+      | FR   | key   | ref:0     |
+
+    Then graql delete
+      """
+      match
+        $r (friend: $x, friend: $x, friend: $x) isa friendship;
+      delete
+        $r (friend: $x);
         $r (friend: $x);
       """
 
@@ -468,7 +506,6 @@ Feature: Graql Delete Query
       | FR    | ALEX | BOB  |
 
 
-  # this scenario should be identical in behaviour to the above, only the match differs
   Scenario: delete one of role players from a relation removes only one duplicate
     When graql insert
       """
