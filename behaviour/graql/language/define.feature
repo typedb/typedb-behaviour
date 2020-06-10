@@ -1142,7 +1142,7 @@ Feature: Graql Define Query
   # RULES #
   #########
 
-  Scenario: a rule can infer an attribute value
+  Scenario: a rule can infer both an attribute and its ownership
     Given graql define
       """
       define

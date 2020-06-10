@@ -79,10 +79,6 @@ Feature: Graql Match Clause
 
   Scenario: a negation does not match if the negated block has any matches
 
-  Scenario: `has` matches attribute ownerships inferred from rules
-
-  Scenario: `isa` matches relations inferred from rules
-
   Scenario: a relation is matchable from role players without specifying relation type
     Given graql define
       """
