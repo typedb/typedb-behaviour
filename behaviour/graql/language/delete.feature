@@ -129,6 +129,7 @@ Feature: Graql Delete Query
 
 
   Scenario: delete an entity instance using 'entity' meta label succeeds
+  Scenario: an entity can be deleted using the 'entity' meta label
     When graql insert
       """
       insert
@@ -164,7 +165,7 @@ Feature: Graql Delete Query
       | BOB |
 
 
-  Scenario: delete a relation instance using 'relation' meta label succeeds
+  Scenario: a relation can be deleted using the 'relation' meta label
     When graql insert
       """
       insert
@@ -198,7 +199,7 @@ Feature: Graql Delete Query
     Then answer size is: 0
 
 
-  Scenario: delete an attribute instance using 'attribute' meta label succeeds
+  Scenario: an attribute can be deleted using the 'attribute' meta label
     When graql insert
       """
       insert
@@ -225,7 +226,41 @@ Feature: Graql Delete Query
     Then answer size is: 0
 
 
-  Scenario: delete an instance using unrelated type throws
+  Scenario: one delete statement can delete multiple things
+    When graql insert
+      """
+      insert
+      $a isa person, has name "Alice";
+      $b isa person, has name "Barbara";
+      """
+    When the integrity is validated
+    When get answers of graql query
+      """
+      match $x isa person; get;
+      """
+    Then concept identifiers are
+      |     | check | value        |
+      | ALC | key   | name:Alice   |
+      | BAR | key   | name:Barbara |
+    Then uniquely identify answer concepts
+      | x   |
+      | ALC |
+      | BAR |
+    Then graql delete
+      """
+      match
+      $p isa person;
+      delete
+      $p isa person;
+      """
+    Then get answers of graql query
+      """
+      match $x isa person; get;
+      """
+    Then answer size is: 0
+
+
+  Scenario: delete an instance using an unrelated type label throws
     When graql insert
       """
       insert
@@ -700,7 +735,133 @@ Feature: Graql Delete Query
     Then the integrity is validated
 
 
-  Scenario: delete attribute ownership makes attribute invisible to owner, but keeps both attribute and owner intact
+#  Even when a $role variable matches multiple roles (will always match `role` unless constrained)
+#  We only delete role player edges until the `match` is no longer satisfied
+#
+#  For example
+#  ```match $r ($role1: $x, director: $y) isa directed-by; // concrete instance matches: $r (production: $x, director: $y) isa directed-by;
+#  delete $r ($role1: $x);```
+#  We will match `$role1` = ROLE meta type. Using this first answer we will remove $x from $r via the `production role`.
+#  This means the match clause is no longer satisfiable, and should throw the next (identical, up to role type) answer that is matched.
+#
+#  So, if the user does not specify a specific-enough roles, we may throw.
+  Scenario: delete a role player with a variable role throws if the role selector has multiple distinct matches
+    Given graql define
+      """
+      define
+      ship-crew sub relation, relates captain, relates navigator, relates chef;
+      person plays captain, plays navigator, plays chef;
+      """
+    Given the integrity is validated
+    When graql insert
+      """
+      insert
+      $x isa person, has name "Cook";
+      $y isa person, has name "Drake";
+      $z isa person, has name "Joshua";
+      $r (captain: $x, navigator: $y, chef: $z) isa ship-crew;
+      """
+    When the integrity is validated
+    Then graql delete throws
+      """
+      match
+        $r ($role1: $x, captain: $y) isa ship-crew;
+      delete
+        $r ($role1: $x);
+      """
+
+
+#  Even when a $role variable matches multiple roles (will always match `role` unless constrained)
+#  We only delete role player edges until the `match` is no longer satisfied.
+#
+#  **Sometimes this means multiple duplicate role players will be unassigned **
+#
+#  For example
+#  ```
+#  // concrete instance:  $r (production: $x, production: $x, production: $x, director: $y) isa directed-by;
+#  match $r ($role1: $x, director: $y) isa directed-by; $type sub work;
+#  delete $r ($role1: $x);```
+#  First, we will match `$role1` = ROLE meta role. Using this answer we will remove a single $x from $r via the `production`.
+#  Next, we will match `$role1` = WORK role, and we delete another `production` player. This repeats again for $role=`production`.
+  Scenario: when deleting duplicate role players with a single variable role, both duplicates are removed
+    Given graql define
+      """
+      define
+      ship-crew sub relation, relates captain, relates navigator, relates chef, key ref;
+      person plays captain, plays navigator, plays chef;
+      """
+    Given the integrity is validated
+    When graql insert
+      """
+      insert
+      $x isa person, has name "Cook";
+      $y isa person, has name "Joshua";
+      $r (captain: $x, chef: $y, chef: $y) isa ship-crew, has ref 0;
+      """
+    When the integrity is validated
+    Then get answers of graql query
+      """
+      match $rel (chef: $p) isa ship-crew; get;
+      """
+    Then concept identifiers are
+      |       | check | value       |
+      | CREW  | key   | ref:0       |
+      | JOSH  | key   | name:Joshua |
+    Then uniquely identify answer concepts
+      | rel  | p    |
+      | CREW | JOSH |
+    Then graql delete
+      """
+      match
+        $r ($role1: $x, captain: $y) isa ship-crew;
+      delete
+        $r ($role1: $x);
+      """
+    Then the integrity is validated
+    Then get answers of graql query
+      """
+      match $rel (chef: $p) isa ship-crew; get;
+      """
+    Then answer size is: 0
+
+
+  Scenario: deleting an attribute instance also deletes its ownerships
+    Given graql define
+      """
+      define
+      age sub attribute, value long;
+      person has age;
+      """
+    Given the integrity is validated
+    When graql insert
+      """
+      insert
+      $x isa person, has name "Anna", has age 18;
+      """
+    When the integrity is validated
+    When get answers of graql query
+      """
+      match $x has age 18; get;
+      """
+    Then concept identifiers are
+      |     | check | value     |
+      | ANA | key   | name:Anna |
+    Then graql delete
+      """
+      match
+        $x 18 isa age;
+      delete
+        $x isa attribute;
+      """
+    Then the integrity is validated
+    Then get answers of graql query
+      """
+      match $x has age 18; get;
+      """
+    Then answer size is: 0
+
+
+  Scenario: an attribute ownership can be deleted using the attribute's type label
     When graql define
       """
       define
@@ -762,7 +923,256 @@ Feature: Graql Delete Query
       | JOHN  | lnST   |
 
 
-  Scenario: using unmatched variable in delete throws even without data
+  Scenario: an attribute ownership can be deleted using the 'attribute' meta label
+    Given graql define
+      """
+      define
+      address sub attribute, value string;
+      postcode sub address;
+      person has postcode;
+      """
+    Given the integrity is validated
+    When graql insert
+      """
+      insert
+      $x isa person, has name "Sherlock", has postcode "W1U8ED";
+      """
+    When the integrity is validated
+    Then concept identifiers are
+      |      | check | value           |
+      | SHER | key   | name:Sherlock   |
+      | nSLK | value | name:Sherlock   |
+      | pcW1 | value | postcode:W1U8ED |
+    Then get answers of graql query
+      """
+      match $x has attribute $a; get;
+      """
+    Then uniquely identify answer concepts
+      | x    | a    |
+      | SHER | nSLK |
+      | SHER | pcW1 |
+    Then graql delete
+      """
+      match
+        $x isa person, has attribute $a;
+        $a isa postcode;
+      delete
+        $x has attribute $a;
+      """
+    Then the integrity is validated
+    Then get answers of graql query
+      """
+      match $x has attribute $a; get;
+      """
+    Then uniquely identify answer concepts
+      | x    | a    |
+      | SHER | nSLK |
+
+
+  Scenario: an attribute ownership can be deleted using its supertype as a label
+    Given graql define
+      """
+      define
+      address sub attribute, value string;
+      postcode sub address;
+      person has postcode;
+      """
+    Given the integrity is validated
+    When graql insert
+      """
+      insert
+      $x isa person, has name "Sherlock", has postcode "W1U8ED";
+      """
+    When the integrity is validated
+    Then concept identifiers are
+      |      | check | value           |
+      | SHER | key   | name:Sherlock   |
+      | nSLK | value | name:Sherlock   |
+      | pcW1 | value | postcode:W1U8ED |
+    Then get answers of graql query
+      """
+      match $x has address $a; get;
+      """
+    Then uniquely identify answer concepts
+      | x    | a    |
+      | SHER | pcW1 |
+    Then graql delete
+      """
+      match
+        $x isa person, has address $a;
+      delete
+        $x has address $a;
+      """
+    Then the integrity is validated
+    Then get answers of graql query
+      """
+      match $x has address $a; get;
+      """
+    Then answer size is: 0
+
+
+  Scenario: deleting an attribute ownership using 'thing' as a label throws an error
+    Given graql define
+      """
+      define
+      address sub attribute, value string;
+      postcode sub address;
+      person has postcode;
+      """
+    Given the integrity is validated
+    When graql insert
+      """
+      insert
+      $x isa person, has name "Sherlock", has postcode "W1U8ED";
+      """
+    When the integrity is validated
+    Then graql delete throws
+      """
+      match
+        $x isa person, has address $a;
+      delete
+        $x has thing $a;
+      """
+
+
+  Scenario: you can specify the direct type of an attribute when deleting an ownership of it
+    Given graql insert
+      """
+      insert
+      $x isa person, has name "Watson";
+      """
+    When the integrity is validated
+    Then concept identifiers are
+      |      | check | value      |
+      | WAT | key   | name:Watson |
+      | nWA | value | name:Watson |
+    Then get answers of graql query
+      """
+      match $x isa person; get;
+      """
+    Then uniquely identify answer concepts
+      | x   |
+      | WAT |
+    Then graql delete
+      """
+      match
+        $x isa person;
+      delete
+        $x isa! person;
+      """
+    Then the integrity is validated
+    Then get answers of graql query
+      """
+      match $x isa person; get;
+      """
+    Then answer size is: 0
+
+
+  Scenario: deleting an attribute ownership throws an error when the incorrect direct type is specified
+    Given graql insert
+      """
+      insert
+      $x isa person, has name "Watson";
+      """
+    When the integrity is validated
+    Then graql delete throws
+      """
+      match
+        $x isa person;
+      delete
+        $x isa! entity;
+      """
+
+
+  Scenario: deleting the owner of an attribute also deletes the attribute ownership
+    Given graql define
+      """
+      define
+      duration sub attribute, value long;
+      friendship has duration;
+      """
+    Given the integrity is validated
+    When graql insert
+      """
+      insert
+      $x isa person, has name "Tom";
+      $y isa person, has name "Jerry";
+      $r (friend: $x, friend: $y) isa friendship, has ref 0, has duration 1000;
+      """
+    When the integrity is validated
+    When get answers of graql query
+      """
+      match $x has duration $d; get;
+      """
+    Then concept identifiers are
+      |      | check | value         |
+      | REF0 | key   | ref:0         |
+      | DURA | value | duration:1000 |
+    Then uniquely identify answer concepts
+      | x    | d    |
+      | REF0 | DURA |
+    Then graql delete
+      """
+      match
+        $r isa friendship;
+      delete
+        $r isa relation;
+      """
+    Then the integrity is validated
+    Then get answers of graql query
+      """
+      match $x has duration $d; get;
+      """
+    Then answer size is: 0
+
+
+  Scenario: deleting the last roleplayer in a relation deletes both the relation and its attribute ownerships
+    Given graql define
+      """
+      define
+      duration sub attribute, value long;
+      friendship has duration;
+      """
+    Given the integrity is validated
+    When graql insert
+      """
+      insert
+      $x isa person, has name "Emma";
+      $r (friend: $x) isa friendship, has ref 0, has duration 1000;
+      """
+    When the integrity is validated
+    When get answers of graql query
+      """
+      match $x has duration $d; get;
+      """
+    Then concept identifiers are
+      |      | check | value         |
+      | REF0 | key   | ref:0         |
+      | DURA | value | duration:1000 |
+    Then uniquely identify answer concepts
+      | x    | d    |
+      | REF0 | DURA |
+    Then graql delete
+      """
+      match
+        $r (friend: $x) isa friendship;
+      delete
+        $r (friend: $x);
+      """
+    Then the integrity is validated
+    Then get answers of graql query
+      """
+      match $x has duration $d; get;
+      """
+    Then answer size is: 0
+    Then get answers of graql query
+      """
+      match $r isa friendship; get;
+      """
+    Then answer size is: 0
+
+
+  Scenario: deleting a variable not in the query throws, even if there were no matches
     Then graql delete throws
       """
       match $x isa person; delete $n isa name;
@@ -898,7 +1308,7 @@ Feature: Graql Delete Query
     Then answer size is: 0
 
 
-  Scenario: delete key ownership throws exception
+  Scenario: deleting a key ownership throws an error
     When graql insert
       """
       insert
@@ -917,7 +1327,32 @@ Feature: Graql Delete Query
     Then the integrity is validated
 
 
-  Scenario: delete a schema concept throws
+  @ignore
+  # TODO: re-enable when deleting an attribute instance that is owned as a key throws an error
+  Scenario: deleting an attribute instance that is owned as a key throws an error
+    Given graql insert
+      """
+      insert
+      $x isa person, has name "Tatyana";
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x isa name; get;
+      """
+    Then concept identifiers are
+      |     | check | value        |
+      | TAT | value | name:Tatyana |
+    Then graql delete throws
+      """
+      match
+        $x "Tatyana" isa name;
+      delete
+        $x isa attribute;
+      """
+
+
+  Scenario: deleting a type throws an error
     Then graql delete throws
       """
       match
