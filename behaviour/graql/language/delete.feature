@@ -37,13 +37,6 @@ Feature: Graql Delete Query
     Given the integrity is validated
 
 
-  Scenario: entities can be deleted
-
-  Scenario: relations can be deleted
-
-  Scenario: attributes can be deleted
-
-
   Scenario: when deleting multiple variables, they all get deleted
     When graql insert
       """
@@ -97,6 +90,43 @@ Feature: Graql Delete Query
       | x    |
       | nALX |
       | nBOB |
+
+
+  Scenario: delete an instance using 'thing' meta label succeeds
+    When graql insert
+      """
+      insert
+      $x isa person, has name "Alex";
+      $y isa person, has name "Bob";
+      $r (friend: $x, friend: $y) isa friendship,
+         has ref 0;
+      $n "John" isa name;
+      """
+    When the integrity is validated
+
+    Then concept identifiers are
+      |      | check | value     |
+      | ALEX | key   | name:Alex |
+      | BOB  | key   | name:Bob  |
+      | FR   | key   | ref:0     |
+      | JOHN | value | name:John |
+
+    Then graql delete
+      """
+      match
+        $r isa person, has name "Alex";
+      delete
+        $r isa thing;
+      """
+
+    Then get answers of graql query
+      """
+      match $x isa person; get;
+      """
+    Then uniquely identify answer concepts
+      | x   |
+      | BOB |
+
 
   Scenario: delete an entity instance using 'entity' meta label succeeds
     When graql insert
@@ -195,7 +225,7 @@ Feature: Graql Delete Query
     Then answer size is: 0
 
 
-  Scenario: delete an instance using wrong type throws
+  Scenario: delete an instance using unrelated type throws
     When graql insert
       """
       insert
@@ -215,7 +245,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
 
 
-  Scenario: delete an instance using too-specific (downcasting) type throws
+  Scenario: delete a relation instance using too-specific (downcasting) type throws
     When graql define
       """
       define
@@ -241,7 +271,10 @@ Feature: Graql Delete Query
     Then the integrity is validated
 
 
-  Scenario: delete a role player from a relation removes the player from the relation
+  Scenario: delete an attribute ownership using too-specific (downcasting) type throws
+
+
+  Scenario: delete a role player from a relation keeps the relation and removes the role player from it
     When graql insert
       """
       insert
@@ -532,7 +565,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
 
 
-  Scenario: delete all role players of relation cleans up relation instance
+  Scenario: when all instances that play roles in a relation are deleted, the relation instance gets deleted
     When graql insert
       """
       insert
@@ -557,6 +590,41 @@ Feature: Graql Delete Query
         $x isa person;
         $y isa person;
       """
+
+    Then get answers of graql query
+      """
+      match $r isa friendship; get;
+      """
+    Then answer size is: 0
+
+
+  Scenario: when the last role player is disassociated from a relation instance, the relation instance gets deleted
+    When graql insert
+      """
+      insert
+      $x isa person, has name "Alex";
+      $y isa person, has name "Bob";
+      $r (friend: $x, friend: $y) isa friendship, has ref 0;
+      """
+    When the integrity is validated
+
+    Then concept identifiers are
+      |      | check | value     |
+      | ALEX | key   | name:Alex |
+      | BOB  | key   | name:Bob  |
+      | FR   | key   | ref:0     |
+
+    Then graql delete
+      """
+      match
+        $x isa person, has name "Alex";
+        $y isa person, has name "Bob";
+        $r ($x, $y) isa friendship;
+      delete
+        $r (role: $x);
+        $r (role: $y);
+      """
+
 
     Then get answers of graql query
       """
@@ -595,7 +663,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
 
 
-  Scenario: delete attribute ownership makes attribute invisible to owner
+  Scenario: delete attribute ownership makes attribute invisible to owner, but keeps both attribute and owner intact
     When graql define
       """
       define
@@ -812,12 +880,12 @@ Feature: Graql Delete Query
     Then the integrity is validated
 
 
-  Scenario: delete a type throws
+  Scenario: delete a schema concept throws
     Then graql delete throws
       """
       match
         $x type person;
       delete
-        $x sub type;
+        $x isa thing;
       """
     Then the integrity is validated
