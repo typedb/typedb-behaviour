@@ -16,5 +16,6 @@ Feature: Graql Reasoner Resolution
 
   Scenario: `isa` matches inferred roleplayers in relation instances
 
-  # TODO: should this be allowed?
-  Scenario: `isa $x` matches instances that have `$x` as an inferred supertype (?)
+  Scenario: `isa $x` matches instances that have `$x` as an inferred type, which is a subtype of its defined type
+
+  Scenario: `isa $x` matches instances that have `$x` as an inferred type, which is unrelated to its defined type
