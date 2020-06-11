@@ -24,7 +24,60 @@ Feature: Graql Match Clause
     Given transaction is initialised
     Given the integrity is validated
 
-  Scenario: Disjunctions return the union of composing query statements
+  Scenario: `type` matches only the specified type, and does not match subtypes
+
+  Scenario: `sub` matches the specified type and all its subtypes
+
+  Scenario: `sub!` matches the specified type and its direct subtypes
+
+  # TODO: ensure there are types that don't have the specified attribute, as well, so we know it's a precise match
+  Scenario: `has` matches types that have the specified attribute type
+
+  Scenario: `has` matches types that have only a subtype of the specified attribute type (?)
+
+  Scenario: `plays` matches types that can play the specified role
+
+  Scenario: `key` matches types that have the specified attribute type as a key (?)
+
+  Scenario: `has` matches types that have the specified attribute type, even if they use it as a key (?)
+
+  Scenario: `relates` matches types that have the specified roleplayer, regardless of their role
+
+  Scenario: `relates` with `as` matches only types that have the specified roleplayer playing the specified role
+
+  Scenario: `relates` matches/does not match types that block the specified roleplayer with `as` (?)
+
+  Scenario: `isa` matches things of the specified type and all its subtypes
+
+  Scenario: `isa!` matches only things of the specified type, and does not match subtypes
+
+  Scenario: when an attribute type is specified but no value, `has` matches things that have any instance of the specified attribute (?)
+
+  Scenario: when a value is specified but no type, `has` matches things that have any kind of attribute with that value
+
+  Scenario: when an attribute instance is fully specified, `has` matches all of its owners
+
+  Scenario: `has` with an instance fully specified matches all of its owners, even if they own other instances of the same attribute
+
+  Scenario: `contains` matches strings that contain the specified substring
+
+  Scenario: `like` matches strings that match the specified regex
+
+  Scenario: `has $attr > $x` matches owners of any instance `$y` of `$attr` where `$y > $x`
+
+  Scenario: `has $attr < $x` matches owners of any instance `$y` of `$attr` where `$y < $x`
+
+  Scenario: `has $attr !== $x` matches owners of any instance `$y` of `$attr` where `$y !== $x`
+
+  Scenario: `has $attr > $x` matches owners of any instance `$y` of `$attr` where `$y > $x` even if they also own instance `$z` where `$z < $x`
+
+  Scenario: `id` matches the instance with the specified internal id
+
+  Scenario: disjunctions return the union of composing query statements
+
+  Scenario: a negation matches if the negated block has no matches
+
+  Scenario: a negation does not match if the negated block has any matches
 
   Scenario: a relation is matchable from role players without specifying relation type
     Given graql define

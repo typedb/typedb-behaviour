@@ -34,7 +34,14 @@ Feature: Graql Undefine Query
       """
     Given the integrity is validated
 
-  Scenario: undefine a subtype removes a type
+
+  Scenario: undefine an entity type removes it
+
+  Scenario: undefine a relation type and its roles removes them
+
+  Scenario: undefine a relation type throws on commit if its roles are left behind, still played by other types
+
+  Scenario: undefine an attribute type with value `string` removes it
     Given graql undefine
       """
       undefine email sub attribute;
@@ -54,6 +61,18 @@ Feature: Graql Undefine Query
       | NAME |
 
 
+
+  Scenario: undefine an attribute type with value `long` removes it
+
+  Scenario: undefine an attribute type with value `double` removes it
+
+  Scenario: undefine an attribute type with value `boolean` removes it
+
+  Scenario: undefine an attribute type with value `datetime` removes it
+
+  Scenario: undefine a subtype removes it, but preserves its parent type
+
+
   Scenario: undefine 'plays' from super entity removes 'plays' from subtypes
     Given graql define
       """
@@ -69,14 +88,6 @@ Feature: Graql Undefine Query
       match $x type child; $x plays employee; get;
       """
     Then answer size is: 0
-
-
-  # TODO is this expected to hold?
-  Scenario: undefine the only attribute key- and owner-ship removes implicit owner-/key-ship relation types
-
-  Scenario: undefine attribute removes implicit ownership roles from owners
-
-  Scenario: undefine attribute removes implicit roles
 
 
   @ignore
@@ -120,6 +131,7 @@ Feature: Graql Undefine Query
       """
     Then answer size is: 0
 
+
   @ignore
   # re-enable when 'relates' is inherited
   Scenario: undefine 'relates' from super relation removes 'relates' from child relation
@@ -153,7 +165,6 @@ Feature: Graql Undefine Query
   # TODO
   Scenario: undefine a sub-role using 'as' removes sub-role from child relations
 
-  # TODO these are repetitions of analogous scenarios but not using entity
   Scenario: undefine 'plays' from super relation removes 'plays' from child relation
 
   Scenario: undefine 'has' from super relation removes 'has' from child relation
@@ -270,3 +281,24 @@ Feature: Graql Undefine Query
       undefine person sub entity;
       """
     Then the integrity is validated
+
+
+  Scenario: undefine an entity type throws if instances exist
+
+  Scenario: undefine a relation type throws if instances exist
+
+  Scenario: undefine an attribute type throws if instances exist
+
+  Scenario: a type can be undefined after deleting all of its instances
+
+  Scenario: undefine 'plays' from type throws if there is an instance playing that role in an existing relation
+
+  Scenario: 'relates' can be undefined when there are existing relations, but none of them have that roleplayer
+
+  Scenario: undefine 'relates' from relation type throws if there is an existing instance with that roleplayer
+
+  Scenario: attribute ownership can be undefined when there are instances of the owner, but none of them own that attribute
+
+  Scenario: undefine attribute ownership throws if any instance of the owner currently owns that attribute
+
+  Scenario: undefine 'key' from a type throws if there are existing instances
