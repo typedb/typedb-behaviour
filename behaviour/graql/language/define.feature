@@ -354,6 +354,13 @@ Feature: Graql Define Query
     Then the integrity is validated
 
 
+  Scenario: define new meta-type ('sub thing') throws
+    Then graql define throws
+      """
+      define column sub thing;
+      """
+
+
   Scenario: define entity type with 'value' throws
     Then graql define throws
       """
