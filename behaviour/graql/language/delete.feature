@@ -37,6 +37,10 @@ Feature: Graql Delete Query
     Given the integrity is validated
 
 
+  ##########
+  # THINGS #
+  ##########
+
   Scenario: when deleting multiple variables, they all get deleted
     When graql insert
       """
@@ -303,6 +307,11 @@ Feature: Graql Delete Query
         $r isa special-friendship;
       """
     Then the integrity is validated
+
+
+  ###############
+  # ROLEPLAYERS #
+  ###############
 
 
   Scenario: delete a role player from a relation using its role keeps the relation and removes the role player from it
@@ -866,6 +875,10 @@ Feature: Graql Delete Query
     Then answer size is: 0
 
 
+  ########################
+  # ATTRIBUTE OWNERSHIPS #
+  ########################
+
   Scenario: deleting an attribute instance also deletes its ownerships
     Given graql define
       """
@@ -1236,6 +1249,10 @@ Feature: Graql Delete Query
       """
     Then answer size is: 0
 
+
+  ##############
+  # EDGE CASES #
+  ##############
 
   Scenario: deleting a variable not in the query throws, even if there were no matches
     Then graql delete throws
