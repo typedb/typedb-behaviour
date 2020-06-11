@@ -354,6 +354,12 @@ Feature: Graql Define Query
     Then the integrity is validated
 
 
+
+  @ignore
+  # TODO: re-enable when writing a variable in a 'define' is forbidden
+  Scenario: write a variable in a 'define' throws
+
+
   #############
   # RELATIONS #
   #############
@@ -1136,7 +1142,7 @@ Feature: Graql Define Query
   # RULES #
   #########
 
-  Scenario: a rule can infer an attribute value
+  Scenario: a rule can infer both an attribute and its ownership
     Given graql define
       """
       define
