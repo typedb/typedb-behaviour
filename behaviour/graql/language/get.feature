@@ -16,6 +16,8 @@
 #
 Feature: Graql Get Query
 
+  Scenario: match-get returns an empty answer if there are no matches
+
   Scenario: Disjunctions return the union of composing query statements
 
   Scenario: Restricting variables in get removes variable from answer maps
