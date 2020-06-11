@@ -305,9 +305,6 @@ Feature: Graql Delete Query
     Then the integrity is validated
 
 
-  Scenario: delete an attribute ownership using too-specific (downcasting) type throws
-
-
   Scenario: delete a role player from a relation using its role keeps the relation and removes the role player from it
     When graql insert
       """
@@ -389,6 +386,51 @@ Feature: Graql Delete Query
 
 
   Scenario: delete a role player from a relation using a super-role removes the player from the relation
+    Given graql define
+      """
+      define
+      special-friendship sub friendship,
+        relates special-friend as friend;
+      person plays special-friend;
+      """
+    Given the integrity is validated
+    When graql insert
+      """
+      insert
+      $x isa person, has name "Alex";
+      $y isa person, has name "Bob";
+      $z isa person, has name "Carrie";
+      $r (special-friend: $x, special-friend: $y, special-friend: $z) isa special-friendship,
+         has ref 0;
+      """
+    When the integrity is validated
+
+    Then concept identifiers are
+      |      | check | value       |
+      | ALEX | key   | name:Alex   |
+      | BOB  | key   | name:Bob    |
+      | CAR  | key   | name:Carrie |
+      | FR   | key   | ref:0       |
+
+    Then graql delete
+      """
+      match
+        $r (friend: $x, friend: $y, friend: $z) isa friendship;
+        $x isa person, has name "Alex";
+        $y isa person, has name "Bob";
+        $z isa person, has name "Carrie";
+      delete
+        $r (friend: $x);
+      """
+
+    Then get answers of graql query
+      """
+      match (special-friend: $x, special-friend: $y) isa friendship; get;
+      """
+    Then uniquely identify answer concepts
+      | x     | y     |
+      | BOB   | CAR   |
+      | CAR   | BOB   |
 
 
   Scenario: delete an instance removes it from all relations
@@ -1008,6 +1050,30 @@ Feature: Graql Delete Query
       match $x has address $a; get;
       """
     Then answer size is: 0
+
+
+  Scenario: delete an attribute ownership using too-specific (downcasting) type throws
+    Given graql define
+      """
+      define
+      address sub attribute, value string;
+      postcode sub address;
+      person has address;
+      """
+    Given the integrity is validated
+    When graql insert
+      """
+      insert
+      $x isa person, has name "Sherlock", has address "221B Baker Street";
+      """
+    When the integrity is validated
+    Then graql delete
+      """
+      match
+        $x isa person, has address $a;
+      delete
+        $x has postcode $a;
+      """
 
 
   Scenario: deleting an attribute ownership using 'thing' as a label throws an error
