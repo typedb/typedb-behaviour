@@ -51,6 +51,30 @@ Feature: Graql Match Clause
 
   Scenario: `isa!` matches only things of the specified type, and does not match subtypes
 
+  # TODO: Create 5 scenarios in place of this one, one for each attribute value type
+  Scenario: attributes can be matched by value
+    Given graql define
+      """
+      define name sub attribute, value string;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert $n "John" isa name;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $a "John"; get;
+      """
+    Then concept identifiers are
+      |      | check | value     |
+      | JOHN | value | name:John |
+    Then uniquely identify answer concepts
+      | a    |
+      | JOHN |
+
+
   Scenario: when an attribute type is specified but no value, `has` matches things that have any instance of the specified attribute (?)
 
   Scenario: when a value is specified but no type, `has` matches things that have any kind of attribute with that value
@@ -130,6 +154,7 @@ Feature: Graql Match Clause
       | y    | r    |
       | REF1 | REF2 |
 
+
   Scenario: retrieve all combinations of players in a relation
     Given graql define
       """
@@ -200,6 +225,7 @@ Feature: Graql Match Clause
       """
       match $x sub $z; $x id <answer.x.id>; $z id <answer.z.id>; get;
       """
+
 
   Scenario: duplicate role players are retrieved singly when queried doubly
     Given graql define
