@@ -26,67 +26,187 @@ Feature: Graql Insert Query
     Given graql define
       """
       define
+
       person sub entity,
         plays employee,
         has name,
+        has age,
         key ref;
+
       company sub entity,
         plays employer,
         key ref;
+
       employment sub relation,
         relates employee,
         relates employer,
         key ref;
+
       name sub attribute,
-        value string,
-        key ref;
+        value string;
+
+      age sub attribute,
+        value long;
+
       ref sub attribute,
         value long;
       """
     Given the integrity is validated
 
 
-  # TODO: make 3 tests: entity, attribute, relation
-  Scenario: insert an instance creates instance of that type
+  Scenario: inserting an entity creates an instance of it
     When graql insert
       """
-      insert
-      $name "John" isa name, has ref 0;
-      $x isa person, has name $name, has ref 1;
+      insert $x isa person, has ref 0;
       """
     When the integrity is validated
 
     When get answers of graql query
       """
-      match $x isa thing; $x has name "John"; get;
+      match $x isa person; get;
       """
     Then concept identifiers are
       |     | check | value |
-      | JHN | key   | ref:1 |
+      | PER | key   | ref:0 |
     Then uniquely identify answer concepts
       | x   |
-      | JHN |
+      | PER |
 
 
-  Scenario: an attribute value can be set on insert when its value type is `string`
+  Scenario: inserting a relation creates an instance of it
 
-  Scenario: an attribute value can be set on insert when its value type is `long`
 
-  Scenario: an attribute value can be set on insert when its value type is `double`
+  Scenario Outline: an attribute of type `<type>` can be inserted
+    Given graql define
+      """
+      define <attr> sub attribute, value <type>;
+      """
+    Given the integrity is validated
+    Given get answers of graql query
+      """
+      match $x <value> isa <attr>; get;
+      """
+    Given answer size is: 0
+    When graql insert
+      """
+      insert $x <value> isa <attr>;
+      """
+    When the integrity is validated
+    When get answers of graql query
+      """
+      match $x <value> isa <attr>; get;
+      """
+    Then answer size is: 1
 
-  Scenario: an attribute value can be set on insert when its value type is `boolean`
+  Examples:
+    | attr           | type     | value      |
+    | title          | string   | "Prologue" |
+    | page-number    | long     | 233        |
+    | price          | double   | 15.99      |
+    | purchased      | boolean  | true       |
+    | published-date | datetime | 2020-01-01 |
 
-  Scenario: an attribute value can be set on insert when its value type is `datetime`
 
-  Scenario: multiple distinct values of the same `string` attribute can be set on insert
+  Scenario: when inserting a new thing that owns new attributes, both the thing and the attributes get created
+    Given get answers of graql query
+      """
+      match $x isa thing; get;
+      """
+    Given answer size is: 0
+    When graql insert
+      """
+      insert $x isa person, has name "Wilhelmina", has age 25, has ref 0;
+      """
+    When the integrity is validated
+    Then get answers of graql query
+      """
+      match $x isa thing; get;
+      """
+    Then concept identifiers are
+      |      | check | value           |
+      | WIL  | key   | ref:0           |
+      | nWIL | value | name:Wilhelmina |
+      | a25  | value | age:25          |
+      | REF0 | value | ref:0           |
+    Then uniquely identify answer concepts
+      | x    |
+      | WIL  |
+      | nWIL |
+      | a25  |
+      | REF0 |
 
-  Scenario: multiple distinct values of the same `long` attribute can be set on insert
 
-  Scenario: multiple distinct values of the same `double` attribute can be set on insert
+  Scenario: a freshly inserted attribute has no owners
+    Given graql insert
+      """
+      insert $name "John" isa name;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x has name "John"; get;
+      """
+    Then answer size is: 0
 
-  Scenario: multiple distinct values of the same `boolean` attribute can be set on insert
 
-  Scenario: multiple distinct values of the same `datetime` attribute can be set on insert
+  Scenario: when inserting a new thing that owns an existing attribute, and that attribute has no previous owner, that thing becomes its first owner
+    Given graql insert
+      """
+      insert $name "Kyle" isa name;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert $x isa person, has name "Kyle", has ref 0;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x has name "Kyle"; get;
+      """
+    Then concept identifiers are
+      |      | check | value |
+      | KYLE | key   | ref:0 |
+    Then uniquely identify answer concepts
+      | x    |
+      | KYLE |
+
+
+  Scenario: after inserting two things that own the same attribute, the things become linked, in that they are both owners of that attribute
+    When graql insert
+      """
+      insert
+      $p1 isa person, has name "Jack", has age 10, has ref 0;
+      $p2 isa person, has name "Jill", has age 10, has ref 1;
+      """
+    When the integrity is validated
+    Then get answers of graql query
+      """
+      match
+      $p1 isa person, has age $a;
+      $p2 isa person, has age $a;
+      $p1 != $p2;
+      get $p1, $p2;
+      """
+    Then concept identifiers are
+      |      | check | value |
+      | JACK | key   | ref:0 |
+      | JILL | key   | ref:1 |
+    Then uniquely identify answer concepts
+      | p1   | p2   |
+      | JACK | JILL |
+      | JILL | JACK |
+
+
+  Scenario Outline: an insert can attach multiple distinct values of the same <type> attribute to a single owner
+  Examples:
+    | type     |
+    | string   |
+    | long     |
+    | double   |
+    | boolean  |
+    | datetime |
+
 
   Scenario: insert an additional role player is visible in the relation
     When graql insert
@@ -136,80 +256,25 @@ Feature: Graql Insert Query
       | REF0 | REF1 |
 
 
-  # TODO: Create 5 scenarios in place of this one, one for each attribute value type
-  Scenario: insert an attribute with a value is retrievable by the value
-    When graql insert
-      """
-      insert $n "John" isa name, has ref 0;
-      """
-    When the integrity is validated
-    Then get answers of graql query
-      """
-      match $a "John"; get;
-      """
-    Then concept identifiers are
-      |      | check | value |
-      | REF0 | key   | ref:0 |
-    Then uniquely identify answer concepts
-      | a    |
-      | REF0 |
-
-
   # TODO - fix this; should fail but it does not!
   @ignore
   Scenario: insert an attribute that already exists throws errors when inserted with different keys
+    Given graql define
+      """
+      define
+      name key ref;
+      """
+    Given the integrity is validated
     When graql insert
       """
       insert $a "john" isa name, has ref 0;
       """
     When the integrity is validated
-
     Then graql insert throws
       """
       insert $a "john" isa name, has ref 1;
       """
     Then the integrity is validated
-
-
-  Scenario: insert two owners of the same attribute links owners via attribute
-    Given graql define
-      """
-      define
-      person sub entity, has age;
-      age sub attribute, value long;
-      """
-    Given the integrity is validated
-
-    When graql insert
-      """
-      insert $p isa person, has age 10, has ref 0;
-      """
-    When the integrity is validated
-
-    When graql insert
-      """
-      insert $p isa person, has age 10, has ref 1;
-      """
-    When the integrity is validated
-
-    Then get answers of graql query
-      """
-      match
-      $p1 isa person, has age $a;
-      $p2 isa person, has age $a;
-      $p1 != $p2;
-      get $p1, $p2;
-      """
-
-    Then concept identifiers are
-      |      | check | value |
-      | REF0 | key   | ref:0 |
-      | REF1 | key   | ref:1 |
-
-    Then uniquely identify answer concepts
-      | p1   | p2   |
-      | REF0 | REF1 |
-      | REF1 | REF0 |
 
 
   Scenario: insert a subtype of an attribute with same value creates a separate instance
@@ -260,4 +325,3 @@ Feature: Graql Insert Query
   Scenario: if any insert in a transaction fails with a semantic error, none of the inserts are performed
 
   Scenario: if any insert in a transaction fails with a `key` violation, none of the inserts are performed
-
