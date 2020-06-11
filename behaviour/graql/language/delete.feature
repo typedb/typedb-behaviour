@@ -128,7 +128,6 @@ Feature: Graql Delete Query
       | BOB |
 
 
-  Scenario: delete an entity instance using 'entity' meta label succeeds
   Scenario: an entity can be deleted using the 'entity' meta label
     When graql insert
       """
@@ -1308,7 +1307,7 @@ Feature: Graql Delete Query
     Then answer size is: 0
 
 
-  Scenario: deleting a key ownership throws an error
+  Scenario: deleting a key ownership throws on commit
     When graql insert
       """
       insert
