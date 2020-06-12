@@ -52,7 +52,7 @@ Feature: Concept Entity
 
   Scenario: Entity can be deleted
     When $x = entity(person) create new instance
-    When entity $x is deleted
+    When delete entity: $x
     Then entity(person) instances is empty
     When transaction commits
     When session opens transaction of type: write
@@ -61,7 +61,7 @@ Feature: Concept Entity
     When transaction commits
     When session opens transaction of type: write
     When $x = entity(person) get first instance
-    When entity $x is deleted
+    When delete entity: $x
     Then entity(person) instances is empty
     When transaction commits
     When session opens transaction of type: read
