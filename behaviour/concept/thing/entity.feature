@@ -69,6 +69,19 @@ Feature: Concept Entity
     # TODO: lookup by key
 
   Scenario: Entity can have key
+    When $x = entity(person) create new instance
+    When $y = attribute(email) as(string) put: name@email.com
+    When entity $x set key: $y
+    Then entity $x get keys(email) contain: $y
+    Then entity $x get keys contain: $y
+    Then attribute $y get owners contain: $x
+    When transaction commits
+    When session opens transaction of type: read
+    When $x = entity(person) get first instance
+    When $y = attribute(email) as(string) get: name@email.com
+    Then entity $x get keys(email) contain: $y
+    Then entity $x get keys contain: $y
+    Then attribute $y get owners contain: $x
 
   Scenario: Entity can get keys
 
