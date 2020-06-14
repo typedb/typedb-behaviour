@@ -28,7 +28,7 @@ Feature: Concept Entity
     Given put attribute type: email, with value type: string
     Given put attribute type: name, with value type: string
     Given put entity type: person
-    Given entity(person) set key attribute: email
+    Given entity(person) set key attribute type: email
     Given entity(person) set has attribute: name
     Given transaction commits
     Given connection close all sessions
@@ -66,7 +66,6 @@ Feature: Concept Entity
     When transaction commits
     When session opens transaction of type: read
     Then entity(person) instances is empty
-    # TODO: lookup by key
 
   Scenario: Entity can have keys
     When $x = entity(person) create new instance

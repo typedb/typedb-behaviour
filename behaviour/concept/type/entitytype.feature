@@ -208,8 +208,8 @@ Feature: Concept Entity Type
     When put attribute type: email, with value type: string
     When put attribute type: username, with value type: string
     When put entity type: person
-    When entity(person) set key attribute: email
-    When entity(person) set key attribute: username
+    When entity(person) set key attribute type: email
+    When entity(person) set key attribute type: username
     Then entity(person) get key attributes contain:
       | email    |
       | username |
@@ -223,8 +223,8 @@ Feature: Concept Entity Type
     When put attribute type: email, with value type: string
     When put attribute type: username, with value type: string
     When put entity type: person
-    When entity(person) set key attribute: email
-    When entity(person) set key attribute: username
+    When entity(person) set key attribute type: email
+    When entity(person) set key attribute type: username
     When entity(person) remove key attribute: email
     Then entity(person) get key attributes do not contain:
       | email |
@@ -242,10 +242,10 @@ Feature: Concept Entity Type
     When put attribute type: name, with value type: string
     When put attribute type: timestamp, with value type: datetime
     When put entity type: person
-    When entity(person) set key attribute: age
-    When entity(person) set key attribute: name
-    When entity(person) set key attribute: timestamp
-    When entity(person) set key attribute: timestamp
+    When entity(person) set key attribute type: age
+    When entity(person) set key attribute type: name
+    When entity(person) set key attribute type: timestamp
+    When entity(person) set key attribute type: timestamp
     When entity(person) fails at setting key attribute: is-open
     When entity(person) fails at setting key attribute: rating
 
@@ -286,8 +286,8 @@ Feature: Concept Entity Type
     When put attribute type: name, with value type: string
     When put attribute type: age, with value type: long
     When put entity type: person
-    When entity(person) set key attribute: email
-    When entity(person) set key attribute: username
+    When entity(person) set key attribute type: email
+    When entity(person) set key attribute type: username
     When entity(person) set has attribute: name
     When entity(person) set has attribute: age
     Then entity(person) get key attributes contain:
@@ -315,11 +315,11 @@ Feature: Concept Entity Type
     When put attribute type: reference, with value type: string
     When put attribute type: rating, with value type: double
     When put entity type: person
-    When entity(person) set key attribute: email
+    When entity(person) set key attribute type: email
     When entity(person) set has attribute: name
     When put entity type: customer
     When entity(customer) set supertype: person
-    When entity(customer) set key attribute: reference
+    When entity(customer) set key attribute type: reference
     When entity(customer) set has attribute: rating
     Then entity(customer) get key attributes contain:
       | email     |
@@ -343,7 +343,7 @@ Feature: Concept Entity Type
     When put attribute type: points, with value type: double
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
-    When entity(subscriber) set key attribute: license
+    When entity(subscriber) set key attribute type: license
     When entity(subscriber) set has attribute: points
     When transaction commits
     When session opens transaction of type: read
@@ -375,11 +375,11 @@ Feature: Concept Entity Type
     When put attribute type: rating, with value type: double
     When attribute(rating) set supertype: score
     When put entity type: person
-    When entity(person) set key attribute: username
+    When entity(person) set key attribute type: username
     When entity(person) set has attribute: score
     When put entity type: customer
     When entity(customer) set supertype: person
-    When entity(customer) set key attribute: reference
+    When entity(customer) set key attribute type: reference
     When entity(customer) set has attribute: rating
     Then entity(customer) get key attributes contain:
       | username  |
@@ -405,7 +405,7 @@ Feature: Concept Entity Type
     When attribute(points) set supertype: rating
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
-    When entity(subscriber) set key attribute: license
+    When entity(subscriber) set key attribute type: license
     When entity(subscriber) set has attribute: points
     When transaction commits
     When session opens transaction of type: read
@@ -441,14 +441,14 @@ Feature: Concept Entity Type
     When attribute(nick-name) set supertype: name
     When put attribute type: rating, with value type: double
     When put entity type: person
-    When entity(person) set key attribute: username
-    When entity(person) set key attribute: email
+    When entity(person) set key attribute type: username
+    When entity(person) set key attribute type: email
     When entity(person) set has attribute: name
     When entity(person) set has attribute: age
     When put entity type: customer
     When entity(customer) set supertype: person
-    When entity(customer) set key attribute: reference
-    When entity(customer) set key attribute: work-email as email
+    When entity(customer) set key attribute type: reference
+    When entity(customer) set key attribute type: work-email as email
     When entity(customer) set has attribute: rating
     When entity(customer) set has attribute: nick-name as name
     Then entity(customer) get key attributes contain:
@@ -491,7 +491,7 @@ Feature: Concept Entity Type
     When attribute(points) set supertype: rating
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
-    When entity(subscriber) set key attribute: license as reference
+    When entity(subscriber) set key attribute type: license as reference
     When entity(subscriber) set has attribute: points as rating
     When transaction commits
     When session opens transaction of type: read
@@ -539,7 +539,7 @@ Feature: Concept Entity Type
     When entity(person) set has attribute: name
     When put entity type: customer
     When entity(customer) set supertype: person
-    When entity(customer) set key attribute: username as name
+    When entity(customer) set key attribute type: username as name
     Then entity(customer) get key attributes contain:
       | username |
     Then entity(customer) get key attributes do not contain:
@@ -562,7 +562,7 @@ Feature: Concept Entity Type
   Scenario: Entity types cannot redeclare keys as attributes
     When put attribute type: username, with value type: string
     When put entity type: person
-    When entity(person) set key attribute: username
+    When entity(person) set key attribute type: username
     Then entity(person) fails at setting has attribute: username
 
   Scenario: Entity types cannot redeclare attributes as keys
@@ -575,7 +575,7 @@ Feature: Concept Entity Type
     When put attribute type: email, with value type: string
     When put attribute type: name, with value type: string
     When put entity type: person
-    When entity(person) set key attribute: email
+    When entity(person) set key attribute type: email
     When entity(person) set has attribute: name
     When put entity type: customer
     When entity(customer) set supertype: person
@@ -590,11 +590,11 @@ Feature: Concept Entity Type
     When put attribute type: customer-name, with value type: string
     When attribute(customer-name) set supertype: name
     When put entity type: person
-    When entity(person) set key attribute: email
+    When entity(person) set key attribute type: email
     When entity(person) set has attribute: name
     When put entity type: customer
     When entity(customer) set supertype: person
-    When entity(customer) set key attribute: customer-email
+    When entity(customer) set key attribute type: customer-email
     When entity(customer) set has attribute: customer-name
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
@@ -611,7 +611,7 @@ Feature: Concept Entity Type
     When put attribute type: first-name, with value type: string
     When attribute(first-name) set supertype: name
     When put entity type: person
-    When entity(person) set key attribute: username
+    When entity(person) set key attribute type: username
     When entity(person) set has attribute: name
     Then entity(person) fails at setting key attribute: email as username
     Then entity(person) fails at setting has attribute: first-name as name
@@ -621,7 +621,7 @@ Feature: Concept Entity Type
     When put attribute type: email, with value type: string
     When attribute(email) set supertype: username
     When put entity type: person
-    When entity(person) set key attribute: username
+    When entity(person) set key attribute type: username
     When put entity type: customer
     When entity(customer) set supertype: person
     Then entity(customer) fails at setting has attribute: email as username
@@ -632,7 +632,7 @@ Feature: Concept Entity Type
     When put attribute type: reference, with value type: string
     When put attribute type: rating, with value type: double
     When put entity type: person
-    When entity(person) set key attribute: username
+    When entity(person) set key attribute type: username
     When entity(person) set has attribute: name
     When put entity type: customer
     When entity(customer) set supertype: person

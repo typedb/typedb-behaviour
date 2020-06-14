@@ -403,7 +403,7 @@ Feature: Concept Relation Type and Role Type
     When put attribute type: license, with value type: string
     When put relation type: marriage
     When relation(marriage) set relates role: spouse
-    When relation(marriage) set key attribute: license
+    When relation(marriage) set key attribute type: license
     Then relation(marriage) get key attributes contain:
       | license |
     When transaction commits
@@ -416,8 +416,8 @@ Feature: Concept Relation Type and Role Type
     When put attribute type: certificate, with value type: string
     When put relation type: marriage
     When relation(marriage) set relates role: spouse
-    When relation(marriage) set key attribute: license
-    When relation(marriage) set key attribute: certificate
+    When relation(marriage) set key attribute type: license
+    When relation(marriage) set key attribute type: certificate
     When relation(marriage) remove key attribute: license
     Then relation(marriage) get key attributes do not contain:
       | license |
@@ -435,9 +435,9 @@ Feature: Concept Relation Type and Role Type
     When put attribute type: reference, with value type: string
     When put attribute type: start-date, with value type: datetime
     When put relation type: employment
-    When relation(employment) set key attribute: contract-years
-    When relation(employment) set key attribute: reference
-    When relation(employment) set key attribute: start-date
+    When relation(employment) set key attribute type: contract-years
+    When relation(employment) set key attribute type: reference
+    When relation(employment) set key attribute type: start-date
     When relation(employment) fails at setting key attribute: is-permanent
     When relation(employment) fails at setting key attribute: salary
 
@@ -480,8 +480,8 @@ Feature: Concept Relation Type and Role Type
     When put attribute type: date, with value type: datetime
     When put attribute type: religion, with value type: string
     When put relation type: marriage
-    When relation(marriage) set key attribute: license
-    When relation(marriage) set key attribute: certificate
+    When relation(marriage) set key attribute type: license
+    When relation(marriage) set key attribute type: certificate
     When relation(marriage) set has attribute: date
     When relation(marriage) set has attribute: religion
     Then relation(marriage) get key attributes contain:
@@ -511,11 +511,11 @@ Feature: Concept Relation Type and Role Type
     When put relation type: employment
     When relation(employment) set relates role: employee
     When relation(employment) set relates role: employer
-    When relation(employment) set key attribute: employment-reference
+    When relation(employment) set key attribute type: employment-reference
     When relation(employment) set has attribute: employment-hours
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    When relation(contractor-employment) set key attribute: contractor-reference
+    When relation(contractor-employment) set key attribute type: contractor-reference
     When relation(contractor-employment) set has attribute: contractor-hours
     Then relation(contractor-employment) get key attributes contain:
       | employment-reference |
@@ -539,7 +539,7 @@ Feature: Concept Relation Type and Role Type
     When put attribute type: parttime-hours, with value type: long
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
-    When relation(parttime-employment) set key attribute: parttime-reference
+    When relation(parttime-employment) set key attribute type: parttime-reference
     When relation(parttime-employment) set has attribute: parttime-hours
     Then relation(parttime-employment) get key attributes contain:
       | employment-reference |
@@ -584,11 +584,11 @@ Feature: Concept Relation Type and Role Type
     When put relation type: employment
     When relation(employment) set relates role: employee
     When relation(employment) set relates role: employer
-    When relation(employment) set key attribute: employment-reference
+    When relation(employment) set key attribute type: employment-reference
     When relation(employment) set has attribute: employment-hours
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    When relation(contractor-employment) set key attribute: contractor-reference
+    When relation(contractor-employment) set key attribute type: contractor-reference
     When relation(contractor-employment) set has attribute: contractor-hours
     Then relation(contractor-employment) get key attributes contain:
       | employment-reference |
@@ -614,7 +614,7 @@ Feature: Concept Relation Type and Role Type
     When attribute(parttime-hours) set supertype: contractor-hours
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
-    When relation(parttime-employment) set key attribute: parttime-reference
+    When relation(parttime-employment) set key attribute type: parttime-reference
     When relation(parttime-employment) set has attribute: parttime-hours
     Then relation(parttime-employment) get key attributes contain:
       | employment-reference |
@@ -659,11 +659,11 @@ Feature: Concept Relation Type and Role Type
     When put relation type: employment
     When relation(employment) set relates role: employee
     When relation(employment) set relates role: employer
-    When relation(employment) set key attribute: employment-reference
+    When relation(employment) set key attribute type: employment-reference
     When relation(employment) set has attribute: employment-hours
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    When relation(contractor-employment) set key attribute: contractor-reference as employment-reference
+    When relation(contractor-employment) set key attribute type: contractor-reference as employment-reference
     When relation(contractor-employment) set has attribute: contractor-hours as employment-hours
     Then relation(contractor-employment) get key attributes contain:
       | contractor-reference |
@@ -693,7 +693,7 @@ Feature: Concept Relation Type and Role Type
     When attribute(parttime-hours) set supertype: contractor-hours
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
-    When relation(parttime-employment) set key attribute: parttime-reference as contractor-reference
+    When relation(parttime-employment) set key attribute type: parttime-reference as contractor-reference
     When relation(parttime-employment) set has attribute: parttime-hours as contractor-hours
     Then relation(parttime-employment) get key attributes contain:
       | parttime-reference |
@@ -736,7 +736,7 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set has attribute: employment-reference
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    When relation(contractor-employment) set key attribute: contractor-reference as employment-reference
+    When relation(contractor-employment) set key attribute type: contractor-reference as employment-reference
     Then relation(contractor-employment) get key attributes contain:
       | contractor-reference |
     Then relation(contractor-employment) get key attributes do not contain:
@@ -760,7 +760,7 @@ Feature: Concept Relation Type and Role Type
     When put attribute type: license, with value type: string
     When put relation type: marriage
     When relation(marriage) set relates role: spouse
-    When relation(marriage) set key attribute: license
+    When relation(marriage) set key attribute type: license
     Then relation(marriage) fails at setting has attribute: license
 
   Scenario: Relation types cannot redeclare attributes as keys
@@ -776,7 +776,7 @@ Feature: Concept Relation Type and Role Type
     When put relation type: employment
     When relation(employment) set relates role: employee
     When relation(employment) set relates role: employer
-    When relation(employment) set key attribute: employment-reference
+    When relation(employment) set key attribute type: employment-reference
     When relation(employment) set has attribute: employment-hours
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
@@ -792,11 +792,11 @@ Feature: Concept Relation Type and Role Type
     When attribute(contractor-hours) set supertype: employment-hours
     When put relation type: employment
     When relation(employment) set relates role: employee
-    When relation(employment) set key attribute: employment-reference
+    When relation(employment) set key attribute type: employment-reference
     When relation(employment) set has attribute: employment-hours
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    When relation(contractor-employment) set key attribute: contractor-reference as employment-reference
+    When relation(contractor-employment) set key attribute type: contractor-reference as employment-reference
     When relation(contractor-employment) set has attribute: contractor-hours as employment-hours
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
@@ -815,7 +815,7 @@ Feature: Concept Relation Type and Role Type
     When put relation type: employment
     When relation(employment) set relates role: employee
     When relation(employment) set relates role: employer
-    When relation(employment) set key attribute: reference
+    When relation(employment) set key attribute type: reference
     When relation(employment) set has attribute: hours
     Then relation(employment) fails at setting key attribute: social-security-number as reference
     Then relation(employment) fails at setting has attribute: max-hours as hours
@@ -827,7 +827,7 @@ Feature: Concept Relation Type and Role Type
     When put relation type: employment
     When relation(employment) set relates role: employer
     When relation(employment) set relates role: employee
-    When relation(employment) set key attribute: employment-reference
+    When relation(employment) set key attribute type: employment-reference
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
     Then relation(contractor-employment) fails at setting has attribute: contractor-reference as employment-reference
@@ -840,7 +840,7 @@ Feature: Concept Relation Type and Role Type
     When put relation type: employment
     When relation(employment) set relates role: employee
     When relation(employment) set relates role: employer
-    When relation(employment) set key attribute: employment-reference
+    When relation(employment) set key attribute type: employment-reference
     When relation(employment) set has attribute: employment-hours
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment

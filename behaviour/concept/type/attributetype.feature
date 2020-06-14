@@ -410,7 +410,7 @@ Feature: Concept Attribute Type
   Scenario: Attribute types can have keys
     When put attribute type: country-code, with value type: string
     When put attribute type: country-name, with value type: string
-    When attribute(country-name) set key attribute: country-code
+    When attribute(country-name) set key attribute type: country-code
     Then attribute(country-name) get key attributes contain:
       | country-code |
     When transaction commits
@@ -422,8 +422,8 @@ Feature: Concept Attribute Type
     When put attribute type: country-code-1, with value type: string
     When put attribute type: country-code-2, with value type: string
     When put attribute type: country-name, with value type: string
-    When attribute(country-name) set key attribute: country-code-1
-    When attribute(country-name) set key attribute: country-code-2
+    When attribute(country-name) set key attribute type: country-code-1
+    When attribute(country-name) set key attribute type: country-code-2
     When attribute(country-name) remove key attribute: country-code-1
     Then attribute(country-name) get key attributes do not contain:
       | country-code-1 |
@@ -469,7 +469,7 @@ Feature: Concept Attribute Type
     When put attribute type: country-code, with value type: string
     When put attribute type: country-abbreviation, with value type: string
     When put attribute type: country-name, with value type: string
-    When attribute(country-name) set key attribute: country-code
+    When attribute(country-name) set key attribute type: country-code
     When attribute(country-name) set has attribute: country-abbreviation
     Then attribute(country-name) get key attributes contain:
       | country-code |
@@ -488,7 +488,7 @@ Feature: Concept Attribute Type
     When put attribute type: hash, with value type: string
     When put attribute type: abbreviation, with value type: string
     When put attribute type: name, with value type: string
-    When attribute(name) set key attribute: hash
+    When attribute(name) set key attribute type: hash
     When attribute(name) set has attribute: abbreviation
     When put attribute type: real-name, with value type: string
     When attribute(real-name) set supertype: name
