@@ -113,43 +113,43 @@ Feature: Concept Attribute
 
   Scenario: Attribute with value type boolean can be retrieved from its type
     When $x = attribute(is-alive) as(boolean) put: true
-    Then attribute(is-alive) instances contain: $x
+    Then attribute(is-alive) get instances contain: $x
     When transaction commits
     When session opens transaction of type: read
     When $x = attribute(is-alive) as(boolean) get: true
-    Then attribute(is-alive) instances contain: $x
+    Then attribute(is-alive) get instances contain: $x
 
   Scenario: Attribute with value type long can be retrieved from its type
     When $x = attribute(age) as(long) put: 21
-    Then attribute(age) instances contain: $x
+    Then attribute(age) get instances contain: $x
     When transaction commits
     When session opens transaction of type: read
     When $x = attribute(age) as(long) get: 21
-    Then attribute(age) instances contain: $x
+    Then attribute(age) get instances contain: $x
 
   Scenario: Attribute with value type double can be retrieved from its type
     When $x = attribute(score) as(double) put: 123.456
-    Then attribute(score) instances contain: $x
+    Then attribute(score) get instances contain: $x
     When transaction commits
     When session opens transaction of type: read
     When $x = attribute(score) as(double) get: 123.456
-    Then attribute(score) instances contain: $x
+    Then attribute(score) get instances contain: $x
 
   Scenario: Attribute with value type string can be retrieved from its type
     When $x = attribute(name) as(string) put: alice
-    Then attribute(name) instances contain: $x
+    Then attribute(name) get instances contain: $x
     When transaction commits
     When session opens transaction of type: read
     When $x = attribute(name) as(string) get: alice
-    Then attribute(name) instances contain: $x
+    Then attribute(name) get instances contain: $x
 
   Scenario: Attribute with value type datetime can be retrieved from its type
     When $x = attribute(birth-date) as(datetime) put: 1990-01-01 11:22:33
-    Then attribute(birth-date) instances contain: $x
+    Then attribute(birth-date) get instances contain: $x
     When transaction commits
     When session opens transaction of type: read
     When $x = attribute(birth-date) as(datetime) get: 1990-01-01 11:22:33
-    Then attribute(birth-date) instances contain: $x
+    Then attribute(birth-date) get instances contain: $x
 
   Scenario: Attribute with value type boolean can be deleted
     When $x = attribute(is-alive) as(boolean) put: true

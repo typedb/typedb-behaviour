@@ -43,29 +43,29 @@ Feature: Concept Entity
 
   Scenario: Entity can be retrieved from its type
     When $x = entity(person) create new instance
-    Then entity(person) instances contain: $x
+    Then entity(person) get instances contain: $x
     When transaction commits
     When session opens transaction of type: read
     When $x = entity(person) get first instance
-    Then entity(person) instances contain: $x
+    Then entity(person) get instances contain: $x
     # TODO: lookup by key
 
   Scenario: Entity can be deleted
     When $x = entity(person) create new instance
     When delete entity: $x
-    Then entity(person) instances is empty
+    Then entity(person) get instances is empty
     When transaction commits
     When session opens transaction of type: write
-    Then entity(person) instances is empty
+    Then entity(person) get instances is empty
     When $x = entity(person) create new instance
     When transaction commits
     When session opens transaction of type: write
     When $x = entity(person) get first instance
     When delete entity: $x
-    Then entity(person) instances is empty
+    Then entity(person) get instances is empty
     When transaction commits
     When session opens transaction of type: read
-    Then entity(person) instances is empty
+    Then entity(person) get instances is empty
 
   Scenario: Entity can have keys
     When $x = entity(person) create new instance
