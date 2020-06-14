@@ -70,7 +70,7 @@ Feature: Concept Entity
   Scenario: Entity can have keys
     When $x = entity(person) create new instance
     When $y = attribute(email) as(string) put: name@email.com
-    When entity $x set key: $y
+    When entity $x set has: $y
     Then entity $x get keys(email) contain: $y
     Then entity $x get keys contain: $y
     Then attribute $y get owners contain: $x
@@ -85,7 +85,7 @@ Feature: Concept Entity
   Scenario: Entity can remove keys
     When $x = entity(person) create new instance
     When $y = attribute(email) as(string) put: name@email.com
-    When entity $x set key: $y
+    When entity $x set has: $y
     When entity $x remove key: $y
     Then entity $x get keys(email) do not contain: $y
     Then entity $x get keys do not contain: $y
@@ -97,7 +97,7 @@ Feature: Concept Entity
     Then entity $x get keys(email) do not contain: $y
     Then entity $x get keys do not contain: $y
     Then attribute $y get owners do not contain: $x
-    When entity $x set key: $y
+    When entity $x set has: $y
     When transaction commits
     When session opens transaction of type: write
     When $x = entity(person) get first instance
@@ -115,6 +115,19 @@ Feature: Concept Entity
     Then attribute $y get owners do not contain: $x
 
   Scenario: Entity can have attribute
+    When $x = entity(person) create new instance
+    When $y = attribute(name) as(string) put: alice
+    When entity $x set has: $y
+    Then entity $x get attributes(name) contain: $y
+    Then entity $x get attributes contain: $y
+    Then attribute $y get owners contain: $x
+    When transaction commits
+    When session opens transaction of type: read
+    When $x = entity(person) get first instance
+    When $y = attribute(name) as(string) get: alice
+    Then entity $x get attributes(name) contain: $y
+    Then entity $x get attributes contain: $y
+    Then attribute $y get owners contain: $x
 
   Scenario: Entity can get attributes
 
