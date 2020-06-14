@@ -31,11 +31,11 @@ Feature: Concept Attribute
     Given put attribute type: name, with value type: string
     Given put attribute type: birth-date, with value type: datetime
     Given put entity type: person
-    Given entity(person) set has attribute: is-alive
-    Given entity(person) set has attribute: age
-    Given entity(person) set has attribute: score
-    Given entity(person) set has attribute: name
-    Given entity(person) set has attribute: birth-date
+    Given entity(person) set has attribute type: is-alive
+    Given entity(person) set has attribute type: age
+    Given entity(person) set has attribute type: score
+    Given entity(person) set has attribute type: name
+    Given entity(person) set has attribute type: birth-date
     Given transaction commits
     Given connection close all sessions
     Given connection open data session for keyspace: grakn

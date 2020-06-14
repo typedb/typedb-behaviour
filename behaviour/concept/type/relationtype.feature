@@ -404,11 +404,11 @@ Feature: Concept Relation Type and Role Type
     When put relation type: marriage
     When relation(marriage) set relates role: spouse
     When relation(marriage) set key attribute type: license
-    Then relation(marriage) get key attributes contain:
+    Then relation(marriage) get key attribute types contain:
       | license |
     When transaction commits
     When session opens transaction of type: read
-    Then relation(marriage) get key attributes contain:
+    Then relation(marriage) get key attribute types contain:
       | license |
 
   Scenario: Relation types can remove keys
@@ -418,13 +418,13 @@ Feature: Concept Relation Type and Role Type
     When relation(marriage) set relates role: spouse
     When relation(marriage) set key attribute type: license
     When relation(marriage) set key attribute type: certificate
-    When relation(marriage) remove key attribute: license
-    Then relation(marriage) get key attributes do not contain:
+    When relation(marriage) remove key attribute type: license
+    Then relation(marriage) get key attribute types do not contain:
       | license |
     When transaction commits
     When session opens transaction of type: write
-    When relation(marriage) remove key attribute: certificate
-    Then relation(marriage) get key attributes do not contain:
+    When relation(marriage) remove key attribute type: certificate
+    Then relation(marriage) get key attribute types do not contain:
       | license     |
       | certificate |
 
@@ -438,22 +438,22 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set key attribute type: contract-years
     When relation(employment) set key attribute type: reference
     When relation(employment) set key attribute type: start-date
-    When relation(employment) fails at setting key attribute: is-permanent
-    When relation(employment) fails at setting key attribute: salary
+    When relation(employment) fails at setting key attribute type: is-permanent
+    When relation(employment) fails at setting key attribute type: salary
 
   Scenario: Relation types can have attributes
     When put attribute type: date, with value type: datetime
     When put attribute type: religion, with value type: string
     When put relation type: marriage
     When relation(marriage) set relates role: spouse
-    When relation(marriage) set has attribute: date
-    When relation(marriage) set has attribute: religion
-    Then relation(marriage) get has attributes contain:
+    When relation(marriage) set has attribute type: date
+    When relation(marriage) set has attribute type: religion
+    Then relation(marriage) get has attribute types contain:
       | date     |
       | religion |
     When transaction commits
     When session opens transaction of type: read
-    Then relation(marriage) get has attributes contain:
+    Then relation(marriage) get has attribute types contain:
       | date     |
       | religion |
 
@@ -462,15 +462,15 @@ Feature: Concept Relation Type and Role Type
     When put attribute type: religion, with value type: string
     When put relation type: marriage
     When relation(marriage) set relates role: spouse
-    When relation(marriage) set has attribute: date
-    When relation(marriage) set has attribute: religion
-    When relation(marriage) remove has attribute: religion
-    Then relation(marriage) get has attributes do not contain:
+    When relation(marriage) set has attribute type: date
+    When relation(marriage) set has attribute type: religion
+    When relation(marriage) remove has attribute type: religion
+    Then relation(marriage) get has attribute types do not contain:
       | religion |
     When transaction commits
     When session opens transaction of type: write
-    When relation(marriage) remove has attribute: date
-    Then relation(marriage) get has attributes do not contain:
+    When relation(marriage) remove has attribute type: date
+    Then relation(marriage) get has attribute types do not contain:
       | date     |
       | religion |
 
@@ -482,22 +482,22 @@ Feature: Concept Relation Type and Role Type
     When put relation type: marriage
     When relation(marriage) set key attribute type: license
     When relation(marriage) set key attribute type: certificate
-    When relation(marriage) set has attribute: date
-    When relation(marriage) set has attribute: religion
-    Then relation(marriage) get key attributes contain:
+    When relation(marriage) set has attribute type: date
+    When relation(marriage) set has attribute type: religion
+    Then relation(marriage) get key attribute types contain:
       | license     |
       | certificate |
-    Then relation(marriage) get has attributes contain:
+    Then relation(marriage) get has attribute types contain:
       | license     |
       | certificate |
       | date        |
       | religion    |
     When transaction commits
     When session opens transaction of type: read
-    Then relation(marriage) get key attributes contain:
+    Then relation(marriage) get key attribute types contain:
       | license     |
       | certificate |
-    Then relation(marriage) get has attributes contain:
+    Then relation(marriage) get has attribute types contain:
       | license     |
       | certificate |
       | date        |
@@ -512,25 +512,25 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set relates role: employee
     When relation(employment) set relates role: employer
     When relation(employment) set key attribute type: employment-reference
-    When relation(employment) set has attribute: employment-hours
+    When relation(employment) set has attribute type: employment-hours
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
     When relation(contractor-employment) set key attribute type: contractor-reference
-    When relation(contractor-employment) set has attribute: contractor-hours
-    Then relation(contractor-employment) get key attributes contain:
+    When relation(contractor-employment) set has attribute type: contractor-hours
+    Then relation(contractor-employment) get key attribute types contain:
       | employment-reference |
       | contractor-reference |
-    Then relation(contractor-employment) get has attributes contain:
+    Then relation(contractor-employment) get has attribute types contain:
       | employment-reference |
       | contractor-reference |
       | employment-hours     |
       | contractor-hours     |
     When transaction commits
     When session opens transaction of type: write
-    Then relation(contractor-employment) get key attributes contain:
+    Then relation(contractor-employment) get key attribute types contain:
       | employment-reference |
       | contractor-reference |
-    Then relation(contractor-employment) get has attributes contain:
+    Then relation(contractor-employment) get has attribute types contain:
       | employment-reference |
       | contractor-reference |
       | employment-hours     |
@@ -540,12 +540,12 @@ Feature: Concept Relation Type and Role Type
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
     When relation(parttime-employment) set key attribute type: parttime-reference
-    When relation(parttime-employment) set has attribute: parttime-hours
-    Then relation(parttime-employment) get key attributes contain:
+    When relation(parttime-employment) set has attribute type: parttime-hours
+    Then relation(parttime-employment) get key attribute types contain:
       | employment-reference |
       | contractor-reference |
       | parttime-reference   |
-    Then relation(parttime-employment) get has attributes contain:
+    Then relation(parttime-employment) get has attribute types contain:
       | employment-reference |
       | contractor-reference |
       | parttime-reference   |
@@ -554,19 +554,19 @@ Feature: Concept Relation Type and Role Type
       | parttime-hours       |
     When transaction commits
     When session opens transaction of type: read
-    Then relation(contractor-employment) get key attributes contain:
+    Then relation(contractor-employment) get key attribute types contain:
       | employment-reference |
       | contractor-reference |
-    Then relation(contractor-employment) get has attributes contain:
+    Then relation(contractor-employment) get has attribute types contain:
       | employment-reference |
       | contractor-reference |
       | employment-hours     |
       | contractor-hours     |
-    Then relation(parttime-employment) get key attributes contain:
+    Then relation(parttime-employment) get key attribute types contain:
       | employment-reference |
       | contractor-reference |
       | parttime-reference   |
-    Then relation(parttime-employment) get has attributes contain:
+    Then relation(parttime-employment) get has attribute types contain:
       | employment-reference |
       | contractor-reference |
       | parttime-reference   |
@@ -585,25 +585,25 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set relates role: employee
     When relation(employment) set relates role: employer
     When relation(employment) set key attribute type: employment-reference
-    When relation(employment) set has attribute: employment-hours
+    When relation(employment) set has attribute type: employment-hours
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
     When relation(contractor-employment) set key attribute type: contractor-reference
-    When relation(contractor-employment) set has attribute: contractor-hours
-    Then relation(contractor-employment) get key attributes contain:
+    When relation(contractor-employment) set has attribute type: contractor-hours
+    Then relation(contractor-employment) get key attribute types contain:
       | employment-reference |
       | contractor-reference |
-    Then relation(contractor-employment) get has attributes contain:
+    Then relation(contractor-employment) get has attribute types contain:
       | employment-reference |
       | contractor-reference |
       | employment-hours     |
       | contractor-hours     |
     When transaction commits
     When session opens transaction of type: write
-    Then relation(contractor-employment) get key attributes contain:
+    Then relation(contractor-employment) get key attribute types contain:
       | employment-reference |
       | contractor-reference |
-    Then relation(contractor-employment) get has attributes contain:
+    Then relation(contractor-employment) get has attribute types contain:
       | employment-reference |
       | contractor-reference |
       | employment-hours     |
@@ -615,12 +615,12 @@ Feature: Concept Relation Type and Role Type
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
     When relation(parttime-employment) set key attribute type: parttime-reference
-    When relation(parttime-employment) set has attribute: parttime-hours
-    Then relation(parttime-employment) get key attributes contain:
+    When relation(parttime-employment) set has attribute type: parttime-hours
+    Then relation(parttime-employment) get key attribute types contain:
       | employment-reference |
       | contractor-reference |
       | parttime-reference   |
-    Then relation(parttime-employment) get has attributes contain:
+    Then relation(parttime-employment) get has attribute types contain:
       | employment-reference |
       | contractor-reference |
       | parttime-reference   |
@@ -629,19 +629,19 @@ Feature: Concept Relation Type and Role Type
       | parttime-hours       |
     When transaction commits
     When session opens transaction of type: read
-    Then relation(contractor-employment) get key attributes contain:
+    Then relation(contractor-employment) get key attribute types contain:
       | employment-reference |
       | contractor-reference |
-    Then relation(contractor-employment) get has attributes contain:
+    Then relation(contractor-employment) get has attribute types contain:
       | employment-reference |
       | contractor-reference |
       | employment-hours     |
       | contractor-hours     |
-    Then relation(parttime-employment) get key attributes contain:
+    Then relation(parttime-employment) get key attribute types contain:
       | employment-reference |
       | contractor-reference |
       | parttime-reference   |
-    Then relation(parttime-employment) get has attributes contain:
+    Then relation(parttime-employment) get has attribute types contain:
       | employment-reference |
       | contractor-reference |
       | parttime-reference   |
@@ -660,31 +660,31 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set relates role: employee
     When relation(employment) set relates role: employer
     When relation(employment) set key attribute type: employment-reference
-    When relation(employment) set has attribute: employment-hours
+    When relation(employment) set has attribute type: employment-hours
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
     When relation(contractor-employment) set key attribute type: contractor-reference as employment-reference
-    When relation(contractor-employment) set has attribute: contractor-hours as employment-hours
-    Then relation(contractor-employment) get key attributes contain:
+    When relation(contractor-employment) set has attribute type: contractor-hours as employment-hours
+    Then relation(contractor-employment) get key attribute types contain:
       | contractor-reference |
-    Then relation(contractor-employment) get key attributes do not contain:
+    Then relation(contractor-employment) get key attribute types do not contain:
       | employment-reference |
-    Then relation(contractor-employment) get has attributes contain:
+    Then relation(contractor-employment) get has attribute types contain:
       | contractor-reference |
       | contractor-hours     |
-    Then relation(contractor-employment) get has attributes do not contain:
+    Then relation(contractor-employment) get has attribute types do not contain:
       | employment-reference |
       | employment-hours     |
     When transaction commits
     When session opens transaction of type: write
-    Then relation(contractor-employment) get key attributes contain:
+    Then relation(contractor-employment) get key attribute types contain:
       | contractor-reference |
-    Then relation(contractor-employment) get key attributes do not contain:
+    Then relation(contractor-employment) get key attribute types do not contain:
       | employment-reference |
-    Then relation(contractor-employment) get has attributes contain:
+    Then relation(contractor-employment) get has attribute types contain:
       | contractor-reference |
       | contractor-hours     |
-    Then relation(contractor-employment) get has attributes do not contain:
+    Then relation(contractor-employment) get has attribute types do not contain:
       | employment-reference |
       | employment-hours     |
     When put attribute type: parttime-reference, with value type: string
@@ -694,33 +694,33 @@ Feature: Concept Relation Type and Role Type
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
     When relation(parttime-employment) set key attribute type: parttime-reference as contractor-reference
-    When relation(parttime-employment) set has attribute: parttime-hours as contractor-hours
-    Then relation(parttime-employment) get key attributes contain:
+    When relation(parttime-employment) set has attribute type: parttime-hours as contractor-hours
+    Then relation(parttime-employment) get key attribute types contain:
       | parttime-reference |
-    Then relation(parttime-employment) get has attributes contain:
+    Then relation(parttime-employment) get has attribute types contain:
       | parttime-reference |
       | parttime-hours     |
     When transaction commits
     When session opens transaction of type: read
-    Then relation(contractor-employment) get key attributes contain:
+    Then relation(contractor-employment) get key attribute types contain:
       | contractor-reference |
-    Then relation(contractor-employment) get key attributes do not contain:
+    Then relation(contractor-employment) get key attribute types do not contain:
       | employment-reference |
-    Then relation(contractor-employment) get has attributes contain:
+    Then relation(contractor-employment) get has attribute types contain:
       | contractor-reference |
       | contractor-hours     |
-    Then relation(contractor-employment) get has attributes do not contain:
+    Then relation(contractor-employment) get has attribute types do not contain:
       | employment-reference |
       | employment-hours     |
-    Then relation(parttime-employment) get key attributes contain:
+    Then relation(parttime-employment) get key attribute types contain:
       | parttime-reference |
-    Then relation(parttime-employment) get key attributes do not contain:
+    Then relation(parttime-employment) get key attribute types do not contain:
       | employment-reference |
       | contractor-reference |
-    Then relation(parttime-employment) get has attributes contain:
+    Then relation(parttime-employment) get has attribute types contain:
       | parttime-reference |
       | parttime-hours     |
-    Then relation(parttime-employment) get key attributes do not contain:
+    Then relation(parttime-employment) get key attribute types do not contain:
       | employment-reference |
       | contractor-reference |
       | employment-hours     |
@@ -733,27 +733,27 @@ Feature: Concept Relation Type and Role Type
     When put relation type: employment
     When relation(employment) set relates role: employer
     When relation(employment) set relates role: employee
-    When relation(employment) set has attribute: employment-reference
+    When relation(employment) set has attribute type: employment-reference
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
     When relation(contractor-employment) set key attribute type: contractor-reference as employment-reference
-    Then relation(contractor-employment) get key attributes contain:
+    Then relation(contractor-employment) get key attribute types contain:
       | contractor-reference |
-    Then relation(contractor-employment) get key attributes do not contain:
+    Then relation(contractor-employment) get key attribute types do not contain:
       | employment-reference |
-    Then relation(contractor-employment) get has attributes contain:
+    Then relation(contractor-employment) get has attribute types contain:
       | contractor-reference |
-    Then relation(contractor-employment) get has attributes do not contain:
+    Then relation(contractor-employment) get has attribute types do not contain:
       | employment-reference |
     When transaction commits
     When session opens transaction of type: read
-    Then relation(contractor-employment) get key attributes contain:
+    Then relation(contractor-employment) get key attribute types contain:
       | contractor-reference |
-    Then relation(contractor-employment) get key attributes do not contain:
+    Then relation(contractor-employment) get key attribute types do not contain:
       | employment-reference |
-    Then relation(contractor-employment) get has attributes contain:
+    Then relation(contractor-employment) get has attribute types contain:
       | contractor-reference |
-    Then relation(contractor-employment) get has attributes do not contain:
+    Then relation(contractor-employment) get has attribute types do not contain:
       | employment-reference |
 
   Scenario: Relation types cannot redeclare keys as attributes
@@ -761,14 +761,14 @@ Feature: Concept Relation Type and Role Type
     When put relation type: marriage
     When relation(marriage) set relates role: spouse
     When relation(marriage) set key attribute type: license
-    Then relation(marriage) fails at setting has attribute: license
+    Then relation(marriage) fails at setting has attribute type: license
 
   Scenario: Relation types cannot redeclare attributes as keys
     When put attribute type: date, with value type: datetime
     When put relation type: marriage
     When relation(marriage) set relates role: spouse
-    When relation(marriage) set has attribute: date
-    Then relation(marriage) fails at setting key attribute: date
+    When relation(marriage) set has attribute type: date
+    Then relation(marriage) fails at setting key attribute type: date
 
   Scenario: Relation types cannot redeclare inherited keys and attributes
     When put attribute type: employment-reference, with value type: string
@@ -777,11 +777,11 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set relates role: employee
     When relation(employment) set relates role: employer
     When relation(employment) set key attribute type: employment-reference
-    When relation(employment) set has attribute: employment-hours
+    When relation(employment) set has attribute type: employment-hours
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    Then relation(contractor-employment) fails at setting key attribute: employment-reference
-    Then relation(contractor-employment) fails at setting has attribute: employment-hours
+    Then relation(contractor-employment) fails at setting key attribute type: employment-reference
+    Then relation(contractor-employment) fails at setting has attribute type: employment-hours
 
   Scenario: Relation types cannot redeclare inherited/overridden key/has attribute types
     When put attribute type: employment-reference, with value type: string
@@ -793,17 +793,17 @@ Feature: Concept Relation Type and Role Type
     When put relation type: employment
     When relation(employment) set relates role: employee
     When relation(employment) set key attribute type: employment-reference
-    When relation(employment) set has attribute: employment-hours
+    When relation(employment) set has attribute type: employment-hours
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
     When relation(contractor-employment) set key attribute type: contractor-reference as employment-reference
-    When relation(contractor-employment) set has attribute: contractor-hours as employment-hours
+    When relation(contractor-employment) set has attribute type: contractor-hours as employment-hours
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
-    Then relation(parttime-employment) fails at setting key attribute: employment-reference
-    Then relation(parttime-employment) fails at setting key attribute: contractor-reference
-    Then relation(parttime-employment) fails at setting has attribute: employment-hours
-    Then relation(parttime-employment) fails at setting has attribute: contractor-hours
+    Then relation(parttime-employment) fails at setting key attribute type: employment-reference
+    Then relation(parttime-employment) fails at setting key attribute type: contractor-reference
+    Then relation(parttime-employment) fails at setting has attribute type: employment-hours
+    Then relation(parttime-employment) fails at setting has attribute type: contractor-hours
 
   Scenario: Relation types cannot override declared keys and attributes
     When put attribute type: reference, with value type: string
@@ -816,9 +816,9 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set relates role: employee
     When relation(employment) set relates role: employer
     When relation(employment) set key attribute type: reference
-    When relation(employment) set has attribute: hours
-    Then relation(employment) fails at setting key attribute: social-security-number as reference
-    Then relation(employment) fails at setting has attribute: max-hours as hours
+    When relation(employment) set has attribute type: hours
+    Then relation(employment) fails at setting key attribute type: social-security-number as reference
+    Then relation(employment) fails at setting has attribute type: max-hours as hours
 
   Scenario: Relation types cannot override inherited keys as attributes
     When put attribute type: employment-reference, with value type: string
@@ -830,7 +830,7 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set key attribute type: employment-reference
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    Then relation(contractor-employment) fails at setting has attribute: contractor-reference as employment-reference
+    Then relation(contractor-employment) fails at setting has attribute type: contractor-reference as employment-reference
 
   Scenario: Relation types cannot override inherited keys and attributes other than with their subtypes
     When put attribute type: employment-reference, with value type: string
@@ -841,11 +841,11 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set relates role: employee
     When relation(employment) set relates role: employer
     When relation(employment) set key attribute type: employment-reference
-    When relation(employment) set has attribute: employment-hours
+    When relation(employment) set has attribute type: employment-hours
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    Then relation(contractor-employment) fails at setting key attribute: contractor-reference as employment-reference
-    Then relation(contractor-employment) fails at setting has attribute: contractor-hours as employment-hours
+    Then relation(contractor-employment) fails at setting key attribute type: contractor-reference as employment-reference
+    Then relation(contractor-employment) fails at setting has attribute type: contractor-hours as employment-hours
 
   Scenario: Relation types can play role types
     When put relation type: locates

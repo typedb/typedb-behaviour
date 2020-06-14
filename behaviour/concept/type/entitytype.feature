@@ -210,12 +210,12 @@ Feature: Concept Entity Type
     When put entity type: person
     When entity(person) set key attribute type: email
     When entity(person) set key attribute type: username
-    Then entity(person) get key attributes contain:
+    Then entity(person) get key attribute types contain:
       | email    |
       | username |
     When transaction commits
     When session opens transaction of type: read
-    Then entity(person) get key attributes contain:
+    Then entity(person) get key attribute types contain:
       | email    |
       | username |
 
@@ -225,13 +225,13 @@ Feature: Concept Entity Type
     When put entity type: person
     When entity(person) set key attribute type: email
     When entity(person) set key attribute type: username
-    When entity(person) remove key attribute: email
-    Then entity(person) get key attributes do not contain:
+    When entity(person) remove key attribute type: email
+    Then entity(person) get key attribute types do not contain:
       | email |
     When transaction commits
     When session opens transaction of type: write
-    When entity(person) remove key attribute: username
-    Then entity(person) get key attributes do not contain:
+    When entity(person) remove key attribute type: username
+    Then entity(person) get key attribute types do not contain:
       | email    |
       | username |
 
@@ -246,21 +246,21 @@ Feature: Concept Entity Type
     When entity(person) set key attribute type: name
     When entity(person) set key attribute type: timestamp
     When entity(person) set key attribute type: timestamp
-    When entity(person) fails at setting key attribute: is-open
-    When entity(person) fails at setting key attribute: rating
+    When entity(person) fails at setting key attribute type: is-open
+    When entity(person) fails at setting key attribute type: rating
 
   Scenario: Entity types can have attributes
     When put attribute type: name, with value type: string
     When put attribute type: age, with value type: long
     When put entity type: person
-    When entity(person) set has attribute: name
-    When entity(person) set has attribute: age
-    Then entity(person) get has attributes contain:
+    When entity(person) set has attribute type: name
+    When entity(person) set has attribute type: age
+    Then entity(person) get has attribute types contain:
       | name |
       | age  |
     When transaction commits
     When session opens transaction of type: read
-    Then entity(person) get has attributes contain:
+    Then entity(person) get has attribute types contain:
       | name |
       | age  |
 
@@ -268,15 +268,15 @@ Feature: Concept Entity Type
     When put attribute type: name, with value type: string
     When put attribute type: age, with value type: long
     When put entity type: person
-    When entity(person) set has attribute: name
-    When entity(person) set has attribute: age
-    When entity(person) remove has attribute: age
-    Then entity(person) get has attributes do not contain:
+    When entity(person) set has attribute type: name
+    When entity(person) set has attribute type: age
+    When entity(person) remove has attribute type: age
+    Then entity(person) get has attribute types do not contain:
       | age |
     When transaction commits
     When session opens transaction of type: write
-    When entity(person) remove has attribute: name
-    Then entity(person) get has attributes do not contain:
+    When entity(person) remove has attribute type: name
+    Then entity(person) get has attribute types do not contain:
       | name |
       | age  |
 
@@ -288,22 +288,22 @@ Feature: Concept Entity Type
     When put entity type: person
     When entity(person) set key attribute type: email
     When entity(person) set key attribute type: username
-    When entity(person) set has attribute: name
-    When entity(person) set has attribute: age
-    Then entity(person) get key attributes contain:
+    When entity(person) set has attribute type: name
+    When entity(person) set has attribute type: age
+    Then entity(person) get key attribute types contain:
       | email    |
       | username |
-    Then entity(person) get has attributes contain:
+    Then entity(person) get has attribute types contain:
       | email    |
       | username |
       | name     |
       | age      |
     When transaction commits
     When session opens transaction of type: read
-    Then entity(person) get key attributes contain:
+    Then entity(person) get key attribute types contain:
       | email    |
       | username |
-    Then entity(person) get has attributes contain:
+    Then entity(person) get has attribute types contain:
       | email    |
       | username |
       | name     |
@@ -316,25 +316,25 @@ Feature: Concept Entity Type
     When put attribute type: rating, with value type: double
     When put entity type: person
     When entity(person) set key attribute type: email
-    When entity(person) set has attribute: name
+    When entity(person) set has attribute type: name
     When put entity type: customer
     When entity(customer) set supertype: person
     When entity(customer) set key attribute type: reference
-    When entity(customer) set has attribute: rating
-    Then entity(customer) get key attributes contain:
+    When entity(customer) set has attribute type: rating
+    Then entity(customer) get key attribute types contain:
       | email     |
       | reference |
-    Then entity(customer) get has attributes contain:
+    Then entity(customer) get has attribute types contain:
       | email     |
       | reference |
       | name      |
       | rating    |
     When transaction commits
     When session opens transaction of type: write
-    Then entity(customer) get key attributes contain:
+    Then entity(customer) get key attribute types contain:
       | email     |
       | reference |
-    Then entity(customer) get has attributes contain:
+    Then entity(customer) get has attribute types contain:
       | email     |
       | reference |
       | name      |
@@ -344,22 +344,22 @@ Feature: Concept Entity Type
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
     When entity(subscriber) set key attribute type: license
-    When entity(subscriber) set has attribute: points
+    When entity(subscriber) set has attribute type: points
     When transaction commits
     When session opens transaction of type: read
-    Then entity(customer) get key attributes contain:
+    Then entity(customer) get key attribute types contain:
       | email     |
       | reference |
-    Then entity(customer) get has attributes contain:
+    Then entity(customer) get has attribute types contain:
       | email     |
       | reference |
       | name      |
       | rating    |
-    Then entity(subscriber) get key attributes contain:
+    Then entity(subscriber) get key attribute types contain:
       | email     |
       | reference |
       | license   |
-    Then entity(subscriber) get has attributes contain:
+    Then entity(subscriber) get has attribute types contain:
       | email     |
       | reference |
       | license   |
@@ -376,25 +376,25 @@ Feature: Concept Entity Type
     When attribute(rating) set supertype: score
     When put entity type: person
     When entity(person) set key attribute type: username
-    When entity(person) set has attribute: score
+    When entity(person) set has attribute type: score
     When put entity type: customer
     When entity(customer) set supertype: person
     When entity(customer) set key attribute type: reference
-    When entity(customer) set has attribute: rating
-    Then entity(customer) get key attributes contain:
+    When entity(customer) set has attribute type: rating
+    Then entity(customer) get key attribute types contain:
       | username  |
       | reference |
-    Then entity(customer) get has attributes contain:
+    Then entity(customer) get has attribute types contain:
       | username  |
       | reference |
       | score     |
       | rating    |
     When transaction commits
     When session opens transaction of type: write
-    Then entity(customer) get key attributes contain:
+    Then entity(customer) get key attribute types contain:
       | username  |
       | reference |
-    Then entity(customer) get has attributes contain:
+    Then entity(customer) get has attribute types contain:
       | username  |
       | reference |
       | score     |
@@ -406,22 +406,22 @@ Feature: Concept Entity Type
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
     When entity(subscriber) set key attribute type: license
-    When entity(subscriber) set has attribute: points
+    When entity(subscriber) set has attribute type: points
     When transaction commits
     When session opens transaction of type: read
-    Then entity(customer) get key attributes contain:
+    Then entity(customer) get key attribute types contain:
       | username  |
       | reference |
-    Then entity(customer) get has attributes contain:
+    Then entity(customer) get has attribute types contain:
       | username  |
       | reference |
       | score     |
       | rating    |
-    Then entity(subscriber) get key attributes contain:
+    Then entity(subscriber) get key attribute types contain:
       | username  |
       | reference |
       | license   |
-    Then entity(subscriber) get has attributes contain:
+    Then entity(subscriber) get has attribute types contain:
       | username  |
       | reference |
       | license   |
@@ -443,46 +443,46 @@ Feature: Concept Entity Type
     When put entity type: person
     When entity(person) set key attribute type: username
     When entity(person) set key attribute type: email
-    When entity(person) set has attribute: name
-    When entity(person) set has attribute: age
+    When entity(person) set has attribute type: name
+    When entity(person) set has attribute type: age
     When put entity type: customer
     When entity(customer) set supertype: person
     When entity(customer) set key attribute type: reference
     When entity(customer) set key attribute type: work-email as email
-    When entity(customer) set has attribute: rating
-    When entity(customer) set has attribute: nick-name as name
-    Then entity(customer) get key attributes contain:
+    When entity(customer) set has attribute type: rating
+    When entity(customer) set has attribute type: nick-name as name
+    Then entity(customer) get key attribute types contain:
       | username   |
       | reference  |
       | work-email |
-    Then entity(customer) get key attributes do not contain:
+    Then entity(customer) get key attribute types do not contain:
       | email |
-    Then entity(customer) get has attributes contain:
+    Then entity(customer) get has attribute types contain:
       | username   |
       | reference  |
       | work-email |
       | age        |
       | rating     |
       | nick-name  |
-    Then entity(customer) get has attributes do not contain:
+    Then entity(customer) get has attribute types do not contain:
       | email |
       | name  |
     When transaction commits
     When session opens transaction of type: write
-    Then entity(customer) get key attributes contain:
+    Then entity(customer) get key attribute types contain:
       | username   |
       | reference  |
       | work-email |
-    Then entity(customer) get key attributes do not contain:
+    Then entity(customer) get key attribute types do not contain:
       | email |
-    Then entity(customer) get has attributes contain:
+    Then entity(customer) get has attribute types contain:
       | username   |
       | reference  |
       | work-email |
       | age        |
       | rating     |
       | nick-name  |
-    Then entity(customer) get has attributes do not contain:
+    Then entity(customer) get has attribute types do not contain:
       | email |
       | name  |
     When put attribute type: license, with value type: string
@@ -492,40 +492,40 @@ Feature: Concept Entity Type
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
     When entity(subscriber) set key attribute type: license as reference
-    When entity(subscriber) set has attribute: points as rating
+    When entity(subscriber) set has attribute type: points as rating
     When transaction commits
     When session opens transaction of type: read
-    Then entity(customer) get key attributes contain:
+    Then entity(customer) get key attribute types contain:
       | username   |
       | reference  |
       | work-email |
-    Then entity(customer) get key attributes do not contain:
+    Then entity(customer) get key attribute types do not contain:
       | email |
-    Then entity(customer) get has attributes contain:
+    Then entity(customer) get has attribute types contain:
       | username   |
       | reference  |
       | work-email |
       | age        |
       | rating     |
       | nick-name  |
-    Then entity(customer) get has attributes do not contain:
+    Then entity(customer) get has attribute types do not contain:
       | email |
       | name  |
-    Then entity(subscriber) get key attributes contain:
+    Then entity(subscriber) get key attribute types contain:
       | username   |
       | license    |
       | work-email |
-    Then entity(subscriber) get key attributes do not contain:
+    Then entity(subscriber) get key attribute types do not contain:
       | email     |
       | reference |
-    Then entity(subscriber) get has attributes contain:
+    Then entity(subscriber) get has attribute types contain:
       | username   |
       | license    |
       | work-email |
       | age        |
       | points     |
       | nick-name  |
-    Then entity(subscriber) get has attributes do not contain:
+    Then entity(subscriber) get has attribute types do not contain:
       | email      |
       | references |
       | name       |
@@ -536,51 +536,51 @@ Feature: Concept Entity Type
     When put attribute type: username, with value type: string
     When attribute(username) set supertype: name
     When put entity type: person
-    When entity(person) set has attribute: name
+    When entity(person) set has attribute type: name
     When put entity type: customer
     When entity(customer) set supertype: person
     When entity(customer) set key attribute type: username as name
-    Then entity(customer) get key attributes contain:
+    Then entity(customer) get key attribute types contain:
       | username |
-    Then entity(customer) get key attributes do not contain:
+    Then entity(customer) get key attribute types do not contain:
       | name |
-    Then entity(customer) get has attributes contain:
+    Then entity(customer) get has attribute types contain:
       | username |
-    Then entity(customer) get has attributes do not contain:
+    Then entity(customer) get has attribute types do not contain:
       | name |
     When transaction commits
     When session opens transaction of type: read
-    Then entity(customer) get key attributes contain:
+    Then entity(customer) get key attribute types contain:
       | username |
-    Then entity(customer) get key attributes do not contain:
+    Then entity(customer) get key attribute types do not contain:
       | name |
-    Then entity(customer) get has attributes contain:
+    Then entity(customer) get has attribute types contain:
       | username |
-    Then entity(customer) get has attributes do not contain:
+    Then entity(customer) get has attribute types do not contain:
       | name |
 
   Scenario: Entity types cannot redeclare keys as attributes
     When put attribute type: username, with value type: string
     When put entity type: person
     When entity(person) set key attribute type: username
-    Then entity(person) fails at setting has attribute: username
+    Then entity(person) fails at setting has attribute type: username
 
   Scenario: Entity types cannot redeclare attributes as keys
     When put attribute type: name, with value type: string
     When put entity type: person
-    When entity(person) set has attribute: name
-    Then entity(person) fails at setting key attribute: name
+    When entity(person) set has attribute type: name
+    Then entity(person) fails at setting key attribute type: name
 
   Scenario: Entity types cannot redeclare inherited keys and attributes
     When put attribute type: email, with value type: string
     When put attribute type: name, with value type: string
     When put entity type: person
     When entity(person) set key attribute type: email
-    When entity(person) set has attribute: name
+    When entity(person) set has attribute type: name
     When put entity type: customer
     When entity(customer) set supertype: person
-    Then entity(customer) fails at setting key attribute: email
-    Then entity(customer) fails at setting has attribute: name
+    Then entity(customer) fails at setting key attribute type: email
+    Then entity(customer) fails at setting has attribute type: name
 
   Scenario: Entity types cannot redeclare inherited/overridden key/has attribute types
     When put attribute type: email, with value type: string
@@ -591,17 +591,17 @@ Feature: Concept Entity Type
     When attribute(customer-name) set supertype: name
     When put entity type: person
     When entity(person) set key attribute type: email
-    When entity(person) set has attribute: name
+    When entity(person) set has attribute type: name
     When put entity type: customer
     When entity(customer) set supertype: person
     When entity(customer) set key attribute type: customer-email
-    When entity(customer) set has attribute: customer-name
+    When entity(customer) set has attribute type: customer-name
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
-    Then entity(subscriber) fails at setting key attribute: email
-    Then entity(subscriber) fails at setting key attribute: customer-email
-    Then entity(subscriber) fails at setting has attribute: name
-    Then entity(subscriber) fails at setting has attribute: customer-name
+    Then entity(subscriber) fails at setting key attribute type: email
+    Then entity(subscriber) fails at setting key attribute type: customer-email
+    Then entity(subscriber) fails at setting has attribute type: name
+    Then entity(subscriber) fails at setting has attribute type: customer-name
 
   Scenario: Entity types cannot override declared keys and attributes
     When put attribute type: username, with value type: string
@@ -612,9 +612,9 @@ Feature: Concept Entity Type
     When attribute(first-name) set supertype: name
     When put entity type: person
     When entity(person) set key attribute type: username
-    When entity(person) set has attribute: name
-    Then entity(person) fails at setting key attribute: email as username
-    Then entity(person) fails at setting has attribute: first-name as name
+    When entity(person) set has attribute type: name
+    Then entity(person) fails at setting key attribute type: email as username
+    Then entity(person) fails at setting has attribute type: first-name as name
 
   Scenario: Entity types cannot override inherited keys as attributes
     When put attribute type: username, with value type: string
@@ -624,7 +624,7 @@ Feature: Concept Entity Type
     When entity(person) set key attribute type: username
     When put entity type: customer
     When entity(customer) set supertype: person
-    Then entity(customer) fails at setting has attribute: email as username
+    Then entity(customer) fails at setting has attribute type: email as username
 
   Scenario: Entity types cannot override inherited keys and attributes other than with their subtypes
     When put attribute type: username, with value type: string
@@ -633,11 +633,11 @@ Feature: Concept Entity Type
     When put attribute type: rating, with value type: double
     When put entity type: person
     When entity(person) set key attribute type: username
-    When entity(person) set has attribute: name
+    When entity(person) set has attribute type: name
     When put entity type: customer
     When entity(customer) set supertype: person
-    Then entity(customer) fails at setting key attribute: reference as username
-    Then entity(customer) fails at setting has attribute: rating as name
+    Then entity(customer) fails at setting key attribute type: reference as username
+    Then entity(customer) fails at setting has attribute type: rating as name
 
   Scenario: Entity types can play role types
     When put relation type: marriage

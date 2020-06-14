@@ -411,11 +411,11 @@ Feature: Concept Attribute Type
     When put attribute type: country-code, with value type: string
     When put attribute type: country-name, with value type: string
     When attribute(country-name) set key attribute type: country-code
-    Then attribute(country-name) get key attributes contain:
+    Then attribute(country-name) get key attribute types contain:
       | country-code |
     When transaction commits
     When session opens transaction of type: read
-    Then attribute(country-name) get key attributes contain:
+    Then attribute(country-name) get key attribute types contain:
       | country-code |
 
   Scenario: Attribute types can remove keys
@@ -424,13 +424,13 @@ Feature: Concept Attribute Type
     When put attribute type: country-name, with value type: string
     When attribute(country-name) set key attribute type: country-code-1
     When attribute(country-name) set key attribute type: country-code-2
-    When attribute(country-name) remove key attribute: country-code-1
-    Then attribute(country-name) get key attributes do not contain:
+    When attribute(country-name) remove key attribute type: country-code-1
+    Then attribute(country-name) get key attribute types do not contain:
       | country-code-1 |
     When transaction commits
     When session opens transaction of type: write
-    When attribute(country-name) remove key attribute: country-code-2
-    Then attribute(country-name) get key attributes do not contain:
+    When attribute(country-name) remove key attribute type: country-code-2
+    Then attribute(country-name) get key attribute types do not contain:
       | country-code-1 |
       | country-code-2 |
 
@@ -438,14 +438,14 @@ Feature: Concept Attribute Type
     When put attribute type: utc-zone-code, with value type: string
     When put attribute type: utc-zone-hour, with value type: double
     When put attribute type: timestamp, with value type: datetime
-    When attribute(timestamp) set has attribute: utc-zone-code
-    When attribute(timestamp) set has attribute: utc-zone-hour
-    Then attribute(timestamp) get has attributes contain:
+    When attribute(timestamp) set has attribute type: utc-zone-code
+    When attribute(timestamp) set has attribute type: utc-zone-hour
+    Then attribute(timestamp) get has attribute types contain:
       | utc-zone-code |
       | utc-zone-hour |
     When transaction commits
     When session opens transaction of type: read
-    Then attribute(timestamp) get has attributes contain:
+    Then attribute(timestamp) get has attribute types contain:
       | utc-zone-code |
       | utc-zone-hour |
 
@@ -453,15 +453,15 @@ Feature: Concept Attribute Type
     When put attribute type: utc-zone-code, with value type: string
     When put attribute type: utc-zone-hour, with value type: double
     When put attribute type: timestamp, with value type: datetime
-    When attribute(timestamp) set has attribute: utc-zone-code
-    When attribute(timestamp) set has attribute: utc-zone-hour
-    When attribute(timestamp) remove has attribute: utc-zone-hour
-    Then attribute(timestamp) get has attributes do not contain:
+    When attribute(timestamp) set has attribute type: utc-zone-code
+    When attribute(timestamp) set has attribute type: utc-zone-hour
+    When attribute(timestamp) remove has attribute type: utc-zone-hour
+    Then attribute(timestamp) get has attribute types do not contain:
       | utc-zone-hour |
     When transaction commits
     When session opens transaction of type: write
-    When attribute(timestamp) remove has attribute: utc-zone-code
-    Then attribute(timestamp) get has attributes do not contain:
+    When attribute(timestamp) remove has attribute type: utc-zone-code
+    Then attribute(timestamp) get has attribute types do not contain:
       | utc-zone-code |
       | utc-zone-hour |
 
@@ -470,17 +470,17 @@ Feature: Concept Attribute Type
     When put attribute type: country-abbreviation, with value type: string
     When put attribute type: country-name, with value type: string
     When attribute(country-name) set key attribute type: country-code
-    When attribute(country-name) set has attribute: country-abbreviation
-    Then attribute(country-name) get key attributes contain:
+    When attribute(country-name) set has attribute type: country-abbreviation
+    Then attribute(country-name) get key attribute types contain:
       | country-code |
-    Then attribute(country-name) get has attributes contain:
+    Then attribute(country-name) get has attribute types contain:
       | country-code         |
       | country-abbreviation |
     When transaction commits
     When session opens transaction of type: read
-    Then attribute(country-name) get key attributes contain:
+    Then attribute(country-name) get key attribute types contain:
       | country-code |
-    Then attribute(country-name) get has attributes contain:
+    Then attribute(country-name) get has attribute types contain:
       | country-code         |
       | country-abbreviation |
 
@@ -489,32 +489,32 @@ Feature: Concept Attribute Type
     When put attribute type: abbreviation, with value type: string
     When put attribute type: name, with value type: string
     When attribute(name) set key attribute type: hash
-    When attribute(name) set has attribute: abbreviation
+    When attribute(name) set has attribute type: abbreviation
     When put attribute type: real-name, with value type: string
     When attribute(real-name) set supertype: name
-    Then attribute(real-name) get key attributes contain:
+    Then attribute(real-name) get key attribute types contain:
       | hash |
-    Then attribute(real-name) get has attributes contain:
+    Then attribute(real-name) get has attribute types contain:
       | hash         |
       | abbreviation |
     When transaction commits
     When session opens transaction of type: write
-    Then attribute(real-name) get key attributes contain:
+    Then attribute(real-name) get key attribute types contain:
       | hash |
-    Then attribute(real-name) get has attributes contain:
+    Then attribute(real-name) get has attribute types contain:
       | hash         |
       | abbreviation |
     When put attribute type: last-name, with value type: string
     When attribute(last-name) set supertype: real-name
     When transaction commits
     When session opens transaction of type: read
-    Then attribute(real-name) get key attributes contain:
+    Then attribute(real-name) get key attribute types contain:
       | hash |
-    Then attribute(real-name) get has attributes contain:
+    Then attribute(real-name) get has attribute types contain:
       | hash         |
       | abbreviation |
-    Then attribute(last-name) get key attributes contain:
+    Then attribute(last-name) get key attribute types contain:
       | hash |
-    Then attribute(last-name) get has attributes contain:
+    Then attribute(last-name) get has attribute types contain:
       | hash         |
       | abbreviation |

@@ -29,7 +29,7 @@ Feature: Concept Entity
     Given put attribute type: name, with value type: string
     Given put entity type: person
     Given entity(person) set key attribute type: email
-    Given entity(person) set has attribute: name
+    Given entity(person) set has attribute type: name
     Given transaction commits
     Given connection close all sessions
     Given connection open data session for keyspace: grakn
