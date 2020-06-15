@@ -150,9 +150,24 @@ Feature: Concept Entity
     Then entity $x get attributes do not contain: $y
     Then attribute $y get owners do not contain: $x
     When transaction commits
-    When session opens transaction of type: read
+    When session opens transaction of type: write
     When $x = entity(person) get first instance
     When $y = attribute(name) as(string) get: alice
     Then entity $x get attributes(name) do not contain: $y
     Then attribute $y get owners do not contain: $x
-
+    When entity $x set has: $y
+    When transaction commits
+    When session opens transaction of type: write
+    When $x = entity(person) get first instance
+    When $y = attribute(name) as(string) get: alice
+    When entity $x set has: $y
+    When entity $x remove has: $y
+    Then entity $x get attributes(name) do not contain: $y
+    Then entity $x get attributes do not contain: $y
+    Then attribute $y get owners do not contain: $x
+    When transaction commits
+    When session opens transaction of type: write
+    When $x = entity(person) get first instance
+    When $y = attribute(name) as(string) get: alice
+    Then entity $x get attributes(name) do not contain: $y
+    Then attribute $y get owners do not contain: $x
