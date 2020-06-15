@@ -106,7 +106,7 @@ public class Validator {
         LOG.info("Retrieving RejectDuplicateSet<Type> ...");
         RejectDuplicateSet<Type> types = new RejectDuplicateSet<Type> ();
         try (GraknClient.Transaction tx = session.transaction().read()) {
-            List<ConceptMap> answers = tx.execute(Graql.parse("match $x sub thing; get;").asGet());
+            List<ConceptMap> answers = tx.execute(Graql.parse("match $x sub thing; get;").asGet()).get();
             for (ConceptMap answer : answers) {
                 types.add(new Type(answer.get("x").asSchemaConcept()));
             }
@@ -120,7 +120,7 @@ public class Validator {
         LOG.info("Retrieving roles...");
         RejectDuplicateSet<Type>  roles = new RejectDuplicateSet<Type> ();
         try (GraknClient.Transaction tx = session.transaction().read()) {
-            List<ConceptMap> answers = tx.execute(Graql.parse("match $x sub role; get;").asGet());
+            List<ConceptMap> answers = tx.execute(Graql.parse("match $x sub role; get;").asGet()).get();
             for (ConceptMap answer : answers) {
                 roles.add(new Type(answer.get("x").asSchemaConcept()));
             }
@@ -346,7 +346,7 @@ public class Validator {
     }
 
     private boolean ask(GraknClient.Transaction tx, GraqlGet query) {
-        List<ConceptMap> answer = tx.execute(query);
+        List<ConceptMap> answer = tx.execute(query).get();
         return answer.size() == 1;
     }
 
