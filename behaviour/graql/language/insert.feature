@@ -197,17 +197,6 @@ Feature: Graql Insert Query
     Then the integrity is validated
 
 
-  Scenario: inserting a thing with multiple ids throws an error
-    Then graql insert throws
-      """
-      insert
-      $x isa person, has ref 0;
-      $x id V123;
-      $x id V456;
-      """
-    Then the integrity is validated
-
-
   #######################
   # ATTRIBUTE OWNERSHIP #
   #######################
@@ -937,7 +926,149 @@ Feature: Graql Insert Query
       | MIC | TAR |
 
 
-  Scenario: match-insert inserts nothing if it matches nothing
+  Scenario: if match-insert matches nothing, then it inserts nothing
+
+  Scenario: match-inserting only existing entities is a no-op
+    Given get answers of graql query
+      """
+      insert
+      $x isa person, has name "Rebecca", has ref 0;
+      $y isa person, has name "Steven", has ref 1;
+      $z isa person, has name "Theresa", has ref 2;
+      """
+    Given the integrity is validated
+    Given concept identifiers are
+      |     | check | value |
+      | BEC | key   | ref:0 |
+      | STE | key   | ref:1 |
+      | THE | key   | ref:2 |
+    Given uniquely identify answer concepts
+      | x   | y   | z   |
+      | BEC | STE | THE |
+    Given get answers of graql query
+      """
+      match $x isa person; get;
+      """
+    Given uniquely identify answer concepts
+      | x   |
+      | BEC |
+      | STE |
+      | THE |
+    When graql insert
+      """
+      match
+        $x isa person;
+      insert
+        $x isa person;
+      """
+    When the integrity is validated
+    Then get answers of graql query
+      """
+      match $x isa person; get;
+      """
+    Then uniquely identify answer concepts
+      | x   |
+      | BEC |
+      | STE |
+      | THE |
+
+
+  Scenario: match-inserting only existing relations is a no-op
+    Given get answers of graql query
+      """
+      insert
+      $x isa person, has name "Homer", has ref 0;
+      $y isa person, has name "Burns", has ref 1;
+      $z isa person, has name "Smithers", has ref 2;
+      $c isa company, has name "Springfield Nuclear Power Plant", has ref 3;
+      $xr (employee: $x, employer: $c) isa employment, has ref 4;
+      $yr (employee: $y, employer: $c) isa employment, has ref 5;
+      $zr (employee: $z, employer: $c) isa employment, has ref 6;
+      """
+    Given the integrity is validated
+    Given concept identifiers are
+      |      | check | value |
+      | HOM  | key   | ref:0 |
+      | BUR  | key   | ref:1 |
+      | SMI  | key   | ref:2 |
+      | NPP  | key   | ref:3 |
+      | eHOM | key   | ref:4 |
+      | eBUR | key   | ref:5 |
+      | eSMI | key   | ref:6 |
+    Given uniquely identify answer concepts
+      | x   | y   | z   | c   | xr   | yr   | zr   |
+      | HOM | BUR | SMI | NPP | eHOM | eBUR | eSMI |
+    Given get answers of graql query
+      """
+      match $r (employee: $x, employer: $c) isa employment; get;
+      """
+    Given uniquely identify answer concepts
+      | r    | x   | c   |
+      | eHOM | HOM | NPP |
+      | eBUR | BUR | NPP |
+      | eSMI | SMI | NPP |
+    When graql insert
+      """
+      match
+        $x isa employment;
+      insert
+        $x isa employment;
+      """
+    When the integrity is validated
+    Then get answers of graql query
+      """
+      match $r (employee: $x, employer: $c) isa employment; get;
+      """
+    Then uniquely identify answer concepts
+      | r    | x   | c   |
+      | eHOM | HOM | NPP |
+      | eBUR | BUR | NPP |
+      | eSMI | SMI | NPP |
+
+
+  Scenario: match-inserting only existing attributes is a no-op
+    Given get answers of graql query
+      """
+      insert
+      $x "Ash" isa name;
+      $y "Misty" isa name;
+      $z "Brock" isa name;
+      """
+    Given the integrity is validated
+    Given concept identifiers are
+      |     | check | value      |
+      | ASH | value | name:Ash   |
+      | MIS | value | name:Misty |
+      | BRO | value | name:Brock |
+    Given uniquely identify answer concepts
+      | x   | y   | z   |
+      | ASH | MIS | BRO |
+    Given get answers of graql query
+      """
+      match $x isa name; get;
+      """
+    Given uniquely identify answer concepts
+      | x   |
+      | ASH |
+      | MIS |
+      | BRO |
+    When graql insert
+      """
+      match
+        $x isa name;
+      insert
+        $x isa name;
+      """
+    When the integrity is validated
+    Then get answers of graql query
+      """
+      match $x isa name; get;
+      """
+    Then uniquely identify answer concepts
+      | x   |
+      | ASH |
+      | MIS |
+      | BRO |
 
 
   ####################
@@ -949,3 +1080,22 @@ Feature: Graql Insert Query
   Scenario: if any insert in a transaction fails with a semantic error, none of the inserts are performed
 
   Scenario: if any insert in a transaction fails with a `key` violation, none of the inserts are performed
+
+
+  ##############
+  # EDGE CASES #
+  ##############
+
+  Scenario: the 'id' property is used internally by Grakn and cannot be manually assigned
+    Given graql define
+      """
+      define
+      bird sub entity;
+      """
+    Given the integrity is validated
+    Then graql insert throws
+      """
+      insert
+      $x isa bird;
+      $x id V123;
+      """
