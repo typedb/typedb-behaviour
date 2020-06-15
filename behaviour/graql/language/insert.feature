@@ -187,7 +187,20 @@ Feature: Graql Insert Query
     Then answer size is: 3
 
 
-  Scenario: insert instance of an abstract type throws (on commit?)
+  Scenario: attempting to insert an instance of an abstract type throws an error
+    Given graql define
+      """
+      define
+      factory sub entity, abstract;
+      electronics-factory sub factory;
+      """
+    Given the integrity is validated
+    Then graql insert throws
+      """
+      insert $x isa factory;
+      """
+    Then the integrity is validated
+
 
   Scenario: attempting to insert an instance of type 'thing' throws an error
     Then graql insert throws
@@ -292,14 +305,79 @@ Feature: Graql Insert Query
       | JILL | JACK |
 
 
+  Scenario: after inserting a new owner for every existing ownership of an attribute, its number of owners doubles
+    Given graql define
+      """
+      define
+      dog sub entity, has name;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $p1 isa dog, has name "Frank";
+      $p2 isa dog, has name "Geoff";
+      $p3 isa dog, has name "Harriet";
+      $p4 isa dog, has name "Ingrid";
+      $p5 isa dog, has name "Jacob";
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $p isa dog; get;
+      """
+    Then answer size is: 5
+    Then graql insert
+      """
+      match
+        $p has name $name;
+      insert
+        $p2 isa dog, has name $name;
+      """
+    Then the integrity is validated
+    Then get answers of graql query
+      """
+      match $p isa dog; get;
+      """
+    Then answer size is: 10
+
+
   Scenario Outline: an insert can attach multiple distinct values of the same <type> attribute to a single owner
+    Given graql define
+      """
+      define
+      <attr> sub attribute, value <type>, key ref;
+      person has <attr>;
+      """
+    Given the integrity is validated
+    When graql insert
+      """
+      insert
+      $x <val1> isa <attr>, has ref 0;
+      $y <val2> isa <attr>, has ref 1;
+      $p isa person, has name "Imogen", has ref 2, has <attr> <val1>, has <attr> <val2>;
+      """
+    When the integrity is validated
+    When get answers of graql query
+      """
+      match $p isa person, has <attr> $x; get $x;
+      """
+    Then concept identifiers are
+      |      | check | value |
+      | VAL1 | key   | ref:0 |
+      | VAL2 | key   | ref:1 |
+    Then uniquely identify answer concepts
+      | x    |
+      | VAL1 |
+      | VAL2 |
+
   Examples:
-    | type     |
-    | string   |
-    | long     |
-    | double   |
-    | boolean  |
-    | datetime |
+    | attr              | type     | val1       | val2       |
+    | subject-taken     | string   | "Maths"    | "Physics"  |
+    | lucky-number      | long     | 10         | 3          |
+    | recite-pi-attempt | double   | 3.146      | 3.14158    |
+    | is-alive          | boolean  | true       | false      |
+    | work-start-date   | datetime | 2018-01-01 | 2020-01-01 |
 
 
   ########################################
@@ -496,6 +574,44 @@ Feature: Graql Insert Query
 
 
   Scenario: an attribute ownership currently inferred by a rule can be explicitly inserted
+    Given graql define
+      """
+      define
+      lucy-is-aged-32 sub rule,
+      when {
+        $p isa person, has name "Lucy";
+      }, then {
+        $p has age 32;
+      };
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert $p isa person, has name "Lucy", has ref 0;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $p has age 32; get;
+      """
+    Then concept identifiers are
+      |      | check | value |
+      | LUCY | key   | ref:0 |
+    Then graql insert
+      """
+      match
+        $p has name "Lucy";
+      insert
+        $p has age 32;
+      """
+    Then the integrity is validated
+    Then get answers of graql query
+      """
+      match $p has age 32; get;
+      """
+    Then uniquely identify answer concepts
+      | p    |
+      | LUCY |
 
 
   #############
@@ -503,6 +619,25 @@ Feature: Graql Insert Query
   #############
 
   Scenario: inserting a relation creates an instance of it
+    Given graql insert
+      """
+      insert
+      $p isa person, has ref 0;
+      $r (employee: $p) isa employment, has ref 1;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $r (employee: $p) isa employment; get;
+      """
+    Then concept identifiers are
+      |     | check | value |
+      | PER | key   | ref:0 |
+      | EMP | key   | ref:1 |
+    Then uniquely identify answer concepts
+      | p   | r   |
+      | PER | EMP |
+
 
   Scenario: when inserting a ternary relation that both owns an attribute and has an attribute as a roleplayer, both attributes are created
     Given graql define
@@ -577,11 +712,12 @@ Feature: Graql Insert Query
       | HEL | value | name:Helen  |
 
 
-  Scenario: insert an additional role player is visible in the relation
-    When graql insert
+  Scenario: an additional role player can be inserted into a relation
+    Given graql insert
       """
       insert $p isa person, has ref 0; $r (employee: $p) isa employment, has ref 1;
       """
+    Given the integrity is validated
     When graql insert
       """
       match $r isa employment; insert $r (employer: $c) isa employment; $c isa company, has ref 2;
@@ -601,17 +737,47 @@ Feature: Graql Insert Query
       | REF0 | REF2 | REF1 |
 
 
-  Scenario: insert an additional duplicate role player
+  Scenario: an additional role player can be inserted into every relation matching a pattern
+    Given graql insert
+      """
+      insert
+      $p isa person, has name "Ruth", has ref 0;
+      $r (employee: $p) isa employment, has ref 1;
+      $s (employee: $p) isa employment, has ref 2;
+      """
+    Given the integrity is validated
     When graql insert
+      """
+      match $r isa employment; insert $r (employer: $c) isa employment; $c isa company, has ref 3;
+      """
+    When the integrity is validated
+    Then get answers of graql query
+      """
+      match $r (employer: $c, employee: $p) isa employment; get;
+      """
+    Then concept identifiers are
+      |      | check | value |
+      | RUTH | key   | ref:0 |
+      | EMP1 | key   | ref:1 |
+      | EMP2 | key   | ref:2 |
+      | COMP | key   | ref:3 |
+    Then uniquely identify answer concepts
+      | p    | c    | r    |
+      | RUTH | COMP | EMP1 |
+      | RUTH | COMP | EMP2 |
+
+
+  Scenario: an additional duplicate role player can be inserted into a relation
+    Given graql insert
       """
       insert $p isa person, has ref 0; $r (employee: $p) isa employment, has ref 1;
       """
+    Given the integrity is validated
     When graql insert
       """
       match $r isa employment; $p isa person; insert $r (employee: $p) isa employment;
       """
     When the integrity is validated
-
     Then get answers of graql query
       """
       match $r (employee: $p, employee: $p) isa employment; get;
@@ -625,13 +791,34 @@ Feature: Graql Insert Query
       | REF0 | REF1 |
 
 
-  Scenario: extend relation with duplicate role player
+  Scenario: inserting a roleplayer in a relation that can't have that roleplayer throws on commit
+    When graql define
+      """
+      define
+      tennis-group sub relation, relates tennis-player;
+      person plays tennis-player;
+      """
+    When the integrity is validated
+    Then graql insert throws
+      """
+      insert
+      $r (tennis-player: $p) isa employment, has ref 0;
+      $p isa person, has ref 1;
+      """
+    Then the integrity is validated
 
-  Scenario: inserting disallowed role being played throws on commit (? or at insert)
 
-  Scenario: inserting disallowed role being related throws on commit (? or at insert)
+  Scenario: inserting a roleplayer that can't play the role throws on commit
+    Then graql insert throws
+      """
+      insert
+      $r (employer: $p) isa employment, has ref 0;
+      $p isa person, has ref 1;
+      """
+    Then the integrity is validated
 
-  Scenario: inserting a supertype of a valid roleplayer in a role is invalid, and throws on commit (? or at insert)
+
+  Scenario: inserting a roleplayer that can't play the role, yet is the parent of a type that can play the role, is still invalid and throws on commit
     When graql define
       """
       define
@@ -651,7 +838,14 @@ Feature: Graql Insert Query
     Then the integrity is validated
 
 
-  Scenario: inserting a relation with no role players throws on commit (? or at insert)
+  Scenario: inserting a relation with no role players throws on commit
+    Then graql insert throws
+      """
+      insert
+      $x isa employment, has ref 0;
+      """
+    Then the integrity is validated
+
 
   Scenario: inserting a relation with an empty variable as a roleplayer throws an error
     Then graql insert throws
@@ -663,6 +857,52 @@ Feature: Graql Insert Query
 
 
   Scenario: a relation currently inferred by a rule can be explicitly inserted
+    Given graql define
+      """
+      define
+      gym-membership sub relation, relates gym-member;
+      person plays gym-member;
+      jennifer-has-a-gym-membership sub rule,
+      when {
+        $p isa person, has name "Jennifer";
+      }, then {
+        (gym-member: $p) isa gym-membership;
+      };
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert $p isa person, has name "Jennifer", has ref 0;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match (gym-member: $p) isa gym-membership; get $p;
+      """
+    Then concept identifiers are
+      |     | check | value |
+      | JEN | key   | ref:0 |
+    Then graql insert
+      """
+      match
+        $p has name "Jennifer";
+      insert
+        $r (gym-member: $p) isa gym-membership;
+      """
+    Then the integrity is validated
+    Then get answers of graql query
+      """
+      match (gym-member: $p) isa gym-membership; get $p;
+      """
+    Then uniquely identify answer concepts
+      | p   |
+      | JEN |
+    Then get answers of graql query
+      """
+      match $r isa gym-membership; get $r;
+      """
+    Then answer size is: 1
+
 
   #######################
   # ATTRIBUTE INSERTION #
@@ -704,7 +944,32 @@ Feature: Graql Insert Query
       | published-date | datetime | 2020-01-01 |
 
 
-  Scenario: insert a subtype of an attribute with same value creates a separate instance
+  Scenario: inserting a subtype of an attribute with the same value creates a separate instance
+    Given graql define
+      """
+      define first-name sub name;
+      """
+    Given the integrity is validated
+    When graql insert
+      """
+      insert
+      $x "Alan" isa name;
+      $y "Alan" isa first-name;
+      """
+    When the integrity is validated
+    When get answers of graql query
+      """
+      match $x isa name; get $x;
+      """
+    Then concept identifiers are
+      |     | check | value           |
+      | NAM | value | name:Alan       |
+      | FNA | value | first-name:Alan |
+    Then uniquely identify answer concepts
+      | x   |
+      | NAM |
+      | FNA |
+
 
   Scenario: insert a regex attribute throws error if not conforming to regex
     Given graql define
@@ -927,6 +1192,32 @@ Feature: Graql Insert Query
 
 
   Scenario: if match-insert matches nothing, then it inserts nothing
+    Given graql define
+      """
+      define
+      season-ticket-ownership sub relation, relates season-ticket-holder;
+      person plays season-ticket-holder;
+      """
+    Given the integrity is validated
+    Given get answers of graql query
+      """
+      match $p isa person; get;
+      """
+    Given answer size is: 0
+    When graql insert
+      """
+      match
+        $p isa person;
+      insert
+        $r (season-ticket-holder: $p) isa season-ticket-ownership;
+      """
+    When the integrity is validated
+    Then get answers of graql query
+      """
+      match $r isa season-ticket-ownership; get;
+      """
+    Then answer size is: 0
+
 
   Scenario: match-inserting only existing entities is a no-op
     Given get answers of graql query
@@ -1076,10 +1367,66 @@ Feature: Graql Insert Query
   ####################
 
   Scenario: if any insert in a transaction fails with a syntax error, none of the inserts are performed
+    Given graql insert without commit
+      """
+      insert
+      $x isa person, has name "Derek", has ref 0;
+      """
+    Given graql insert throws
+      """
+      insert
+      $y qwertyuiop;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x isa person, has name "Derek"; get;
+      """
+    Then answer size is: 0
+
 
   Scenario: if any insert in a transaction fails with a semantic error, none of the inserts are performed
+    Given graql define
+      """
+      define
+      capacity sub attribute, value long;
+      """
+    Given the integrity is validated
+    Given graql insert without commit
+      """
+      insert
+      $x isa person, has name "Derek", has ref 0;
+      """
+    Given graql insert throws
+      """
+      insert
+      $y isa person, has name "Emily", has capacity 1000;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x isa person, has name "Derek"; get;
+      """
+    Then answer size is: 0
+
 
   Scenario: if any insert in a transaction fails with a `key` violation, none of the inserts are performed
+    Given graql insert without commit
+      """
+      insert
+      $x isa person, has name "Derek", has ref 0;
+      """
+    Given graql insert throws
+      """
+      insert
+      $y isa person, has name "Emily", has ref 0;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x isa person, has name "Derek"; get;
+      """
+    Then answer size is: 0
 
 
   ##############
