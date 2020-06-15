@@ -39,16 +39,11 @@ Feature: Concept Entity
     When $x = entity(person) create new instance
     Then entity $x is null: false
     Then entity $x has type: person
-    Then transaction commits
-
-  Scenario: Entity can be retrieved from its type
-    When $x = entity(person) create new instance
     Then entity(person) get instances contain: $x
-    When transaction commits
+    Then transaction commits
     When session opens transaction of type: read
     When $x = entity(person) get first instance
     Then entity(person) get instances contain: $x
-    # TODO: lookup by key
 
   Scenario: Entity can be deleted
     When $x = entity(person) create new instance
