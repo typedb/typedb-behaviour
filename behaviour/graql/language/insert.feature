@@ -107,7 +107,7 @@ Feature: Graql Insert Query
       insert
       $x has name "Bond";
       $x has name "James Bond";
-      $x has ref 0, isa person;
+      $x isa person, has ref 0;
       """
     When the integrity is validated
     Then get answers of graql query
@@ -152,7 +152,7 @@ Feature: Graql Insert Query
     Given the integrity is validated
     Given get answers of graql query
       """
-      match $x isa dog;
+      match $x isa dog; get;
       """
     Given answer size is: 0
     When graql insert
@@ -162,7 +162,7 @@ Feature: Graql Insert Query
     When the integrity is validated
     Then get answers of graql query
       """
-      match $x isa dog;
+      match $x isa dog; get;
       """
     Then answer size is: 1
     Then graql insert
@@ -172,7 +172,7 @@ Feature: Graql Insert Query
     Then the integrity is validated
     Then get answers of graql query
       """
-      match $x isa dog;
+      match $x isa dog; get;
       """
     Then answer size is: 2
     Then graql insert
@@ -182,7 +182,7 @@ Feature: Graql Insert Query
     Then the integrity is validated
     Then get answers of graql query
       """
-      match $x isa dog;
+      match $x isa dog; get;
       """
     Then answer size is: 3
 
@@ -744,11 +744,16 @@ Feature: Graql Insert Query
       $p isa person, has name "Ruth", has ref 0;
       $r (employee: $p) isa employment, has ref 1;
       $s (employee: $p) isa employment, has ref 2;
+      $c isa company, has name "The Boring Company", has ref 3;
       """
     Given the integrity is validated
     When graql insert
       """
-      match $r isa employment; insert $r (employer: $c) isa employment; $c isa company, has ref 3;
+      match
+        $r isa employment, has ref $ref;
+        $c isa company;
+      insert
+        $r (employer: $c) isa employment;
       """
     When the integrity is validated
     Then get answers of graql query
