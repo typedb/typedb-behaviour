@@ -22,6 +22,24 @@ Feature: Graql Match Clause
     Given connection open sessions for keyspaces:
       | test_match |
     Given transaction is initialised
+    Given graql define
+      """
+      define
+      person sub entity,
+        plays employee,
+        has name,
+        key ref;
+      company sub entity,
+        plays employer,
+        has name,
+        key ref;
+      employment sub relation,
+        relates employee,
+        relates employer,
+        key ref;
+      name sub attribute, value string;
+      ref sub attribute, value long;
+      """
     Given the integrity is validated
 
   Scenario: `type` matches only the specified type, and does not match subtypes
@@ -84,6 +102,50 @@ Feature: Graql Match Clause
   Scenario: `has` with an instance fully specified matches all of its owners, even if they own other instances of the same attribute
 
   Scenario: `contains` matches strings that contain the specified substring
+    Given graql insert
+      """
+      insert
+      $x "Seven Databases in Seven Weeks" isa name;
+      $y "Four Weddings and a Funeral" isa name;
+      $z "Fun Facts about Space" isa name;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x contains "Fun"; get;
+      """
+    Then concept identifiers are
+      |     | check | value                            |
+      | FOU | value | name:Four Weddings and a Funeral |
+      | FUN | value | name:Fun Facts about Space       |
+    Then uniquely identify answer concepts
+      | x   |
+      | FOU |
+      | FUN |
+
+
+  Scenario: `contains` performs a case-insensitive match
+    Given graql insert
+      """
+      insert
+      $x "The Phantom of the Opera" isa name;
+      $y "Pirates of the Caribbean" isa name;
+      $z "Mr. Bean" isa name;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x contains "Bean"; get;
+      """
+    Then concept identifiers are
+      |     | check | value                         |
+      | PIR | value | name:Pirates of the Caribbean |
+      | MRB | value | name:Mr. Bean                 |
+    Then uniquely identify answer concepts
+      | x   |
+      | PIR |
+      | MRB |
+
 
   Scenario: `like` matches strings that match the specified regex
 
@@ -104,23 +166,6 @@ Feature: Graql Match Clause
   Scenario: a negation does not match if the negated block has any matches
 
   Scenario: a relation is matchable from role players without specifying relation type
-    Given graql define
-      """
-      define
-      person sub entity,
-        plays employee,
-        key ref;
-      company sub entity,
-        plays employer,
-        key ref;
-      employment sub relation,
-        relates employee,
-        relates employer,
-        key ref;
-      ref sub attribute, value long;
-      """
-    Given the integrity is validated
-
     When graql insert
       """
       insert
@@ -130,7 +175,6 @@ Feature: Graql Match Clause
          has ref 2;
       """
     When the integrity is validated
-
     Then get answers of graql query
       """
       match $x isa person; $r (employee: $x) isa relation; get;
@@ -140,39 +184,19 @@ Feature: Graql Match Clause
       | REF0 | key   | ref:0 |
       | REF1 | key   | ref:1 |
       | REF2 | key   | ref:2 |
-
     Then uniquely identify answer concepts
       | x    | r    |
       | REF0 | REF2 |
-
     Then get answers of graql query
       """
       match $y isa company; $r (employer: $y) isa relation; get;
       """
-
     Then uniquely identify answer concepts
       | y    | r    |
       | REF1 | REF2 |
 
 
   Scenario: retrieve all combinations of players in a relation
-    Given graql define
-      """
-      define
-      person sub entity,
-        plays employee,
-        key ref;
-      company sub entity,
-        plays employer,
-        key ref;
-      employment sub relation,
-        relates employee,
-        relates employer,
-        key ref;
-      ref sub attribute, value long;
-      """
-    Given the integrity is validated
-
     When graql insert
       """
       insert $p isa person, has ref 0;
@@ -181,19 +205,16 @@ Feature: Graql Match Clause
       $r (employee: $p, employer: $c, employer: $c2) isa employment, has ref 3;
       """
     When the integrity is validated
-
     Then get answers of graql query
       """
       match $r ($x, $y) isa employment; get; 
       """
-
     Then concept identifiers are
       |      | check | value |
       | REF0 | key   | ref:0 |
       | REF1 | key   | ref:1 |
       | REF2 | key   | ref:2 |
       | REF3 | key   | ref:3 |
-
     Then uniquely identify answer concepts
       | x    | y    | r    |
       | REF0 | REF1 | REF3 |
@@ -219,7 +240,11 @@ Feature: Graql Match Clause
 
     When get answers of graql query
       """
-      match $x sub $y; $y sub $z; get;
+      match
+        $x sub $y;
+        $y sub $z;
+        $z sub sub1;
+      get;
       """
     Then each answer satisfies
       """
@@ -231,18 +256,15 @@ Feature: Graql Match Clause
     Given graql define
       """
       define
-        some-entity sub entity, plays player, key ref;
-        symmetric sub relation, relates player, key ref;
-        ref sub attribute, value long;
+      some-entity sub entity, plays player, key ref;
+      symmetric sub relation, relates player, key ref;
       """
     Given the integrity is validated
-
     Given graql insert
       """
       insert $x isa some-entity, has ref 0; (player: $x, player: $x) isa symmetric, has ref 1;
       """
     Given the integrity is validated
-
     When get answers of graql query
       """
       match $r (player: $x, player: $x) isa relation; get;
@@ -255,22 +277,20 @@ Feature: Graql Match Clause
       | x    | r    |
       | REF0 | REF1 |
 
+
   Scenario: duplicate role players are retrieved singly when queried singly
     Given graql define
       """
       define
-        some-entity sub entity, plays player, key ref;
-        symmetric sub relation, relates player, key ref;
-        ref sub attribute, value long;
+      some-entity sub entity, plays player, key ref;
+      symmetric sub relation, relates player, key ref;
       """
     Given the integrity is validated
-
     Given graql insert
       """
       insert $x isa some-entity, has ref 0; (player: $x, player: $x) isa symmetric, has ref 1;
       """
     Given the integrity is validated
-
     When get answers of graql query
       """
       match $r (player: $x) isa relation; get;
