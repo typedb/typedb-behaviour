@@ -28,6 +28,7 @@ Feature: Graql Match Clause
       person sub entity,
         plays employee,
         has name,
+        has age,
         key ref;
       company sub entity,
         plays employer,
@@ -38,9 +39,15 @@ Feature: Graql Match Clause
         relates employer,
         key ref;
       name sub attribute, value string;
+      age sub attribute, value long;
       ref sub attribute, value long;
       """
     Given the integrity is validated
+
+
+  ###################
+  # SCHEMA CONCEPTS #
+  ###################
 
   Scenario: `type` matches only the specified type, and does not match subtypes
 
@@ -65,105 +72,21 @@ Feature: Graql Match Clause
 
   Scenario: `relates` matches/does not match types that block the specified roleplayer with `as` (?)
 
+
+  ##########
+  # THINGS #
+  ##########
+
   Scenario: `isa` matches things of the specified type and all its subtypes
 
   Scenario: `isa!` matches only things of the specified type, and does not match subtypes
 
-  # TODO: Create 5 scenarios in place of this one, one for each attribute value type
-  Scenario: attributes can be matched by value
-    Given graql define
-      """
-      define name sub attribute, value string;
-      """
-    Given the integrity is validated
-    Given graql insert
-      """
-      insert $n "John" isa name;
-      """
-    Given the integrity is validated
-    When get answers of graql query
-      """
-      match $a "John"; get;
-      """
-    Then concept identifiers are
-      |      | check | value     |
-      | JOHN | value | name:John |
-    Then uniquely identify answer concepts
-      | a    |
-      | JOHN |
-
-
-  Scenario: when an attribute type is specified but no value, `has` matches things that have any instance of the specified attribute (?)
-
-  Scenario: when a value is specified but no type, `has` matches things that have any kind of attribute with that value
-
-  Scenario: when an attribute instance is fully specified, `has` matches all of its owners
-
-  Scenario: `has` with an instance fully specified matches all of its owners, even if they own other instances of the same attribute
-
-  Scenario: `contains` matches strings that contain the specified substring
-    Given graql insert
-      """
-      insert
-      $x "Seven Databases in Seven Weeks" isa name;
-      $y "Four Weddings and a Funeral" isa name;
-      $z "Fun Facts about Space" isa name;
-      """
-    Given the integrity is validated
-    When get answers of graql query
-      """
-      match $x contains "Fun"; get;
-      """
-    Then concept identifiers are
-      |     | check | value                            |
-      | FOU | value | name:Four Weddings and a Funeral |
-      | FUN | value | name:Fun Facts about Space       |
-    Then uniquely identify answer concepts
-      | x   |
-      | FOU |
-      | FUN |
-
-
-  Scenario: `contains` performs a case-insensitive match
-    Given graql insert
-      """
-      insert
-      $x "The Phantom of the Opera" isa name;
-      $y "Pirates of the Caribbean" isa name;
-      $z "Mr. Bean" isa name;
-      """
-    Given the integrity is validated
-    When get answers of graql query
-      """
-      match $x contains "Bean"; get;
-      """
-    Then concept identifiers are
-      |     | check | value                         |
-      | PIR | value | name:Pirates of the Caribbean |
-      | MRB | value | name:Mr. Bean                 |
-    Then uniquely identify answer concepts
-      | x   |
-      | PIR |
-      | MRB |
-
-
-  Scenario: `like` matches strings that match the specified regex
-
-  Scenario: `has $attr > $x` matches owners of any instance `$y` of `$attr` where `$y > $x`
-
-  Scenario: `has $attr < $x` matches owners of any instance `$y` of `$attr` where `$y < $x`
-
-  Scenario: `has $attr !== $x` matches owners of any instance `$y` of `$attr` where `$y !== $x`
-
-  Scenario: `has $attr > $x` matches owners of any instance `$y` of `$attr` where `$y > $x` even if they also own instance `$z` where `$z < $x`
-
   Scenario: `id` matches the instance with the specified internal id
 
-  Scenario: disjunctions return the union of composing query statements
 
-  Scenario: a negation matches if the negated block has no matches
-
-  Scenario: a negation does not match if the negated block has any matches
+  #############
+  # RELATIONS #
+  #############
 
   Scenario: a relation is matchable from role players without specifying relation type
     When graql insert
@@ -207,7 +130,7 @@ Feature: Graql Match Clause
     When the integrity is validated
     Then get answers of graql query
       """
-      match $r ($x, $y) isa employment; get; 
+      match $r ($x, $y) isa employment; get;
       """
     Then concept identifiers are
       |      | check | value |
@@ -302,3 +225,152 @@ Feature: Graql Match Clause
     Then uniquely identify answer concepts
       | x    | r    |
       | REF0 | REF1 |
+
+
+  ##############
+  # ATTRIBUTES #
+  ##############
+
+  # TODO: Create 5 scenarios in place of this one, one for each attribute value type
+  Scenario: attributes can be matched by value
+    Given graql define
+      """
+      define name sub attribute, value string;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert $n "John" isa name;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $a "John"; get;
+      """
+    Then concept identifiers are
+      |      | check | value     |
+      | JOHN | value | name:John |
+    Then uniquely identify answer concepts
+      | a    |
+      | JOHN |
+
+
+  Scenario: `contains` matches strings that contain the specified substring
+    Given graql insert
+      """
+      insert
+      $x "Seven Databases in Seven Weeks" isa name;
+      $y "Four Weddings and a Funeral" isa name;
+      $z "Fun Facts about Space" isa name;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x contains "Fun"; get;
+      """
+    Then concept identifiers are
+      |     | check | value                            |
+      | FOU | value | name:Four Weddings and a Funeral |
+      | FUN | value | name:Fun Facts about Space       |
+    Then uniquely identify answer concepts
+      | x   |
+      | FOU |
+      | FUN |
+
+
+  Scenario: `contains` performs a case-insensitive match
+    Given graql insert
+      """
+      insert
+      $x "The Phantom of the Opera" isa name;
+      $y "Pirates of the Caribbean" isa name;
+      $z "Mr. Bean" isa name;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x contains "Bean"; get;
+      """
+    Then concept identifiers are
+      |     | check | value                         |
+      | PIR | value | name:Pirates of the Caribbean |
+      | MRB | value | name:Mr. Bean                 |
+    Then uniquely identify answer concepts
+      | x   |
+      | PIR |
+      | MRB |
+
+
+  Scenario: `like` matches strings that match the specified regex
+
+
+  #######################
+  # ATTRIBUTE OWNERSHIP #
+  #######################
+
+  Scenario: when an attribute type is specified but no value, `has` matches things that have any instance of the specified attribute (?)
+
+  Scenario: when a value is specified but no type, `has` matches things that have any kind of attribute with that value
+
+  Scenario: when an attribute instance is fully specified, `has` matches all of its owners
+
+  Scenario: `has` with an instance fully specified matches all of its owners, even if they own other instances of the same attribute
+
+
+  ##############################
+  # ATTRIBUTE VALUE COMPARISON #
+  ##############################
+
+  Scenario: when two things each own an attribute with the same value, and those attributes have different types, they will match by equality, but not by ownership
+    Given graql define
+      """
+      define
+      start-date sub attribute, value datetime;
+      graduation-date sub attribute, value datetime;
+      person has graduation-date;
+      employment has start-date;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $x isa person, has name "James", has ref 0, has graduation-date 2009-07-16;
+      $r (employee: $x) isa employment, has start-date 2009-07-16, has ref 1;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x isa person, has graduation-date $date;
+        $r (employee: $x) isa employment, has start-date $date;
+      get;
+      """
+    Then answer size is: 0
+    Then get answers of graql query
+      """
+      match
+        $x isa person, has graduation-date $date;
+        $r (employee: $x) isa employment, has start-date == $date;
+      get;
+      """
+    Then answer size is: 1
+
+
+  Scenario: `has $attr > $x` matches owners of any instance `$y` of `$attr` where `$y > $x`
+
+  Scenario: `has $attr < $x` matches owners of any instance `$y` of `$attr` where `$y < $x`
+
+  Scenario: `has $attr !== $x` matches owners of any instance `$y` of `$attr` where `$y !== $x`
+
+  Scenario: `has $attr > $x` matches owners of any instance `$y` of `$attr` where `$y > $x` even if they also own instance `$z` where `$z < $x`
+
+
+  ############
+  # PATTERNS #
+  ############
+
+  Scenario: disjunctions return the union of composing query statements
+
+  Scenario: a negation matches if the negated block has no matches
+
+  Scenario: a negation does not match if the negated block has any matches
