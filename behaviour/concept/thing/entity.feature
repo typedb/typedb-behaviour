@@ -47,8 +47,11 @@ Feature: Concept Entity
 
   Scenario: Entity can be deleted
     When $x = entity(person) create new instance
+    When $y = attribute(name) as(string) put: alice
+    When entity $x set has: $y
     When delete entity: $x
     Then entity(person) get instances is empty
+    Then attribute $y get owners do not contain: $x
     When transaction commits
     When session opens transaction of type: write
     Then entity(person) get instances is empty
@@ -56,11 +59,16 @@ Feature: Concept Entity
     When transaction commits
     When session opens transaction of type: write
     When $x = entity(person) get first instance
+    When $y = attribute(name) as(string) get: alice
+    When entity $x set has: $y
     When delete entity: $x
     Then entity(person) get instances is empty
+    Then attribute $y get owners do not contain: $x
     When transaction commits
     When session opens transaction of type: read
     Then entity(person) get instances is empty
+    When $y = attribute(name) as(string) get: alice
+    Then attribute $y get owners do not contain: $x
 
   Scenario: Entity can have keys
     When $x = entity(person) create new instance
