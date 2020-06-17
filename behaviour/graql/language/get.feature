@@ -70,7 +70,7 @@ Feature: Graql Get Query
       $z isa person, has name $x, has age $y, has ref 0;
       """
     Given the integrity is validated
-    Given concept identifiers are
+    And concept identifiers are
       |     | check | value     |
       | PER | key   | ref:0     |
       | LIS | value | name:Lisa |
@@ -113,7 +113,7 @@ Feature: Graql Get Query
       get;
       sort $x asc;
       """
-    Then concept identifiers are
+    And concept identifiers are
       |      | check | value |
       | VAL1 | key   | ref:0 |
       | VAL2 | key   | ref:1 |
@@ -151,7 +151,7 @@ Feature: Graql Get Query
       get;
       sort $y asc;
       """
-    Then concept identifiers are
+    And concept identifiers are
       |      | check | value          |
       | GAR  | key   | ref:0          |
       | JEM  | key   | ref:1          |
@@ -167,7 +167,7 @@ Feature: Graql Get Query
       | FRE | nFRE |
       | GAR | nGAR |
       | JEM | nJEM |
-    Then get answers of graql query
+    When get answers of graql query
       """
       match
         $x isa person, has name $y;
@@ -198,7 +198,7 @@ Feature: Graql Get Query
         $x isa person, has name $y;
       get;
       """
-    Then concept identifiers are
+    And concept identifiers are
       |      | check | value          |
       | GAR  | key   | ref:0          |
       | JEM  | key   | ref:1          |
@@ -234,7 +234,7 @@ Feature: Graql Get Query
       sort $y asc;
       limit 3;
       """
-    Then concept identifiers are
+    And concept identifiers are
       |      | check | value          |
       | GAR  | key   | ref:0          |
       | FRE  | key   | ref:2          |
@@ -267,7 +267,7 @@ Feature: Graql Get Query
       sort $y asc;
       offset 2;
       """
-    Then concept identifiers are
+    And concept identifiers are
       |      | check | value          |
       | GAR  | key   | ref:0          |
       | JEM  | key   | ref:1          |
@@ -298,7 +298,7 @@ Feature: Graql Get Query
       offset 1;
       limit 2;
       """
-    Then concept identifiers are
+    And concept identifiers are
       |      | check | value          |
       | GAR  | key   | ref:0          |
       | FRE  | key   | ref:2          |
@@ -363,7 +363,7 @@ Feature: Graql Get Query
       $e "secret agent" isa name;
       """
     When the integrity is validated
-    Then concept identifiers are
+    And concept identifiers are
       |     | check | value             |
       | BON | value | name:Bond         |
       | JAM | value | name:James Bond   |
@@ -405,7 +405,7 @@ Feature: Graql Get Query
       sort $y asc;
       limit 2;
       """
-    Then concept identifiers are
+    And concept identifiers are
       |      | check | value |
       | A2P1 | key   | ref:0 |
       | A2P2 | key   | ref:4 |
@@ -414,7 +414,7 @@ Feature: Graql Get Query
       | x    | y    |
       | A2P1 | AGE2 |
       | A2P2 | AGE2 |
-    Then get answers of graql query
+    When get answers of graql query
       """
       match
         $x isa person, has age $y;
@@ -423,7 +423,7 @@ Feature: Graql Get Query
       offset 2;
       limit 2;
       """
-    Then concept identifiers are
+    And concept identifiers are
       |      | check | value |
       | A6P1 | key   | ref:1 |
       | A6P2 | key   | ref:3 |
@@ -476,7 +476,7 @@ Feature: Graql Get Query
       get;
       """
     Then answer size is: 9
-    Then get answers of graql query
+    When get answers of graql query
       """
       match
         $x isa person;
@@ -486,7 +486,7 @@ Feature: Graql Get Query
       count;
       """
     Then aggregate value is: 9
-    Then get answers of graql query
+    When get answers of graql query
       """
       match
         $x isa person;
@@ -495,7 +495,7 @@ Feature: Graql Get Query
       get;
       """
     Then answer size is: 6
-    Then get answers of graql query
+    When get answers of graql query
       """
       match
         $x isa person;
@@ -811,7 +811,7 @@ Feature: Graql Get Query
       """
       match ($x, $y) isa friendship; get;
       """
-    Then concept identifiers are
+    And concept identifiers are
       |     | check | value |
       | VIO | key   | ref:0 |
       | RUP | key   | ref:1 |
@@ -837,7 +837,7 @@ Feature: Graql Get Query
       get;
       group $x;
       """
-    Then group identifiers are
+    And group identifiers are
       |      | owner |
       | gVIO | VIO   |
       | gRUP | RUP   |
@@ -896,7 +896,7 @@ Feature: Graql Get Query
       """
       match $x isa person; get;
       """
-    Then concept identifiers are
+    And concept identifiers are
       |     | check | value |
       | VIO | key   | ref:0 |
       | RUP | key   | ref:1 |
@@ -909,7 +909,7 @@ Feature: Graql Get Query
       group $x;
       count;
       """
-    Then group identifiers are
+    And group identifiers are
       |      | owner |
       | gVIO | VIO   |
       | gRUP | RUP   |
@@ -936,7 +936,7 @@ Feature: Graql Get Query
       $e2 (employer: $c2, employee: $p3) isa employment, has ref 6;
       """
     Given the integrity is validated
-    Given concept identifiers are
+    And concept identifiers are
       |      | check | value |
       | APP  | key   | ref:0 |
       | GOO  | key   | ref:1 |
@@ -973,7 +973,7 @@ Feature: Graql Get Query
       group $x;
       count;
       """
-    Then group identifiers are
+    And group identifiers are
       |      | owner |
       | gAPP | APP   |
       | gGOO | GOO   |
@@ -997,7 +997,7 @@ Feature: Graql Get Query
       $e2 (employer: $c2, employee: $p4) isa employment, has ref 7;
       """
     Given the integrity is validated
-    Given concept identifiers are
+    And concept identifiers are
       |     | check | value |
       | LLO | key   | ref:0 |
       | BAR | key   | ref:1 |
@@ -1011,7 +1011,7 @@ Feature: Graql Get Query
       group $x;
       max $z;
       """
-    Then group identifiers are
+    And group identifiers are
       |      | owner |
       | gLLO | LLO   |
       | gBAR | BAR   |
