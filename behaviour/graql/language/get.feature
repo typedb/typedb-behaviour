@@ -27,11 +27,20 @@ Feature: Graql Get Query
       define
       person sub entity,
         plays friend,
+        plays employee,
         has name,
         has age,
         key ref;
+      company sub entity,
+        plays employer,
+        has name,
+        key ref;
       friendship sub relation,
         relates friend,
+        key ref;
+      employment sub relation,
+        relates employee,
+        relates employer,
         key ref;
       name sub attribute, value string;
       age sub attribute, value long;
@@ -39,11 +48,42 @@ Feature: Graql Get Query
       """
     Given the integrity is validated
 
+
+  ########################
+  # ANSWERS OF GET QUERY #
+  ########################
+
   Scenario: match-get returns an empty answer if there are no matches
+    When get answers of graql query
+      """
+      match $x isa person, has name "Anonymous Coward"; get;
+      """
+    Then answer size is: 0
 
-  Scenario: Disjunctions return the union of composing query statements
 
-  Scenario: Restricting variables in get removes variable from answer maps
+  Scenario: when restricting the variables in a get, the answer includes only the variables that are specified
+    Given graql insert
+      """
+      insert
+      $x "Lisa" isa name;
+      $y 16 isa age;
+      $z isa person, has name $x, has age $y, has ref 0;
+      """
+    Given the integrity is validated
+    Given concept identifiers are
+      |     | check | value     |
+      | PER | key   | ref:0     |
+      | LIS | value | name:Lisa |
+      | SIX | value | age:16    |
+    When get answers of graql query
+      """
+      match
+        $z isa person, has name $x, has age $y;
+      get $z, $x;
+      """
+    Then uniquely identify answer concepts
+      | z   | x   |
+      | PER | LIS |
 
 
   ########
@@ -394,6 +434,25 @@ Feature: Graql Get Query
       | A6P2 | AGE6 |
 
 
+  Scenario: when sorting by a variable not contained in the answer set, an error is thrown
+    Given graql insert
+      """
+      insert
+      $a isa person, has age 2, has ref 0;
+      $b isa person, has age 6, has ref 1;
+      """
+    Given the integrity is validated
+    Then graql get throws
+      """
+      match
+        $x isa person, has age $y;
+      get $x;
+      sort $y asc;
+      limit 2;
+      """
+    Then the integrity is validated
+
+
   #############
   # AGGREGATE #
   #############
@@ -446,6 +505,291 @@ Feature: Graql Get Query
       count;
       """
     Then aggregate value is: 6
+
+
+  Scenario: the `count` of an empty answer set is zero
+    When get answers of graql query
+      """
+      match
+        $x isa person, has name "Voldemort";
+      get;
+      count;
+      """
+    Then aggregate value is: 0
+
+
+  Scenario Outline: the <agg_type> of an answer set of `<type>` values can be retrieved
+    Given graql define
+      """
+      define
+      <attr> sub attribute, value <type>;
+      person has <attr>;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $p1 isa person, has <attr> <val1>, has ref 0;
+      $p2 isa person, has <attr> <val2>, has ref 1;
+      $p3 isa person, has <attr> <val3>, has ref 2;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x isa person, has <attr> $y;
+      get;
+      <agg_type> $y;
+      """
+    Then aggregate value is: <agg_val>
+
+    Examples:
+      | attr   | type   | val1 | val2 | val3 | agg_type | agg_val |
+      | age    | long   | 6    | 30   | 14   | sum      | 50      |
+      | age    | long   | 6    | 30   | 14   | max      | 30      |
+      | age    | long   | 6    | 30   | 14   | min      | 6       |
+      | age    | long   | 6    | 30   | 14   | mean     | 16.6667 |
+      | age    | long   | 6    | 30   | 14   | median   | 14      |
+      | weight | double | 61.8 | 86.5 | 24.8 | sum      | 173.1   |
+      | weight | double | 61.8 | 86.5 | 24.8 | max      | 86.5    |
+      | weight | double | 61.8 | 86.5 | 24.8 | min      | 24.8    |
+      | weight | double | 61.8 | 86.5 | 24.8 | mean     | 57.7    |
+      | weight | double | 61.8 | 86.5 | 24.8 | median   | 61.8    |
+
+
+  Scenario: the sample standard deviation can be retrieved for an answer set of `double` values
+    Given graql define
+      """
+      define
+      weight sub attribute, value double;
+      person has weight;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $p1 isa person, has weight 61.8, has ref 0;
+      $p2 isa person, has weight 86.5, has ref 1;
+      $p3 isa person, has weight 24.8, has ref 2;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x isa person, has weight $y;
+      get;
+      std $y;
+      """
+    # Note: This is the sample standard deviation, NOT the population standard deviation
+    Then aggregate value is: 31.0537
+
+
+  Scenario: restricting the variables in the `get` does not affect the result of the `sum`
+    Given graql insert
+      """
+      insert
+      $p1 isa person, has name "Jeff", has age 30, has ref 0;
+      $p2 isa person, has name "Yoko", has age 20, has ref 1;
+      $p3 isa person, has name "Miles", has age 15, has ref 2;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x isa person, has name $y, has age $z;
+      get;
+      sum $z;
+      """
+    Then aggregate value is: 65
+    Then get answers of graql query
+      """
+      match
+        $x isa person, has name $y, has age $z;
+      get $y, $z;
+      sum $z;
+      """
+    Then aggregate value is: 65
+
+
+  Scenario Outline: duplicate attribute values are included in a `<agg_type>`
+    Given graql insert
+      """
+      insert
+      $p1 isa person, has age <val1and2>, has ref 0;
+      $p2 isa person, has age <val1and2>, has ref 1;
+      $p3 isa person, has age <val3>, has ref 2;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x isa person, has age $y;
+      get;
+      <agg_type> $y;
+      """
+    Then aggregate value is: <agg_val>
+
+    Examples:
+      | val1and2 | val3 | agg_type | agg_val |
+      | 30       | 75   | sum      | 135     |
+      | 30       | 60   | mean     | 40      |
+      | 17       | 14   | median   | 17      |
+
+
+  Scenario: the median of an even number of values is the number halfway between the two most central values
+    Given graql insert
+      """
+      insert
+      $p1 isa person, has age 42, has ref 0;
+      $p2 isa person, has age 38, has ref 1;
+      $p3 isa person, has age 19, has ref 2;
+      $p4 isa person, has age 35, has ref 3;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x isa person, has age $y;
+      get;
+      median $y;
+      """
+    Then aggregate value is: 36.5
+
+
+  Scenario Outline: when an answer set is empty, calling `<agg_type>` on it returns an empty answer
+    Given graql define
+      """
+      define
+      income sub attribute, value double;
+      person has income;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x isa person, has income $y;
+      get;
+      <agg_type> $y;
+      """
+    Then aggregate answer is empty
+
+    Examples:
+      | agg_type |
+      | sum      |
+      | max      |
+      | min      |
+      | mean     |
+      | median   |
+      | std      |
+
+
+  Scenario Outline: an error is thrown when getting the `<agg_type>` of an undefined variable in an aggregate query
+    Then graql get throws
+      """
+      match
+        $x isa person;
+      get;
+      <agg_type> $y;
+      """
+
+    Examples:
+      | agg_type |
+      | sum      |
+      | max      |
+      | min      |
+      | mean     |
+      | median   |
+      | std      |
+
+
+  Scenario: aggregates can only be performed over sets of attributes
+    When graql insert
+      """
+      insert $x isa person, has ref 0;
+      """
+    When the integrity is validated
+    Then graql get throws
+      """
+      match
+        $x isa person;
+      get;
+      min $x;
+      """
+    Then the integrity is validated
+
+
+  Scenario Outline: an error is thrown when getting the `<agg_type>` of attributes that have the inapplicable type, `<type>`
+    Given graql define
+      """
+      define
+      <attr> sub attribute, value <type>;
+      person has <attr>;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $x isa person, has ref 0, has <attr> <value>;
+      """
+    Given the integrity is validated
+    Then graql get throws
+      """
+      match
+        $x isa person, has <attr> $y;
+      get;
+      <agg_type> $y;
+      """
+    Then the integrity is validated
+
+  Examples:
+    | attr       | type     | value      | agg_type |
+    | name       | string   | "Talia"    | sum      |
+    | name       | string   | "Talia"    | max      |
+    | name       | string   | "Talia"    | min      |
+    | name       | string   | "Talia"    | mean     |
+    | name       | string   | "Talia"    | median   |
+    | name       | string   | "Talia"    | std      |
+    | is-awake   | boolean  | true       | sum      |
+    | is-awake   | boolean  | true       | max      |
+    | is-awake   | boolean  | true       | min      |
+    | is-awake   | boolean  | true       | mean     |
+    | is-awake   | boolean  | true       | median   |
+    | is-awake   | boolean  | true       | std      |
+    | birth-date | datetime | 2000-01-01 | sum      |
+    | birth-date | datetime | 2000-01-01 | max      |
+    | birth-date | datetime | 2000-01-01 | min      |
+    | birth-date | datetime | 2000-01-01 | mean     |
+    | birth-date | datetime | 2000-01-01 | median   |
+    | birth-date | datetime | 2000-01-01 | std      |
+
+
+  Scenario: when taking the sum of a set of attributes, where some are numeric and others are strings, an error is thrown
+    When graql insert
+      """
+      insert
+      $x isa person, has name "Barry", has age 39, has ref 0;
+      $y isa person, has name "Gloria", has age 28, has ref 1;
+      """
+    When the integrity is validated
+    Then graql get throws
+      """
+      match
+        $x isa person, has attribute $y;
+      get;
+      sum $y;
+      """
+    Then the integrity is validated
+
+
+  Scenario: when taking the sum of an empty set, even if any matches would definitely be strings, no error is thrown and an empty answer is returned
+    When get answers of graql query
+      """
+      match
+        $x isa person, has name $y;
+      get;
+      sum $y;
+      """
+    Then aggregate answer is empty
 
 
   #########
@@ -515,7 +859,29 @@ Feature: Graql Get Query
       | gCOL  | COL | BER |
 
 
-  Scenario: answer groups can be counted
+  Scenario: when grouping answers by a variable that is not contained in the answer set, an error is thrown
+    Given graql insert
+      """
+      insert
+      $p1 isa person, has name "Violet", has ref 0;
+      $p2 isa person, has name "Rupert", has ref 1;
+      $f (friend: $p1, friend: $p2) isa friendship, has ref 2;
+      """
+    Given the integrity is validated
+    Then graql get throws
+      """
+      match ($x, $y) isa friendship;
+      get $x;
+      group $y;
+      """
+    Then the integrity is validated
+
+
+  ###################
+  # GROUP AGGREGATE #
+  ###################
+
+  Scenario: the size of each answer group can be retrieved using a group `count`
     Given graql insert
       """
       insert
@@ -549,9 +915,107 @@ Feature: Graql Get Query
       | gRUP | RUP   |
       | gBER | BER   |
       | gCOL | COL   |
-    Then aggregate group answers are
+    Then group aggregate values are
       | group | value |
       | gVIO  | 3     |
       | gRUP  | 3     |
       | gBER  | 3     |
       | gCOL  | 3     |
+
+
+  Scenario: the size of answer groups is still computed correctly when restricting variables in the `get`
+    Given graql insert
+      """
+      insert
+      $c1 isa company, has name "Apple", has ref 0;
+      $c2 isa company, has name "Google", has ref 1;
+      $p1 isa person, has name "Elena", has ref 2;
+      $p2 isa person, has name "Flynn", has ref 3;
+      $p3 isa person, has name "Lyudmila", has ref 4;
+      $e1 (employer: $c1, employee: $p1, employee: $p2) isa employment, has ref 5;
+      $e2 (employer: $c2, employee: $p3) isa employment, has ref 6;
+      """
+    Given the integrity is validated
+    Given concept identifiers are
+      |      | check | value |
+      | APP  | key   | ref:0 |
+      | GOO  | key   | ref:1 |
+      | ELE  | key   | ref:2 |
+      | FLY  | key   | ref:3 |
+      | LYU  | key   | ref:4 |
+    When get answers of graql query
+      """
+      match
+        $x isa company;
+        $y isa person;
+        $z isa person;
+        $y != $z;
+        ($x, $y) isa relation;
+      get $x, $y, $z;
+      """
+    Then uniquely identify answer concepts
+      | x   | y   | z   |
+      | APP | ELE | FLY |
+      | APP | ELE | LYU |
+      | APP | FLY | ELE |
+      | APP | FLY | LYU |
+      | GOO | LYU | ELE |
+      | GOO | LYU | FLY |
+    Then get answers of graql query
+      """
+      match
+        $x isa company;
+        $y isa person;
+        $z isa person;
+        $y != $z;
+        ($x, $y) isa relation;
+      get $x, $y, $z;
+      group $x;
+      count;
+      """
+    Then group identifiers are
+      |      | owner |
+      | gAPP | APP   |
+      | gGOO | GOO   |
+    Then group aggregate values are
+      | group | value |
+      | gAPP  | 4     |
+      | gGOO  | 2     |
+
+
+  Scenario: the maximum value for a particular variable within each answer group can be retrieved using a group `max`
+    Given graql insert
+      """
+      insert
+      $c1 isa company, has name "Lloyds", has ref 0;
+      $c2 isa company, has name "Barclays", has ref 1;
+      $p1 isa person, has name "Amy", has age 48, has ref 2;
+      $p2 isa person, has name "Weiyi", has age 57, has ref 3;
+      $p3 isa person, has name "Kimberly", has age 31, has ref 4;
+      $p4 isa person, has name "Reginald", has age 45, has ref 5;
+      $e1 (employer: $c1, employee: $p1, employee: $p2, employee: $p3) isa employment, has ref 6;
+      $e2 (employer: $c2, employee: $p4) isa employment, has ref 7;
+      """
+    Given the integrity is validated
+    Given concept identifiers are
+      |     | check | value |
+      | LLO | key   | ref:0 |
+      | BAR | key   | ref:1 |
+    When get answers of graql query
+      """
+      match
+        $x isa company;
+        $y isa person, has age $z;
+        ($x, $y) isa employment;
+      get;
+      group $x;
+      max $z;
+      """
+    Then group identifiers are
+      |      | owner |
+      | gLLO | LLO   |
+      | gBAR | BAR   |
+    Then group aggregate values are
+      | group | value |
+      | gLLO  | 57    |
+      | gBAR  | 45    |
