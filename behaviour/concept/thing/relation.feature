@@ -25,29 +25,33 @@ Feature: Concept Relation
     Given connection open schema session for keyspace: grakn
     Given session opens transaction of type: write
     # Write schema for the test scenarios
-    Given put attribute type: email, with value type: string
+    Given put attribute type: username, with value type: string
     Given put attribute type: license, with value type: string
     Given put attribute type: date, with value type: datetime
     Given put relation type: marriage
-    Given relation(marriage) set relates role: husband
     Given relation(marriage) set relates role: wife
+    Given relation(marriage) set relates role: husband
     Given relation(marriage) set key attribute type: license
     Given relation(marriage) set has attribute type: date
     Given put entity type: person
-    Given entity(person) set key attribute type: email
-    Given entity(person) set plays role: marriage:husband
+    Given entity(person) set key attribute type: username
     Given entity(person) set plays role: marriage:wife
+    Given entity(person) set plays role: marriage:husband
     Given transaction commits
     Given connection close all sessions
     Given connection open data session for keyspace: grakn
     Given session opens transaction of type: write
 
   Scenario: Relation can be created
-    When $x = relation(marriage) create new instance
-    Then relation $x is null: false
-    Then relation $x has type: marriage
-    Then relation(marriage) get instances contain: $x
-    Then transaction commits
-    When session opens transaction of type: read
-    When $x = relation(marriage) get first instance
-    Then relation(marriage) get instances contain: $x
+    When $m = relation(marriage) create new instance
+    When $a = entity(person) create new instance
+    When $alice = attribute(username) as(string) put: alice
+    When entity $a set has: $alice
+    When $b = entity(person) create new instance
+    When $bob = attribute(username) as(string) put: bob
+    When entity $b set has: $bob
+    When relation $m set player for role(wife): $a
+    When relation $m set player for role(husband): $b
+    Then relation(marriage) get instances contain: $m
+    Then relation $m is null: false
+    Then relation $m has type: marriage
