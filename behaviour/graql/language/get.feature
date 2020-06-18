@@ -197,6 +197,7 @@ Feature: Graql Get Query
       match
         $x isa person, has name $y;
       get;
+      sort $y;
       """
     And concept identifiers are
       |      | check | value          |
