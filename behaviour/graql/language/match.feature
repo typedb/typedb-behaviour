@@ -523,7 +523,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x isa writer; get;
+      match $x isa! writer; get;
       """
     And concept identifiers are
       |     | check | value |
@@ -673,7 +673,7 @@ Feature: Graql Match Clause
   Scenario Outline: `<type>` attributes can be matched by value
     Given graql define
       """
-      define <attr> sub attribute, value <type>, has ref 0;
+      define <attr> sub attribute, value <type>, has ref;
       """
     Given the integrity is validated
     Given graql insert
