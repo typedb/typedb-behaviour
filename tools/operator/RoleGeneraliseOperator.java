@@ -32,9 +32,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.management.relation.Relation;
 
-import static grakn.verification.tools.operator.Utils.rolePlayerVariables;
 import static grakn.verification.tools.operator.Utils.sanitise;
 
 /**

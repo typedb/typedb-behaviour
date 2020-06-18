@@ -14,10 +14,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-Feature: Graql Get Query
 
-  Scenario: match-get returns an empty answer if there are no matches
+package(default_visibility = ["//visibility:public"])
 
-  Scenario: Disjunctions return the union of composing query statements
-
-  Scenario: Restricting variables in get removes variable from answer maps
+exports_files([
+    "resolution.feature",
+])

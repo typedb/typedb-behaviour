@@ -22,16 +22,16 @@ Feature: Concept Thing Type
     Given connection delete all keyspaces
     Given connection does not have any keyspace
     Given connection create keyspace: grakn
-    Given connection open session for keyspace: grakn
+    Given connection open schema session for keyspace: grakn
     Given session opens transaction of type: write
 
   Scenario: Thing type root can retrieve all the subtypes
     When put entity type: person
-    When put attribute type: is-alive, value class: boolean
-    When put attribute type: age, value class: long
-    When put attribute type: rating, value class: double
-    When put attribute type: name, value class: string
-    When put attribute type: birth-date, value class: datetime
+    When put attribute type: is-alive, with value type: boolean
+    When put attribute type: age, with value type: long
+    When put attribute type: rating, with value type: double
+    When put attribute type: name, with value type: string
+    When put attribute type: birth-date, with value type: datetime
     When put relation type: marriage
     When relation(marriage) set relates role: husband
     When relation(marriage) set relates role: wife
