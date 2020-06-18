@@ -673,12 +673,12 @@ Feature: Graql Match Clause
   Scenario Outline: `<type>` attributes can be matched by value
     Given graql define
       """
-      define <attr> sub attribute, value <type>, has ref;
+      define <attr> sub attribute, value <type>, key ref;
       """
     Given the integrity is validated
     Given graql insert
       """
-      insert $n <value> isa <attr>;
+      insert $n <value> isa <attr>, has ref 0;
       """
     Given the integrity is validated
     When get answers of graql query
@@ -692,13 +692,13 @@ Feature: Graql Match Clause
       | a   |
       | ATT |
 
-  Examples:
-    | attr        | type     | value      |
-    | colour      | string   | "Green"    |
-    | calories    | long     | 1761       |
-    | grams       | double   | 9.6        |
-    | gluten-free | boolean  | false      |
-    | use-by-date | datetime | 2020-06-16 |
+    Examples:
+      | attr        | type     | value      |
+      | colour      | string   | "Green"    |
+      | calories    | long     | 1761       |
+      | grams       | double   | 9.6        |
+      | gluten-free | boolean  | false      |
+      | use-by-date | datetime | 2020-06-16 |
 
 
   Scenario: `contains` matches strings that contain the specified substring
