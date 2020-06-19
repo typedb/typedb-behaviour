@@ -42,7 +42,7 @@ Feature: Graql Delete Query
   ##########
 
   Scenario: when deleting multiple variables, they all get deleted
-    When graql insert
+    Given get answers of graql insert
       """
       insert
       $x isa person, has name "Alex";
@@ -51,9 +51,8 @@ Feature: Graql Delete Query
          has ref 0;
       $n "John" isa name;
       """
-    When the integrity is validated
-
-    Then concept identifiers are
+    Given the integrity is validated
+    When concept identifiers are
       |      | check | value     |
       | ALEX | key   | name:Alex |
       | BOB  | key   | name:Bob  |
@@ -61,8 +60,10 @@ Feature: Graql Delete Query
       | JOHN | value | name:John |
       | nALX | value | name:Alex |
       | nBOB | value | name:Bob  |
-
-    Then graql delete
+    Then uniquely identify answer concepts
+      | x    | y   | r  | n    |
+      | ALEX | BOB | FR | JOHN |
+    When graql delete
       """
       match
         $x isa person, has name "Alex";
@@ -71,22 +72,20 @@ Feature: Graql Delete Query
       delete
         $x isa thing; $r isa thing; $n isa thing;
       """
-
-    Then get answers of graql query
+    Then the integrity is validated
+    When get answers of graql query
       """
       match $x isa person; get;
       """
     Then uniquely identify answer concepts
       | x   |
       | BOB |
-
-    Then get answers of graql query
+    When get answers of graql query
       """
       match $x isa friendship; get;
       """
     Then answer size is: 0
-
-    Then get answers of graql query
+    When get answers of graql query
       """
       match $x isa name; get;
       """
@@ -97,7 +96,7 @@ Feature: Graql Delete Query
 
 
   Scenario: delete an instance using 'thing' meta label succeeds
-    When graql insert
+    Given get answers of graql insert
       """
       insert
       $x isa person, has name "Alex";
@@ -106,24 +105,25 @@ Feature: Graql Delete Query
          has ref 0;
       $n "John" isa name;
       """
-    When the integrity is validated
-
-    Then concept identifiers are
+    Given the integrity is validated
+    When concept identifiers are
       |      | check | value     |
       | ALEX | key   | name:Alex |
       | BOB  | key   | name:Bob  |
       | FR   | key   | ref:0     |
       | JOHN | value | name:John |
-
-    Then graql delete
+    Then uniquely identify answer concepts
+      | x    | y   | r  | n    |
+      | ALEX | BOB | FR | JOHN |
+    When graql delete
       """
       match
         $r isa person, has name "Alex";
       delete
         $r isa thing;
       """
-
-    Then get answers of graql query
+    Then the integrity is validated
+    When get answers of graql query
       """
       match $x isa person; get;
       """
@@ -133,7 +133,7 @@ Feature: Graql Delete Query
 
 
   Scenario: an entity can be deleted using the 'entity' meta label
-    When graql insert
+    Given get answers of graql insert
       """
       insert
       $x isa person, has name "Alex";
@@ -142,24 +142,25 @@ Feature: Graql Delete Query
          has ref 0;
       $n "John" isa name;
       """
-    When the integrity is validated
-
-    Then concept identifiers are
+    Given the integrity is validated
+    When concept identifiers are
       |      | check | value     |
       | ALEX | key   | name:Alex |
       | BOB  | key   | name:Bob  |
       | FR   | key   | ref:0     |
       | JOHN | value | name:John |
-
-    Then graql delete
+    Then uniquely identify answer concepts
+      | x    | y   | r  | n    |
+      | ALEX | BOB | FR | JOHN |
+    When graql delete
       """
       match
         $r isa person, has name "Alex";
       delete
         $r isa entity;
       """
-
-    Then get answers of graql query
+    Then the integrity is validated
+    When get answers of graql query
       """
       match $x isa person; get;
       """
@@ -169,7 +170,7 @@ Feature: Graql Delete Query
 
 
   Scenario: a relation can be deleted using the 'relation' meta label
-    When graql insert
+    Given get answers of graql insert
       """
       insert
       $x isa person, has name "Alex";
@@ -178,24 +179,25 @@ Feature: Graql Delete Query
          has ref 0;
       $n "John" isa name;
       """
-    When the integrity is validated
-
-    Then concept identifiers are
+    Given the integrity is validated
+    When concept identifiers are
       |      | check | value     |
       | ALEX | key   | name:Alex |
       | BOB  | key   | name:Bob  |
       | FR   | key   | ref:0     |
       | JOHN | value | name:John |
-
-    Then graql delete
+    Then uniquely identify answer concepts
+      | x    | y   | r  | n    |
+      | ALEX | BOB | FR | JOHN |
+    When graql delete
       """
       match
         $r isa friendship, has ref 0;
       delete
         $r isa relation;
       """
-
-    Then get answers of graql query
+    Then the integrity is validated
+    When get answers of graql query
       """
       match $x isa friendship; get;
       """
@@ -203,26 +205,27 @@ Feature: Graql Delete Query
 
 
   Scenario: an attribute can be deleted using the 'attribute' meta label
-    When graql insert
+    Given get answers of graql insert
       """
       insert
       $n "John" isa name;
       """
-    When the integrity is validated
-
-    Then concept identifiers are
+    Given the integrity is validated
+    When concept identifiers are
       |      | check | value     |
       | JOHN | value | name:John |
-
-    Then graql delete
+    Then uniquely identify answer concepts
+      | n    |
+      | JOHN |
+    When graql delete
       """
       match
         $r "John" isa name;
       delete
         $r isa attribute;
       """
-
-    Then get answers of graql query
+    Then the integrity is validated
+    When get answers of graql query
       """
       match $x isa name; get;
       """
@@ -230,18 +233,14 @@ Feature: Graql Delete Query
 
 
   Scenario: one delete statement can delete multiple things
-    When graql insert
+    Given graql insert
       """
       insert
       $a isa person, has name "Alice";
       $b isa person, has name "Barbara";
       """
-    When the integrity is validated
-    When get answers of graql query
-      """
-      match $x isa person; get;
-      """
-    Then concept identifiers are
+    Given the integrity is validated
+    When concept identifiers are
       |     | check | value        |
       | ALC | key   | name:Alice   |
       | BAR | key   | name:Barbara |
@@ -249,14 +248,15 @@ Feature: Graql Delete Query
       | x   |
       | ALC |
       | BAR |
-    Then graql delete
+    When graql delete
       """
       match
       $p isa person;
       delete
       $p isa person;
       """
-    Then get answers of graql query
+    Then the integrity is validated
+    When get answers of graql query
       """
       match $x isa person; get;
       """
@@ -264,14 +264,13 @@ Feature: Graql Delete Query
 
 
   Scenario: delete an instance using an unrelated type label throws
-    When graql insert
+    Given graql insert
       """
       insert
       $x isa person, has name "Alex";
       $n "John" isa name;
       """
-    When the integrity is validated
-
+    Given the integrity is validated
     Then graql delete throws
       """
       match
@@ -284,21 +283,21 @@ Feature: Graql Delete Query
 
 
   Scenario: delete a relation instance using too-specific (downcasting) type throws
-    When graql define
+    Given graql define
       """
       define
       special-friendship sub friendship,
         relates friend;
       """
-    When graql insert
+    Given the integrity is validated
+    Given graql insert
       """
       insert
       $x isa person, has name "Alex";
       $y isa person, has name "Bob";
       $r (friend: $x, friend: $y) isa friendship, has ref 0;
       """
-    When the integrity is validated
-
+    Given the integrity is validated
     Then graql delete throws
       """
       match
@@ -313,9 +312,8 @@ Feature: Graql Delete Query
   # ROLEPLAYERS #
   ###############
 
-
   Scenario: delete a role player from a relation using its role keeps the relation and removes the role player from it
-    When graql insert
+    Given get answers of graql insert
       """
       insert
       $x isa person, has name "Alex";
@@ -324,16 +322,17 @@ Feature: Graql Delete Query
       $r (friend: $x, friend: $y, friend: $z) isa friendship,
          has ref 0;
       """
-    When the integrity is validated
-
-    Then concept identifiers are
+    Given the integrity is validated
+    When concept identifiers are
       |      | check | value       |
       | ALEX | key   | name:Alex   |
       | BOB  | key   | name:Bob    |
       | CAR  | key   | name:Carrie |
       | FR   | key   | ref:0       |
-
-    Then graql delete
+    Then uniquely identify answer concepts
+      | x    | y   | z   | r  |
+      | ALEX | BOB | CAR | FR |
+    When graql delete
       """
       match
         $r (friend: $x, friend: $y, friend: $z) isa friendship;
@@ -343,8 +342,8 @@ Feature: Graql Delete Query
       delete
         $r (friend: $x);
       """
-
-    Then get answers of graql query
+    Then the integrity is validated
+    When get answers of graql query
       """
       match (friend: $x, friend: $y) isa friendship; get;
       """
@@ -355,7 +354,7 @@ Feature: Graql Delete Query
 
 
   Scenario: delete a role player from a relation using meta role removes the player from the relation
-    When graql insert
+    Given get answers of graql insert
       """
       insert
       $x isa person, has name "Alex";
@@ -364,16 +363,17 @@ Feature: Graql Delete Query
       $r (friend: $x, friend: $y, friend: $z) isa friendship,
          has ref 0;
       """
-    When the integrity is validated
-
-    Then concept identifiers are
+    Given the integrity is validated
+    When concept identifiers are
       |      | check | value       |
       | ALEX | key   | name:Alex   |
       | BOB  | key   | name:Bob    |
       | CAR  | key   | name:Carrie |
       | FR   | key   | ref:0       |
-
-    Then graql delete
+    Then uniquely identify answer concepts
+      | x    | y   | z   | r  |
+      | ALEX | BOB | CAR | FR |
+    When graql delete
       """
       match
         $r (friend: $x, friend: $y, friend: $z) isa friendship;
@@ -383,15 +383,15 @@ Feature: Graql Delete Query
       delete
         $r (role: $x);
       """
-
-    Then get answers of graql query
+    Then the integrity is validated
+    When get answers of graql query
       """
       match (friend: $x, friend: $y) isa friendship; get;
       """
     Then uniquely identify answer concepts
-      | x     | y     |
-      | BOB   | CAR   |
-      | CAR   | BOB   |
+      | x   | y   |
+      | BOB | CAR |
+      | CAR | BOB |
 
 
   Scenario: delete a role player from a relation using a super-role removes the player from the relation
@@ -403,7 +403,7 @@ Feature: Graql Delete Query
       person plays special-friend;
       """
     Given the integrity is validated
-    When graql insert
+    When get answers of graql insert
       """
       insert
       $x isa person, has name "Alex";
@@ -412,16 +412,17 @@ Feature: Graql Delete Query
       $r (special-friend: $x, special-friend: $y, special-friend: $z) isa special-friendship,
          has ref 0;
       """
-    When the integrity is validated
-
-    Then concept identifiers are
+    Then the integrity is validated
+    When concept identifiers are
       |      | check | value       |
       | ALEX | key   | name:Alex   |
       | BOB  | key   | name:Bob    |
       | CAR  | key   | name:Carrie |
       | FR   | key   | ref:0       |
-
-    Then graql delete
+    Then uniquely identify answer concepts
+      | x    | y   | z   | r  |
+      | ALEX | BOB | CAR | FR |
+    When graql delete
       """
       match
         $r (friend: $x, friend: $y, friend: $z) isa friendship;
@@ -431,8 +432,8 @@ Feature: Graql Delete Query
       delete
         $r (friend: $x);
       """
-
-    Then get answers of graql query
+    Then the integrity is validated
+    When get answers of graql query
       """
       match (special-friend: $x, special-friend: $y) isa friendship; get;
       """
@@ -443,7 +444,7 @@ Feature: Graql Delete Query
 
 
   Scenario: delete an instance removes it from all relations
-    When graql insert
+    Given get answers of graql insert
       """
       insert
       $x isa person, has name "Alex";
@@ -452,25 +453,26 @@ Feature: Graql Delete Query
       $r (friend: $x, friend: $y) isa friendship, has ref 1;
       $r2 (friend: $x, friend: $z) isa friendship, has ref 2;
       """
-    When the integrity is validated
-
-    Then concept identifiers are
+    Given the integrity is validated
+    When concept identifiers are
       |      | check | value       |
       | ALEX | key   | name:Alex   |
       | BOB  | key   | name:Bob    |
       | CAR  | key   | name:Carrie |
       | FR1  | key   | ref:1       |
       | FR2  | key   | ref:2       |
-
-    Then graql delete
+    Then uniquely identify answer concepts
+      | x    | y   | z   | r   | r2  |
+      | ALEX | BOB | CAR | FR1 | FR2 |
+    When graql delete
       """
       match
         $x isa person, has name "Alex";
       delete
         $x isa person;
       """
-
-    Then get answers of graql query
+    Then the integrity is validated
+    When get answers of graql query
       """
       match $x isa person; get;
       """
@@ -478,8 +480,7 @@ Feature: Graql Delete Query
       | x    |
       | BOB  |
       | CAR  |
-
-    Then get answers of graql query
+    When get answers of graql query
       """
       match $r (friend: $x) isa friendship; get;
       """
@@ -490,30 +491,31 @@ Feature: Graql Delete Query
 
 
   Scenario: delete duplicate role players from a relation removes duplicate player from relation
-    When graql insert
+    Given get answers of graql insert
       """
       insert
       $x isa person, has name "Alex";
       $y isa person, has name "Bob";
       $r (friend: $x, friend: $x, friend: $y) isa friendship, has ref 0;
       """
-    When the integrity is validated
-
-    Then concept identifiers are
+    Given the integrity is validated
+    When concept identifiers are
       |      | check | value     |
       | ALEX | key   | name:Alex |
       | BOB  | key   | name:Bob  |
       | FR   | key   | ref:0     |
-
-    Then graql delete
+    Then uniquely identify answer concepts
+      | x    | y   | r  |
+      | ALEX | BOB | FR |
+    When graql delete
       """
       match
         $r (friend: $x, friend: $x) isa friendship;
       delete
         $r (friend: $x, friend: $x);
       """
-
-    Then get answers of graql query
+    Then the integrity is validated
+    When get answers of graql query
       """
       match $r (friend: $x) isa friendship; get;
       """
@@ -523,30 +525,31 @@ Feature: Graql Delete Query
 
 
   Scenario: when deleting multiple duplicate role players from a relation, it removes the number you asked to delete
-    When graql insert
+    Given get answers of graql insert
       """
       insert
       $x isa person, has name "Alex";
       $y isa person, has name "Bob";
       $r (friend: $x, friend: $x, friend: $x, friend: $y) isa friendship, has ref 0;
       """
-    When the integrity is validated
-
-    Then concept identifiers are
+    Given the integrity is validated
+    When concept identifiers are
       |      | check | value     |
       | ALEX | key   | name:Alex |
       | BOB  | key   | name:Bob  |
       | FR   | key   | ref:0     |
-
-    Then graql delete
+    Then uniquely identify answer concepts
+      | x    | y   | r  |
+      | ALEX | BOB | FR |
+    When graql delete
       """
       match
         $r (friend: $x, friend: $x, friend: $x) isa friendship;
       delete
         $r (friend: $x, friend: $x);
       """
-
-    Then get answers of graql query
+    Then the integrity is validated
+    When get answers of graql query
       """
       match $r (friend: $x, friend: $y) isa friendship; get;
       """
@@ -557,57 +560,60 @@ Feature: Graql Delete Query
 
 
   Scenario: when deleting duplicate role players in multiple statements, it still removes the total number you asked to delete
-    When graql insert
+    Given get answers of graql insert
       """
       insert
       $x isa person, has name "Alex";
       $y isa person, has name "Bob";
       $r (friend: $x, friend: $x, friend: $x, friend: $y) isa friendship, has ref 0;
       """
-    When the integrity is validated
-
-    Then concept identifiers are
+    Given the integrity is validated
+    When concept identifiers are
       |      | check | value     |
       | ALEX | key   | name:Alex |
       | BOB  | key   | name:Bob  |
       | FR   | key   | ref:0     |
-
-    Then graql delete
+    Then uniquely identify answer concepts
+      | x    | y   | r  |
+      | ALEX | BOB | FR |
+    When graql delete
       """
       match
+        $x isa person;
         $r (friend: $x, friend: $x, friend: $x) isa friendship;
       delete
         $r (friend: $x);
         $r (friend: $x);
       """
-
-    Then get answers of graql query
+    Then the integrity is validated
+    When get answers of graql query
       """
       match $r (friend: $x, friend: $y) isa friendship; get;
       """
     Then uniquely identify answer concepts
-      | r     | x    | y    |
-      | FR    | BOB  | ALEX |
-      | FR    | ALEX | BOB  |
+      | r  | x    | y    |
+      | FR | BOB  | ALEX |
+      | FR | ALEX | BOB  |
 
 
   Scenario: delete one of role players from a relation removes only one duplicate
-    When graql insert
+    Given get answers of graql insert
       """
       insert
       $x isa person, has name "Alex";
       $y isa person, has name "Bob";
       $r (friend: $x, friend: $x, friend: $y) isa friendship, has ref 0;
       """
-    When the integrity is validated
-
-    Then concept identifiers are
+    Given the integrity is validated
+    When concept identifiers are
       |      | check | value     |
       | ALEX | key   | name:Alex |
       | BOB  | key   | name:Bob  |
       | FR   | key   | ref:0     |
-
-    Then graql delete
+    Then uniquely identify answer concepts
+      | x    | y   | r  |
+      | ALEX | BOB | FR |
+    When graql delete
       """
       match
         $r (friend: $x) isa friendship;
@@ -615,8 +621,8 @@ Feature: Graql Delete Query
       delete
         $r (friend: $x);
       """
-
-    Then get answers of graql query
+    Then the integrity is validated
+    When get answers of graql query
       """
       match $r (friend: $x, friend: $y) isa friendship; get;
       """
@@ -627,7 +633,7 @@ Feature: Graql Delete Query
 
 
   Scenario: delete role players in multiple statements are all deleted
-    When graql insert
+    Given get answers of graql insert
       """
       insert
       $x isa person, has name "Alex";
@@ -635,16 +641,17 @@ Feature: Graql Delete Query
       $z isa person, has name "Carrie";
       $r (friend: $x, friend: $y, friend: $z) isa friendship, has ref 0;
       """
-    When the integrity is validated
-
-    Then concept identifiers are
+    Given the integrity is validated
+    When concept identifiers are
       |      | check | value       |
       | ALEX | key   | name:Alex   |
       | BOB  | key   | name:Bob    |
       | CAR  | key   | name:Carrie |
       | FR   | key   | ref:0       |
-
-    Then graql delete
+    Then uniquely identify answer concepts
+      | x    | y   | z   | r  |
+      | ALEX | BOB | CAR | FR |
+    When graql delete
       """
       match
         $r (friend: $x, friend: $y, friend: $z) isa friendship;
@@ -655,26 +662,25 @@ Feature: Graql Delete Query
         $r (friend: $x);
         $r (friend: $y);
       """
-
-    Then get answers of graql query
+    Then the integrity is validated
+    When get answers of graql query
       """
       match $r (friend: $x) isa friendship; get;
       """
     Then uniquely identify answer concepts
-      | r     | x    |
-      | FR    | CAR  |
+      | r  | x   |
+      | FR | CAR |
 
 
   Scenario: delete more role players than exist throws
-    When graql insert
+    Given graql insert
       """
       insert
       $x isa person, has name "Alex";
       $y isa person, has name "Bob";
       $r (friend: $x, friend: $y) isa friendship, has ref 0;
       """
-    When the integrity is validated
-
+    Given the integrity is validated
     Then graql delete throws
       """
       match
@@ -688,22 +694,23 @@ Feature: Graql Delete Query
 
 
   Scenario: when all instances that play roles in a relation are deleted, the relation instance gets deleted
-    When graql insert
+    Given get answers of graql insert
       """
       insert
       $x isa person, has name "Alex";
       $y isa person, has name "Bob";
       $r (friend: $x, friend: $y) isa friendship, has ref 0;
       """
-    When the integrity is validated
-
-    Then concept identifiers are
+    Given the integrity is validated
+    When concept identifiers are
       |      | check | value     |
       | ALEX | key   | name:Alex |
       | BOB  | key   | name:Bob  |
       | FR   | key   | ref:0     |
-
-    Then graql delete
+    Then uniquely identify answer concepts
+      | x    | y   | r  |
+      | ALEX | BOB | FR |
+    When graql delete
       """
       match
         $x isa person, has name "Alex";
@@ -712,8 +719,8 @@ Feature: Graql Delete Query
         $x isa person;
         $y isa person;
       """
-
-    Then get answers of graql query
+    Then the integrity is validated
+    When get answers of graql query
       """
       match $r isa friendship; get;
       """
@@ -721,22 +728,23 @@ Feature: Graql Delete Query
 
 
   Scenario: when the last role player is disassociated from a relation instance, the relation instance gets deleted
-    When graql insert
+    Given get answers of graql insert
       """
       insert
       $x isa person, has name "Alex";
       $y isa person, has name "Bob";
       $r (friend: $x, friend: $y) isa friendship, has ref 0;
       """
-    When the integrity is validated
-
-    Then concept identifiers are
+    Given the integrity is validated
+    When concept identifiers are
       |      | check | value     |
       | ALEX | key   | name:Alex |
       | BOB  | key   | name:Bob  |
       | FR   | key   | ref:0     |
-
-    Then graql delete
+    Then uniquely identify answer concepts
+      | x    | y   | r  |
+      | ALEX | BOB | FR |
+    When graql delete
       """
       match
         $x isa person, has name "Alex";
@@ -746,9 +754,8 @@ Feature: Graql Delete Query
         $r (role: $x);
         $r (role: $y);
       """
-
-
-    Then get answers of graql query
+    Then the integrity is validated
+    When get answers of graql query
       """
       match $r isa friendship; get;
       """
@@ -763,7 +770,6 @@ Feature: Graql Delete Query
         relates special-friend as friend;
       """
     Given the integrity is validated
-
     When graql insert
       """
       insert
@@ -771,8 +777,7 @@ Feature: Graql Delete Query
       $y isa person, has name "Bob";
       $r (friend: $x, friend: $y) isa friendship, has ref 0;
       """
-    When the integrity is validated
-
+    Then the integrity is validated
     Then graql delete throws
       """
       match
@@ -803,7 +808,7 @@ Feature: Graql Delete Query
       person plays captain, plays navigator, plays chef;
       """
     Given the integrity is validated
-    When graql insert
+    Given graql insert
       """
       insert
       $x isa person, has name "Cook";
@@ -811,7 +816,7 @@ Feature: Graql Delete Query
       $z isa person, has name "Joshua";
       $r (captain: $x, navigator: $y, chef: $z) isa ship-crew;
       """
-    When the integrity is validated
+    Given the integrity is validated
     Then graql delete throws
       """
       match
@@ -841,26 +846,26 @@ Feature: Graql Delete Query
       person plays captain, plays navigator, plays chef;
       """
     Given the integrity is validated
-    When graql insert
+    Given graql insert
       """
       insert
       $x isa person, has name "Cook";
       $y isa person, has name "Joshua";
       $r (captain: $x, chef: $y, chef: $y) isa ship-crew, has ref 0;
       """
-    When the integrity is validated
-    Then get answers of graql query
+    Given the integrity is validated
+    When get answers of graql query
       """
       match $rel (chef: $p) isa ship-crew; get;
       """
-    Then concept identifiers are
+    When concept identifiers are
       |       | check | value       |
       | CREW  | key   | ref:0       |
       | JOSH  | key   | name:Joshua |
     Then uniquely identify answer concepts
       | rel  | p    |
       | CREW | JOSH |
-    Then graql delete
+    When graql delete
       """
       match
         $r ($role1: $x, captain: $y) isa ship-crew;
@@ -868,7 +873,7 @@ Feature: Graql Delete Query
         $r ($role1: $x);
       """
     Then the integrity is validated
-    Then get answers of graql query
+    When get answers of graql query
       """
       match $rel (chef: $p) isa ship-crew; get;
       """
@@ -887,20 +892,23 @@ Feature: Graql Delete Query
       person has age;
       """
     Given the integrity is validated
-    When graql insert
+    Given graql insert
       """
       insert
       $x isa person, has name "Anna", has age 18;
       """
-    When the integrity is validated
+    Given the integrity is validated
     When get answers of graql query
       """
       match $x has age 18; get;
       """
-    Then concept identifiers are
+    When concept identifiers are
       |     | check | value     |
       | ANA | key   | name:Anna |
-    Then graql delete
+    Then uniquely identify answer concepts
+      | x   |
+      | ANA |
+    When graql delete
       """
       match
         $x 18 isa age;
@@ -908,7 +916,7 @@ Feature: Graql Delete Query
         $x isa attribute;
       """
     Then the integrity is validated
-    Then get answers of graql query
+    When get answers of graql query
       """
       match $x has age 18; get;
       """
@@ -916,13 +924,14 @@ Feature: Graql Delete Query
 
 
   Scenario: an attribute ownership can be deleted using the attribute's type label
-    When graql define
+    Given graql define
       """
       define
       lastname sub attribute, value string;
       person sub entity, has lastname;
       """
-    When graql insert
+    Given the integrity is validated
+    Given get answers of graql insert
       """
       insert
       $x isa person,
@@ -932,17 +941,18 @@ Feature: Graql Delete Query
         has lastname "Smith",
         has name "John";
       """
-    When the integrity is validated
-
-    Then concept identifiers are
+    Given the integrity is validated
+    When concept identifiers are
       |      | check | value          |
       | ALEX | key   | name:Alex      |
       | JOHN | key   | name:John      |
       | lnST | value | lastname:Smith |
       | nALX | value | name:Alex      |
       | nJHN | value | name:John      |
-
-    Then graql delete
+    Then uniquely identify answer concepts
+      | x    | y    |
+      | ALEX | JOHN |
+    When graql delete
       """
       match
         $x isa person, has lastname $n, has name "Alex";
@@ -950,31 +960,29 @@ Feature: Graql Delete Query
       delete
         $x has lastname $n;
       """
-
-    Then get answers of graql query
+    Then the integrity is validated
+    When get answers of graql query
       """
       match $x isa person; get;
       """
     Then uniquely identify answer concepts
-      | x     |
-      | ALEX  |
-      | JOHN  |
-
-    Then get answers of graql query
+      | x    |
+      | ALEX |
+      | JOHN |
+    When get answers of graql query
       """
       match $n isa lastname; get;
       """
     Then uniquely identify answer concepts
-      | n     |
-      | lnST  |
-
-    Then get answers of graql query
+      | n    |
+      | lnST |
+    When get answers of graql query
       """
       match $x isa person, has lastname $n; get;
       """
     Then uniquely identify answer concepts
-      | x     | n      |
-      | JOHN  | lnST   |
+      | x    | n    |
+      | JOHN | lnST |
 
 
   Scenario: an attribute ownership can be deleted using the 'attribute' meta label
@@ -986,18 +994,21 @@ Feature: Graql Delete Query
       person has postcode;
       """
     Given the integrity is validated
-    When graql insert
+    Given get answers of graql insert
       """
       insert
       $x isa person, has name "Sherlock", has postcode "W1U8ED";
       """
-    When the integrity is validated
-    Then concept identifiers are
+    Given the integrity is validated
+    Given concept identifiers are
       |      | check | value           |
       | SHER | key   | name:Sherlock   |
       | nSLK | value | name:Sherlock   |
       | pcW1 | value | postcode:W1U8ED |
-    Then get answers of graql query
+    Then uniquely identify answer concepts
+      | x    |
+      | SHER |
+    When get answers of graql query
       """
       match $x has attribute $a; get;
       """
@@ -1005,7 +1016,7 @@ Feature: Graql Delete Query
       | x    | a    |
       | SHER | nSLK |
       | SHER | pcW1 |
-    Then graql delete
+    When graql delete
       """
       match
         $x isa person, has attribute $a;
@@ -1014,7 +1025,7 @@ Feature: Graql Delete Query
         $x has attribute $a;
       """
     Then the integrity is validated
-    Then get answers of graql query
+    When get answers of graql query
       """
       match $x has attribute $a; get;
       """
@@ -1032,25 +1043,25 @@ Feature: Graql Delete Query
       person has postcode;
       """
     Given the integrity is validated
-    When graql insert
+    Given graql insert
       """
       insert
       $x isa person, has name "Sherlock", has postcode "W1U8ED";
       """
-    When the integrity is validated
-    Then concept identifiers are
+    Given the integrity is validated
+    Given concept identifiers are
       |      | check | value           |
       | SHER | key   | name:Sherlock   |
       | nSLK | value | name:Sherlock   |
       | pcW1 | value | postcode:W1U8ED |
-    Then get answers of graql query
+    When get answers of graql query
       """
       match $x has address $a; get;
       """
     Then uniquely identify answer concepts
       | x    | a    |
       | SHER | pcW1 |
-    Then graql delete
+    When graql delete
       """
       match
         $x isa person, has address $a;
@@ -1058,7 +1069,7 @@ Feature: Graql Delete Query
         $x has address $a;
       """
     Then the integrity is validated
-    Then get answers of graql query
+    When get answers of graql query
       """
       match $x has address $a; get;
       """
@@ -1074,13 +1085,13 @@ Feature: Graql Delete Query
       person has address;
       """
     Given the integrity is validated
-    When graql insert
+    Given graql insert
       """
       insert
       $x isa person, has name "Sherlock", has address "221B Baker Street";
       """
-    When the integrity is validated
-    Then graql delete
+    Given the integrity is validated
+    Then graql delete throws
       """
       match
         $x isa person, has address $a;
@@ -1098,12 +1109,12 @@ Feature: Graql Delete Query
       person has postcode;
       """
     Given the integrity is validated
-    When graql insert
+    Given graql insert
       """
       insert
       $x isa person, has name "Sherlock", has postcode "W1U8ED";
       """
-    When the integrity is validated
+    Given the integrity is validated
     Then graql delete throws
       """
       match
@@ -1114,24 +1125,20 @@ Feature: Graql Delete Query
 
 
   Scenario: you can specify the direct type of an attribute when deleting an ownership of it
-    Given graql insert
+    Given get answers of graql insert
       """
       insert
       $x isa person, has name "Watson";
       """
-    When the integrity is validated
-    Then concept identifiers are
+    Given the integrity is validated
+    Given concept identifiers are
       |      | check | value      |
       | WAT | key   | name:Watson |
       | nWA | value | name:Watson |
-    Then get answers of graql query
-      """
-      match $x isa person; get;
-      """
     Then uniquely identify answer concepts
       | x   |
       | WAT |
-    Then graql delete
+    When graql delete
       """
       match
         $x isa person;
@@ -1139,7 +1146,7 @@ Feature: Graql Delete Query
         $x isa! person;
       """
     Then the integrity is validated
-    Then get answers of graql query
+    When get answers of graql query
       """
       match $x isa person; get;
       """
@@ -1152,7 +1159,7 @@ Feature: Graql Delete Query
       insert
       $x isa person, has name "Watson";
       """
-    When the integrity is validated
+    Given the integrity is validated
     Then graql delete throws
       """
       match
@@ -1170,26 +1177,26 @@ Feature: Graql Delete Query
       friendship has duration;
       """
     Given the integrity is validated
-    When graql insert
+    Given graql insert
       """
       insert
       $x isa person, has name "Tom";
       $y isa person, has name "Jerry";
       $r (friend: $x, friend: $y) isa friendship, has ref 0, has duration 1000;
       """
-    When the integrity is validated
+    Given the integrity is validated
     When get answers of graql query
       """
       match $x has duration $d; get;
       """
-    Then concept identifiers are
+    When concept identifiers are
       |      | check | value         |
       | REF0 | key   | ref:0         |
       | DURA | value | duration:1000 |
     Then uniquely identify answer concepts
       | x    | d    |
       | REF0 | DURA |
-    Then graql delete
+    When graql delete
       """
       match
         $r isa friendship;
@@ -1197,7 +1204,7 @@ Feature: Graql Delete Query
         $r isa relation;
       """
     Then the integrity is validated
-    Then get answers of graql query
+    When get answers of graql query
       """
       match $x has duration $d; get;
       """
@@ -1212,25 +1219,25 @@ Feature: Graql Delete Query
       friendship has duration;
       """
     Given the integrity is validated
-    When graql insert
+    Given graql insert
       """
       insert
       $x isa person, has name "Emma";
       $r (friend: $x) isa friendship, has ref 0, has duration 1000;
       """
-    When the integrity is validated
+    Given the integrity is validated
     When get answers of graql query
       """
       match $x has duration $d; get;
       """
-    Then concept identifiers are
+    When concept identifiers are
       |      | check | value         |
       | REF0 | key   | ref:0         |
       | DURA | value | duration:1000 |
     Then uniquely identify answer concepts
       | x    | d    |
       | REF0 | DURA |
-    Then graql delete
+    When graql delete
       """
       match
         $r (friend: $x) isa friendship;
@@ -1238,12 +1245,12 @@ Feature: Graql Delete Query
         $r (friend: $x);
       """
     Then the integrity is validated
-    Then get answers of graql query
+    When get answers of graql query
       """
       match $x has duration $d; get;
       """
     Then answer size is: 0
-    Then get answers of graql query
+    When get answers of graql query
       """
       match $r isa friendship; get;
       """
@@ -1263,13 +1270,14 @@ Feature: Graql Delete Query
 
 
   Scenario: delete complex pattern
-    When graql define
+    Given graql define
       """
       define
       lastname sub attribute, value string;
       person sub entity, has lastname;
       """
-    When graql insert
+    Given the integrity is validated
+    Given graql insert
       """
       insert
       $x isa person,
@@ -1282,9 +1290,8 @@ Feature: Graql Delete Query
       $r1 (friend: $x, friend: $y) isa friendship, has ref 2;
       $reflexive (friend: $x, friend: $x) isa friendship, has ref 3;
       """
-    When the integrity is validated
-
-    Then concept identifiers are
+    Given the integrity is validated
+    Given concept identifiers are
       |      | check | value          |
       | ALEX | key   | name:Alex      |
       | JOHN | key   | name:John      |
@@ -1294,8 +1301,7 @@ Feature: Graql Delete Query
       | F1   | key   | ref:1          |
       | F2   | key   | ref:2          |
       | REFL | key   | ref:3          |
-
-    Then graql delete
+    When graql delete
       """
       match
         $x isa person, has name "Alex", has lastname $n;
@@ -1307,8 +1313,8 @@ Feature: Graql Delete Query
         $refl (friend: $x);
         $f1 isa friendship;
       """
-
-    Then get answers of graql query
+    Then the integrity is validated
+    When get answers of graql query
       """
       match $f (friend: $x) isa friendship; get;
       """
@@ -1317,8 +1323,7 @@ Feature: Graql Delete Query
       | F2    | ALEX  |
       | F2    | JOHN  |
       | REFL  | ALEX  |
-
-    Then get answers of graql query
+    When get answers of graql query
       """
       match $n isa name; get;
       """
@@ -1326,8 +1331,7 @@ Feature: Graql Delete Query
       | n     |
       | nJHN  |
       | nALX  |
-
-    Then get answers of graql query
+    When get answers of graql query
       """
       match $x isa person, has lastname $n; get;
       """
@@ -1337,13 +1341,14 @@ Feature: Graql Delete Query
 
 
   Scenario: delete everything in a complex pattern
-    When graql define
+    Given graql define
       """
       define
       lastname sub attribute, value string;
       person sub entity, has lastname;
       """
-    When graql insert
+    Given the integrity is validated
+    Given graql insert
       """
       insert
       $x isa person,
@@ -1356,9 +1361,8 @@ Feature: Graql Delete Query
       $r1 (friend: $x, friend: $y) isa friendship, has ref 2;
       $reflexive (friend: $x, friend: $x) isa friendship, has ref 3;
       """
-    When the integrity is validated
-
-    Then concept identifiers are
+    Given the integrity is validated
+    Given concept identifiers are
       |      | check | value          |
       | ALEX | key   | name:Alex      |
       | JOHN | key   | name:John      |
@@ -1368,8 +1372,7 @@ Feature: Graql Delete Query
       | F1   | key   | ref:1          |
       | F2   | key   | ref:2          |
       | REFL | key   | ref:3          |
-
-    Then graql delete
+    When graql delete
       """
       match
         $x isa person, has name "Alex", has lastname $n;
@@ -1382,8 +1385,8 @@ Feature: Graql Delete Query
         $refl (friend: $x, friend: $x) isa friendship, has ref $r1;
         $f1 (friend: $x, friend: $y) isa friendship, has ref $r2;
       """
-
-    Then get answers of graql query
+    Then the integrity is validated
+    When get answers of graql query
       """
       match $x isa person, has lastname $n; get;
       """
@@ -1391,13 +1394,12 @@ Feature: Graql Delete Query
 
 
   Scenario: deleting a key ownership throws on commit
-    When graql insert
+    Given graql insert
       """
       insert
       $x isa person, has name "Alex";
       """
-    When the integrity is validated
-
+    Given the integrity is validated
     Then graql delete throws
       """
       match
@@ -1422,9 +1424,12 @@ Feature: Graql Delete Query
       """
       match $x isa name; get;
       """
-    Then concept identifiers are
+    When concept identifiers are
       |     | check | value        |
       | TAT | value | name:Tatyana |
+    Then uniquely identify answer concepts
+      | x   |
+      | TAT |
     Then graql delete throws
       """
       match
