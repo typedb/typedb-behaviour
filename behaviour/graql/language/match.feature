@@ -798,7 +798,7 @@ Feature: Graql Match Clause
       | GRA |
 
 
-  Scenario: by using the `attribute` meta label, `has` can be used to match things that own any type of attribute with a specified value
+  Scenario: using the `attribute` meta label, `has` can match things that own any attribute with a specified value
     Given graql define
       """
       define
@@ -829,30 +829,42 @@ Feature: Graql Match Clause
 
 
   Scenario: when an attribute instance is fully specified, `has` matches its owners
+    Given graql define
+      """
+      define
+      friendship has age;
+      graduation-date sub attribute, value datetime, has age, key ref;
+      person has graduation-date;
+      """
+    Given the integrity is validated
     Given graql insert
       """
       insert
-      $x isa person, has name "John", has ref 0;
-      $y isa person, has name "John", has ref 1;
-      $z isa person, has name "Not John", has ref 2;
+      $x isa person, has name "Zoe", has age 21, has graduation-date 2020-06-01, has ref 0;
+      $y (friend: $x) isa friendship, has age 21, has ref 1;
+      $z 2020-06-01 isa graduation-date, has age 21, has ref 2;
       $w isa person, has ref 3;
+      $v (friend: $x, friend: $w) isa friendship, has age 7, has ref 4;
+      $u 2019-06-03 isa graduation-date, has age 22, has ref 5;
       """
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x has name "John"; get;
+      match $x has age 21; get;
       """
     And concept identifiers are
       |     | check | value |
-      | JH1 | key   | ref:0 |
-      | JH2 | key   | ref:1 |
+      | PER | key   | ref:0 |
+      | FRI | key   | ref:1 |
+      | GRA | key   | ref:2 |
     Then uniquely identify answer concepts
       | x   |
-      | JH1 |
-      | JH2 |
+      | PER |
+      | FRI |
+      | GRA |
 
 
-  Scenario: `has` with an instance fully specified matches all its owners, even if they own other instances of the same attribute
+  Scenario: `has` matches an attribute's owner even if it owns more attributes of the same type
     Given graql define
       """
       define
@@ -882,7 +894,7 @@ Feature: Graql Match Clause
   # ATTRIBUTE VALUE COMPARISON #
   ##############################
 
-  Scenario: when two things each own an attribute with the same value, and those attributes have different types, they will match by equality, but not by ownership
+  Scenario: when things own attributes of different types but the same value, they match by equality, but not ownership
     Given graql define
       """
       define
@@ -982,7 +994,7 @@ Feature: Graql Match Clause
       | SUS |
 
 
-  Scenario: `has $attr > $x` matches owners of any instance `$y` of `$attr` where `$y > $x` even if they also own instance `$z` where `$z < $x`
+  Scenario: when a thing owns multiple attributes of the same type, a value comparison matches if any value matches
     Given graql define
       """
       define
