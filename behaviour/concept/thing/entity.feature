@@ -28,8 +28,8 @@ Feature: Concept Entity
     Given put attribute type: email, with value type: string
     Given put attribute type: name, with value type: string
     Given put entity type: person
-    Given entity(person) set key attribute: email
-    Given entity(person) set has attribute: name
+    Given entity(person) set key attribute type: email
+    Given entity(person) set has attribute type: name
     Given transaction commits
     Given connection close all sessions
     Given connection open data session for keyspace: grakn
@@ -39,21 +39,143 @@ Feature: Concept Entity
     When $x = entity(person) create new instance
     Then entity $x is null: false
     Then entity $x has type: person
+    Then entity(person) get instances contain: $x
     Then transaction commits
-
-  Scenario: Entity can be retrieved from its type
+    When session opens transaction of type: read
+    When $x = entity(person) get first instance
+    Then entity(person) get instances contain: $x
 
   Scenario: Entity can be deleted
+    When $x = entity(person) create new instance
+    When $y = attribute(name) as(string) put: alice
+    When entity $x set has: $y
+    When delete entity: $x
+    Then entity(person) get instances is empty
+    Then attribute $y get owners do not contain: $x
+    When transaction commits
+    When session opens transaction of type: write
+    Then entity(person) get instances is empty
+    When $x = entity(person) create new instance
+    When transaction commits
+    When session opens transaction of type: write
+    When $x = entity(person) get first instance
+    When $y = attribute(name) as(string) get: alice
+    When entity $x set has: $y
+    When delete entity: $x
+    Then entity(person) get instances is empty
+    Then attribute $y get owners do not contain: $x
+    When transaction commits
+    When session opens transaction of type: read
+    Then entity(person) get instances is empty
+    When $y = attribute(name) as(string) get: alice
+    Then attribute $y get owners do not contain: $x
 
-  Scenario: Entity can have key
+  Scenario: Entity can have keys
+    When $x = entity(person) create new instance
+    When $y = attribute(email) as(string) put: name@email.com
+    When entity $x set has: $y
+    Then entity $x get keys(email) contain: $y
+    Then entity $x get keys contain: $y
+    Then attribute $y get owners contain: $x
+    When transaction commits
+    When session opens transaction of type: read
+    When $x = entity(person) get first instance
+    When $y = attribute(email) as(string) get: name@email.com
+    Then entity $x get keys(email) contain: $y
+    Then entity $x get keys contain: $y
+    Then attribute $y get owners contain: $x
 
-  Scenario: Entity can get keys
-
-  Scenario: Entity can remove key
+  Scenario: Entity can remove keys
+    When $x = entity(person) create new instance
+    When $y = attribute(email) as(string) put: name@email.com
+    When entity $x set has: $y
+    When entity $x remove has: $y
+    Then entity $x get keys(email) do not contain: $y
+    Then entity $x get keys do not contain: $y
+    Then attribute $y get owners do not contain: $x
+    When transaction commits
+    When session opens transaction of type: write
+    When $x = entity(person) get first instance
+    When $y = attribute(email) as(string) get: name@email.com
+    Then entity $x get keys(email) do not contain: $y
+    Then entity $x get keys do not contain: $y
+    Then attribute $y get owners do not contain: $x
+    When entity $x set has: $y
+    When transaction commits
+    When session opens transaction of type: write
+    When $x = entity(person) get first instance
+    When $y = attribute(email) as(string) get: name@email.com
+    Then entity $x get keys(email) contain: $y
+    When entity $x remove has: $y
+    Then entity $x get keys(email) do not contain: $y
+    Then entity $x get keys do not contain: $y
+    Then attribute $y get owners do not contain: $x
+    When transaction commits
+    When session opens transaction of type: read
+    When $x = entity(person) get first instance
+    When $y = attribute(email) as(string) get: name@email.com
+    Then entity $x get keys(email) do not contain: $y
+    Then attribute $y get owners do not contain: $x
 
   Scenario: Entity can have attribute
-
-  Scenario: Entity can get attributes
+    When $x = entity(person) create new instance
+    When $y = attribute(name) as(string) put: alice
+    When entity $x set has: $y
+    Then entity $x get attributes(name) contain: $y
+    Then entity $x get attributes contain: $y
+    Then attribute $y get owners contain: $x
+    When transaction commits
+    When session opens transaction of type: read
+    When $x = entity(person) get first instance
+    When $y = attribute(name) as(string) get: alice
+    Then entity $x get attributes(name) contain: $y
+    Then entity $x get attributes contain: $y
+    Then attribute $y get owners contain: $x
 
   Scenario: Entity can remove attribute
-
+    When $x = entity(person) create new instance
+    When $y = attribute(name) as(string) put: alice
+    When entity $x set has: $y
+    When entity $x remove has: $y
+    Then entity $x get attributes(name) do not contain: $y
+    Then entity $x get attributes do not contain: $y
+    Then attribute $y get owners do not contain: $x
+    When transaction commits
+    When session opens transaction of type: write
+    When $x = entity(person) get first instance
+    When $y = attribute(name) as(string) get: alice
+    Then entity $x get attributes(name) do not contain: $y
+    Then entity $x get attributes do not contain: $y
+    Then attribute $y get owners do not contain: $x
+    When entity $x set has: $y
+    When transaction commits
+    When session opens transaction of type: write
+    When $x = entity(person) get first instance
+    When $y = attribute(name) as(string) get: alice
+    Then entity $x get attributes(name) contain: $y
+    When entity $x remove has: $y
+    Then entity $x get attributes(name) do not contain: $y
+    Then entity $x get attributes do not contain: $y
+    Then attribute $y get owners do not contain: $x
+    When transaction commits
+    When session opens transaction of type: write
+    When $x = entity(person) get first instance
+    When $y = attribute(name) as(string) get: alice
+    Then entity $x get attributes(name) do not contain: $y
+    Then attribute $y get owners do not contain: $x
+    When entity $x set has: $y
+    When transaction commits
+    When session opens transaction of type: write
+    When $x = entity(person) get first instance
+    When $y = attribute(name) as(string) get: alice
+    When entity $x set has: $y
+    When entity $x remove has: $y
+    Then entity $x get attributes(name) do not contain: $y
+    Then entity $x get attributes do not contain: $y
+    Then attribute $y get owners do not contain: $x
+    When transaction commits
+    When session opens transaction of type: write
+    When $x = entity(person) get first instance
+    When $y = attribute(name) as(string) get: alice
+    Then entity $x get attributes(name) do not contain: $y
+    Then attribute $y get owners do not contain: $x
