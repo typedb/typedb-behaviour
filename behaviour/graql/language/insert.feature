@@ -1288,10 +1288,10 @@ Feature: Graql Insert Query
     When get answers of graql insert
       """
       match
-        (employer: $x, employee: $z) isa employment;
+        (employer: $x, employee: $z) isa employment, has ref $ref;
         $y isa person, has name "Tarja";
       insert
-        (employer: $x, employee: $y) isa employment;
+        (employer: $x, employee: $y) isa employment, has ref 10;
       """
     Then concept identifiers are
       |     | check | value |
