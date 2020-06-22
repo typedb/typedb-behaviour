@@ -595,7 +595,7 @@ Feature: Graql Delete Query
       | FR    | ALEX | BOB  |
 
 
-  Scenario: when deleting duplicate role players in multiple statements, it still removes the total number you asked to delete
+  Scenario: when deleting duplicate role players in multiple statements, it removes the total number you asked to delete
     Given get answers of graql insert
       """
       insert
@@ -1160,7 +1160,7 @@ Feature: Graql Delete Query
       """
 
 
-  Scenario: you can specify the direct type of an attribute when deleting an ownership of it
+  Scenario: an attribute can be specified by direct type when deleting an ownership of it
     Given get answers of graql insert
       """
       insert
@@ -1203,6 +1203,7 @@ Feature: Graql Delete Query
       delete
         $x isa! entity;
       """
+    Then the integrity is validated
 
 
   Scenario: deleting the owner of an attribute also deletes the attribute ownership
