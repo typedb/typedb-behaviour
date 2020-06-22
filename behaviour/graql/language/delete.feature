@@ -1112,7 +1112,7 @@ Feature: Graql Delete Query
     Then answer size is: 0
 
 
-  Scenario: delete an attribute ownership using too-specific (downcasting) type throws
+  Scenario: deleting an attribute ownership using too-specific (downcasting) type throws
     Given graql define
       """
       define
@@ -1294,17 +1294,9 @@ Feature: Graql Delete Query
     Then answer size is: 0
 
 
-  ##############
-  # EDGE CASES #
-  ##############
-
-  Scenario: deleting a variable not in the query throws, even if there were no matches
-    Then graql delete throws
-      """
-      match $x isa person; delete $n isa name;
-      """
-    Then the integrity is validated
-
+  ####################
+  # COMPLEX PATTERNS #
+  ####################
 
   Scenario: delete complex pattern
     Given graql define
@@ -1428,6 +1420,18 @@ Feature: Graql Delete Query
       match $x isa person, has lastname $n; get;
       """
     Then answer size is: 0
+
+
+  ##############
+  # EDGE CASES #
+  ##############
+
+  Scenario: deleting a variable not in the query throws, even if there were no matches
+    Then graql delete throws
+      """
+      match $x isa person; delete $n isa name;
+      """
+    Then the integrity is validated
 
 
   Scenario: deleting a key ownership throws on commit
