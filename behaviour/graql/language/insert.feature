@@ -1203,7 +1203,7 @@ Feature: Graql Insert Query
   ###########################
 
   Scenario: an insert with multiple thing variables returns a single answer that contains them all
-    When get answers of graql query
+    When get answers of graql insert
       """
       insert
       $x isa person, has name "Bruce Wayne", has ref 0;
@@ -1221,7 +1221,7 @@ Feature: Graql Insert Query
 
 
   Scenario: when inserting a thing variable with a type variable, the answer contains both variables
-    When get answers of graql query
+    When get answers of graql insert
       """
       match
         $type type company;
@@ -1285,7 +1285,7 @@ Feature: Graql Insert Query
       $z isa person, has name "Tarja", has ref 3;
       """
     Given the integrity is validated
-    When get answers of graql query
+    When get answers of graql insert
       """
       match
         (employer: $x, employee: $z) isa employment;
@@ -1332,7 +1332,7 @@ Feature: Graql Insert Query
 
 
   Scenario: match-inserting only existing entities is a no-op
-    Given get answers of graql query
+    Given get answers of graql insert
       """
       insert
       $x isa person, has name "Rebecca", has ref 0;
@@ -1377,7 +1377,7 @@ Feature: Graql Insert Query
 
 
   Scenario: match-inserting only existing relations is a no-op
-    Given get answers of graql query
+    Given get answers of graql insert
       """
       insert
       $x isa person, has name "Homer", has ref 0;
@@ -1430,7 +1430,7 @@ Feature: Graql Insert Query
 
 
   Scenario: match-inserting only existing attributes is a no-op
-    Given get answers of graql query
+    Given get answers of graql insert
       """
       insert
       $x "Ash" isa name;
