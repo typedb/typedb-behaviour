@@ -16,6 +16,6 @@ Feature: Graql Reasoner Resolution
 
   Scenario: `isa` matches inferred roleplayers in relation instances
 
-  Scenario: `isa $x` matches instances that have `$x` as an inferred type, which is a subtype of its defined type
+  Scenario: `isa` matches inferred types that are subtypes of the thing's defined type
 
-  Scenario: `isa $x` matches instances that have `$x` as an inferred type, which is unrelated to its defined type
+  Scenario: `isa` matches inferred types that are unrelated to the thing's defined type

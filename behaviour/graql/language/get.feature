@@ -354,7 +354,7 @@ Feature: Graql Get Query
 
 
   Scenario: string sorting is case-insensitive
-    When get answers of graql query
+    When get answers of graql insert
       """
       insert
       $a "Bond" isa name;
