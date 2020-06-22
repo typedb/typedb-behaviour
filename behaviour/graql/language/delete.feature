@@ -282,9 +282,8 @@ Feature: Graql Delete Query
       | ALC | key   | name:Alice   |
       | BAR | key   | name:Barbara |
     Then uniquely identify answer concepts
-      | x   |
-      | ALC |
-      | BAR |
+      | a   | b   |
+      | ALC | BAR |
     When graql delete
       """
       match
