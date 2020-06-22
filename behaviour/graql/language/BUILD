@@ -21,6 +21,7 @@ exports_files([
     "compute.feature",
     "define.feature",
     "delete.feature",
+    "get.feature",
     "insert.feature",
     "match.feature",
     "undefine.feature",
