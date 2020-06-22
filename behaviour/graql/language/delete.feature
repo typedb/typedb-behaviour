@@ -232,8 +232,45 @@ Feature: Graql Delete Query
     Then answer size is: 0
 
 
+  Scenario: an instance can be deleted using its own type label
+    Given get answers of graql insert
+      """
+      insert
+      $x isa person, has name "Alex";
+      $y isa person, has name "Bob";
+      $r (friend: $x, friend: $y) isa friendship,
+         has ref 0;
+      $n "John" isa name;
+      """
+    Given the integrity is validated
+    When concept identifiers are
+      |      | check | value     |
+      | ALEX | key   | name:Alex |
+      | BOB  | key   | name:Bob  |
+      | FR   | key   | ref:0     |
+      | JOHN | value | name:John |
+    Then uniquely identify answer concepts
+      | x    | y   | r  | n    |
+      | ALEX | BOB | FR | JOHN |
+    When graql delete
+      """
+      match
+        $r isa person, has name "Alex";
+      delete
+        $r isa person;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x isa person; get;
+      """
+    Then uniquely identify answer concepts
+      | x   |
+      | BOB |
+
+
   Scenario: one delete statement can delete multiple things
-    Given graql insert
+    Given get answers of graql insert
       """
       insert
       $a isa person, has name "Alice";
