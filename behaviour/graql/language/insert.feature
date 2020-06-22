@@ -256,7 +256,7 @@ Feature: Graql Insert Query
     Then answer size is: 0
 
 
-  Scenario: when inserting a new thing that owns an existing attribute, and that attribute has no previous owner, that thing becomes its first owner
+  Scenario: given an attribute with no owners, inserting a thing that owns it results in it having an owner
     Given graql insert
       """
       insert $name "Kyle" isa name;
@@ -279,7 +279,7 @@ Feature: Graql Insert Query
       | KYLE |
 
 
-  Scenario: after inserting two things that own the same attribute, the things become linked, in that they are both owners of that attribute
+  Scenario: after inserting two things that own the same attribute, the attribute has two owners
     When graql insert
       """
       insert
@@ -639,7 +639,7 @@ Feature: Graql Insert Query
       | PER | EMP |
 
 
-  Scenario: when inserting a ternary relation that both owns an attribute and has an attribute as a roleplayer, both attributes are created
+  Scenario: when inserting a relation that owns an attribute and has an attribute roleplayer, both attributes are created
     Given graql define
       """
       define
@@ -720,7 +720,11 @@ Feature: Graql Insert Query
     Given the integrity is validated
     When graql insert
       """
-      match $r isa employment; insert $r (employer: $c) isa employment; $c isa company, has ref 2;
+      match
+        $r isa employment;
+      insert
+        $r (employer: $c) isa employment;
+        $c isa company, has ref 2;
       """
     When the integrity is validated
     Then get answers of graql query
@@ -780,7 +784,11 @@ Feature: Graql Insert Query
     Given the integrity is validated
     When graql insert
       """
-      match $r isa employment; $p isa person; insert $r (employee: $p) isa employment;
+      match
+        $r isa employment;
+        $p isa person;
+      insert
+        $r (employee: $p) isa employment;
       """
     When the integrity is validated
     Then get answers of graql query
@@ -823,7 +831,7 @@ Feature: Graql Insert Query
     Then the integrity is validated
 
 
-  Scenario: inserting a roleplayer that can't play the role, yet is the parent of a type that can play the role, is still invalid and throws on commit
+  Scenario: inserting a roleplayer that is only the parent of a valid type is invalid and throws on commit
     When graql define
       """
       define
@@ -1128,7 +1136,7 @@ Feature: Graql Insert Query
     Then the integrity is validated
 
 
-  Scenario: inserting duplicate values of the same key on a thing throws on commit
+  Scenario: instances of a key must be unique among all instances of a type
     Then graql insert throws
       """
       insert
@@ -1295,7 +1303,7 @@ Feature: Graql Insert Query
       | MIC | TAR |
 
 
-  Scenario: if match-insert matches nothing, then it inserts nothing
+  Scenario: if match-insert matches nothing, then nothing is inserted
     Given graql define
       """
       define
