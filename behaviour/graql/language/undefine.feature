@@ -429,6 +429,8 @@ Feature: Graql Undefine Query
     Then the integrity is validated
 
 
+  @ignore
+  # TODO: re-enable when removing a role from a relation cleans up the role
   Scenario: all existing instances of a relation type must be deleted in order to undefine it
     Given get answers of graql query
       """
