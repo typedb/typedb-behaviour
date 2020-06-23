@@ -29,7 +29,7 @@ Feature: Graql Undefine Query
       person sub entity, plays employee, has name, key email;
       employment sub relation, relates employee, relates employer;
       name sub attribute, value string;
-      email sub attribute, value string, regex ".+@\w.com";
+      email sub attribute, value string, regex ".+@\w+\..+";
       abstract-type sub entity, abstract;
       """
     Given the integrity is validated
@@ -39,15 +39,115 @@ Feature: Graql Undefine Query
   # ENTITIES #
   ############
 
-  Scenario: undefining an entity type removes it
+  Scenario: calling `undefine` with `sub entity` on a subtype of `entity` deletes it
+    Given get answers of graql query
+      """
+      match $x sub entity; get;
+      """
+    Given concept identifiers are
+      |     | check | value         |
+      | ABS | label | abstract-type |
+      | PER | label | person        |
+      | ENT | label | entity        |
+    Given uniquely identify answer concepts
+      | x   |
+      | ABS |
+      | PER |
+      | ENT |
+    When graql undefine
+      """
+      undefine person sub entity;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x sub entity; get;
+      """
+    Then uniquely identify answer concepts
+      | x   |
+      | ABS |
+      | ENT |
 
-  Scenario: undefining a subtype preserves its parent type
+
+  Scenario: when undefining `sub` on an entity type, specifying a type that isn't really its supertype, nothing happens
+    When graql undefine
+      """
+      undefine person sub thing;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x type person; get;
+      """
+    When concept identifiers are
+      |     | check | value  |
+      | PER | label | person |
+    Then uniquely identify answer concepts
+      | x   |
+      | PER |
+
+
+  Scenario: a sub-entity can be deleted by using its direct supertype when undefining `sub`, and its parent is preserved
+    Given graql define
+      """
+      define child sub person;
+      """
+    Given the integrity is validated
+    Given get answers of graql query
+      """
+      match $x sub person; get;
+      """
+    Given concept identifiers are
+      |     | check | value  |
+      | PER | label | person |
+      | CHI | label | child  |
+    Given uniquely identify answer concepts
+      | x   |
+      | PER |
+      | CHI |
+    When graql undefine
+      """
+      undefine child sub person;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x sub person; get;
+      """
+    Then uniquely identify answer concepts
+      | x   |
+      | PER |
+
+
+  Scenario: if `entity` is not the direct supertype of an entity, undefining `sub entity` on it does nothing
+    Given graql define
+      """
+      define child sub person;
+      """
+    Given the integrity is validated
+    When graql undefine
+      """
+      undefine child sub entity;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x type child; get;
+      """
+    When concept identifiers are
+      |     | check | value |
+      | CHI | label | child |
+    Then uniquely identify answer concepts
+      | x   |
+      | CHI |
+
 
   Scenario: undefining a supertype throws an error if subtypes exist
     Given graql define
       """
       define child sub person;
       """
+    Given the integrity is validated
     Then graql undefine throws
       """
       undefine person sub entity;
@@ -55,12 +155,13 @@ Feature: Graql Undefine Query
     Then the integrity is validated
 
 
-  Scenario: removing playable roles from a super entity type also removes them from its subtypes
+  Scenario: removing a playable role from a super entity type also removes it from its subtypes
     Given graql define
       """
       define child sub person; 
       """
-    Given graql undefine
+    Given the integrity is validated
+    When graql undefine
       """
       undefine person plays employee;
       """
@@ -77,7 +178,8 @@ Feature: Graql Undefine Query
       """
       define child sub person; 
       """
-    Given graql undefine
+    Given the integrity is validated
+    When graql undefine
       """
       undefine person has name;
       """
@@ -94,7 +196,8 @@ Feature: Graql Undefine Query
       """
       define child sub person; 
       """
-    Given graql undefine
+    Given the integrity is validated
+    When graql undefine
       """
       undefine person key email;
       """
@@ -105,67 +208,479 @@ Feature: Graql Undefine Query
       """
     Then answer size is: 0
 
-  @ignore
-  # TODO fails since undefining an abstract removes the type fully
-  Scenario: undefining a type as abstract converts an abstract to a concrete type, allowing creation of instances
-    Given graql undefine
-      """
-      undefine abstract-type abstract;
-      """
-    Given the integrity is validated
-    When get answers of graql query
-      """
-      match $x abstract; get; 
-      """
-    Then concept identifiers are
-      |           | check | value     |
-      | ENTITY    | label | entity    |
-      | RELATION  | label | relation  |
-      | ATTRIBUTE | label | attribute |
-      | THING     | label | thing     |
-    Then uniquely identify answer concepts
-      | x         |
-      | ENTITY    |
-      | RELATION  |
-      | ATTRIBUTE |
-      | THING     |
 
-
-  @ignore
-  # TODO fails same as undefine abstract; then require sub-abstract type validation
-  Scenario: undefining a type as abstract errors if has abstract child types (?)
-    Given graql define
+  Scenario: all existing instances of an entity type must be deleted in order to undefine it
+    Given get answers of graql query
       """
-      define sub-abstract-type sub abstract-type, abstract;
+      match $x sub entity; get;
+      """
+    Given concept identifiers are
+      |     | check | value         |
+      | ABS | label | abstract-type |
+      | PER | label | person        |
+      | ENT | label | entity        |
+    Given uniquely identify answer concepts
+      | x   |
+      | ABS |
+      | PER |
+      | ENT |
+    Given graql insert
+      """
+      insert $x isa person, has name "Victor", has email "victor@grakn.ai";
       """
     Given the integrity is validated
     Then graql undefine throws
       """
-      undefine abstract-type abstract;
+      undefine person sub entity;
       """
     Then the integrity is validated
+    When graql delete
+      """
+      match
+        $x isa person;
+      delete
+        $x isa person;
+      """
+    Then the integrity is validated
+    When graql undefine
+      """
+      undefine person sub entity;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x sub entity; get;
+      """
+    Then uniquely identify answer concepts
+      | x   |
+      | ABS |
+      | ENT |
 
-
-  Scenario: undefining an entity type throws on commit if it has existing instances
-
-  Scenario: once the existing instances have been deleted, an entity type can be undefined
 
   #############
   # RELATIONS #
   #############
 
-  Scenario: undefining a relation type and its roles removes them
+  @ignore
+  # TODO: re-enable when removing a role from a relation cleans up the role
+  Scenario: a relation type is deleted by disassociating its roles and their roleplayers, then undefining `sub relation`
+    Given get answers of graql query
+      """
+      match $x sub relation; get;
+      """
+    Given concept identifiers are
+      |     | check | value      |
+      | EMP | label | employment |
+      | REL | label | relation   |
+    Given uniquely identify answer concepts
+      | x   |
+      | EMP |
+      | REL |
+    When graql undefine
+      """
+      undefine
+      employment relates employee;
+      employment relates employer;
+      person plays employee;
+      employment sub relation;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x sub relation; get;
+      """
+    Then uniquely identify answer concepts
+      | x   |
+      | REL |
 
-  Scenario: undefining a relation type throws on commit if its roles are left behind, still played by other types
+
+  Scenario: undefining a relation type without also undefining its roles throws an error
+    Then graql undefine throws
+      """
+      undefine employment sub relation;
+      """
+    Then the integrity is validated
+
+
+  Scenario: undefining a relation type and its roles without disassociating them from their roleplayers throws an error
+    Then graql undefine throws
+      """
+      undefine
+      employment relates employee;
+      employment relates employer;
+      employment sub relation;
+      """
+    Then the integrity is validated
+
+
+  Scenario: removing playable roles from a super relation type also removes them from its subtypes
+    Given graql define
+      """
+      define
+      employment-terms sub relation, relates employment-with-terms;
+      employment plays employment-with-terms;
+      contract-employment sub employment, relates employee, relates employer;
+      """
+    Given the integrity is validated
+    Given get answers of graql query
+      """
+      match contract-employment plays $x; get;
+      """
+    Given concept identifiers are
+      |     | check | value                 |
+      | EWT | label | employment-with-terms |
+    Given uniquely identify answer concepts
+      | x   |
+      | EWT |
+    When graql undefine
+      """
+      undefine employment plays employment-with-terms;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match contract-employment plays $x; get;
+      """
+    Then answer size is: 0
+
+
+  Scenario: removing attribute ownerships from a super relation type also removes them from its subtypes
+    Given graql define
+      """
+      define
+      start-date sub attribute, value datetime;
+      employment has start-date;
+      contract-employment sub employment, relates employee, relates employer;
+      """
+    Given the integrity is validated
+    Given get answers of graql query
+      """
+      match $x has start-date; get;
+      """
+    Given concept identifiers are
+      |     | check | value               |
+      | EMP | label | employment          |
+      | CEM | label | contract-employment |
+    Given uniquely identify answer concepts
+      | x   |
+      | EMP |
+      | CEM |
+    When graql undefine
+      """
+      undefine employment has start-date;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x has start-date; get;
+      """
+    Then answer size is: 0
+
+
+  Scenario: removing key ownerships from a super relation type also removes them from its subtypes
+    Given graql define
+      """
+      define
+      employment-reference sub attribute, value string;
+      employment key employment-reference;
+      contract-employment sub employment, relates employee, relates employer;
+      """
+    Given the integrity is validated
+    Given get answers of graql query
+      """
+      match $x key employment-reference; get;
+      """
+    Given concept identifiers are
+      |     | check | value               |
+      | EMP | label | employment          |
+      | CEM | label | contract-employment |
+    Given uniquely identify answer concepts
+      | x   |
+      | EMP |
+      | CEM |
+    When graql undefine
+      """
+      undefine employment key employment-reference;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x key employment-reference; get;
+      """
+    Then answer size is: 0
+
+
+  Scenario: undefining a relation type throws on commit if it has existing instances
+    Given graql insert
+      """
+      insert
+      $p isa person, has name "Harald", has email "harald@grakn.ai";
+      $r (employee: $p) isa employment;
+      """
+    Given the integrity is validated
+    Then graql undefine throws
+      """
+      undefine
+      employment relates employee;
+      employment relates employer;
+      person plays employee;
+      employment sub relation;
+      """
+    Then the integrity is validated
+
+
+  Scenario: all existing instances of a relation type must be deleted in order to undefine it
+    Given get answers of graql query
+      """
+      match $x sub relation; get;
+      """
+    Given concept identifiers are
+      |     | check | value      |
+      | EMP | label | employment |
+      | REL | label | relation   |
+    Given uniquely identify answer concepts
+      | x   |
+      | EMP |
+      | REL |
+    Given graql insert
+      """
+      insert
+      $p isa person, has name "Harald", has email "harald@grakn.ai";
+      $r (employee: $p) isa employment;
+      """
+    Given the integrity is validated
+    Then graql undefine throws
+      """
+      undefine
+      employment relates employee;
+      employment relates employer;
+      person plays employee;
+      employment sub relation;
+      """
+    Then the integrity is validated
+    When graql delete
+      """
+      match
+        $r isa employment;
+      delete
+        $r isa employment;
+      """
+    Then the integrity is validated
+    When graql undefine
+      """
+      undefine
+      employment relates employee;
+      employment relates employer;
+      person plays employee;
+      employment sub relation;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x sub relation; get;
+      """
+    Then uniquely identify answer concepts
+      | x   |
+      | REL |
+
+
+  ##################################
+  # ROLES IN RELATIONS ('RELATES') #
+  ##################################
 
   @ignore
-  # re-enable when 'relates' is inherited
+  # TODO: re-enable when removing a role from a relation cleans up the role
+  Scenario: a role is deleted by removing it from its relation type and disassociating its roleplayers
+    Given get answers of graql query
+      """
+      match employment relates $x; get;
+      """
+    Given concept identifiers are
+      |     | check | value    |
+      | EME | label | employee |
+      | EMR | label | employer |
+    Given uniquely identify answer concepts
+      | x   |
+      | EME |
+      | EMR |
+    When graql undefine
+      """
+      undefine
+      person plays employee;
+      employment relates employee;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match employment relates $x; get;
+      """
+    Then uniquely identify answer concepts
+      | x   |
+      | EMR |
+
+
+  Scenario: deleting a role without disassociating its roleplayers throws an error
+    Then graql undefine throws
+      """
+      undefine
+      employment relates employee;
+      """
+    Then the integrity is validated
+
+
+  Scenario: leaving a role with no possible players is valid, and does not throw
+    When graql undefine
+      """
+      undefine person plays employee;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x plays employee; get;
+      """
+    Then answer size is: 0
+
+
+  @ignore
+  # TODO: re-enable when removing a role from a relation cleans up the role
+  Scenario: after deleting a role from a relation type, relation instances can no longer be created with that role
+    Given graql insert
+      """
+      insert
+      $p isa person, has email "ganesh@grakn.ai";
+      $r (employee: $p) isa employment;
+      """
+    Given the integrity is validated
+    Given graql delete
+      """
+      match
+        $r isa employment;
+      delete
+        $r isa employment;
+      """
+    Given the integrity is validated
+    When graql undefine
+      """
+      undefine
+      person plays employee;
+      employment relates employee;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x relates employee; get;
+      """
+    Then answer size is: 0
+    Then graql insert throws
+      """
+      match
+        $p isa person, has email "ganesh@grakn.ai";
+      insert
+        $r (employee: $p) isa employment;
+      """
+    Then the integrity is validated
+
+
+  @ignore
+  # TODO: re-enable when removing a role from a relation cleans up the role
+  Scenario: after deleting a role from a relation type without commit, its instances can no longer have that role
+    Given graql insert
+      """
+      insert
+      $p isa person, has email "ganesh@grakn.ai";
+      $r (employee: $p) isa employment;
+      """
+    Given the integrity is validated
+    Given graql delete
+      """
+      match
+        $r isa employment;
+      delete
+        $r isa employment;
+      """
+    Given the integrity is validated
+    When graql undefine without commit
+      """
+      undefine
+      person plays employee;
+      employment relates employee;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x relates employee; get;
+      """
+    Then answer size is: 0
+    Then graql insert throws
+      """
+      match
+        $p isa person, has email "ganesh@grakn.ai";
+      insert
+        $r (employee: $p) isa employment;
+      """
+    Then the integrity is validated
+
+
+  @ignore
+  # TODO: re-enable when removing a role from a relation cleans up the role
+  Scenario: deleting a role throws an error if it is played by existing roleplayers in relations
+    Given graql define
+      """
+      define
+      company sub entity, has name, plays employer;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $p isa person, has name "Ada", has email "ada@grakn.ai";
+      $c isa company, has name "IBM";
+      $r (employee: $p, employer: $c) isa employment;
+      """
+    Given the integrity is validated
+    Then graql undefine throws
+      """
+      undefine employment relates employer;
+      """
+    Then the integrity is validated
+
+
+  @ignore
+  # TODO: re-enable when removing a role from a relation cleans up the role
+  Scenario: a role that is not played in any existing instance of its relation type can be safely deleted
+    Given graql insert
+      """
+      insert
+      $p isa person, has name "Vijay", has email "vijay@grakn.ai";
+      $r (employee: $p) isa employment;
+      """
+    Given the integrity is validated
+    When graql undefine
+      """
+      undefine employment relates employer;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match employment relates $x; get;
+      """
+    When concept identifiers are
+      |     | check | value    |
+      | EME | value | employee |
+    Then uniquely identify answer concepts
+      | x   |
+      | EME |
+
+
+  @ignore
+  # TODO: re-enable when 'relates' is inherited
   Scenario: removing a role from a super relation type also removes it from its subtypes
     Given graql define
       """
       define part-time sub employment;
       """
-    Given graql undefine
+    Given the integrity is validated
+    When graql undefine
       """
       undefine employment relates employer;
       """
@@ -188,89 +703,490 @@ Feature: Graql Undefine Query
 
   @ignore
   # TODO: re-enable when 'relates' is inherited
-  Scenario: after undefining a sub-role from a relation type, it is gone and the type is left with just the parent role
+  Scenario: after undefining a sub-role from a relation type, it is gone and the type is left with just its parent role
 
-  Scenario: removing playable roles from a super relation type also removes them from its subtypes
 
-  Scenario: removing attribute ownerships from a super relation type also removes them from its subtypes
+  ###################################
+  # ROLES PLAYED BY TYPES ('PLAYS') #
+  ###################################
 
-  Scenario: removing key ownerships from a super relation type also removes them from its subtypes
+  Scenario: after undefining a playable role from a type, the type can no longer play the role
+    Given graql insert
+      """
+      insert
+      $p isa person, has email "ganesh@grakn.ai";
+      $r (employee: $p) isa employment;
+      """
+    Given the integrity is validated
+    Given graql delete
+      """
+      match
+        $r isa employment;
+      delete
+        $r isa employment;
+      """
+    Given the integrity is validated
+    When graql undefine
+      """
+      undefine person plays employee;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x plays employee; get;
+      """
+    Then answer size is: 0
+    Then graql insert throws
+      """
+      match
+        $p isa person, has email "ganesh@grakn.ai";
+      insert
+        $r (employee: $p) isa employment;
+      """
+    Then the integrity is validated
 
-  Scenario: undefining a relation type throws on commit if it has existing instances
 
-  Scenario: once the existing instances have been deleted, a relation type can be undefined
-
-  Scenario: undefining a role throws on commit if it is played by existing roleplayers in relations
-
-  Scenario: a role can be undefined when there are existing relations, as long as none of them have that roleplayer
+  # TODO: why is this ok, but undefining a not-actually-owned attribute ownership is not ok?
+  Scenario: attempting to undefine a playable role that was not actually playable to begin with does nothing
+    Given get answers of graql query
+      """
+      match person plays $x; get;
+      """
+    Given concept identifiers are
+      |     | check | value    |
+      | EMP | label | employee |
+    Given uniquely identify answer concepts
+      | x   |
+      | EMP |
+    When graql undefine
+      """
+      undefine person plays employer;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match person plays $x; get;
+      """
+    Then uniquely identify answer concepts
+      | x   |
+      | EMP |
 
 
   ##############
   # ATTRIBUTES #
   ##############
 
-  # TODO: implement this
-  Scenario Outline: undefining an attribute type with value `<type>` removes it
-    Given graql undefine
+  Scenario Outline: calling `undefine` with `sub attribute` on an attribute type with value `<type>` deletes it
+    Given graql define
       """
-      undefine email sub attribute;
+      define <attr> sub attribute, value <type>;
       """
     Given the integrity is validated
-    When get answers of graql query
+    Given get answers of graql query
       """
-      match $x sub attribute; get;
+      match $x type <attr>; get;
       """
-    Then concept identifiers are
-      |      | check | value     |
-      | ATTR | label | attribute |
-      | NAME | label | name      |
-    Then uniquely identify answer concepts
-      | x    |
-      | ATTR |
-      | NAME |
+    Given answer size is: 1
+    When graql undefine
+      """
+      undefine <attr> sub attribute;
+      """
+    Then the integrity is validated
+    Then graql get throws
+      """
+      match $x type <attr>; get;
+      """
 
     Examples:
-      | type     |
-      | string   |
-      | long     |
-      | double   |
-      | boolean  |
-      | datetime |
+      | type     | attr       |
+      | string   | colour     |
+      | long     | age        |
+      | double   | height     |
+      | boolean  | is-awake   |
+      | datetime | birth-date |
 
-
-  Scenario: removing playable roles from a super attribute type also removes them from its subtypes
-
-  Scenario: removing attribute ownerships from a super attribute type also removes them from its subtypes
-
-  Scenario: removing key ownerships from a super attribute type also removes them from its subtypes
 
   Scenario: undefining a regex on an attribute type removes the regex constraints on the attribute
-    Given graql undefine
+    When graql undefine
       """
-      undefine email regex ".+@\w.com";
+      undefine email regex ".+@\w+\..+";
       """
-    Given the integrity is validated
+    Then the integrity is validated
     When graql insert
       """
       insert $x "not-email-regex" isa email;
       """
-    Given the integrity is validated
-    Then get answers of graql query
+    Then the integrity is validated
+    When get answers of graql query
       """
       match $x isa email; get;
       """
     Then answer size is: 1
 
 
-  Scenario: undefining an attribute type throws on commit if it has existing instances
+  Scenario: undefining the wrong regex from an attribute type does nothing
+    When graql undefine
+      """
+      undefine email regex ".+@\w.com";
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x regex ".+@\w+\..+"; get;
+      """
+    When concept identifiers are
+      |     | check | value |
+      | EMA | label | email |
+    Then uniquely identify answer concepts
+      | x   |
+      | EMA |
 
-  Scenario: once the existing instances have been deleted, an attribute type can be undefined
+
+  Scenario: removing playable roles from a super attribute type also removes them from its subtypes
+    Given graql define
+      """
+      define
+      first-name sub name;
+      employment relates manager-name;
+      name plays manager-name;
+      """
+    Given the integrity is validated
+    Given get answers of graql query
+      """
+      match first-name plays $x; get;
+      """
+    Given concept identifiers are
+      |     | check | value        |
+      | MNA | label | manager-name |
+    Given uniquely identify answer concepts
+      | x   |
+      | MNA |
+    When graql undefine
+      """
+      undefine name plays manager-name;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match first-name plays $x; get;
+      """
+    Then answer size is: 0
+
+
+  Scenario: removing attribute ownerships from a super attribute type also removes them from its subtypes
+    Given graql define
+      """
+      define
+      first-name sub name;
+      locale sub attribute, value string;
+      name has locale;
+      """
+    Given the integrity is validated
+    Given get answers of graql query
+      """
+      match $x has locale; get;
+      """
+    Given concept identifiers are
+      |     | check | value      |
+      | NAM | label | name       |
+      | FNA | label | first-name |
+    Given uniquely identify answer concepts
+      | x   |
+      | NAM |
+      | FNA |
+    When graql undefine
+      """
+      undefine name has locale;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x has locale; get;
+      """
+    Then answer size is: 0
+
+
+  Scenario: removing key ownerships from a super attribute type also removes them from its subtypes
+    Given graql define
+      """
+      define
+      first-name sub name;
+      name-id sub attribute, value long;
+      name key name-id;
+      """
+    Given the integrity is validated
+    Given get answers of graql query
+      """
+      match $x key name-id; get;
+      """
+    Given concept identifiers are
+      |     | check | value      |
+      | NAM | label | name       |
+      | FNA | label | first-name |
+    Given uniquely identify answer concepts
+      | x   |
+      | NAM |
+      | FNA |
+    When graql undefine
+      """
+      undefine name key name-id;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x key name-id; get;
+      """
+    Then answer size is: 0
+
+
+  Scenario: an attribute and its self-ownership can be deleted simultaneously
+    Given graql define
+      """
+      define
+      name has name;
+      """
+    Given the integrity is validated
+    When graql undefine
+      """
+      undefine
+      name has name;
+      name sub attribute;
+      """
+    Then the integrity is validated
+    Then graql get throws
+      """
+      match $x type name; get;
+      """
+
+
+  Scenario: undefining the value type of an attribute does nothing
+    When graql undefine
+      """
+      undefine name value string;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x type name;
+        $x value string;
+      get;
+      """
+    When concept identifiers are
+      |     | check | value |
+      | NAM | label | name  |
+    Then uniquely identify answer concepts
+      | x   |
+      | NAM |
+
+
+  Scenario: all existing instances of an attribute type must be deleted in order to undefine it
+    Given get answers of graql query
+      """
+      match $x sub attribute; get;
+      """
+    Given concept identifiers are
+      |     | check | value     |
+      | NAM | label | name      |
+      | EMA | label | email     |
+      | ATT | label | attribute |
+    Given uniquely identify answer concepts
+      | x   |
+      | NAM |
+      | EMA |
+      | ATT |
+    Given graql insert
+      """
+      insert $x "Colette" isa name;
+      """
+    Given the integrity is validated
+    Then graql undefine throws
+      """
+      undefine name sub attribute;
+      """
+    Then the integrity is validated
+    When graql delete
+      """
+      match
+        $x isa name;
+      delete
+        $x isa name;
+      """
+    Then the integrity is validated
+    When graql undefine
+      """
+      undefine name sub attribute;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x sub attribute; get;
+      """
+    Then uniquely identify answer concepts
+      | x   |
+      | EMA |
+      | ATT |
+
+
+  ########################
+  # ATTRIBUTE OWNERSHIPS #
+  ########################
+
+  Scenario: undefining an attribute ownership removes it
+    Given get answers of graql query
+      """
+      match
+        $x has name;
+        $x type person;
+      get;
+      """
+    Given concept identifiers are
+      |     | check | value  |
+      | PER | label | person |
+    Given uniquely identify answer concepts
+      | x   |
+      | PER |
+    When graql undefine
+      """
+      undefine person has name;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x has name;
+        $x type person;
+      get;
+      """
+    Then answer size is: 0
+
+
+  Scenario: attempting to undefine an attribute ownership that was not actually owned to begin with throws an error
+    Then graql undefine throws
+      """
+      undefine employment has name;
+      """
+    Then the integrity is validated
+
+
+  Scenario: attempting to undefine an attribute ownership inherited from a parent throws an error
+    Given graql define
+      """
+      define child sub person;
+      """
+    Given the integrity is validated
+    Then graql undefine throws
+      """
+      undefine child has name;
+      """
+    Then the integrity is validated
+
+
+  Scenario: undefining a key ownership removes it
+    Given get answers of graql query
+      """
+      match
+        $x key email;
+        $x type person;
+      get;
+      """
+    Given concept identifiers are
+      |     | check | value  |
+      | PER | label | person |
+    Given uniquely identify answer concepts
+      | x   |
+      | PER |
+    When graql undefine
+      """
+      undefine person key email;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x key email;
+        $x type person;
+      get;
+      """
+    Then answer size is: 0
+
+
+  Scenario: attempting to undefine a key ownership that doesn't exist throws an error
+    Then graql undefine throws
+      """
+      undefine employment key email;
+      """
+    Then the integrity is validated
+
+
+  Scenario: attempting to undefine an attribute owned with `key` by using `has` throws an error
+    Then graql undefine throws
+      """
+      undefine person has email;
+      """
+    Then the integrity is validated
+
+
+  Scenario: attempting to undefine an attribute owned with `has` by using `key` throws an error
+    Then graql undefine throws
+      """
+      undefine person key name;
+      """
+    Then the integrity is validated
+
 
   Scenario: when an attribute owner has instances, but none of them own that attribute, the ownership can be removed
+    Given get answers of graql query
+      """
+      match $x has name; get;
+      """
+    Given concept identifiers are
+      |     | check | value  |
+      | PER | label | person |
+    Given uniquely identify answer concepts
+      | x   |
+      | PER |
+    Given graql insert
+      """
+      insert $x isa person, has email "anon@grakn.ai";
+      """
+    Given the integrity is validated
+    When graql undefine
+      """
+      undefine person has name;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x has name; get;
+      """
+    Then answer size is: 0
 
-  Scenario: undefining an attribute ownership throws on commit if any instance of the owner owns that attribute
 
-  Scenario: undefining a key ownership always throws on commit if there are existing instances of the owner
+  Scenario: undefining an attribute ownership throws an error if any instance of the owner owns that attribute
+    Given graql insert
+      """
+      insert $x isa person, has name "Tomas", has email "tomas@grakn.ai";
+      """
+    Given the integrity is validated
+    Then graql undefine throws
+      """
+      undefine person has name;
+      """
+    Then the integrity is validated
+
+
+  Scenario: undefining a type's key ownership throws an error if it has existing instances
+    Given graql insert
+      """
+      insert $x isa person, has name "Daniel", has email "daniel@grakn.ai";
+      """
+    Given the integrity is validated
+    Then graql undefine throws
+      """
+      undefine person key email;
+      """
+    Then the integrity is validated
 
 
   #########
@@ -300,12 +1216,286 @@ Feature: Graql Undefine Query
       | x      |
       | RULE   |
       | A_RULE |
-    Then graql undefine
+    When graql undefine
       """
       undefine a-rule sub rule;
       """
+    Then the integrity is validated
     Then get answers of graql query
       """
       match $x sub rule; get;
       """
     Then answer size is: 1
+
+
+  Scenario: after undefining a rule, concepts previously inferred by that rule are no longer inferred
+    Given graql define
+      """
+      define
+      samuel-email-rule sub rule, when {
+        $x has email "samuel@grakn.ai";
+      }, then {
+        $x has name "Samuel";
+      };
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert $x isa person, has email "samuel@grakn.ai";
+      """
+    Given the integrity is validated
+    Given get answers of graql query
+      """
+      match
+        $x has name $n;
+      get $n;
+      """
+    Given concept identifiers are
+      |     | check | value       |
+      | SAM | value | name:Samuel |
+    Given uniquely identify answer concepts
+      | n   |
+      | SAM |
+    When graql undefine
+      """
+      undefine samuel-email-rule sub rule;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x has name $n;
+      get $n;
+      """
+    Then answer size is: 0
+
+
+  ############
+  # ABSTRACT #
+  ############
+
+  Scenario: undefining a type as abstract converts an abstract to a concrete type, allowing creation of instances
+    Given get answers of graql query
+      """
+      match
+        $x type abstract-type;
+        not { $x abstract; };
+      get;
+      """
+    Given answer size is: 0
+    Given graql insert throws
+      """
+      insert $x isa abstract-type;
+      """
+    Given the integrity is validated
+    Given graql undefine
+      """
+      undefine abstract-type abstract;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x type abstract-type;
+        not { $x abstract; };
+      get;
+      """
+    Then concept identifiers are
+      |     | check | value         |
+      | ABS | label | abstract-type |
+    Then uniquely identify answer concepts
+      | x   |
+      | ABS |
+    When graql insert
+      """
+      insert $x isa abstract-type;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x isa abstract-type; get;
+      """
+    Then answer size is: 1
+
+
+  Scenario: undefining abstract on a type that is already non-abstract does nothing
+    When graql undefine
+      """
+      undefine person abstract;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x type person;
+        not { $x abstract; };
+      get;
+      """
+    When concept identifiers are
+      |     | check | value  |
+      | PER | label | person |
+    Then uniquely identify answer concepts
+      | x   |
+      | PER |
+
+
+  @ignore
+  # TODO fails same as undefine abstract; then require sub-abstract type validation
+  Scenario: undefining a type as abstract errors if has abstract child types (?)
+    Given graql define
+      """
+      define sub-abstract-type sub abstract-type, abstract;
+      """
+    Given the integrity is validated
+    Then graql undefine throws
+      """
+      undefine abstract-type abstract;
+      """
+    Then the integrity is validated
+
+
+  ###################
+  # COMPLEX QUERIES #
+  ###################
+
+  Scenario: a type and an attribute type that it owns can be deleted simultaneously
+    Given concept identifiers are
+      |     | check | value         |
+      | PER | label | person        |
+      | ABS | label | abstract-type |
+      | ENT | label | entity        |
+      | NAM | label | name          |
+      | EMA | label | email         |
+      | ATT | label | attribute     |
+    Given get answers of graql query
+      """
+      match $x sub entity; get;
+      """
+    Given uniquely identify answer concepts
+      | x   |
+      | PER |
+      | ABS |
+      | ENT |
+    Given get answers of graql query
+      """
+      match $x sub attribute; get;
+      """
+    Given uniquely identify answer concepts
+      | x   |
+      | NAM |
+      | EMA |
+      | ATT |
+    When graql undefine
+      """
+      undefine
+      person sub entity, has name;
+      name sub attribute;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x sub entity; get;
+      """
+    Then uniquely identify answer concepts
+      | x   |
+      | ABS |
+      | ENT |
+    When get answers of graql query
+      """
+      match $x sub attribute; get;
+      """
+    Then uniquely identify answer concepts
+      | x   |
+      | EMA |
+      | ATT |
+
+
+  @ignore
+  # TODO: re-enable when deleting a relation type cleans up its roles
+  Scenario: a type, a relation type that it plays in and an attribute type that it owns can be deleted simultaneously
+    Given concept identifiers are
+      |     | check | value         |
+      | PER | label | person        |
+      | ABS | label | abstract-type |
+      | ENT | label | entity        |
+      | EMP | label | employment    |
+      | REL | label | relation      |
+      | EME | label | employee      |
+      | EMR | label | employer      |
+      | ROL | label | role          |
+      | NAM | label | name          |
+      | EMA | label | email         |
+      | ATT | label | attribute     |
+    Given get answers of graql query
+      """
+      match $x sub entity; get;
+      """
+    Given uniquely identify answer concepts
+      | x   |
+      | PER |
+      | ABS |
+      | ENT |
+    Given get answers of graql query
+      """
+      match $x sub relation; get;
+      """
+    Given uniquely identify answer concepts
+      | x   |
+      | EMP |
+      | REL |
+    Given get answers of graql query
+      """
+      match $x sub attribute; get;
+      """
+    Given uniquely identify answer concepts
+      | x   |
+      | NAM |
+      | EMA |
+      | ATT |
+    Given get answers of graql query
+      """
+      match $x sub role; get;
+      """
+    Given uniquely identify answer concepts
+      | x   |
+      | EME |
+      | EMR |
+      | ROL |
+    When graql undefine
+      """
+      undefine
+      person sub entity, has name, key email, plays employee;
+      employment sub relation, relates employee, relates employer;
+      name sub attribute;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x sub entity; get;
+      """
+    Then uniquely identify answer concepts
+      | x   |
+      | ABS |
+      | ENT |
+    When get answers of graql query
+      """
+      match $x sub relation; get;
+      """
+    Then uniquely identify answer concepts
+      | x   |
+      | REL |
+    When get answers of graql query
+      """
+      match $x sub attribute; get;
+      """
+    Then uniquely identify answer concepts
+      | x   |
+      | EMA |
+      | ATT |
+    When get answers of graql query
+      """
+      match $x sub role; get;
+      """
+    Then uniquely identify answer concepts
+      | x   |
+      | ROL |
