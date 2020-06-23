@@ -17,23 +17,23 @@
 
 version: 2.1
 commands:
-  install-bazel-linux-rbe:
+  bazel-install:
     steps:
       - run: curl -OL https://raw.githubusercontent.com/graknlabs/build-tools/master/ci/install-bazel-linux.sh
       - run: bash ./install-bazel-linux.sh && rm ./install-bazel-linux.sh
       - run: curl -OL https://raw.githubusercontent.com/graknlabs/build-tools/master/ci/install-bazel-rbe.sh
       - run: bash ./install-bazel-rbe.sh && rm ./install-bazel-rbe.sh
 
-  run-bazel-rbe:
+  bazel-run-rbe:
     parameters:
       command:
         type: string
     steps:
-      - run: bazel run @graknlabs_build_tools//ci:run-bazel-rbe -- << parameters.command >>
+      - run: bazel run @graknlabs_build_tools//ci:bazel-run-rbe -- << parameters.command >>
 
-  run-grakn-server:
+  grakn-run:
     steps:
-      - run-bazel-rbe:
+      - bazel-run-rbe:
           command: bazel build @graknlabs_grakn_core//server:assemble-linux-targz
       - run: mkdir dist && tar -xvzf bazel-bin/external/graknlabs_grakn_core/server/grakn-core-server-linux.tar.gz -C ./dist/
       - run: nohup ./dist/grakn-core-server-linux/grakn server start
@@ -43,9 +43,9 @@ jobs:
     machine: true
     working_directory: ~/verification
     steps:
-      - install-bazel-linux-rbe
+      - bazel-install
       - checkout
-      - run-bazel-rbe:
+      - bazel-run-rbe:
           command: bazel build //...
       - run: bazel run @graknlabs_build_tools//unused_deps -- list
 
@@ -53,28 +53,28 @@ jobs:
     machine: true
     working_directory: ~/verification
     steps:
-      - install-bazel-linux-rbe
+      - bazel-install
       - checkout
-      - run: bazel run @graknlabs_build_tools//checkstyle:test-coverage
-      - run-bazel-rbe:
+      - run: bazel run @graknlabs_dependencies//tools/checkstyle:test-coverage
+      - bazel-run-rbe:
           command: bazel test $(bazel query 'kind(checkstyle_test, //...)')
 
   tools-operator-test:
     machine: true
     working_directory: ~/verification
     steps:
-      - install-bazel-linux-rbe
+      - bazel-install
       - checkout
-      - run-bazel-rbe:
+      - bazel-run-rbe:
           command: bazel test //tools/operator/... --test_output=errors
 
   tools-integrity-test:
     machine: true
     working_directory: ~/verification
     steps:
-      - install-bazel-linux-rbe
+      - bazel-install
       - checkout
-      - run-grakn-server
+      - grakn-run
       - run: bazel test //tools/integrity/... --test_output=errors --spawn_strategy=local
 
 workflows:
