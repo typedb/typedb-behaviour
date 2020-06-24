@@ -59,8 +59,14 @@ Feature: Concept Relation
     Then relation $m get player for role(husband): $b
     Then transaction commits
     When session opens transaction of type: read
-    When $x = relation(marriage) get first instance
-    Then relation(marriage) get instances contain: $x
+    When $m = relation(marriage) get first instance
+    Then relation(marriage) get instances contain: $m
+    When $alice = attribute(username) as(string) get: alice
+    When $a = entity(person) get instance with key: $alice
+    When $bob = attribute(username) as(string) get: bob
+    When $b = entity(person) get instance with key: $bob
+    Then relation $m get player for role(wife): $a
+    Then relation $m get player for role(husband): $b
 
   Scenario: Relation without role player cannot be created
 
