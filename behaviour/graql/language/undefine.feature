@@ -521,7 +521,7 @@ Feature: Graql Undefine Query
       | EMR |
 
 
-  Scenario: deleting a role without disassociating its roleplayers throws an error
+  Scenario: removing a role without disassociating its roleplayers throws an error
     Then graql undefine throws
       """
       undefine
@@ -545,7 +545,7 @@ Feature: Graql Undefine Query
 
   @ignore
   # TODO: re-enable when removing a role from a relation cleans up the role
-  Scenario: after deleting a role from a relation type, relation instances can no longer be created with that role
+  Scenario: after removing a role from a relation type, relation instances can no longer be created with that role
     Given graql insert
       """
       insert
@@ -585,7 +585,7 @@ Feature: Graql Undefine Query
 
   @ignore
   # TODO: re-enable when removing a role from a relation cleans up the role
-  Scenario: after deleting a role from a relation type without commit, its instances can no longer have that role
+  Scenario: after removing a role from a relation type without commit, its instances can no longer have that role
     Given graql insert
       """
       insert
@@ -625,7 +625,7 @@ Feature: Graql Undefine Query
 
   @ignore
   # TODO: re-enable when removing a role from a relation cleans up the role
-  Scenario: deleting a role throws an error if it is played by existing roleplayers in relations
+  Scenario: removing a role throws an error if it is played by existing roleplayers in relations
     Given graql define
       """
       define
@@ -1413,7 +1413,7 @@ Feature: Graql Undefine Query
 
 
   @ignore
-  # TODO: re-enable when deleting a relation type cleans up its roles
+  # TODO: re-enable when removing a relation type cleans up its roles
   Scenario: a type, a relation type that it plays in and an attribute type that it owns can be removed simultaneously
     Given concept identifiers are
       |     | check | value         |
