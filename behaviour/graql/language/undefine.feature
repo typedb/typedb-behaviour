@@ -530,7 +530,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
 
 
-  Scenario: leaving a role with no possible players is valid, and does not throw
+  Scenario: undefining all players of a role produces a valid schema
     When graql undefine
       """
       undefine person plays employee;
@@ -619,6 +619,16 @@ Feature: Graql Undefine Query
         $p isa person, has email "ganesh@grakn.ai";
       insert
         $r (employee: $p) isa employment;
+      """
+    Then the integrity is validated
+
+
+  Scenario: removing all roles from a relation type, without removing the type, throws an error
+    Then graql undefine throws
+      """
+      undefine
+      employment relates employee;
+      employment relates employer;
       """
     Then the integrity is validated
 
@@ -1272,6 +1282,50 @@ Feature: Graql Undefine Query
     Then answer size is: 0
 
 
+  Scenario: after undefining a rule without a commit, concepts previously inferred by that rule are still inferred
+    Given graql define
+      """
+      define
+      samuel-email-rule sub rule, when {
+        $x has email "samuel@grakn.ai";
+      }, then {
+        $x has name "Samuel";
+      };
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert $x isa person, has email "samuel@grakn.ai";
+      """
+    Given the integrity is validated
+    Given get answers of graql query
+      """
+      match
+        $x has name $n;
+      get $n;
+      """
+    Given concept identifiers are
+      |     | check | value       |
+      | SAM | value | name:Samuel |
+    Given uniquely identify answer concepts
+      | n   |
+      | SAM |
+    When graql undefine without commit
+      """
+      undefine samuel-email-rule sub rule;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x has name $n;
+      get $n;
+      """
+    Then uniquely identify answer concepts
+      | n   |
+      | SAM |
+
+
   ############
   # ABSTRACT #
   ############
@@ -1341,19 +1395,55 @@ Feature: Graql Undefine Query
       | PER |
 
 
-  @ignore
-  # TODO fails same as undefine abstract; then require sub-abstract type validation
-  Scenario: undefining a type as abstract errors if has abstract child types (?)
+  Scenario: an abstract type can be changed into a concrete type even if has an abstract child type
     Given graql define
       """
       define sub-abstract-type sub abstract-type, abstract;
       """
     Given the integrity is validated
-    Then graql undefine throws
+    When graql undefine
       """
       undefine abstract-type abstract;
       """
     Then the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x type abstract-type;
+        not { $x abstract; };
+      get;
+      """
+    When concept identifiers are
+      |     | check | value         |
+      | ABS | label | abstract-type |
+    Then uniquely identify answer concepts
+      | x   |
+      | ABS |
+
+
+  Scenario: undefining abstract on an attribute type is allowed, even if that attribute type has an owner
+    Given graql define
+      """
+      define
+      vehicle-registration sub attribute, value string, abstract;
+      car-registration sub vehicle-registration;
+      person has vehicle-registration;
+      """
+    Given the integrity is validated
+    When graql undefine
+      """
+      undefine
+      vehicle-registration abstract;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x type vehicle-registration;
+        not { $x abstract; };
+      get;
+      """
+    Then answer size is: 1
 
 
   ###################
