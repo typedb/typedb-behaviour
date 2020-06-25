@@ -87,7 +87,7 @@ Feature: Graql Undefine Query
       | PER |
 
 
-  Scenario: a sub-entity can be deleted by using its direct supertype when undefining `sub`, and its parent is preserved
+  Scenario: a sub-entity type can be removed using `sub` with its direct supertype, and its parent is preserved
     Given graql define
       """
       define child sub person;
@@ -263,7 +263,7 @@ Feature: Graql Undefine Query
 
   @ignore
   # TODO: re-enable when removing a role from a relation cleans up the role
-  Scenario: a relation type is deleted by disassociating its roles and their roleplayers, then undefining `sub relation`
+  Scenario: a relation type is removed by disassociating its roles and their roleplayers, then undefining `sub relation`
     Given get answers of graql query
       """
       match $x sub relation; get;
@@ -492,7 +492,7 @@ Feature: Graql Undefine Query
 
   @ignore
   # TODO: re-enable when removing a role from a relation cleans up the role
-  Scenario: a role is deleted by removing it from its relation type and disassociating its roleplayers
+  Scenario: a role is removed by removing it from its relation type and disassociating its roleplayers
     Given get answers of graql query
       """
       match employment relates $x; get;
@@ -649,7 +649,7 @@ Feature: Graql Undefine Query
 
   @ignore
   # TODO: re-enable when removing a role from a relation cleans up the role
-  Scenario: a role that is not played in any existing instance of its relation type can be safely deleted
+  Scenario: a role that is not played in any existing instance of its relation type can be safely removed
     Given graql insert
       """
       insert
@@ -778,7 +778,7 @@ Feature: Graql Undefine Query
   # ATTRIBUTES #
   ##############
 
-  Scenario Outline: calling `undefine` with `sub attribute` on an attribute type with value `<type>` deletes it
+  Scenario Outline: calling `undefine` with `sub attribute` on an attribute type with value `<type>` removes it
     Given graql define
       """
       define <attr> sub attribute, value <type>;
@@ -941,7 +941,7 @@ Feature: Graql Undefine Query
     Then answer size is: 0
 
 
-  Scenario: an attribute and its self-ownership can be deleted simultaneously
+  Scenario: an attribute and its self-ownership can be removed simultaneously
     Given graql define
       """
       define
@@ -1360,7 +1360,7 @@ Feature: Graql Undefine Query
   # COMPLEX QUERIES #
   ###################
 
-  Scenario: a type and an attribute type that it owns can be deleted simultaneously
+  Scenario: a type and an attribute type that it owns can be removed simultaneously
     Given concept identifiers are
       |     | check | value         |
       | PER | label | person        |
@@ -1414,7 +1414,7 @@ Feature: Graql Undefine Query
 
   @ignore
   # TODO: re-enable when deleting a relation type cleans up its roles
-  Scenario: a type, a relation type that it plays in and an attribute type that it owns can be deleted simultaneously
+  Scenario: a type, a relation type that it plays in and an attribute type that it owns can be removed simultaneously
     Given concept identifiers are
       |     | check | value         |
       | PER | label | person        |
