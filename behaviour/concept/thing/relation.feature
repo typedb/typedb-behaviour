@@ -42,7 +42,7 @@ Feature: Concept Relation
     Given connection open data session for keyspace: grakn
     Given session opens transaction of type: write
 
-  Scenario: Relation can be created
+  Scenario: Relation with role player can be created and role players can be retrieved
     When $m = relation(marriage) create new instance
     When $a = entity(person) create new instance
     When $alice = attribute(username) as(string) put: alice
@@ -55,3 +55,30 @@ Feature: Concept Relation
     Then relation(marriage) get instances contain: $m
     Then relation $m is null: false
     Then relation $m has type: marriage
+    Then relation $m get player for role(wife): $a
+    Then relation $m get player for role(husband): $b
+    Then transaction commits
+    When session opens transaction of type: read
+    When $m = relation(marriage) get first instance
+    Then relation(marriage) get instances contain: $m
+    When $alice = attribute(username) as(string) get: alice
+    When $a = entity(person) get instance with key: $alice
+    When $bob = attribute(username) as(string) get: bob
+    When $b = entity(person) get instance with key: $bob
+    Then relation $m get player for role(wife): $a
+    Then relation $m get player for role(husband): $b
+
+  Scenario: Relation without role player cannot be created
+    When $m = relation(marriage) create new instance
+    Then relation(marriage) get instances contain: $m
+    Then relation $m is null: false
+    Then relation $m has type: marriage
+    Then transaction commits successfully: false
+
+  Scenario: Relation can get role players
+
+  Scenario: Role players can get relations
+
+  Scenario: Role player can be deleted from relation
+
+  Scenario: Relation with role player can be deleted

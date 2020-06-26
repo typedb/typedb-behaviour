@@ -153,6 +153,8 @@ Feature: Concept Entity
     When $x = entity(person) get first instance
     When $y = attribute(name) as(string) get: alice
     Then entity $x get attributes(name) contain: $y
+    Then entity $x get attributes contain: $y
+    Then attribute $y get owners contain: $x
     When entity $x remove has: $y
     Then entity $x get attributes(name) do not contain: $y
     Then entity $x get attributes do not contain: $y
