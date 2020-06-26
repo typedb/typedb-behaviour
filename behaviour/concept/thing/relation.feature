@@ -55,8 +55,10 @@ Feature: Concept Relation
     Then relation(marriage) get instances contain: $m
     Then relation $m is null: false
     Then relation $m has type: marriage
-    Then relation $m get player for role(wife): $a
-    Then relation $m get player for role(husband): $b
+    Then relation $m get players for role(wife) contain: $a
+    Then relation $m get players for role(husband) contain: $b
+    Then relation $m get players contain: $a
+    Then relation $m get players contain: $b
     When transaction commits
     When session opens transaction of type: read
     When $m = relation(marriage) get first instance
@@ -65,8 +67,10 @@ Feature: Concept Relation
     When $a = entity(person) get instance with key: $alice
     When $bob = attribute(username) as(string) get: bob
     When $b = entity(person) get instance with key: $bob
-    Then relation $m get player for role(wife): $a
-    Then relation $m get player for role(husband): $b
+    Then relation $m get players for role(wife) contain: $a
+    Then relation $m get players for role(husband) contain: $b
+    Then relation $m get players contain: $a
+    Then relation $m get players contain: $b
 
   Scenario: Relation without role player cannot be created
     When $m = relation(marriage) create new instance
@@ -101,7 +105,42 @@ Feature: Concept Relation
     Then entity $b get relations(marriage:husband) contain: $m
 
   Scenario: Role player can be deleted from relation
-
-  Scenario: Relation with role player can be deleted
+    When $m = relation(marriage) create new instance
+    When $a = entity(person) create new instance
+    When $alice = attribute(username) as(string) put: alice
+    When entity $a set has: $alice
+    When $b = entity(person) create new instance
+    When $bob = attribute(username) as(string) put: bob
+    When entity $b set has: $bob
+    When relation $m set player for role(wife): $a
+    When relation $m set player for role(husband): $b
+    When relation $m remove player for role(wife): $a
+    Then relation $m get players for role(wife) do not contain: $a
+    Then entity $a get relations(marriage:wife) do not contain: $m
+    When transaction commits
+    When session opens transaction of type: write
+    When $m = relation(marriage) get first instance
+    When $alice = attribute(username) as(string) get: alice
+    When $a = entity(person) get instance with key: $alice
+    Then relation $m get players for role(wife) do not contain: $a
+    Then entity $a get relations(marriage:wife) do not contain: $m
+    When relation $m set player for role(wife): $a
+    When transaction commits
+    When session opens transaction of type: write
+    When $m = relation(marriage) get first instance
+    When $alice = attribute(username) as(string) get: alice
+    When $a = entity(person) get instance with key: $alice
+    When relation $m remove player for role(wife): $a
+    Then relation $m get players for role(wife) do not contain: $a
+    Then entity $a get relations(marriage:wife) do not contain: $m
+    When transaction commits
+    When session opens transaction of type: read
+    When $m = relation(marriage) get first instance
+    When $alice = attribute(username) as(string) get: alice
+    When $a = entity(person) get instance with key: $alice
+    Then relation $m get players for role(wife) do not contain: $a
+    Then entity $a get relations(marriage:wife) do not contain: $m
 
   Scenario: Relation without role players get deleted
+
+  Scenario: Relation with role player can be deleted
