@@ -17,64 +17,68 @@
 
 version: 2.1
 commands:
-  install-bazel-linux-rbe:
+  install-bazel:
     steps:
-      - run: curl -OL https://raw.githubusercontent.com/graknlabs/build-tools/master/ci/install-bazel-linux.sh
-      - run: bash ./install-bazel-linux.sh && rm ./install-bazel-linux.sh
-      - run: curl -OL https://raw.githubusercontent.com/graknlabs/build-tools/master/ci/install-bazel-rbe.sh
-      - run: bash ./install-bazel-rbe.sh && rm ./install-bazel-rbe.sh
+      - run: curl -OL https://raw.githubusercontent.com/graknlabs/dependencies/master/tool/bazelinstall/linux.sh
+      - run: bash ./linux.sh && rm ./linux.sh
+      - run: curl -OL https://raw.githubusercontent.com/graknlabs/dependencies/master/tool/bazelinstall/rbe.sh
+      - run: bash ./rbe.sh && rm ./rbe.sh          
 
-  run-bazel-rbe:
+  run-bazel:
     parameters:
       command:
         type: string
     steps:
-      - run: bazel run @graknlabs_build_tools//ci:run-bazel-rbe -- << parameters.command >>
+      - run: bazel run @graknlabs_dependencies//tool/bazelrun:rbe -- << parameters.command >>
 
-  run-grakn-server:
+  run-grakn:
     steps:
-      - run-bazel-rbe:
+      - run-bazel:
           command: bazel build @graknlabs_grakn_core//server:assemble-linux-targz
       - run: mkdir dist && tar -xvzf bazel-bin/external/graknlabs_grakn_core/server/grakn-core-server-linux.tar.gz -C ./dist/
       - run: nohup ./dist/grakn-core-server-linux/grakn server start
 
 jobs:
   build:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     working_directory: ~/verification
     steps:
-      - install-bazel-linux-rbe
+      - install-bazel
       - checkout
-      - run-bazel-rbe:
+      - run-bazel:
           command: bazel build //...
-      - run: bazel run @graknlabs_build_tools//unused_deps -- list
+      - run: bazel run @graknlabs_dependencies//tool/unuseddeps:unused-deps -- list
 
   build-checkstyle:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     working_directory: ~/verification
     steps:
-      - install-bazel-linux-rbe
+      - install-bazel
       - checkout
-      - run: bazel run @graknlabs_build_tools//checkstyle:test-coverage
-      - run-bazel-rbe:
+      - run: bazel run @graknlabs_dependencies//tool/checkstyle:test-coverage
+      - run-bazel:
           command: bazel test $(bazel query 'kind(checkstyle_test, //...)')
 
   tools-operator-test:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     working_directory: ~/verification
     steps:
-      - install-bazel-linux-rbe
+      - install-bazel
       - checkout
-      - run-bazel-rbe:
+      - run-bazel:
           command: bazel test //tools/operator/... --test_output=errors
 
   tools-integrity-test:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     working_directory: ~/verification
     steps:
-      - install-bazel-linux-rbe
+      - install-bazel
       - checkout
-      - run-grakn-server
+      - run-grakn
       - run: bazel test //tools/integrity/... --test_output=errors --spawn_strategy=local
 
 workflows:
