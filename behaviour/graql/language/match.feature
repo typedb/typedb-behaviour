@@ -558,6 +558,43 @@ Feature: Graql Match Clause
     Then the integrity is validated
 
 
+  Scenario: matching that the same variable is of two types is allowed
+    Then get answers of graql query
+      """
+      match
+        $x isa person;
+        $x isa company;
+      get;
+      """
+    Then answer size is: 0
+
+
+  Scenario: an error is thrown when matching that a variable has a specific type, when that type is in fact a role
+    Then graql get throws
+      """
+      match $x isa friend; get;
+      """
+    Then the integrity is validated
+
+
+  Scenario: an error is thrown when matching that a variable has a specific type, when that type is in fact a rule
+    Given graql define
+      """
+      define
+      metre-rule sub rule, when {
+        $x isa person;
+      }, then {
+        $x has name "metre";
+      };
+      """
+    Given the integrity is validated
+    Then graql get throws
+      """
+      match $x isa metre-rule; get;
+      """
+    Then the integrity is validated
+
+
   #############
   # RELATIONS #
   #############
@@ -686,6 +723,16 @@ Feature: Graql Match Clause
     Then graql get throws
       """
       match ($x) isa person; get;
+      """
+    Then the integrity is validated
+
+
+  @ignore
+  # TODO: re-enable when matching a role in a relation type that doesn't have that role throws
+  Scenario: an error is thrown when matching a role in a relation type that doesn't have that role
+    Then graql get throws
+      """
+      match (friend: $x) isa employment; get;
       """
     Then the integrity is validated
 
@@ -912,6 +959,14 @@ Feature: Graql Match Clause
     Then uniquely identify answer concepts
       | x   |
       | PER |
+
+
+  Scenario: an error is thrown when matching by attribute ownership, when the owned thing is actually an entity
+    Then graql get throws
+      """
+      match $x has person "Luke"; get;
+      """
+    Then the integrity is validated
 
 
   ##############################

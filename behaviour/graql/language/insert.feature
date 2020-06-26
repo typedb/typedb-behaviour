@@ -394,6 +394,15 @@ Feature: Graql Insert Query
     | work-start-date   | datetime | 2018-01-01 | 2020-01-01 |
 
 
+  Scenario: inserting an attribute onto a thing that can't have that attribute throws an error
+    Then graql insert throws
+      """
+      insert
+      $x isa company, has ref 0, has age 10;
+      """
+    Then the integrity is validated
+
+
   ########################################
   # ADDING ATTRIBUTES TO EXISTING THINGS #
   ########################################
@@ -1567,6 +1576,76 @@ Feature: Graql Insert Query
       | ASH |
       | MIS |
       | BRO |
+
+
+  Scenario: inserting a new instance type on an existing instance is fine if it is already of that type
+    Given graql insert
+      """
+      insert
+      $x isa person, has ref 0;
+      """
+    Given the integrity is validated
+    Then graql insert
+      """
+      match
+        $x isa person;
+      insert
+        $x isa person;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x isa person; get;
+      """
+    Then answer size is: 1
+
+
+  Scenario: inserting a new type on an existing instance throws, if the old type is not a subtype of the new one
+    Given graql insert
+      """
+      insert
+      $x isa person, has ref 0;
+      """
+    Given the integrity is validated
+    Then graql insert throws
+      """
+      match
+        $x isa person;
+      insert
+        $x isa company;
+      """
+    Then the integrity is validated
+
+
+  Scenario: inserting a new type on an existing instance has no effect, if the old type is a subtype of the new one
+    Given graql define
+      """
+      define child sub person;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert $x isa child, has ref 0;
+      """
+    Given the integrity is validated
+    When graql insert
+      """
+      match
+        $x isa child;
+      insert
+        $x isa person;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x isa! child; get;
+      """
+    Then answer size is: 1
+    When get answers of graql query
+      """
+      match $x isa! person; get;
+      """
+    Then answer size is: 0
 
 
   ####################
