@@ -58,8 +58,8 @@ Feature: Graql Reasoning Explanation
       | AL |
 
     Then answers contain explanation tree
-      |   | children | vars | identifiers | rule   | pattern                                  |
-      | 0 | -        | p    | AL          | lookup | { $p isa person; $p id <answer.p.id>; }; |
+      |   | children | vars | identifiers | explanation | pattern                                  |
+      | 0 | -        | p    | AL          | lookup      | { $p isa person; $p id <answer.p.id>; }; |
 
   Scenario: relation has lookup explanation
     Given graql define
@@ -110,8 +110,8 @@ Feature: Graql Reasoning Explanation
       | KC | LDN | KCn |
 
     Then answers contain explanation tree
-      |   | children | vars    | identifiers  | rule   | pattern                                                                                                                                                  |
-      | 0 | -        | k, l, n | KC, LDN, KCn | lookup | { $k isa area; $k has name $n; (superior: $l, subordinate: $k) isa location-hierarchy; $k id <answer.k.id>; $n id <answer.n.id>; $l id <answer.l.id>; }; |
+      |   | children | vars    | identifiers  | explanation | pattern                                                                                                                                                  |
+      | 0 | -        | k, l, n | KC, LDN, KCn | lookup      | { $k isa area; $k has name $n; (superior: $l, subordinate: $k) isa location-hierarchy; $k id <answer.k.id>; $n id <answer.n.id>; $l id <answer.l.id>; }; |
 
   Scenario: non-atomic query has lookup explanation with the full pattern
 
@@ -169,8 +169,8 @@ Feature: Graql Reasoning Explanation
       | KC | LDN | UK | KCn |
 
     Then answers contain explanation tree
-      |   | children | vars       | identifiers       | rule   | pattern                                                                                                                                                                                                                                |
-      | 0 | -        | k, l, u, n | KC, LDN, UK, KCn  | lookup | { $k isa area; $k has name $n; (superior: $l, subordinate: $k) isa location-hierarchy; (superior: $u, subordinate: $l) isa location-hierarchy; $u id <answer.u.id>; $l id <answer.l.id>; $k id <answer.k.id>; $n id <answer.n.id>; };  |
+      |   | children | vars       | identifiers       | explanation | pattern                                                                                                                                                                                                                                |
+      | 0 | -        | k, l, u, n | KC, LDN, UK, KCn  | lookup      | { $k isa area; $k has name $n; (superior: $l, subordinate: $k) isa location-hierarchy; (superior: $u, subordinate: $l) isa location-hierarchy; $u id <answer.u.id>; $l id <answer.l.id>; $k id <answer.k.id>; $n id <answer.n.id>; };  |
 
   Scenario: a query containing a negation has a negation explanation
 
@@ -216,7 +216,7 @@ Feature: Graql Reasoning Explanation
       | ACO | N |
 
     Then answers contain explanation tree
-      |   | children  | vars    | identifiers | rule        | pattern                                                                                                                   |
+      |   | children  | vars    | identifiers | explanation | pattern                                                                                                                   |
       | 0 | 1         | com, n  | ACO, N      | negation    | { $com isa company; $com has name $n; $com id <answer.com.id>; $n id <answer.n.id>; not { { $n == "the-company"; }; }; }; |
       | 1 | -         | com, n  | ACO, N      | lookup      | { $com isa company; $com has name $n; $com id <answer.com.id>; $n id <answer.n.id>; };                                    |
 
@@ -264,7 +264,7 @@ Feature: Graql Reasoning Explanation
       | ACO |
 
     Then answers contain explanation tree
-      |   | children  | vars    | identifiers | rule        | pattern                                                                                                                                                           |
+      |   | children  | vars    | identifiers | explanation | pattern                                                                                                                                                           |
       | 0 | 1         | com     | ACO         | disjunction | { $com id <answer.com.id>; { $com isa company; $com has name $n1; $n1 == "the-company";} or {$com isa company; $com has name $n2; $n2 == "another-company";}; };  |
       | 1 | -         | com, n2 | ACO, N2     | lookup      | { $com isa company; $com has name $n2; $n2 == "another-company"; $com id <answer.com.id>; $n2 id <answer.n2.id>; };                                               |
 
@@ -312,6 +312,6 @@ Feature: Graql Reasoning Explanation
       | ACO |
 
     Then answers contain explanation tree
-      |   | children  | vars    | identifiers | rule        | pattern                                                                                                                                                                                                                             |
+      |   | children  | vars    | identifiers | explanation | pattern                                                                                                                                                                                                                             |
       | 0 | 1         | com     | ACO         | disjunction | { $com id <answer.com.id>; { $com isa company; $com has name $n1; $n1 == "the-company";} or {$com isa company; $com has name $n2; $n2 == "another-company";} or {$com isa company; $com has name $n2; $n2 == "third-company";}; };  |
       | 1 | -         | com, n2 | ACO, N2     | lookup      | { $com isa company; $com has name $n2; $n2 == "another-company"; $com id <answer.com.id>; $n2 id <answer.n2.id>; };                                                                                                                 |
