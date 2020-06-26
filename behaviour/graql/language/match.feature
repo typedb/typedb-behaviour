@@ -550,6 +550,14 @@ Feature: Graql Match Clause
       """
 
 
+  Scenario: an error is thrown when matching a non-existent concept type
+    Then graql get throws
+      """
+      match $x isa ganesh; get;
+      """
+    Then the integrity is validated
+
+
   #############
   # RELATIONS #
   #############
@@ -664,6 +672,22 @@ Feature: Graql Match Clause
     Then uniquely identify answer concepts
       | x    | r    |
       | REF0 | REF1 |
+
+
+  Scenario: an error is thrown when matching an entity type as if it were a role
+    Then graql get throws
+      """
+      match (person: $x) isa relation; get;
+      """
+    Then the integrity is validated
+
+
+  Scenario: an error is thrown when matching an entity as if it were a relation
+    Then graql get throws
+      """
+      match ($x) isa person; get;
+      """
+    Then the integrity is validated
 
 
   ##############
