@@ -26,6 +26,7 @@ Feature: Graql Reasoning Explanation
       | test_explanation |
     Given transaction is initialised
 
+  @ignore-client-java
   Scenario: a rule explanation is given when a rule is applied
     Given graql define
       """
@@ -75,6 +76,7 @@ Feature: Graql Reasoning Explanation
       | 0 | 1        | co, n | CO, CON     | company-has-name | { $co id <answer.co.id>; $co has name $n; $n id <answer.n.id>; }; |
       | 1 | -        | c     | CO          | lookup           | { $c isa company; $c id <answer.c.id>; };                         |
 
+  @ignore-client-java
   Scenario: nested rule explanations are given when multiple rules are applied
     Given graql define
       """
@@ -141,6 +143,7 @@ Feature: Graql Reasoning Explanation
       | 1 | 2        | c2, name | CO, CON     | company-has-name  | { $c2 isa company; $c2 has name $name; $name == "the-company"; $c2 id <answer.c2.id>; $name id <answer.name.id>; }; |
       | 2 | -        | c1       | CO          | lookup            | { $c1 isa company; $c1 id <answer.c1.id>; };                                                                        |
 
+  @ignore-client-java
   Scenario: a join explanation can be given directly and inside a rule explanation
     Given graql define
       """
@@ -220,6 +223,7 @@ Feature: Graql Reasoning Explanation
       | 1 | -        | k, n    | KC, KCN      | lookup      | { $k isa area; $k has name $n; $n id <answer.n.id>; $k id <answer.k.id>; };                                                                              |
       | 2 | -        | k, l    | KC, LDN      | lookup      | { (superior: $l, subordinate: $k) isa location-hierarchy; $k isa area; $k id <answer.k.id>; $l id <answer.l.id>; };                                      |
 
+  @ignore-client-java
   Scenario: an answer with a more specific type can be retrieved from the cache with correct explanations
     Given graql define
       """
@@ -312,6 +316,7 @@ Feature: Graql Reasoning Explanation
       | 3 | -         | p1, na        | ALI, ALIN             | lookup               | { $p1 isa woman; $p1 has name $na; $na == "Alice"; $p1 id <answer.p1.id>; $na id <answer.na.id>; };                                                                                        |
       | 4 | -         | man           | BOB                   | lookup               | { $man isa man; $man id <answer.man.id>; };                                                                                                                                                |
 
+  @ignore-client-java
   Scenario: a query with a disjunction and negated inference has disjunctive and negation explanation but no rule explanation
 
     A rule explanation is not be given since the rule was only used to infer facts that were later negated
@@ -378,6 +383,7 @@ Feature: Graql Reasoning Explanation
       | 1 | 2         | com, n2 | ACO, N2     | negation    | { $com isa company; $com has name $n2; $n2 == "another-company"; $com id <answer.com.id>; $n2 id <answer.n2.id>; not { { $com has is-liable $liability; }; }; };                                                                                              |
       | 2 | -         | com, n2 | ACO, N2     | lookup      | { $com isa company; $com has name $n2; $n2 == "another-company"; $com id <answer.com.id>; $n2 id <answer.n2.id>; };                                                                                                                                           |
 
+  @ignore-client-java
   Scenario: a rule containing a negation gives a rule explanation with a negation explanation inside
     Given graql define
       """
@@ -441,6 +447,7 @@ Feature: Graql Reasoning Explanation
       | 1 | 2         | c2        | ACO         | negation          | { $c2 isa company; $c2 id <answer.c2.id>; not { { $c2 has name $n2; $n2 == "the-company"; }; }; };              |
       | 2 | -         | c2        | ACO         | lookup            | { $c2 isa company; $c2 id <answer.c2.id>; };                                                                    |
 
+  @ignore-client-java
   Scenario: a query containing multiple negations with inferred conjunctions inside has just one negation explanation
 
     A rule explanation is not be given since the rule was only used to infer facts that were later negated
