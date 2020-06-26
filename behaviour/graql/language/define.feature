@@ -2442,6 +2442,39 @@ Feature: Graql Define Query
       | SHS |
 
 
+  Scenario: assigning a new supertype succeeds even if they have different attributes + roles, if there are no instances
+    Given graql define
+      """
+      define
+      species sub entity, has name, plays the-species;
+      species-membership sub relation, relates the-species, relates member-of-species;
+      lifespan sub attribute, value double;
+      organism sub entity, has lifespan, plays member-of-species;
+      child sub person;
+      """
+    Given the integrity is validated
+    When graql define
+      """
+      define
+      person sub organism;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x sub organism; get;
+      """
+    When concept identifiers are
+      |     | check | value    |
+      | ORG | label | organism |
+      | PER | label | person   |
+      | CHI | label | child    |
+    Then uniquely identify answer concepts
+      | x   |
+      | ORG |
+      | PER |
+      | CHI |
+
+
   Scenario: assign new supertype with existing data succeeds if the supertypes have no properties
     Given graql define
       """
