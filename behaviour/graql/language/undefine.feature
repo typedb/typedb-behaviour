@@ -1131,7 +1131,9 @@ Feature: Graql Undefine Query
     Then the integrity is validated
 
 
-  Scenario: attempting to undefine an attribute owned with `key` by using `has` throws an error
+  @ignore
+  # TODO: need to decide how this should behave
+  Scenario: undefining an attribute owned with `key` by using `has` removes ownership / does nothing / throws (?)
     Then graql undefine throws
       """
       undefine person has email;
