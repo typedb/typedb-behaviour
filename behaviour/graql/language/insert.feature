@@ -187,6 +187,20 @@ Feature: Graql Insert Query
     Then answer size is: 3
 
 
+  Scenario: an insert can be performed using a direct type specifier, and it functions equivalently to `isa`
+    When get answers of graql insert
+      """
+      insert $x isa! person, has name "Harry", has ref 0;
+      """
+    Then the integrity is validated
+    When concept identifiers are
+      |     | check | value |
+      | HAR | key   | ref:0 |
+    Then uniquely identify answer concepts
+      | x   |
+      | HAR |
+
+
   Scenario: attempting to insert an instance of an abstract type throws an error
     Given graql define
       """
