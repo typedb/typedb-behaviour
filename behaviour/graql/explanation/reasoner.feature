@@ -26,7 +26,7 @@ Feature: Graql Reasoning Explanation
       | test_explanation |
     Given transaction is initialised
 
-  Scenario: an attribute's existence and ownership can be inferred
+  Scenario: a rule explanation is given when a rule is applied
     Given graql define
       """
       define
@@ -75,7 +75,7 @@ Feature: Graql Reasoning Explanation
       | 0 | 1        | co, n | CO, CON     | company-has-name | { $co id <answer.co.id>; $co has name $n; $n id <answer.n.id>; }; |
       | 1 | -        | c     | CO          | lookup           | { $c isa company; $c id <answer.c.id>; };                         |
 
-  Scenario: an attribute's existence, and ownership can be inferred recursively
+  Scenario: nested rule explanations are given when multiple rules are applied
     Given graql define
       """
       define
@@ -141,7 +141,7 @@ Feature: Graql Reasoning Explanation
       | 1 | 2        | c2, name | CO, CON     | company-has-name  | { $c2 isa company; $c2 has name $name; $name == "the-company"; $c2 id <answer.c2.id>; $name id <answer.name.id>; }; |
       | 2 | -        | c1       | CO          | lookup            | { $c1 isa company; $c1 id <answer.c1.id>; };                                                                        |
 
-  Scenario: a one-hop transitive relation can be inferred
+  Scenario: a join explanation can be given directly and inside a rule explanation
     Given graql define
       """
       define
@@ -214,17 +214,13 @@ Feature: Graql Reasoning Explanation
       | 4 | -        | b, c    | LDN, KC     | lookup                          | { (superior: $b, subordinate: $c) isa location-hierarchy; $c isa area; $b id <answer.b.id>; $c id <answer.c.id>; };                                                                              |
       | 5 | -        | a, b    | UK, LDN     | lookup                          | { (superior: $a, subordinate: $b) isa location-hierarchy; $b id <answer.b.id>; $a id <answer.a.id>; };                                                                                           |
 
-#   TODO Non-deterministically getting this error:
-#   Expected :{ (superior: $b, subordinate: $c) isa location-hierarchy; $c isa area; $b id V8240; $c id V20656; };
-#   Actual   :{ $c id V20656; $b id V8240; (superior: $b, subordinate: $c) isa location-hierarchy; };
-
     Then answers contain explanation tree
       |   | children | vars    | identifiers  | rule   | pattern                                                                                                                                                  |
       | 0 | 1, 2     | k, l, n | KC, LDN, KCN | join   | { $k isa area; $k has name $n; (superior: $l, subordinate: $k) isa location-hierarchy; $k id <answer.k.id>; $n id <answer.n.id>; $l id <answer.l.id>; }; |
       | 1 | -        | k, n    | KC, KCN      | lookup | { $k isa area; $k has name $n; $n id <answer.n.id>; $k id <answer.k.id>; };                                                                              |
       | 2 | -        | k, l    | KC, LDN      | lookup | { (superior: $l, subordinate: $k) isa location-hierarchy; $k isa area; $k id <answer.k.id>; $l id <answer.l.id>; };                                      |
 
-  Scenario: an answer with a more specific type can be retrieved from the cache
+  Scenario: an answer with a more specific type can be retrieved from the cache with correct explanations
     Given graql define
       """
       define
@@ -316,7 +312,10 @@ Feature: Graql Reasoning Explanation
       | 3 | -         | p1, na        | ALI, ALIN             | lookup               | { $p1 isa woman; $p1 has name $na; $na == "Alice"; $p1 id <answer.p1.id>; $na id <answer.na.id>; };                                                                                        |
       | 4 | -         | man           | BOB                   | lookup               | { $man isa man; $man id <answer.man.id>; };                                                                                                                                                |
 
-  Scenario: a query with a disjunction and negation of an inference is explained as expected
+  Scenario: a query with a disjunction and negated inference has disjunctive and negation explanation but no rule explanation
+
+    A rule explanation is not be given since the rule was only used to infer facts that were later negated
+
     Given graql define
       """
       define
@@ -379,7 +378,7 @@ Feature: Graql Reasoning Explanation
       | 1 | 2         | com, n2 | ACO, N2     | negation    | { $com isa company; $com has name $n2; $n2 == "another-company"; $com id <answer.com.id>; $n2 id <answer.n2.id>; not { { $com has is-liable $liability; }; }; };                                                                                              |
       | 2 | -         | com, n2 | ACO, N2     | lookup      | { $com isa company; $com has name $n2; $n2 == "another-company"; $com id <answer.com.id>; $n2 id <answer.n2.id>; };                                                                                                                                           |
 
-  Scenario: a rule containing a negation is explained as expected
+  Scenario: a rule containing a negation gives a rule explanation with a negation explanation inside
     Given graql define
       """
       define
@@ -442,7 +441,10 @@ Feature: Graql Reasoning Explanation
       | 1 | 2         | c2        | ACO         | negation          | { $c2 isa company; $c2 id <answer.c2.id>; not { { $c2 has name $n2; $n2 == "the-company"; }; }; };              |
       | 2 | -         | c2        | ACO         | lookup            | { $c2 isa company; $c2 id <answer.c2.id>; };                                                                    |
 
-  Scenario: a query containing multiple negations with inferred conjunctions inside is explained as expected
+  Scenario: a query containing multiple negations with inferred conjunctions inside has just one negation explanation
+
+    A rule explanation is not be given since the rule was only used to infer facts that were later negated
+
     Given graql define
       """
       define
