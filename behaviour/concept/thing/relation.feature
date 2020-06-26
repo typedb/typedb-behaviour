@@ -57,7 +57,7 @@ Feature: Concept Relation
     Then relation $m has type: marriage
     Then relation $m get player for role(wife): $a
     Then relation $m get player for role(husband): $b
-    Then transaction commits
+    When transaction commits
     When session opens transaction of type: read
     When $m = relation(marriage) get first instance
     Then relation(marriage) get instances contain: $m
@@ -75,10 +75,33 @@ Feature: Concept Relation
     Then relation $m has type: marriage
     Then transaction commits successfully: false
 
-  Scenario: Relation can get role players
-
   Scenario: Role players can get relations
+    When $m = relation(marriage) create new instance
+    When $a = entity(person) create new instance
+    When $alice = attribute(username) as(string) put: alice
+    When entity $a set has: $alice
+    When $b = entity(person) create new instance
+    When $bob = attribute(username) as(string) put: bob
+    When entity $b set has: $bob
+    Then entity $a get relations(marriage:wife) do not contain: $m
+    Then entity $b get relations(marriage:husband) do not contain: $m
+    When relation $m set player for role(wife): $a
+    When relation $m set player for role(husband): $b
+    Then entity $a get relations(marriage:wife) contain: $m
+    Then entity $b get relations(marriage:husband) contain: $m
+    When transaction commits
+    When session opens transaction of type: read
+    When $m = relation(marriage) get first instance
+    Then relation(marriage) get instances contain: $m
+    When $alice = attribute(username) as(string) get: alice
+    When $a = entity(person) get instance with key: $alice
+    When $bob = attribute(username) as(string) get: bob
+    When $b = entity(person) get instance with key: $bob
+    Then entity $a get relations(marriage:wife) contain: $m
+    Then entity $b get relations(marriage:husband) contain: $m
 
   Scenario: Role player can be deleted from relation
 
   Scenario: Relation with role player can be deleted
+
+  Scenario: Relation without role players get deleted
