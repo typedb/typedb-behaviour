@@ -465,6 +465,17 @@ Feature: Graql Match Clause
       | EMR |
 
 
+  Scenario: when matching by a concept id that doesn't exist, an empty result is returned
+    When get answers of graql query
+      """
+      match
+        $x id V1337;
+        $y id V456;
+      get;
+      """
+    Then answer size is: 0
+
+
   ##########
   # THINGS #
   ##########
@@ -550,10 +561,34 @@ Feature: Graql Match Clause
       """
 
 
-  Scenario: an error is thrown when matching a non-existent concept type
+  Scenario: when matching by a type whose label doesn't exist, an error is thrown
     Then graql get throws
       """
       match $x isa ganesh; get;
+      """
+    Then the integrity is validated
+
+
+  Scenario: when matching by a type id that doesn't exist, an empty result is returned
+    When get answers of graql query
+      """
+      match $x isa $type; $type id V1337; get;
+      """
+    Then answer size is: 0
+
+
+  Scenario: when matching by a relation type whose label doesn't exist, an error is thrown
+    Then graql get throws
+      """
+      match ($x, $y) isa $type; $type type jakas-relacja; get;
+      """
+    Then the integrity is validated
+
+
+  Scenario: when matching a non-existent type label to a variable from a generic `isa` query, an error is thrown
+    Then graql get throws
+      """
+      match $x isa $type; $type type polok; get;
       """
     Then the integrity is validated
 
@@ -727,14 +762,52 @@ Feature: Graql Match Clause
     Then the integrity is validated
 
 
-  @ignore
-  # TODO: re-enable when matching a role in a relation type that doesn't have that role throws
-  Scenario: an error is thrown when matching a role in a relation type that doesn't have that role
+  Scenario: an error is thrown when matching a non-existent type label as if it were a relation type
     Then graql get throws
+      """
+      match ($x) isa bottle-of-rum; get;
+      """
+    Then the integrity is validated
+
+
+  Scenario: when matching a role that doesn't exist, an error is thrown
+    Then graql get throws
+      """
+      match (rolein-rolein-rolein: $rolein) isa relation; get;
+      """
+    Then the integrity is validated
+
+
+  Scenario: when matching a role in a relation type that doesn't have that role, an empty result is returned
+    When get answers of graql query
       """
       match (friend: $x) isa employment; get;
       """
-    Then the integrity is validated
+    Then answer size is: 0
+
+
+  Scenario: when matching a roleplayer in a relation that can't actually play that role, an empty result is returned
+    When get answers of graql query
+      """
+      match
+        $x isa company;
+        ($x) isa friendship;
+      get;
+      """
+    Then answer size is: 0
+
+
+  Scenario: when querying for a non-existent relation type id, an empty result is returned
+    When get answers of graql query
+      """
+      match ($x, $y) isa $type; $type id V1337; get;
+      """
+    Then answer size is: 0
+    When get answers of graql query
+      """
+      match $r ($x, $y) isa $type; $r id V1337; get;
+      """
+    Then answer size is: 0
 
 
   ##############
@@ -839,6 +912,19 @@ Feature: Graql Match Clause
       | x   |
       | ONE |
       | NIN |
+
+
+  Scenario: when querying for a non-existent attribute type id, an empty result is returned
+    When get answers of graql query
+      """
+      match $x has name $y; $x id V1337; get;
+      """
+    Then answer size is: 0
+    When get answers of graql query
+      """
+      match $x has name $y; $y id V1337; get;
+      """
+    Then answer size is: 0
 
 
   #######################
@@ -965,6 +1051,22 @@ Feature: Graql Match Clause
     Then graql get throws
       """
       match $x has person "Luke"; get;
+      """
+    Then the integrity is validated
+
+
+  Scenario: when matching by an attribute ownership, if the owner can't actually own it, an empty result is returned
+    When get answers of graql query
+      """
+      match $x isa company, has age $n; get;
+      """
+    Then answer size is: 0
+
+
+  Scenario: an error is thrown when matching by attribute ownership, when the owned type label doesn't exist
+    Then graql get throws
+      """
+      match $x has bananananananana "rama"; get;
       """
     Then the integrity is validated
 
