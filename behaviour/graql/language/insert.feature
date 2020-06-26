@@ -1040,7 +1040,7 @@ Feature: Graql Insert Query
 
   @ignore
   # TODO: currently it creates two concepts! should create only 1
-  Scenario: inserting attribute values [2] and [2] with the same attribute type creates a single concept
+  Scenario: inserting two `double` attribute values with the same integer value creates a single concept
     Given graql define
       """
       define
@@ -1085,6 +1085,87 @@ Feature: Graql Insert Query
       match $x isa length; get;
       """
     Then answer size is: 1
+
+
+  Scenario Outline: a `<type>` inserted as [<insert>] is retrieved when matching [<match>]
+    Given graql define
+      """
+      define <attr> sub attribute, value <type>, key ref;
+      """
+    Given the integrity is validated
+    When get answers of graql insert
+      """
+      insert $x <insert> isa <attr>, has ref 0;
+      """
+    Then the integrity is validated
+    When concept identifiers are
+      |     | check | value |
+      | RF0 | key   | ref:0 |
+    Then uniquely identify answer concepts
+      | x   |
+      | RF0 |
+    When get answers of graql query
+      """
+      match $x <match> isa <attr>; get;
+      """
+    Then uniquely identify answer concepts
+      | x   |
+      | RF0 |
+
+    Examples:
+      | type     | attr       | insert           | match            |
+      | long     | shoe-size  | 92               | 92               |
+      | long     | shoe-size  | 92               | 92.00            |
+      | long     | shoe-size  | 92.0             | 92               |
+      | long     | shoe-size  | 92.0             | 92.00            |
+      | double   | length     | 52               | 52               |
+      | double   | length     | 52               | 52.00            |
+      | double   | length     | 52.0             | 52               |
+      | double   | length     | 52.0             | 52.00            |
+      | datetime | start-date | 2019-12-26       | 2019-12-26       |
+      | datetime | start-date | 2019-12-26       | 2019-12-26T00:00 |
+      | datetime | start-date | 2019-12-26T00:00 | 2019-12-26       |
+      | datetime | start-date | 2019-12-26T00:00 | 2019-12-26T00:00 |
+
+
+  Scenario Outline: inserting [<value>] as a `<type>` throws an error
+    Given graql define
+      """
+      define <attr> sub attribute, value <type>, key ref;
+      """
+    Given the integrity is validated
+    Then graql insert throws
+      """
+      insert $x <value> isa <attr>, has ref 0;
+      """
+    Then the integrity is validated
+
+    Examples:
+      | type     | attr       | value        |
+      | string   | colour     | 92           |
+      | string   | colour     | 92.8         |
+      | string   | colour     | false        |
+      | string   | colour     | 2019-12-26   |
+      | long     | shoe-size  | "28"         |
+      | long     | shoe-size  | true         |
+      | long     | shoe-size  | 2019-12-26   |
+      | double   | length     | "28.0"       |
+      | double   | length     | false        |
+      | double   | length     | 2019-12-26   |
+      | boolean  | is-alive   | 3            |
+      | boolean  | is-alive   | -17.9        |
+      | boolean  | is-alive   | 2019-12-26   |
+      | datetime | start-date | 1992         |
+      | datetime | start-date | 3.14         |
+      | datetime | start-date | false        |
+      | datetime | start-date | "2019-12-26" |
+    @ignore
+    # TODO: re-enable when only true and false are accepted as boolean values
+    Examples:
+      | boolean  | is-alive   | 1            |
+      | boolean  | is-alive   | 0.0          |
+      | boolean  | is-alive   | "true"       |
+      | boolean  | is-alive   | "not true"   |
 
 
   Scenario: inserting an attribute with no value throws an error

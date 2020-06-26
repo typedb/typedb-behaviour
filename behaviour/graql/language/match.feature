@@ -929,6 +929,27 @@ Feature: Graql Match Clause
     Then answer size is: 1
 
 
+  Scenario: `has $attr == $x` matches owners of any instance `$y` of `$attr` where `$y` and `$x` are equal by value
+    Given graql insert
+      """
+      insert
+      $x isa person, has name "Susie", has age 16, has ref 0;
+      $y isa person, has name "Donald", has age 25, has ref 1;
+      $z isa person, has name "Ralph", has age 18, has ref 2;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x has age == 16; get;
+      """
+    And concept identifiers are
+      |     | check | value |
+      | SUS | key   | ref:0 |
+    Then uniquely identify answer concepts
+      | x   |
+      | SUS |
+
+
   Scenario: `has $attr > $x` matches owners of any instance `$y` of `$attr` where `$y > $x`
     Given graql insert
       """
@@ -994,6 +1015,119 @@ Feature: Graql Match Clause
       | SUS |
 
 
+  Scenario: when all instances of a type own a single attribute, matches with and without `!==` partition them
+    Given graql insert
+      """
+      insert
+      $x isa person, has name "Susie", has age 16, has ref 0;
+      $y isa person, has name "Donald", has age 25, has ref 1;
+      $z isa person, has name "Ralph", has age 18, has ref 2;
+      """
+    Given the integrity is validated
+    When concept identifiers are
+      |     | check | value |
+      | SUS | key   | ref:0 |
+      | DON | key   | ref:1 |
+      | RAL | key   | ref:2 |
+    When get answers of graql query
+      """
+      match
+        $x has age $y;
+        $y !== 18;
+      get $x;
+      """
+    Then uniquely identify answer concepts
+      | x   |
+      | DON |
+      | SUS |
+    When get answers of graql query
+      """
+      match
+        $x has age $y;
+        $y 18;
+      get $x;
+      """
+    Then uniquely identify answer concepts
+      | x   |
+      | RAL |
+    When get answers of graql query
+      """
+      match
+        $x has age $y;
+      get $x;
+      """
+    Then uniquely identify answer concepts
+      | x   |
+      | DON |
+      | SUS |
+      | RAL |
+
+
+  Scenario: value comparisons can be performed between a `double` and a `long`
+    Given graql define
+      """
+      define
+      house-number sub attribute, value long;
+      length sub attribute, value double;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $x 1 isa house-number;
+      $y 2.0 isa length;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x isa house-number;
+        $x == 1.0;
+      get;
+      """
+    Then answer size is: 1
+    When get answers of graql query
+      """
+      match
+        $x isa length;
+        $x == 2;
+      get;
+      """
+    Then answer size is: 1
+    When get answers of graql query
+      """
+      match
+        $x isa house-number;
+        $x 1.0;
+      get;
+      """
+    Then answer size is: 1
+    When get answers of graql query
+      """
+      match
+        $x isa length;
+        $x 2;
+      get;
+      """
+    Then answer size is: 1
+    When get answers of graql query
+      """
+      match
+        $x isa attribute;
+        $x >= 1;
+      get;
+      """
+    Then answer size is: 2
+    When get answers of graql query
+      """
+      match
+        $x isa attribute;
+        $x < 2.0;
+      get;
+      """
+    Then answer size is: 1
+
+
   Scenario: when a thing owns multiple attributes of the same type, a value comparison matches if any value matches
     Given graql define
       """
@@ -1018,6 +1152,20 @@ Feature: Graql Match Clause
     Then uniquely identify answer concepts
       | x   |
       | PER |
+
+
+  Scenario: comparing unbound variables throws an error
+    Then graql get throws
+      """
+      match $x != $y; get;
+      """
+
+
+  Scenario: concept comparison of unbound variables throws an error
+    Then graql get throws
+      """
+      match $x !== $y; get;
+      """
 
 
   ############
