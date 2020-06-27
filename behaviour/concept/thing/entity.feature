@@ -45,11 +45,14 @@ Feature: Concept Entity
     When $x = entity(person) get first instance
     Then entity(person) get instances contain: $x
 
+  Scenario: Entity cannot be created when it misses a key
+
   Scenario: Entity can be deleted
     When $x = entity(person) create new instance
     When $y = attribute(name) as(string) put: alice
     When entity $x set has: $y
     When delete entity: $x
+    Then entity $x is deleted: true
     Then entity(person) get instances is empty
     Then attribute $y get owners do not contain: $x
     When transaction commits
@@ -62,6 +65,7 @@ Feature: Concept Entity
     When $y = attribute(name) as(string) get: alice
     When entity $x set has: $y
     When delete entity: $x
+    Then entity $x is deleted: true
     Then entity(person) get instances is empty
     Then attribute $y get owners do not contain: $x
     When transaction commits
@@ -181,3 +185,10 @@ Feature: Concept Entity
     When $y = attribute(name) as(string) get: alice
     Then entity $x get attributes(name) do not contain: $y
     Then attribute $y get owners do not contain: $x
+
+  Scenario: Entity can play a role in a relation
+
+  Scenario: Entity can retrieve relations where it plays a role in
+
+  Scenario: Entity can retrieve role types it plays
+
