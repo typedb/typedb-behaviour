@@ -42,7 +42,7 @@ Feature: Concept Relation
     Given connection open data session for keyspace: grakn
     Given session opens transaction of type: write
 
-  Scenario: Relation with role player can be created and role players can be retrieved
+  Scenario: Relation with role players can be created and role players can be retrieved
     When $m = relation(marriage) create new instance
     Then relation $m is null: false
     Then relation $m has type: marriage
@@ -178,4 +178,43 @@ Feature: Concept Relation
     When $m = relation(marriage) get first instance
     Then relation $m is null: true
 
-  Scenario: Relation with role player can be deleted
+  Scenario: Relation with role players can be deleted
+    When $m = relation(marriage) create new instance
+    When $a = entity(person) create new instance
+    When $alice = attribute(username) as(string) put: alice
+    When entity $a set has: $alice
+    When $b = entity(person) create new instance
+    When $bob = attribute(username) as(string) put: bob
+    When entity $b set has: $bob
+    When relation $m set player for role(wife): $a
+    When relation $m set player for role(husband): $b
+    When delete relation: $m
+    Then relation $m is deleted: true
+    Then relation(marriage) get instances do not contain: $m
+    Then entity $a get relations do not contain: $m
+    Then entity $b get relations do not contain: $m
+    When transaction commits
+    When session opens transaction of type: write
+    When $alice = attribute(username) as(string) get: alice
+    When $a = entity(person) get instance with key: $alice
+    When $bob = attribute(username) as(string) get: bob
+    When $b = entity(person) get instance with key: $bob
+    When $m = relation(marriage) create new instance
+    When relation $m set player for role(wife): $a
+    When relation $m set player for role(husband): $b
+    When transaction commits
+    When session opens transaction of type: write
+    When $alice = attribute(username) as(string) get: alice
+    When $a = entity(person) get instance with key: $alice
+    When $bob = attribute(username) as(string) get: bob
+    When $b = entity(person) get instance with key: $bob
+    When $m = relation(marriage) get first instance
+    When delete relation: $m
+    Then relation $m is deleted: true
+    Then relation(marriage) get instances do not contain: $m
+    Then entity $a get relations do not contain: $m
+    Then entity $b get relations do not contain: $m
+    When transaction commits
+    When session opens transaction of type: read
+    When $m = relation(marriage) get first instance
+    Then relation $m is null: true
