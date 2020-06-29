@@ -135,6 +135,19 @@ Feature: Concept Entity
     When $bob = attribute(username) as(string) get: bob
     When entity $a fails at setting has: $bob
 
+  Scenario: Entity cannot have a key that has been taken
+    When $a = entity(person) create new instance
+    When $alice = attribute(username) as(string) put: alice
+    When entity $a set has: $alice
+    When $b = entity(person) create new instance
+    Then entity $b fails at setting has: $alice
+    Then delete entity: $b
+    When transaction commits
+    When session opens transaction of type: write
+    When $alice = attribute(username) as(string) get: alice
+    When $b = entity(person) create new instance
+    When entity $b fails at setting has: $alice
+
   Scenario: Entity can have attribute
     When $a = entity(person) create new instance with key(username): alice
     When $email = attribute(email) as(string) put: alice@email.com
