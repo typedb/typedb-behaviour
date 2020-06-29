@@ -42,43 +42,158 @@ Feature: Concept Relation
     Given connection open data session for keyspace: grakn
     Given session opens transaction of type: write
 
-  Scenario: Relation with role player can be created and role players can be retrieved
-    When $m = relation(marriage) create new instance
-    When $a = entity(person) create new instance
-    When $alice = attribute(username) as(string) put: alice
-    When entity $a set has: $alice
-    When $b = entity(person) create new instance
-    When $bob = attribute(username) as(string) put: bob
-    When entity $b set has: $bob
-    When relation $m set player for role(wife): $a
-    When relation $m set player for role(husband): $b
-    Then relation(marriage) get instances contain: $m
+  Scenario: Relation with role players can be created and role players can be retrieved
+    When $m = relation(marriage) create new instance with key(license): m
     Then relation $m is null: false
     Then relation $m has type: marriage
-    Then relation $m get player for role(wife): $a
-    Then relation $m get player for role(husband): $b
-    Then transaction commits
-    When session opens transaction of type: read
-    When $m = relation(marriage) get first instance
     Then relation(marriage) get instances contain: $m
-    When $alice = attribute(username) as(string) get: alice
-    When $a = entity(person) get instance with key: $alice
-    When $bob = attribute(username) as(string) get: bob
-    When $b = entity(person) get instance with key: $bob
-    Then relation $m get player for role(wife): $a
-    Then relation $m get player for role(husband): $b
+    When $a = entity(person) create new instance with key(username): alice
+    When $b = entity(person) create new instance with key(username): bob
+    When relation $m set player for role(wife): $a
+    When relation $m set player for role(husband): $b
+    Then relation $m is null: false
+    Then relation $m has type: marriage
+    Then relation(marriage) get instances contain: $m
+    Then relation $m get players for role(wife) contain: $a
+    Then relation $m get players for role(husband) contain: $b
+    Then relation $m get players contain: $a
+    Then relation $m get players contain: $b
+    When transaction commits
+    When session opens transaction of type: read
+    When $m = relation(marriage) get instance with key(license): m
+    Then relation $m is null: false
+    Then relation $m has type: marriage
+    Then relation(marriage) get instances contain: $m
+    When $a = entity(person) get instance with key(username): alice
+    When $b = entity(person) get instance with key(username): bob
+    Then relation $m get players for role(wife) contain: $a
+    Then relation $m get players for role(husband) contain: $b
+    Then relation $m get players contain: $a
+    Then relation $m get players contain: $b
 
   Scenario: Relation without role player cannot be created
-    When $m = relation(marriage) create new instance
+    When $m = relation(marriage) create new instance with key(license): m
     Then relation(marriage) get instances contain: $m
     Then relation $m is null: false
     Then relation $m has type: marriage
     Then transaction commits successfully: false
-
-  Scenario: Relation can get role players
-
+#
   Scenario: Role players can get relations
+    When $m = relation(marriage) create new instance with key(license): m
+    When $a = entity(person) create new instance with key(username): alice
+    When $b = entity(person) create new instance with key(username): bob
+    Then entity $a get relations(marriage:wife) do not contain: $m
+    Then entity $b get relations(marriage:husband) do not contain: $m
+    When relation $m set player for role(wife): $a
+    When relation $m set player for role(husband): $b
+    Then entity $a get relations(marriage:wife) contain: $m
+    Then entity $b get relations(marriage:husband) contain: $m
+    When transaction commits
+    When session opens transaction of type: read
+    When $m = relation(marriage) get instance with key(license): m
+    Then relation(marriage) get instances contain: $m
+    When $a = entity(person) get instance with key(username): alice
+    When $b = entity(person) get instance with key(username): bob
+    Then entity $a get relations(marriage:wife) contain: $m
+    Then entity $b get relations(marriage:husband) contain: $m
 
-  Scenario: Role player can be deleted from relation
+  Scenario: Role player can be unassigned from relation
+    When $m = relation(marriage) create new instance with key(license): m
+    When $a = entity(person) create new instance with key(username): alice
+    When $b = entity(person) create new instance with key(username): bob
+    When relation $m set player for role(wife): $a
+    When relation $m set player for role(husband): $b
+    When relation $m remove player for role(wife): $a
+    Then relation $m get players for role(wife) do not contain: $a
+    Then entity $a get relations(marriage:wife) do not contain: $m
+    When transaction commits
+    When session opens transaction of type: write
+    When $m = relation(marriage) get instance with key(license): m
+    When $a = entity(person) get instance with key(username): alice
+    Then relation $m get players for role(wife) do not contain: $a
+    Then entity $a get relations(marriage:wife) do not contain: $m
+    When relation $m set player for role(wife): $a
+    When transaction commits
+    When session opens transaction of type: write
+    When $m = relation(marriage) get instance with key(license): m
+    When $a = entity(person) get instance with key(username): alice
+    When relation $m remove player for role(wife): $a
+    Then relation $m get players for role(wife) do not contain: $a
+    Then entity $a get relations(marriage:wife) do not contain: $m
+    When transaction commits
+    When session opens transaction of type: read
+    When $m = relation(marriage) get instance with key(license): m
+    When $a = entity(person) get instance with key(username): alice
+    Then relation $m get players for role(wife) do not contain: $a
+    Then entity $a get relations(marriage:wife) do not contain: $m
 
-  Scenario: Relation with role player can be deleted
+  Scenario: Relation without role players get deleted
+    When $m = relation(marriage) create new instance with key(license): m
+    When $a = entity(person) create new instance with key(username): alice
+    When relation $m set player for role(wife): $a
+    When relation $m remove player for role(wife): $a
+    Then relation $m is deleted: true
+    Then entity $a get relations do not contain: $m
+    Then relation(marriage) get instances do not contain: $m
+    When $m = relation(marriage) get instance with key(license): m
+    Then relation $m is null: true
+    Then relation(marriage) get instances is empty
+    When transaction commits
+    When session opens transaction of type: write
+    When $m = relation(marriage) get instance with key(license): m
+    Then relation $m is null: true
+    Then relation(marriage) get instances is empty
+    When $m = relation(marriage) create new instance with key(license): m
+    When $a = entity(person) get instance with key(username): alice
+    When relation $m set player for role(wife): $a
+    When transaction commits
+    When session opens transaction of type: write
+    When $m = relation(marriage) get instance with key(license): m
+    When $a = entity(person) get instance with key(username): alice
+    When relation $m remove player for role(wife): $a
+    Then relation $m is deleted: true
+    Then entity $a get relations do not contain: $m
+    When $m = relation(marriage) get instance with key(license): m
+    Then relation $m is null: true
+    Then relation(marriage) get instances is empty
+    When transaction commits
+    When session opens transaction of type: read
+    When $m = relation(marriage) get instance with key(license): m
+    Then relation $m is null: true
+    Then relation(marriage) get instances is empty
+
+  Scenario: Relation with role players can be deleted
+    When $m = relation(marriage) create new instance with key(license): m
+    When $a = entity(person) create new instance with key(username): alice
+    When $b = entity(person) create new instance with key(username): bob
+    When relation $m set player for role(wife): $a
+    When relation $m set player for role(husband): $b
+    When delete relation: $m
+    Then relation $m is deleted: true
+    Then relation(marriage) get instances do not contain: $m
+    Then entity $a get relations do not contain: $m
+    Then entity $b get relations do not contain: $m
+    Then relation(marriage) get instances is empty
+    When transaction commits
+    When session opens transaction of type: write
+    When $a = entity(person) get instance with key(username): alice
+    When $b = entity(person) get instance with key(username): bob
+    When $m = relation(marriage) create new instance with key(license): m
+    When relation $m set player for role(wife): $a
+    When relation $m set player for role(husband): $b
+    When transaction commits
+    When session opens transaction of type: write
+    When $a = entity(person) get instance with key(username): alice
+    When $b = entity(person) get instance with key(username): bob
+    When $m = relation(marriage) get instance with key(license): m
+    When delete relation: $m
+    Then relation $m is deleted: true
+    Then relation(marriage) get instances do not contain: $m
+    Then entity $a get relations do not contain: $m
+    Then entity $b get relations do not contain: $m
+    Then relation(marriage) get instances is empty
+    When transaction commits
+    When session opens transaction of type: read
+    When $m = relation(marriage) get instance with key(license): m
+    Then relation $m is null: true
+    Then relation(marriage) get instances is empty
