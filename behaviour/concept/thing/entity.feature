@@ -46,6 +46,11 @@ Feature: Concept Entity
     Then entity(person) get instances contain: $a
 
   Scenario: Entity cannot be created when it misses a key
+    When $a = entity(person) create new instance
+    Then entity $a is null: false
+    Then entity $a has type: person
+    Then entity(person) get instances contain: $a
+    Then transaction commits successfully: false
 
   Scenario: Entity can be deleted
     When $a = entity(person) create new instance with key(username): alice
