@@ -112,12 +112,28 @@ Feature: Concept Entity
     When entity $a set has: $alice
     When entity $a remove has: $alice
     Then transaction commits successfully: false
+    When session opens transaction of type: write
+    When $a = entity(person) create new instance
+    When $alice = attribute(username) as(string) put: alice
     When entity $a set has: $alice
     When transaction commits
-    When $a = entity(person) get new instance with key(username): alice
+    When session opens transaction of type: write
+    When $a = entity(person) get instance with key(username): alice
     When $alice = attribute(username) as(string) get: alice
     When entity $a remove has: $alice
     Then transaction commits successfully: false
+
+  Scenario: Entity cannot have more than one key for a given key type
+    When $a = entity(person) create new instance
+    When $alice = attribute(username) as(string) put: alice
+    When $bob = attribute(username) as(string) put: bob
+    When entity $a set has: $alice
+    Then entity $a fails at setting has: $bob
+    When transaction commits
+    When session opens transaction of type: write
+    When $a = entity(person) get instance with key(username): alice
+    When $bob = attribute(username) as(string) get: bob
+    When entity $a fails at setting has: $bob
 
   Scenario: Entity can have attribute
     When $a = entity(person) create new instance with key(username): alice
