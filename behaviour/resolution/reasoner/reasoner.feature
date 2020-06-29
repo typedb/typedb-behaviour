@@ -279,6 +279,7 @@ Feature: Reasoning
     Then test keyspace is complete
 
 
+  @ignore
   Scenario: querying with a disjunction and a negation
     Given graql define
       """
