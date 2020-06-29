@@ -104,7 +104,20 @@ Feature: Concept Entity
     Then entity $a get keys(username) do not contain: $alice
     Then entity $a get keys do not contain: $alice
     Then attribute $alice get owners do not contain: $a
-    When transaction commits successfully: false
+    Then transaction commits successfully: false
+
+  Scenario: Entity that has its key removed cannot be committed
+    When $a = entity(person) create new instance
+    When $alice = attribute(username) as(string) put: alice
+    When entity $a set has: $alice
+    When entity $a remove has: $alice
+    Then transaction commits successfully: false
+    When entity $a set has: $alice
+    When transaction commits
+    When $a = entity(person) get new instance with key(username): alice
+    When $alice = attribute(username) as(string) get: alice
+    When entity $a remove has: $alice
+    Then transaction commits successfully: false
 
   Scenario: Entity can have attribute
     When $a = entity(person) create new instance with key(username): alice
