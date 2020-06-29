@@ -299,11 +299,11 @@ Feature: Graql Delete Query
     Then answer size is: 0
 
 
-  Scenario: delete an instance using an unrelated type label throws
+  Scenario: deleting an instance using an unrelated type label throws
     Given graql insert
       """
       insert
-      $x isa person, has name "Alex", has ref 0;
+      $x isa person, has name "Alex";
       $n "John" isa name;
       """
     Given the integrity is validated
