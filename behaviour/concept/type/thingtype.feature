@@ -25,7 +25,7 @@ Feature: Concept Thing Type
     Given connection open schema session for keyspace: grakn
     Given session opens transaction of type: write
 
-  Scenario: Thing type root can retrieve all the subtypes
+  Scenario: Root thing type can retrieve all types
     When put entity type: person
     When put attribute type: is-alive, with value type: boolean
     When put attribute type: age, with value type: long
@@ -59,3 +59,37 @@ Feature: Concept Thing Type
     Then thing type root get subtypes do not contain:
       | husband |
       | wife    |
+
+  Scenario: Root thing type can retrieve all instances
+    When put attribute type: is-alive, with value type: boolean
+    When put attribute type: age, with value type: long
+    When put attribute type: score, with value type: double
+    When put attribute type: username, with value type: string
+    When put attribute type: license, with value type: string
+    When put attribute type: birth-date, with value type: datetime
+    When put relation type: marriage
+    When relation(marriage) set relates role: wife
+    When relation(marriage) set key attribute type: license
+    When put entity type: person
+    When entity(person) set key attribute type: username
+    When transaction commits
+    When connection close all sessions
+    When connection open data session for keyspace: grakn
+    When session opens transaction of type: write
+    When $att1 = attribute(is-alive) as(boolean) put: true
+    When $att2 = attribute(age) as(long) put: 21
+    When $att3 = attribute(score) as(double) put: 123.456
+    When $att4 = attribute(username) as(string) put: alice
+    When $att5 = attribute(license) as(string) put: abc
+    When $att6 = attribute(birth-date) as(datetime) put: 1990-01-01 11:22:33
+    When $ent1 = entity(person) create new instance with key(username): alice
+    When $rel1 = relation(marriage) create new instance with key(license): abc
+    Then root(thing) get instances count: 8
+    Then root(thing) get instances contain: $att1
+    Then root(thing) get instances contain: $att2
+    Then root(thing) get instances contain: $att3
+    Then root(thing) get instances contain: $att4
+    Then root(thing) get instances contain: $att5
+    Then root(thing) get instances contain: $att6
+    Then root(thing) get instances contain: $ent1
+    Then root(thing) get instances contain: $rel1
