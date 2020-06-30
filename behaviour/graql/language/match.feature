@@ -593,7 +593,7 @@ Feature: Graql Match Clause
     Then the integrity is validated
 
 
-  Scenario: matching that the same variable is of two types is allowed
+  Scenario: when matching that the same variable is of two types, an empty result is returned
     Then get answers of graql query
       """
       match
@@ -835,6 +835,27 @@ Feature: Graql Match Clause
     Then uniquely identify answer concepts
       | a   |
       | ATT |
+
+    Examples:
+      | attr        | type     | value      |
+      | colour      | string   | "Green"    |
+      | calories    | long     | 1761       |
+      | grams       | double   | 9.6        |
+      | gluten-free | boolean  | false      |
+      | use-by-date | datetime | 2020-06-16 |
+
+
+  Scenario Outline: when matching a `<type>` attribute by a value that doesn't exist, an empty answer is returned
+    Given graql define
+      """
+      define <attr> sub attribute, value <type>, key ref;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $a <value>; get;
+      """
+    Then answer size is: 0
 
     Examples:
       | attr        | type     | value      |
@@ -1196,54 +1217,6 @@ Feature: Graql Match Clause
       | SUS |
 
 
-  Scenario: when all instances of a type own a single attribute, matches with and without `!==` partition them
-    Given graql insert
-      """
-      insert
-      $x isa person, has name "Susie", has age 16, has ref 0;
-      $y isa person, has name "Donald", has age 25, has ref 1;
-      $z isa person, has name "Ralph", has age 18, has ref 2;
-      """
-    Given the integrity is validated
-    When concept identifiers are
-      |     | check | value |
-      | SUS | key   | ref:0 |
-      | DON | key   | ref:1 |
-      | RAL | key   | ref:2 |
-    When get answers of graql query
-      """
-      match
-        $x has age $y;
-        $y !== 18;
-      get $x;
-      """
-    Then uniquely identify answer concepts
-      | x   |
-      | DON |
-      | SUS |
-    When get answers of graql query
-      """
-      match
-        $x has age $y;
-        $y 18;
-      get $x;
-      """
-    Then uniquely identify answer concepts
-      | x   |
-      | RAL |
-    When get answers of graql query
-      """
-      match
-        $x has age $y;
-      get $x;
-      """
-    Then uniquely identify answer concepts
-      | x   |
-      | DON |
-      | SUS |
-      | RAL |
-
-
   Scenario: value comparisons can be performed between a `double` and a `long`
     Given graql define
       """
@@ -1335,7 +1308,7 @@ Feature: Graql Match Clause
       | PER |
 
 
-  Scenario: comparing unbound variables throws an error
+  Scenario: value comparison of unbound variables throws an error
     Then graql get throws
       """
       match $x != $y; get;

@@ -1169,7 +1169,7 @@ Feature: Graql Insert Query
       | datetime | start-date | false        |
       | datetime | start-date | "2019-12-26" |
     @ignore
-    # TODO: re-enable when only true and false are accepted as boolean values
+    # TODO: re-enable when only true and false are accepted as boolean values (issue #5803)
     Examples:
       | boolean  | is-alive   | 1            |
       | boolean  | is-alive   | 0.0          |
@@ -1578,7 +1578,7 @@ Feature: Graql Insert Query
       | BRO |
 
 
-  Scenario: inserting a new instance type on an existing instance is fine if it is already of that type
+  Scenario: re-inserting a matched instance does nothing
     Given graql insert
       """
       insert
@@ -1600,7 +1600,7 @@ Feature: Graql Insert Query
     Then answer size is: 1
 
 
-  Scenario: inserting a new type on an existing instance throws, if the old type is not a subtype of the new one
+  Scenario: re-inserting a matched instance as an unrelated type throws an error
     Given graql insert
       """
       insert
