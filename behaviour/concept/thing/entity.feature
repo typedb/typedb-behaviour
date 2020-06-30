@@ -50,7 +50,7 @@ Feature: Concept Entity
     Then entity $a is null: false
     Then entity $a has type: person
     Then entity(person) get instances contain: $a
-    Then transaction commits successfully: false
+    Then transaction commits; throws exception
 
   Scenario: Entity can be deleted
     When $a = entity(person) create new instance with key(username): alice
@@ -104,14 +104,14 @@ Feature: Concept Entity
     Then entity $a get keys(username) do not contain: $alice
     Then entity $a get keys do not contain: $alice
     Then attribute $alice get owners do not contain: $a
-    Then transaction commits successfully: false
+    Then transaction commits; throws exception
 
   Scenario: Entity that has its key removed cannot be committed
     When $a = entity(person) create new instance
     When $alice = attribute(username) as(string) put: alice
     When entity $a set has: $alice
     When entity $a remove has: $alice
-    Then transaction commits successfully: false
+    Then transaction commits; throws exception
     When session opens transaction of type: write
     When $a = entity(person) create new instance
     When $alice = attribute(username) as(string) put: alice
@@ -121,32 +121,32 @@ Feature: Concept Entity
     When $a = entity(person) get instance with key(username): alice
     When $alice = attribute(username) as(string) get: alice
     When entity $a remove has: $alice
-    Then transaction commits successfully: false
+    Then transaction commits; throws exception
 
   Scenario: Entity cannot have more than one key for a given key type
     When $a = entity(person) create new instance
     When $alice = attribute(username) as(string) put: alice
     When $bob = attribute(username) as(string) put: bob
     When entity $a set has: $alice
-    Then entity $a fails at setting has: $bob
+    Then entity $a set has: $bob; throws exception
     When transaction commits
     When session opens transaction of type: write
     When $a = entity(person) get instance with key(username): alice
     When $bob = attribute(username) as(string) get: bob
-    When entity $a fails at setting has: $bob
+    When entity $a set has: $bob; throws exception
 
   Scenario: Entity cannot have a key that has been taken
     When $a = entity(person) create new instance
     When $alice = attribute(username) as(string) put: alice
     When entity $a set has: $alice
     When $b = entity(person) create new instance
-    Then entity $b fails at setting has: $alice
+    Then entity $b set has: $alice; throws exception
     Then delete entity: $b
     When transaction commits
     When session opens transaction of type: write
     When $alice = attribute(username) as(string) get: alice
     When $b = entity(person) create new instance
-    When entity $b fails at setting has: $alice
+    When entity $b set has: $alice; throws exception
 
   Scenario: Entity can have attribute
     When $a = entity(person) create new instance with key(username): alice

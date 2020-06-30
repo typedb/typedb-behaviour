@@ -119,22 +119,22 @@ Feature: Concept Attribute Type
   Scenario: Attribute types can be set to abstract
     When put attribute type: name, with value type: string
     When attribute(name) set abstract: true
-    When put attribute type: email, with value type: string
     Then attribute(name) is abstract: true
-    Then attribute(name) as(string) fails at putting an instance
+    Then attribute(name) as(string) put: alice; throws exception
+    When put attribute type: email, with value type: string
     Then attribute(email) is abstract: false
     When transaction commits
     When session opens transaction of type: write
     Then attribute(name) is abstract: true
-    Then attribute(name) as(string) fails at putting an instance
+    Then attribute(name) as(string) put: alice; throws exception
     Then attribute(email) is abstract: false
     When attribute(email) set abstract: true
     Then attribute(email) is abstract: true
-    Then attribute(email) as(string) fails at putting an instance
+    Then attribute(email) as(string) put: alice@email.com; throws exception
     When transaction commits
     When session opens transaction of type: write
     Then attribute(email) is abstract: true
-    Then attribute(email) as(string) fails at putting an instance
+    Then attribute(email) as(string) put: alice@email.com; throws exception
 
   Scenario: Attribute types can be subtypes of other attribute types
     When put attribute type: first-name, with value type: string
@@ -245,26 +245,26 @@ Feature: Concept Attribute Type
     When put attribute type: rating, with value type: double
     When put attribute type: name, with value type: string
     When put attribute type: timestamp, with value type: datetime
-    Then attribute(is-open) fails at setting supertype: age
-    Then attribute(is-open) fails at setting supertype: rating
-    Then attribute(is-open) fails at setting supertype: name
-    Then attribute(is-open) fails at setting supertype: timestamp
-    Then attribute(age) fails at setting supertype: is-open
-    Then attribute(age) fails at setting supertype: rating
-    Then attribute(age) fails at setting supertype: name
-    Then attribute(age) fails at setting supertype: timestamp
-    Then attribute(rating) fails at setting supertype: is-open
-    Then attribute(rating) fails at setting supertype: age
-    Then attribute(rating) fails at setting supertype: name
-    Then attribute(rating) fails at setting supertype: timestamp
-    Then attribute(name) fails at setting supertype: is-open
-    Then attribute(name) fails at setting supertype: age
-    Then attribute(name) fails at setting supertype: rating
-    Then attribute(name) fails at setting supertype: timestamp
-    Then attribute(timestamp) fails at setting supertype: is-open
-    Then attribute(timestamp) fails at setting supertype: age
-    Then attribute(timestamp) fails at setting supertype: rating
-    Then attribute(timestamp) fails at setting supertype: name
+    Then attribute(is-open) set supertype: age; throws exception
+    Then attribute(is-open) set supertype: rating; throws exception
+    Then attribute(is-open) set supertype: name; throws exception
+    Then attribute(is-open) set supertype: timestamp; throws exception
+    Then attribute(age) set supertype: is-open; throws exception
+    Then attribute(age) set supertype: rating; throws exception
+    Then attribute(age) set supertype: name; throws exception
+    Then attribute(age) set supertype: timestamp; throws exception
+    Then attribute(rating) set supertype: is-open; throws exception
+    Then attribute(rating) set supertype: age; throws exception
+    Then attribute(rating) set supertype: name; throws exception
+    Then attribute(rating) set supertype: timestamp; throws exception
+    Then attribute(name) set supertype: is-open; throws exception
+    Then attribute(name) set supertype: age; throws exception
+    Then attribute(name) set supertype: rating; throws exception
+    Then attribute(name) set supertype: timestamp; throws exception
+    Then attribute(timestamp) set supertype: is-open; throws exception
+    Then attribute(timestamp) set supertype: age; throws exception
+    Then attribute(timestamp) set supertype: rating; throws exception
+    Then attribute(timestamp) set supertype: name; throws exception
 
   Scenario: Attribute types can get the root type as the same value class
     When put attribute type: is-open, with value type: boolean
