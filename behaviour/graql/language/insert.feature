@@ -1047,6 +1047,8 @@ Feature: Graql Insert Query
       | AGE2 |
 
 
+  @ignore
+  # TODO: re-enable in 1.9
   Scenario: inserting two `double` attribute values with the same integer value creates a single concept
     Given graql define
       """
@@ -1280,6 +1282,8 @@ Feature: Graql Insert Query
     Then the integrity is validated
 
 
+  @ignore
+  # TODO: re-enable in 1.9
   Scenario: [2] and [2.0] are considered to be the same value when validating key uniqueness
     Given graql define
       """
