@@ -181,5 +181,6 @@ maven(
     graknlabs_graql_artifacts +
     graknlabs_grabl_tracing_artifacts +
     graknlabs_client_java_artifacts +
+    graknlabs_grakn_core_artifacts +
     graknlabs_verification_artifacts
 )
