@@ -217,6 +217,13 @@ Feature: Concept Entity Type
       | man    |
       | woman  |
 
+  Scenario: Entity types cannot subtype itself
+    When put entity type: person
+    Then entity(person) set supertype: person; throws exception
+    When transaction commits
+    When session opens transaction of type: write
+    Then entity(person) set supertype: person; throws exception
+
   Scenario: Entity types can have keys
     When put attribute type: email, with value type: string
     When put attribute type: username, with value type: string

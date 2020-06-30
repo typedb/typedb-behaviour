@@ -354,6 +354,14 @@ Feature: Concept Relation Type and Role Type
       | fathership:father |
       | father-son:son    |
 
+  Scenario: Relation types cannot subtype itself
+    When put relation type: marriage
+    When relation(marriage) set relates role: wife
+    Then relation(marriage) set supertype: marriage; throws exception
+    When transaction commits
+    When session opens transaction of type: write
+    Then relation(marriage) set supertype: marriage; throws exception
+
   Scenario: Relation types can inherit related role types
     When put relation type: parentship
     When relation(parentship) set relates role: parent

@@ -252,6 +252,25 @@ Feature: Concept Attribute Type
       | first-name |
       | last-name  |
 
+  Scenario: Attribute types cannot subtype itself
+    When put attribute type: is-open, with value type: boolean
+    When put attribute type: age, with value type: long
+    When put attribute type: rating, with value type: double
+    When put attribute type: name, with value type: string
+    When put attribute type: timestamp, with value type: datetime
+    Then attribute(is-open) set supertype: is-open; throws exception
+    Then attribute(age) set supertype: age; throws exception
+    Then attribute(rating) set supertype: rating; throws exception
+    Then attribute(name) set supertype: name; throws exception
+    Then attribute(timestamp) set supertype: timestamp; throws exception
+    When transaction commits
+    When session opens transaction of type: write
+    Then attribute(is-open) set supertype: is-open; throws exception
+    Then attribute(age) set supertype: age; throws exception
+    Then attribute(rating) set supertype: rating; throws exception
+    Then attribute(name) set supertype: name; throws exception
+    Then attribute(timestamp) set supertype: timestamp; throws exception
+
   Scenario: Attribute types cannot subtype another attribute type of different value class
     When put attribute type: is-open, with value type: boolean
     When put attribute type: age, with value type: long
