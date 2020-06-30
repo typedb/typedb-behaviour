@@ -87,7 +87,7 @@ Feature: Graql Get Query
 
 
   Scenario: match-get throws an error when there are unbound variables in the `get`
-    Then get answers of graql query
+    Then graql get throws
       """
       match $x isa person; get $y;
       """
