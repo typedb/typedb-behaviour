@@ -29,8 +29,8 @@ java_library(
         "@graknlabs_client_java//:client-java",
         "@graknlabs_graql//java:graql",
         "@graknlabs_common//:common",
-        "//dependencies/maven/artifacts/com/google/guava",
-        "//dependencies/maven/artifacts/org/slf4j:slf4j-api",
+        "@maven//:com_google_guava_guava",
+        "@maven//:org_slf4j_slf4j_api",
     ],
 )
 

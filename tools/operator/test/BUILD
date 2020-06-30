@@ -9,7 +9,7 @@ java_test(
     test_class = "grakn.verification.tools.operator.test.OperatorTest",
     visibility = ["//visibility:public"],
     deps = [
-        "//dependencies/maven/artifacts/com/google/guava",
+        "@maven//:com_google_guava_guava",
         "//tools/operator:operator",
         "@graknlabs_graql//java:graql",
     ],

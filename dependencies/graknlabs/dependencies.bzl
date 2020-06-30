@@ -1,36 +1,36 @@
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 def graknlabs_dependencies():
-    git_repository(
+        git_repository(
         name = "graknlabs_dependencies",
-        remote = "https://github.com/graknlabs/dependencies",
-        commit = "a9e7d9b44dc2f5a281d477fc6b63b02c5afc803a",  # sync-marker: do not remove this comment, this is used for sync-dependencies by @graknlabs_dependencies
+        remote = "https://github.com/lolski/dependencies",
+        commit = "708ec420415474fb6085f946774298ffdbb667d2",  # sync-marker: do not remove this comment, this is used for sync-dependencies by @graknlabs_dependencies
     )
 
 def graknlabs_common():
     git_repository(
         name = "graknlabs_common",
         remote = "https://github.com/graknlabs/common",
-        commit = "c8f1859cf25f44f6748d198371a3721b1a888068" # sync-marker: do not remove this comment, this is used for sync-dependencies by @graknlabs_common
+        commit = "1648679f923a7166bca775dcaf61cc6133167346" # sync-marker: do not remove this comment, this is used for sync-dependencies by @graknlabs_common
     )
 
 def graknlabs_graql():
     git_repository(
         name = "graknlabs_graql",
         remote = "https://github.com/graknlabs/graql",
-        commit = "4269a114607933b3dcacca73be0c71fb5359a6ea" # sync-marker: do not remove this comment, this is used for sync-dependencies by @graknlabs_graql
+        commit = "4aa5ae0be36ad23a9092efd85edf9037a6fbc0c1" # sync-marker: do not remove this comment, this is used for sync-dependencies by @graknlabs_graql
     )
 
 def graknlabs_client_java():
     git_repository(
         name = "graknlabs_client_java",
         remote = "https://github.com/graknlabs/client-java",
-        commit = "0fa3309739c56dfe35cd513c889a6c611c32894a",
+        commit = "4373dd79751432ca613be0e0b357097393844404",
     )
 
 def graknlabs_grakn_core():
     git_repository(
         name = "graknlabs_grakn_core",
         remote = "https://github.com/graknlabs/grakn",
-        commit = "921f8a7abb84b0d092241a77d5a687beb81d89ba",
+        commit = "aa2a8fa9b24f11af71578cdc3809cc8e41b47ac5",
     )
