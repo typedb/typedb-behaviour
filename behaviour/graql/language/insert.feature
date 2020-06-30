@@ -1024,9 +1024,7 @@ Feature: Graql Insert Query
       | AGE2 |
 
 
-  @ignore
-  # TODO: currently it creates two concepts! should create only 1
-  Scenario: inserting attribute values [2] and [2] with the same attribute type creates a single concept
+  Scenario: inserting two `double` attribute values with the same integer value creates a single concept
     Given graql define
       """
       define
@@ -1041,7 +1039,39 @@ Feature: Graql Insert Query
       """
     When concept identifiers are
       |     | check | value      |
-      | L2  | value | length:2   |
+      | L2  | value | length:2.0 |
+    When get answers of graql query
+      """
+      match $x isa length; get;
+      """
+    Then answer size is: 1
+    Then uniquely identify answer concepts
+      | x   |
+      | L2  |
+
+
+  Scenario: inserting the same integer twice as a `double` in separate transactions creates a single concept
+    Given graql define
+      """
+      define
+      length sub attribute, value double;
+      """
+    Given the integrity is validated
+    When graql insert
+      """
+      insert
+      $x 2 isa length;
+      """
+    Then the integrity is validated
+    When graql insert
+      """
+      insert
+      $y 2 isa length;
+      """
+    Then the integrity is validated
+    When concept identifiers are
+      |     | check | value      |
+      | L2  | value | length:2.0 |
     When get answers of graql query
       """
       match $x isa length; get;
@@ -1146,9 +1176,7 @@ Feature: Graql Insert Query
     Then the integrity is validated
 
 
-  @ignore
-  # TODO: gives inconsistent (non-deterministic) results!!
-  Scenario: 2 and 2.0 are considered to be distinct values when validating key uniqueness
+  Scenario: [2] and [2.0] are considered to be the same value when validating key uniqueness
     Given graql define
       """
       define
@@ -1156,25 +1184,13 @@ Feature: Graql Insert Query
       dref sub attribute, value double;
       """
     Given the integrity is validated
-    When graql insert
+    Then graql insert throws
       """
       insert
       $x isa cat, has dref 2;
       $y isa cat, has dref 2.0;
       """
-    When the integrity is validated
-    When get answers of graql query
-      """
-      match $x isa cat; get;
-      """
-    Then concept identifiers are
-      |      | check | value    |
-      | CAT1 | key   | dref:2   |
-      | CAT2 | key   | dref:2.0 |
-    Then uniquely identify answer concepts
-      | x    |
-      | CAT1 |
-      | CAT2 |
+    Then the integrity is validated
 
 
   # TODO - fix this; should fail but it does not!
