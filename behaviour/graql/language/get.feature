@@ -86,6 +86,14 @@ Feature: Graql Get Query
       | PER | LIS |
 
 
+  Scenario: match-get throws an error when there are unbound variables in the `get`
+    Then graql get throws
+      """
+      match $x isa person; get $y;
+      """
+    Then the integrity is validated
+
+
   ########
   # SORT #
   ########

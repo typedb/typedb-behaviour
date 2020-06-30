@@ -187,6 +187,20 @@ Feature: Graql Insert Query
     Then answer size is: 3
 
 
+  Scenario: an insert can be performed using a direct type specifier, and it functions equivalently to `isa`
+    When get answers of graql insert
+      """
+      insert $x isa! person, has name "Harry", has ref 0;
+      """
+    Then the integrity is validated
+    When concept identifiers are
+      |     | check | value |
+      | HAR | key   | ref:0 |
+    Then uniquely identify answer concepts
+      | x   |
+      | HAR |
+
+
   Scenario: attempting to insert an instance of an abstract type throws an error
     Given graql define
       """
@@ -378,6 +392,15 @@ Feature: Graql Insert Query
     | recite-pi-attempt | double   | 3.146      | 3.14158    |
     | is-alive          | boolean  | true       | false      |
     | work-start-date   | datetime | 2018-01-01 | 2020-01-01 |
+
+
+  Scenario: inserting an attribute onto a thing that can't have that attribute throws an error
+    Then graql insert throws
+      """
+      insert
+      $x isa company, has ref 0, has age 10;
+      """
+    Then the integrity is validated
 
 
   ########################################
@@ -1103,6 +1126,87 @@ Feature: Graql Insert Query
     Then answer size is: 1
 
 
+  Scenario Outline: a `<type>` inserted as [<insert>] is retrieved when matching [<match>]
+    Given graql define
+      """
+      define <attr> sub attribute, value <type>, key ref;
+      """
+    Given the integrity is validated
+    When get answers of graql insert
+      """
+      insert $x <insert> isa <attr>, has ref 0;
+      """
+    Then the integrity is validated
+    When concept identifiers are
+      |     | check | value |
+      | RF0 | key   | ref:0 |
+    Then uniquely identify answer concepts
+      | x   |
+      | RF0 |
+    When get answers of graql query
+      """
+      match $x <match> isa <attr>; get;
+      """
+    Then uniquely identify answer concepts
+      | x   |
+      | RF0 |
+
+    Examples:
+      | type     | attr       | insert           | match            |
+      | long     | shoe-size  | 92               | 92               |
+      | long     | shoe-size  | 92               | 92.00            |
+      | long     | shoe-size  | 92.0             | 92               |
+      | long     | shoe-size  | 92.0             | 92.00            |
+      | double   | length     | 52               | 52               |
+      | double   | length     | 52               | 52.00            |
+      | double   | length     | 52.0             | 52               |
+      | double   | length     | 52.0             | 52.00            |
+      | datetime | start-date | 2019-12-26       | 2019-12-26       |
+      | datetime | start-date | 2019-12-26       | 2019-12-26T00:00 |
+      | datetime | start-date | 2019-12-26T00:00 | 2019-12-26       |
+      | datetime | start-date | 2019-12-26T00:00 | 2019-12-26T00:00 |
+
+
+  Scenario Outline: inserting [<value>] as a `<type>` throws an error
+    Given graql define
+      """
+      define <attr> sub attribute, value <type>, key ref;
+      """
+    Given the integrity is validated
+    Then graql insert throws
+      """
+      insert $x <value> isa <attr>, has ref 0;
+      """
+    Then the integrity is validated
+
+    Examples:
+      | type     | attr       | value        |
+      | string   | colour     | 92           |
+      | string   | colour     | 92.8         |
+      | string   | colour     | false        |
+      | string   | colour     | 2019-12-26   |
+      | long     | shoe-size  | "28"         |
+      | long     | shoe-size  | true         |
+      | long     | shoe-size  | 2019-12-26   |
+      | double   | length     | "28.0"       |
+      | double   | length     | false        |
+      | double   | length     | 2019-12-26   |
+      | boolean  | is-alive   | 3            |
+      | boolean  | is-alive   | -17.9        |
+      | boolean  | is-alive   | 2019-12-26   |
+      | datetime | start-date | 1992         |
+      | datetime | start-date | 3.14         |
+      | datetime | start-date | false        |
+      | datetime | start-date | "2019-12-26" |
+    @ignore
+    # TODO: re-enable when only true and false are accepted as boolean values (issue #5803)
+    Examples:
+      | boolean  | is-alive   | 1            |
+      | boolean  | is-alive   | 0.0          |
+      | boolean  | is-alive   | "true"       |
+      | boolean  | is-alive   | "not true"   |
+
+
   Scenario: inserting an attribute with no value throws an error
     Then graql insert throws
       """
@@ -1488,6 +1592,76 @@ Feature: Graql Insert Query
       | ASH |
       | MIS |
       | BRO |
+
+
+  Scenario: re-inserting a matched instance does nothing
+    Given graql insert
+      """
+      insert
+      $x isa person, has ref 0;
+      """
+    Given the integrity is validated
+    Then graql insert
+      """
+      match
+        $x isa person;
+      insert
+        $x isa person;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x isa person; get;
+      """
+    Then answer size is: 1
+
+
+  Scenario: re-inserting a matched instance as an unrelated type throws an error
+    Given graql insert
+      """
+      insert
+      $x isa person, has ref 0;
+      """
+    Given the integrity is validated
+    Then graql insert throws
+      """
+      match
+        $x isa person;
+      insert
+        $x isa company;
+      """
+    Then the integrity is validated
+
+
+  Scenario: inserting a new type on an existing instance has no effect, if the old type is a subtype of the new one
+    Given graql define
+      """
+      define child sub person;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert $x isa child, has ref 0;
+      """
+    Given the integrity is validated
+    When graql insert
+      """
+      match
+        $x isa child;
+      insert
+        $x isa person;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x isa! child; get;
+      """
+    Then answer size is: 1
+    When get answers of graql query
+      """
+      match $x isa! person; get;
+      """
+    Then answer size is: 0
 
 
   ####################
