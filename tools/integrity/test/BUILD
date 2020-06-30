@@ -29,8 +29,8 @@ java_test(
         "//tools/integrity:integrity",
         "@graknlabs_client_java//:client-java",
         "@graknlabs_common//:common",
-        "//dependencies/maven/artifacts/com/google/guava",
-        "//dependencies/maven/artifacts/org/mockito:mockito-core",
+        "@maven//:com_google_guava_guava",
+        "@maven//:org_mockito_mockito_core",
     ],
 )
 
@@ -44,13 +44,13 @@ java_test(
         "//tools/integrity:integrity",
         "@graknlabs_client_java//:client-java",
         "@graknlabs_common//:common",
-        "//dependencies/maven/artifacts/com/google/guava",
-        "//dependencies/maven/artifacts/org/mockito:mockito-core",
-        "//dependencies/maven/artifacts/org/slf4j:slf4j-api",
+        "@maven//:com_google_guava_guava",
+        "@maven//:org_mockito_mockito_core",
+        "@maven//:org_slf4j_slf4j_api",
     ],
     runtime_deps = [
-        "//dependencies/maven/artifacts/ch/qos/logback:logback-classic",
-        "//dependencies/maven/artifacts/ch/qos/logback:logback-core",
+        "@maven//:ch_qos_logback_logback_classic",
+        "@maven//:ch_qos_logback_logback_core",
     ],
 )
 
@@ -64,13 +64,13 @@ java_test(
         "//tools/integrity:integrity",
         "@graknlabs_client_java//:client-java",
         "@graknlabs_graql//java:graql",
-        "//dependencies/maven/artifacts/com/google/guava",
-        "//dependencies/maven/artifacts/org/mockito:mockito-core",
-        "//dependencies/maven/artifacts/org/slf4j:slf4j-api",
+        "@maven//:com_google_guava_guava",
+        "@maven//:org_mockito_mockito_core",
+        "@maven//:org_slf4j_slf4j_api",
     ],
     runtime_deps = [
-        "//dependencies/maven/artifacts/ch/qos/logback:logback-classic",
-        "//dependencies/maven/artifacts/ch/qos/logback:logback-core",
+        "@maven//:ch_qos_logback_logback_classic",
+        "@maven//:ch_qos_logback_logback_core",
     ],
     classpath_resources = [
         "//tools/integrity/test:logback.xml",
