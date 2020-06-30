@@ -92,6 +92,24 @@ Feature: Concept Relation Type and Role Type
       | marriage:husband  |
       | marriage:wife     |
 
+  Scenario: Relation types that have instances cannot be deleted
+    When put relation type: marriage
+    When relation(marriage) set relates role: wife
+    When put entity type: person
+    When entity(person) set plays role: marriage:wife
+    When transaction commits
+    When connection close all sessions
+    When connection open data session for keyspace: grakn
+    When session opens transaction of type: write
+    When $m = relation(marriage) create new instance
+    When $a = entity(person) create new instance
+    When relation $m set player for role(wife): $a
+    When transaction commits
+    When connection close all sessions
+    When connection open schema session for keyspace: grakn
+    When session opens transaction of type: write
+    Then delete relation type: marriage; throws exception
+
   Scenario: Relation and role types can change labels
     When put relation type: parentship
     When relation(parentship) set relates role: parent

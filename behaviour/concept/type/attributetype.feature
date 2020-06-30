@@ -97,6 +97,19 @@ Feature: Concept Attribute Type
       | name |
       | age  |
 
+  Scenario: Attribute types that have instances cannot be deleted
+    When put attribute type: name, with value type: string
+    When transaction commits
+    When connection close all sessions
+    When connection open data session for keyspace: grakn
+    When session opens transaction of type: write
+    When $x = attribute(name) as(string) put: alice
+    When transaction commits
+    When connection close all sessions
+    When connection open schema session for keyspace: grakn
+    When session opens transaction of type: write
+    Then delete attribute type: name; throws exception
+
   Scenario: Attribute types can change labels
     When put attribute type: name, with value type: string
     Then attribute(name) get label: name

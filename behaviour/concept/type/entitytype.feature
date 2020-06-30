@@ -62,6 +62,19 @@ Feature: Concept Entity Type
       | person  |
       | company |
 
+  Scenario: Entity types that have instances cannot be deleted
+    When put entity type: person
+    When transaction commits
+    When connection close all sessions
+    When connection open data session for keyspace: grakn
+    When session opens transaction of type: write
+    When $x = entity(person) create new instance
+    When transaction commits
+    When connection close all sessions
+    When connection open schema session for keyspace: grakn
+    When session opens transaction of type: write
+    Then delete entity type: person; throws exception
+
   Scenario: Entity types can change labels
     When put entity type: person
     Then entity(person) get label: person
