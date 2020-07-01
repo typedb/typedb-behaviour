@@ -120,7 +120,7 @@ Feature: Graql Reasoner Attribute Attachment
       """
 
 
-  Scenario: when using a non-persisted value type, no duplicates are created
+  Scenario: reusing attributes, reattaching an attribute to an entity
     Given get answers of graql query
       """
       match $x isa genericEntity; get;
