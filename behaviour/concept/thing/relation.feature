@@ -76,7 +76,7 @@ Feature: Concept Relation
     Then relation(marriage) get instances contain: $m
     Then relation $m is null: false
     Then relation $m has type: marriage
-    Then transaction commits successfully: false
+    Then transaction commits; throws exception
 #
   Scenario: Role players can get relations
     When $m = relation(marriage) create new instance with key(license): m

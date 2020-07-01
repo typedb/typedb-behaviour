@@ -465,6 +465,17 @@ Feature: Graql Match Clause
       | EMR |
 
 
+  Scenario: when matching by a concept id that doesn't exist, an empty result is returned
+    When get answers of graql query
+      """
+      match
+        $x id V1337;
+        $y id V456;
+      get;
+      """
+    Then answer size is: 0
+
+
   ##########
   # THINGS #
   ##########
@@ -548,6 +559,75 @@ Feature: Graql Match Clause
       """
       match $x id <answer.x.id>; get;
       """
+
+
+  Scenario: when matching by a type whose label doesn't exist, an error is thrown
+    Then graql get throws
+      """
+      match $x isa ganesh; get;
+      """
+    Then the integrity is validated
+
+
+  Scenario: when matching by a type id that doesn't exist, an empty result is returned
+    When get answers of graql query
+      """
+      match $x isa $type; $type id V1337; get;
+      """
+    Then answer size is: 0
+
+
+  Scenario: when matching by a relation type whose label doesn't exist, an error is thrown
+    Then graql get throws
+      """
+      match ($x, $y) isa $type; $type type jakas-relacja; get;
+      """
+    Then the integrity is validated
+
+
+  Scenario: when matching a non-existent type label to a variable from a generic `isa` query, an error is thrown
+    Then graql get throws
+      """
+      match $x isa $type; $type type polok; get;
+      """
+    Then the integrity is validated
+
+
+  Scenario: when matching that the same variable is of two types, an empty result is returned
+    Then get answers of graql query
+      """
+      match
+        $x isa person;
+        $x isa company;
+      get;
+      """
+    Then answer size is: 0
+
+
+  Scenario: an error is thrown when matching that a variable has a specific type, when that type is in fact a role
+    Then graql get throws
+      """
+      match $x isa friend; get;
+      """
+    Then the integrity is validated
+
+
+  Scenario: an error is thrown when matching that a variable has a specific type, when that type is in fact a rule
+    Given graql define
+      """
+      define
+      metre-rule sub rule, when {
+        $x isa person;
+      }, then {
+        $x has name "metre";
+      };
+      """
+    Given the integrity is validated
+    Then graql get throws
+      """
+      match $x isa metre-rule; get;
+      """
+    Then the integrity is validated
 
 
   #############
@@ -666,6 +746,70 @@ Feature: Graql Match Clause
       | REF0 | REF1 |
 
 
+  Scenario: an error is thrown when matching an entity type as if it were a role
+    Then graql get throws
+      """
+      match (person: $x) isa relation; get;
+      """
+    Then the integrity is validated
+
+
+  Scenario: an error is thrown when matching an entity as if it were a relation
+    Then graql get throws
+      """
+      match ($x) isa person; get;
+      """
+    Then the integrity is validated
+
+
+  Scenario: an error is thrown when matching a non-existent type label as if it were a relation type
+    Then graql get throws
+      """
+      match ($x) isa bottle-of-rum; get;
+      """
+    Then the integrity is validated
+
+
+  Scenario: when matching a role that doesn't exist, an error is thrown
+    Then graql get throws
+      """
+      match (rolein-rolein-rolein: $rolein) isa relation; get;
+      """
+    Then the integrity is validated
+
+
+  Scenario: when matching a role in a relation type that doesn't have that role, an empty result is returned
+    When get answers of graql query
+      """
+      match (friend: $x) isa employment; get;
+      """
+    Then answer size is: 0
+
+
+  Scenario: when matching a roleplayer in a relation that can't actually play that role, an empty result is returned
+    When get answers of graql query
+      """
+      match
+        $x isa company;
+        ($x) isa friendship;
+      get;
+      """
+    Then answer size is: 0
+
+
+  Scenario: when querying for a non-existent relation type id, an empty result is returned
+    When get answers of graql query
+      """
+      match ($x, $y) isa $type; $type id V1337; get;
+      """
+    Then answer size is: 0
+    When get answers of graql query
+      """
+      match $r ($x, $y) isa $type; $r id V1337; get;
+      """
+    Then answer size is: 0
+
+
   ##############
   # ATTRIBUTES #
   ##############
@@ -691,6 +835,27 @@ Feature: Graql Match Clause
     Then uniquely identify answer concepts
       | a   |
       | ATT |
+
+    Examples:
+      | attr        | type     | value      |
+      | colour      | string   | "Green"    |
+      | calories    | long     | 1761       |
+      | grams       | double   | 9.6        |
+      | gluten-free | boolean  | false      |
+      | use-by-date | datetime | 2020-06-16 |
+
+
+  Scenario Outline: when matching a `<type>` attribute by a value that doesn't exist, an empty answer is returned
+    Given graql define
+      """
+      define <attr> sub attribute, value <type>, key ref;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $a <value>; get;
+      """
+    Then answer size is: 0
 
     Examples:
       | attr        | type     | value      |
@@ -768,6 +933,19 @@ Feature: Graql Match Clause
       | x   |
       | ONE |
       | NIN |
+
+
+  Scenario: when querying for a non-existent attribute type id, an empty result is returned
+    When get answers of graql query
+      """
+      match $x has name $y; $x id V1337; get;
+      """
+    Then answer size is: 0
+    When get answers of graql query
+      """
+      match $x has name $y; $y id V1337; get;
+      """
+    Then answer size is: 0
 
 
   #######################
@@ -890,6 +1068,30 @@ Feature: Graql Match Clause
       | PER |
 
 
+  Scenario: an error is thrown when matching by attribute ownership, when the owned thing is actually an entity
+    Then graql get throws
+      """
+      match $x has person "Luke"; get;
+      """
+    Then the integrity is validated
+
+
+  Scenario: when matching by an attribute ownership, if the owner can't actually own it, an empty result is returned
+    When get answers of graql query
+      """
+      match $x isa company, has age $n; get;
+      """
+    Then answer size is: 0
+
+
+  Scenario: an error is thrown when matching by attribute ownership, when the owned type label doesn't exist
+    Then graql get throws
+      """
+      match $x has bananananananana "rama"; get;
+      """
+    Then the integrity is validated
+
+
   ##############################
   # ATTRIBUTE VALUE COMPARISON #
   ##############################
@@ -927,6 +1129,27 @@ Feature: Graql Match Clause
       get;
       """
     Then answer size is: 1
+
+
+  Scenario: `has $attr == $x` matches owners of any instance `$y` of `$attr` where `$y` and `$x` are equal by value
+    Given graql insert
+      """
+      insert
+      $x isa person, has name "Susie", has age 16, has ref 0;
+      $y isa person, has name "Donald", has age 25, has ref 1;
+      $z isa person, has name "Ralph", has age 18, has ref 2;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x has age == 16; get;
+      """
+    And concept identifiers are
+      |     | check | value |
+      | SUS | key   | ref:0 |
+    Then uniquely identify answer concepts
+      | x   |
+      | SUS |
 
 
   Scenario: `has $attr > $x` matches owners of any instance `$y` of `$attr` where `$y > $x`
@@ -994,6 +1217,71 @@ Feature: Graql Match Clause
       | SUS |
 
 
+  Scenario: value comparisons can be performed between a `double` and a `long`
+    Given graql define
+      """
+      define
+      house-number sub attribute, value long;
+      length sub attribute, value double;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $x 1 isa house-number;
+      $y 2.0 isa length;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x isa house-number;
+        $x == 1.0;
+      get;
+      """
+    Then answer size is: 1
+    When get answers of graql query
+      """
+      match
+        $x isa length;
+        $x == 2;
+      get;
+      """
+    Then answer size is: 1
+    When get answers of graql query
+      """
+      match
+        $x isa house-number;
+        $x 1.0;
+      get;
+      """
+    Then answer size is: 1
+    When get answers of graql query
+      """
+      match
+        $x isa length;
+        $x 2;
+      get;
+      """
+    Then answer size is: 1
+    When get answers of graql query
+      """
+      match
+        $x isa attribute;
+        $x >= 1;
+      get;
+      """
+    Then answer size is: 2
+    When get answers of graql query
+      """
+      match
+        $x isa attribute;
+        $x < 2.0;
+      get;
+      """
+    Then answer size is: 1
+
+
   Scenario: when a thing owns multiple attributes of the same type, a value comparison matches if any value matches
     Given graql define
       """
@@ -1018,6 +1306,20 @@ Feature: Graql Match Clause
     Then uniquely identify answer concepts
       | x   |
       | PER |
+
+
+  Scenario: value comparison of unbound variables throws an error
+    Then graql get throws
+      """
+      match $x != $y; get;
+      """
+
+
+  Scenario: concept comparison of unbound variables throws an error
+    Then graql get throws
+      """
+      match $x !== $y; get;
+      """
 
 
   ############

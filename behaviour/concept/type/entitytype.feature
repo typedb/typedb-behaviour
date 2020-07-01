@@ -62,6 +62,19 @@ Feature: Concept Entity Type
       | person  |
       | company |
 
+  Scenario: Entity types that have instances cannot be deleted
+    When put entity type: person
+    When transaction commits
+    When connection close all sessions
+    When connection open data session for keyspace: grakn
+    When session opens transaction of type: write
+    When $x = entity(person) create new instance
+    When transaction commits
+    When connection close all sessions
+    When connection open schema session for keyspace: grakn
+    When session opens transaction of type: write
+    Then delete entity type: person; throws exception
+
   Scenario: Entity types can change labels
     When put entity type: person
     Then entity(person) get label: person
@@ -86,20 +99,20 @@ Feature: Concept Entity Type
     When entity(person) set abstract: true
     When put entity type: company
     Then entity(person) is abstract: true
-    Then entity(person) fails at creating an instance
+    Then entity(person) create new instance; throws exception
     Then entity(company) is abstract: false
     When transaction commits
     When session opens transaction of type: write
     Then entity(person) is abstract: true
-    Then entity(person) fails at creating an instance
+    Then entity(person) create new instance; throws exception
     Then entity(company) is abstract: false
     When entity(company) set abstract: true
     Then entity(company) is abstract: true
-    Then entity(company) fails at creating an instance
+    Then entity(company) create new instance; throws exception
     When transaction commits
     When session opens transaction of type: write
     Then entity(company) is abstract: true
-    Then entity(company) fails at creating an instance
+    Then entity(company) create new instance; throws exception
 
   Scenario: Entity types can be subtypes of other entity types
     When put entity type: man
@@ -204,6 +217,13 @@ Feature: Concept Entity Type
       | man    |
       | woman  |
 
+  Scenario: Entity types cannot subtype itself
+    When put entity type: person
+    Then entity(person) set supertype: person; throws exception
+    When transaction commits
+    When session opens transaction of type: write
+    Then entity(person) set supertype: person; throws exception
+
   Scenario: Entity types can have keys
     When put attribute type: email, with value type: string
     When put attribute type: username, with value type: string
@@ -246,8 +266,8 @@ Feature: Concept Entity Type
     When entity(person) set key attribute type: name
     When entity(person) set key attribute type: timestamp
     When entity(person) set key attribute type: timestamp
-    When entity(person) fails at setting key attribute type: is-open
-    When entity(person) fails at setting key attribute type: rating
+    When entity(person) set key attribute type: is-open; throws exception
+    When entity(person) set key attribute type: rating; throws exception
 
   Scenario: Entity types can have attributes
     When put attribute type: name, with value type: string
@@ -563,13 +583,13 @@ Feature: Concept Entity Type
     When put attribute type: username, with value type: string
     When put entity type: person
     When entity(person) set key attribute type: username
-    Then entity(person) fails at setting has attribute type: username
+    Then entity(person) set has attribute type: username; throws exception
 
   Scenario: Entity types cannot redeclare attributes as keys
     When put attribute type: name, with value type: string
     When put entity type: person
     When entity(person) set has attribute type: name
-    Then entity(person) fails at setting key attribute type: name
+    Then entity(person) set key attribute type: name; throws exception
 
   Scenario: Entity types cannot redeclare inherited keys and attributes
     When put attribute type: email, with value type: string
@@ -579,8 +599,8 @@ Feature: Concept Entity Type
     When entity(person) set has attribute type: name
     When put entity type: customer
     When entity(customer) set supertype: person
-    Then entity(customer) fails at setting key attribute type: email
-    Then entity(customer) fails at setting has attribute type: name
+    Then entity(customer) set key attribute type: email; throws exception
+    Then entity(customer) set has attribute type: name; throws exception
 
   Scenario: Entity types cannot redeclare inherited/overridden key/has attribute types
     When put attribute type: email, with value type: string
@@ -598,10 +618,10 @@ Feature: Concept Entity Type
     When entity(customer) set has attribute type: customer-name
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
-    Then entity(subscriber) fails at setting key attribute type: email
-    Then entity(subscriber) fails at setting key attribute type: customer-email
-    Then entity(subscriber) fails at setting has attribute type: name
-    Then entity(subscriber) fails at setting has attribute type: customer-name
+    Then entity(subscriber) set key attribute type: email; throws exception
+    Then entity(subscriber) set key attribute type: customer-email; throws exception
+    Then entity(subscriber) set has attribute type: name; throws exception
+    Then entity(subscriber) set has attribute type: customer-name; throws exception
 
   Scenario: Entity types cannot override declared keys and attributes
     When put attribute type: username, with value type: string
@@ -613,8 +633,8 @@ Feature: Concept Entity Type
     When put entity type: person
     When entity(person) set key attribute type: username
     When entity(person) set has attribute type: name
-    Then entity(person) fails at setting key attribute type: email as username
-    Then entity(person) fails at setting has attribute type: first-name as name
+    Then entity(person) set key attribute type: email as username; throws exception
+    Then entity(person) set has attribute type: first-name as name; throws exception
 
   Scenario: Entity types cannot override inherited keys as attributes
     When put attribute type: username, with value type: string
@@ -624,7 +644,7 @@ Feature: Concept Entity Type
     When entity(person) set key attribute type: username
     When put entity type: customer
     When entity(customer) set supertype: person
-    Then entity(customer) fails at setting has attribute type: email as username
+    Then entity(customer) set has attribute type: email as username; throws exception
 
   Scenario: Entity types cannot override inherited keys and attributes other than with their subtypes
     When put attribute type: username, with value type: string
@@ -636,8 +656,8 @@ Feature: Concept Entity Type
     When entity(person) set has attribute type: name
     When put entity type: customer
     When entity(customer) set supertype: person
-    Then entity(customer) fails at setting key attribute type: reference as username
-    Then entity(customer) fails at setting has attribute type: rating as name
+    Then entity(customer) set key attribute type: reference as username; throws exception
+    Then entity(customer) set has attribute type: rating as name; throws exception
 
   Scenario: Entity types can play role types
     When put relation type: marriage
@@ -847,8 +867,8 @@ Feature: Concept Entity Type
     When entity(man) set plays role: fathership:father as parent
     When put entity type: boy
     When entity(boy) set supertype: man
-    Then entity(boy) fails at setting plays role: parentship:parent
-    Then entity(boy) fails at setting plays role: fathership:father
+    Then entity(boy) set plays role: parentship:parent; throws exception
+    Then entity(boy) set plays role: fathership:father; throws exception
 
   Scenario: Entity types cannot override declared playing role types
     When put relation type: parentship
@@ -858,7 +878,7 @@ Feature: Concept Entity Type
     When relation(fathership) set relates role: father as parent
     When put entity type: person
     When entity(person) set plays role: parentship:parent
-    Then entity(person) fails at setting plays role: fathership:father as parentship:parent
+    Then entity(person) set plays role: fathership:father as parentship:parent; throws exception
 
   Scenario: Entity types cannot override inherited playing role types other than with their subtypes
     When put relation type: parentship
@@ -871,4 +891,4 @@ Feature: Concept Entity Type
     When entity(person) set plays role: parentship:child
     When put entity type: man
     When entity(man) set supertype: person
-    Then entity(man) fails at setting plays role: fathership:father as parentship:parent
+    Then entity(man) set plays role: fathership:father as parentship:parent; throws exception

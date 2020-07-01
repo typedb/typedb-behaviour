@@ -299,7 +299,7 @@ Feature: Graql Delete Query
     Then answer size is: 0
 
 
-  Scenario: delete an instance using an unrelated type label throws
+  Scenario: deleting an instance using an unrelated type label throws
     Given graql insert
       """
       insert
@@ -314,6 +314,23 @@ Feature: Graql Delete Query
         $r isa name; $r "John";
       delete
         $r isa person;
+      """
+    Then the integrity is validated
+
+
+  Scenario: deleting an instance using a non-existing type label throws
+    Given graql insert
+      """
+      insert
+      $n "John" isa name;
+      """
+    Given the integrity is validated
+    Then graql delete throws
+      """
+      match
+        $r isa name; $r "John";
+      delete
+        $r isa heffalump;
       """
     Then the integrity is validated
 
@@ -1292,6 +1309,17 @@ Feature: Graql Delete Query
       match $r isa friendship; get;
       """
     Then answer size is: 0
+
+
+  Scenario: an error is thrown when deleting the ownership of a non-existent attribute
+    Then graql delete throws
+      """
+      match
+        $x has diameter $val;
+      delete
+        $x has diameter $val;
+      """
+    Then the integrity is validated
 
 
   ####################

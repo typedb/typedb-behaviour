@@ -53,8 +53,8 @@ Feature: Connection Transaction
       | grakn   |
     When for each session, open transaction of type:
       | write   |
-    Then for each session, transaction commits successfully: true
-    Then for each session, transaction is open: false
+    Then for each session, transaction commits
+    Then for each session, transaction commits; throws exception
 
   Scenario: one keyspace, one session, re-committing transaction throws
     When connection create keyspace:
@@ -63,8 +63,8 @@ Feature: Connection Transaction
       | grakn   |
     When for each session, open transaction of type:
       | write   |
-    Then for each session, transaction commits successfully: true
-    Then for each session, transaction commits successfully: false
+    Then for each session, transaction commits
+    Then for each session, transaction commits; throws exception
 
   Scenario: one keyspace, one session, transaction close is idempotent
     When connection create keyspace:
@@ -73,9 +73,9 @@ Feature: Connection Transaction
       | grakn   |
     When for each session, open transaction of type:
       | write   |
-    Then for each session, transaction close
+    Then for each session, transaction closes
     Then for each session, transaction is open: false
-    Then for each session, transaction close
+    Then for each session, transaction closes
     Then for each session, transaction is open: false
 
   @ignore-grakn-core
