@@ -1,15 +1,29 @@
-# Constraints
-#  Only scenarios where there is only one possible resolution path can be tested in this way
+#
+# Copyright (C) 2020 Grakn Labs
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
 
-Feature: Graql Reasoner Attribute Attachment
+Feature: Attribute Attachment Resolution
 
-  Background: Initialise a session and transaction for each scenario
+  Background: Setup base KBs
+
     Given connection has been opened
     Given connection delete all keyspaces
     Given connection open sessions for keyspaces:
-      | test_attribute_attachment |
-    Given transaction is initialised
-    Given the integrity is validated
+      | completion |
+      | test       |
     Given graql define
       """
       define
@@ -21,19 +35,23 @@ Feature: Graql Reasoner Attribute Attachment
           has unrelated-attribute,
           has sub-string-attribute,
           has age,
-          has is-old;
+          has is-old,
+          key ref;
 
       tortoise sub entity,
           has age,
-          has is-old;
+          has is-old,
+          key ref;
 
       soft-drink sub entity,
-          has retailer;
+          has retailer,
+          key ref;
 
       team sub relation,
           relates leader,
           relates team-member,
-          has string-attribute;
+          has string-attribute,
+          key ref;
 
       string-attribute sub attribute, value string;
       retailer sub attribute, value string;
@@ -41,8 +59,8 @@ Feature: Graql Reasoner Attribute Attachment
       is-old sub attribute, value boolean;
       sub-string-attribute sub string-attribute;
       unrelated-attribute sub attribute, value string;
+      ref sub attribute, value long;
       """
-    Given the integrity is validated
 
 
   Scenario: when a rule copies an attribute from one entity to another, the existing attribute instance is reused
@@ -58,23 +76,28 @@ Feature: Graql Reasoner Attribute Attachment
         $y has string-attribute $r1;
       };
       """
-    Given the integrity is validated
     Given graql insert
       """
       insert
-      $geX isa person, has string-attribute "banana";
-      $geY isa person;
+      $geX isa person, has string-attribute "banana", has ref 0;
+      $geY isa person, has ref 1;
       """
-    When get answers of graql query
+    When reference kb is completed
+    Then for graql query
       """
       match $x isa person, has string-attribute $y; get;
       """
-    Then answer size is: 2
-    When get answers of graql query
+    Then answer count is correct
+    And answers resolution is correct
+    And answer count is: 2
+    Then for graql query
       """
       match $x isa string-attribute; get;
       """
-    Then answer size is: 1
+    Then answer count is correct
+    And answers resolution is correct
+    And answer count is: 1
+    Then test keyspace is complete
 
 
   Scenario: when multiple rules copy attributes from an entity, they all get resolved
@@ -106,24 +129,29 @@ Feature: Graql Reasoner Attribute Attachment
         $x has unrelated-attribute $r1;
       };
       """
-    Given the integrity is validated
     Given graql insert
       """
       insert
-      $geX isa person, has string-attribute "banana";
-      $geY isa person;
+      $geX isa person, has string-attribute "banana", has ref 0;
+      $geY isa person, has ref 1;
       """
-    Given get answers of graql query
+    When reference kb is completed
+    Then for graql query
       """
       match $x isa person; get;
       """
-    Given answer size is: 2
-    When get answers of graql query
+    Then answer count is correct
+    And answers resolution is correct
+    And answer count is: 2
+    Then for graql query
       """
       match $x isa person, has attribute $y; get;
       """
     # three attributes for each entity
-    Then answer size is: 6
+    Then answer count is correct
+    And answers resolution is correct
+    And answer count is: 6
+    Then test keyspace is complete
 
 
   Scenario: when a rule copies an attribute value to its sub-attribute, a new attribute concept is inferred
@@ -138,28 +166,35 @@ Feature: Graql Reasoner Attribute Attachment
         $x has sub-string-attribute $r1;
       };
       """
-    Given the integrity is validated
     Given graql insert
       """
       insert
-      $geX isa person, has string-attribute "banana";
+      $geX isa person, has string-attribute "banana", has ref 0;
       """
-    When get answers of graql query
+    When reference kb is completed
+    Then for graql query
       """
       match $x isa person, has sub-string-attribute $y; get;
       """
-    Then answer size is: 1
-    When get answers of graql query
+    Then answer count is correct
+    And answers resolution is correct
+    And answer count is: 1
+    Then for graql query
       """
       match $x isa sub-string-attribute; get;
       """
-    Then answer size is: 1
-    When get answers of graql query
+    Then answer count is correct
+    And answers resolution is correct
+    And answer count is: 1
+    Then for graql query
       """
       match $x isa string-attribute; $y isa sub-string-attribute; get;
       """
     # 2 SA instances - one base, one sub hence two answers
-    Then answer size is: 2
+    Then answer count is correct
+    And answers resolution is correct
+    And answer count is: 2
+    Then test keyspace is complete
 
 
   Scenario: when a rule copies an attribute value to an unrelated attribute, a new attribute concept is inferred
@@ -174,23 +209,28 @@ Feature: Graql Reasoner Attribute Attachment
         $x has unrelated-attribute $r1;
       };
       """
-    Given the integrity is validated
     Given graql insert
       """
       insert
-      $geX isa person, has string-attribute "banana";
-      $geY isa person;
+      $geX isa person, has string-attribute "banana", has ref 0;
+      $geY isa person, has ref 1;
       """
-    When get answers of graql query
+    When reference kb is completed
+    Then for graql query
       """
       match $x isa person, has unrelated-attribute $y; get;
       """
-    Then answer size is: 1
-    When get answers of graql query
+    Then answer count is correct
+    And answers resolution is correct
+    And answer count is: 1
+    Then for graql query
       """
       match $x isa unrelated-attribute; get;
       """
-    Then answer size is: 1
+    Then answer count is correct
+    And answers resolution is correct
+    And answer count is: 1
+    Then test keyspace is complete
 
 
   Scenario: when the same attribute is inferred on an entity and relation, both owners are correctly retrieved
@@ -215,19 +255,22 @@ Feature: Graql Reasoner Attribute Attachment
         $z has string-attribute $y;
       };
       """
-    Given the integrity is validated
     Given graql insert
       """
       insert
-      $geX isa person, has string-attribute "banana";
-      $geY isa person;
-      (leader:$geX, team-member:$geX) isa team;
+      $geX isa person, has string-attribute "banana", has ref 0;
+      $geY isa person, has ref 1;
+      (leader:$geX, team-member:$geX) isa team, has ref 2;
       """
-    When get answers of graql query
+    When reference kb is completed
+    Then for graql query
       """
       match $x has string-attribute $y; get;
       """
-    Then answer size is: 3
+    Then answer count is correct
+    And answers resolution is correct
+    And answer count is: 3
+    Then test keyspace is complete
 
 
   # TODO: doesn't it feel like this is in the wrong file?
@@ -237,23 +280,28 @@ Feature: Graql Reasoner Attribute Attachment
       define
       tortoises-become-old-at-age-1-year sub rule,
       when {
-        $x isa tortoise, has age > 0;
+        $x isa tortoise, has age $a;
+        $a > 0;
       },
       then {
-        $x has is-old true;
+        $x has is-old $t;
+        $t true;
       };
       """
-    Given the integrity is validated
     Given graql insert
       """
       insert
-      $se isa tortoise, has age 1;
+      $se isa tortoise, has age 1, has ref 0;
       """
-    When get answers of graql query
+    When reference kb is completed
+    Then for graql query
       """
       match $x has is-old $r; get;
       """
-    Then answer size is: 1
+    Then answer count is correct
+    And answers resolution is correct
+    And answer count is: 1
+    Then test keyspace is complete
 
 
   Scenario: a rule can infer an attribute value that did not previously exist in the graph
@@ -278,29 +326,36 @@ Feature: Graql Reasoner Attribute Attachment
         $y has retailer 'Ocado';
       };
       """
-    Given the integrity is validated
     Given graql insert
       """
       insert
-      $aeX isa soft-drink;
-      $aeY isa soft-drink;
+      $aeX isa soft-drink, has ref 0;
+      $aeY isa soft-drink, has ref 1;
       $r "Ocado" isa retailer;
       """
-    When get answers of graql query
+    When reference kb is completed
+    Then for graql query
       """
       match $x has retailer 'Ocado'; get;
       """
-    Then answer size is: 2
-    When get answers of graql query
+    Then answer count is correct
+    And answers resolution is correct
+    And answer count is: 2
+    Then for graql query
       """
       match $x has retailer $r; get;
       """
-    Then answer size is: 4
-    When get answers of graql query
+    Then answer count is correct
+    And answers resolution is correct
+    And answer count is: 4
+    Then for graql query
       """
       match $x has retailer 'Tesco'; get;
       """
-    Then answer size is: 2
+    Then answer count is correct
+    And answers resolution is correct
+    And answer count is: 2
+    Then test keyspace is complete
 
 
   Scenario: a rule can make a thing own an attribute that previously had no edges in the graph
@@ -314,19 +369,22 @@ Feature: Graql Reasoner Attribute Attachment
         $y isa soft-drink;
       },
       then {
-        $y has retailer 'Ocado';
+        $y has retailer $x;
       };
       """
-    Given the integrity is validated
     Given graql insert
       """
       insert
-      $aeX isa soft-drink;
-      $aeY isa soft-drink;
+      $aeX isa soft-drink, has ref 0;
+      $aeY isa soft-drink, has ref 1;
       $r "Ocado" isa retailer;
       """
-    When get answers of graql query
+    When reference kb is completed
+    Then for graql query
       """
       match $x isa soft-drink, has retailer 'Ocado'; get;
       """
-    Then answer size is: 2
+    Then answer count is correct
+    And answers resolution is correct
+    And answer count is: 2
+    Then test keyspace is complete
