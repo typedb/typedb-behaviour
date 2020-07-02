@@ -464,8 +464,8 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set key attribute type: contract-years
     When relation(employment) set key attribute type: reference
     When relation(employment) set key attribute type: start-date
-    When relation(employment) set key attribute type: is-permanent; throws exception
-    When relation(employment) set key attribute type: salary; throws exception
+    Then relation(employment) set key attribute type: is-permanent; throws exception
+    Then relation(employment) set key attribute type: salary; throws exception
 
   Scenario: Relation types can have attributes
     When put attribute type: date, with value type: datetime

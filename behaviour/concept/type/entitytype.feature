@@ -266,8 +266,8 @@ Feature: Concept Entity Type
     When entity(person) set key attribute type: name
     When entity(person) set key attribute type: timestamp
     When entity(person) set key attribute type: timestamp
-    When entity(person) set key attribute type: is-open; throws exception
-    When entity(person) set key attribute type: rating; throws exception
+    Then entity(person) set key attribute type: is-open; throws exception
+    Then entity(person) set key attribute type: rating; throws exception
 
   Scenario: Entity types can have attributes
     When put attribute type: name, with value type: string
