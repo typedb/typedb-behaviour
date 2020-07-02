@@ -14,249 +14,319 @@ Feature: Graql Reasoner Attribute Attachment
       """
       define
 
-      genericEntity sub entity,
-          plays someRole,
-          plays otherRole,
-          has reattachable-resource-string,
-          has unrelated-reattachable-string,
-          has subResource,
-          has resource-long,
-          has derived-resource-boolean;
+      person sub entity,
+          plays leader,
+          plays team-member,
+          has string-attribute,
+          has unrelated-attribute,
+          has sub-string-attribute,
+          has age,
+          has is-old;
 
-      anotherEntity sub entity,
-          has resource-long,
-          has derived-resource-boolean;
+      tortoise sub entity,
+          has age,
+          has is-old;
 
-      yetAnotherEntity sub entity,
-          has derived-resource-string;
+      soft-drink sub entity,
+          has retailer;
 
-      relation0 sub relation,
-          relates someRole,
-          relates otherRole,
-          has reattachable-resource-string;
+      team sub relation,
+          relates leader,
+          relates team-member,
+          has string-attribute;
 
-      derivable-resource-string sub attribute, value string;
-      reattachable-resource-string sub derivable-resource-string, value string;
-      derived-resource-string sub derivable-resource-string, value string;
-      resource-long sub attribute, value long;
-      derived-resource-boolean sub attribute, value boolean;
-      subResource sub reattachable-resource-string;
-      unrelated-reattachable-string sub attribute, value string;
+      string-attribute sub attribute, value string;
+      retailer sub attribute, value string;
+      age sub attribute, value long;
+      is-old sub attribute, value boolean;
+      sub-string-attribute sub string-attribute;
+      unrelated-attribute sub attribute, value string;
+      """
+    Given the integrity is validated
 
-      transferResourceToEntity sub rule,
+
+  Scenario: when a rule copies an attribute from one entity to another, the existing attribute instance is reused
+    Given graql define
+      """
+      define
+      transfer-string-attribute-to-other-people sub rule,
       when {
-          $x isa genericEntity, has reattachable-resource-string $r1;
-          $y isa genericEntity;
+        $x isa person, has string-attribute $r1;
+        $y isa person;
       },
       then {
-          $y has reattachable-resource-string $r1;
-      };
-
-      transferResourceToRelation sub rule,
-      when {
-          $x isa genericEntity, has reattachable-resource-string $y;
-          $z isa relation0;
-      },
-      then {
-          $z has reattachable-resource-string $y;
-      };
-
-      attachResourceValueToResourceOfDifferentSubtype sub rule,
-      when {
-          $x isa genericEntity, has reattachable-resource-string $r1;
-      },
-      then {
-          $x has subResource $r1;
-      };
-
-      attachResourceValueToResourceOfUnrelatedType sub rule,
-      when {
-          $x isa genericEntity, has reattachable-resource-string $r1;
-      },
-      then {
-          $x has unrelated-reattachable-string $r1;
-      };
-
-      setResourceFlagBasedOnOtherResourceValue sub rule,
-      when {
-          $x isa anotherEntity, has resource-long > 0;
-      },
-      then {
-          $x has derived-resource-boolean true;
-      };
-
-      attachResourceToEntity sub rule,
-      when {
-          $x isa yetAnotherEntity;
-      },
-      then {
-          $x has derived-resource-string 'value';
-      };
-
-      attachUnattachedResourceToEntity sub rule,
-      when {
-          $x isa derived-resource-string;
-          $x == 'unattached';
-          $y isa yetAnotherEntity;
-      },
-      then {
-          $y has derived-resource-string 'unattached';
+        $y has string-attribute $r1;
       };
       """
     Given the integrity is validated
     Given graql insert
       """
       insert
-
-      $geX isa genericEntity, has reattachable-resource-string "value";
-      $geY isa genericEntity;
-      (someRole:$geX, otherRole:$geX) isa relation0;
-
-      $se isa anotherEntity, has resource-long 1;
-      $aeX isa yetAnotherEntity;
-      $aeY isa yetAnotherEntity;
-
-      $r "unattached" isa derived-resource-string;
+      $geX isa person, has string-attribute "banana";
+      $geY isa person;
       """
-
-
-  Scenario: reusing attributes, reattaching an attribute to an entity
-    Given get answers of graql query
-      """
-      match $x isa genericEntity; get;
-      """
-    Given answer size is: 2
     When get answers of graql query
       """
-      match $x isa genericEntity, has reattachable-resource-string $y; get;
+      match $x isa person, has string-attribute $y; get;
       """
-    # two attributes for each entity
-    Then answer size is: 4
-    When get answers of graql query
-      """
-      match $x isa reattachable-resource-string; get;
-      """
-    # one base attribute, one sub
     Then answer size is: 2
+    When get answers of graql query
+      """
+      match $x isa string-attribute; get;
+      """
+    Then answer size is: 1
 
 
-  Scenario: reusing attributes, quering for generic ownership
+  Scenario: when multiple rules copy attributes from an entity, they all get resolved
+    Given graql define
+      """
+      define
+      transfer-string-attribute-to-other-people sub rule,
+      when {
+        $x isa person, has string-attribute $r1;
+        $y isa person;
+      },
+      then {
+        $y has string-attribute $r1;
+      };
+
+      transfer-attribute-value-to-sub-attribute sub rule,
+      when {
+        $x isa person, has string-attribute $r1;
+      },
+      then {
+        $x has sub-string-attribute $r1;
+      };
+
+      transfer-attribute-value-to-unrelated-attribute sub rule,
+      when {
+        $x isa person, has string-attribute $r1;
+      },
+      then {
+        $x has unrelated-attribute $r1;
+      };
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $geX isa person, has string-attribute "banana";
+      $geY isa person;
+      """
     Given get answers of graql query
       """
-      match $x isa genericEntity; get;
+      match $x isa person; get;
       """
     Given answer size is: 2
     When get answers of graql query
       """
-      match $x isa genericEntity, has attribute $y; get;
+      match $x isa person, has attribute $y; get;
       """
     # three attributes for each entity
     Then answer size is: 6
 
 
-  Scenario: reusing attributes, using existing attribute to create sub-attribute
-    Given get answers of graql query
+  Scenario: when a rule copies an attribute value to its sub-attribute, a new attribute concept is inferred
+    Given graql define
       """
-      match $x isa genericEntity; get;
+      define
+      transfer-attribute-value-to-sub-attribute sub rule,
+      when {
+        $x isa person, has string-attribute $r1;
+      },
+      then {
+        $x has sub-string-attribute $r1;
+      };
       """
-    Given answer size is: 2
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $geX isa person, has string-attribute "banana";
+      """
     When get answers of graql query
       """
-      match $x isa genericEntity, has subResource $y; get;
-      """
-    Then answer size is: 2
-    When get answers of graql query
-      """
-      match $x isa subResource; get;
+      match $x isa person, has sub-string-attribute $y; get;
       """
     Then answer size is: 1
     When get answers of graql query
       """
-      match $x isa reattachable-resource-string; $y isa subResource; get;
-      """
-    # 2 RRS instances - one base, one sub hence two answers
-    Then answer size is: 2
-
-
-  Scenario: reusing attributes, using existing attribute to create unrelated attribute
-    Given get answers of graql query
-      """
-      match $x isa genericEntity; get;
-      """
-    Given answer size is: 2
-    When get answers of graql query
-      """
-      match $x isa genericEntity, has unrelated-reattachable-string $y; get;
-      """
-    Then answer size is: 2
-    When get answers of graql query
-      """
-      match $x isa unrelated-reattachable-string; get;
+      match $x isa sub-string-attribute; get;
       """
     Then answer size is: 1
     When get answers of graql query
       """
-      match $x isa reattachable-resource-string; $y isa unrelated-reattachable-string; get;
+      match $x isa string-attribute; $y isa sub-string-attribute; get;
       """
-    # 2 RRS instances - one base, one sub hence two answers
+    # 2 SA instances - one base, one sub hence two answers
     Then answer size is: 2
 
 
-  Scenario: when reasoning with attributes, results are complete
+  Scenario: when a rule copies an attribute value to an unrelated attribute, a new attribute concept is inferred
+    Given graql define
+      """
+      define
+      transfer-attribute-value-to-unrelated-attribute sub rule,
+      when {
+        $x isa person, has string-attribute $r1;
+      },
+      then {
+        $x has unrelated-attribute $r1;
+      };
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $geX isa person, has string-attribute "banana";
+      $geY isa person;
+      """
     When get answers of graql query
       """
-      match $x has reattachable-resource-string $y; get;
+      match $x isa person, has unrelated-attribute $y; get;
       """
-    Then answer size is: 5
-
-
-  Scenario: reusing attributes, attaching existing attribute to a relation
-    Given get answers of graql query
-      """
-      match $x isa genericEntity; get;
-      """
-    Given answer size is: 2
+    Then answer size is: 1
     When get answers of graql query
       """
-      match $x isa genericEntity, has reattachable-resource-string $y; $z isa relation0; get;
+      match $x isa unrelated-attribute; get;
+      """
+    Then answer size is: 1
+
+
+  Scenario: when the same attribute is inferred on an entity and relation, both owners are correctly retrieved
+    Given graql define
+      """
+      define
+      transfer-string-attribute-to-other-people sub rule,
+      when {
+        $x isa person, has string-attribute $r1;
+        $y isa person;
+      },
+      then {
+        $y has string-attribute $r1;
+      };
+
+      transfer-string-attribute-from-people-to-teams sub rule,
+      when {
+        $x isa person, has string-attribute $y;
+        $z isa team;
+      },
+      then {
+        $z has string-attribute $y;
+      };
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $geX isa person, has string-attribute "banana";
+      $geY isa person;
+      (leader:$geX, team-member:$geX) isa team;
+      """
+    When get answers of graql query
+      """
+      match $x has string-attribute $y; get;
+      """
+    Then answer size is: 3
+
+
+  # TODO: doesn't it feel like this is in the wrong file?
+  Scenario: a rule can infer an attribute ownership based on a value predicate
+    Given graql define
+      """
+      define
+      tortoises-become-old-at-age-1-year sub rule,
+      when {
+        $x isa tortoise, has age > 0;
+      },
+      then {
+        $x has is-old true;
+      };
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $se isa tortoise, has age 1;
+      """
+    When get answers of graql query
+      """
+      match $x has is-old $r; get;
+      """
+    Then answer size is: 1
+
+
+  Scenario: a rule can infer an attribute value that did not previously exist in the graph
+    Given graql define
+      """
+      define
+      tesco-sells-all-soft-drinks sub rule,
+      when {
+        $x isa soft-drink;
+      },
+      then {
+        $x has retailer 'Tesco';
+      };
+
+      if-ocado-exists-it-sells-all-soft-drinks sub rule,
+      when {
+        $x isa retailer;
+        $x == 'Ocado';
+        $y isa soft-drink;
+      },
+      then {
+        $y has retailer 'Ocado';
+      };
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $aeX isa soft-drink;
+      $aeY isa soft-drink;
+      $r "Ocado" isa retailer;
+      """
+    When get answers of graql query
+      """
+      match $x has retailer 'Ocado'; get;
+      """
+    Then answer size is: 2
+    When get answers of graql query
+      """
+      match $x has retailer $r; get;
       """
     Then answer size is: 4
     When get answers of graql query
       """
-      match $x isa relation0, has reattachable-resource-string $y; get;
-      """
-    Then answer size is: 1
-
-
-  Scenario: reusing attributes, deriving attribute from another attribute with conditional value
-    When get answers of graql query
-      """
-      match $x has derived-resource-boolean $r; get;
-      """
-    Then answer size is: 1
-
-
-  Scenario: deriving an attribute with a specific value
-    When get answers of graql query
-      """
-      match $x has derived-resource-string 'value'; get;
-      """
-    Then answer size is: 2
-    When get answers of graql query
-      """
-      match $x has derived-resource-string $r; get;
-      """
-    Then answer size is: 4
-    When get answers of graql query
-      """
-      match $x has derived-resource-string 'value'; get;
+      match $x has retailer 'Tesco'; get;
       """
     Then answer size is: 2
 
 
-  Scenario: reusing attributes: attaching a stray attribute to an entity doesn't throw errors
+  Scenario: a rule can make a thing own an attribute that previously had no edges in the graph
+    Given graql define
+      """
+      define
+      if-ocado-exists-it-sells-all-soft-drinks sub rule,
+      when {
+        $x isa retailer;
+        $x == 'Ocado';
+        $y isa soft-drink;
+      },
+      then {
+        $y has retailer 'Ocado';
+      };
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $aeX isa soft-drink;
+      $aeY isa soft-drink;
+      $r "Ocado" isa retailer;
+      """
     When get answers of graql query
       """
-      match $x isa yetAnotherEntity, has derived-resource-string 'unattached'; get;
+      match $x isa soft-drink, has retailer 'Ocado'; get;
       """
     Then answer size is: 2
