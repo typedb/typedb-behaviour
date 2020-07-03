@@ -28,7 +28,7 @@ Feature: Concept Entity
     Given put attribute type: username, with value type: string
     Given put attribute type: email, with value type: string
     Given put entity type: person
-    Given entity(person) set key attribute type: username
+    Given entity(person) set has key type: username
     Given entity(person) set has attribute type: email
     Given transaction commits
     Given connection close all sessions
