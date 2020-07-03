@@ -591,16 +591,44 @@ Feature: Concept Entity Type
     When entity(person) set has attribute type: name
     Then entity(person) set has key type: name; throws exception
 
-  Scenario: Entity types cannot redeclare inherited keys and attributes
+  Scenario: Entity types can redeclare inherited attributes as keys (which will override)
+    When put attribute type: email, with value type: string
+    When put attribute type: name, with value type: string
+    When put entity type: person
+    When entity(person) set has attribute type: email
+    When put entity type: customer
+    When entity(customer) set supertype: person
+    Then entity(customer) set has key type: email
+    Then entity(customer) get has key types contain:
+      | email |
+    When transaction commits
+    When session opens transaction of type: write
+    Then entity(customer) get has key types contain:
+      | email |
+    When put entity type: subscriber
+    When entity(subscriber) set supertype: person
+    Then entity(subscriber) set has key type: email
+    Then entity(subscriber) get has key types contain:
+      | email |
+
+  Scenario: Entity types cannot redeclare inherited attributes as attributes
+    When put attribute type: email, with value type: string
+    When put attribute type: name, with value type: string
+    When put entity type: person
+    When entity(person) set has attribute type: name
+    When put entity type: customer
+    When entity(customer) set supertype: person
+    Then entity(customer) set has attribute type: name; throws exception
+
+  Scenario: Entity types cannot redeclare inherited keys and keys or attributes
     When put attribute type: email, with value type: string
     When put attribute type: name, with value type: string
     When put entity type: person
     When entity(person) set has key type: email
-    When entity(person) set has attribute type: name
     When put entity type: customer
     When entity(customer) set supertype: person
     Then entity(customer) set has key type: email; throws exception
-    Then entity(customer) set has attribute type: name; throws exception
+    Then entity(customer) set has attribute type: email; throws exception
 
   Scenario: Entity types cannot redeclare inherited/overridden key/has attribute types
     When put attribute type: email, with value type: string
