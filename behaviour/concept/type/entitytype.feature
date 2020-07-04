@@ -579,7 +579,7 @@ Feature: Concept Entity Type
     Then entity(customer) get has attribute types do not contain:
       | name |
 
-  Scenario: Entity types can redeclare attributes as keys
+  Scenario: Entity types can redeclare keys as attributes
     When put attribute type: name, with value type: string
     When put attribute type: email, with value type: string
     When put entity type: person
