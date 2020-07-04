@@ -789,12 +789,12 @@ Feature: Concept Relation Type and Role Type
     When relation(marriage) set has key type: license
     Then relation(marriage) set has attribute type: license; throws exception
 
-  Scenario: Relation types cannot redeclare attributes as keys
+  Scenario: Relation types can redeclare attributes as keys
     When put attribute type: date, with value type: datetime
     When put relation type: marriage
     When relation(marriage) set relates role: spouse
     When relation(marriage) set has attribute type: date
-    Then relation(marriage) set has key type: date; throws exception
+    Then relation(marriage) set has key type: date
 
   Scenario: Relation types cannot redeclare inherited keys and attributes
     When put attribute type: employment-reference, with value type: string

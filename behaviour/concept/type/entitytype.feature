@@ -591,10 +591,10 @@ Feature: Concept Entity Type
     When put entity type: person
     When entity(person) set has attribute type: name
     When entity(person) set has attribute type: email
-    Then entity(person) set has key type: name; throws exception
+    Then entity(person) set has key type: name
     When transaction commits
     When session opens transaction of type: write
-    Then entity(person) set has key type: email; throws exception
+    Then entity(person) set has key type: email
 
   Scenario: Entity types can redeclare inherited attributes as keys (which will override)
     When put attribute type: email, with value type: string
