@@ -585,15 +585,19 @@ Feature: Concept Entity Type
     When entity(person) set has key type: username
     Then entity(person) set has attribute type: username; throws exception
 
-  Scenario: Entity types cannot redeclare attributes as keys
+  Scenario: Entity types can redeclare attributes as keys
     When put attribute type: name, with value type: string
+    When put attribute type: email, with value type: string
     When put entity type: person
     When entity(person) set has attribute type: name
+    When entity(person) set has attribute type: email
     Then entity(person) set has key type: name; throws exception
+    When transaction commits
+    When session opens transaction of type: write
+    Then entity(person) set has key type: email; throws exception
 
   Scenario: Entity types can redeclare inherited attributes as keys (which will override)
     When put attribute type: email, with value type: string
-    When put attribute type: name, with value type: string
     When put entity type: person
     When entity(person) set has attribute type: email
     When put entity type: customer
@@ -620,7 +624,7 @@ Feature: Concept Entity Type
     When entity(customer) set supertype: person
     Then entity(customer) set has attribute type: name; throws exception
 
-  Scenario: Entity types cannot redeclare inherited keys and keys or attributes
+  Scenario: Entity types cannot redeclare inherited keys as keys or attributes
     When put attribute type: email, with value type: string
     When put attribute type: name, with value type: string
     When put entity type: person
