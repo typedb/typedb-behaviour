@@ -579,11 +579,16 @@ Feature: Concept Entity Type
     Then entity(customer) get has attribute types do not contain:
       | name |
 
-  Scenario: Entity types cannot redeclare keys as attributes
-    When put attribute type: username, with value type: string
+  Scenario: Entity types can redeclare attributes as keys
+    When put attribute type: name, with value type: string
+    When put attribute type: email, with value type: string
     When put entity type: person
-    When entity(person) set has key type: username
-    Then entity(person) set has attribute type: username; throws exception
+    When entity(person) set has key type: name
+    When entity(person) set has key type: email
+    Then entity(person) set has attribute type: name
+    When transaction commits
+    When session opens transaction of type: write
+    Then entity(person) set has attribute type: email
 
   Scenario: Entity types can redeclare attributes as keys
     When put attribute type: name, with value type: string
