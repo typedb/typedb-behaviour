@@ -782,19 +782,29 @@ Feature: Concept Relation Type and Role Type
     Then relation(contractor-employment) get has attribute types do not contain:
       | employment-reference |
 
-  Scenario: Relation types cannot redeclare keys as attributes
+  Scenario: Relation types can redeclare keys as attributes
+    When put attribute type: date, with value type: datetime
     When put attribute type: license, with value type: string
     When put relation type: marriage
     When relation(marriage) set relates role: spouse
+    When relation(marriage) set has key type: date
     When relation(marriage) set has key type: license
-    Then relation(marriage) set has attribute type: license; throws exception
+    When relation(marriage) set has attribute type: date
+    When transaction commits
+    When session opens transaction of type: write
+    Then relation(marriage) set has attribute type: license
 
   Scenario: Relation types can redeclare attributes as keys
     When put attribute type: date, with value type: datetime
+    When put attribute type: license, with value type: string
     When put relation type: marriage
     When relation(marriage) set relates role: spouse
     When relation(marriage) set has attribute type: date
+    When relation(marriage) set has attribute type: license
     Then relation(marriage) set has key type: date
+    When transaction commits
+    When session opens transaction of type: write
+    When relation(marriage) set has key type: license
 
   Scenario: Relation types cannot redeclare inherited keys and attributes
     When put attribute type: employment-reference, with value type: string
