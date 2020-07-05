@@ -389,10 +389,14 @@ Feature: Concept Entity Type
 
   Scenario: Entity types can inherited keys and attributes that are subtypes of each other
     When put attribute type: username, with value type: string
+    When attribute(username) set abstract: true
     When put attribute type: score, with value type: double
+    When attribute(score) set abstract: true
     When put attribute type: reference, with value type: string
+    When attribute(reference) set abstract: true
     When attribute(reference) set supertype: username
     When put attribute type: rating, with value type: double
+    When attribute(rating) set abstract: true
     When attribute(rating) set supertype: score
     When put entity type: person
     When entity(person) set has key type: username
@@ -452,14 +456,18 @@ Feature: Concept Entity Type
   Scenario: Entity types can override inherited keys and attributes
     When put attribute type: username, with value type: string
     When put attribute type: email, with value type: string
+    When attribute(email) set abstract: true
     When put attribute type: name, with value type: string
+    When attribute(name) set abstract: true
     When put attribute type: age, with value type: long
     When put attribute type: reference, with value type: string
+    When attribute(reference) set abstract: true
     When put attribute type: work-email, with value type: string
     When attribute(work-email) set supertype: email
     When put attribute type: nick-name, with value type: string
     When attribute(nick-name) set supertype: name
     When put attribute type: rating, with value type: double
+    When attribute(rating) set abstract: true
     When put entity type: person
     When entity(person) set has key type: username
     When entity(person) set has key type: email
@@ -553,6 +561,7 @@ Feature: Concept Entity Type
 
   Scenario: Entity types can override inherited attributes as keys
     When put attribute type: name, with value type: string
+    When attribute(name) set abstract: true
     When put attribute type: username, with value type: string
     When attribute(username) set supertype: name
     When put entity type: person
@@ -641,7 +650,9 @@ Feature: Concept Entity Type
 
   Scenario: Entity types cannot redeclare inherited/overridden key/has attribute types
     When put attribute type: email, with value type: string
+    When attribute(email) set abstract: true
     When put attribute type: name, with value type: string
+    When attribute(name) set abstract: true
     When put attribute type: customer-email, with value type: string
     When attribute(customer-email) set supertype: email
     When put attribute type: customer-name, with value type: string
@@ -662,9 +673,11 @@ Feature: Concept Entity Type
 
   Scenario: Entity types cannot override declared keys and attributes
     When put attribute type: username, with value type: string
+    When attribute(username) set abstract: true
     When put attribute type: email, with value type: string
     When attribute(email) set supertype: username
     When put attribute type: name, with value type: string
+    When attribute(name) set abstract: true
     When put attribute type: first-name, with value type: string
     When attribute(first-name) set supertype: name
     When put entity type: person
@@ -675,6 +688,7 @@ Feature: Concept Entity Type
 
   Scenario: Entity types cannot override inherited keys as attributes
     When put attribute type: username, with value type: string
+    When attribute(username) set abstract: true
     When put attribute type: email, with value type: string
     When attribute(email) set supertype: username
     When put entity type: person

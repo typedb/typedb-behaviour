@@ -602,10 +602,14 @@ Feature: Concept Relation Type and Role Type
 
   Scenario: Relation types can inherit keys and attributes that are subtypes of each other
     When put attribute type: employment-reference, with value type: string
+    When attribute(employment-reference) set abstract: true
     When put attribute type: employment-hours, with value type: long
+    When attribute(employment-hours) set abstract: true
     When put attribute type: contractor-reference, with value type: string
+    When attribute(contractor-reference) set abstract: true
     When attribute(contractor-reference) set supertype: employment-reference
     When put attribute type: contractor-hours, with value type: long
+    When attribute(contractor-hours) set abstract: true
     When attribute(contractor-hours) set supertype: employment-hours
     When put relation type: employment
     When relation(employment) set relates role: employee
@@ -677,10 +681,14 @@ Feature: Concept Relation Type and Role Type
 
   Scenario: Relation types can override inherited keys and attributes
     When put attribute type: employment-reference, with value type: string
+    When attribute(employment-reference) set abstract: true
     When put attribute type: employment-hours, with value type: long
+    When attribute(employment-hours) set abstract: true
     When put attribute type: contractor-reference, with value type: string
+    When attribute(contractor-reference) set abstract: true
     When attribute(contractor-reference) set supertype: employment-reference
     When put attribute type: contractor-hours, with value type: long
+    When attribute(contractor-hours) set abstract: true
     When attribute(contractor-hours) set supertype: employment-hours
     When put relation type: employment
     When relation(employment) set relates role: employee
@@ -754,6 +762,7 @@ Feature: Concept Relation Type and Role Type
 
   Scenario: Relation types can override inherited attributes as keys
     When put attribute type: employment-reference, with value type: string
+    When attribute(employment-reference) set abstract: true
     When put attribute type: contractor-reference, with value type: string
     When attribute(contractor-reference) set supertype: employment-reference
     When put relation type: employment
@@ -821,7 +830,9 @@ Feature: Concept Relation Type and Role Type
 
   Scenario: Relation types cannot redeclare inherited/overridden key/has attribute types
     When put attribute type: employment-reference, with value type: string
+    When attribute(employment-reference) set abstract: true
     When put attribute type: employment-hours, with value type: long
+    When attribute(employment-hours) set abstract: true
     When put attribute type: contractor-reference, with value type: string
     When attribute(contractor-reference) set supertype: employment-reference
     When put attribute type: contractor-hours, with value type: long
@@ -843,9 +854,11 @@ Feature: Concept Relation Type and Role Type
 
   Scenario: Relation types cannot override declared keys and attributes
     When put attribute type: reference, with value type: string
+    When attribute(reference) set abstract: true
     When put attribute type: social-security-number, with value type: string
     When attribute(social-security-number) set supertype: reference
     When put attribute type: hours, with value type: long
+    When attribute(hours) set abstract: true
     When put attribute type: max-hours, with value type: long
     When attribute(max-hours) set supertype: hours
     When put relation type: employment
@@ -858,6 +871,7 @@ Feature: Concept Relation Type and Role Type
 
   Scenario: Relation types cannot override inherited keys as attributes
     When put attribute type: employment-reference, with value type: string
+    When attribute(employment-reference) set abstract: true
     When put attribute type: contractor-reference, with value type: string
     When attribute(contractor-reference) set supertype: employment-reference
     When put relation type: employment
