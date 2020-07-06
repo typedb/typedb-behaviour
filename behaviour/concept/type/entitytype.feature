@@ -399,9 +399,11 @@ Feature: Concept Entity Type
     When attribute(rating) set abstract: true
     When attribute(rating) set supertype: score
     When put entity type: person
+    When entity(person) set abstract: true
     When entity(person) set has key type: username
     When entity(person) set has attribute type: score
     When put entity type: customer
+    When entity(customer) set abstract: true
     When entity(customer) set supertype: person
     When entity(customer) set has key type: reference
     When entity(customer) set has attribute type: rating
@@ -428,6 +430,7 @@ Feature: Concept Entity Type
     When put attribute type: points, with value type: double
     When attribute(points) set supertype: rating
     When put entity type: subscriber
+    When entity(subscriber) set abstract: true
     When entity(subscriber) set supertype: customer
     When entity(subscriber) set has key type: license
     When entity(subscriber) set has attribute type: points
@@ -469,11 +472,13 @@ Feature: Concept Entity Type
     When put attribute type: rating, with value type: double
     When attribute(rating) set abstract: true
     When put entity type: person
+    When entity(person) set abstract: true
     When entity(person) set has key type: username
     When entity(person) set has key type: email
     When entity(person) set has attribute type: name
     When entity(person) set has attribute type: age
     When put entity type: customer
+    When entity(customer) set abstract: true
     When entity(customer) set supertype: person
     When entity(customer) set has key type: reference
     When entity(customer) set has key type: work-email as email
@@ -565,6 +570,7 @@ Feature: Concept Entity Type
     When put attribute type: username, with value type: string
     When attribute(username) set supertype: name
     When put entity type: person
+    When entity(person) set abstract: true
     When entity(person) set has attribute type: name
     When put entity type: customer
     When entity(customer) set supertype: person
@@ -658,6 +664,7 @@ Feature: Concept Entity Type
     When put attribute type: customer-name, with value type: string
     When attribute(customer-name) set supertype: name
     When put entity type: person
+    When entity(person) set abstract: true
     When entity(person) set has key type: email
     When entity(person) set has attribute type: name
     When put entity type: customer
@@ -681,6 +688,7 @@ Feature: Concept Entity Type
     When put attribute type: first-name, with value type: string
     When attribute(first-name) set supertype: name
     When put entity type: person
+    When entity(person) set abstract: true
     When entity(person) set has key type: username
     When entity(person) set has attribute type: name
     Then entity(person) set has key type: email as username; throws exception
@@ -692,6 +700,7 @@ Feature: Concept Entity Type
     When put attribute type: email, with value type: string
     When attribute(email) set supertype: username
     When put entity type: person
+    When entity(person) set abstract: true
     When entity(person) set has key type: username
     When put entity type: customer
     When entity(customer) set supertype: person

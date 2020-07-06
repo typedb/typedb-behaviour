@@ -612,11 +612,13 @@ Feature: Concept Relation Type and Role Type
     When attribute(contractor-hours) set abstract: true
     When attribute(contractor-hours) set supertype: employment-hours
     When put relation type: employment
+    When relation(employment) set abstract: true
     When relation(employment) set relates role: employee
     When relation(employment) set relates role: employer
     When relation(employment) set has key type: employment-reference
     When relation(employment) set has attribute type: employment-hours
     When put relation type: contractor-employment
+    When relation(contractor-employment) set abstract: true
     When relation(contractor-employment) set supertype: employment
     When relation(contractor-employment) set has key type: contractor-reference
     When relation(contractor-employment) set has attribute type: contractor-hours
@@ -643,6 +645,7 @@ Feature: Concept Relation Type and Role Type
     When put attribute type: parttime-hours, with value type: long
     When attribute(parttime-hours) set supertype: contractor-hours
     When put relation type: parttime-employment
+    When relation(parttime-employment) set abstract: true
     When relation(parttime-employment) set supertype: contractor-employment
     When relation(parttime-employment) set has key type: parttime-reference
     When relation(parttime-employment) set has attribute type: parttime-hours
@@ -691,11 +694,13 @@ Feature: Concept Relation Type and Role Type
     When attribute(contractor-hours) set abstract: true
     When attribute(contractor-hours) set supertype: employment-hours
     When put relation type: employment
+    When relation(employment) set abstract: true
     When relation(employment) set relates role: employee
     When relation(employment) set relates role: employer
     When relation(employment) set has key type: employment-reference
     When relation(employment) set has attribute type: employment-hours
     When put relation type: contractor-employment
+    When relation(contractor-employment) set abstract: true
     When relation(contractor-employment) set supertype: employment
     When relation(contractor-employment) set has key type: contractor-reference as employment-reference
     When relation(contractor-employment) set has attribute type: contractor-hours as employment-hours
@@ -766,6 +771,7 @@ Feature: Concept Relation Type and Role Type
     When put attribute type: contractor-reference, with value type: string
     When attribute(contractor-reference) set supertype: employment-reference
     When put relation type: employment
+    When relation(employment) set abstract: true
     When relation(employment) set relates role: employer
     When relation(employment) set relates role: employee
     When relation(employment) set has attribute type: employment-reference
@@ -838,6 +844,7 @@ Feature: Concept Relation Type and Role Type
     When put attribute type: contractor-hours, with value type: long
     When attribute(contractor-hours) set supertype: employment-hours
     When put relation type: employment
+    When relation(employment) set abstract: true
     When relation(employment) set relates role: employee
     When relation(employment) set has key type: employment-reference
     When relation(employment) set has attribute type: employment-hours
@@ -862,6 +869,7 @@ Feature: Concept Relation Type and Role Type
     When put attribute type: max-hours, with value type: long
     When attribute(max-hours) set supertype: hours
     When put relation type: employment
+    When relation(employment) set abstract: true
     When relation(employment) set relates role: employee
     When relation(employment) set relates role: employer
     When relation(employment) set has key type: reference
@@ -875,6 +883,7 @@ Feature: Concept Relation Type and Role Type
     When put attribute type: contractor-reference, with value type: string
     When attribute(contractor-reference) set supertype: employment-reference
     When put relation type: employment
+    When relation(employment) set abstract: true
     When relation(employment) set relates role: employer
     When relation(employment) set relates role: employee
     When relation(employment) set has key type: employment-reference
