@@ -18,5 +18,6 @@
 package(default_visibility = ["//visibility:public"])
 
 exports_files([
+    "reasoner.feature",
     "resolution.feature",
 ])
