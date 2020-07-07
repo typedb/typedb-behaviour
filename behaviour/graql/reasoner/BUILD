@@ -18,6 +18,5 @@
 package(default_visibility = ["//visibility:public"])
 
 exports_files([
-    "resolution/attribute-attachment.feature",
     "resolution.feature",
 ])
