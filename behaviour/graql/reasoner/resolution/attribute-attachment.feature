@@ -15,6 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+# TODO: Uncomment all res. testing steps when test framework supports them
 Feature: Attribute Attachment Resolution
 
   Background: Set up keyspaces for resolution testing
@@ -26,7 +27,6 @@ Feature: Attribute Attachment Resolution
       | reasoned     |
     Given materialised keyspace is named: materialised
     Given reasoned keyspace is named: reasoned
-    Given transaction is initialised
     Given for each session, graql define
       """
       define
@@ -85,7 +85,7 @@ Feature: Attribute Attachment Resolution
       $geX isa person, has string-attribute "banana", has ref 0;
       $geY isa person, has ref 1;
       """
-    When materialised keyspace is completed
+#    When materialised keyspace is completed
     Then for graql query
       """
       match $x isa person, has string-attribute $y; get;
@@ -98,7 +98,7 @@ Feature: Attribute Attachment Resolution
       """
 #    Then in reasoned keyspace, all answers are correct
     Then in reasoned keyspace, answer size is: 1
-    Then materialised and reasoned keyspaces are the same size
+#    Then materialised and reasoned keyspaces are the same size
 
 
   Scenario: when multiple rules copy attributes from an entity, they all get resolved
@@ -136,7 +136,7 @@ Feature: Attribute Attachment Resolution
       $geX isa person, has string-attribute "banana", has ref 0;
       $geY isa person, has ref 1;
       """
-    When materialised keyspace is completed
+#    When materialised keyspace is completed
     Then for graql query
       """
       match $x isa person; get;
@@ -147,10 +147,10 @@ Feature: Attribute Attachment Resolution
       """
       match $x isa person, has attribute $y; get;
       """
-    # three attributes for each entity
+    # four attributes for each entity
 #    Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, answer size is: 6
-    Then materialised and reasoned keyspaces are the same size
+    Then in reasoned keyspace, answer size is: 8
+#    Then materialised and reasoned keyspaces are the same size
 
 
   Scenario: when a rule copies an attribute value to its sub-attribute, a new attribute concept is inferred
@@ -170,27 +170,27 @@ Feature: Attribute Attachment Resolution
       insert
       $geX isa person, has string-attribute "banana", has ref 0;
       """
-    When materialised keyspace is completed
+#    When materialised keyspace is completed
     Then for graql query
       """
       match $x isa person, has sub-string-attribute $y; get;
       """
-    Then in reasoned keyspace, all answers are correct
+#    Then in reasoned keyspace, all answers are correct
     Then in reasoned keyspace, answer size is: 1
     Then for graql query
       """
       match $x isa sub-string-attribute; get;
       """
-    Then in reasoned keyspace, all answers are correct
+#    Then in reasoned keyspace, all answers are correct
     Then in reasoned keyspace, answer size is: 1
     Then for graql query
       """
       match $x isa string-attribute; $y isa sub-string-attribute; get;
       """
     # 2 SA instances - one base, one sub hence two answers
-    Then in reasoned keyspace, all answers are correct
+#    Then in reasoned keyspace, all answers are correct
     Then in reasoned keyspace, answer size is: 2
-    Then materialised and reasoned keyspaces are the same size
+#    Then materialised and reasoned keyspaces are the same size
 
 
   Scenario: when a rule copies an attribute value to an unrelated attribute, a new attribute concept is inferred
@@ -211,20 +211,20 @@ Feature: Attribute Attachment Resolution
       $geX isa person, has string-attribute "banana", has ref 0;
       $geY isa person, has ref 1;
       """
-    When materialised keyspace is completed
+#    When materialised keyspace is completed
     Then for graql query
       """
       match $x isa person, has unrelated-attribute $y; get;
       """
-    Then in reasoned keyspace, all answers are correct
+#    Then in reasoned keyspace, all answers are correct
     Then in reasoned keyspace, answer size is: 1
     Then for graql query
       """
       match $x isa unrelated-attribute; get;
       """
-    Then in reasoned keyspace, all answers are correct
+#    Then in reasoned keyspace, all answers are correct
     Then in reasoned keyspace, answer size is: 1
-    Then materialised and reasoned keyspaces are the same size
+#    Then materialised and reasoned keyspaces are the same size
 
 
   Scenario: when the same attribute is inferred on an entity and relation, both owners are correctly retrieved
@@ -256,17 +256,18 @@ Feature: Attribute Attachment Resolution
       $geY isa person, has ref 1;
       (leader:$geX, team-member:$geX) isa team, has ref 2;
       """
-    When materialised keyspace is completed
+#    When materialised keyspace is completed
     Then for graql query
       """
       match $x has string-attribute $y; get;
       """
-    Then in reasoned keyspace, all answers are correct
+#    Then in reasoned keyspace, all answers are correct
     Then in reasoned keyspace, answer size is: 3
-    Then materialised and reasoned keyspaces are the same size
+#    Then materialised and reasoned keyspaces are the same size
 
 
   # TODO: doesn't it feel like this is in the wrong file?
+  # TODO: should infer "$x has is-old true"; change once res. testing supports it
   Scenario: a rule can infer an attribute ownership based on a value predicate
     Given for each session, graql define
       """
@@ -325,26 +326,26 @@ Feature: Attribute Attachment Resolution
       $aeY isa soft-drink, has ref 1;
       $r "Ocado" isa retailer;
       """
-    When materialised keyspace is completed
+#    When materialised keyspace is completed
     Then for graql query
       """
       match $x has retailer 'Ocado'; get;
       """
-    Then in reasoned keyspace, all answers are correct
+#    Then in reasoned keyspace, all answers are correct
     Then in reasoned keyspace, answer size is: 2
     Then for graql query
       """
       match $x has retailer $r; get;
       """
-    Then in reasoned keyspace, all answers are correct
+#    Then in reasoned keyspace, all answers are correct
     Then in reasoned keyspace, answer size is: 4
     Then for graql query
       """
       match $x has retailer 'Tesco'; get;
       """
-    Then in reasoned keyspace, all answers are correct
+#    Then in reasoned keyspace, all answers are correct
     Then in reasoned keyspace, answer size is: 2
-    Then materialised and reasoned keyspaces are the same size
+#    Then materialised and reasoned keyspaces are the same size
 
 
   Scenario: a rule can make a thing own an attribute that previously had no edges in the graph
@@ -368,11 +369,11 @@ Feature: Attribute Attachment Resolution
       $aeY isa soft-drink, has ref 1;
       $r "Ocado" isa retailer;
       """
-    When materialised keyspace is completed
+#    When materialised keyspace is completed
     Then for graql query
       """
       match $x isa soft-drink, has retailer 'Ocado'; get;
       """
-    Then in reasoned keyspace, all answers are correct
+#    Then in reasoned keyspace, all answers are correct
     Then in reasoned keyspace, answer size is: 2
-    Then materialised and reasoned keyspaces are the same size
+#    Then materialised and reasoned keyspaces are the same size
