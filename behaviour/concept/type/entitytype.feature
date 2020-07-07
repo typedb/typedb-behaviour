@@ -387,7 +387,7 @@ Feature: Concept Entity Type
       | rating    |
       | points    |
 
-  Scenario: Entity types can inherited keys and attributes that are subtypes of each other
+  Scenario: Entity types can inherit keys and attributes that are subtypes of each other
     When put attribute type: username, with value type: string
     When attribute(username) set abstract: true
     When put attribute type: score, with value type: double
@@ -593,6 +593,60 @@ Feature: Concept Entity Type
       | username |
     Then entity(customer) get has attribute types do not contain:
       | name |
+
+  Scenario: Entity types can redeclare keys as keys
+    When put attribute type: name, with value type: string
+    When put attribute type: email, with value type: string
+    When put entity type: person
+    When entity(person) set has key type: name
+    When entity(person) set has key type: email
+    Then entity(person) set has key type: name
+    When transaction commits
+    When session opens transaction of type: write
+    Then entity(person) set has key type: email
+
+  Scenario: Entity types can redeclare attributes as attributes
+    When put attribute type: name, with value type: string
+    When put attribute type: email, with value type: string
+    When put entity type: person
+    When entity(person) set has attribute type: name
+    When entity(person) set has attribute type: email
+    Then entity(person) set has attribute type: name
+    When transaction commits
+    When session opens transaction of type: write
+    Then entity(person) set has attribute type: email
+
+  Scenario: Entity types can re-override keys as keys
+    When put attribute type: email, with value type: string
+    When attribute(email) set abstract: true
+    When put attribute type: work-email, with value type: string
+    When attribute(work-email) set supertype: email
+    When put entity type: person
+    When entity(person) set abstract: true
+    When entity(person) set has key type: email
+    When put entity type: customer
+    When entity(customer) set abstract: true
+    When entity(customer) set supertype: person
+    When entity(customer) set has key type: work-email as email
+    When transaction commits
+    When session opens transaction of type: write
+    When entity(customer) set has key type: work-email as email
+
+  Scenario: Entity types can re-override attributes as attributes
+    When put attribute type: name, with value type: string
+    When attribute(name) set abstract: true
+    When put attribute type: nick-name, with value type: string
+    When attribute(nick-name) set supertype: name
+    When put entity type: person
+    When entity(person) set abstract: true
+    When entity(person) set has attribute type: name
+    When put entity type: customer
+    When entity(customer) set abstract: true
+    When entity(customer) set supertype: person
+    When entity(customer) set has attribute type: nick-name as name
+    When transaction commits
+    When session opens transaction of type: write
+    When entity(customer) set has attribute type: nick-name as name
 
   Scenario: Entity types can redeclare keys as attributes
     When put attribute type: name, with value type: string
