@@ -98,7 +98,7 @@ Feature: Attribute Attachment Resolution
       """
 #    Then in reasoned keyspace, all answers are correct
     Then in reasoned keyspace, answer size is: 1
-    Then in reasoned keyspace, no answers are missing
+    Then materialised and reasoned keyspaces are the same size
 
 
   Scenario: when multiple rules copy attributes from an entity, they all get resolved
@@ -150,7 +150,7 @@ Feature: Attribute Attachment Resolution
     # three attributes for each entity
 #    Then in reasoned keyspace, all answers are correct
     Then in reasoned keyspace, answer size is: 6
-    Then in reasoned keyspace, no answers are missing
+    Then materialised and reasoned keyspaces are the same size
 
 
   Scenario: when a rule copies an attribute value to its sub-attribute, a new attribute concept is inferred
@@ -190,7 +190,7 @@ Feature: Attribute Attachment Resolution
     # 2 SA instances - one base, one sub hence two answers
     Then in reasoned keyspace, all answers are correct
     Then in reasoned keyspace, answer size is: 2
-    Then in reasoned keyspace, no answers are missing
+    Then materialised and reasoned keyspaces are the same size
 
 
   Scenario: when a rule copies an attribute value to an unrelated attribute, a new attribute concept is inferred
@@ -224,7 +224,7 @@ Feature: Attribute Attachment Resolution
       """
     Then in reasoned keyspace, all answers are correct
     Then in reasoned keyspace, answer size is: 1
-    Then in reasoned keyspace, no answers are missing
+    Then materialised and reasoned keyspaces are the same size
 
 
   Scenario: when the same attribute is inferred on an entity and relation, both owners are correctly retrieved
@@ -263,7 +263,7 @@ Feature: Attribute Attachment Resolution
       """
     Then in reasoned keyspace, all answers are correct
     Then in reasoned keyspace, answer size is: 3
-    Then in reasoned keyspace, no answers are missing
+    Then materialised and reasoned keyspaces are the same size
 
 
   # TODO: doesn't it feel like this is in the wrong file?
@@ -293,7 +293,7 @@ Feature: Attribute Attachment Resolution
       """
     Then in reasoned keyspace, all answers are correct
     Then in reasoned keyspace, answer size is: 1
-    Then in reasoned keyspace, no answers are missing
+    Then materialised and reasoned keyspaces are the same size
 
 
   Scenario: a rule can infer an attribute value that did not previously exist in the graph
@@ -344,7 +344,7 @@ Feature: Attribute Attachment Resolution
       """
     Then in reasoned keyspace, all answers are correct
     Then in reasoned keyspace, answer size is: 2
-    Then in reasoned keyspace, no answers are missing
+    Then materialised and reasoned keyspaces are the same size
 
 
   Scenario: a rule can make a thing own an attribute that previously had no edges in the graph
@@ -375,4 +375,4 @@ Feature: Attribute Attachment Resolution
       """
     Then in reasoned keyspace, all answers are correct
     Then in reasoned keyspace, answer size is: 2
-    Then in reasoned keyspace, no answers are missing
+    Then materialised and reasoned keyspaces are the same size

@@ -17,14 +17,17 @@
 
 Feature: Value Predicate Resolution
 
-  Background: Setup base KBs
+  Background: Set up keyspaces for resolution testing
 
     Given connection has been opened
     Given connection delete all keyspaces
     Given connection open sessions for keyspaces:
-      | completion |
-      | test       |
-    Given graql define
+      | materialised |
+      | reasoned     |
+    Given materialised keyspace is named: materialised
+    Given reasoned keyspace is named: reasoned
+    Given transaction is initialised
+    Given for each session, graql define
       """
       define
 
@@ -64,7 +67,7 @@ Feature: Value Predicate Resolution
 
 
   Scenario Outline: when querying inferred attributes with `<op>`, the answers matching the predicate are returned
-    Given graql define
+    Given for each session, graql define
       """
       define
       lucky-number sub attribute, value long;
@@ -73,13 +76,13 @@ Feature: Value Predicate Resolution
       rule-1667 sub rule, when { $x isa person; }, then { $x has lucky-number $n; $n 1667; };
       rule-1997 sub rule, when { $x isa person; }, then { $x has lucky-number $n; $n 1997; };
       """
-    Given graql insert
+    Given for each session, graql insert
       """
       insert
       $x isa person, has ref 0;
       $y isa person, has ref 1;
       """
-    When reference kb is completed
+    When materialised keyspace is completed
     Then for graql query
       """
       match
@@ -87,23 +90,22 @@ Feature: Value Predicate Resolution
         $n <op> 1667;
       get;
       """
-    Then answer count is correct
-    And answers resolution is correct
-    And answer count is: <answer-count>
-    Then test keyspace is complete
+    Then in reasoned keyspace, all answers are correct
+    Then in reasoned keyspace, answer size is: <answer-size>
+    Then materialised and reasoned keyspaces are the same size
 
   Examples:
-    | op | answer-count |
-    | >  | 2            |
-    | >= | 4            |
-    | <  | 2            |
-    | <= | 4            |
-    | == | 2            |
-    | != | 4            |
+    | op | answer-size |
+    | >  | 2           |
+    | >= | 4           |
+    | <  | 2           |
+    | <= | 4           |
+    | == | 2           |
+    | != | 4           |
 
 
   Scenario Outline: when both sides of a `<op>` comparison are inferred attributes, all answers satisfy the predicate
-    Given graql define
+    Given for each session, graql define
       """
       define
       lucky-number sub attribute, value long;
@@ -111,13 +113,13 @@ Feature: Value Predicate Resolution
       rule-1337 sub rule, when { $x isa person; }, then { $x has lucky-number $n; $n 1337; };
       rule-1667 sub rule, when { $x isa person; }, then { $x has lucky-number $n; $n 1667; };
       """
-    Given graql insert
+    Given for each session, graql insert
       """
       insert
       $x isa person, has ref 0;
       $y isa person, has ref 1;
       """
-    When reference kb is completed
+    When materialised keyspace is completed
     Then for graql query
       """
       match
@@ -126,16 +128,15 @@ Feature: Value Predicate Resolution
         $m <op> $n;
       get;
       """
-    Then answer count is correct
-    And answers resolution is correct
-    And answer count is: <answer-count>
-    Then test keyspace is complete
+    Then in reasoned keyspace, all answers are correct
+    Then in reasoned keyspace, answer size is: <answer-size>
+    Then materialised and reasoned keyspaces are the same size
 
     Examples:
-      | op | answer-count |
-      | >  | 1            |
-      | >= | 3            |
-      | <  | 1            |
-      | <= | 3            |
-      | == | 2            |
-      | != | 2            |
+      | op | answer-size |
+      | >  | 1           |
+      | >= | 3           |
+      | <  | 1           |
+      | <= | 3           |
+      | == | 2           |
+      | != | 2           |
