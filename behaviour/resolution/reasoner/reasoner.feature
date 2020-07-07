@@ -22,12 +22,15 @@ Feature: Reasoning
     Given connection has been opened
     Given connection delete all keyspaces
     Given connection open sessions for keyspaces:
-      | completion  |
-      | test        |
+      | materialised |
+      | reasoned     |
+    Given materialised keyspace is named: materialised
+    Given reasoned keyspace is named: reasoned
+    Given transaction is initialised
 
 
   Scenario: basic rule
-    Given graql define
+    Given for each session, graql define
       """
       define
 
@@ -45,24 +48,23 @@ Feature: Reasoning
          $c has name  $n; $n "the-company";
       };
       """
-    Given graql insert
+    Given for each session, graql insert
       """
       insert
       $x isa company, has company-id 0;
       """
 
-    When reference kb is completed
+    When materialised keyspace is completed
     Then for graql query
       """
       match $co has name $n; get;
       """
-    Then answer count is correct
-    Then answers resolution is correct
-    Then test keyspace is complete
+    Then in reasoned keyspace, all answers are correct
+    Then in reasoned keyspace, no answers are missing
 
 
   Scenario: compounding rules
-    Given graql define
+    Given for each session, graql define
       """
       define
 
@@ -94,24 +96,23 @@ Feature: Reasoning
           $c2 has is-liable $lia; $lia true;
       };
       """
-    Given graql insert
+    Given for each session, graql insert
       """
       insert
       $co isa company, has company-id 0;
       """
 
-    When reference kb is completed
+    When materialised keyspace is completed
     Then for graql query
       """
       match $co has is-liable $l; get;
       """
-    Then answer count is correct
-    Then answers resolution is correct
-    Then test keyspace is complete
+    Then in reasoned keyspace, all answers are correct
+    Then in reasoned keyspace, no answers are missing
 
 
   Scenario: 2-hop transitivity
-    Given graql define
+    Given for each session, graql define
       """
       define
       name sub attribute, value string;
@@ -141,7 +142,7 @@ Feature: Reasoning
           (superior: $a, subordinate: $c) isa location-hierarchy;
       };
       """
-    Given graql insert
+    Given for each session, graql insert
       """
       insert
       $ar isa area, has name "King's Cross";
@@ -151,7 +152,7 @@ Feature: Reasoning
       (superior: $cit, subordinate: $ar) isa location-hierarchy, has location-hierarchy-id 1;
       """
 
-    When reference kb is completed
+    When materialised keyspace is completed
     Then for graql query
       """
       match
@@ -159,13 +160,12 @@ Feature: Reasoning
       (superior: $l, subordinate: $k) isa location-hierarchy;
       get;
       """
-    Then answer count is correct
-    Then answers resolution is correct
-    Then test keyspace is complete
+    Then in reasoned keyspace, all answers are correct
+    Then in reasoned keyspace, no answers are missing
 
 
   Scenario: 3-hop transitivity
-    Given graql define
+    Given for each session, graql define
       """
       define
       name sub attribute,
@@ -198,7 +198,7 @@ Feature: Reasoning
           (location-hierarchy_superior: $a, location-hierarchy_subordinate: $c) isa location-hierarchy;
       };
       """
-    Given graql insert
+    Given for each session, graql insert
       """
       insert
       $ar isa area, has name "King's Cross";
@@ -210,20 +210,19 @@ Feature: Reasoning
       (location-hierarchy_superior: $cit, location-hierarchy_subordinate: $ar) isa location-hierarchy, has location-hierarchy-id 2;
       """
 
-    When reference kb is completed
+    When materialised keyspace is completed
     Then for graql query
       """
       match $lh (location-hierarchy_superior: $continent, location-hierarchy_subordinate: $area) isa location-hierarchy;
       $continent isa continent; $area isa area;
       get;
       """
-    Then answer count is correct
-    Then answers resolution is correct
-    Then test keyspace is complete
+    Then in reasoned keyspace, all answers are correct
+    Then in reasoned keyspace, no answers are missing
 
 
   Scenario: queried relation is a supertype of the inferred relation
-    Given graql define
+    Given for each session, graql define
       """
       define
 
@@ -262,26 +261,25 @@ Feature: Reasoning
           (sibling: $p, sibling: $p1) isa siblingship;
       };
       """
-    Given graql insert
+    Given for each session, graql insert
       """
       insert
       $a isa woman, has person-id 0, has name "Alice";
       $b isa man, has person-id 1;
       """
 
-    When reference kb is completed
+    When materialised keyspace is completed
     Then for graql query
       """
       match ($w, $m) isa family-relation; $w isa woman; get;
       """
-    Then answer count is correct
-    Then answers resolution is correct
-    Then test keyspace is complete
+    Then in reasoned keyspace, all answers are correct
+    Then in reasoned keyspace, no answers are missing
 
 
   @ignore
   Scenario: querying with a disjunction and a negation
-    Given graql define
+    Given for each session, graql define
       """
       define
 
@@ -306,7 +304,7 @@ Feature: Reasoning
           $c2 has is-liable $l; $l true;
       };
       """
-    Given graql insert
+    Given for each session, graql insert
       """
       insert
       $c1 isa company, has company-id 0;
@@ -315,7 +313,7 @@ Feature: Reasoning
       $c2 has name $n2; $n2 "another-company";
       """
 
-    When reference kb is completed
+    When materialised keyspace is completed
     Then for graql query
       """
       match $com isa company;
@@ -323,13 +321,12 @@ Feature: Reasoning
       not {$com has is-liable $liability;};
       get;
       """
-    Then answer count is correct
-    Then answers resolution is correct
-    Then test keyspace is complete
+    Then in reasoned keyspace, all answers are correct
+    Then in reasoned keyspace, no answers are missing
 
 
   Scenario: a rule containing a negation
-    Given graql define
+    Given for each session, graql define
       """
       define
 
@@ -357,7 +354,7 @@ Feature: Reasoning
           $c2 has is-liable $l; $l true;
       };
       """
-    Given graql insert
+    Given for each session, graql insert
       """
       insert
       $c1 isa company, has company-id 0;
@@ -366,18 +363,17 @@ Feature: Reasoning
       $c2 has name $n2; $n2 "another-company";
       """
 
-    When reference kb is completed
+    When materialised keyspace is completed
     Then for graql query
       """
       match $com isa company, has is-liable $lia; $lia true; get;
       """
-    Then answer count is correct
-    Then answers resolution is correct
-    Then test keyspace is complete
+    Then in reasoned keyspace, all answers are correct
+    Then in reasoned keyspace, no answers are missing
 
 
   Scenario: querying with multiple negations
-    Given graql define
+    Given for each session, graql define
       """
       define
 
@@ -403,7 +399,7 @@ Feature: Reasoning
           $c2 has is-liable $l; $l true;
       };
       """
-    Given graql insert
+    Given for each session, graql insert
       """
       insert
       $c1 isa company, has company-id 0;
@@ -412,11 +408,10 @@ Feature: Reasoning
       $c2 has name $n2; $n2 "another-company";
       """
 
-    When reference kb is completed
+    When materialised keyspace is completed
     Then for graql query
       """
       match $com isa company; not { $com has is-liable $lia; $lia true; }; not { $com has name $n; $n "the-company"; }; get;
       """
-    Then answer count is correct
-    Then answers resolution is correct
-    Then test keyspace is complete
+    Then in reasoned keyspace, all answers are correct
+    Then in reasoned keyspace, no answers are missing
