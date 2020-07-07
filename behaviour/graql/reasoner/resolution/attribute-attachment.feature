@@ -22,9 +22,12 @@ Feature: Attribute Attachment Resolution
     Given connection has been opened
     Given connection delete all keyspaces
     Given connection open sessions for keyspaces:
-      | completion |
-      | test       |
-    Given graql define
+      | materialised |
+      | reasoned     |
+    Given materialised keyspace is named: materialised
+    Given reasoned keyspace is named: reasoned
+    Given transaction is initialised
+    Given for each session, graql define
       """
       define
 
@@ -140,16 +143,16 @@ Feature: Attribute Attachment Resolution
       """
       match $x isa person; get;
       """
-    Then answer count is correct
-    And answers resolution is correct
+#    Then answer count is correct
+#    And answers resolution is correct
     And answer count is: 2
     Then for graql query
       """
       match $x isa person, has attribute $y; get;
       """
     # three attributes for each entity
-    Then answer count is correct
-    And answers resolution is correct
+#    Then answer count is correct
+#    And answers resolution is correct
     And answer count is: 6
     Then test keyspace is complete
 
