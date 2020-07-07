@@ -28,7 +28,7 @@ Feature: Concept Entity
     Given put attribute type: username, with value type: string
     Given put attribute type: email, with value type: string
     Given put entity type: person
-    Given entity(person) set key attribute type: username
+    Given entity(person) set has key type: username
     Given entity(person) set has attribute type: email
     Given transaction commits
     Given connection close all sessions
@@ -133,7 +133,7 @@ Feature: Concept Entity
     When session opens transaction of type: write
     When $a = entity(person) get instance with key(username): alice
     When $bob = attribute(username) as(string) get: bob
-    When entity $a set has: $bob; throws exception
+    Then entity $a set has: $bob; throws exception
 
   Scenario: Entity cannot have a key that has been taken
     When $a = entity(person) create new instance
@@ -146,7 +146,7 @@ Feature: Concept Entity
     When session opens transaction of type: write
     When $alice = attribute(username) as(string) get: alice
     When $b = entity(person) create new instance
-    When entity $b set has: $alice; throws exception
+    Then entity $b set has: $alice; throws exception
 
   Scenario: Entity can have attribute
     When $a = entity(person) create new instance with key(username): alice
