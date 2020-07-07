@@ -17,7 +17,7 @@
 
 Feature: Attribute Attachment Resolution
 
-  Background: Setup base KBs
+  Background: Set up keyspaces for resolution testing
 
     Given connection has been opened
     Given connection delete all keyspaces
@@ -67,7 +67,7 @@ Feature: Attribute Attachment Resolution
 
 
   Scenario: when a rule copies an attribute from one entity to another, the existing attribute instance is reused
-    Given graql define
+    Given for each session, graql define
       """
       define
       transfer-string-attribute-to-other-people sub rule,
@@ -79,32 +79,30 @@ Feature: Attribute Attachment Resolution
         $y has string-attribute $r1;
       };
       """
-    Given graql insert
+    Given for each session, graql insert
       """
       insert
       $geX isa person, has string-attribute "banana", has ref 0;
       $geY isa person, has ref 1;
       """
-    When reference kb is completed
+    When materialised keyspace is completed
     Then for graql query
       """
       match $x isa person, has string-attribute $y; get;
       """
-    Then answer count is correct
-    And answers resolution is correct
-    And answer count is: 2
+#    Then in reasoned keyspace, all answers are correct
+    Then in reasoned keyspace, answer size is: 2
     Then for graql query
       """
       match $x isa string-attribute; get;
       """
-    Then answer count is correct
-    And answers resolution is correct
-    And answer count is: 1
-    Then test keyspace is complete
+#    Then in reasoned keyspace, all answers are correct
+    Then in reasoned keyspace, answer size is: 1
+    Then in reasoned keyspace, no answers are missing
 
 
   Scenario: when multiple rules copy attributes from an entity, they all get resolved
-    Given graql define
+    Given for each session, graql define
       """
       define
       transfer-string-attribute-to-other-people sub rule,
@@ -132,33 +130,31 @@ Feature: Attribute Attachment Resolution
         $x has unrelated-attribute $r1;
       };
       """
-    Given graql insert
+    Given for each session, graql insert
       """
       insert
       $geX isa person, has string-attribute "banana", has ref 0;
       $geY isa person, has ref 1;
       """
-    When reference kb is completed
+    When materialised keyspace is completed
     Then for graql query
       """
       match $x isa person; get;
       """
-#    Then answer count is correct
-#    And answers resolution is correct
-    And answer count is: 2
+#    Then in reasoned keyspace, all answers are correct
+    Then in reasoned keyspace, answer size is: 2
     Then for graql query
       """
       match $x isa person, has attribute $y; get;
       """
     # three attributes for each entity
-#    Then answer count is correct
-#    And answers resolution is correct
-    And answer count is: 6
-    Then test keyspace is complete
+#    Then in reasoned keyspace, all answers are correct
+    Then in reasoned keyspace, answer size is: 6
+    Then in reasoned keyspace, no answers are missing
 
 
   Scenario: when a rule copies an attribute value to its sub-attribute, a new attribute concept is inferred
-    Given graql define
+    Given for each session, graql define
       """
       define
       transfer-attribute-value-to-sub-attribute sub rule,
@@ -169,39 +165,36 @@ Feature: Attribute Attachment Resolution
         $x has sub-string-attribute $r1;
       };
       """
-    Given graql insert
+    Given for each session, graql insert
       """
       insert
       $geX isa person, has string-attribute "banana", has ref 0;
       """
-    When reference kb is completed
+    When materialised keyspace is completed
     Then for graql query
       """
       match $x isa person, has sub-string-attribute $y; get;
       """
-    Then answer count is correct
-    And answers resolution is correct
-    And answer count is: 1
+    Then in reasoned keyspace, all answers are correct
+    Then in reasoned keyspace, answer size is: 1
     Then for graql query
       """
       match $x isa sub-string-attribute; get;
       """
-    Then answer count is correct
-    And answers resolution is correct
-    And answer count is: 1
+    Then in reasoned keyspace, all answers are correct
+    Then in reasoned keyspace, answer size is: 1
     Then for graql query
       """
       match $x isa string-attribute; $y isa sub-string-attribute; get;
       """
     # 2 SA instances - one base, one sub hence two answers
-    Then answer count is correct
-    And answers resolution is correct
-    And answer count is: 2
-    Then test keyspace is complete
+    Then in reasoned keyspace, all answers are correct
+    Then in reasoned keyspace, answer size is: 2
+    Then in reasoned keyspace, no answers are missing
 
 
   Scenario: when a rule copies an attribute value to an unrelated attribute, a new attribute concept is inferred
-    Given graql define
+    Given for each session, graql define
       """
       define
       transfer-attribute-value-to-unrelated-attribute sub rule,
@@ -212,32 +205,30 @@ Feature: Attribute Attachment Resolution
         $x has unrelated-attribute $r1;
       };
       """
-    Given graql insert
+    Given for each session, graql insert
       """
       insert
       $geX isa person, has string-attribute "banana", has ref 0;
       $geY isa person, has ref 1;
       """
-    When reference kb is completed
+    When materialised keyspace is completed
     Then for graql query
       """
       match $x isa person, has unrelated-attribute $y; get;
       """
-    Then answer count is correct
-    And answers resolution is correct
-    And answer count is: 1
+    Then in reasoned keyspace, all answers are correct
+    Then in reasoned keyspace, answer size is: 1
     Then for graql query
       """
       match $x isa unrelated-attribute; get;
       """
-    Then answer count is correct
-    And answers resolution is correct
-    And answer count is: 1
-    Then test keyspace is complete
+    Then in reasoned keyspace, all answers are correct
+    Then in reasoned keyspace, answer size is: 1
+    Then in reasoned keyspace, no answers are missing
 
 
   Scenario: when the same attribute is inferred on an entity and relation, both owners are correctly retrieved
-    Given graql define
+    Given for each session, graql define
       """
       define
       transfer-string-attribute-to-other-people sub rule,
@@ -258,27 +249,26 @@ Feature: Attribute Attachment Resolution
         $z has string-attribute $y;
       };
       """
-    Given graql insert
+    Given for each session, graql insert
       """
       insert
       $geX isa person, has string-attribute "banana", has ref 0;
       $geY isa person, has ref 1;
       (leader:$geX, team-member:$geX) isa team, has ref 2;
       """
-    When reference kb is completed
+    When materialised keyspace is completed
     Then for graql query
       """
       match $x has string-attribute $y; get;
       """
-    Then answer count is correct
-    And answers resolution is correct
-    And answer count is: 3
-    Then test keyspace is complete
+    Then in reasoned keyspace, all answers are correct
+    Then in reasoned keyspace, answer size is: 3
+    Then in reasoned keyspace, no answers are missing
 
 
   # TODO: doesn't it feel like this is in the wrong file?
   Scenario: a rule can infer an attribute ownership based on a value predicate
-    Given graql define
+    Given for each session, graql define
       """
       define
       tortoises-become-old-at-age-1-year sub rule,
@@ -291,24 +281,23 @@ Feature: Attribute Attachment Resolution
         $t true;
       };
       """
-    Given graql insert
+    Given for each session, graql insert
       """
       insert
       $se isa tortoise, has age 1, has ref 0;
       """
-    When reference kb is completed
+    When materialised keyspace is completed
     Then for graql query
       """
       match $x has is-old $r; get;
       """
-    Then answer count is correct
-    And answers resolution is correct
-    And answer count is: 1
-    Then test keyspace is complete
+    Then in reasoned keyspace, all answers are correct
+    Then in reasoned keyspace, answer size is: 1
+    Then in reasoned keyspace, no answers are missing
 
 
   Scenario: a rule can infer an attribute value that did not previously exist in the graph
-    Given graql define
+    Given for each session, graql define
       """
       define
       tesco-sells-all-soft-drinks sub rule,
@@ -329,40 +318,37 @@ Feature: Attribute Attachment Resolution
         $y has retailer 'Ocado';
       };
       """
-    Given graql insert
+    Given for each session, graql insert
       """
       insert
       $aeX isa soft-drink, has ref 0;
       $aeY isa soft-drink, has ref 1;
       $r "Ocado" isa retailer;
       """
-    When reference kb is completed
+    When materialised keyspace is completed
     Then for graql query
       """
       match $x has retailer 'Ocado'; get;
       """
-    Then answer count is correct
-    And answers resolution is correct
-    And answer count is: 2
+    Then in reasoned keyspace, all answers are correct
+    Then in reasoned keyspace, answer size is: 2
     Then for graql query
       """
       match $x has retailer $r; get;
       """
-    Then answer count is correct
-    And answers resolution is correct
-    And answer count is: 4
+    Then in reasoned keyspace, all answers are correct
+    Then in reasoned keyspace, answer size is: 4
     Then for graql query
       """
       match $x has retailer 'Tesco'; get;
       """
-    Then answer count is correct
-    And answers resolution is correct
-    And answer count is: 2
-    Then test keyspace is complete
+    Then in reasoned keyspace, all answers are correct
+    Then in reasoned keyspace, answer size is: 2
+    Then in reasoned keyspace, no answers are missing
 
 
   Scenario: a rule can make a thing own an attribute that previously had no edges in the graph
-    Given graql define
+    Given for each session, graql define
       """
       define
       if-ocado-exists-it-sells-all-soft-drinks sub rule,
@@ -375,19 +361,18 @@ Feature: Attribute Attachment Resolution
         $y has retailer $x;
       };
       """
-    Given graql insert
+    Given for each session, graql insert
       """
       insert
       $aeX isa soft-drink, has ref 0;
       $aeY isa soft-drink, has ref 1;
       $r "Ocado" isa retailer;
       """
-    When reference kb is completed
+    When materialised keyspace is completed
     Then for graql query
       """
       match $x isa soft-drink, has retailer 'Ocado'; get;
       """
-    Then answer count is correct
-    And answers resolution is correct
-    And answer count is: 2
-    Then test keyspace is complete
+    Then in reasoned keyspace, all answers are correct
+    Then in reasoned keyspace, answer size is: 2
+    Then in reasoned keyspace, no answers are missing
