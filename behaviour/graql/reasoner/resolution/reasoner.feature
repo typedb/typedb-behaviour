@@ -17,7 +17,7 @@
 
 Feature: Reasoning
 
-  Background: Setup base KBs
+  Background: Set up keyspaces for resolution testing
 
     Given connection has been opened
     Given connection delete all keyspaces
