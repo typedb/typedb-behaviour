@@ -26,7 +26,6 @@ Feature: Reasoning
       | reasoned     |
     Given materialised keyspace is named: materialised
     Given reasoned keyspace is named: reasoned
-    Given transaction is initialised
 
 
   Scenario: basic rule
@@ -60,7 +59,7 @@ Feature: Reasoning
       match $co has name $n; get;
       """
     Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, no answers are missing
+    Then materialised and reasoned keyspaces are the same size
 
 
   Scenario: compounding rules
@@ -108,7 +107,7 @@ Feature: Reasoning
       match $co has is-liable $l; get;
       """
     Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, no answers are missing
+    Then materialised and reasoned keyspaces are the same size
 
 
   Scenario: 2-hop transitivity
@@ -161,7 +160,7 @@ Feature: Reasoning
       get;
       """
     Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, no answers are missing
+    Then materialised and reasoned keyspaces are the same size
 
 
   Scenario: 3-hop transitivity
@@ -218,7 +217,7 @@ Feature: Reasoning
       get;
       """
     Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, no answers are missing
+    Then materialised and reasoned keyspaces are the same size
 
 
   Scenario: queried relation is a supertype of the inferred relation
@@ -274,7 +273,7 @@ Feature: Reasoning
       match ($w, $m) isa family-relation; $w isa woman; get;
       """
     Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, no answers are missing
+    Then materialised and reasoned keyspaces are the same size
 
 
   @ignore
@@ -322,7 +321,7 @@ Feature: Reasoning
       get;
       """
     Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, no answers are missing
+    Then materialised and reasoned keyspaces are the same size
 
 
   Scenario: a rule containing a negation
@@ -369,7 +368,7 @@ Feature: Reasoning
       match $com isa company, has is-liable $lia; $lia true; get;
       """
     Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, no answers are missing
+    Then materialised and reasoned keyspaces are the same size
 
 
   Scenario: querying with multiple negations
@@ -414,4 +413,4 @@ Feature: Reasoning
       match $com isa company; not { $com has is-liable $lia; $lia true; }; not { $com has name $n; $n "the-company"; }; get;
       """
     Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, no answers are missing
+    Then materialised and reasoned keyspaces are the same size
