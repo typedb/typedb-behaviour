@@ -59,6 +59,7 @@ Feature: Value Predicate Resolution
       string-attribute sub attribute, value string;
       retailer sub attribute, value string;
       age sub attribute, value long;
+      name sub attribute, value string;
       is-old sub attribute, value boolean;
       sub-string-attribute sub string-attribute;
       unrelated-attribute sub attribute, value string;

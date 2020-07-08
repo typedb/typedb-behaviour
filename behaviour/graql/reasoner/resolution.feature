@@ -1,6 +1,7 @@
 # Constraints
 #  Only scenarios where there is only one possible resolution path can be tested in this way
 
+# TODO: these tests should be implemented somewhere, but probably not in a file called 'resolution.feature'
 Feature: Graql Reasoner Resolution
 
   Background: Initialise a session and transaction for each scenario
