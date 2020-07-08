@@ -20,7 +20,7 @@ workspace(name = "graknlabs_verification")
 ################################
 # Load @graknlabs_dependencies #
 ################################
-load("//dependencies/graknlabs:dependencies.bzl", "graknlabs_dependencies")
+load("//dependencies/graknlabs:repositories.bzl", "graknlabs_dependencies")
 graknlabs_dependencies()
 
 # Load Antlr
@@ -138,13 +138,13 @@ rules_pkg_dependencies()
 ##########################
 # Load @graknlabs_common #
 ##########################
-load("//dependencies/graknlabs:dependencies.bzl", "graknlabs_common")
+load("//dependencies/graknlabs:repositories.bzl", "graknlabs_common")
 graknlabs_common()
 
 #########################
 # Load @graknlabs_graql #
 #########################
-load("//dependencies/graknlabs:dependencies.bzl", "graknlabs_graql")
+load("//dependencies/graknlabs:repositories.bzl", "graknlabs_graql")
 graknlabs_graql()
 
 load("@graknlabs_graql//dependencies/maven:artifacts.bzl", graknlabs_graql_artifacts = "artifacts")
@@ -152,7 +152,7 @@ load("@graknlabs_graql//dependencies/maven:artifacts.bzl", graknlabs_graql_artif
 ###############################
 # Load @graknlabs_client_java #
 ###############################
-load("//dependencies/graknlabs:dependencies.bzl", "graknlabs_client_java")
+load("//dependencies/graknlabs:repositories.bzl", "graknlabs_client_java")
 graknlabs_client_java()
 load("@graknlabs_client_java//dependencies/maven:artifacts.bzl", graknlabs_client_java_artifacts = "artifacts")
 
@@ -166,15 +166,8 @@ load("@graknlabs_grabl_tracing//dependencies/maven:artifacts.bzl", graknlabs_gra
 ##############################
 # Load @graknlabs_grakn_core #
 ##############################
-load("//dependencies/graknlabs:dependencies.bzl", "graknlabs_grakn_core")
-graknlabs_grakn_core()
-load("@graknlabs_grakn_core//dependencies/maven:artifacts.bzl", graknlabs_grakn_core_artifacts = "artifacts")
-
-#########################################################
-# Load @graknlabs_protocol (from @graknlabs_grakn_core) #
-#########################################################
-load("@graknlabs_grakn_core//dependencies/graknlabs:dependencies.bzl", "graknlabs_protocol")
-graknlabs_protocol()
+load("//dependencies/graknlabs:artifacts.bzl", "graknlabs_grakn_core_artifact")
+graknlabs_grakn_core_artifact()
 
 ################################
 # Load @graknlabs_verification #
@@ -188,6 +181,5 @@ maven(
     graknlabs_graql_artifacts +
     graknlabs_grabl_tracing_artifacts +
     graknlabs_client_java_artifacts +
-    graknlabs_grakn_core_artifacts +
     graknlabs_verification_artifacts
 )
