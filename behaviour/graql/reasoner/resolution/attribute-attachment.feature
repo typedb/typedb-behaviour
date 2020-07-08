@@ -15,7 +15,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-# TODO: Uncomment all res. testing steps when test framework supports them
 Feature: Attribute Attachment Resolution
 
   Background: Set up keyspaces for resolution testing
@@ -66,6 +65,7 @@ Feature: Attribute Attachment Resolution
       """
 
 
+  # TODO: re-enable all steps once attribute re-attachment is resolvable
   Scenario: when a rule copies an attribute from one entity to another, the existing attribute instance is reused
     Given for each session, graql define
       """
@@ -101,6 +101,7 @@ Feature: Attribute Attachment Resolution
 #    Then materialised and reasoned keyspaces are the same size
 
 
+  # TODO: re-enable all steps once re-attachment of unrelated attributes is resolvable
   Scenario: when multiple rules copy attributes from an entity, they all get resolved
     Given for each session, graql define
       """
@@ -153,6 +154,7 @@ Feature: Attribute Attachment Resolution
 #    Then materialised and reasoned keyspaces are the same size
 
 
+  # TODO: re-enable all steps once re-attachment of unrelated attributes is resolvable
   Scenario: when a rule copies an attribute value to its sub-attribute, a new attribute concept is inferred
     Given for each session, graql define
       """
@@ -193,6 +195,7 @@ Feature: Attribute Attachment Resolution
 #    Then materialised and reasoned keyspaces are the same size
 
 
+  # TODO: re-enable all steps once re-attachment of unrelated attributes is resolvable
   Scenario: when a rule copies an attribute value to an unrelated attribute, a new attribute concept is inferred
     Given for each session, graql define
       """
@@ -227,6 +230,7 @@ Feature: Attribute Attachment Resolution
 #    Then materialised and reasoned keyspaces are the same size
 
 
+  # TODO: re-enable all steps once attribute re-attachment is resolvable
   Scenario: when the same attribute is inferred on an entity and relation, both owners are correctly retrieved
     Given for each session, graql define
       """
@@ -267,7 +271,7 @@ Feature: Attribute Attachment Resolution
 
 
   # TODO: doesn't it feel like this is in the wrong file?
-  # TODO: should infer "$x has is-old true"; change once res. testing supports it
+  # TODO: change 'then' block to "$x has is-old true" once implicit attribute variables are resolvable
   Scenario: a rule can infer an attribute ownership based on a value predicate
     Given for each session, graql define
       """
@@ -297,6 +301,7 @@ Feature: Attribute Attachment Resolution
     Then materialised and reasoned keyspaces are the same size
 
 
+  # TODO: re-enable all steps once implicit attribute variables are resolvable
   Scenario: a rule can infer an attribute value that did not previously exist in the graph
     Given for each session, graql define
       """
@@ -348,6 +353,7 @@ Feature: Attribute Attachment Resolution
 #    Then materialised and reasoned keyspaces are the same size
 
 
+  # TODO: re-enable all steps once implicit attribute variables are resolvable
   Scenario: a rule can make a thing own an attribute that previously had no edges in the graph
     Given for each session, graql define
       """
