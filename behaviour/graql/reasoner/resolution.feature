@@ -11,8 +11,6 @@ Feature: Graql Reasoner Resolution
       | test_resolution |
     Given transaction is initialised
 
-  Scenario: `has` matches inferred attribute ownerships
-
   Scenario: `isa` matches inferred relations
 
   Scenario: `isa` matches inferred roleplayers in relation instances
