@@ -156,11 +156,12 @@ load("//dependencies/graknlabs:repositories.bzl", "graknlabs_client_java")
 graknlabs_client_java()
 load("@graknlabs_client_java//dependencies/maven:artifacts.bzl", graknlabs_client_java_artifacts = "artifacts")
 
-###############################################################
-# Load @graknlabs_grabl_tracing (from @graknlabs_client_java) #
-###############################################################
+load("@graknlabs_client_java//dependencies/graknlabs:dependencies.bzl", "graknlabs_protocol")
+graknlabs_protocol()
+
 load("@graknlabs_client_java//dependencies/graknlabs:dependencies.bzl", "graknlabs_grabl_tracing")
 graknlabs_grabl_tracing()
+
 load("@graknlabs_grabl_tracing//dependencies/maven:artifacts.bzl", graknlabs_grabl_tracing_artifacts = "artifacts")
 
 ##############################
