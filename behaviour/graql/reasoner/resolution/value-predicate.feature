@@ -149,8 +149,8 @@ Feature: Value Predicate Resolution
     Given for each session, graql insert
       """
       insert
-      $x isa person, has name " has ref 0;
-      $y isa person, has ref 1;
+      $x isa person, has name "Alice", has ref 0;
+      $y isa person, has name "Bob", has ref 1;
       """
     When materialised keyspace is completed
     Then for graql query
