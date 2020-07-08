@@ -33,9 +33,10 @@ commands:
 
   run-grakn:
     steps:
-      # TODO: This command needs to be replaced with a non-hard-coded distribution filepath
-      - run: mkdir dist && tar -xvzf bazel-client-java/external/graknlabs_grakn_core_artifact/file/grakn-core-all-linux-7cc0fcc8e44eb419f540b5ccedb4fcfe23c26e32.tar.gz -C ./dist/
-      - run: nohup ./dist/grakn-core-server-linux/grakn server start
+      - run-bazel:
+          command: bazel build //tools:grakn-extractor
+      - run: bazel-bin/tools/grakn-extractor.sh dist/grakn-core-all-linux
+      - run: nohup ./dist/grakn-core-all-linux/grakn server start
 
 jobs:
   build:
