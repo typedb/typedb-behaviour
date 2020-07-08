@@ -68,6 +68,36 @@ Feature: Value Predicate Resolution
       """
 
 
+  # TODO: change 'then' block to "$x has is-old true" once implicit attribute variables are resolvable
+  Scenario: a rule can infer an attribute ownership based on a value predicate
+    Given for each session, graql define
+      """
+      define
+      tortoises-become-old-at-age-1-year sub rule,
+      when {
+        $x isa tortoise, has age $a;
+        $a > 0;
+      },
+      then {
+        $x has is-old $t;
+        $t true;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+      $se isa tortoise, has age 1, has ref 0;
+      """
+    When materialised keyspace is completed
+    Then for graql query
+      """
+      match $x has is-old $r; get;
+      """
+    Then in reasoned keyspace, all answers are correct
+    Then in reasoned keyspace, answer size is: 1
+    Then materialised and reasoned keyspaces are the same size
+
+
   # TODO: re-enable all steps once materialised keyspace counts duplicate attributes only once
   Scenario Outline: when querying for inferred attributes with `<op>`, the answers matching the predicate are returned
     Given for each session, graql define
@@ -545,6 +575,7 @@ Feature: Value Predicate Resolution
 #    Then materialised and reasoned keyspaces are the same size
 
 
+  # TODO: move to negation.feature
   # TODO: re-enable all steps once implicit attribute variables are resolvable
   Scenario: a negation can filter out variables by equality to another variable with a specified value
     Given for each session, graql define
@@ -638,6 +669,7 @@ Feature: Value Predicate Resolution
     Then materialised and reasoned keyspaces are the same size
 
 
+  # TODO: move to negation.feature
   Scenario: when matching a pair of unrelated inferred attributes with negation and ==, the answers are unequal
     Given for each session, graql define
       """

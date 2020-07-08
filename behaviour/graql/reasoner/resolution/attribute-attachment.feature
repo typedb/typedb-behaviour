@@ -270,37 +270,6 @@ Feature: Attribute Attachment Resolution
 #    Then materialised and reasoned keyspaces are the same size
 
 
-  # TODO: doesn't it feel like this is in the wrong file?
-  # TODO: change 'then' block to "$x has is-old true" once implicit attribute variables are resolvable
-  Scenario: a rule can infer an attribute ownership based on a value predicate
-    Given for each session, graql define
-      """
-      define
-      tortoises-become-old-at-age-1-year sub rule,
-      when {
-        $x isa tortoise, has age $a;
-        $a > 0;
-      },
-      then {
-        $x has is-old $t;
-        $t true;
-      };
-      """
-    Given for each session, graql insert
-      """
-      insert
-      $se isa tortoise, has age 1, has ref 0;
-      """
-    When materialised keyspace is completed
-    Then for graql query
-      """
-      match $x has is-old $r; get;
-      """
-    Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, answer size is: 1
-    Then materialised and reasoned keyspaces are the same size
-
-
   # TODO: re-enable all steps once implicit attribute variables are resolvable
   Scenario: a rule can infer an attribute value that did not previously exist in the graph
     Given for each session, graql define
@@ -354,7 +323,7 @@ Feature: Attribute Attachment Resolution
 
 
   # TODO: re-enable all steps once implicit attribute variables are resolvable
-  Scenario: a rule can make a thing own an attribute that previously had no edges in the graph
+  Scenario: a rule can make a thing own an attribute that had no prior owners
     Given for each session, graql define
       """
       define
