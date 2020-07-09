@@ -787,7 +787,7 @@ Feature: Value Predicate Resolution
 
 
   @ignore
-  # TODO: re-enable once #5821 is fixed (in some answers, $typeof_ax is 'base-attribute' which is incorrect)
+  # TODO: re-enable once grakn#5821 is fixed (in some answers, $typeof_ax is 'base-attribute' which is incorrect)
   # TODO: re-enable all steps once implicit attribute variables are resolvable
   Scenario: when restricting concept types of a pair of inferred attributes with `!=`, the answers have distinct types
     Given for each session, graql define
@@ -834,7 +834,8 @@ Feature: Value Predicate Resolution
     Then answer size in reasoned keyspace is: 6
 #    Then materialised and reasoned keyspaces are the same size
 
-
+  @ignore
+  # TODO: re-enable once grakn#5821 is fixed
   # TODO: re-enable all steps once implicit attribute variables are resolvable
   Scenario: inferred attribute matches can be simultaneously restricted by both concept type and attribute value
     Given for each session, graql define
