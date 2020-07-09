@@ -157,14 +157,14 @@ Feature: Value Predicate Resolution
     Then for graql query
       """
       match
-        $x isa person, has lucky-number $m;
-        $y isa person, has lucky-number $n;
+        $x isa person, has ref 0, has lucky-number $m;
+        $y isa person, has ref 1, has lucky-number $n;
         $m <op> $n;
       get;
       """
 #    Then in reasoned keyspace, all answers are correct
     Then in reasoned keyspace, answer size is: <answer-size>
-    Then materialised and reasoned keyspaces are the same size
+#    Then materialised and reasoned keyspaces are the same size
 
     Examples:
       | op  | answer-size |
@@ -197,24 +197,24 @@ Feature: Value Predicate Resolution
     Then for graql query
       """
       match
-        $x isa person, has lucky-number $m;
-        $y isa person, has lucky-number $n;
+        $x isa person, has ref 0, has lucky-number $m;
+        $y isa person, has ref 1, has lucky-number $n;
         $m <op> $n;
         $n <op> 1667;
       get;
       """
 #    Then in reasoned keyspace, all answers are correct
     Then in reasoned keyspace, answer size is: <answer-size>
-    Then materialised and reasoned keyspaces are the same size
+#    Then materialised and reasoned keyspaces are the same size
 
     Examples:
       | op  | answer-size |
       | >   | 0           |
-      | >=  | 4           |
+      | >=  | 3           |
       | <   | 0           |
-      | <=  | 4           |
-      | ==  | 2           |
-      | !== | 8           |
+      | <=  | 3           |
+      | ==  | 1           |
+      | !== | 4           |
 
 
   # TODO: re-enable all steps once implicit attribute variables are resolvable
@@ -260,7 +260,7 @@ Feature: Value Predicate Resolution
     # x     | r     |
     # Fanta | Tesco |
     # Tango | Tesco |
-    Given in reasoned keyspace, answer size is: 2
+    Then in reasoned keyspace, answer size is: 2
 #    Then materialised and reasoned keyspaces are the same size
 
 
@@ -307,7 +307,7 @@ Feature: Value Predicate Resolution
     # x     | r     |
     # Fanta | Ocado |
     # Tango | Ocado |
-    Given in reasoned keyspace, answer size is: 2
+    Then in reasoned keyspace, answer size is: 2
 #    Then materialised and reasoned keyspaces are the same size
 
 
@@ -410,8 +410,12 @@ Feature: Value Predicate Resolution
     # Tango | Iceland   | Fanta | Iceland   |
     # Fanta | Poundland | Tango | Poundland |
     # Tango | Poundland | Fanta | Poundland |
-    Then in reasoned keyspace, answer size is: 4
-    Then materialised and reasoned keyspaces are the same size
+    # Fanta | Iceland   | Fanta | Iceland   |
+    # Fanta | Poundland | Fanta | Poundland |
+    # Tango | Iceland   | Tango | Iceland   |
+    # Tango | Poundland | Tango | Poundland |
+    Then in reasoned keyspace, answer size is: 8
+#    Then materialised and reasoned keyspaces are the same size
 
 
   # TODO: re-enable all steps when fixed (#75)
@@ -466,8 +470,20 @@ Feature: Value Predicate Resolution
     # Tango | Iceland   | Fanta | Poundland |
     # Fanta | Poundland | Tango | Iceland   |
     # Tango | Poundland | Fanta | Iceland   |
-    Then in reasoned keyspace, answer size is: 4
-    Then materialised and reasoned keyspaces are the same size
+    # Fanta | Londis    | Tango | Poundland |
+    # Tango | Londis    | Fanta | Poundland |
+    # Fanta | Londis    | Tango | Iceland   |
+    # Tango | Londis    | Fanta | Iceland   |
+    # Fanta | Iceland   | Fanta | Poundland |
+    # Tango | Iceland   | Tango | Poundland |
+    # Fanta | Poundland | Fanta | Iceland   |
+    # Tango | Poundland | Tango | Iceland   |
+    # Fanta | Londis    | Fanta | Poundland |
+    # Tango | Londis    | Tango | Poundland |
+    # Fanta | Londis    | Fanta | Iceland   |
+    # Tango | Londis    | Tango | Iceland   |
+    Then in reasoned keyspace, answer size is: 16
+#    Then materialised and reasoned keyspaces are the same size
 
 
   # TODO: re-enable all steps once implicit attribute variables are resolvable
@@ -655,8 +671,8 @@ Feature: Value Predicate Resolution
     Given for each session, graql insert
       """
       insert
-      $x isa person, has string-attribute "Tesco", has ref 0;
-      $y isa person, has string-attribute "Safeway", has ref 1;
+      $x isa person, has name "Alice", has string-attribute "Tesco", has ref 0;
+      $y isa person, has name "Bob", has string-attribute "Safeway", has ref 1;
       $z isa soft-drink, has name "Tango", has ref 2;
       """
 #    When materialised keyspace is completed
@@ -669,9 +685,11 @@ Feature: Value Predicate Resolution
       get;
       """
 #    Then in reasoned keyspace, all answers are correct
-    # x   | re      | y   | sa    |
-    # SAF | Safeway | TAN | Tesco |
-    Then in reasoned keyspace, answer size is: 1
+    # The string-attributes are transferred to each other, so in fact both people have both Tesco and Safeway
+    # x     | re    | y     | sa      |
+    # Tango | Tesco | Alice | Safeway |
+    # Tango | Tesco | Bob   | Safeway |
+    Then in reasoned keyspace, answer size is: 2
 #    Then materialised and reasoned keyspaces are the same size
 
 
@@ -701,8 +719,8 @@ Feature: Value Predicate Resolution
     Given for each session, graql insert
       """
       insert
-      $x isa person, has string-attribute "Tesco", has ref 0;
-      $y isa person, has string-attribute "Safeway", has ref 1;
+      $x isa person, has name "Alice", has string-attribute "Tesco", has ref 0;
+      $y isa person, has name "Bob", has string-attribute "Safeway", has ref 1;
       $z isa soft-drink, has name "Tango", has ref 2;
       """
 #    When materialised keyspace is completed
@@ -715,9 +733,11 @@ Feature: Value Predicate Resolution
       get;
       """
 #    Then in reasoned keyspace, all answers are correct
-    # x   | re      | y   | sa    |
-    # SAF | Safeway | TAN | Tesco |
-    Then in reasoned keyspace, answer size is: 1
+    # The string-attributes are transferred to each other, so in fact both people have both Tesco and Safeway
+    # x     | re    | y     | sa      |
+    # Tango | Tesco | Alice | Safeway |
+    # Tango | Tesco | Bob   | Safeway |
+    Then in reasoned keyspace, answer size is: 2
 #    Then materialised and reasoned keyspaces are the same size
 
 
@@ -730,15 +750,6 @@ Feature: Value Predicate Resolution
       string-attribute sub base-attribute;
       name sub base-attribute;
       retailer sub base-attribute;
-
-      transfer-string-attribute-to-other-people sub rule,
-      when {
-        $x isa person, has string-attribute $r1;
-        $y isa person;
-      },
-      then {
-        $y has string-attribute $r1;
-      };
 
       tesco-sells-all-soft-drinks sub rule,
       when {
@@ -769,10 +780,14 @@ Feature: Value Predicate Resolution
     # PER | STA | SOF | RET |
     # SOF | NAM | PER | STA |
     # SOF | RET | PER | STA |
-    Then in reasoned keyspace, answer size is: 4
+    # SOF | NAM | SOF | RET |
+    # SOF | RET | SOF | NAM |
+    Then in reasoned keyspace, answer size is: 6
 #    Then materialised and reasoned keyspaces are the same size
 
 
+  @ignore
+  # TODO: re-enable once #5821 is fixed (in some answers, $typeof_ax is 'base-attribute' which is incorrect)
   # TODO: re-enable all steps once implicit attribute variables are resolvable
   Scenario: when restricting concept types of a pair of inferred attributes with `!=`, the answers have distinct types
     Given for each session, graql define
@@ -782,15 +797,6 @@ Feature: Value Predicate Resolution
       string-attribute sub base-attribute;
       name sub base-attribute;
       retailer sub base-attribute;
-
-      transfer-string-attribute-to-other-people sub rule,
-      when {
-        $x isa person, has string-attribute $r1;
-        $y isa person;
-      },
-      then {
-        $y has string-attribute $r1;
-      };
 
       tesco-sells-all-soft-drinks sub rule,
       when {
@@ -812,8 +818,8 @@ Feature: Value Predicate Resolution
       match
         $x has base-attribute $ax;
         $y has base-attribute $ay;
-        $ax isa $typeof_ax;
-        $ay isa $typeof_ay;
+        $ax isa! $typeof_ax;
+        $ay isa! $typeof_ay;
         $typeof_ax != $typeof_ay;
       get;
       """
@@ -823,7 +829,9 @@ Feature: Value Predicate Resolution
     # PER | STA | SOF | RET |
     # SOF | NAM | PER | STA |
     # SOF | RET | PER | STA |
-    Then in reasoned keyspace, answer size is: 4
+    # SOF | NAM | SOF | STA |
+    # SOF | STA | SOF | NAM |
+    Then in reasoned keyspace, answer size is: 6
 #    Then materialised and reasoned keyspaces are the same size
 
 
@@ -879,8 +887,8 @@ Feature: Value Predicate Resolution
         $y has base-attribute $unwantedValue;
         $value !== $unwantedValue;
         $unwantedValue "Ocado";
-        $value isa $type;
-        $unwantedValue isa $type;
+        $value isa! $type;
+        $unwantedValue isa! $type;
         $type != $unwantedType;
         $unwantedType type string-attribute;
       get $x, $value, $type;
