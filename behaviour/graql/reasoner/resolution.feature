@@ -1,6 +1,7 @@
 # Constraints
 #  Only scenarios where there is only one possible resolution path can be tested in this way
 
+# TODO: these tests should be implemented somewhere, but probably not in a file called 'resolution.feature'
 Feature: Graql Reasoner Resolution
 
   Background: Initialise a session and transaction for each scenario
@@ -9,8 +10,6 @@ Feature: Graql Reasoner Resolution
     Given connection open sessions for keyspaces:
       | test_resolution |
     Given transaction is initialised
-
-  Scenario: `has` matches inferred attribute ownerships
 
   Scenario: `isa` matches inferred relations
 

@@ -17,7 +17,7 @@
 
 Feature: Reasoning
 
-  Background: Setup base KBs
+  Background: Set up keyspaces for resolution testing
 
     Given connection has been opened
     Given connection delete all keyspaces
@@ -58,7 +58,7 @@ Feature: Reasoning
       """
       match $co has name $n; get;
       """
-    Then in reasoned keyspace, all answers are correct
+    Then all answers are correct in reasoned keyspace
     Then materialised and reasoned keyspaces are the same size
 
 
@@ -106,7 +106,7 @@ Feature: Reasoning
       """
       match $co has is-liable $l; get;
       """
-    Then in reasoned keyspace, all answers are correct
+    Then all answers are correct in reasoned keyspace
     Then materialised and reasoned keyspaces are the same size
 
 
@@ -159,7 +159,7 @@ Feature: Reasoning
       (superior: $l, subordinate: $k) isa location-hierarchy;
       get;
       """
-    Then in reasoned keyspace, all answers are correct
+    Then all answers are correct in reasoned keyspace
     Then materialised and reasoned keyspaces are the same size
 
 
@@ -216,7 +216,7 @@ Feature: Reasoning
       $continent isa continent; $area isa area;
       get;
       """
-    Then in reasoned keyspace, all answers are correct
+    Then all answers are correct in reasoned keyspace
     Then materialised and reasoned keyspaces are the same size
 
 
@@ -272,7 +272,7 @@ Feature: Reasoning
       """
       match ($w, $m) isa family-relation; $w isa woman; get;
       """
-    Then in reasoned keyspace, all answers are correct
+    Then all answers are correct in reasoned keyspace
     Then materialised and reasoned keyspaces are the same size
 
 
@@ -320,7 +320,7 @@ Feature: Reasoning
       not {$com has is-liable $liability;};
       get;
       """
-    Then in reasoned keyspace, all answers are correct
+    Then all answers are correct in reasoned keyspace
     Then materialised and reasoned keyspaces are the same size
 
 
@@ -367,7 +367,7 @@ Feature: Reasoning
       """
       match $com isa company, has is-liable $lia; $lia true; get;
       """
-    Then in reasoned keyspace, all answers are correct
+    Then all answers are correct in reasoned keyspace
     Then materialised and reasoned keyspaces are the same size
 
 
@@ -412,5 +412,5 @@ Feature: Reasoning
       """
       match $com isa company; not { $com has is-liable $lia; $lia true; }; not { $com has name $n; $n "the-company"; }; get;
       """
-    Then in reasoned keyspace, all answers are correct
+    Then all answers are correct in reasoned keyspace
     Then materialised and reasoned keyspaces are the same size

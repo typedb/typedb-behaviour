@@ -18,5 +18,6 @@
 package(default_visibility = ["//visibility:public"])
 
 exports_files([
-    "reasoner.feature",
+    "attribute-attachment.feature",
+    "value-predicate.feature"
 ])
