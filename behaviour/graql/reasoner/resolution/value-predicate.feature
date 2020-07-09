@@ -93,8 +93,8 @@ Feature: Value Predicate Resolution
       """
       match $x has is-old $r; get;
       """
-    Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, answer size is: 1
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 1
     Then materialised and reasoned keyspaces are the same size
 
 
@@ -123,8 +123,8 @@ Feature: Value Predicate Resolution
         $n <op> 1667;
       get;
       """
-    Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, answer size is: <answer-size>
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: <answer-size>
 #    Then materialised and reasoned keyspaces are the same size
 
     Examples:
@@ -162,8 +162,8 @@ Feature: Value Predicate Resolution
         $m <op> $n;
       get;
       """
-#    Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, answer size is: <answer-size>
+#    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: <answer-size>
 #    Then materialised and reasoned keyspaces are the same size
 
     Examples:
@@ -203,8 +203,8 @@ Feature: Value Predicate Resolution
         $n <op> 1667;
       get;
       """
-#    Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, answer size is: <answer-size>
+#    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: <answer-size>
 #    Then materialised and reasoned keyspaces are the same size
 
     Examples:
@@ -256,11 +256,11 @@ Feature: Value Predicate Resolution
         $unwanted == "Ocado";
       get;
       """
-#    Given in reasoned keyspace, all answers are correct
+#    Given all answers are correct in reasoned keyspace
     # x     | r     |
     # Fanta | Tesco |
     # Tango | Tesco |
-    Then in reasoned keyspace, answer size is: 2
+    Then answer size in reasoned keyspace is: 2
 #    Then materialised and reasoned keyspaces are the same size
 
 
@@ -303,11 +303,11 @@ Feature: Value Predicate Resolution
         $r == $wanted;
       get;
       """
-#    Given in reasoned keyspace, all answers are correct
+#    Given all answers are correct in reasoned keyspace
     # x     | r     |
     # Fanta | Ocado |
     # Tango | Ocado |
-    Then in reasoned keyspace, answer size is: 2
+    Then answer size in reasoned keyspace is: 2
 #    Then materialised and reasoned keyspaces are the same size
 
 
@@ -353,8 +353,8 @@ Feature: Value Predicate Resolution
         $rx contains "land";
       get;
       """
-    Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, answer size is: 2
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 2
 #    Then materialised and reasoned keyspaces are the same size
 
 
@@ -404,7 +404,7 @@ Feature: Value Predicate Resolution
         $ry contains 'land';
       get;
       """
-#    Then in reasoned keyspace, all answers are correct
+#    Then all answers are correct in reasoned keyspace
     # x     | rx        | y     | ry        |
     # Fanta | Iceland   | Tango | Iceland   |
     # Tango | Iceland   | Fanta | Iceland   |
@@ -414,7 +414,7 @@ Feature: Value Predicate Resolution
     # Fanta | Poundland | Fanta | Poundland |
     # Tango | Iceland   | Tango | Iceland   |
     # Tango | Poundland | Tango | Poundland |
-    Then in reasoned keyspace, answer size is: 8
+    Then answer size in reasoned keyspace is: 8
 #    Then materialised and reasoned keyspaces are the same size
 
 
@@ -464,7 +464,7 @@ Feature: Value Predicate Resolution
         $ry contains 'land';
       get;
       """
-#    Then in reasoned keyspace, all answers are correct
+#    Then all answers are correct in reasoned keyspace
     # x     | rx        | y     | ry        |
     # Fanta | Iceland   | Tango | Poundland |
     # Tango | Iceland   | Fanta | Poundland |
@@ -482,7 +482,7 @@ Feature: Value Predicate Resolution
     # Tango | Londis    | Tango | Poundland |
     # Fanta | Londis    | Fanta | Iceland   |
     # Tango | Londis    | Tango | Iceland   |
-    Then in reasoned keyspace, answer size is: 16
+    Then answer size in reasoned keyspace is: 16
 #    Then materialised and reasoned keyspaces are the same size
 
 
@@ -524,11 +524,11 @@ Feature: Value Predicate Resolution
         $r !== "Ocado";
       get;
       """
-#    Given in reasoned keyspace, all answers are correct
+#    Given all answers are correct in reasoned keyspace
     # x     | r     |
     # Fanta | Tesco |
     # Tango | Tesco |
-    Given in reasoned keyspace, answer size is: 2
+    Given answer size in reasoned keyspace is: 2
     Then for graql query
       """
       match
@@ -536,8 +536,8 @@ Feature: Value Predicate Resolution
         not { $r == "Ocado"; };
       get;
       """
-#    Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, answer size is: 2
+#    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 2
 #    Then materialised and reasoned keyspaces are the same size
 
 
@@ -579,11 +579,11 @@ Feature: Value Predicate Resolution
         $r == "Ocado";
       get;
       """
-#    Given in reasoned keyspace, all answers are correct
+#    Given all answers are correct in reasoned keyspace
     # x     | r     |
     # Fanta | Ocado |
     # Tango | Ocado |
-    Given in reasoned keyspace, answer size is: 2
+    Given answer size in reasoned keyspace is: 2
     Then for graql query
       """
       match
@@ -591,8 +591,8 @@ Feature: Value Predicate Resolution
         not { $r !== "Ocado"; };
       get;
       """
-#    Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, answer size is: 2
+#    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 2
 #    Then materialised and reasoned keyspaces are the same size
 
 
@@ -638,11 +638,11 @@ Feature: Value Predicate Resolution
         };
       get;
       """
-#    Then in reasoned keyspace, all answers are correct
+#    Then all answers are correct in reasoned keyspace
     # x     | r     |
     # Fanta | Tesco |
     # Tango | Tesco |
-    Then in reasoned keyspace, answer size is: 2
+    Then answer size in reasoned keyspace is: 2
 #    Then materialised and reasoned keyspaces are the same size
 
 
@@ -684,12 +684,12 @@ Feature: Value Predicate Resolution
         $re !== $sa;
       get;
       """
-#    Then in reasoned keyspace, all answers are correct
+#    Then all answers are correct in reasoned keyspace
     # The string-attributes are transferred to each other, so in fact both people have both Tesco and Safeway
     # x     | re    | y     | sa      |
     # Tango | Tesco | Alice | Safeway |
     # Tango | Tesco | Bob   | Safeway |
-    Then in reasoned keyspace, answer size is: 2
+    Then answer size in reasoned keyspace is: 2
 #    Then materialised and reasoned keyspaces are the same size
 
 
@@ -732,12 +732,12 @@ Feature: Value Predicate Resolution
         not { $re == $sa; };
       get;
       """
-#    Then in reasoned keyspace, all answers are correct
+#    Then all answers are correct in reasoned keyspace
     # The string-attributes are transferred to each other, so in fact both people have both Tesco and Safeway
     # x     | re    | y     | sa      |
     # Tango | Tesco | Alice | Safeway |
     # Tango | Tesco | Bob   | Safeway |
-    Then in reasoned keyspace, answer size is: 2
+    Then answer size in reasoned keyspace is: 2
 #    Then materialised and reasoned keyspaces are the same size
 
 
@@ -774,7 +774,7 @@ Feature: Value Predicate Resolution
         $ax != $ay;
       get;
       """
-#    Then in reasoned keyspace, all answers are correct
+#    Then all answers are correct in reasoned keyspace
     # x   | ax  | y   | ay  |
     # PER | STA | SOF | NAM |
     # PER | STA | SOF | RET |
@@ -782,7 +782,7 @@ Feature: Value Predicate Resolution
     # SOF | RET | PER | STA |
     # SOF | NAM | SOF | RET |
     # SOF | RET | SOF | NAM |
-    Then in reasoned keyspace, answer size is: 6
+    Then answer size in reasoned keyspace is: 6
 #    Then materialised and reasoned keyspaces are the same size
 
 
@@ -823,7 +823,7 @@ Feature: Value Predicate Resolution
         $typeof_ax != $typeof_ay;
       get;
       """
-#    Then in reasoned keyspace, all answers are correct
+#    Then all answers are correct in reasoned keyspace
     # x   | ax  | y   | ay  |
     # PER | STA | SOF | NAM |
     # PER | STA | SOF | RET |
@@ -831,7 +831,7 @@ Feature: Value Predicate Resolution
     # SOF | RET | PER | STA |
     # SOF | NAM | SOF | STA |
     # SOF | STA | SOF | NAM |
-    Then in reasoned keyspace, answer size is: 6
+    Then answer size in reasoned keyspace is: 6
 #    Then materialised and reasoned keyspaces are the same size
 
 
@@ -893,8 +893,8 @@ Feature: Value Predicate Resolution
         $unwantedType type string-attribute;
       get $x, $value, $type;
       """
-#    Then in reasoned keyspace, all answers are correct
+#    Then all answers are correct in reasoned keyspace
     # x      | value | type     |
     # Sprite | Tesco | retailer |
-    Then in reasoned keyspace, answer size is: 1
+    Then answer size in reasoned keyspace is: 1
 #    Then materialised and reasoned keyspaces are the same size

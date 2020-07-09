@@ -90,14 +90,14 @@ Feature: Attribute Attachment Resolution
       """
       match $x isa person, has string-attribute $y; get;
       """
-#    Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, answer size is: 2
+#    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 2
     Then for graql query
       """
       match $x isa string-attribute; get;
       """
-#    Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, answer size is: 1
+#    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 1
 #    Then materialised and reasoned keyspaces are the same size
 
 
@@ -142,15 +142,15 @@ Feature: Attribute Attachment Resolution
       """
       match $x isa person; get;
       """
-#    Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, answer size is: 2
+#    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 2
     Then for graql query
       """
       match $x isa person, has attribute $y; get;
       """
     # four attributes for each entity
-#    Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, answer size is: 8
+#    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 8
 #    Then materialised and reasoned keyspaces are the same size
 
 
@@ -177,21 +177,21 @@ Feature: Attribute Attachment Resolution
       """
       match $x isa person, has sub-string-attribute $y; get;
       """
-#    Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, answer size is: 1
+#    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 1
     Then for graql query
       """
       match $x isa sub-string-attribute; get;
       """
-#    Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, answer size is: 1
+#    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 1
     Then for graql query
       """
       match $x isa string-attribute; $y isa sub-string-attribute; get;
       """
     # 2 SA instances - one base, one sub hence two answers
-#    Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, answer size is: 2
+#    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 2
 #    Then materialised and reasoned keyspaces are the same size
 
 
@@ -219,14 +219,14 @@ Feature: Attribute Attachment Resolution
       """
       match $x isa person, has unrelated-attribute $y; get;
       """
-#    Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, answer size is: 1
+#    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 1
     Then for graql query
       """
       match $x isa unrelated-attribute; get;
       """
-#    Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, answer size is: 1
+#    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 1
 #    Then materialised and reasoned keyspaces are the same size
 
 
@@ -265,8 +265,8 @@ Feature: Attribute Attachment Resolution
       """
       match $x has string-attribute $y; get;
       """
-#    Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, answer size is: 3
+#    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 3
 #    Then materialised and reasoned keyspaces are the same size
 
 
@@ -305,20 +305,20 @@ Feature: Attribute Attachment Resolution
       """
       match $x has retailer 'Ocado'; get;
       """
-#    Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, answer size is: 2
+#    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 2
     Then for graql query
       """
       match $x has retailer $r; get;
       """
-#    Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, answer size is: 4
+#    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 4
     Then for graql query
       """
       match $x has retailer 'Tesco'; get;
       """
-#    Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, answer size is: 2
+#    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 2
 #    Then materialised and reasoned keyspaces are the same size
 
 
@@ -349,6 +349,6 @@ Feature: Attribute Attachment Resolution
       """
       match $x isa soft-drink, has retailer 'Ocado'; get;
       """
-#    Then in reasoned keyspace, all answers are correct
-    Then in reasoned keyspace, answer size is: 2
+#    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 2
 #    Then materialised and reasoned keyspaces are the same size
