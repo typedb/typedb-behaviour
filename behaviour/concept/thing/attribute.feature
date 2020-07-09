@@ -28,13 +28,16 @@ Feature: Concept Attribute
     Given put attribute type: is-alive, with value type: boolean
     Given put attribute type: age, with value type: long
     Given put attribute type: score, with value type: double
-    Given put attribute type: name, with value type: string
     Given put attribute type: birth-date, with value type: datetime
+    Given put attribute type: name, with value type: string
+    Given put attribute type: email, with value type: string
+    Given attribute(email) as(string) set regex: \S+@\S+\.\S+
     Given put entity type: person
     Given entity(person) set has attribute type: is-alive
     Given entity(person) set has attribute type: age
     Given entity(person) set has attribute type: score
     Given entity(person) set has attribute type: name
+    Given entity(person) set has attribute type: email
     Given entity(person) set has attribute type: birth-date
     Given transaction commits
     Given connection close all sessions
@@ -96,6 +99,23 @@ Feature: Concept Attribute
     Then attribute $x has type: name
     Then attribute $x has value type: string
     Then attribute $x has string value: alice
+
+  Scenario: Attribute with value type string and satisfies a regular expression can be created
+    When $x = attribute(email) as(string) put: alice@email.com
+    Then attribute $x is null: false
+    Then attribute $x has type: email
+    Then attribute $x has value type: string
+    Then attribute $x has string value: alice@email.com
+    When transaction commits
+    When session opens transaction of type: read
+    When $x = attribute(email) as(string) get: alice@email.com
+    Then attribute $x is null: false
+    Then attribute $x has type: email
+    Then attribute $x has value type: string
+    Then attribute $x has string value: alice@email.com
+
+  Scenario: Attribute with value type string but does not satisfy a regular expression cannot be created
+    When attribute(email) as(string) put: alice-email-com; throws exception
 
   Scenario: Attribute with value type datetime can be created
     When $x = attribute(birth-date) as(datetime) put: 1990-01-01 11:22:33
