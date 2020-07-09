@@ -68,7 +68,6 @@ Feature: Value Predicate Resolution
       """
 
 
-  # TODO: change 'then' block to "$x has is-old true" once implicit attribute variables are resolvable
   Scenario: a rule can infer an attribute ownership based on a value predicate
     Given for each session, graql define
       """
@@ -79,8 +78,7 @@ Feature: Value Predicate Resolution
         $a > 0;
       },
       then {
-        $x has is-old $t;
-        $t true;
+        $x has is-old true;
       };
       """
     Given for each session, graql insert
@@ -217,7 +215,6 @@ Feature: Value Predicate Resolution
       | !== | 4           |
 
 
-  # TODO: re-enable all steps once implicit attribute variables are resolvable
   Scenario: inferred attributes can be matched by inequality to a variable that is equal to a specified value
     Given for each session, graql define
       """
@@ -247,7 +244,7 @@ Feature: Value Predicate Resolution
       $y isa soft-drink, has name "Tango", has ref 1;
       $r "Ocado" isa retailer;
       """
-#    When materialised keyspace is completed
+    When materialised keyspace is completed
     Then for graql query
       """
       match
@@ -256,15 +253,14 @@ Feature: Value Predicate Resolution
         $unwanted == "Ocado";
       get;
       """
-#    Given all answers are correct in reasoned keyspace
+    Given all answers are correct in reasoned keyspace
     # x     | r     |
     # Fanta | Tesco |
     # Tango | Tesco |
     Then answer size in reasoned keyspace is: 2
-#    Then materialised and reasoned keyspaces are the same size
+    Then materialised and reasoned keyspaces are the same size
 
 
-  # TODO: re-enable all steps once implicit attribute variables are resolvable
   Scenario: inferred attributes can be matched by equality to a variable that is not equal to a specified value
     Given for each session, graql define
       """
@@ -294,7 +290,7 @@ Feature: Value Predicate Resolution
       $y isa soft-drink, has name "Tango", has ref 1;
       $r "Ocado" isa retailer;
       """
-#    When materialised keyspace is completed
+    When materialised keyspace is completed
     Then for graql query
       """
       match
@@ -303,12 +299,12 @@ Feature: Value Predicate Resolution
         $r == $wanted;
       get;
       """
-#    Given all answers are correct in reasoned keyspace
+    Given all answers are correct in reasoned keyspace
     # x     | r     |
     # Fanta | Ocado |
     # Tango | Ocado |
     Then answer size in reasoned keyspace is: 2
-#    Then materialised and reasoned keyspaces are the same size
+    Then materialised and reasoned keyspaces are the same size
 
 
   # TODO: re-enable all steps when fixed (#75)
@@ -486,7 +482,6 @@ Feature: Value Predicate Resolution
 #    Then materialised and reasoned keyspaces are the same size
 
 
-  # TODO: re-enable all steps once implicit attribute variables are resolvable
   Scenario: in a rule, `not { $x == $y; }` is the same as saying `$x !== $y`
     Given for each session, graql define
       """
@@ -516,7 +511,7 @@ Feature: Value Predicate Resolution
       $y isa soft-drink, has name "Tango", has ref 1;
       $r "Ocado" isa retailer;
       """
-#    When materialised keyspace is completed
+    When materialised keyspace is completed
     Given for graql query
       """
       match
@@ -524,7 +519,7 @@ Feature: Value Predicate Resolution
         $r !== "Ocado";
       get;
       """
-#    Given all answers are correct in reasoned keyspace
+    Given all answers are correct in reasoned keyspace
     # x     | r     |
     # Fanta | Tesco |
     # Tango | Tesco |
@@ -536,12 +531,11 @@ Feature: Value Predicate Resolution
         not { $r == "Ocado"; };
       get;
       """
-#    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned keyspace
     Then answer size in reasoned keyspace is: 2
-#    Then materialised and reasoned keyspaces are the same size
+    Then materialised and reasoned keyspaces are the same size
 
 
-  # TODO: re-enable all steps once implicit attribute variables are resolvable
   Scenario: in a rule, `not { $x !== $y; }` is the same as saying `$x == $y`
     Given for each session, graql define
       """
@@ -571,7 +565,7 @@ Feature: Value Predicate Resolution
       $y isa soft-drink, has name "Tango", has ref 1;
       $r "Ocado" isa retailer;
       """
-#    When materialised keyspace is completed
+    When materialised keyspace is completed
     Given for graql query
       """
       match
@@ -579,7 +573,7 @@ Feature: Value Predicate Resolution
         $r == "Ocado";
       get;
       """
-#    Given all answers are correct in reasoned keyspace
+    Given all answers are correct in reasoned keyspace
     # x     | r     |
     # Fanta | Ocado |
     # Tango | Ocado |
@@ -591,13 +585,12 @@ Feature: Value Predicate Resolution
         not { $r !== "Ocado"; };
       get;
       """
-#    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned keyspace
     Then answer size in reasoned keyspace is: 2
-#    Then materialised and reasoned keyspaces are the same size
+    Then materialised and reasoned keyspaces are the same size
 
 
   # TODO: move to negation.feature
-  # TODO: re-enable all steps once implicit attribute variables are resolvable
   Scenario: a negation can filter out variables by equality to another variable with a specified value
     Given for each session, graql define
       """
@@ -627,7 +620,7 @@ Feature: Value Predicate Resolution
       $y isa soft-drink, has name "Tango", has ref 1;
       $r "Ocado" isa retailer;
       """
-#    When materialised keyspace is completed
+    When materialised keyspace is completed
     Then for graql query
       """
       match
@@ -638,15 +631,15 @@ Feature: Value Predicate Resolution
         };
       get;
       """
-#    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned keyspace
     # x     | r     |
     # Fanta | Tesco |
     # Tango | Tesco |
     Then answer size in reasoned keyspace is: 2
-#    Then materialised and reasoned keyspaces are the same size
+    Then materialised and reasoned keyspaces are the same size
 
 
-  # TODO: re-enable all steps once implicit attribute variables are resolvable
+  # TODO: re-enable all steps once attribute re-attachment is resolvable
   Scenario: when matching a pair of unrelated inferred attributes with `!==`, the answers are unequal
     Given for each session, graql define
       """
@@ -693,7 +686,7 @@ Feature: Value Predicate Resolution
 #    Then materialised and reasoned keyspaces are the same size
 
 
-  # TODO: re-enable all steps once implicit attribute variables are resolvable
+  # TODO: re-enable all steps once attribute re-attachment is resolvable
   # TODO: move to negation.feature
   Scenario: when matching a pair of unrelated inferred attributes with negation and ==, the answers are unequal
     Given for each session, graql define
@@ -741,7 +734,6 @@ Feature: Value Predicate Resolution
 #    Then materialised and reasoned keyspaces are the same size
 
 
-  # TODO: re-enable all steps once implicit attribute variables are resolvable
   Scenario: when restricting the values of a pair of inferred attributes with `!=`, the answers have distinct types
     Given for each session, graql define
       """
@@ -765,7 +757,7 @@ Feature: Value Predicate Resolution
       $x isa person, has string-attribute "Tesco", has ref 0;
       $y isa soft-drink, has name "Tesco", has ref 1;
       """
-#    When materialised keyspace is completed
+    When materialised keyspace is completed
     Then for graql query
       """
       match
@@ -774,7 +766,7 @@ Feature: Value Predicate Resolution
         $ax != $ay;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned keyspace
     # x   | ax  | y   | ay  |
     # PER | STA | SOF | NAM |
     # PER | STA | SOF | RET |
@@ -783,12 +775,11 @@ Feature: Value Predicate Resolution
     # SOF | NAM | SOF | RET |
     # SOF | RET | SOF | NAM |
     Then answer size in reasoned keyspace is: 6
-#    Then materialised and reasoned keyspaces are the same size
+    Then materialised and reasoned keyspaces are the same size
 
 
   @ignore
   # TODO: re-enable once grakn#5821 is fixed (in some answers, $typeof_ax is 'base-attribute' which is incorrect)
-  # TODO: re-enable all steps once implicit attribute variables are resolvable
   Scenario: when restricting concept types of a pair of inferred attributes with `!=`, the answers have distinct types
     Given for each session, graql define
       """
@@ -812,7 +803,7 @@ Feature: Value Predicate Resolution
       $x isa person, has string-attribute "Tesco", has ref 0;
       $y isa soft-drink, has name "Tesco", has ref 1;
       """
-#    When materialised keyspace is completed
+    When materialised keyspace is completed
     Then for graql query
       """
       match
@@ -823,7 +814,7 @@ Feature: Value Predicate Resolution
         $typeof_ax != $typeof_ay;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned keyspace
     # x   | ax  | y   | ay  |
     # PER | STA | SOF | NAM |
     # PER | STA | SOF | RET |
@@ -832,11 +823,10 @@ Feature: Value Predicate Resolution
     # SOF | NAM | SOF | STA |
     # SOF | STA | SOF | NAM |
     Then answer size in reasoned keyspace is: 6
-#    Then materialised and reasoned keyspaces are the same size
+    Then materialised and reasoned keyspaces are the same size
 
   @ignore
   # TODO: re-enable once grakn#5821 is fixed
-  # TODO: re-enable all steps once implicit attribute variables are resolvable
   Scenario: inferred attribute matches can be simultaneously restricted by both concept type and attribute value
     Given for each session, graql define
       """
@@ -880,7 +870,7 @@ Feature: Value Predicate Resolution
       $y isa soft-drink, has name "Sprite", has ref 2;
       $z "Ocado" isa retailer;
       """
-#    When materialised keyspace is completed
+    When materialised keyspace is completed
     Then for graql query
       """
       match
@@ -894,8 +884,8 @@ Feature: Value Predicate Resolution
         $unwantedType type string-attribute;
       get $x, $value, $type;
       """
-#    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned keyspace
     # x      | value | type     |
     # Sprite | Tesco | retailer |
     Then answer size in reasoned keyspace is: 1
-#    Then materialised and reasoned keyspaces are the same size
+    Then materialised and reasoned keyspaces are the same size
