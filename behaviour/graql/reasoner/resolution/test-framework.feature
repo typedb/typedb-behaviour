@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-Feature: Reasoning
+Feature: Resolution Test Framework
 
   Background: Set up keyspaces for resolution testing
 

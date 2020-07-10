@@ -19,5 +19,7 @@ package(default_visibility = ["//visibility:public"])
 
 exports_files([
     "attribute-attachment.feature",
-    "value-predicate.feature"
+    "test-framework.feature",
+    "type-generation.feature",
+    "value-predicate.feature",
 ])
