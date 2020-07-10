@@ -68,7 +68,7 @@ Feature: Concept Attribute Type
     Then attribute(email) as(string) get regex: \S+@\S+\.\S+
     When transaction commits
     When session opens transaction of type: read
-    Then attribute(email) as(string) get regex: /^\S+@\S+\.\S+$/
+    Then attribute(email) as(string) get regex: \S+@\S+\.\S+
 
   Scenario: Attribute types can be created with value class datetime
     When put attribute type: timestamp, with value type: datetime
