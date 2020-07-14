@@ -152,8 +152,8 @@ Feature: Value Predicate Resolution
     Then for graql query
       """
       match
-        $x isa person, has lucky-number $m;
-        $y isa person, has lucky-number $n;
+        $x isa person, has name "Alice", has lucky-number $m;
+        $y isa person, has name "Bob", has lucky-number $n;
         $m <op> $n;
       get;
       """
@@ -185,15 +185,15 @@ Feature: Value Predicate Resolution
     Given for each session, graql insert
       """
       insert
-      $x isa person;
-      $y isa person;
+      $x isa person, has name "Alice";
+      $y isa person, has name "Bob";
       """
     When materialised keyspace is completed
     Then for graql query
       """
       match
-        $x isa person, has lucky-number $m;
-        $y isa person, has lucky-number $n;
+        $x isa person, has name "Alice", has lucky-number $m;
+        $y isa person, has name "Bob", has lucky-number $n;
         $m <op> $n;
         $n <op> 1667;
       get;
