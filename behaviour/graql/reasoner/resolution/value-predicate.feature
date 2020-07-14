@@ -38,24 +38,20 @@ Feature: Value Predicate Resolution
         has sub-string-attribute,
         has name,
         has age,
-        has is-old,
-        key ref;
+        has is-old;
 
       tortoise sub entity,
         has age,
-        has is-old,
-        key ref;
+        has is-old;
 
       soft-drink sub entity,
         has name,
-        has retailer,
-        key ref;
+        has retailer;
 
       team sub relation,
         relates leader,
         relates team-member,
-        has string-attribute,
-        key ref;
+        has string-attribute;
 
       string-attribute sub attribute, value string;
       retailer sub attribute, value string;
@@ -64,7 +60,6 @@ Feature: Value Predicate Resolution
       is-old sub attribute, value boolean;
       sub-string-attribute sub string-attribute;
       unrelated-attribute sub attribute, value string;
-      ref sub attribute, value long;
       """
 
 
@@ -86,7 +81,7 @@ Feature: Value Predicate Resolution
     Given for each session, graql insert
       """
       insert
-      $se isa tortoise, has age 1, has ref 0;
+      $se isa tortoise, has age 1;
       """
     When materialised keyspace is completed
     Then for graql query
@@ -112,8 +107,8 @@ Feature: Value Predicate Resolution
     Given for each session, graql insert
       """
       insert
-      $x isa person, has ref 0;
-      $y isa person, has ref 1;
+      $x isa person;
+      $y isa person;
       """
     When materialised keyspace is completed
     Then for graql query
@@ -150,15 +145,15 @@ Feature: Value Predicate Resolution
     Given for each session, graql insert
       """
       insert
-      $x isa person, has name "Alice", has ref 0;
-      $y isa person, has name "Bob", has ref 1;
+      $x isa person, has name "Alice";
+      $y isa person, has name "Bob";
       """
     When materialised keyspace is completed
     Then for graql query
       """
       match
-        $x isa person, has ref 0, has lucky-number $m;
-        $y isa person, has ref 1, has lucky-number $n;
+        $x isa person, has lucky-number $m;
+        $y isa person, has lucky-number $n;
         $m <op> $n;
       get;
       """
@@ -190,15 +185,15 @@ Feature: Value Predicate Resolution
     Given for each session, graql insert
       """
       insert
-      $x isa person, has ref 0;
-      $y isa person, has ref 1;
+      $x isa person;
+      $y isa person;
       """
     When materialised keyspace is completed
     Then for graql query
       """
       match
-        $x isa person, has ref 0, has lucky-number $m;
-        $y isa person, has ref 1, has lucky-number $n;
+        $x isa person, has lucky-number $m;
+        $y isa person, has lucky-number $n;
         $m <op> $n;
         $n <op> 1667;
       get;
@@ -243,8 +238,8 @@ Feature: Value Predicate Resolution
     Given for each session, graql insert
       """
       insert
-      $x isa soft-drink, has name "Fanta", has ref 0;
-      $y isa soft-drink, has name "Tango", has ref 1;
+      $x isa soft-drink, has name "Fanta";
+      $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
 #    When materialised keyspace is completed
@@ -290,8 +285,8 @@ Feature: Value Predicate Resolution
     Given for each session, graql insert
       """
       insert
-      $x isa soft-drink, has name "Fanta", has ref 0;
-      $y isa soft-drink, has name "Tango", has ref 1;
+      $x isa soft-drink, has name "Fanta";
+      $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
 #    When materialised keyspace is completed
@@ -343,7 +338,7 @@ Feature: Value Predicate Resolution
       """
     Given for each session, graql insert
       """
-      insert $x isa soft-drink, has name "Fanta", has ref 0;
+      insert $x isa soft-drink, has name "Fanta";
       """
     When materialised keyspace is completed
     Then for graql query
@@ -391,8 +386,8 @@ Feature: Value Predicate Resolution
     Given for each session, graql insert
       """
       insert
-      $x isa soft-drink, has name "Fanta", has ref 0;
-      $y isa soft-drink, has name "Tango", has ref 1;
+      $x isa soft-drink, has name "Fanta";
+      $y isa soft-drink, has name "Tango";
       """
     When materialised keyspace is completed
     Then for graql query
@@ -451,8 +446,8 @@ Feature: Value Predicate Resolution
     Given for each session, graql insert
       """
       insert
-      $x isa soft-drink, has name "Fanta", has ref 0;
-      $y isa soft-drink, has name "Tango", has ref 1;
+      $x isa soft-drink, has name "Fanta";
+      $y isa soft-drink, has name "Tango";
       """
     When materialised keyspace is completed
     Then for graql query
@@ -512,8 +507,8 @@ Feature: Value Predicate Resolution
     Given for each session, graql insert
       """
       insert
-      $x isa soft-drink, has name "Fanta", has ref 0;
-      $y isa soft-drink, has name "Tango", has ref 1;
+      $x isa soft-drink, has name "Fanta";
+      $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
 #    When materialised keyspace is completed
@@ -567,8 +562,8 @@ Feature: Value Predicate Resolution
     Given for each session, graql insert
       """
       insert
-      $x isa soft-drink, has name "Fanta", has ref 0;
-      $y isa soft-drink, has name "Tango", has ref 1;
+      $x isa soft-drink, has name "Fanta";
+      $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
 #    When materialised keyspace is completed
@@ -623,8 +618,8 @@ Feature: Value Predicate Resolution
     Given for each session, graql insert
       """
       insert
-      $x isa soft-drink, has name "Fanta", has ref 0;
-      $y isa soft-drink, has name "Tango", has ref 1;
+      $x isa soft-drink, has name "Fanta";
+      $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
 #    When materialised keyspace is completed
@@ -671,9 +666,9 @@ Feature: Value Predicate Resolution
     Given for each session, graql insert
       """
       insert
-      $x isa person, has name "Alice", has string-attribute "Tesco", has ref 0;
-      $y isa person, has name "Bob", has string-attribute "Safeway", has ref 1;
-      $z isa soft-drink, has name "Tango", has ref 2;
+      $x isa person, has name "Alice", has string-attribute "Tesco";
+      $y isa person, has name "Bob", has string-attribute "Safeway";
+      $z isa soft-drink, has name "Tango";
       """
 #    When materialised keyspace is completed
     Then for graql query
@@ -719,9 +714,9 @@ Feature: Value Predicate Resolution
     Given for each session, graql insert
       """
       insert
-      $x isa person, has name "Alice", has string-attribute "Tesco", has ref 0;
-      $y isa person, has name "Bob", has string-attribute "Safeway", has ref 1;
-      $z isa soft-drink, has name "Tango", has ref 2;
+      $x isa person, has name "Alice", has string-attribute "Tesco";
+      $y isa person, has name "Bob", has string-attribute "Safeway";
+      $z isa soft-drink, has name "Tango";
       """
 #    When materialised keyspace is completed
     Then for graql query
@@ -762,8 +757,8 @@ Feature: Value Predicate Resolution
     Given for each session, graql insert
       """
       insert
-      $x isa person, has string-attribute "Tesco", has ref 0;
-      $y isa soft-drink, has name "Tesco", has ref 1;
+      $x isa person, has string-attribute "Tesco";
+      $y isa soft-drink, has name "Tesco";
       """
 #    When materialised keyspace is completed
     Then for graql query
@@ -809,8 +804,8 @@ Feature: Value Predicate Resolution
     Given for each session, graql insert
       """
       insert
-      $x isa person, has string-attribute "Tesco", has ref 0;
-      $y isa soft-drink, has name "Tesco", has ref 1;
+      $x isa person, has string-attribute "Tesco";
+      $y isa soft-drink, has name "Tesco";
       """
 #    When materialised keyspace is completed
     Then for graql query
@@ -875,9 +870,9 @@ Feature: Value Predicate Resolution
     Given for each session, graql insert
       """
       insert
-      $w isa person, has string-attribute "Ocado", has ref 0;
-      $x isa person, has string-attribute "Tesco", has ref 1;
-      $y isa soft-drink, has name "Sprite", has ref 2;
+      $w isa person, has string-attribute "Ocado";
+      $x isa person, has string-attribute "Tesco";
+      $y isa soft-drink, has name "Sprite";
       $z "Ocado" isa retailer;
       """
 #    When materialised keyspace is completed

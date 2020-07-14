@@ -57,7 +57,6 @@ Feature: Attribute Attachment Resolution
       is-old sub attribute, value boolean;
       sub-string-attribute sub string-attribute;
       unrelated-attribute sub attribute, value string;
-      ref sub attribute, value long;
       """
 
 
