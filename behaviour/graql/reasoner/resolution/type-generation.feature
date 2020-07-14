@@ -28,7 +28,7 @@ Feature: Type Generation Resolution
     Given reasoned keyspace is named: reasoned
 
 
-  # TODO: re-enable all steps when things do not require keys in resolution testing
+  # TODO: re-enable all steps once attribute re-attachment is resolvable
   Scenario: additional types for entities can be derived using `isa`
     Given for each session, graql define
       """
@@ -64,7 +64,7 @@ Feature: Type Generation Resolution
 #    Then materialised and reasoned keyspaces are the same size
 
 
-  # TODO: re-enable all steps when things do not require keys in resolution testing
+  # TODO: re-enable all steps once attribute re-attachment is resolvable
   Scenario: additional types for entities can be derived using direct `isa!`
     Given for each session, graql define
       """
@@ -122,7 +122,7 @@ Feature: Type Generation Resolution
 #    Then materialised and reasoned keyspaces are the same size
 
 
-  # TODO: re-enable all steps when things do not require keys in resolution testing
+  # TODO: re-enable all steps once attribute re-attachment is resolvable
   Scenario: additional types for entities can be derived via relations that they play roles in
     Given for each session, graql define
       """
@@ -228,7 +228,7 @@ Feature: Type Generation Resolution
 #    Then materialised and reasoned keyspaces are the same size
 
 
-  # TODO: re-enable all steps when things do not require keys in resolution testing
+  # TODO: re-enable all steps once attribute re-attachment is resolvable
   Scenario: additional types for relations can be derived using direct `isa!`
     Given for each session, graql define
       """
