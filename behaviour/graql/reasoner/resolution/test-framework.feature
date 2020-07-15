@@ -155,6 +155,8 @@ Feature: Resolution Test Framework
     Then materialised and reasoned keyspaces are the same size
 
 
+  @ignore
+  # TODO: currently this scenario takes longer than 2 hours to execute (#75) - re-enable when fixed
   Scenario: 3-hop transitivity
     Given for each session, graql define
       """
