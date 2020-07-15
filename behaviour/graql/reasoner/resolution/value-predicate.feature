@@ -389,7 +389,7 @@ Feature: Value Predicate Resolution
       $x isa soft-drink, has name "Fanta";
       $y isa soft-drink, has name "Tango";
       """
-    When materialised keyspace is completed
+#    When materialised keyspace is completed
     Then for graql query
       """
       match
@@ -449,7 +449,7 @@ Feature: Value Predicate Resolution
       $x isa soft-drink, has name "Fanta";
       $y isa soft-drink, has name "Tango";
       """
-    When materialised keyspace is completed
+#    When materialised keyspace is completed
     Then for graql query
       """
       match
