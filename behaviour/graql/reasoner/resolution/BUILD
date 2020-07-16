@@ -21,5 +21,6 @@ exports_files([
     "attribute-attachment.feature",
     "test-framework.feature",
     "type-generation.feature",
+    "type-hierarchy.feature",
     "value-predicate.feature",
 ])
