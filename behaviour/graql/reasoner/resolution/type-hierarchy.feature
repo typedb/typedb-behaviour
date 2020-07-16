@@ -67,7 +67,6 @@ Feature: Type Hierarchy Resolution
       """
       match (role2:$x, role3:$y) isa relation2; get;
       """
-    Then no answers are resolved in reasoned keyspace
     Then answer size in reasoned keyspace is: 0
     Then materialised and reasoned keyspaces are the same size
 
