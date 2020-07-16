@@ -33,91 +33,199 @@ Feature: Type Hierarchy Resolution
       """
       define
 
-      entity1 sub entity,
-          plays role1,
-          plays role2,
-          plays role3;
+      person sub entity,
+          plays child,
+          plays parent,
+          plays mother,
+          plays father;
 
-      relation1 sub relation,
-          relates role1,
-          relates role2;
+      family sub relation,
+          relates child,
+          relates parent;
 
-      relation2 sub relation,
-          relates role1,
-          relates role2,
-          relates role3;
+      large-family sub family,
+          relates child,
+          relates mother as parent,
+          relates father as parent;
 
-      rule-1 sub rule,
+      parents-are-mothers sub rule,
       when {
-          (role1:$x, role2:$y) isa relation1;
+          (child: $x, parent: $y) isa family;
       },
       then {
-          (role1:$x, role3:$y) isa relation2;
+          (child: $x, mother: $y) isa large-family;
       };
       """
     Given for each session, graql insert
       """
       insert
-      $x isa entity1;
-      $y isa entity1;
-      (role1:$x, role2:$y) isa relation1;
+      $x isa person;
+      $y isa person;
+      (child: $x, parent: $y) isa family;
       """
     When materialised keyspace is completed
+    # Matching a sibling of the actual role
     Then for graql query
       """
-      match (role2:$x, role3:$y) isa relation2; get;
+      match (child: $x, father: $y) isa large-family; get;
+      """
+    Then answer size in reasoned keyspace is: 0
+    # Matching two siblings when only one is present
+    Then for graql query
+      """
+      match (mother: $x, father: $y) isa large-family; get;
       """
     Then answer size in reasoned keyspace is: 0
     Then materialised and reasoned keyspaces are the same size
 
 
-  Scenario: when a relation with sub-roles is inferred, it can be retrieved by matching their super-roles
+  Scenario: when a sub-relation is inferred, it can be retrieved by matching its super-relation and sub-roles
     Given for each session, graql define
       """
       define
 
-      role1 sub role;
-      role2 sub role;
-      role3 sub role1;
-      role4 sub role2;
+      person sub entity,
+          plays writer,
+          plays performer,
+          plays film-writer,
+          plays actor,
+          plays scifi-writer,
+          plays scifi-actor;
 
-      entity1 sub entity,
-          plays role1,
-          plays role2,
-          plays role3,
-          plays role4;
+      performance sub relation,
+          relates writer,
+          relates performer;
 
-      relation1 sub relation,
-          relates role1,
-          relates role2;
+      film-production sub relation,
+          relates film-writer,
+          relates actor;
 
-      relation2 sub relation,
-          relates role1,
-          relates role2;
+      scifi-production sub film-production,
+          relates scifi-writer as film-writer,
+          relates scifi-actor as actor;
 
-      relation3 sub relation2,
-          relates role3,
-          relates role4;
-
-      rule-1 sub rule,
+      performance-to-scifi sub rule,
       when {
-          (role1:$x, role2:$y) isa relation1;
+          (writer:$x, performer:$y) isa performance;
       },
       then {
-          (role3:$x, role4:$y) isa relation3;
+          (scifi-writer:$x, scifi-actor:$y) isa scifi-production;
       };
       """
     Given for each session, graql insert
       """
       insert
-      $x isa entity1;
-      $y isa entity1;
-      (role1:$x, role2:$y) isa relation1;
+      $x isa person;
+      $y isa person;
+      (writer:$x, performer:$y) isa performance;
       """
     When materialised keyspace is completed
+    # sub-roles, super-relation
     Then for graql query
       """
-      match (role1:$x, role2:$y) isa relation2; get;
+      match (scifi-writer:$x, scifi-actor:$y) isa film-production; get;
+      """
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 1
+    Then materialised and reasoned keyspaces are the same size
+
+
+  Scenario: when a sub-relation is inferred, it can be retrieved by matching its sub-relation and super-roles
+    Given for each session, graql define
+      """
+      define
+
+      person sub entity,
+          plays writer,
+          plays performer,
+          plays film-writer,
+          plays actor,
+          plays scifi-writer,
+          plays scifi-actor;
+
+      performance sub relation,
+          relates writer,
+          relates performer;
+
+      film-production sub relation,
+          relates film-writer,
+          relates actor;
+
+      scifi-production sub film-production,
+          relates scifi-writer as film-writer,
+          relates scifi-actor as actor;
+
+      performance-to-scifi sub rule,
+      when {
+          (writer:$x, performer:$y) isa performance;
+      },
+      then {
+          (scifi-writer:$x, scifi-actor:$y) isa scifi-production;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+      $x isa person;
+      $y isa person;
+      (writer:$x, performer:$y) isa performance;
+      """
+    When materialised keyspace is completed
+    # super-roles, sub-relation
+    Then for graql query
+      """
+      match (film-writer:$x, actor:$y) isa scifi-production; get;
+      """
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 1
+    Then materialised and reasoned keyspaces are the same size
+
+
+  Scenario: when a sub-relation is inferred, it can be retrieved by matching its super-relation and super-roles
+    Given for each session, graql define
+      """
+      define
+
+      person sub entity,
+          plays writer,
+          plays performer,
+          plays film-writer,
+          plays actor,
+          plays scifi-writer,
+          plays scifi-actor;
+
+      performance sub relation,
+          relates writer,
+          relates performer;
+
+      film-production sub relation,
+          relates film-writer,
+          relates actor;
+
+      scifi-production sub film-production,
+          relates scifi-writer as film-writer,
+          relates scifi-actor as actor;
+
+      performance-to-scifi sub rule,
+      when {
+          (writer:$x, performer:$y) isa performance;
+      },
+      then {
+          (scifi-writer:$x, scifi-actor:$y) isa scifi-production;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+      $x isa person;
+      $y isa person;
+      (writer:$x, performer:$y) isa performance;
+      """
+    When materialised keyspace is completed
+    # super-roles, super-relation
+    Then for graql query
+      """
+      match (film-writer:$x, actor:$y) isa film-production; get;
       """
     Then all answers are correct in reasoned keyspace
     Then answer size in reasoned keyspace is: 1
@@ -129,65 +237,67 @@ Feature: Type Hierarchy Resolution
       """
       define
 
-      entity1 sub entity,
+      person sub entity,
           has name,
-          plays role1,
-          plays role2;
+          plays writer,
+          plays performer,
+          plays film-writer,
+          plays actor;
 
-      subEntity1 sub entity1;
+      child sub person;
 
-      relation1 sub relation,
-          relates role1,
-          relates role2;
+      performance sub relation,
+          relates writer,
+          relates performer;
 
-      relation2 sub relation,
-          relates role1,
-          relates role2;
+      film-production sub relation,
+          relates film-writer,
+          relates actor;
 
       name sub attribute, value string;
 
-      rule-1 sub rule,
+      performance-to-film-production sub rule,
       when {
-          $x isa subEntity1;
-          $y isa entity1;
-          (role1:$x, role2:$y) isa relation2;
+          $x isa child;
+          $y isa person;
+          (performer:$x, writer:$y) isa performance;
       },
       then {
-          (role1:$x, role2:$y) isa relation1;
+          (actor:$x, film-writer:$y) isa film-production;
       };
       """
     Given for each session, graql insert
       """
       insert
-      $x isa subEntity1, has name "a";
-      $y isa entity1, has name "b";
-      $z isa entity1, has name "a";
-      $w isa entity1, has name "b2";
-      $v isa subEntity1, has name "a";
+      $x isa child, has name "a";
+      $y isa person, has name "b";
+      $z isa person, has name "a";
+      $w isa person, has name "b2";
+      $v isa child, has name "a";
 
-      (role1:$x, role2:$z) isa relation2;     # subEntity1 - entity1    -> satisfies rule
-      (role1:$y, role2:$z) isa relation2;     # entity1 - entity1       -> doesn't satisfy rule
-      (role1:$x, role2:$v) isa relation2;     # subEntity1 - subEntity1 -> satisfies rule
-      (role1:$y, role2:$v) isa relation2;     # entity1 - subEntity1    -> doesn't satisfy rule
+      (performer:$x, writer:$z) isa performance;  # child - person   -> satisfies rule
+      (performer:$y, writer:$z) isa performance;  # person - person  -> doesn't satisfy rule
+      (performer:$x, writer:$v) isa performance;  # child - child    -> satisfies rule
+      (performer:$y, writer:$v) isa performance;  # person - child   -> doesn't satisfy rule
       """
     When materialised keyspace is completed
     Then for graql query
       """
       match
-        $x isa entity1;
-        $y isa entity1;
-        (role1: $x, role2: $y) isa relation1;
+        $x isa person;
+        $y isa person;
+        (actor: $x, film-writer: $y) isa film-production;
       get;
       """
     Then all answers are correct in reasoned keyspace
-    # Answers are (role1:$x, role2:$z) and (role1:$x, role2:$v)
+    # Answers are (actor:$x, film-writer:$z) and (actor:$x, film-writer:$v)
     Then answer size in reasoned keyspace is: 2
     Then for graql query
       """
       match
-        $x isa entity1;
-        $y isa entity1;
-        (role1: $x, role2: $y) isa relation1;
+        $x isa person;
+        $y isa person;
+        (actor: $x, film-writer: $y) isa film-production;
         $y has name 'a';
       get;
       """
@@ -196,20 +306,20 @@ Feature: Type Hierarchy Resolution
     Then for graql query
       """
       match
-        $x isa entity1;
-        $y isa subEntity1;
-        (role1: $x, role2: $y) isa relation1;
+        $x isa person;
+        $y isa child;
+        (actor: $x, film-writer: $y) isa film-production;
       get;
       """
     Then all answers are correct in reasoned keyspace
-    # Answer is (role1:$x, role2:$v) ONLY
+    # Answer is (actor:$x, film-writer:$v) ONLY
     Then answer size in reasoned keyspace is: 1
     Then for graql query
       """
       match
-        $x isa entity1;
-        $y isa subEntity1;
-        (role1: $x, role2: $y) isa relation1;
+        $x isa person;
+        $y isa child;
+        (actor: $x, film-writer: $y) isa film-production;
         $y has name 'a';
       get;
       """
@@ -218,20 +328,20 @@ Feature: Type Hierarchy Resolution
     Then for graql query
       """
       match
-        $x isa subEntity1;
-        $y isa entity1;
-        (role1: $x, role2: $y) isa relation1;
+        $x isa child;
+        $y isa person;
+        (actor: $x, film-writer: $y) isa film-production;
       get;
       """
     Then all answers are correct in reasoned keyspace
-    # Answers are (role1:$x, role2:$z) and (role1:$x, role2:$v)
+    # Answers are (actor:$x, film-writer:$z) and (actor:$x, film-writer:$v)
     Then answer size in reasoned keyspace is: 2
     Then for graql query
       """
       match
-        $x isa subEntity1;
-        $y isa entity1;
-        (role1: $x, role2: $y) isa relation1;
+        $x isa child;
+        $y isa person;
+        (actor: $x, film-writer: $y) isa film-production;
         $y has name 'a';
       get;
       """
@@ -245,75 +355,77 @@ Feature: Type Hierarchy Resolution
       """
       define
 
-      entity1 sub entity,
+      person sub entity,
           has name,
-          plays role1,
-          plays role2;
+          plays writer,
+          plays performer,
+          plays film-writer,
+          plays actor;
 
-      subEntity1 sub entity1;
+      child sub person;
 
-      relation1 sub relation,
-          relates role1,
-          relates role2;
+      performance sub relation,
+          relates writer,
+          relates performer;
 
-      relation2 sub relation,
-          relates role1,
-          relates role2;
+      film-production sub relation,
+          relates film-writer,
+          relates actor;
 
       name sub attribute, value string;
 
-      rule-1 sub rule,
+      performance-to-film-production sub rule,
       when {
-          $x isa subEntity1;
-          $y isa entity1;
-          (role1:$x, role2:$y) isa relation2;
+          $x isa child;
+          $y isa person;
+          (performer:$x, writer:$y) isa performance;
       },
       then {
-          (role1:$x, role2:$y) isa relation1;
+          (actor:$x, film-writer:$y) isa film-production;
       };
 
-      rule-2 sub rule,
+      performance-to-performance sub rule,
       when {
-          $x isa entity1;
-          $y isa subEntity1;
-          (role1:$x, role2:$y) isa relation2;
+          $x isa person;
+          $y isa child;
+          (performer:$x, writer:$y) isa performance;
       },
       then {
-          (role1:$x, role2:$y) isa relation2;
+          (performer:$x, writer:$y) isa performance;
       };
       """
     Given for each session, graql insert
       """
       insert
-      $x isa subEntity1, has name "a";
-      $y isa entity1, has name "b";
-      $z isa entity1, has name "a";
-      $w isa entity1, has name "b2";
-      $v isa subEntity1, has name "a";
+      $x isa child, has name "a";
+      $y isa person, has name "b";
+      $z isa person, has name "a";
+      $w isa person, has name "b2";
+      $v isa child, has name "a";
 
-      (role1:$x, role2:$z) isa relation2;     # subEntity1 - entity1    -> satisfies rule
-      (role1:$y, role2:$z) isa relation2;     # entity1 - entity1       -> doesn't satisfy rule
-      (role1:$x, role2:$v) isa relation2;     # subEntity1 - subEntity1 -> satisfies rule
-      (role1:$y, role2:$v) isa relation2;     # entity1 - subEntity1    -> doesn't satisfy rule
+      (performer:$x, writer:$z) isa performance;  # child - person   -> satisfies rule
+      (performer:$y, writer:$z) isa performance;  # person - person  -> doesn't satisfy rule
+      (performer:$x, writer:$v) isa performance;  # child - child    -> satisfies rule
+      (performer:$y, writer:$v) isa performance;  # person - child   -> doesn't satisfy rule
       """
     When materialised keyspace is completed
     Then for graql query
       """
       match
-        $x isa entity1;
-        $y isa entity1;
-        (role1: $x, role2: $y) isa relation1;
+        $x isa person;
+        $y isa person;
+        (actor: $x, film-writer: $y) isa film-production;
       get;
       """
     Then all answers are correct in reasoned keyspace
-    # Answers are (role1:$x, role2:$z) and (role1:$x, role2:$v)
+    # Answers are (actor:$x, film-writer:$z) and (actor:$x, film-writer:$v)
     Then answer size in reasoned keyspace is: 2
     Then for graql query
       """
       match
-        $x isa entity1;
-        $y isa entity1;
-        (role1: $x, role2: $y) isa relation1;
+        $x isa person;
+        $y isa person;
+        (actor: $x, film-writer: $y) isa film-production;
         $y has name 'a';
       get;
       """
@@ -322,20 +434,20 @@ Feature: Type Hierarchy Resolution
     Then for graql query
       """
       match
-        $x isa entity1;
-        $y isa subEntity1;
-        (role1: $x, role2: $y) isa relation1;
+        $x isa person;
+        $y isa child;
+        (actor: $x, film-writer: $y) isa film-production;
       get;
       """
     Then all answers are correct in reasoned keyspace
-    # Answer is (role1:$x, role2:$v) ONLY
+    # Answer is (actor:$x, film-writer:$v) ONLY
     Then answer size in reasoned keyspace is: 1
     Then for graql query
       """
       match
-        $x isa entity1;
-        $y isa subEntity1;
-        (role1: $x, role2: $y) isa relation1;
+        $x isa person;
+        $y isa child;
+        (actor: $x, film-writer: $y) isa film-production;
         $y has name 'a';
       get;
       """
@@ -344,20 +456,20 @@ Feature: Type Hierarchy Resolution
     Then for graql query
       """
       match
-        $x isa subEntity1;
-        $y isa entity1;
-        (role1: $x, role2: $y) isa relation1;
+        $x isa child;
+        $y isa person;
+        (actor: $x, film-writer: $y) isa film-production;
       get;
       """
     Then all answers are correct in reasoned keyspace
-    # Answers are (role1:$x, role2:$z) and (role1:$x, role2:$v)
+    # Answers are (actor:$x, film-writer:$z) and (actor:$x, film-writer:$v)
     Then answer size in reasoned keyspace is: 2
     Then for graql query
       """
       match
-        $x isa subEntity1;
-        $y isa entity1;
-        (role1: $x, role2: $y) isa relation1;
+        $x isa child;
+        $y isa person;
+        (actor: $x, film-writer: $y) isa film-production;
         $y has name 'a';
       get;
       """
@@ -371,42 +483,46 @@ Feature: Type Hierarchy Resolution
       """
       define
 
-      entity1 sub entity,
-          plays role1,
-          plays role2;
+      person sub entity,
+          plays home-owner,
+          plays resident,
+          plays parent-home-owner,
+          plays child-resident,
+          plays parent,
+          plays child;
 
-      relation1 sub relation,
-          relates role1,
-          relates role2;
+      residence sub relation,
+          relates home-owner,
+          relates resident;
 
-      sub-relation1 sub relation1,
-          relates role1,
-          relates role2;
+      family-residence sub residence,
+          relates parent-home-owner as home-owner,
+          relates child-resident as resident;
 
-      relation2 sub relation,
-          relates role1,
-          relates role2;
+      family sub relation,
+          relates parent,
+          relates child;
 
-      rule-1 sub rule,
+      families-live-together sub rule,
       when {
-          (role1:$x, role2:$y) isa relation2;
+          (parent:$x, child:$y) isa family;
       },
       then {
-          (role1:$x, role2:$y) isa sub-relation1;
+          (parent-home-owner:$x, child-resident:$y) isa family-residence;
       };
       """
     Given for each session, graql insert
       """
       insert
-      $x isa entity1;
-      $y isa entity1;
-      (role1:$x, role2:$y) isa relation2;
+      $x isa person;
+      $y isa person;
+      (parent:$x, child:$y) isa family;
       """
     When materialised keyspace is completed
     Then for graql query
       """
       match
-        (role1: $x, role2: $y) isa relation1;
+        (home-owner: $x, resident: $y) isa residence;
       get;
       """
     Then all answers are correct in reasoned keyspace
@@ -414,8 +530,8 @@ Feature: Type Hierarchy Resolution
     Then for graql query
       """
       match
-        (role1: $x, role2: $y) isa relation1;
-        (role1: $x, role2: $y) isa sub-relation1;
+        (home-owner: $x, resident: $y) isa residence;
+        (parent-home-owner: $x, child-resident: $y) isa family-residence;
       get;
       """
     Then all answers are correct in reasoned keyspace
@@ -429,32 +545,28 @@ Feature: Type Hierarchy Resolution
       """
       define
 
-      #Entities
+      person sub entity;
+      drunk-person sub person;
+      panda sub entity;
 
-      baseEntity sub entity;
-      subEntity sub baseEntity;
-      anotherBaseEntity sub entity;
-
-      #Rules
-
-      rule-1 sub rule,
+      pandas-are-actually-drunk-people sub rule,
       when {
-          $x isa anotherBaseEntity;
+          $x isa panda;
       },
       then {
-          $x isa subEntity;
+          $x isa drunk-person;
       };
       """
     Given for each session, graql insert
       """
       insert
-      $x isa anotherBaseEntity;
+      $x isa panda;
       """
 #    When materialised keyspace is completed
     Then for graql query
       """
       match
-        $x isa baseEntity;
+        $x isa person;
       get;
       """
 #    Then all answers are correct in reasoned keyspace
@@ -462,8 +574,8 @@ Feature: Type Hierarchy Resolution
     Then for graql query
       """
       match
-        $x isa baseEntity;
-        $x isa subEntity;
+        $x isa person;
+        $x isa drunk-person;
       get;
       """
 #    Then all answers are correct in reasoned keyspace
