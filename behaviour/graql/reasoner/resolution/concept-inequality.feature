@@ -30,38 +30,40 @@ Feature: Concept Inequality Resolution
       """
       define
 
-      entity1 sub entity,
+      ball sub entity,
           has name,
-          plays role1,
-          plays role2;
+          plays ball1,
+          plays ball2;
 
-      relation1 sub relation,
-          relates role1,
-          relates role2;
+      # Represents a selection of balls from a bag, with replacement after each selection
+      selection sub relation,
+          relates ball1,
+          relates ball2;
 
       name sub attribute, value string;
 
       transitivity sub rule,
       when {
-          (role1:$x, role2:$y) isa relation1;
-          (role1:$y, role2:$z) isa relation1;
+          (ball1:$x, ball2:$y) isa selection;
+          (ball1:$y, ball2:$z) isa selection;
       },
       then {
-          (role1:$x, role2:$z) isa relation1;
+          (ball1:$x, ball2:$z) isa selection;
       };
       """
     Given for each session, graql insert
       """
       insert
 
-      $a isa entity1, has name 'a';
-      $b isa entity1, has name 'b';
-      $c isa entity1, has name 'c';
+      $a isa ball, has name 'a';
+      $b isa ball, has name 'b';
+      $c isa ball, has name 'c';
 
-      (role1: $a, role2: $b) isa relation1;
-      (role1: $b, role2: $a) isa relation1;
-      (role1: $b, role2: $c) isa relation1;
-      (role1: $c, role2: $b) isa relation1;
+      # selection is effectively reflexive, symmetric and transitive
+      (ball1: $a, ball2: $b) isa selection;
+      (ball1: $b, ball2: $a) isa selection;
+      (ball1: $b, ball2: $c) isa selection;
+      (ball1: $c, ball2: $b) isa selection;
       """
 
 
@@ -130,7 +132,7 @@ Feature: Concept Inequality Resolution
     Given for graql query
       """
       match
-        (role1: $x, role2: $y) isa relation1;
+        (ball1: $x, ball2: $y) isa selection;
       get;
       """
 #    Given all answers are correct in reasoned keyspace
@@ -140,7 +142,7 @@ Feature: Concept Inequality Resolution
     Then for graql query
       """
       match
-        (role1: $x, role2: $y) isa relation1;
+        (ball1: $x, ball2: $y) isa selection;
         $x != $y;
       get;
       """
@@ -152,7 +154,7 @@ Feature: Concept Inequality Resolution
     Then for graql query
       """
       match
-        (role1: $x, role2: $y) isa relation1;
+        (ball1: $x, ball2: $y) isa selection;
         $x != $y;
         $x has name $nx;
         $y has name $ny;
@@ -169,7 +171,7 @@ Feature: Concept Inequality Resolution
     Then for graql query
       """
       match
-        (role1: $x, role2: $y) isa relation1;
+        (ball1: $x, ball2: $y) isa selection;
         $x != $y;
         $y has name 'c';
       get;
@@ -180,7 +182,7 @@ Feature: Concept Inequality Resolution
     Then for graql query
       """
       match
-        (role1: $x, role2: $y) isa relation1;
+        (ball1: $x, ball2: $y) isa selection;
         $x != $y;
         $y has name 'c';
         {$x has name 'a';} or {$x has name 'b';};
@@ -190,14 +192,23 @@ Feature: Concept Inequality Resolution
     Then answer size in reasoned keyspace is: 2
 #    Then materialised and reasoned keyspaces are the same size
 
-
+  #
+  #   Tests a scenario in which the neq predicate binds free variables of two equivalent relations.
+  #   Corresponds to the following pattern:
+  #
+  #                     x
+  #                    / \
+  #                   /   \
+  #                  v     v
+  #                 y  !=   z
+  #
   Scenario: pairs of inferred relations can be filtered by inequality of players in the same role
 #    When materialised keyspace is completed
     Then for graql query
       """
       match
-        (role1: $x, role2: $y) isa relation1;
-        (role1: $x, role2: $z) isa relation1;
+        (ball1: $x, ball2: $y) isa selection;
+        (ball1: $x, ball2: $z) isa selection;
         $y != $z;
       get;
       """
@@ -210,8 +221,8 @@ Feature: Concept Inequality Resolution
     Then for graql query
       """
       match
-        (role1: $x, role2: $y) isa relation1;
-        (role1: $x, role2: $z) isa relation1;
+        (ball1: $x, ball2: $y) isa selection;
+        (ball1: $x, ball2: $z) isa selection;
         $y != $z;
         $y has name $ny;
         $z has name $nz;
@@ -223,13 +234,22 @@ Feature: Concept Inequality Resolution
 #    Then materialised and reasoned keyspaces are the same size
 
 
+  #   Tests a scenario in which the neq predicate binds free variables
+  #   of two non-equivalent relations. Corresponds to the following pattern:
+  #
+  #                       y
+  #                      ^ \
+  #                     /   \
+  #                    /     v
+  #                   x  !=   z
+  #
   Scenario: pairs of inferred relations can be filtered by inequality of players in different roles
 #    When materialised keyspace is completed
     Then for graql query
       """
       match
-        (role1: $x, role2: $y) isa relation1;
-        (role1: $y, role2: $z) isa relation1;
+        (ball1: $x, ball2: $y) isa selection;
+        (ball1: $y, ball2: $z) isa selection;
         $x != $z;
       get;
       """
@@ -239,8 +259,8 @@ Feature: Concept Inequality Resolution
     Then for graql query
       """
       match
-        (role1: $x, role2: $y) isa relation1;
-        (role1: $x, role2: $z) isa relation1;
+        (ball1: $x, ball2: $y) isa selection;
+        (ball1: $x, ball2: $z) isa selection;
         $x != $z;
         $x has name $nx;
         $z has name $nz;
@@ -249,4 +269,129 @@ Feature: Concept Inequality Resolution
       """
 #    Then all answers are correct in reasoned keyspace
     Then answer size in reasoned keyspace is: 18
+#    Then materialised and reasoned keyspaces are the same size
+
+
+  #
+  #   Tests a scenario in which the multiple neq predicates are present but bind at most single var in a relation.
+  #   Corresponds to the following pattern:
+  #
+  #                    y    !=    z1
+  #                     ^        ^
+  #                      \      /
+  #                       \    /
+  #                        x[a]
+  #                       /    \
+  #                      /      \
+  #                     v        v
+  #                   y2    !=    z2
+  #
+  Scenario: inequality predicates can operate independently against multiple pairs of relations in the same query
+#    When materialised keyspace is completed
+    Given for graql query
+      """
+      match
+        (ball1: $x, ball2: $y1) isa selection;
+        (ball1: $x, ball2: $z1) isa selection;
+        (ball1: $x, ball2: $y2) isa selection;
+        (ball1: $x, ball2: $z2) isa selection;
+      get;
+      """
+#    Given all answers are correct in reasoned keyspace
+    # For each of the [3] values of $x, there are 3^4 = 81 choices for {$y1, $z1, $y2, $z2}, for a total of 243
+    Given answer size in reasoned keyspace is: 243
+    Then for graql query
+      """
+      match
+        (ball1: $x, ball2: $y1) isa selection;
+        (ball1: $x, ball2: $z1) isa selection;
+        (ball1: $x, ball2: $y2) isa selection;
+        (ball1: $x, ball2: $z2) isa selection;
+
+        $y1 != $z1;
+        $y2 != $z2;
+      get;
+      """
+#    Then all answers are correct in reasoned keyspace
+    # Each neq predicate reduces the answer size by 1/3, cutting it to 162, then 108
+    Then answer size in reasoned keyspace is: 108
+    # verify that $y1 and $z1 - as well as $y2 and $z2 - always have distinct names
+    Then for graql query
+      """
+      match
+        (ball1: $x, ball2: $y1) isa selection;
+        (ball1: $x, ball2: $z1) isa selection;
+        (ball1: $x, ball2: $y2) isa selection;
+        (ball1: $x, ball2: $z2) isa selection;
+        $y1 != $z1;
+        $y2 != $z2;
+        $y1 has name $ny1;
+        $z1 has name $nz1;
+        $y2 has name $ny2;
+        $z2 has name $nz2;
+        $ny1 !== $nz1;
+        $ny2 !== $nz2;
+      get $x, $y1, $z1, $y2, $z2;
+      """
+#    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 108
+#    Then materialised and reasoned keyspaces are the same size
+
+
+  #
+  #   Tests a scenario in which a single relation has both variables bound with two different neq predicates.
+  #   Corresponds to the following pattern:
+  #
+  #                    x[a]  - != - >  z1
+  #                    |
+  #                    |
+  #                    v
+  #                    y     - != - >  z2
+  #
+  Scenario: inequality predicates can operate independently against multiple roleplayers in the same relation
+#    When materialised keyspace is completed
+    Given for graql query
+      """
+      match
+        (ball1: $x, ball2: $y) isa selection;
+        (ball1: $x, ball2: $z1) isa selection;
+        (ball1: $y, ball2: $z2) isa selection;
+      get;
+      """
+#    Given all answers are correct in reasoned keyspace
+    # There are 3^4 possible choices for the set {$x, $y, $z1, $z2}, for a total of 81
+    Given answer size in reasoned keyspace is: 81
+    Then for graql query
+      """
+      match
+        (ball1: $x, ball2: $y) isa selection;
+        (ball1: $x, ball2: $z1) isa selection;
+        (ball1: $x, ball2: $z2) isa selection;
+
+        $x != $z1;
+        $y != $z2;
+      get;
+      """
+#    Then all answers are correct in reasoned keyspace
+    # Each neq predicate reduces the answer size by 1/3, cutting it to 54, then 36
+    Then answer size in reasoned keyspace is: 36
+    # verify that $y1 and $z1 - as well as $y2 and $z2 - always have distinct names
+    Then for graql query
+      """
+      match
+        (ball1: $x, ball2: $y) isa selection;
+        (ball1: $x, ball2: $z1) isa selection;
+        (ball1: $x, ball2: $z2) isa selection;
+        $x != $z1;
+        $y != $z2;
+        $x has name $nx;
+        $z1 has name $nz1;
+        $y has name $ny;
+        $z2 has name $nz2;
+        $nx !== $nz1;
+        $ny !== $nz2;
+      get $x, $y, $z1, $z2;
+      """
+#    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 36
 #    Then materialised and reasoned keyspaces are the same size
