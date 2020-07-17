@@ -22,5 +22,5 @@ load("@graknlabs_dependencies//distribution/artifact:rules.bzl", "artifact_extra
 
 artifact_extractor(
     name = "grakn-extractor",
-    target = "@graknlabs_grakn_core_artifact//file",
+    artifact = "@graknlabs_grakn_core_artifact//file",
 )
