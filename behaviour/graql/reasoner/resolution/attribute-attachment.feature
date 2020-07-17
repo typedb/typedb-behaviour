@@ -37,23 +37,19 @@ Feature: Attribute Attachment Resolution
           has unrelated-attribute,
           has sub-string-attribute,
           has age,
-          has is-old,
-          key ref;
+          has is-old;
 
       tortoise sub entity,
           has age,
-          has is-old,
-          key ref;
+          has is-old;
 
       soft-drink sub entity,
-          has retailer,
-          key ref;
+          has retailer;
 
       team sub relation,
           relates leader,
           relates team-member,
-          has string-attribute,
-          key ref;
+          has string-attribute;
 
       string-attribute sub attribute, value string;
       retailer sub attribute, value string;
@@ -61,7 +57,6 @@ Feature: Attribute Attachment Resolution
       is-old sub attribute, value boolean;
       sub-string-attribute sub string-attribute;
       unrelated-attribute sub attribute, value string;
-      ref sub attribute, value long;
       """
 
 
@@ -82,8 +77,8 @@ Feature: Attribute Attachment Resolution
     Given for each session, graql insert
       """
       insert
-      $geX isa person, has string-attribute "banana", has ref 0;
-      $geY isa person, has ref 1;
+      $geX isa person, has string-attribute "banana";
+      $geY isa person;
       """
 #    When materialised keyspace is completed
     Then for graql query
@@ -134,8 +129,8 @@ Feature: Attribute Attachment Resolution
     Given for each session, graql insert
       """
       insert
-      $geX isa person, has string-attribute "banana", has ref 0;
-      $geY isa person, has ref 1;
+      $geX isa person, has string-attribute "banana";
+      $geY isa person;
       """
 #    When materialised keyspace is completed
     Then for graql query
@@ -150,7 +145,7 @@ Feature: Attribute Attachment Resolution
       """
     # four attributes for each entity
 #    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 8
+    Then answer size in reasoned keyspace is: 6
 #    Then materialised and reasoned keyspaces are the same size
 
 
@@ -170,7 +165,7 @@ Feature: Attribute Attachment Resolution
     Given for each session, graql insert
       """
       insert
-      $geX isa person, has string-attribute "banana", has ref 0;
+      $geX isa person, has string-attribute "banana";
       """
 #    When materialised keyspace is completed
     Then for graql query
@@ -211,8 +206,8 @@ Feature: Attribute Attachment Resolution
     Given for each session, graql insert
       """
       insert
-      $geX isa person, has string-attribute "banana", has ref 0;
-      $geY isa person, has ref 1;
+      $geX isa person, has string-attribute "banana";
+      $geY isa person;
       """
 #    When materialised keyspace is completed
     Then for graql query
@@ -256,9 +251,9 @@ Feature: Attribute Attachment Resolution
     Given for each session, graql insert
       """
       insert
-      $geX isa person, has string-attribute "banana", has ref 0;
-      $geY isa person, has ref 1;
-      (leader:$geX, team-member:$geX) isa team, has ref 2;
+      $geX isa person, has string-attribute "banana";
+      $geY isa person;
+      (leader:$geX, team-member:$geX) isa team;
       """
 #    When materialised keyspace is completed
     Then for graql query
@@ -296,8 +291,8 @@ Feature: Attribute Attachment Resolution
     Given for each session, graql insert
       """
       insert
-      $aeX isa soft-drink, has ref 0;
-      $aeY isa soft-drink, has ref 1;
+      $aeX isa soft-drink;
+      $aeY isa soft-drink;
       $r "Ocado" isa retailer;
       """
 #    When materialised keyspace is completed
@@ -340,8 +335,8 @@ Feature: Attribute Attachment Resolution
     Given for each session, graql insert
       """
       insert
-      $aeX isa soft-drink, has ref 0;
-      $aeY isa soft-drink, has ref 1;
+      $aeX isa soft-drink;
+      $aeY isa soft-drink;
       $r "Ocado" isa retailer;
       """
 #    When materialised keyspace is completed

@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-Feature: Reasoning
+Feature: Resolution Test Framework
 
   Background: Set up keyspaces for resolution testing
 
@@ -34,11 +34,9 @@ Feature: Reasoning
       define
 
       name sub attribute, value string;
-      company-id sub attribute, value long;
 
       company sub entity,
-        has name,
-        key company-id;
+        has name;
 
       company-has-name sub rule,
       when {
@@ -50,9 +48,8 @@ Feature: Reasoning
     Given for each session, graql insert
       """
       insert
-      $x isa company, has company-id 0;
+      $x isa company;
       """
-
     When materialised keyspace is completed
     Then for graql query
       """
@@ -73,11 +70,7 @@ Feature: Reasoning
       is-liable sub attribute,
           value boolean;
 
-      company-id sub attribute,
-          value long;
-
       company sub entity,
-          key company-id,
           has name,
           has is-liable;
 
@@ -98,7 +91,7 @@ Feature: Reasoning
     Given for each session, graql insert
       """
       insert
-      $co isa company, has company-id 0;
+      $co isa company;
       """
 
     When materialised keyspace is completed
@@ -120,7 +113,7 @@ Feature: Reasoning
 
       location sub entity,
           abstract,
-          key name,
+          has name,
           plays superior,
           plays subordinate;
 
@@ -129,7 +122,6 @@ Feature: Reasoning
       country sub location;
 
       location-hierarchy sub relation,
-          key location-hierarchy-id,
           relates superior,
           relates subordinate;
 
@@ -147,15 +139,15 @@ Feature: Reasoning
       $ar isa area, has name "King's Cross";
       $cit isa city, has name "London";
       $cntry isa country, has name "UK";
-      (superior: $cntry, subordinate: $cit) isa location-hierarchy, has location-hierarchy-id 0;
-      (superior: $cit, subordinate: $ar) isa location-hierarchy, has location-hierarchy-id 1;
+      (superior: $cntry, subordinate: $cit) isa location-hierarchy;
+      (superior: $cit, subordinate: $ar) isa location-hierarchy;
       """
 
     When materialised keyspace is completed
     Then for graql query
       """
       match
-      $k isa area, has name $n;
+      $k isa entity, has name "King's Cross";
       (superior: $l, subordinate: $k) isa location-hierarchy;
       get;
       """
@@ -163,6 +155,8 @@ Feature: Reasoning
     Then materialised and reasoned keyspaces are the same size
 
 
+  @ignore
+  # TODO: currently this scenario takes longer than 2 hours to execute (#75) - re-enable when fixed
   Scenario: 3-hop transitivity
     Given for each session, graql define
       """
@@ -175,7 +169,7 @@ Feature: Reasoning
 
       location sub entity,
           abstract,
-          key name,
+          has name,
           plays location-hierarchy_superior,
           plays location-hierarchy_subordinate;
 
@@ -185,7 +179,6 @@ Feature: Reasoning
       continent sub location;
 
       location-hierarchy sub relation,
-          key location-hierarchy-id,
           relates location-hierarchy_superior,
           relates location-hierarchy_subordinate;
 
@@ -204,9 +197,9 @@ Feature: Reasoning
       $cit isa city, has name "London";
       $cntry isa country, has name "UK";
       $cont isa continent, has name "Europe";
-      (location-hierarchy_superior: $cont, location-hierarchy_subordinate: $cntry) isa location-hierarchy, has location-hierarchy-id 0;
-      (location-hierarchy_superior: $cntry, location-hierarchy_subordinate: $cit) isa location-hierarchy, has location-hierarchy-id 1;
-      (location-hierarchy_superior: $cit, location-hierarchy_subordinate: $ar) isa location-hierarchy, has location-hierarchy-id 2;
+      (location-hierarchy_superior: $cont, location-hierarchy_subordinate: $cntry) isa location-hierarchy;
+      (location-hierarchy_superior: $cntry, location-hierarchy_subordinate: $cit) isa location-hierarchy;
+      (location-hierarchy_superior: $cit, location-hierarchy_subordinate: $ar) isa location-hierarchy;
       """
 
     When materialised keyspace is completed
@@ -227,11 +220,7 @@ Feature: Reasoning
 
       name sub attribute, value string;
 
-      person-id sub attribute, value long;
-      siblingship-id sub attribute, value long;
-
       person sub entity,
-          key person-id,
           has name,
           plays sibling;
 
@@ -242,7 +231,6 @@ Feature: Reasoning
         abstract;
 
       siblingship sub family-relation,
-          key siblingship-id,
           relates sibling;
 
       a-man-is-called-bob sub rule,
@@ -263,8 +251,8 @@ Feature: Reasoning
     Given for each session, graql insert
       """
       insert
-      $a isa woman, has person-id 0, has name "Alice";
-      $b isa man, has person-id 1;
+      $a isa woman, has name "Alice";
+      $b isa man;
       """
 
     When materialised keyspace is completed
@@ -288,11 +276,7 @@ Feature: Reasoning
       is-liable sub attribute,
           value boolean;
 
-      company-id sub attribute,
-          value long;
-
       company sub entity,
-          key company-id,
           has name,
           has is-liable;
 
@@ -306,9 +290,9 @@ Feature: Reasoning
     Given for each session, graql insert
       """
       insert
-      $c1 isa company, has company-id 0;
+      $c1 isa company;
       $c1 has name $n1; $n1 "the-company";
-      $c2 isa company, has company-id 1;
+      $c2 isa company;
       $c2 has name $n2; $n2 "another-company";
       """
 
@@ -335,11 +319,7 @@ Feature: Reasoning
       is-liable sub attribute,
           value boolean;
 
-      company-id sub attribute,
-          value long;
-
       company sub entity,
-          key company-id,
           has name,
           has is-liable;
 
@@ -356,9 +336,9 @@ Feature: Reasoning
     Given for each session, graql insert
       """
       insert
-      $c1 isa company, has company-id 0;
+      $c1 isa company;
       $c1 has name $n1; $n1 "the-company";
-      $c2 isa company, has company-id 1;
+      $c2 isa company;
       $c2 has name $n2; $n2 "another-company";
       """
 
@@ -382,11 +362,7 @@ Feature: Reasoning
       is-liable sub attribute,
           value boolean;
 
-      company-id sub attribute,
-          value long;
-
       company sub entity,
-          key company-id,
           has name,
           has is-liable;
 
@@ -401,9 +377,9 @@ Feature: Reasoning
     Given for each session, graql insert
       """
       insert
-      $c1 isa company, has company-id 0;
+      $c1 isa company;
       $c1 has name $n1; $n1 "the-company";
-      $c2 isa company, has company-id 1;
+      $c2 isa company;
       $c2 has name $n2; $n2 "another-company";
       """
 
