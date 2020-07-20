@@ -28,6 +28,124 @@ Feature: Type Hierarchy Resolution
     Given reasoned keyspace is named: reasoned
 
 
+  Scenario: subtypes trigger rules based on their parents; parent types don't trigger rules based on their children
+    Given for each session, graql define
+      """
+      define
+
+      person sub entity,
+          has name,
+          plays writer,
+          plays performer,
+          plays film-writer,
+          plays actor;
+
+      child sub person;
+
+      performance sub relation,
+          relates writer,
+          relates performer;
+
+      film-production sub relation,
+          relates film-writer,
+          relates actor;
+
+      name sub attribute, value string;
+
+      performance-to-film-production sub rule,
+      when {
+          $x isa child;
+          $y isa person;
+          (performer:$x, writer:$y) isa performance;
+      },
+      then {
+          (actor:$x, film-writer:$y) isa film-production;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+      $x isa child, has name "a";
+      $y isa person, has name "b";
+      $z isa person, has name "a";
+      $w isa person, has name "b2";
+      $v isa child, has name "a";
+
+      (performer:$x, writer:$z) isa performance;  # child - person   -> satisfies rule
+      (performer:$y, writer:$z) isa performance;  # person - person  -> doesn't satisfy rule
+      (performer:$x, writer:$v) isa performance;  # child - child    -> satisfies rule
+      (performer:$y, writer:$v) isa performance;  # person - child   -> doesn't satisfy rule
+      """
+    When materialised keyspace is completed
+    Then for graql query
+      """
+      match
+        $x isa person;
+        $y isa person;
+        (actor: $x, film-writer: $y) isa film-production;
+      get;
+      """
+    Then all answers are correct in reasoned keyspace
+    # Answers are (actor:$x, film-writer:$z) and (actor:$x, film-writer:$v)
+    Then answer size in reasoned keyspace is: 2
+    Then for graql query
+      """
+      match
+        $x isa person;
+        $y isa person;
+        (actor: $x, film-writer: $y) isa film-production;
+        $y has name 'a';
+      get;
+      """
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 2
+    Then for graql query
+      """
+      match
+        $x isa person;
+        $y isa child;
+        (actor: $x, film-writer: $y) isa film-production;
+      get;
+      """
+    Then all answers are correct in reasoned keyspace
+    # Answer is (actor:$x, film-writer:$v) ONLY
+    Then answer size in reasoned keyspace is: 1
+    Then for graql query
+      """
+      match
+        $x isa person;
+        $y isa child;
+        (actor: $x, film-writer: $y) isa film-production;
+        $y has name 'a';
+      get;
+      """
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 1
+    Then for graql query
+      """
+      match
+        $x isa child;
+        $y isa person;
+        (actor: $x, film-writer: $y) isa film-production;
+      get;
+      """
+    Then all answers are correct in reasoned keyspace
+    # Answers are (actor:$x, film-writer:$z) and (actor:$x, film-writer:$v)
+    Then answer size in reasoned keyspace is: 2
+    Then for graql query
+      """
+      match
+        $x isa child;
+        $y isa person;
+        (actor: $x, film-writer: $y) isa film-production;
+        $y has name 'a';
+      get;
+      """
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 2
+    Then materialised and reasoned keyspaces are the same size
+
+
   Scenario: when matching different roles to those that are actually inferred, no answers are returned
     Given for each session, graql define
       """
@@ -229,124 +347,6 @@ Feature: Type Hierarchy Resolution
       """
     Then all answers are correct in reasoned keyspace
     Then answer size in reasoned keyspace is: 1
-    Then materialised and reasoned keyspaces are the same size
-
-
-  Scenario: subtypes trigger rules based on their parents; parent types don't trigger rules based on their children
-    Given for each session, graql define
-      """
-      define
-
-      person sub entity,
-          has name,
-          plays writer,
-          plays performer,
-          plays film-writer,
-          plays actor;
-
-      child sub person;
-
-      performance sub relation,
-          relates writer,
-          relates performer;
-
-      film-production sub relation,
-          relates film-writer,
-          relates actor;
-
-      name sub attribute, value string;
-
-      performance-to-film-production sub rule,
-      when {
-          $x isa child;
-          $y isa person;
-          (performer:$x, writer:$y) isa performance;
-      },
-      then {
-          (actor:$x, film-writer:$y) isa film-production;
-      };
-      """
-    Given for each session, graql insert
-      """
-      insert
-      $x isa child, has name "a";
-      $y isa person, has name "b";
-      $z isa person, has name "a";
-      $w isa person, has name "b2";
-      $v isa child, has name "a";
-
-      (performer:$x, writer:$z) isa performance;  # child - person   -> satisfies rule
-      (performer:$y, writer:$z) isa performance;  # person - person  -> doesn't satisfy rule
-      (performer:$x, writer:$v) isa performance;  # child - child    -> satisfies rule
-      (performer:$y, writer:$v) isa performance;  # person - child   -> doesn't satisfy rule
-      """
-    When materialised keyspace is completed
-    Then for graql query
-      """
-      match
-        $x isa person;
-        $y isa person;
-        (actor: $x, film-writer: $y) isa film-production;
-      get;
-      """
-    Then all answers are correct in reasoned keyspace
-    # Answers are (actor:$x, film-writer:$z) and (actor:$x, film-writer:$v)
-    Then answer size in reasoned keyspace is: 2
-    Then for graql query
-      """
-      match
-        $x isa person;
-        $y isa person;
-        (actor: $x, film-writer: $y) isa film-production;
-        $y has name 'a';
-      get;
-      """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
-    Then for graql query
-      """
-      match
-        $x isa person;
-        $y isa child;
-        (actor: $x, film-writer: $y) isa film-production;
-      get;
-      """
-    Then all answers are correct in reasoned keyspace
-    # Answer is (actor:$x, film-writer:$v) ONLY
-    Then answer size in reasoned keyspace is: 1
-    Then for graql query
-      """
-      match
-        $x isa person;
-        $y isa child;
-        (actor: $x, film-writer: $y) isa film-production;
-        $y has name 'a';
-      get;
-      """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
-    Then for graql query
-      """
-      match
-        $x isa child;
-        $y isa person;
-        (actor: $x, film-writer: $y) isa film-production;
-      get;
-      """
-    Then all answers are correct in reasoned keyspace
-    # Answers are (actor:$x, film-writer:$z) and (actor:$x, film-writer:$v)
-    Then answer size in reasoned keyspace is: 2
-    Then for graql query
-      """
-      match
-        $x isa child;
-        $y isa person;
-        (actor: $x, film-writer: $y) isa film-production;
-        $y has name 'a';
-      get;
-      """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
     Then materialised and reasoned keyspaces are the same size
 
 

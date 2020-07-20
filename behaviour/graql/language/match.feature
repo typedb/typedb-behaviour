@@ -746,6 +746,22 @@ Feature: Graql Match Clause
       | REF0 | REF1 |
 
 
+  Scenario: relations between distinct concepts are not retrieved when matching concepts that relate to themselves
+    Given graql insert
+      """
+      insert
+      $x isa person;
+      $y isa person;
+      (friend: $x, friend: $y) isa friendship;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match (friend: $x, friend: $x) isa friendship; get;
+      """
+    Then answer size is: 0
+
+
   Scenario: an error is thrown when matching an entity type as if it were a role
     Then graql get throws
       """
