@@ -15,6 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+# TODO: re-enable all steps in file when 3-hop transitivity is resolvable
 Feature: Concept Inequality Resolution
 
   Background: Set up keyspaces for resolution testing
