@@ -193,17 +193,18 @@ Feature: Concept Inequality Resolution
     Then answer size in reasoned keyspace is: 2
 #    Then materialised and reasoned keyspaces are the same size
 
-  #
-  #   Tests a scenario in which the neq predicate binds free variables of two equivalent relations.
-  #   Corresponds to the following pattern:
-  #
-  #                     x
-  #                    / \
-  #                   /   \
-  #                  v     v
-  #                 y  !=   z
-  #
+
   Scenario: pairs of inferred relations can be filtered by inequality of players in the same role
+
+  Tests a scenario in which the neq predicate binds free variables of two equivalent relations.
+  Corresponds to the following pattern:
+
+                   x
+                  / \
+                 /   \
+                v     v
+               y  !=   z
+
 #    When materialised keyspace is completed
     Then for graql query
       """
@@ -235,16 +236,19 @@ Feature: Concept Inequality Resolution
 #    Then materialised and reasoned keyspaces are the same size
 
 
-  #   Tests a scenario in which the neq predicate binds free variables
-  #   of two non-equivalent relations. Corresponds to the following pattern:
-  #
-  #                       y
-  #                      ^ \
-  #                     /   \
-  #                    /     v
-  #                   x  !=   z
-  #
+
+
   Scenario: pairs of inferred relations can be filtered by inequality of players in different roles
+
+    Tests a scenario in which the neq predicate binds free variables
+    of two non-equivalent relations. Corresponds to the following pattern:
+
+                         y
+                        ^ \
+                       /   \
+                      /     v
+                     x  !=   z
+
 #    When materialised keyspace is completed
     Then for graql query
       """
@@ -273,21 +277,21 @@ Feature: Concept Inequality Resolution
 #    Then materialised and reasoned keyspaces are the same size
 
 
-  #
-  #   Tests a scenario in which the multiple neq predicates are present but bind at most single var in a relation.
-  #   Corresponds to the following pattern:
-  #
-  #                    y    !=    z1
-  #                     ^        ^
-  #                      \      /
-  #                       \    /
-  #                        x[a]
-  #                       /    \
-  #                      /      \
-  #                     v        v
-  #                   y2    !=    z2
-  #
   Scenario: inequality predicates can operate independently against multiple pairs of relations in the same query
+
+     Tests a scenario in which multiple neq predicates are present but bind at most a single var in a relation.
+     Corresponds to the following pattern:
+
+                  y    !=    z1
+                   ^        ^
+                    \      /
+                     \    /
+                      x[a]
+                     /    \
+                    /      \
+                   v        v
+                 y2    !=    z2
+
 #    When materialised keyspace is completed
     Given for graql query
       """
@@ -339,17 +343,17 @@ Feature: Concept Inequality Resolution
 #    Then materialised and reasoned keyspaces are the same size
 
 
-  #
-  #   Tests a scenario in which a single relation has both variables bound with two different neq predicates.
-  #   Corresponds to the following pattern:
-  #
-  #                    x[a]  - != - >  z1
-  #                    |
-  #                    |
-  #                    v
-  #                    y     - != - >  z2
-  #
   Scenario: inequality predicates can operate independently against multiple roleplayers in the same relation
+
+     Tests a scenario in which a single relation has both variables bound with two different neq predicates.
+     Corresponds to the following pattern:
+
+                  x[a]  - != - >  z1
+                  |
+                  |
+                  v
+                  y     - != - >  z2
+
 #    When materialised keyspace is completed
     Given for graql query
       """
