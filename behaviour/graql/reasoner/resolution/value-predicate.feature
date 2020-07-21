@@ -1010,3 +1010,66 @@ Feature: Value Predicate Resolution
     Then all answers are correct in reasoned keyspace
     # sum of all previous answers
     Then answer size in reasoned keyspace is: 5
+    Then materialised and reasoned keyspaces are the same size
+
+
+  Scenario: attribute comparison can be used to classify concept pairs as predecessors and successors of each other
+    Given for each session, graql define
+      """
+      define
+
+      post sub entity,
+          plays original,
+          plays reply,
+          plays predecessor,
+          plays successor,
+          has creation-date;
+
+      reply-of sub relation,
+          relates original,
+          relates reply;
+
+      message-succession sub relation,
+          relates predecessor,
+          relates successor;
+
+      creation-date sub attribute, value datetime;
+
+      succession-rule sub rule,
+      when {
+          (original:$p, reply:$s) isa reply-of;
+          $s has creation-date $d1;
+          $d1 < $d2;
+          (original:$p, reply:$r) isa reply-of;
+          $r has creation-date $d2;
+      },
+      then {
+          (predecessor:$s, successor:$r) isa message-succession;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+
+      $x isa post, has creation-date 2020-07-01;
+      $x1 isa post, has creation-date 2020-07-02;
+      $x2 isa post, has creation-date 2020-07-03;
+      $x3 isa post, has creation-date 2020-07-04;
+      $x4 isa post, has creation-date 2020-07-05;
+      $x5 isa post, has creation-date 2020-07-06;
+
+      (original:$x, reply:$x1) isa reply-of;
+      (original:$x, reply:$x2) isa reply-of;
+      (original:$x, reply:$x3) isa reply-of;
+      (original:$x, reply:$x4) isa reply-of;
+      (original:$x, reply:$x5) isa reply-of;
+      """
+    When materialised keyspace is completed
+    Then for graql query
+      """
+      match (predecessor:$x1, successor:$x2) isa message-succession; get;
+      """
+    Then all answers are correct in reasoned keyspace
+    # the (n-1)th triangle number, where n is the number of replies to the first post
+    Then answer size in reasoned keyspace is: 10
+    Then materialised and reasoned keyspaces are the same size

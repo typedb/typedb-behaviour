@@ -59,6 +59,10 @@ Feature: Relation Inference Resolution
       """
 
 
+  ##############################
+  # CONDITIONS AND CONCLUSIONS #
+  ##############################
+
   Scenario: a relation can be inferred on all concepts of a given type
     Given for each session, graql define
       """
@@ -136,6 +140,81 @@ Feature: Relation Inference Resolution
     Then answer size in reasoned keyspace is: 0
     Then materialised and reasoned keyspaces are the same size
 
+
+  Scenario: a rule can infer a relation with an attribute as a roleplayer
+    Given for each session, graql define
+      """
+      define
+      item sub entity, has name, plays listed-item;
+      price sub attribute, value double, plays item-price;
+      item-listing sub relation, relates listed-item, relates item-price;
+      nutella-price sub rule,
+      when {
+        $x isa item, has name "3kg jar of Nutella";
+        $y 14.99 isa price;
+      }, then {
+        (listed-item: $x, item-price: $y) isa item-listing;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+      $x isa item, has name "3kg jar of Nutella";
+      $y 14.99 isa price;
+      """
+    When materialised keyspace is completed
+    Then for graql query
+      """
+      match
+        $r (listed-item: $i, item-price: $p) isa item-listing;
+        $i isa item, has name $n;
+        $n "3kg jar of Nutella" isa name;
+        $p 14.99 isa price;
+      get;
+      """
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 1
+    Then materialised and reasoned keyspaces are the same size
+
+
+  Scenario: a rule can infer a relation based on ownership of any instance of a specific attribute type
+    Given for each session, graql define
+      """
+      define
+      year sub attribute, value long, plays favourite-year;
+      employment relates favourite-year;
+      kronenbourg-employs-anyone-with-a-name sub rule,
+      when {
+        $x isa company, has name "Kronenbourg";
+        $p isa person, has name $n;
+        $y 1664 isa year;
+      }, then {
+        (employee: $p, employer: $x, favourite-year: $y) isa employment;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+      $x isa company, has name "Kronenbourg";
+      $p isa person, has name "Ronald";
+      $p2 isa person, has name "Prasanth";
+      """
+    When materialised keyspace is completed
+    Then for graql query
+      """
+      match
+        $x 1664 isa year;
+        ($x, employee: $p, employer: $y) isa employment;
+      get;
+      """
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 2
+    Then materialised and reasoned keyspaces are the same size
+
+
+  ###############
+  # REFLEXIVITY #
+  ###############
 
   Scenario: when inferring relations on concept pairs, the number of inferences is the square of the number of concepts
     Given for each session, graql define
@@ -258,6 +337,10 @@ Feature: Relation Inference Resolution
     Then materialised and reasoned keyspaces are the same size
 
 
+  ############
+  # SYMMETRY #
+  ############
+
   Scenario: when a relation is symmetric, its symmetry can be used to make additional inferences
     Given for each session, graql define
       """
@@ -339,6 +422,81 @@ Feature: Relation Inference Resolution
     Then materialised and reasoned keyspaces are the same size
 
 
+  ################
+  # TRANSITIVITY #
+  ################
+
+  Scenario: a transitive rule will not infer any new relations when there are only two related entities
+    Given for each session, graql define
+      """
+      define
+      transitive-location sub rule,
+      when {
+        (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
+        (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
+      }, then {
+        (location-subordinate: $x, location-superior: $z) isa location-hierarchy;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+      $x isa place, has name "Delhi";
+      $y isa place, has name "India";
+      (location-subordinate: $x, location-superior: $x) isa location-hierarchy;
+      (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
+      (location-subordinate: $y, location-superior: $y) isa location-hierarchy;
+      """
+    When materialised keyspace is completed
+    Then for graql query
+      """
+      match $x isa location-hierarchy; get;
+      """
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 3
+    Then materialised and reasoned keyspaces are the same size
+
+
+  # TODO: re-enable all steps when 3-hop transitivity is resolvable
+  Scenario: when a query using transitivity has a limit exceeding the result size, answers are consistent between runs
+    Given for each session, graql define
+      """
+      define
+      transitive-location sub rule,
+      when {
+        (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
+        (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
+      }, then {
+        (location-subordinate: $x, location-superior: $z) isa location-hierarchy;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+      $a isa place, has name "University of Warsaw";
+      $b isa place, has name "Warsaw";
+      $c isa place, has name "Poland";
+      $d isa place, has name "Europe";
+
+      (location-subordinate: $a, location-superior: $b) isa location-hierarchy;
+      (location-subordinate: $b, location-superior: $c) isa location-hierarchy;
+      (location-subordinate: $c, location-superior: $d) isa location-hierarchy;
+      """
+#    When materialised keyspace is completed
+    Then for graql query
+      """
+      match (location-subordinate: $x1, location-superior: $x2) isa location-hierarchy; get;
+      """
+#    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 6
+    Then answers are consistent across 5 executions in reasoned keyspace
+#    Then materialised and reasoned keyspaces are the same size
+
+
+  #################
+  # ROLE MATCHING #
+  #################
+
   Scenario: an inferred relation with one player in a role is not retrieved when the role appears twice in a match query
     Given for each session, graql define
       """
@@ -393,6 +551,10 @@ Feature: Relation Inference Resolution
     Then answer size in reasoned keyspace is: 1
     Then materialised and reasoned keyspaces are the same size
 
+
+  #####################
+  # CHAINED INFERENCE #
+  #####################
 
   Scenario: the types of entities in inferred relations can be used to make further inferences
     Given for each session, graql define
@@ -517,37 +679,6 @@ Feature: Relation Inference Resolution
     Then materialised and reasoned keyspaces are the same size
 
 
-  Scenario: a transitive rule will not infer any new relations when there are only two related entities
-    Given for each session, graql define
-      """
-      define
-      transitive-location sub rule,
-      when {
-        (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
-        (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
-      }, then {
-        (location-subordinate: $x, location-superior: $z) isa location-hierarchy;
-      };
-      """
-    Given for each session, graql insert
-      """
-      insert
-      $x isa place, has name "Delhi";
-      $y isa place, has name "India";
-      (location-subordinate: $x, location-superior: $x) isa location-hierarchy;
-      (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
-      (location-subordinate: $y, location-superior: $y) isa location-hierarchy;
-      """
-    When materialised keyspace is completed
-    Then for graql query
-      """
-      match $x isa location-hierarchy; get;
-      """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 3
-    Then materialised and reasoned keyspaces are the same size
-
-
   Scenario: circular rule dependencies can be resolved
     Given for each session, graql define
       """
@@ -621,77 +752,6 @@ Feature: Relation Inference Resolution
       """
     Then all answers are correct in reasoned keyspace
     # Relation-3-to-2 should not make any additional inferences - it should merely assert that the relations exist
-    Then answer size in reasoned keyspace is: 2
-    Then materialised and reasoned keyspaces are the same size
-
-
-  Scenario: a rule can infer a relation with an attribute as a roleplayer
-    Given for each session, graql define
-      """
-      define
-      item sub entity, has name, plays listed-item;
-      price sub attribute, value double, plays item-price;
-      item-listing sub relation, relates listed-item, relates item-price;
-      nutella-price sub rule,
-      when {
-        $x isa item, has name "3kg jar of Nutella";
-        $y 14.99 isa price;
-      }, then {
-        (listed-item: $x, item-price: $y) isa item-listing;
-      };
-      """
-    Given for each session, graql insert
-      """
-      insert
-      $x isa item, has name "3kg jar of Nutella";
-      $y 14.99 isa price;
-      """
-    When materialised keyspace is completed
-    Then for graql query
-      """
-      match
-        $r (listed-item: $i, item-price: $p) isa item-listing;
-        $i isa item, has name $n;
-        $n "3kg jar of Nutella" isa name;
-        $p 14.99 isa price;
-      get;
-      """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
-    Then materialised and reasoned keyspaces are the same size
-
-
-  Scenario: a rule can infer a relation based on ownership of any instance of a specific attribute type
-    Given for each session, graql define
-      """
-      define
-      year sub attribute, value long, plays favourite-year;
-      employment relates favourite-year;
-      kronenbourg-employs-anyone-with-a-name sub rule,
-      when {
-        $x isa company, has name "Kronenbourg";
-        $p isa person, has name $n;
-        $y 1664 isa year;
-      }, then {
-        (employee: $p, employer: $x, favourite-year: $y) isa employment;
-      };
-      """
-    Given for each session, graql insert
-      """
-      insert
-      $x isa company, has name "Kronenbourg";
-      $p isa person, has name "Ronald";
-      $p2 isa person, has name "Prasanth";
-      """
-    When materialised keyspace is completed
-    Then for graql query
-      """
-      match
-        $x 1664 isa year;
-        ($x, employee: $p, employer: $y) isa employment;
-      get;
-      """
-    Then all answers are correct in reasoned keyspace
     Then answer size in reasoned keyspace is: 2
     Then materialised and reasoned keyspaces are the same size
 
