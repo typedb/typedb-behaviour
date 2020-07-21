@@ -46,7 +46,8 @@ Feature: Value Predicate Resolution
 
       soft-drink sub entity,
         has name,
-        has retailer;
+        has retailer,
+        has price;
 
       team sub relation,
         relates leader,
@@ -58,6 +59,7 @@ Feature: Value Predicate Resolution
       age sub attribute, value long;
       name sub attribute, value string;
       is-old sub attribute, value boolean;
+      price sub attribute, value double;
       sub-string-attribute sub string-attribute;
       unrelated-attribute sub attribute, value string;
       """
@@ -737,6 +739,7 @@ Feature: Value Predicate Resolution
 
 
   # TODO: re-enable all steps once implicit attribute variables are resolvable
+  # TODO: migrate to concept-inequality.feature
   Scenario: when restricting the values of a pair of inferred attributes with `!=`, the answers have distinct types
     Given for each session, graql define
       """
@@ -784,6 +787,7 @@ Feature: Value Predicate Resolution
   @ignore
   # TODO: re-enable once grakn#5821 is fixed (in some answers, $typeof_ax is 'base-attribute' which is incorrect)
   # TODO: re-enable all steps once implicit attribute variables are resolvable
+  # TODO: migrate to concept-inequality.feature
   Scenario: when restricting concept types of a pair of inferred attributes with `!=`, the answers have distinct types
     Given for each session, graql define
       """
@@ -832,6 +836,7 @@ Feature: Value Predicate Resolution
   @ignore
   # TODO: re-enable once grakn#5821 is fixed
   # TODO: re-enable all steps once implicit attribute variables are resolvable
+  # TODO: migrate to concept-inequality.feature
   Scenario: inferred attribute matches can be simultaneously restricted by both concept type and attribute value
     Given for each session, graql define
       """
@@ -894,3 +899,114 @@ Feature: Value Predicate Resolution
     # Sprite | Tesco | retailer |
     Then answer size in reasoned keyspace is: 1
 #    Then materialised and reasoned keyspaces are the same size
+
+
+  Scenario: rules can divide entities into groups, linking each entity group to a specific concept by attribute value
+    Given for each session, graql define
+      """
+      define
+
+      soft-drink plays priced-item;
+
+      price-range sub attribute, value string,
+        plays price-category;
+
+      price-classification sub relation,
+        relates priced-item,
+        relates price-category;
+
+      expensive-drinks sub rule,
+      when {
+        $x has price >= 3.50;
+        $y "expensive" isa price-range;
+      }, then {
+        (priced-item: $x, price-category: $y) isa price-classification;
+      };
+
+      not-expensive-drinks sub rule,
+      when {
+        $x has price < 3.50;
+        $y "not expensive" isa price-range;
+      }, then {
+        (priced-item: $x, price-category: $y) isa price-classification;
+      };
+
+      low-price-drinks sub rule,
+      when {
+        $x has price < 1.75;
+        $y "low price" isa price-range;
+      }, then {
+        (priced-item: $x, price-category: $y) isa price-classification;
+      };
+
+      cheap-drinks sub rule,
+      when {
+        (priced-item: $x, price-category: $y) isa price-classification;
+        $y "not expensive" isa price-range;
+        (priced-item: $x, price-category: $y2) isa price-classification;
+        $y2 "low price" isa price-range;
+        $y3 "cheap" isa price-range;
+      }, then {
+        (priced-item: $x, price-category: $y3) isa price-classification;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+
+      $x isa soft-drink, has name "San Pellegrino Limonata", has price 3.99;
+      $y isa soft-drink, has name "Sprite", has price 2.00;
+      $z isa soft-drink, has name "Tesco Value Lemonade", has price 0.39;
+
+      $p1 "expensive" isa price-range;
+      $p2 "not expensive" isa price-range;
+      $p3 "low price" isa price-range;
+      $p4 "cheap" isa price-range;
+      """
+    When materialised keyspace is completed
+    Then for graql query
+      """
+      match
+        $x "not expensive" isa price-range;
+        ($x, priced-item: $y) isa price-classification;
+      get;
+      """
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 2
+    Then for graql query
+      """
+      match
+        $x "low price" isa price-range;
+        ($x, priced-item: $y) isa price-classification;
+      get;
+      """
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 1
+    Then for graql query
+      """
+      match
+        $x "cheap" isa price-range;
+        ($x, priced-item: $y) isa price-classification;
+      get;
+      """
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 1
+    Then for graql query
+      """
+      match
+        $x "expensive" isa price-range;
+        ($x, priced-item: $y) isa price-classification;
+      get;
+      """
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 1
+    Then for graql query
+      """
+      match
+        $x isa price-range;
+        ($x, priced-item: $y) isa price-classification;
+      get;
+      """
+    Then all answers are correct in reasoned keyspace
+    # sum of all previous answers
+    Then answer size in reasoned keyspace is: 5
