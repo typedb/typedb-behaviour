@@ -265,7 +265,6 @@ Feature: Attribute Attachment Resolution
 #    Then materialised and reasoned keyspaces are the same size
 
 
-  # TODO: re-enable all steps once implicit attribute variables are resolvable
   Scenario: a rule can infer an attribute value that did not previously exist in the graph
     Given for each session, graql define
       """
@@ -295,29 +294,28 @@ Feature: Attribute Attachment Resolution
       $aeY isa soft-drink;
       $r "Ocado" isa retailer;
       """
-#    When materialised keyspace is completed
+    When materialised keyspace is completed
     Then for graql query
       """
       match $x has retailer 'Ocado'; get;
       """
-#    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned keyspace
     Then answer size in reasoned keyspace is: 2
     Then for graql query
       """
       match $x has retailer $r; get;
       """
-#    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned keyspace
     Then answer size in reasoned keyspace is: 4
     Then for graql query
       """
       match $x has retailer 'Tesco'; get;
       """
-#    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned keyspace
     Then answer size in reasoned keyspace is: 2
-#    Then materialised and reasoned keyspaces are the same size
+    Then materialised and reasoned keyspaces are the same size
 
 
-  # TODO: re-enable all steps once implicit attribute variables are resolvable
   Scenario: a rule can make a thing own an attribute that had no prior owners
     Given for each session, graql define
       """
@@ -339,11 +337,11 @@ Feature: Attribute Attachment Resolution
       $aeY isa soft-drink;
       $r "Ocado" isa retailer;
       """
-#    When materialised keyspace is completed
+    When materialised keyspace is completed
     Then for graql query
       """
       match $x isa soft-drink, has retailer 'Ocado'; get;
       """
-#    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned keyspace
     Then answer size in reasoned keyspace is: 2
-#    Then materialised and reasoned keyspaces are the same size
+    Then materialised and reasoned keyspaces are the same size
