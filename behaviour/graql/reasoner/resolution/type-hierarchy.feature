@@ -232,7 +232,7 @@ Feature: Type Hierarchy Resolution
     Then materialised and reasoned keyspaces are the same size
 
 
-  Scenario: subtypes trigger rules based on their parents; parent types don't trigger rules based on their children
+  Scenario: subtype instances trigger rules whose `when` block references their parent type; supertype instances do not
     Given for each session, graql define
       """
       define
