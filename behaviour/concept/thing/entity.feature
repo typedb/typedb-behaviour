@@ -75,14 +75,14 @@ Feature: Concept Entity
     When $a = entity(person) create new instance
     When $alice = attribute(username) as(string) put: alice
     When entity $a set has: $alice
-    Then entity $a get keys(username) contain: $alice
+    Then entity $a get attributes(username) contain: $alice
     Then entity $a get keys contain: $alice
     Then attribute $alice get owners contain: $a
     When transaction commits
     When session opens transaction of type: read
     When $a = entity(person) get instance with key(username): alice
     When $alice = attribute(username) as(string) get: alice
-    Then entity $a get keys(username) contain: $alice
+    Then entity $a get attributes(username) contain: $alice
     Then entity $a get keys contain: $alice
     Then attribute $alice get owners contain: $a
 
@@ -91,7 +91,7 @@ Feature: Concept Entity
     When $alice = attribute(username) as(string) put: alice
     When entity $a set has: $alice
     When entity $a remove has: $alice
-    Then entity $a get keys(username) do not contain: $alice
+    Then entity $a get attributes(username) do not contain: $alice
     Then entity $a get keys do not contain: $alice
     Then attribute $alice get owners do not contain: $a
     When entity $a set has: $alice
@@ -99,9 +99,9 @@ Feature: Concept Entity
     When session opens transaction of type: write
     When $a = entity(person) get instance with key(username): alice
     When $alice = attribute(username) as(string) get: alice
-    Then entity $a get keys(username) contain: $alice
+    Then entity $a get attributes(username) contain: $alice
     When entity $a remove has: $alice
-    Then entity $a get keys(username) do not contain: $alice
+    Then entity $a get attributes(username) do not contain: $alice
     Then entity $a get keys do not contain: $alice
     Then attribute $alice get owners do not contain: $a
     Then transaction commits; throws exception
