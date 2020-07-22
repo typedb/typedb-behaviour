@@ -762,6 +762,59 @@ Feature: Graql Match Clause
     Then answer size is: 0
 
 
+  Scenario: matching a chain of relations only returns answers if there is a chain of the required length
+    Given graql define
+      """
+      define
+
+      gift-delivery sub relation,
+        relates sender,
+        relates recipient;
+
+      person plays sender,
+        plays recipient;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $x1 isa person, has name "Soroush", has ref 0;
+      $x2a isa person, has name "Martha", has ref 1;
+      $x2b isa person, has name "Patricia", has ref 2;
+      $x2c isa person, has name "Lily", has ref 3;
+
+      (sender: $x1, recipient: $x2a) isa gift-delivery;
+      (sender: $x1, recipient: $x2b) isa gift-delivery;
+      (sender: $x1, recipient: $x2c) isa gift-delivery;
+      (sender: $x2a, recipient: $x2b) isa gift-delivery;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match
+        (sender: $a, recipient: $b) isa gift-delivery;
+        (sender: $b, recipient: $c) isa gift-delivery;
+      get;
+      """
+    When concept identifiers are
+      |     | check | value |
+      | SOR | key   | ref:0 |
+      | MAR | key   | ref:1 |
+      | PAT | key   | ref:2 |
+    Then uniquely identify answer concepts
+      | a   | b   | c   |
+      | SOR | MAR | PAT |
+    When get answers of graql query
+      """
+      match
+        (sender: $a, recipient: $b) isa gift-delivery;
+        (sender: $b, recipient: $c) isa gift-delivery;
+        (sender: $c, recipient: $d) isa gift-delivery;
+      get;
+      """
+    Then answer size is: 0
+
+
   Scenario: an error is thrown when matching an entity type as if it were a role
     Then graql get throws
       """
@@ -1324,14 +1377,14 @@ Feature: Graql Match Clause
       | PER |
 
 
-  Scenario: value comparison of unbound variables throws an error
+  Scenario: concept comparison of unbound variables throws an error
     Then graql get throws
       """
       match $x != $y; get;
       """
 
 
-  Scenario: concept comparison of unbound variables throws an error
+  Scenario: value comparison of unbound variables throws an error
     Then graql get throws
       """
       match $x !== $y; get;
