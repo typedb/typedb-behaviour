@@ -116,15 +116,10 @@ Feature: Concept Inequality Resolution
       """
 #    Then all answers are correct in reasoned keyspace
     Then answer size in reasoned keyspace is: 1
-    Then for graql query
+    Then answer set is equivalent for graql query
       """
-      match
-        $s isa state, has name 's2';
-        (related-state: $s) isa holds;
-      get;
+      match $s isa state, has name 's2'; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
 #    Then materialised and reasoned keyspaces are the same size
 
 
