@@ -750,8 +750,8 @@ Feature: Graql Match Clause
     Given graql insert
       """
       insert
-      $x isa person;
-      $y isa person;
+      $x isa person, has ref 1;
+      $y isa person, has ref 2;
       (friend: $x, friend: $y) isa friendship, has ref 0;
       """
     Given the integrity is validated
