@@ -1377,6 +1377,35 @@ Feature: Graql Match Clause
       | PER |
 
 
+  @ignore
+  # TODO: re-enable when variables used in multiple value predicates are resolvable (grakn#5845)
+  Scenario: an attribute variable used in both `==` and `>=` predicates is correctly resolved
+    Given graql insert
+      """
+      insert
+      $x isa person, has name "Susie", has age 16, has ref 0;
+      $y isa person, has name "Donald", has age 25, has ref 1;
+      $z isa person, has name "Ralph", has age 18, has ref 2;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x has age == $z;
+        $z >= 17;
+        $z isa age;
+      get $x;
+      """
+    And concept identifiers are
+      |     | check | value |
+      | DON | key   | ref:1 |
+      | RAL | key   | ref:2 |
+    Then uniquely identify answer concepts
+      | x   |
+      | DON |
+      | RAL |
+
+
   Scenario: concept comparison of unbound variables throws an error
     Then graql get throws
       """
