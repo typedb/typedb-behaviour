@@ -24,5 +24,6 @@ exports_files([
     "get.feature",
     "insert.feature",
     "match.feature",
+    "rule-validation.feature",
     "undefine.feature",
 ])
