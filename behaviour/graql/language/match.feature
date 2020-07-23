@@ -752,7 +752,7 @@ Feature: Graql Match Clause
       insert
       $x isa person;
       $y isa person;
-      (friend: $x, friend: $y) isa friendship;
+      (friend: $x, friend: $y) isa friendship, has ref 0;
       """
     Given the integrity is validated
     When get answers of graql query
