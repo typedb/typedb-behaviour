@@ -554,9 +554,9 @@ Feature: Relation Inference Resolution
     Then materialised and reasoned keyspaces are the same size
 
 
-  #################
-  # ROLE MATCHING #
-  #################
+  #######################
+  # ROLEPLAYER MATCHING #
+  #######################
 
   Scenario: an inferred relation with one player in a role is not retrieved when the role appears twice in a match query
     Given for each session, graql define
@@ -610,6 +610,286 @@ Feature: Relation Inference Resolution
       """
     Then all answers are correct in reasoned keyspace
     Then answer size in reasoned keyspace is: 1
+    Then materialised and reasoned keyspaces are the same size
+
+
+  Scenario: when matching an inferred relation with repeated roles, answers contain all permutations of the roleplayers
+    Given for each session, graql define
+      """
+      define
+      alice-bob-and-charlie-are-friends-sub-rule,
+      when {
+        $a has name "Alice";
+        $b has name "Bob";
+        $c has name "Charlie";
+      }, then {
+        (friend: $a, friend: $b: friend: $c) isa friendship;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+      $x isa person, has name "Alice";
+      $y isa person, has name "Bob";
+      $z isa person, has name "Charlie";
+      """
+    When materialised keyspace is completed
+    Then for graql query
+      """
+      match
+        (friend: $a, friend: $b, friend: $c) isa friendship;
+      get;
+      """
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 6
+    Then answer set is equivalent for graql query
+      """
+      match
+        $r (friend: $a, friend: $b, friend: $c) isa friendship;
+      get $a, $b, $c;
+      """
+    Then materialised and reasoned keyspaces are the same size
+
+
+  Scenario: inferred relations can be filtered by shared attribute ownership
+    Given for each session, graql define
+      """
+      define
+      selection sub relation, relates choice1, relates choice2;
+      person plays choice1, plays choice2;
+      symmetric-selection sub rule,
+      when {
+        (choice1: $x, choice2: $y) isa selection;
+      }, then {
+        (choice1: $y, choice2: $x) isa selection;
+      };
+      transitive-selection sub rule,
+      when {
+        (choice1: $x, choice2: $y) isa selection;
+        (choice1: $y, choice2: $z) isa selection;
+      }, then {
+        (choice1: $x, choice2: $z) isa selection;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+      $x isa person, has name "a";
+      $y isa person, has name "b";
+      $z isa person, has name "c";
+
+      ($x, $y) isa selection;
+      ($y, $z) isa selection;
+      """
+    When materialised keyspace is completed
+    Then for graql query
+      """
+      match
+        (choice1: $x, choice2: $y) isa selection;
+        $x has name $n;
+        $y has name $n;
+      get;
+      """
+    Then all answers in reasoned keyspace are correct
+    # (a,a), (b,b), (c,c)
+    Then answer size in reasoned keyspace is: 3
+    Then for graql query
+      """
+      match
+        (choice1: $x, choice2: $y) isa selection;
+        $x has name $n;
+        $y has name $n;
+        $n == 'a';
+      get;
+      """
+    Then all answers in reasoned keyspace are correct
+    Then answer size in reasoned keyspace is: 1
+    Then answer set is equivalent for graql query
+      """
+      match
+        (choice1: $x, choice2: $y) isa selection;
+        $x has name 'a';
+        $y has name 'a';
+      get;
+      """
+    Then materialised and reasoned keyspaces are the same size
+
+
+  #######################
+  # UNTYPED MATCH QUERY #
+  #######################
+
+  Scenario: the relation type constraint can be excluded from a reasoned match query
+    Given for each session, graql define
+      """
+      define
+      transitive-location sub rule,
+      when {
+        (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
+        (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
+      }, then {
+        (location-subordinate: $x, location-superior: $z) isa location-hierarchy;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+      $x isa place, has name "Turku Airport";
+      $y isa place, has name "Turku";
+      $z isa place, has name "Finland";
+
+      (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
+      (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
+      """
+    When materialised keyspace is completed
+    Then for graql query
+      """
+      match
+        $a isa place, has name "Turku Airport";
+        ($a, $b);
+        $b isa place, has name "Turku";
+        ($b, $c);
+      get;
+      """
+    Then all answers are correct in reasoned keyspace
+    # $c in {'Turku Airport', 'Finland'}
+    Then answer size in reasoned keyspace is: 2
+    Then materialised and reasoned keyspaces are the same size
+
+
+  Scenario: when the relation type is excluded in a reasoned match query, all valid roleplayer combinations are matches
+    Given for each session, graql define
+      """
+      define
+      transitive-location sub rule,
+      when {
+        (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
+        (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
+      }, then {
+        (location-subordinate: $x, location-superior: $z) isa location-hierarchy;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+      $x isa place, has name "Turku Airport";
+      $y isa place, has name "Turku";
+      $z isa place, has name "Finland";
+
+      (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
+      (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
+      """
+    When materialised keyspace is completed
+    Given for graql query
+      """
+      match
+        $a isa place, has name "Turku Airport";
+        ($a, $b);
+        $b isa place, has name "Turku";
+      get;
+      """
+#    Given all answers are correct in reasoned keyspace
+    Given answer size in reasoned keyspace is: 1
+    Then for graql query
+      """
+      match
+        $a isa place, has name "Turku Airport";
+        ($a, $b);
+        $b isa place, has name "Turku";
+        ($c, $d);
+      get;
+      """
+#    Then all answers are correct in reasoned keyspace
+    # (2 db relations + 1 inferred) x 2 for variable swap
+    Then answer size in reasoned keyspace is: 6
+    Then materialised and reasoned keyspaces are the same size
+
+
+  Scenario: when the relation type is excluded in a reasoned match query, all types of relations match
+    Given for each session, graql define
+      """
+      define
+
+      loc-hie sub relation, relates loc-sub, relates loc-sup;
+
+      place plays loc-sub, plays loc-sup;
+
+      transitive-location sub rule,
+      when {
+        (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
+        (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
+      }, then {
+        (location-subordinate: $x, location-superior: $z) isa location-hierarchy;
+      };
+
+      long-role-names-suck sub rule,
+      when {
+        (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
+      }, then {
+        (loc-sub: $x, loc-sup: $y) isa loc-hie;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+      $x isa place, has name "Turku Airport";
+      $y isa place, has name "Turku";
+      $z isa place, has name "Finland";
+
+      (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
+      (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
+      """
+    When materialised keyspace is completed
+    Given for graql query
+      """
+      match
+        ($a, $b) isa relation;
+      get;
+      """
+    Then all answers are correct in reasoned keyspace
+    # Despite there being more inferred relations, the answer size is still 6 (as in the previous scenario)
+    # because the query is only interested in the related concepts, not in the relation instances themselves
+    Then answer size in reasoned keyspace is: 6
+    Then answer set is equivalent for graql query
+      """
+      match ($a, $b); get;
+      """
+    Then materialised and reasoned keyspaces are the same size
+
+
+  Scenario: conjunctions of untyped reasoned relations are correctly resolved
+    Given for each session, graql define
+      """
+      define
+      transitive-location sub rule,
+      when {
+        (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
+        (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
+      }, then {
+        (location-subordinate: $x, location-superior: $z) isa location-hierarchy;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+      $x isa place, has name "Turku Airport";
+      $y isa place, has name "Turku";
+      $z isa place, has name "Finland";
+
+      (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
+      (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
+      """
+    When materialised keyspace is completed
+    Then for graql query
+      """
+      match
+        ($a, $b);
+        ($b, $c);
+      get;
+      """
+    Then all answers are correct in reasoned keyspace
+    # All 3 entities are related to each other, so the answer size is just (# of entities x # of variables) = 3 x 3 = 9
+    Then answer size in reasoned keyspace is: 9
     Then materialised and reasoned keyspaces are the same size
 
 
@@ -854,179 +1134,109 @@ Feature: Relation Inference Resolution
     Then materialised and reasoned keyspaces are the same size
 
 
-  #######################
-  # UNTYPED MATCH QUERY #
-  #######################
-
-  Scenario: the relation type constraint can be excluded from a reasoned match query
+  Scenario: when relations' and attributes' inferences are mutually recursive, the inferred concepts can be retrieved
     Given for each session, graql define
       """
       define
-      transitive-location sub rule,
+
+      word sub entity,
+          plays subtype,
+          plays supertype,
+          plays prep,
+          plays pobj,
+          has name;
+
+      f sub word;
+      o sub word;
+
+      pobj sub role;
+      prep sub role;
+      subtype sub role;
+      supertype sub role;
+
+      inheritance sub relation,
+          relates supertype,
+          relates subtype;
+
+      pair sub relation,
+          relates prep,
+          relates pobj,
+          has typ,
+          has name;
+
+      name sub attribute, value string;
+      typ sub attribute, value string;
+
+      inference-all-pairs sub rule,
       when {
-        (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
-        (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
-      }, then {
-        (location-subordinate: $x, location-superior: $z) isa location-hierarchy;
+          $x isa word;
+          $y isa word;
+          $x has name !== 'f';
+          $y has name !== 'o';
+      },
+      then {
+          (prep: $x, pobj: $y) isa pair;
+      };
+
+      inference-pairs-ff sub rule,
+      when {
+          $f isa f;
+          (subtype: $prep, supertype: $f) isa inheritance;
+          (subtype: $pobj, supertype: $f) isa inheritance;
+          $p (prep: $prep, pobj: $pobj) isa pair;
+      },
+      then {
+          $p has name 'ff';
+      };
+
+      inference-pairs-fo sub rule,
+      when {
+          $f isa f;
+          $o isa o;
+          (subtype: $prep, supertype: $f) isa inheritance;
+          (subtype: $pobj, supertype: $o) isa inheritance;
+          $p (prep: $prep, pobj: $pobj) isa pair;
+      },
+      then {
+          $p has name 'fo';
       };
       """
     Given for each session, graql insert
       """
       insert
-      $x isa place, has name "Turku Airport";
-      $y isa place, has name "Turku";
-      $z isa place, has name "Finland";
 
-      (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
-      (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
+      $f isa f, has name "f";
+      $o isa o, has name "o";
+
+      $aa isa word, has name "aa";
+      $bb isa word, has name "bb";
+      $cc isa word, has name "cc";
+
+      (supertype: $o, subtype: $aa) isa inheritance;
+      (supertype: $o, subtype: $bb) isa inheritance;
+      (supertype: $o, subtype: $cc) isa inheritance;
+
+      $pp isa word, has name "pp";
+      $qq isa word, has name "qq";
+      $rr isa word, has name "rr";
+      $rr2 isa word, has name "rr";
+
+      (supertype: $f, subtype: $pp) isa inheritance;
+      (supertype: $f, subtype: $qq) isa inheritance;
+      (supertype: $f, subtype: $rr) isa inheritance;
+      (supertype: $f, subtype: $rr2) isa inheritance;
       """
     When materialised keyspace is completed
     Then for graql query
       """
-      match
-        $a isa place, has name "Turku Airport";
-        ($a, $b);
-        $b isa place, has name "Turku";
-        ($b, $c);
-      get;
+      match $p isa pair, has name 'ff'; get;
       """
     Then all answers are correct in reasoned keyspace
-    # $c in {'Turku Airport', 'Finland'}
-    Then answer size in reasoned keyspace is: 2
-    Then materialised and reasoned keyspaces are the same size
-
-
-  Scenario: when the relation type is excluded in a reasoned match query, all valid roleplayer combinations are matches
-    Given for each session, graql define
-      """
-      define
-      transitive-location sub rule,
-      when {
-        (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
-        (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
-      }, then {
-        (location-subordinate: $x, location-superior: $z) isa location-hierarchy;
-      };
-      """
-    Given for each session, graql insert
-      """
-      insert
-      $x isa place, has name "Turku Airport";
-      $y isa place, has name "Turku";
-      $z isa place, has name "Finland";
-
-      (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
-      (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
-      """
-    When materialised keyspace is completed
-    Given for graql query
-      """
-      match
-        $a isa place, has name "Turku Airport";
-        ($a, $b);
-        $b isa place, has name "Turku";
-      get;
-      """
-#    Given all answers are correct in reasoned keyspace
-    Given answer size in reasoned keyspace is: 1
+    Then answer size in reasoned keyspace is: 16
     Then for graql query
       """
-      match
-        $a isa place, has name "Turku Airport";
-        ($a, $b);
-        $b isa place, has name "Turku";
-        ($c, $d);
-      get;
-      """
-#    Then all answers are correct in reasoned keyspace
-    # (2 db relations + 1 inferred) x 2 for variable swap
-    Then answer size in reasoned keyspace is: 6
-    Then materialised and reasoned keyspaces are the same size
-
-
-  Scenario: when the relation type is excluded in a reasoned match query, all types of relations match
-    Given for each session, graql define
-      """
-      define
-
-      loc-hie sub relation, relates loc-sub, relates loc-sup;
-
-      place plays loc-sub, plays loc-sup;
-
-      transitive-location sub rule,
-      when {
-        (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
-        (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
-      }, then {
-        (location-subordinate: $x, location-superior: $z) isa location-hierarchy;
-      };
-
-      long-role-names-suck sub rule,
-      when {
-        (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
-      }, then {
-        (loc-sub: $x, loc-sup: $y) isa loc-hie;
-      };
-      """
-    Given for each session, graql insert
-      """
-      insert
-      $x isa place, has name "Turku Airport";
-      $y isa place, has name "Turku";
-      $z isa place, has name "Finland";
-
-      (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
-      (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
-      """
-    When materialised keyspace is completed
-    Given for graql query
-      """
-      match
-        ($a, $b) isa relation;
-      get;
+      match $p isa pair; get;
       """
     Then all answers are correct in reasoned keyspace
-    # Despite there being more inferred relations, the answer size is still 6 (as in the previous scenario)
-    # because the query is only interested in the related concepts, not in the relation instances themselves
-    Then answer size in reasoned keyspace is: 6
-    Then answer set is equivalent for graql query
-      """
-      match ($a, $b); get;
-      """
-    Then materialised and reasoned keyspaces are the same size
-
-
-  Scenario: conjunctions of untyped reasoned relations are correctly resolved
-    Given for each session, graql define
-      """
-      define
-      transitive-location sub rule,
-      when {
-        (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
-        (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
-      }, then {
-        (location-subordinate: $x, location-superior: $z) isa location-hierarchy;
-      };
-      """
-    Given for each session, graql insert
-      """
-      insert
-      $x isa place, has name "Turku Airport";
-      $y isa place, has name "Turku";
-      $z isa place, has name "Finland";
-
-      (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
-      (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
-      """
-    When materialised keyspace is completed
-    Then for graql query
-      """
-      match
-        ($a, $b);
-        ($b, $c);
-      get;
-      """
-    Then all answers are correct in reasoned keyspace
-    # All 3 entities are related to each other, so the answer size is just (# of entities x # of variables) = 3 x 3 = 9
-    Then answer size in reasoned keyspace is: 9
+    Then answer size in reasoned keyspace is: 64
     Then materialised and reasoned keyspaces are the same size
