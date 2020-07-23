@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-Feature: Graql Reasoner Rule Validation
+Feature: Graql Rule Validation
 
   Background: Initialise a session and transaction for each scenario
     Given connection has been opened
