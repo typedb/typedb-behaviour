@@ -687,6 +687,7 @@ Feature: Relation Inference Resolution
     Then materialised and reasoned keyspaces are the same size
 
 
+  # TODO: re-enable all steps when fixed (#75), currently they are very slow
   Scenario: inferred relations can be filtered by shared attribute ownership
     Given for each session, graql define
       """
@@ -717,7 +718,7 @@ Feature: Relation Inference Resolution
       (choice1: $x, choice2: $y) isa selection;
       (choice1: $y, choice2: $z) isa selection;
       """
-    When materialised keyspace is completed
+#    When materialised keyspace is completed
     Then for graql query
       """
       match
@@ -726,7 +727,7 @@ Feature: Relation Inference Resolution
         $y has name $n;
       get;
       """
-    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned keyspace
     # (a,a), (b,b), (c,c)
     Then answer size in reasoned keyspace is: 3
     Then for graql query
@@ -738,7 +739,7 @@ Feature: Relation Inference Resolution
         $n == 'a';
       get;
       """
-    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned keyspace
     Then answer size in reasoned keyspace is: 1
     Then answer set is equivalent for graql query
       """
@@ -748,7 +749,7 @@ Feature: Relation Inference Resolution
         $y has name 'a';
       get;
       """
-    Then materialised and reasoned keyspaces are the same size
+#    Then materialised and reasoned keyspaces are the same size
 
 
   #######################
