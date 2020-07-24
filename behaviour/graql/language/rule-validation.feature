@@ -108,3 +108,24 @@ Feature: Graql Rule Validation
       };
       """
     Then the integrity is validated
+
+
+  Scenario: when defining a rule to infer an additional type that is missing a necessary attribute, an error is thrown
+    Given graql define
+      """
+      define
+      person sub entity, has name;
+      dog sub entity;
+      """
+    Given the integrity is validated
+    Then graql define throws
+      """
+      define
+      romeo-is-a-dog sub rule,
+      when {
+        $x isa person, has name "Romeo";
+      }, then {
+        $x isa dog;
+      };
+      """
+    Then the integrity is validated

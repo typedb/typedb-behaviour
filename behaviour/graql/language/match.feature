@@ -1489,3 +1489,69 @@ Feature: Graql Match Clause
       get;
       """
     Then answer size is: 0
+
+
+  ##################
+  # VARIABLE TYPES #
+  ##################
+
+  Scenario: all instances and their types can be retrieved
+    Given graql insert
+      """
+      insert
+      $x isa person, has name "Bertie", has ref 0;
+      $y isa person, has name "Angelina", has ref 1;
+      $r (friend: $x, friend: $y) isa friendship, has ref 2;
+      """
+    Given the integrity is validated
+    Given get answers of graql query
+      """
+      match $x isa entity; get;
+      """
+    Given answer size is: 2
+    Given get answers of graql query
+      """
+      match $r isa relation; get;
+      """
+    Given answer size is: 1
+    Given get answers of graql query
+      """
+      match $x isa attribute; get;
+      """
+    Given answer size is: 5
+    When get answers of graql query
+      """
+      match $x isa $type; get;
+      """
+    # 2 entities x 3 types {person,entity,thing}
+    # 1 relation x 3 types {friendship,relation,thing}
+    # 5 attributes x 3 types {ref/name,attribute,thing}
+    Then answer size is: 24
+
+
+  Scenario: all relations and their types can be retrieved
+    Given graql insert
+      """
+      insert
+      $x isa person, has name "Bertie", has ref 0;
+      $y isa person, has name "Angelina", has ref 1;
+      $r (friend: $x, friend: $y) isa friendship, has ref 2;
+      """
+    Given the integrity is validated
+    Given get answers of graql query
+      """
+      match $r isa relation; get;
+      """
+    Given answer size is: 1
+    Given get answers of graql query
+      """
+      match ($x, $y) isa relation; get;
+      """
+    # 2 permutations of the roleplayers
+    Given answer size is: 2
+    When get answers of graql query
+      """
+      match ($x, $y) isa $type; get;
+      """
+    # 2 permutations x 3 types {friendship,relation,thing}
+    Then answer size is: 6
