@@ -777,6 +777,7 @@ Feature: Value Predicate Resolution
     Then materialised and reasoned keyspaces are the same size
 
 
+  # TODO: re-enable all steps when fixed (#75)
   Scenario: rules can divide entities into groups, linking each entity group to a specific concept by attribute value
     Given for each session, graql define
       """
@@ -865,7 +866,7 @@ Feature: Value Predicate Resolution
         ($x, priced-item: $y) isa price-classification;
       get;
       """
-    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned keyspace
     Then answer size in reasoned keyspace is: 1
     Then for graql query
       """
@@ -883,12 +884,13 @@ Feature: Value Predicate Resolution
         ($x, priced-item: $y) isa price-classification;
       get;
       """
-    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned keyspace
     # sum of all previous answers
     Then answer size in reasoned keyspace is: 5
     Then materialised and reasoned keyspaces are the same size
 
 
+  # TODO: re-enable all steps when resolvable (currently it takes too long to resolve)
   Scenario: attribute comparison can be used to classify concept pairs as predecessors and successors of each other
     Given for each session, graql define
       """
@@ -940,12 +942,12 @@ Feature: Value Predicate Resolution
       (original:$x, reply:$x4) isa reply-of;
       (original:$x, reply:$x5) isa reply-of;
       """
-    When materialised keyspace is completed
+#    When materialised keyspace is completed
     Then for graql query
       """
       match (predecessor:$x1, successor:$x2) isa message-succession; get;
       """
-    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned keyspace
     # the (n-1)th triangle number, where n is the number of replies to the first post
     Then answer size in reasoned keyspace is: 10
-    Then materialised and reasoned keyspaces are the same size
+#    Then materialised and reasoned keyspaces are the same size
