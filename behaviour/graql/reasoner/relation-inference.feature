@@ -198,6 +198,7 @@ Feature: Relation Inference Resolution
       $x isa company, has name "Kronenbourg";
       $p isa person, has name "Ronald";
       $p2 isa person, has name "Prasanth";
+      $y 1664 isa year;
       """
     When materialised keyspace is completed
     Then for graql query
@@ -216,7 +217,7 @@ Feature: Relation Inference Resolution
   # REFLEXIVITY #
   ###############
 
-  Scenario: when inferring relations on concept pairs, the number of inferences is the square of the number of concepts
+  Scenario: when inferring relations on all pairs from n concepts, the number of relations is the nth triangle number
     Given for each session, graql define
       """
       define
@@ -241,6 +242,37 @@ Feature: Relation Inference Resolution
     Then for graql query
       """
       match $r isa friendship; get;
+      """
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 15
+    Then materialised and reasoned keyspaces are the same size
+
+
+  Scenario: when matching all possible pairs inferred from n concepts, the answer size is the square of n
+    Given for each session, graql define
+      """
+      define
+      everyone-is-my-friend-including-myself sub rule,
+      when {
+        $x isa person;
+        $y isa person;
+      }, then {
+        (friend: $x, friend: $y) isa friendship;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+      $a isa person, has name "Abigail";
+      $b isa person, has name "Bernadette";
+      $c isa person, has name "Cliff";
+      $d isa person, has name "Damien";
+      $e isa person, has name "Eustace";
+      """
+    When materialised keyspace is completed
+    Then for graql query
+      """
+      match ($x, $y) isa friendship; get;
       """
     Then all answers are correct in reasoned keyspace
     Then answer size in reasoned keyspace is: 25
@@ -341,14 +373,18 @@ Feature: Relation Inference Resolution
   # SYMMETRY #
   ############
 
+  # TODO: re-enable all steps when resolvable (currently takes too long)
   Scenario: when a relation is symmetric, its symmetry can be used to make additional inferences
     Given for each session, graql define
       """
       define
 
-      person plays coworker, plays employer;
+      person plays coworker,
+          plays employer,
+          plays robot-pet-owner;
 
       robot sub entity,
+          plays robot-pet,
           plays coworker,
           plays employee,
           plays employer,
@@ -381,9 +417,9 @@ Feature: Relation Inference Resolution
     Given for each session, graql insert
       """
       insert
-      $a isa robot-pet, has name 'r1';
+      $a isa robot, has name 'r1';
       $b isa person, has name 'p';
-      $c isa robot-pet, has name 'r2';
+      $c isa robot, has name 'r2';
       (robot-pet: $a, robot-pet-owner: $b) isa robot-pet-ownership;
       (coworker: $b, coworker: $c) isa coworkers;
       """
@@ -394,7 +430,7 @@ Feature: Relation Inference Resolution
         (coworker: $x, coworker: $x) isa coworkers;
       get;
       """
-    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned keyspace
     # (p,p) is a coworkers since people work with themselves.
     # Applying the robot work rule we see that (r1,p) is a pet ownership, and (p,p) and (p,r2) are coworker relations,
     # so (r1,p) and (r1,r2) are both coworker relations.
@@ -408,7 +444,7 @@ Feature: Relation Inference Resolution
         (coworker: $x, coworker: $y) isa coworkers;
       get;
       """
-    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned keyspace
     # $x | $y |
     # p  | p  |
     # p  | r2 |
@@ -495,9 +531,9 @@ Feature: Relation Inference Resolution
 
   Scenario: when a transitive rule's `then` matches a query, but its `when` is unmet, the material answers are returned
 
-    This test is included because internally, Reasoner uses backward chaining to answer queries, meaning it has to
-    perform resolution steps even if the conditions of a rule are never met. In this case, `transitive-location`
-    is never triggered because there are no location-hierarchy pairs that satisfy both conditions.
+  This test is included because internally, Reasoner uses backward chaining to answer queries, meaning it has to
+  perform resolution steps even if the conditions of a rule are never met. In this case, `transitive-location`
+  is never triggered because there are no location-hierarchy pairs that satisfy both conditions.
 
     Given for each session, graql define
       """
@@ -617,13 +653,13 @@ Feature: Relation Inference Resolution
     Given for each session, graql define
       """
       define
-      alice-bob-and-charlie-are-friends-sub-rule,
+      alice-bob-and-charlie-are-friends sub rule,
       when {
         $a has name "Alice";
         $b has name "Bob";
         $c has name "Charlie";
       }, then {
-        (friend: $a, friend: $b: friend: $c) isa friendship;
+        (friend: $a, friend: $b, friend: $c) isa friendship;
       };
       """
     Given for each session, graql insert
@@ -678,8 +714,8 @@ Feature: Relation Inference Resolution
       $y isa person, has name "b";
       $z isa person, has name "c";
 
-      ($x, $y) isa selection;
-      ($y, $z) isa selection;
+      (choice1: $x, choice2: $y) isa selection;
+      (choice1: $y, choice2: $z) isa selection;
       """
     When materialised keyspace is completed
     Then for graql query
@@ -690,7 +726,7 @@ Feature: Relation Inference Resolution
         $y has name $n;
       get;
       """
-    Then all answers in reasoned keyspace are correct
+    Then all answers are correct in reasoned keyspace
     # (a,a), (b,b), (c,c)
     Then answer size in reasoned keyspace is: 3
     Then for graql query
@@ -702,7 +738,7 @@ Feature: Relation Inference Resolution
         $n == 'a';
       get;
       """
-    Then all answers in reasoned keyspace are correct
+    Then all answers are correct in reasoned keyspace
     Then answer size in reasoned keyspace is: 1
     Then answer set is equivalent for graql query
       """
@@ -719,6 +755,7 @@ Feature: Relation Inference Resolution
   # UNTYPED MATCH QUERY #
   #######################
 
+  # TODO: re-enable all steps when fixed (#75)
   Scenario: the relation type constraint can be excluded from a reasoned match query
     Given for each session, graql define
       """
@@ -751,12 +788,13 @@ Feature: Relation Inference Resolution
         ($b, $c);
       get;
       """
-    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned keyspace
     # $c in {'Turku Airport', 'Finland'}
     Then answer size in reasoned keyspace is: 2
     Then materialised and reasoned keyspaces are the same size
 
 
+  # TODO: re-enable all steps when fixed (#75)
   Scenario: when the relation type is excluded in a reasoned match query, all valid roleplayer combinations are matches
     Given for each session, graql define
       """
@@ -805,6 +843,7 @@ Feature: Relation Inference Resolution
     Then materialised and reasoned keyspaces are the same size
 
 
+  # TODO: re-enable all steps when fixed (#75)
   Scenario: when the relation type is excluded in a reasoned match query, all types of relations match
     Given for each session, graql define
       """
@@ -846,7 +885,7 @@ Feature: Relation Inference Resolution
         ($a, $b) isa relation;
       get;
       """
-    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned keyspace
     # Despite there being more inferred relations, the answer size is still 6 (as in the previous scenario)
     # because the query is only interested in the related concepts, not in the relation instances themselves
     Then answer size in reasoned keyspace is: 6
@@ -854,9 +893,10 @@ Feature: Relation Inference Resolution
       """
       match ($a, $b); get;
       """
-    Then materialised and reasoned keyspaces are the same size
+#    Then materialised and reasoned keyspaces are the same size
 
 
+  # TODO: re-enable all steps when fixed (#75)
   Scenario: conjunctions of untyped reasoned relations are correctly resolved
     Given for each session, graql define
       """
@@ -888,8 +928,20 @@ Feature: Relation Inference Resolution
       get;
       """
     Then all answers are correct in reasoned keyspace
-    # All 3 entities are related to each other, so the answer size is just (# of entities x # of variables) = 3 x 3 = 9
-    Then answer size in reasoned keyspace is: 9
+    # a   | b   | c   |
+    # AIR | TUR | FIN |
+    # AIR | FIN | TUR |
+    # AIR | TUR | AIR |
+    # AIR | FIN | AIR |
+    # TUR | AIR | FIN |
+    # TUR | FIN | AIR |
+    # TUR | AIR | TUR |
+    # TUR | FIN | TUR |
+    # FIN | AIR | TUR |
+    # FIN | TUR | AIR |
+    # FIN | AIR | FIN |
+    # FIN | TUR | FIN |
+    Then answer size in reasoned keyspace is: 12
     Then materialised and reasoned keyspaces are the same size
 
 
@@ -897,6 +949,7 @@ Feature: Relation Inference Resolution
   # CHAINED INFERENCE #
   #####################
 
+  # TODO: re-enable all steps when query is resolvable (currently takes too long)
   Scenario: the types of entities in inferred relations can be used to make further inferences
     Given for each session, graql define
       """
@@ -942,11 +995,12 @@ Feature: Relation Inference Resolution
       """
       match (big-location-subordinate: $x, big-location-superior: $y) isa big-location-hierarchy; get;
       """
-    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned keyspace
     Then answer size in reasoned keyspace is: 1
     Then materialised and reasoned keyspaces are the same size
 
 
+  # TODO: re-enable all steps when resolvable (currently takes too long)
   Scenario: the types of inferred relations can be used to make further inferences
     Given for each session, graql define
       """
@@ -1015,7 +1069,7 @@ Feature: Relation Inference Resolution
       """
       match (role31: $x, role32: $y) isa relation3; get;
       """
-    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned keyspace
     Then answer size in reasoned keyspace is: 1
     Then materialised and reasoned keyspaces are the same size
 
@@ -1097,6 +1151,7 @@ Feature: Relation Inference Resolution
     Then materialised and reasoned keyspaces are the same size
 
 
+  # TODO: re-enable all steps when we have a solution for materialisation of infinite graphs (#75)
   Scenario: when resolution produces an infinite stream of answers, limiting the answer size allows it to terminate
     Given for each session, graql define
       """
@@ -1124,16 +1179,17 @@ Feature: Relation Inference Resolution
       # If only Yusuf didn't dream about himself...
       (dreamer: $x, dream-subject: $x) isa dream;
       """
-    When materialised keyspace is completed
+#    When materialised keyspace is completed
     Then for graql query
       """
       match $x isa dream; get; limit 10;
       """
-    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned keyspace
     Then answer size in reasoned keyspace is: 10
-    Then materialised and reasoned keyspaces are the same size
+#    Then materialised and reasoned keyspaces are the same size
 
 
+  # TODO: re-enable all steps when materialisation is possible (may be an infinite graph?) (#75)
   Scenario: when relations' and attributes' inferences are mutually recursive, the inferred concepts can be retrieved
     Given for each session, graql define
       """
@@ -1226,17 +1282,17 @@ Feature: Relation Inference Resolution
       (supertype: $f, subtype: $rr) isa inheritance;
       (supertype: $f, subtype: $rr2) isa inheritance;
       """
-    When materialised keyspace is completed
+#    When materialised keyspace is completed
     Then for graql query
       """
       match $p isa pair, has name 'ff'; get;
       """
-    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned keyspace
     Then answer size in reasoned keyspace is: 16
     Then for graql query
       """
       match $p isa pair; get;
       """
-    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned keyspace
     Then answer size in reasoned keyspace is: 64
-    Then materialised and reasoned keyspaces are the same size
+#    Then materialised and reasoned keyspaces are the same size
