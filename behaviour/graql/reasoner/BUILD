@@ -27,5 +27,5 @@ exports_files([
     "type-generation.feature",
     "type-hierarchy.feature",
     "value-predicate.feature",
-    "variable-role.feature",
+    "variable-roles.feature",
 ])
