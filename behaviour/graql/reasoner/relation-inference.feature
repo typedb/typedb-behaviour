@@ -737,7 +737,7 @@ Feature: Relation Inference Resolution
         $x has name $n;
         $y has name $n;
         $n == 'a';
-      get;
+      get $x, $y;
       """
 #    Then all answers are correct in reasoned keyspace
     Then answer size in reasoned keyspace is: 1
@@ -928,7 +928,7 @@ Feature: Relation Inference Resolution
         ($b, $c);
       get;
       """
-    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned keyspace
     # a   | b   | c   |
     # AIR | TUR | FIN |
     # AIR | FIN | TUR |
