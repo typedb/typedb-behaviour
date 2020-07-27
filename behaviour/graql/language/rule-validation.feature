@@ -116,6 +116,7 @@ Feature: Graql Rule Validation
       define
       person sub entity, has name;
       dog sub entity;
+      name sub attribute, value string;
       """
     Given the integrity is validated
     Then graql define throws
