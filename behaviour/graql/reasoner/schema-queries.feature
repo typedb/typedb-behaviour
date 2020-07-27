@@ -157,6 +157,331 @@ Feature: Schema Query Resolution (Variable Types)
     Then materialised and reasoned keyspaces are the same size
 
 
+  Scenario: all inferred instances of types that can own a given attribute type can be retrieved
+    Given for each session, graql define
+      """
+      define
+
+      residency sub relation,
+        relates resident,
+        relates residence,
+        has contract;
+
+      contract sub attribute, value string;
+
+      person plays resident;
+      place plays residence;
+
+      employment has contract;
+
+      everyone-has-friends sub rule,
+      when {
+        $x isa person;
+      }, then {
+        (friend: $x) isa friendship;
+      };
+
+      there-is-no-unemployment sub rule,
+      when {
+        $x isa person;
+      }, then {
+        (employee: $x) isa employment;
+      };
+
+      there-are-no-homeless sub rule,
+      when {
+        $x isa person;
+      }, then {
+        (resident: $x) isa residency;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+      $x isa person, has name "Sharon";
+      $y isa person, has name "Tobias";
+      """
+    When materialised keyspace is completed
+    Given for graql query
+      """
+      match
+        $x isa relation;
+      get;
+      """
+    Given all answers are correct in reasoned keyspace
+    Given answer size in reasoned keyspace is: 6
+    Then for graql query
+      """
+      match
+        $x isa $type;
+        $type has contract;
+      get;
+      """
+    Then all answers are correct in reasoned keyspace
+    # friendship can't have a contract... at least, not in this pristine test world
+    # note: enforcing 'has contract' also eliminates 'relation' and 'thing' as possible types
+    Then answer size in reasoned keyspace is: 4
+    Then materialised and reasoned keyspaces are the same size
+
+
+  Scenario: all inferred instances of types that are subtypes of a given type can be retrieved
+    Given for each session, graql define
+      """
+      define
+
+      everyone-has-friends sub rule,
+      when {
+        $x isa person;
+      }, then {
+        (friend: $x) isa friendship;
+      };
+
+      there-is-no-unemployment sub rule,
+      when {
+        $x isa person;
+      }, then {
+        (employee: $x) isa employment;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+      $x isa person, has name "Annette";
+      $y isa person, has name "Richard";
+      $z isa person, has name "Rupert";
+      """
+    When materialised keyspace is completed
+    Given for graql query
+      """
+      match $x isa relation; get;
+      """
+    # 3 friendships, 3 employments
+    Given answer size in reasoned keyspace is: 6
+    Then for graql query
+      """
+      match
+        $x isa $type;
+        $type sub relation;
+      get;
+      """
+    Then all answers are correct in reasoned keyspace
+    # 3 friendships, 3 employments, 6 relations
+    Then answer size in reasoned keyspace is: 12
+    Then materialised and reasoned keyspaces are the same size
+
+
+  Scenario: all inferred instances of types that can play a given role can be retrieved
+    Given for each session, graql define
+      """
+      define
+
+      residency sub relation,
+        relates resident,
+        relates residence,
+        plays documented-thing;
+
+      legal-documentation sub relation,
+        relates documented-thing,
+        relates consenting-party;
+
+      person plays consenting-party;
+      employment plays documented-thing;
+
+      everyone-has-friends sub rule,
+      when {
+        $x isa person;
+      }, then {
+        (friend: $x) isa friendship;
+      };
+
+      there-is-no-unemployment sub rule,
+      when {
+        $x isa person;
+      }, then {
+        (employee: $x) isa employment;
+      };
+
+      there-are-no-homeless sub rule,
+      when {
+        $x isa person;
+      }, then {
+        (resident: $x) isa residency;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+      $x isa person, has name "Sharon";
+      $y isa person, has name "Tobias";
+      """
+    When materialised keyspace is completed
+    Given for graql query
+      """
+      match
+        $x isa relation;
+      get;
+      """
+    Given all answers are correct in reasoned keyspace
+    Given answer size in reasoned keyspace is: 6
+    Then for graql query
+      """
+      match
+        $x isa $type;
+        $type plays documented-thing;
+      get;
+      """
+    Then all answers are correct in reasoned keyspace
+    # friendship can't be a documented-thing
+    # note: enforcing 'plays documented-thing' also eliminates 'relation' and 'thing' as possible types
+    Then answer size in reasoned keyspace is: 4
+    Then materialised and reasoned keyspaces are the same size
+
+
+  # TODO: implement this once roles are scoped to relations
+  Scenario: all inferred instances of relation types that relate a given role can be retrieved
+
+
+  Scenario: all roleplayers and their types can be retrieved from a relation
+    Given for each session, graql define
+      """
+      define
+
+      military-person sub person;
+      colonel sub military-person,
+        plays employee;
+
+      armed-forces-employ-the-military sub rule,
+      when {
+        $x isa company, has name "Armed Forces";
+        $y isa military-person;
+      }, then {
+        (employee: $y, employer: $x) isa employment;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+      $x isa company, has name "Armed Forces";
+      $y isa colonel;
+      $z isa colonel;
+      $w isa colonel;
+      """
+    When materialised keyspace is completed
+    Given for graql query
+      """
+      match
+        (employee: $x, employer: $y) isa employment;
+      get;
+      """
+    Given all answers are correct in reasoned keyspace
+    Given answer size in reasoned keyspace is: 3
+    Then for graql query
+      """
+      match
+        (employee: $x, employer: $y) isa employment;
+        $x isa $type;
+      get;
+      """
+    Then all answers are correct in reasoned keyspace
+    # 3 colonels * 5 supertypes of colonel (colonel, military-person, person, entity, thing)
+    Then answer size in reasoned keyspace is: 15
+    Then for graql query
+      """
+      match
+        ($x, $y) isa employment;
+        $x isa $type;
+      get;
+      """
+    Then all answers are correct in reasoned keyspace
+    # (3 colonels * 5 supertypes of colonel * 1 company)
+    # + (1 company * 3 supertypes of company * 3 colonels)
+    Then answer size in reasoned keyspace is: 24
+    Then materialised and reasoned keyspaces are the same size
+
+
+  # TODO: re-enable all steps once schema queries are resolvable (#75)
+  Scenario: entity pairs can be matched based on the entity type they are related to
+    Given for each session, graql define
+      """
+      define
+
+      retail-company sub company;
+      finance-company sub company;
+
+      captain-obvious-1 sub rule,
+      when {
+         $x isa retail-company;
+      },
+      then {
+         $x isa company;
+      };
+
+      captain-obvious-2 sub rule,
+      when {
+         $x isa finance-company;
+      },
+      then {
+         $x isa company;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+
+      $s1 isa person;
+      $s2 isa person;
+      $s3 isa person;
+      $s4 isa person;
+
+      $c1 isa retail-company;
+      $c1prime isa retail-company;
+      $c2 isa finance-company;
+      $c2prime isa finance-company;
+
+      (employee: $s1, employer: $c1) isa employment;
+      (employee: $s2, employer: $c1prime) isa employment;
+      (employee: $s3, employer: $c2) isa employment;
+      (employee: $s4, employer: $c2prime) isa employment;
+      """
+    When materialised keyspace is completed
+    Then for graql query
+      """
+      match
+        $x isa person;
+        $y isa person;
+        (employee: $x, employer: $xx) isa employment;
+        $xx isa $type;
+        (employee: $y, employer: $yy) isa employment;
+        $yy isa $type;
+        $y != $x;
+      get $x, $y;
+      """
+#    Then all answers are correct in reasoned keyspace
+    # All companies match when $type is company (or entity)
+    # Query returns {ab,ac,ad,bc,bd,cd} and each of them with the variables flipped
+    Then answer size in reasoned keyspace is: 12
+    Then for graql query
+      """
+      match
+        $x isa person;
+        $y isa person;
+        (employee: $x, employer: $xx) isa employment;
+        $xx isa $type;
+        (employee: $y, employer: $yy) isa employment;
+        $yy isa $type;
+        $y != $x;
+        $meta type entity; $type != $meta;
+        $meta2 type thing; $type != $meta2;
+        $meta3 type company; $type != $meta3;
+      get $x, $y;
+      """
+    # $type is forced to be either finance-company or retail-company, restricting the answer space
+    # Query returns {ab,cd} and each of them with the variables flipped
+    # Note: the two Captain Obvious rules should not affect the answer, as the concepts retain their original types
+    Then answer size in reasoned keyspace is: 4
+    Then materialised and reasoned keyspaces are the same size
+
+
   # TODO: re-enable all steps when type generation is supported in resolution test framework (#75)
   Scenario: when two additional types are inferred in parallel, one can be excluded from the results
     Given for each session, graql define
@@ -263,86 +588,3 @@ Feature: Schema Query Resolution (Variable Types)
     # entity, person, poet
     Then answer size in reasoned keyspace is: 3
 #    Then materialised and reasoned keyspaces are the same size
-
-
-  # TODO: re-enable all steps once schema queries are resolvable (#75)
-  Scenario: entity pairs can be matched based on the entity type they are related to
-    Given for each session, graql define
-      """
-      define
-
-      retail-company sub company;
-      finance-company sub company;
-
-      captain-obvious-1 sub rule,
-      when {
-         $x isa retail-company;
-      },
-      then {
-         $x isa company;
-      };
-
-      captain-obvious-2 sub rule,
-      when {
-         $x isa finance-company;
-      },
-      then {
-         $x isa company;
-      };
-      """
-    Given for each session, graql insert
-      """
-      insert
-
-      $s1 isa person;
-      $s2 isa person;
-      $s3 isa person;
-      $s4 isa person;
-
-      $c1 isa retail-company;
-      $c1prime isa retail-company;
-      $c2 isa finance-company;
-      $c2prime isa finance-company;
-
-      (employee: $s1, employer: $c1) isa employment;
-      (employee: $s2, employer: $c1prime) isa employment;
-      (employee: $s3, employer: $c2) isa employment;
-      (employee: $s4, employer: $c2prime) isa employment;
-      """
-    When materialised keyspace is completed
-    Then for graql query
-      """
-      match
-        $x isa person;
-        $y isa person;
-        (employee: $x, employer: $xx) isa employment;
-        $xx isa $type;
-        (employee: $y, employer: $yy) isa employment;
-        $yy isa $type;
-        $y != $x;
-      get $x, $y;
-      """
-#    Then all answers are correct in reasoned keyspace
-    # All companies match when $type is company (or entity)
-    # Query returns {ab,ac,ad,bc,bd,cd} and each of them with the variables flipped
-    Then answer size in reasoned keyspace is: 12
-    Then for graql query
-      """
-      match
-        $x isa person;
-        $y isa person;
-        (employee: $x, employer: $xx) isa employment;
-        $xx isa $type;
-        (employee: $y, employer: $yy) isa employment;
-        $yy isa $type;
-        $y != $x;
-        $meta type entity; $type != $meta;
-        $meta2 type thing; $type != $meta2;
-        $meta3 type company; $type != $meta3;
-      get $x, $y;
-      """
-    # $type is forced to be either finance-company or retail-company, restricting the answer space
-    # Query returns {ab,cd} and each of them with the variables flipped
-    # Note: the two Captain Obvious rules should not affect the answer, as the concepts retain their original types
-    Then answer size in reasoned keyspace is: 4
-    Then materialised and reasoned keyspaces are the same size
