@@ -166,18 +166,28 @@ Feature: Graql Match Clause
       | EDM | key   | ref:4                        |
       | FEL | key   | ref:5                        |
       | GAR | key   | ref:6                        |
+      | CON | label | construction-worker          |
       | BRI | label | bricklayer                   |
       | CRA | label | crane-driver                 |
+      | TEL | label | telecoms-worker              |
       | MNR | label | mobile-network-researcher    |
       | TBS | label | telecoms-business-strategist |
       | WOR | label | worker                       |
-    # child and retired-person should not be retrieved, as they aren't subtypes of worker
+    # Alfred and Barbara are not retrieved, as they aren't subtypes of worker
     Then uniquely identify answer concepts
       | x   | type |
       | CHA | BRI  |
+      | CHA | CON  |
+      | CHA | WOR  |
       | DEB | CRA  |
+      | DEB | CON  |
+      | DEB | WOR  |
       | EDM | MNR  |
+      | EDM | TEL  |
+      | EDM | WOR  |
       | FEL | TBS  |
+      | FEL | TEL  |
+      | FEL | WOR  |
       | GAR | WOR  |
 
 
@@ -976,7 +986,8 @@ Feature: Graql Match Clause
       """
       define
       residency sub relation,
-        relates resident;
+        relates resident,
+        key ref;
       person plays resident;
       """
     Given the integrity is validated
