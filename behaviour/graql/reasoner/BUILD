@@ -23,7 +23,7 @@ exports_files([
     "negation.feature",
     "relation-inference.feature",
     "roleplayer-attachment.feature",
-    "test-framework.feature",
+    "resolution-test-framework.feature",
     "type-generation.feature",
     "type-hierarchy.feature",
     "value-predicate.feature",

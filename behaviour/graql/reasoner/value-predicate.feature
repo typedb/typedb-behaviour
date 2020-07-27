@@ -890,7 +890,7 @@ Feature: Value Predicate Resolution
     Then materialised and reasoned keyspaces are the same size
 
 
-  # TODO: re-enable all steps when resolvable (currently it takes too long to resolve)
+  # TODO: re-enable all steps when resolvable (currently it takes too long to resolve) (#75)
   Scenario: attribute comparison can be used to classify concept pairs as predecessors and successors of each other
     Given for each session, graql define
       """
