@@ -23,6 +23,7 @@ exports_files([
     "negation.feature",
     "relation-inference.feature",
     "roleplayer-attachment.feature",
+    "schema-queries.feature",
     "test-framework.feature",
     "type-generation.feature",
     "type-hierarchy.feature",
