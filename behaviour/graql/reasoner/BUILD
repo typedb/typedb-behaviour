@@ -21,6 +21,7 @@ exports_files([
     "attribute-attachment.feature",
     "concept-inequality.feature",
     "negation.feature",
+    "recursion.feature",
     "relation-inference.feature",
     "roleplayer-attachment.feature",
     "resolution-test-framework.feature",

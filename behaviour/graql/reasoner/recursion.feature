@@ -409,3 +409,259 @@ Feature: Recursion Resolution
 #    Then all answers are correct in reasoned keyspace
     Then answer size in reasoned keyspace is: 64
 #    Then materialised and reasoned keyspaces are the same size
+
+
+  Scenario: non-regular transitivity requiring iterative generation of tuples
+
+    from Vieille - Recursive Axioms in Deductive Databases p. 192
+
+    Given for each session, graql define
+      """
+      define
+
+      entity2 sub entity,
+        has index;
+
+      R sub relation, relates R-role-A, relates R-role-B;
+      entity2 plays R-role-A, plays R-role-B;
+
+      E sub relation, relates E-role-A, relates E-role-B;
+      entity2 plays E-role-A, plays E-role-B;
+
+      F sub relation, relates F-role-A, relates F-role-B;
+      entity2 plays F-role-A, plays F-role-B;
+
+      G sub relation, relates G-role-A, relates G-role-B;
+      entity2 plays G-role-A, plays G-role-B;
+
+      H sub relation, relates H-role-A, relates H-role-B;
+      entity2 plays H-role-A, plays H-role-B;
+
+      index sub attribute, value string;
+
+      rule-1 sub rule,
+      when {
+        (E-role-A: $x, E-role-B: $y) isa E;
+      }, then {
+        (R-role-A: $x, R-role-B: $y) isa R;
+      };
+
+      rule-2 sub rule,
+      when {
+        (F-role-A: $x, F-role-B: $t) isa F;
+        (R-role-A: $t, R-role-B: $u) isa R;
+        (G-role-A: $u, G-role-B: $v) isa G;
+        (R-role-A: $v, R-role-B: $w) isa R;
+        (H-role-A: $w, H-role-B: $y) isa H;
+      }, then {
+        (R-role-A: $x, R-role-B: $y) isa R;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+
+      $i isa entity2, has index "i";
+      $j isa entity2, has index "j";
+      $k isa entity2, has index "k";
+      $l isa entity2, has index "l";
+      $m isa entity2, has index "m";
+      $n isa entity2, has index "n";
+      $o isa entity2, has index "o";
+      $p isa entity2, has index "p";
+      $q isa entity2, has index "q";
+      $r isa entity2, has index "r";
+      $s isa entity2, has index "s";
+      $t isa entity2, has index "t";
+      $u isa entity2, has index "u";
+      $v isa entity2, has index "v";
+
+      (E-role-A: $i, E-role-B: $j) isa E;
+      (E-role-A: $l, E-role-B: $m) isa E;
+      (E-role-A: $n, E-role-B: $o) isa E;
+      (E-role-A: $q, E-role-B: $r) isa E;
+      (E-role-A: $t, E-role-B: $u) isa E;
+
+      (F-role-A: $i, F-role-B: $i) isa F;
+      (F-role-A: $i, F-role-B: $k) isa F;
+      (F-role-A: $k, F-role-B: $l) isa F;
+
+      (G-role-A: $m, G-role-B: $n) isa G;
+      (G-role-A: $p, G-role-B: $q) isa G;
+      (G-role-A: $s, G-role-B: $t) isa G;
+
+      (H-role-A: $o, H-role-B: $p) isa H;
+      (H-role-A: $r, H-role-B: $s) isa H;
+      (H-role-A: $u, H-role-B: $v) isa H;
+      """
+    When materialised keyspace is completed
+    Then for graql query
+      """
+      match
+        ($x, $y) isa R;
+        $x has index 'i';
+      get $y;
+      """
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 3
+    Then answer set is equivalent for graql query
+      """
+      match
+        $y has index $ind;
+        {$ind == 'j';} or {$ind == 's';} or {$ind == 'v';};
+      get $y;
+      """
+    Then materialised and reasoned keyspaces are the same size
+
+
+  Scenario: ancestor test
+
+    from Bancilhon - An Amateur's Introduction to Recursive Query Processing Strategies p. 25
+
+    Given for each session, graql define
+      """
+      define
+
+      person sub entity,
+        has name;
+
+      Parent sub relation, relates parent, relates child;
+      person plays parent, plays child;
+
+      Ancestor sub relation, relates ancestor, relates descendant;
+      person plays ancestor, plays descendant;
+
+      name sub attribute, value string;
+
+      rule-1 sub rule,
+      when {
+        (parent: $x, child: $z) isa Parent;
+        (ancestor: $z, descendant: $y) isa Ancestor;
+      }, then {
+        (ancestor: $x, descendant: $y) isa Ancestor;
+      };
+
+      rule-2 sub rule,
+      when {
+        (parent: $x, child: $y) isa Parent;
+      }, then {
+        (ancestor: $x, descendant: $y) isa Ancestor;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+
+      $a isa person, has name 'a';
+      $aa isa person, has name 'aa';
+      $aaa isa person, has name 'aaa';
+      $aab isa person, has name 'aab';
+      $aaaa isa person, has name 'aaaa';
+      $ab isa person, has name 'ab';
+      $c isa person, has name 'c';
+      $ca isa person, has name 'ca';
+
+      (parent: $a, child: $aa) isa Parent;
+      (parent: $a, child: $ab) isa Parent;
+      (parent: $aa, child: $aaa) isa Parent;
+      (parent: $aa, child: $aab) isa Parent;
+      (parent: $aaa, child: $aaaa) isa Parent;
+      (parent: $c, child: $ca) isa Parent;
+      """
+    When materialised keyspace is completed
+    Then for graql query
+      """
+      match
+        (ancestor: $X, descendant: $Y) isa Ancestor;
+        $X has name 'aa';
+        $Y has name $name;
+      get $Y, $name;
+      """
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 3
+    Then answer set is equivalent for graql query
+      """
+      match
+        $Y isa person, has name $name;
+        {$name == 'aaa';} or {$name == 'aab';} or {$name == 'aaaa';};
+      get $Y, $name;
+      """
+    Then for graql query
+      """
+      match
+        ($X, $Y) isa Ancestor;
+        $X has name 'aa';
+      get $Y;
+      """
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 4
+    Then answer set is equivalent for graql query
+      """
+      match
+        $Y isa person, has name $name;
+        {$name == 'a';} or {$name == 'aaa';} or {$name == 'aab';} or {$name == 'aaaa';};
+      get $Y;
+      """
+    Then for graql query
+      """
+      match
+        (ancestor: $X, descendant: $Y) isa Ancestor;
+      get;
+      """
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 10
+    Then answer set is equivalent for graql query
+      """
+      match
+        $Y isa person, has name $nameY;
+        $X isa person, has name $nameX;
+        {$nameX == 'a';$nameY == 'aa';} or {$nameX == 'a';$nameY == 'ab';} or
+        {$nameX == 'a';$nameY == 'aaa';} or {$nameX == 'a';$nameY == 'aab';} or
+        {$nameX == 'a';$nameY == 'aaaa';} or {$nameX == 'aa';$nameY == 'aaa';} or
+        {$nameX == 'aa';$nameY == 'aab';} or {$nameX == 'aa';$nameY == 'aaaa';} or
+        {$nameX == 'aaa';$nameY == 'aaaa';} or {$nameX == 'c';$nameY == 'ca';};
+      get $X, $Y;
+      """
+    Then for graql query
+      """
+      match
+        ($X, $Y) isa Ancestor;
+      get;
+      """
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 20
+    Then answer set is equivalent for graql query
+      """
+      match
+        $Y isa person, has name $nameY;
+        $X isa person, has name $nameX;
+        {$nameX == 'a';$nameY == 'aa';} or
+        {$nameX == 'a';$nameY == 'ab';} or {$nameX == 'a';$nameY == 'aaa';} or
+        {$nameX == 'a';$nameY == 'aab';} or {$nameX == 'a';$nameY == 'aaaa';} or
+        {$nameY == 'a';$nameX == 'aa';} or
+        {$nameY == 'a';$nameX == 'ab';} or {$nameY == 'a';$nameX == 'aaa';} or
+        {$nameY == 'a';$nameX == 'aab';} or {$nameY == 'a';$nameX == 'aaaa';} or
+
+        {$nameX == 'aa';$nameY == 'aaa';} or {$nameX == 'aa';$nameY == 'aab';} or
+        {$nameX == 'aa';$nameY == 'aaaa';} or
+        {$nameY == 'aa';$nameX == 'aaa';} or {$nameY == 'aa';$nameX == 'aab';} or
+        {$nameY == 'aa';$nameX == 'aaaa';} or
+
+        {$nameX == 'aaa';$nameY == 'aaaa';} or
+        {$nameY == 'aaa';$nameX == 'aaaa';} or
+
+        {$nameX == 'c';$nameY == 'ca';} or
+        {$nameY == 'c';$nameX == 'ca';};
+      get $X, $Y;
+      """
+    Then materialised and reasoned keyspaces are the same size
+
+
+  Scenario: ancestor-friend test
+
+    from Vieille - Recursive Axioms in Deductive Databases (QSQ approach) p. 186
+
+    Given for each session, graql define
+      """
+
+      """
