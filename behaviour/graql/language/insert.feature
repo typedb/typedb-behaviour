@@ -1427,6 +1427,43 @@ Feature: Graql Insert Query
       | MIC | TAR |
 
 
+  Scenario: match-insert can take an attribute's value and copy it to an attribute of a different type
+    Given graql define
+      """
+      define
+      height sub attribute, value long;
+      person has height;
+      """
+    Given graql insert
+      """
+      insert
+      $x isa person, has name "Susie", has age 16, has ref 0;
+      $y isa person, has name "Donald", has age 25, has ref 1;
+      $z isa person, has name "Ralph", has age 18, has ref 2;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      match
+        $x isa person, has age 16;
+      insert
+        $x has height 16;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x has height $z;
+      get $x;
+      """
+    And concept identifiers are
+      |     | check | value |
+      | SUS | key   | ref:0 |
+    Then uniquely identify answer concepts
+      | x   |
+      | SUS |
+
+
   Scenario: if match-insert matches nothing, then nothing is inserted
     Given graql define
       """

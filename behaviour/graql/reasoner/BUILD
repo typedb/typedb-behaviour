@@ -18,6 +18,14 @@
 package(default_visibility = ["//visibility:public"])
 
 exports_files([
-    "resolution.feature",
-    "rule-validation.feature",
+    "attribute-attachment.feature",
+    "concept-inequality.feature",
+    "negation.feature",
+    "relation-inference.feature",
+    "roleplayer-attachment.feature",
+    "resolution-test-framework.feature",
+    "type-generation.feature",
+    "type-hierarchy.feature",
+    "value-predicate.feature",
+    "variable-roles.feature",
 ])

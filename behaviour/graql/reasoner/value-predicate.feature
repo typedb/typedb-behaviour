@@ -46,7 +46,8 @@ Feature: Value Predicate Resolution
 
       soft-drink sub entity,
         has name,
-        has retailer;
+        has retailer,
+        has price;
 
       team sub relation,
         relates leader,
@@ -58,6 +59,7 @@ Feature: Value Predicate Resolution
       age sub attribute, value long;
       name sub attribute, value string;
       is-old sub attribute, value boolean;
+      price sub attribute, value double;
       sub-string-attribute sub string-attribute;
       unrelated-attribute sub attribute, value string;
       """
@@ -729,6 +731,8 @@ Feature: Value Predicate Resolution
 #    Then materialised and reasoned keyspaces are the same size
 
 
+  # TODO: re-enable all steps once implicit attribute variables are resolvable
+  # TODO: migrate to concept-inequality.feature
   Scenario: when restricting the values of a pair of inferred attributes with `!=`, the answers have distinct types
     Given for each session, graql define
       """
@@ -773,114 +777,177 @@ Feature: Value Predicate Resolution
     Then materialised and reasoned keyspaces are the same size
 
 
-  @ignore
-  # TODO: re-enable once grakn#5821 is fixed (in some answers, $typeof_ax is 'base-attribute' which is incorrect)
-  Scenario: when restricting concept types of a pair of inferred attributes with `!=`, the answers have distinct types
+  # TODO: re-enable all steps when fixed (#75)
+  Scenario: rules can divide entities into groups, linking each entity group to a specific concept by attribute value
     Given for each session, graql define
       """
       define
-      base-attribute sub attribute, value string, abstract;
-      string-attribute sub base-attribute;
-      name sub base-attribute;
-      retailer sub base-attribute;
 
-      tesco-sells-all-soft-drinks sub rule,
+      soft-drink plays priced-item;
+
+      price-range sub attribute, value string,
+        plays price-category;
+
+      price-classification sub relation,
+        relates priced-item,
+        relates price-category;
+
+      expensive-drinks sub rule,
       when {
-        $x isa soft-drink;
-      },
-      then {
-        $x has retailer 'Tesco';
+        $x has price >= 3.50;
+        $y "expensive" isa price-range;
+      }, then {
+        (priced-item: $x, price-category: $y) isa price-classification;
+      };
+
+      not-expensive-drinks sub rule,
+      when {
+        $x has price < 3.50;
+        $y "not expensive" isa price-range;
+      }, then {
+        (priced-item: $x, price-category: $y) isa price-classification;
+      };
+
+      low-price-drinks sub rule,
+      when {
+        $x has price < 1.75;
+        $y "low price" isa price-range;
+      }, then {
+        (priced-item: $x, price-category: $y) isa price-classification;
+      };
+
+      cheap-drinks sub rule,
+      when {
+        (priced-item: $x, price-category: $y) isa price-classification;
+        $y "not expensive" isa price-range;
+        (priced-item: $x, price-category: $y2) isa price-classification;
+        $y2 "low price" isa price-range;
+        $y3 "cheap" isa price-range;
+      }, then {
+        (priced-item: $x, price-category: $y3) isa price-classification;
       };
       """
     Given for each session, graql insert
       """
       insert
-      $x isa person, has string-attribute "Tesco";
-      $y isa soft-drink, has name "Tesco";
+
+      $x isa soft-drink, has name "San Pellegrino Limonata", has price 3.99;
+      $y isa soft-drink, has name "Sprite", has price 2.00;
+      $z isa soft-drink, has name "Tesco Value Lemonade", has price 0.39;
+
+      $p1 "expensive" isa price-range;
+      $p2 "not expensive" isa price-range;
+      $p3 "low price" isa price-range;
+      $p4 "cheap" isa price-range;
       """
     When materialised keyspace is completed
     Then for graql query
       """
       match
-        $x has base-attribute $ax;
-        $y has base-attribute $ay;
-        $ax isa! $typeof_ax;
-        $ay isa! $typeof_ay;
-        $typeof_ax != $typeof_ay;
+        $x "not expensive" isa price-range;
+        ($x, priced-item: $y) isa price-classification;
       get;
       """
     Then all answers are correct in reasoned keyspace
-    # x   | ax  | y   | ay  |
-    # PER | STA | SOF | NAM |
-    # PER | STA | SOF | RET |
-    # SOF | NAM | PER | STA |
-    # SOF | RET | PER | STA |
-    # SOF | NAM | SOF | STA |
-    # SOF | STA | SOF | NAM |
-    Then answer size in reasoned keyspace is: 6
+    Then answer size in reasoned keyspace is: 2
+    Then for graql query
+      """
+      match
+        $x "low price" isa price-range;
+        ($x, priced-item: $y) isa price-classification;
+      get;
+      """
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 1
+    Then for graql query
+      """
+      match
+        $x "cheap" isa price-range;
+        ($x, priced-item: $y) isa price-classification;
+      get;
+      """
+#    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 1
+    Then for graql query
+      """
+      match
+        $x "expensive" isa price-range;
+        ($x, priced-item: $y) isa price-classification;
+      get;
+      """
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 1
+    Then for graql query
+      """
+      match
+        $x isa price-range;
+        ($x, priced-item: $y) isa price-classification;
+      get;
+      """
+#    Then all answers are correct in reasoned keyspace
+    # sum of all previous answers
+    Then answer size in reasoned keyspace is: 5
     Then materialised and reasoned keyspaces are the same size
 
-  @ignore
-  # TODO: re-enable once grakn#5821 is fixed
-  Scenario: inferred attribute matches can be simultaneously restricted by both concept type and attribute value
+
+  # TODO: re-enable all steps when resolvable (currently it takes too long to resolve) (#75)
+  Scenario: attribute comparison can be used to classify concept pairs as predecessors and successors of each other
     Given for each session, graql define
       """
       define
-      base-attribute sub attribute, value string, abstract;
-      string-attribute sub base-attribute;
-      retailer sub base-attribute;
 
-      transfer-string-attribute-to-other-people sub rule,
+      post sub entity,
+          plays original,
+          plays reply,
+          plays predecessor,
+          plays successor,
+          has creation-date;
+
+      reply-of sub relation,
+          relates original,
+          relates reply;
+
+      message-succession sub relation,
+          relates predecessor,
+          relates successor;
+
+      creation-date sub attribute, value datetime;
+
+      succession-rule sub rule,
       when {
-        $x isa person, has string-attribute $r1;
-        $y isa person;
+          (original:$p, reply:$s) isa reply-of;
+          $s has creation-date $d1;
+          $d1 < $d2;
+          (original:$p, reply:$r) isa reply-of;
+          $r has creation-date $d2;
       },
       then {
-        $y has string-attribute $r1;
-      };
-
-      tesco-sells-all-soft-drinks sub rule,
-      when {
-        $x isa soft-drink;
-      },
-      then {
-        $x has retailer 'Tesco';
-      };
-
-      if-ocado-exists-it-sells-all-soft-drinks sub rule,
-      when {
-        $x isa retailer;
-        $x == 'Ocado';
-        $y isa soft-drink;
-      },
-      then {
-        $y has retailer $x;
+          (predecessor:$s, successor:$r) isa message-succession;
       };
       """
     Given for each session, graql insert
       """
       insert
-      $w isa person, has string-attribute "Ocado";
-      $x isa person, has string-attribute "Tesco";
-      $y isa soft-drink, has name "Sprite";
-      $z "Ocado" isa retailer;
+
+      $x isa post, has creation-date 2020-07-01;
+      $x1 isa post, has creation-date 2020-07-02;
+      $x2 isa post, has creation-date 2020-07-03;
+      $x3 isa post, has creation-date 2020-07-04;
+      $x4 isa post, has creation-date 2020-07-05;
+      $x5 isa post, has creation-date 2020-07-06;
+
+      (original:$x, reply:$x1) isa reply-of;
+      (original:$x, reply:$x2) isa reply-of;
+      (original:$x, reply:$x3) isa reply-of;
+      (original:$x, reply:$x4) isa reply-of;
+      (original:$x, reply:$x5) isa reply-of;
       """
-    When materialised keyspace is completed
+#    When materialised keyspace is completed
     Then for graql query
       """
-      match
-        $x has base-attribute $value;
-        $y has base-attribute $unwantedValue;
-        $value !== $unwantedValue;
-        $unwantedValue "Ocado";
-        $value isa! $type;
-        $unwantedValue isa! $type;
-        $type != $unwantedType;
-        $unwantedType type string-attribute;
-      get $x, $value, $type;
+      match (predecessor:$x1, successor:$x2) isa message-succession; get;
       """
-    Then all answers are correct in reasoned keyspace
-    # x      | value | type     |
-    # Sprite | Tesco | retailer |
-    Then answer size in reasoned keyspace is: 1
-    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned keyspace
+    # the (n-1)th triangle number, where n is the number of replies to the first post
+    Then answer size in reasoned keyspace is: 10
+#    Then materialised and reasoned keyspaces are the same size

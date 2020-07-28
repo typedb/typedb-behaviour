@@ -1253,6 +1253,8 @@ Feature: Graql Define Query
   # RULES #
   #########
 
+  # Note: These tests verify only the ability to create rules, and are not concerned with their application.
+
   Scenario: a rule can infer both an attribute and its ownership
     Given graql define
       """
@@ -1281,7 +1283,7 @@ Feature: Graql Define Query
       | RUL |
 
 
-  Scenario: a rule can infer a relation
+  Scenario: when defining a rule using `sub rule`, the rule is successfully created
     Given graql define
       """
       define
