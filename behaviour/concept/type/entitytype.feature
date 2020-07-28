@@ -780,6 +780,8 @@ Feature: Concept Entity Type
     When entity(person) set plays role: marriage:husband
     Then entity(person) get playing roles contain:
       | marriage:husband |
+    Then relation(marriage) get role(husband) get players contain:
+      | person |
     When transaction commits
     When session opens transaction of type: write
     When relation(marriage) set relates role: wife
@@ -787,11 +789,19 @@ Feature: Concept Entity Type
     Then entity(person) get playing roles contain:
       | marriage:husband |
       | marriage:wife    |
+    Then relation(marriage) get role(husband) get players contain:
+      | person |
+    Then relation(marriage) get role(wife) get players contain:
+      | person |
     When transaction commits
     When session opens transaction of type: read
     Then entity(person) get playing roles contain:
       | marriage:husband |
       | marriage:wife    |
+    Then relation(marriage) get role(husband) get players contain:
+      | person |
+    Then relation(marriage) get role(wife) get players contain:
+      | person |
 
   Scenario: Entity types can remove playing role types
     When put relation type: marriage
@@ -803,17 +813,27 @@ Feature: Concept Entity Type
     Then entity(person) remove plays role: marriage:husband
     Then entity(person) get playing roles do not contain:
       | marriage:husband |
+    Then relation(marriage) get role(husband) get players do not contain:
+      | person |
     When transaction commits
     When session opens transaction of type: write
     Then entity(person) remove plays role: marriage:wife
     Then entity(person) get playing roles do not contain:
       | marriage:husband |
       | marriage:wife    |
+    Then relation(marriage) get role(husband) get players do not contain:
+      | person |
+    Then relation(marriage) get role(wife) get players do not contain:
+      | person |
     When transaction commits
     When session opens transaction of type: read
     Then entity(person) get playing roles do not contain:
       | marriage:husband |
       | marriage:wife    |
+    Then relation(marriage) get role(husband) get players do not contain:
+      | person |
+    Then relation(marriage) get role(wife) get players do not contain:
+      | person |
 
   Scenario: Entity types can inherit playing role types
     When put relation type: parentship

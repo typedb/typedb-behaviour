@@ -24,7 +24,7 @@ exports_files([
     "relation-inference.feature",
     "roleplayer-attachment.feature",
     "schema-queries.feature",
-    "test-framework.feature",
+    "resolution-test-framework.feature",
     "type-generation.feature",
     "type-hierarchy.feature",
     "value-predicate.feature",

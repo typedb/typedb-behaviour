@@ -59,9 +59,9 @@ Feature: Relation Inference Resolution
       """
 
 
-  ##############################
-  # CONDITIONS AND CONCLUSIONS #
-  ##############################
+  #######################
+  # BASIC FUNCTIONALITY #
+  #######################
 
   Scenario: a relation can be inferred on all concepts of a given type
     Given for each session, graql define
@@ -217,6 +217,7 @@ Feature: Relation Inference Resolution
   # REFLEXIVITY #
   ###############
 
+  # nth triangle number = sum of all integers from 1 to n, inclusive
   Scenario: when inferring relations on all pairs from n concepts, the number of relations is the nth triangle number
     Given for each session, graql define
       """
@@ -244,6 +245,10 @@ Feature: Relation Inference Resolution
       match $r isa friendship; get;
       """
     Then all answers are correct in reasoned keyspace
+    # When there is 1 concept we have {aa}.
+    # Adding a 2nd concept gives us 2 new relations - where each relation contains b, and one other concept (a or b).
+    # Adding a 3rd concept gives us 3 new relations - where each relation contains c, and one other concept (a, b or c).
+    # Generally, the total number of relations is the sum of all integers from 1 to n inclusive.
     Then answer size in reasoned keyspace is: 15
     Then materialised and reasoned keyspaces are the same size
 
@@ -275,6 +280,7 @@ Feature: Relation Inference Resolution
       match ($x, $y) isa friendship; get;
       """
     Then all answers are correct in reasoned keyspace
+    # Here there are n choices for x, and n choices for y, so the total answer size is n^2
     Then answer size in reasoned keyspace is: 25
     Then materialised and reasoned keyspaces are the same size
 
