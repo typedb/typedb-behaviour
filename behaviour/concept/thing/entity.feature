@@ -75,14 +75,14 @@ Feature: Concept Entity
     When $a = entity(person) create new instance
     When $alice = attribute(username) as(string) put: alice
     When entity $a set has: $alice
-    Then entity $a get keys(username) contain: $alice
+    Then entity $a get attributes(username) as(string) contain: $alice
     Then entity $a get keys contain: $alice
     Then attribute $alice get owners contain: $a
     When transaction commits
     When session opens transaction of type: read
     When $a = entity(person) get instance with key(username): alice
     When $alice = attribute(username) as(string) get: alice
-    Then entity $a get keys(username) contain: $alice
+    Then entity $a get attributes(username) as(string) contain: $alice
     Then entity $a get keys contain: $alice
     Then attribute $alice get owners contain: $a
 
@@ -91,7 +91,7 @@ Feature: Concept Entity
     When $alice = attribute(username) as(string) put: alice
     When entity $a set has: $alice
     When entity $a remove has: $alice
-    Then entity $a get keys(username) do not contain: $alice
+    Then entity $a get attributes(username) as(string) do not contain: $alice
     Then entity $a get keys do not contain: $alice
     Then attribute $alice get owners do not contain: $a
     When entity $a set has: $alice
@@ -99,9 +99,9 @@ Feature: Concept Entity
     When session opens transaction of type: write
     When $a = entity(person) get instance with key(username): alice
     When $alice = attribute(username) as(string) get: alice
-    Then entity $a get keys(username) contain: $alice
+    Then entity $a get attributes(username) as(string) contain: $alice
     When entity $a remove has: $alice
-    Then entity $a get keys(username) do not contain: $alice
+    Then entity $a get attributes(username) as(string) do not contain: $alice
     Then entity $a get keys do not contain: $alice
     Then attribute $alice get owners do not contain: $a
     Then transaction commits; throws exception
@@ -152,14 +152,14 @@ Feature: Concept Entity
     When $a = entity(person) create new instance with key(username): alice
     When $email = attribute(email) as(string) put: alice@email.com
     When entity $a set has: $email
-    Then entity $a get attributes(email) contain: $email
+    Then entity $a get attributes(email) as(string) contain: $email
     Then entity $a get attributes contain: $email
     Then attribute $email get owners contain: $a
     When transaction commits
     When session opens transaction of type: read
     When $a = entity(person) get instance with key(username): alice
     When $email = attribute(email) as(string) get: alice@email.com
-    Then entity $a get attributes(email) contain: $email
+    Then entity $a get attributes(email) as(string) contain: $email
     Then entity $a get attributes contain: $email
     Then attribute $email get owners contain: $a
 
@@ -168,14 +168,14 @@ Feature: Concept Entity
     When $email = attribute(email) as(string) put: alice@email.com
     When entity $a set has: $email
     When entity $a remove has: $email
-    Then entity $a get attributes(email) do not contain: $email
+    Then entity $a get attributes(email) as(string) do not contain: $email
     Then entity $a get attributes do not contain: $email
     Then attribute $email get owners do not contain: $a
     When transaction commits
     When session opens transaction of type: write
     When $a = entity(person) get instance with key(username): alice
     When $email = attribute(email) as(string) get: alice@email.com
-    Then entity $a get attributes(email) do not contain: $email
+    Then entity $a get attributes(email) as(string) do not contain: $email
     Then entity $a get attributes do not contain: $email
     Then attribute $email get owners do not contain: $a
     When entity $a set has: $email
@@ -183,18 +183,18 @@ Feature: Concept Entity
     When session opens transaction of type: write
     When $a = entity(person) get instance with key(username): alice
     When $email = attribute(email) as(string) get: alice@email.com
-    Then entity $a get attributes(email) contain: $email
+    Then entity $a get attributes(email) as(string) contain: $email
     Then entity $a get attributes contain: $email
     Then attribute $email get owners contain: $a
     When entity $a remove has: $email
-    Then entity $a get attributes(email) do not contain: $email
+    Then entity $a get attributes(email) as(string) do not contain: $email
     Then entity $a get attributes do not contain: $email
     Then attribute $email get owners do not contain: $a
     When transaction commits
     When session opens transaction of type: write
     When $a = entity(person) get instance with key(username): alice
     When $email = attribute(email) as(string) get: alice@email.com
-    Then entity $a get attributes(email) do not contain: $email
+    Then entity $a get attributes(email) as(string) do not contain: $email
     Then attribute $email get owners do not contain: $a
     When entity $a set has: $email
     When transaction commits
@@ -203,14 +203,14 @@ Feature: Concept Entity
     When $email = attribute(email) as(string) get: alice@email.com
     When entity $a set has: $email
     When entity $a remove has: $email
-    Then entity $a get attributes(email) do not contain: $email
+    Then entity $a get attributes(email) as(string) do not contain: $email
     Then entity $a get attributes do not contain: $email
     Then attribute $email get owners do not contain: $a
     When transaction commits
     When session opens transaction of type: write
     When $a = entity(person) get instance with key(username): alice
     When $email = attribute(email) as(string) get: alice@email.com
-    Then entity $a get attributes(email) do not contain: $email
+    Then entity $a get attributes(email) as(string) do not contain: $email
     Then attribute $email get owners do not contain: $a
 
   Scenario: Entity can play a role in a relation
