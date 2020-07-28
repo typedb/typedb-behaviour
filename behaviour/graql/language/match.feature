@@ -49,9 +49,9 @@ Feature: Graql Match Clause
     Given the integrity is validated
 
 
-  ###################
-  # SCHEMA CONCEPTS #
-  ###################
+  ##################
+  # SCHEMA QUERIES #
+  ##################
 
   Scenario: `type` matches only the specified type, and does not match subtypes
     Given graql define
