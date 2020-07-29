@@ -1033,29 +1033,28 @@ Feature: Recursion Resolution
       define
 
       vertex sub entity,
-        has index;
+        key index;
 
       link sub relation, relates coordinate;
       vertex plays coordinate;
 
-      reachable sub relation, relates coordinate;
-      vertex plays coordinate;
+      reachable sub link, relates coordinate;
 
       index sub attribute, value string;
 
-      rule-1 sub rule,
+      a-linked-point-is-reachable sub rule,
       when {
         ($x, $y) isa link;
       }, then {
-        ($x, $y) isa reachable;
+        (coordinate: $x, coordinate: $y) isa reachable;
       };
 
-      rule-2 sub rule,
+      a-point-reachable-from-a-linked-point-is-reachable sub rule,
       when {
         ($x, $z) isa link;
         ($z, $y) isa reachable;
       }, then {
-        ($x, $y) isa reachable;
+        (coordinate: $x, coordinate: $y) isa reachable;
       };
       """
     Given for each session, graql insert
