@@ -24,6 +24,7 @@ exports_files([
     "recursion.feature",
     "relation-inference.feature",
     "roleplayer-attachment.feature",
+    "schema-queries.feature",
     "resolution-test-framework.feature",
     "type-generation.feature",
     "type-hierarchy.feature",
