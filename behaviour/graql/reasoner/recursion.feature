@@ -663,5 +663,512 @@ Feature: Recursion Resolution
 
     Given for each session, graql define
       """
+      define
 
+      person sub entity,
+          has name;
+
+      Friend sub relation, relates friend;
+      person plays friend, plays friend;
+
+      Parent sub relation, relates parent, relates child;
+      person plays parent, plays child;
+
+      Ancestor-friend sub relation, relates ancestor, relates ancestor-friend;
+      person plays ancestor, plays ancestor-friend;
+
+      name sub attribute, value string;
+
+      rule-1 sub rule,
+      when {
+        (friend: $x, friend: $y) isa Friend;
+      }, then {
+        (ancestor: $x, ancestor-friend: $y) isa Ancestor-friend;
+      };
+
+      rule-2 sub rule,
+      when {
+        (parent: $x, child: $z) isa Parent;
+        (ancestor: $z, ancestor-friend: $y) isa Ancestor-friend;
+      }, then {
+        (ancestor: $x, ancestor-friend: $y) isa Ancestor-friend;
+      };
       """
+    Given for each session, graql insert
+      """
+      insert
+
+      $a isa person, has name "a";
+      $b isa person, has name "b";
+      $c isa person, has name "c";
+      $d isa person, has name "d";
+      $g isa person, has name "g";
+
+      (parent: $a, child: $b) isa Parent;
+      (parent: $b, child: $c) isa Parent;
+      (friend: $a, friend: $g) isa Friend;
+      (friend: $c, friend: $d) isa Friend;
+      """
+    When materialised keyspace is completed
+    Then for graql query
+      """
+      match
+        (ancestor: $X, ancestor-friend: $Y) isa Ancestor-friend;
+        $X has name 'a';
+        $Y has name $name;
+      get $Y;
+      """
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 2
+    Then answer set is equivalent for graql query
+      """
+      match
+        $Y has name $name;
+        {$name == 'd';} or {$name == 'g';};
+      get $Y;
+      """
+    And answer set is equivalent for graql query
+      """
+      match
+        ($X, $Y) isa Ancestor-friend;
+        $X has name 'a';
+      get $Y;
+      """
+    Then for graql query
+      """
+      match
+        (ancestor: $X, ancestor-friend: $Y) isa Ancestor-friend;
+        $Y has name 'd';
+      get $X;
+      """
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 3
+    Then answer set is equivalent for graql query
+      """
+      match
+        $X has name $name;
+        {$name == 'a';} or {$name == 'b';} or {$name == 'c';};
+      get $X;
+      """
+    And answer set is equivalent for graql query
+      """
+      match
+        ($X, $Y) isa Ancestor-friend;
+        $Y has name 'd';
+      get $X;
+      """
+    Then materialised and reasoned keyspaces are the same size
+
+
+  Scenario: same-generation test
+
+    from Vieille - Recursive Query Processing: The power of logic p. 25
+
+    Given for each session, graql define
+      """
+      define
+
+      entity2 sub entity,
+          has name;
+      Human sub entity2;
+
+      Parent sub relation, relates parent, relates child;
+      entity2 plays parent, plays child;
+
+      SameGen sub relation, relates SG-role;
+      entity2 plays SG-role;
+
+      name sub attribute, value string;
+
+      rule-1 sub rule,
+      when {
+        $x isa Human;
+      }, then {
+        (SG-role: $x, SG-role: $x) isa SameGen;
+      };
+
+      rule-2 sub rule,
+      when {
+        (parent: $x, child: $u) isa Parent;
+        (parent: $y, child: $v) isa Parent;
+        (SG-role: $u, SG-role: $v) isa SameGen;
+      }, then {
+        (SG-role: $x, SG-role: $y) isa SameGen;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+
+      $a isa entity2, has name "a";
+      $b isa entity2, has name "b";
+      $c isa entity2, has name "c";
+      $d isa Human, has name "d";
+      $e isa entity2, has name "e";
+      $f isa entity2, has name "f";
+      $g isa entity2, has name "g";
+      $h isa entity2, has name "h";
+
+      (parent: $a, child: $b) isa Parent;
+      (parent: $a, child: $c) isa Parent;
+
+      (parent: $b, child: $d) isa Parent;
+      (parent: $c, child: $d) isa Parent;
+      (parent: $e, child: $d) isa Parent;
+
+      (parent: $f, child: $e) isa Parent;
+
+      #Extra data
+      (parent: $g, child: $f) isa Parent;
+
+      (parent: $h, child: $g) isa Parent;
+      """
+    When materialised keyspace is completed
+    Then for graql query
+      """
+      match
+        ($x, $y) isa SameGen;
+        $x has name 'a';
+      get $y;
+      """
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 2
+    Then answer set is equivalent for graql query
+      """
+      match
+        $y has name $name;
+        {$name == 'f';} or {$name == 'a';};
+      get $y;
+      """
+    Then materialised and reasoned keyspaces are the same size
+
+
+  Scenario: TC test
+
+    from Vieille - Recursive Query Processing: The power of logic p. 18
+
+    Given for each session, graql define
+      """
+      define
+
+      entity2 sub entity,
+          has index;
+      q sub entity2;
+
+      N-TC sub relation, relates N-TC-roleB, relates N-TC-roleA;
+      entity2 plays N-TC-roleB, plays N-TC-roleA;
+
+      TC sub relation, relates TC-roleA, relates TC-roleB;
+      entity2 plays TC-roleA, plays TC-roleB;
+
+      P sub relation, relates P-roleA, relates P-roleB;
+      entity2 plays P-roleA, plays P-roleB;
+
+      index sub attribute, value string;
+
+      rule-1 sub rule,
+      when {
+        $x isa q;
+        (TC-roleA: $x, TC-roleB: $y) isa TC;
+      }, then {
+        (N-TC-roleA: $x, N-TC-roleB: $y) isa N-TC;
+      };
+
+      rule-2 sub rule,
+      when {
+        (P-roleA: $x, P-roleB: $y) isa P;
+      }, then {
+        (TC-roleA: $x, TC-roleB: $y) isa TC;
+      };
+
+      rule-3 sub rule,
+      when {
+        (P-roleA: $x, P-roleB: $z) isa P;
+        (TC-roleA:$z, TC-roleB: $y) isa TC;
+      }, then {
+        (TC-roleA: $x, TC-roleB: $y) isa TC;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+
+      $a isa entity2, has index "a";
+      $a1 isa entity2, has index "a1";
+      $a2 isa q, has index "a2";
+
+      (P-roleA: $a1, P-roleB: $a) isa P;
+      (P-roleA: $a2, P-roleB: $a1) isa P;
+      """
+    When materialised keyspace is completed
+    Then for graql query
+      """
+      match
+        ($x, $y) isa N-TC;
+        $y has index 'a';
+      get $x;
+      """
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 1
+    Then answer set is equivalent for graql query
+      """
+      match $x has index 'a2'; get;
+      """
+    Then materialised and reasoned keyspaces are the same size
+
+
+  Scenario: given a directed graph, all pairs of vertices (x,y) such that y is reachable from x can be found
+
+    test 5.2 from Green
+
+    It defines a node configuration:
+
+                /^\
+    aa -> bb -> cc -> dd
+
+    and finds all pairs (from, to) such that `to` is reachable from `from`.
+
+    Given for each session, graql define
+      """
+      define
+
+      indexable sub entity,
+          has index;
+
+      traversable sub indexable,
+          plays from,
+          plays to;
+
+      vertex sub traversable;
+      node sub traversable;
+
+      link sub relation, relates from, relates to;
+      indirect-link sub relation, relates from, relates to;
+      reachable sub relation, relates from, relates to;
+      unreachable sub relation, relates from, relates to;
+
+      index sub attribute, value string;
+
+      reachability-transitivityA sub rule,
+      when {
+          (from: $x, to: $y) isa link;
+      }, then {
+          (from: $x, to: $y) isa reachable;
+      };
+
+      reachability-transitivityB sub rule,
+      when {
+          (from: $x, to: $z) isa link;
+          (from: $z, to: $y) isa reachable;
+      }, then {
+          (from: $x, to: $y) isa reachable;
+      };
+
+      indirect-link-rule sub rule,
+      when {
+          (from: $x, to: $y) isa reachable;
+          not {(from: $x, to: $y) isa link;};
+      }, then {
+          (from: $x, to: $y) isa indirect-link;
+      };
+
+      unreachability-rule sub rule,
+      when {
+          $x isa vertex;
+          $y isa vertex;
+          not {(from: $x, to: $y) isa reachable;};
+      }, then {
+          (from: $x, to: $y) isa unreachable;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+
+      $aa isa node, has index "aa";
+      $bb isa node, has index "bb";
+      $cc isa node, has index "cc";
+      $dd isa node, has index "dd";
+
+      (from: $aa, to: $bb) isa link;
+      (from: $bb, to: $cc) isa link;
+      (from: $cc, to: $cc) isa link;
+      (from: $cc, to: $dd) isa link;
+      """
+    When materialised keyspace is completed
+    Then for graql query
+      """
+      match (from: $x, to: $y) isa reachable; get;
+      """
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 7
+    Then answer set is equivalent for graql query
+      """
+      match
+        $x has index $indX;" +
+        $y has index $indY;" +
+        {$indX == 'aa';$indY == 'bb';} or
+        {$indX == 'bb';$indY == 'cc';} or
+        {$indX == 'cc';$indY == 'cc';} or
+        {$indX == 'cc';$indY == 'dd';} or
+        {$indX == 'aa';$indY == 'cc';} or
+        {$indX == 'bb';$indY == 'dd';} or
+        {$indX == 'aa';$indY == 'dd';};
+      get $x, $y;
+      """
+    Then materialised and reasoned keyspaces are the same size
+
+
+  Scenario: given an undirected graph, all vertices connected to a given vertex can be found
+
+    For this test, the graph looks like the following:
+
+             /^\
+    a -- b -- c -- d
+
+    We find the set of vertices connected to 'a', which is in fact all of the vertices, including 'a' itself.
+
+    Given for each session, graql define
+      """
+      define
+
+      vertex sub entity,
+        has index;
+
+      link sub relation, relates coordinate;
+      vertex plays coordinate;
+
+      reachable sub relation, relates coordinate;
+      vertex plays coordinate;
+
+      index sub attribute, value string;
+
+      rule-1 sub rule,
+      when {
+        ($x, $y) isa link;
+      }, then {
+        ($x, $y) isa reachable;
+      };
+
+      rule-2 sub rule,
+      when {
+        ($x, $z) isa link;
+        ($z, $y) isa reachable;
+      }, then {
+        ($x, $y) isa reachable;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+
+      $a isa vertex, has index "a";
+      $b isa vertex, has index "b";
+      $c isa vertex, has index "c";
+      $d isa vertex, has index "d";
+
+      (coordinate: $a, coordinate: $b) isa link;
+      (coordinate: $b, coordinate: $c) isa link;
+      (coordinate: $c, coordinate: $c) isa link;
+      (coordinate: $c, coordinate: $d) isa link;
+      """
+    When materialised keyspace is completed
+    Then for graql query
+      """
+      match
+        ($x, $y) isa reachable;
+        $x has index 'a';
+      get $y;
+      """
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 4
+    Then answer set is equivalent for graql query
+      """
+      match
+        $y has index $indY;
+        {$indY == 'a';} or {$indY == 'b';} or {$indY == 'c';} or {$indY == 'd';};
+      get $y;
+      """
+    Then materialised and reasoned keyspaces are the same size
+
+
+  Scenario: same-generation - Cao test
+
+    test 6.6 from Cao p.76
+
+    Given for each session, graql define
+      """
+      define
+
+      person sub entity,
+        has name;
+
+      Parent sub relation, relates parent, relates child;
+      person plays parent, plays child;
+
+      Sibling sub relation, relates sibA, relates sibB;
+      person plays sibA, plays sibB;
+
+      SameGen sub relation, relates SG-role-A, relates SG-role-B;
+      person plays SG-role-A, plays SG-role-B;
+
+      name sub attribute, value string;
+
+      rule-1 sub rule,
+      when {
+        (sibA: $x, sibB: $y) isa Sibling;
+      }, then {
+        (SG-role-A: $x, SG-role-B: $y) isa SameGen;
+      };
+
+      rule-2 sub rule,
+      when {
+        (parent: $x, child: $u) isa Parent;
+        ($u, $v) isa SameGen;
+        (parent: $y, child: $v) isa Parent;
+      }, then {
+        (SG-role-A: $x, SG-role-B: $y) isa SameGen;
+      };
+
+      rule-3 sub rule,
+      when {
+        (parent: $z, child: $x) isa Parent;
+        (parent: $z, child: $y) isa Parent;
+      }, then {
+        (sibA: $x, sibB: $y) isa Sibling;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+
+      $ann isa person, has name "ann";
+      $bill isa person, has name "bill";
+      $john isa person, has name "john";
+      $peter isa person, has name "peter";
+
+      (parent: $john, child: $ann) isa Parent;
+      (parent: $john, child: $peter) isa Parent;
+      (parent: $john, child: $bill) isa Parent;
+      """
+    When materialised keyspace is completed
+    Then for graql query
+      """
+      match
+        ($x, $y) isa SameGen;
+        $x has name 'ann';
+      get $y;
+      """
+    Then all answers are correct in reasoned keyspace
+    Then answer size in reasoned keyspace is: 3
+    Then answer set is equivalent for graql query
+      """
+      match
+        $y has name $name;
+        {$name == 'ann';} or {$name == 'bill';} or {$name == 'peter';};
+      get $y;
+      """
+    Then materialised and reasoned keyspaces are the same size
+
+
+  Scenario: reverse same-generation test
