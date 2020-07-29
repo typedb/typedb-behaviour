@@ -49,9 +49,9 @@ Feature: Graql Match Clause
     Given the integrity is validated
 
 
-  ###################
-  # SCHEMA CONCEPTS #
-  ###################
+  ##################
+  # SCHEMA QUERIES #
+  ##################
 
   Scenario: `type` matches only the specified type, and does not match subtypes
     Given graql define
@@ -121,6 +121,74 @@ Feature: Graql Match Clause
       | PER |
       | ENT |
       | THI |
+
+
+  Scenario: `sub` can be used to retrieve all instances of types that are subtypes of a given type
+    Given graql define
+      """
+      define
+
+      child sub person;
+      worker sub person;
+      retired-person sub person;
+      construction-worker sub worker;
+      bricklayer sub construction-worker;
+      crane-driver sub construction-worker;
+      telecoms-worker sub worker;
+      mobile-network-researcher sub telecoms-worker;
+      smartphone-designer sub telecoms-worker;
+      telecoms-business-strategist sub telecoms-worker;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $a isa child, has name "Alfred", has ref 0;
+      $b isa retired-person, has name "Barbara", has ref 1;
+      $c isa bricklayer, has name "Charles", has ref 2;
+      $d isa crane-driver, has name "Debbie", has ref 3;
+      $e isa mobile-network-researcher, has name "Edmund", has ref 4;
+      $f isa telecoms-business-strategist, has name "Felicia", has ref 5;
+      $g isa worker, has name "Gary", has ref 6;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x isa $type;
+        $type sub worker;
+      get;
+      """
+    When concept identifiers are
+      |     | check | value                        |
+      | CHA | key   | ref:2                        |
+      | DEB | key   | ref:3                        |
+      | EDM | key   | ref:4                        |
+      | FEL | key   | ref:5                        |
+      | GAR | key   | ref:6                        |
+      | CON | label | construction-worker          |
+      | BRI | label | bricklayer                   |
+      | CRA | label | crane-driver                 |
+      | TEL | label | telecoms-worker              |
+      | MNR | label | mobile-network-researcher    |
+      | TBS | label | telecoms-business-strategist |
+      | WOR | label | worker                       |
+    # Alfred and Barbara are not retrieved, as they aren't subtypes of worker
+    Then uniquely identify answer concepts
+      | x   | type |
+      | CHA | BRI  |
+      | CHA | CON  |
+      | CHA | WOR  |
+      | DEB | CRA  |
+      | DEB | CON  |
+      | DEB | WOR  |
+      | EDM | MNR  |
+      | EDM | TEL  |
+      | EDM | WOR  |
+      | FEL | TBS  |
+      | FEL | TEL  |
+      | FEL | WOR  |
+      | GAR | WOR  |
 
 
   Scenario: `sub!` matches the specified type and its direct subtypes
@@ -271,6 +339,45 @@ Feature: Graql Match Clause
       | REF |
 
 
+  Scenario: `has` can be used to retrieve all instances of types that can own a given attribute type
+    Given graql define
+      """
+      define
+      employment has name;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $x isa person, has ref 0;
+      $y isa company, has ref 1;
+      $z (friend: $x) isa friendship, has ref 2;
+      $w (employee: $x, employer: $y) isa employment, has ref 3;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x isa $type;
+        $type has name;
+      get;
+      """
+    When concept identifiers are
+      |      | check | value      |
+      | PER  | key   | ref:0      |
+      | COM  | key   | ref:1      |
+      | EMP  | key   | ref:3      |
+      | tPER | label | person     |
+      | tCOM | label | company    |
+      | tEMP | label | employment |
+    # friendship and ref should not be retrieved, as they can't have a name
+    Then uniquely identify answer concepts
+      | x   | type |
+      | PER | tPER |
+      | COM | tCOM |
+      | EMP | tEMP |
+
+
   Scenario: `plays` matches types that can play the specified role
     When get answers of graql query
       """
@@ -337,6 +444,42 @@ Feature: Graql Match Clause
       | x   |
       | FRI |
       | EMP |
+
+
+  Scenario: `plays` can be used to retrieve all instances of types that can play a specific role
+    Given graql define
+      """
+      define
+      dog sub entity,
+        plays friend,
+        key ref;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $x isa person, has ref 0;
+      $y isa company, has ref 1;
+      $z isa dog, has ref 2;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x isa $type;
+        $type plays friend;
+      get;
+      """
+    When concept identifiers are
+      |      | check | value  |
+      | PER  | key   | ref:0  |
+      | DOG  | key   | ref:2  |
+      | tPER | label | person |
+      | tDOG | label | dog    |
+    Then uniquely identify answer concepts
+      | x   | type |
+      | PER | tPER |
+      | DOG | tDOG |
 
 
   Scenario: `key` matches types that have the specified attribute type as a key
@@ -665,6 +808,29 @@ Feature: Graql Match Clause
       | REF1 | REF2 |
 
 
+  Scenario: relations are matchable from roleplayers without specifying any roles
+    Given graql insert
+      """
+      insert
+      $x isa person, has ref 0;
+      $y isa company, has ref 1;
+      $r (employee: $x, employer: $y) isa employment,
+         has ref 2;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x isa person; $r ($x) isa relation; get;
+      """
+    When concept identifiers are
+      |      | check | value |
+      | REF0 | key   | ref:0 |
+      | REF2 | key   | ref:2 |
+    Then uniquely identify answer concepts
+      | x    | r    |
+      | REF0 | REF2 |
+
+
   Scenario: retrieve all combinations of players in a relation
     When graql insert
       """
@@ -813,6 +979,56 @@ Feature: Graql Match Clause
       get;
       """
     Then answer size is: 0
+
+
+  Scenario: when multiple relation instances exist with the same roleplayer, matching that player returns just 1 answer
+    Given graql define
+      """
+      define
+      residency sub relation,
+        relates resident,
+        key ref;
+      person plays resident;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $x isa person, has ref 0;
+      $e (employee: $x) isa employment, has ref 1;
+      $f (friend: $x) isa friendship, has ref 2;
+      $r (resident: $x) isa residency, has ref 3;
+      """
+    Given the integrity is validated
+    Given concept identifiers are
+      |     | check | value |
+      | PER | key   | ref:0 |
+      | EMP | key   | ref:1 |
+      | FRI | key   | ref:2 |
+      | RES | key   | ref:3 |
+    Given get answers of graql query
+      """
+      match $r isa relation; get;
+      """
+    Given uniquely identify answer concepts
+      | r   |
+      | EMP |
+      | FRI |
+      | RES |
+    When get answers of graql query
+      """
+      match ($x) isa relation; get;
+      """
+    Then uniquely identify answer concepts
+      | x   |
+      | PER |
+    When get answers of graql query
+      """
+      match ($x); get;
+      """
+    Then uniquely identify answer concepts
+      | x   |
+      | PER |
 
 
   Scenario: an error is thrown when matching an entity type as if it were a role
@@ -1489,3 +1705,69 @@ Feature: Graql Match Clause
       get;
       """
     Then answer size is: 0
+
+
+  ##################
+  # VARIABLE TYPES #
+  ##################
+
+  Scenario: all instances and their types can be retrieved
+    Given graql insert
+      """
+      insert
+      $x isa person, has name "Bertie", has ref 0;
+      $y isa person, has name "Angelina", has ref 1;
+      $r (friend: $x, friend: $y) isa friendship, has ref 2;
+      """
+    Given the integrity is validated
+    Given get answers of graql query
+      """
+      match $x isa entity; get;
+      """
+    Given answer size is: 2
+    Given get answers of graql query
+      """
+      match $r isa relation; get;
+      """
+    Given answer size is: 1
+    Given get answers of graql query
+      """
+      match $x isa attribute; get;
+      """
+    Given answer size is: 5
+    When get answers of graql query
+      """
+      match $x isa $type; get;
+      """
+    # 2 entities x 3 types {person,entity,thing}
+    # 1 relation x 3 types {friendship,relation,thing}
+    # 5 attributes x 3 types {ref/name,attribute,thing}
+    Then answer size is: 24
+
+
+  Scenario: all relations and their types can be retrieved
+    Given graql insert
+      """
+      insert
+      $x isa person, has name "Bertie", has ref 0;
+      $y isa person, has name "Angelina", has ref 1;
+      $r (friend: $x, friend: $y) isa friendship, has ref 2;
+      """
+    Given the integrity is validated
+    Given get answers of graql query
+      """
+      match $r isa relation; get;
+      """
+    Given answer size is: 1
+    Given get answers of graql query
+      """
+      match ($x, $y) isa relation; get;
+      """
+    # 2 permutations of the roleplayers
+    Given answer size is: 2
+    When get answers of graql query
+      """
+      match ($x, $y) isa $type; get;
+      """
+    # 2 permutations x 3 types {friendship,relation,thing}
+    Then answer size is: 6
