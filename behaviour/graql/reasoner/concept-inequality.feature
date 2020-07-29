@@ -81,13 +81,16 @@ Feature: Concept Inequality Resolution
           plays related-state,
           has name;
 
-      achieved sub relation,
+      transition sub relation,
+        relates related-state;
+
+      achieved sub transition,
           relates related-state;
 
-      prior sub relation,
+      prior sub transition,
           relates related-state;
 
-      holds sub relation,
+      holds sub transition,
           relates related-state;
 
       state-rule sub rule,
