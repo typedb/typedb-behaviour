@@ -747,6 +747,27 @@ Feature: Graql Match Clause
     Then answer size is: 0
 
 
+  Scenario: when one entity exists, and we match two variables both of that entity type, the entity is returned
+    Given graql insert
+      """
+      insert $x isa person, has ref 0;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x isa person;
+        $y isa person;
+      get;
+      """
+    When concept identifiers are
+      |     | check | value |
+      | PER | key   | ref:0 |
+    Then uniquely identify answer concepts
+      | x   | y   |
+      | PER | PER |
+
+
   Scenario: an error is thrown when matching that a variable has a specific type, when that type is in fact a role
     Then graql get throws
       """
@@ -1655,6 +1676,23 @@ Feature: Graql Match Clause
       | x    |
       | A24  |
       | L209 |
+
+
+  Scenario: when one entity exists, and we match two variables with concept inequality, an empty answer is returned
+    Given graql insert
+      """
+      insert $x isa person, has ref 0;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x isa person;
+        $y isa person;
+        $x != $y;
+      get;
+      """
+    Then answer size is: 0
 
 
   Scenario: concept comparison of unbound variables throws an error

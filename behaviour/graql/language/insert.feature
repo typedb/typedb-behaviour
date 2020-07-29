@@ -1187,6 +1187,7 @@ Feature: Graql Insert Query
       | string   | colour     | 92.8         |
       | string   | colour     | false        |
       | string   | colour     | 2019-12-26   |
+      | long     | shoe-size  | 28.5         |
       | long     | shoe-size  | "28"         |
       | long     | shoe-size  | true         |
       | long     | shoe-size  | 2019-12-26   |
