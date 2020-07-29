@@ -1047,8 +1047,6 @@ Feature: Graql Insert Query
       | AGE2 |
 
 
-  @ignore
-  # TODO: re-enable in 1.9
   Scenario: inserting two `double` attribute values with the same integer value creates a single concept
     Given graql define
       """
@@ -1157,8 +1155,6 @@ Feature: Graql Insert Query
       | type     | attr       | insert           | match            |
       | long     | shoe-size  | 92               | 92               |
       | long     | shoe-size  | 92               | 92.00            |
-      | long     | shoe-size  | 92.0             | 92               |
-      | long     | shoe-size  | 92.0             | 92.00            |
       | double   | length     | 52               | 52               |
       | double   | length     | 52               | 52.00            |
       | double   | length     | 52.0             | 52               |
@@ -1190,23 +1186,21 @@ Feature: Graql Insert Query
       | long     | shoe-size  | "28"         |
       | long     | shoe-size  | true         |
       | long     | shoe-size  | 2019-12-26   |
+      | long     | shoe-size  | 28.0         |
       | double   | length     | "28.0"       |
       | double   | length     | false        |
       | double   | length     | 2019-12-26   |
       | boolean  | is-alive   | 3            |
       | boolean  | is-alive   | -17.9        |
       | boolean  | is-alive   | 2019-12-26   |
-      | datetime | start-date | 1992         |
-      | datetime | start-date | 3.14         |
-      | datetime | start-date | false        |
-      | datetime | start-date | "2019-12-26" |
-    @ignore
-    # TODO: re-enable when only true and false are accepted as boolean values (issue #5803)
-    Examples:
       | boolean  | is-alive   | 1            |
       | boolean  | is-alive   | 0.0          |
       | boolean  | is-alive   | "true"       |
       | boolean  | is-alive   | "not true"   |
+      | datetime | start-date | 1992         |
+      | datetime | start-date | 3.14         |
+      | datetime | start-date | false        |
+      | datetime | start-date | "2019-12-26" |
 
 
   Scenario: inserting an attribute with no value throws an error
@@ -1282,9 +1276,7 @@ Feature: Graql Insert Query
     Then the integrity is validated
 
 
-  @ignore
-  # TODO: re-enable in 1.9
-  Scenario: [2] and [2.0] are considered to be the same value when validating key uniqueness
+  Scenario: [2] and [2.0] are considered to be the same double value when validating key uniqueness
     Given graql define
       """
       define
