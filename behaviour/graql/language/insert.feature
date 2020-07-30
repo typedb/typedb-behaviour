@@ -2042,7 +2042,7 @@ Feature: Graql Insert Query
       """
       match
         $a isa vertex, has index "a";
-        $b isa vertex, has index "d";
+        $d isa vertex, has index "d";
         $reach ($a, $d) isa reachable;
         $r ($reach) isa road-proposal;
       insert
