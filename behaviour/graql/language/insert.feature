@@ -1730,7 +1730,7 @@ Feature: Graql Insert Query
     Given graql insert
       """
       insert
-      $x isa person, has ref 0;
+      $x isa person, has ref 0, has score 1.0;
       """
     Given the integrity is validated
     When concept identifiers are
@@ -1850,7 +1850,7 @@ Feature: Graql Insert Query
     Given graql insert
       """
       insert
-      $x isa person, has ref 0;
+      $x isa person, has ref 0, has score 1.0;
       $y 'G' isa letter;
       """
     Given the integrity is validated
@@ -1971,7 +1971,7 @@ Feature: Graql Insert Query
     Then answer size is: 1
     When get answers of graql query
       """
-      match (contracted-employment: $x, contract-of-employment: $y) isa employment-contract;
+      match (contracted-employment: $x, contract-of-employment: $y) isa employment-contract; get;
       """
     # And the inserted relation still exists too
     Then answer size is: 1
@@ -1989,7 +1989,7 @@ Feature: Graql Insert Query
       vertex plays coordinate;
 
       reachable sub relation,
-        relates coordinate;
+        relates coordinate,
         plays connected-path;
 
       road-proposal sub relation,
