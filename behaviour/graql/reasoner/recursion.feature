@@ -926,7 +926,7 @@ Feature: Recursion Resolution
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
   Scenario: given a directed graph, all pairs of vertices (x,y) such that y is reachable from x can be found
 
-    test 5.2 from Green
+    test 5.2 from Green - Datalog and Recursive Query Processing
 
     It defines a node configuration:
 
@@ -1309,7 +1309,7 @@ Feature: Recursion Resolution
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
   Scenario: dual linear transitivity matrix test
 
-    test 6.1 from Cao p 71
+    test 6.1 from Cao - Methods for evaluating queries to Horn knowledge bases in first-order logic, p. 71
 
     Tests an `n` x `m` linear transitivity matrix (in this scenario, n = m = 5)
 
@@ -1486,7 +1486,7 @@ Feature: Recursion Resolution
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
   Scenario: tail recursion test
 
-    test 6.3 from Cao p 75
+    test 6.3 from Cao - Methods for evaluating queries to Horn knowledge bases in first-order logic, p 75
 
     Given for each session, graql define
       """
@@ -1690,7 +1690,8 @@ Feature: Recursion Resolution
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
   Scenario: Nguyen's test
 
-    test3 from Nguyen (similar to test 6.5 from Cao):
+    test3 from Madalinska-Bugaj, Nguyen - A Generalized QSQR Evaluation Method for Horn Knowledge Bases
+    (similar to test 6.5 from Cao):
 
     N(x, y) :- R(x, y)
     N(x, y) :- P(x, z), N(z, w), Q(w, y)
@@ -1874,7 +1875,7 @@ Feature: Recursion Resolution
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
   Scenario: linear transitivity matrix test
 
-    test 6.9 from Cao p.82
+    test 6.9 from Cao - Methods for evaluating queries to Horn knowledge bases in first-order logic p.82
 
     Given for each session, graql define
       """
