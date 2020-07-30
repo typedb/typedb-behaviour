@@ -1899,7 +1899,7 @@ Feature: Graql Insert Query
       | GAN |
     When get answers of graql query
       """
-      match (lettered-name: $x, initial: $y) isa name-initial;
+      match (lettered-name: $x, initial: $y) isa name-initial; get;
       """
     # And the inserted relation still exists too
     Then uniquely identify answer concepts
