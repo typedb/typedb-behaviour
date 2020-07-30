@@ -1154,6 +1154,7 @@ Feature: Graql Insert Query
     Examples:
       | type     | attr       | insert           | match            |
       | long     | shoe-size  | 92               | 92               |
+      | long     | shoe-size  | 92               | 92.00            |
       | double   | length     | 52               | 52               |
       | double   | length     | 52               | 52.00            |
       | double   | length     | 52.0             | 52               |
@@ -1162,10 +1163,6 @@ Feature: Graql Insert Query
       | datetime | start-date | 2019-12-26       | 2019-12-26T00:00 |
       | datetime | start-date | 2019-12-26T00:00 | 2019-12-26       |
       | datetime | start-date | 2019-12-26T00:00 | 2019-12-26T00:00 |
-    @Ignore
-    Examples:
-      # TODO we need to decide if we want to throw when matching 92.00 for a known long-valued type
-      | long     | shoe-size  | 92               | 92.00            |
 
 
 
