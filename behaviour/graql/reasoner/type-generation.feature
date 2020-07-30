@@ -235,7 +235,8 @@ Feature: Type Generation Resolution
       define
 
       baseEntity sub entity,
-          plays baseRole;
+          plays baseRole,
+          plays derivedRelationRole;
 
       baseRelation sub relation,
           relates baseRole;
@@ -245,16 +246,16 @@ Feature: Type Generation Resolution
           relates baseRole;
 
       derivedRelation sub relation,
-          relates baseRole;
+          relates derivedRelationRole;
       directDerivedRelation sub derivedRelation,
-          relates baseRole;
+          relates derivedRelationRole;
 
       relationRule sub rule,
       when {
           ($x) isa subRelation;
       },
       then {
-          ($x) isa derivedRelation;
+          (derivedRelationRole: $x) isa derivedRelation;
       };
 
       directRelationRule sub rule,
@@ -262,7 +263,7 @@ Feature: Type Generation Resolution
           ($x) isa! subRelation;
       },
       then {
-          ($x) isa directDerivedRelation;
+          (derivedRelationRole: $x) isa directDerivedRelation;
       };
       """
     Given for each session, graql insert

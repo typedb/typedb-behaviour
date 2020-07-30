@@ -35,8 +35,13 @@ Feature: Variable Role Resolution
           has name,
           plays role1,
           plays role2,
-          plays role3,
-          plays role4;
+          plays ternary-role1,
+          plays ternary-role2,
+          plays ternary-role3,
+          plays quat-role1,
+          plays quat-role2,
+          plays quat-role3,
+          plays quat-role4;
 
       binary-base sub relation,
           relates role1,
@@ -47,26 +52,26 @@ Feature: Variable Role Resolution
           relates role2;
 
       ternary-base sub relation,
-          relates role1,
-          relates role2,
-          relates role3;
+          relates ternary-role1,
+          relates ternary-role2,
+          relates ternary-role3;
 
       ternary sub ternary-base,
-          relates role1,
-          relates role2,
-          relates role3;
+          relates ternary-role1,
+          relates ternary-role2,
+          relates ternary-role3;
 
       quaternary-base sub relation,
-          relates role1,
-          relates role2,
-          relates role3,
-          relates role4;
+          relates quat-role1,
+          relates quat-role2,
+          relates quat-role3,
+          relates quat-role4;
 
       quaternary sub quaternary-base,
-          relates role1,
-          relates role2,
-          relates role3,
-          relates role4;
+          relates quat-role1,
+          relates quat-role2,
+          relates quat-role3,
+          relates quat-role4;
 
       name sub attribute, value string;
 
@@ -85,7 +90,7 @@ Feature: Variable Role Resolution
           (role1:$z, role2:$y) isa binary-base;
       },
       then {
-          (role1:$x, role2:$y, role3: $z) isa ternary-base;
+          (ternary-role1:$x, ternary-role2:$y, ternary-role3: $z) isa ternary-base;
       };
 
       binary-base-to-quaternary-base sub rule,
@@ -95,7 +100,7 @@ Feature: Variable Role Resolution
           (role1:$z2, role2:$y) isa binary-base;
       },
       then {
-          (role1:$x, role2:$z1, role3: $z2, role4: $y) isa quaternary-base;
+          (quat-role1:$x, quat-role2:$z1, quat-role3: $z2, quat-role4: $y) isa quaternary-base;
       };
 
       binary-transitive sub rule,
@@ -113,7 +118,7 @@ Feature: Variable Role Resolution
           (role1:$z, role2:$y) isa binary;
       },
       then {
-          (role1:$x, role2:$y, role3: $z) isa ternary;
+          (ternary-role1:$x, ternary-role2:$y, ternary-role3: $z) isa ternary;
       };
 
       binary-to-quaternary sub rule,
@@ -123,7 +128,7 @@ Feature: Variable Role Resolution
           (role1:$z2, role2:$y) isa binary;
       },
       then {
-          (role1:$x, role2:$z1, role3: $z2, role4: $y) isa quaternary;
+          (quat-role1:$x, quat-role2:$z1, quat-role3: $z2, quat-role4: $y) isa quaternary;
       };
       """
     Given for each session, graql insert
@@ -381,7 +386,7 @@ Feature: Variable Role Resolution
     Then for graql query
       """
       match
-        (role1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
+        (ternary-role1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
         $a1 has name 'a';
       get;
       """
@@ -391,7 +396,7 @@ Feature: Variable Role Resolution
     Then for graql query
       """
       match
-        (role1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
+        (ternary-role1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
       get;
       """
 #    Then all answers are correct in reasoned keyspace
@@ -427,7 +432,7 @@ Feature: Variable Role Resolution
     Then for graql query
       """
       match
-        (role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
+        (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
         $a1 has name 'a';
       get;
       """
@@ -437,7 +442,7 @@ Feature: Variable Role Resolution
     Then for graql query
       """
       match
-        (role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
+        (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
       get;
       """
 #    Then all answers are correct in reasoned keyspace
@@ -472,7 +477,7 @@ Feature: Variable Role Resolution
     Then for graql query
       """
       match
-        (role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
+        (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
         $a1 has name 'a';
       get;
       """
@@ -482,7 +487,7 @@ Feature: Variable Role Resolution
     Then for graql query
       """
       match
-        (role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
+        (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
       get;
       """
 #    Then all answers are correct in reasoned keyspace
