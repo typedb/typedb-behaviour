@@ -799,7 +799,79 @@ Feature: Negation Resolution
 
 
   Scenario: negation can exclude a particular entity from a matched transitive relation
+    Given for each session, graql define
+      """
+      define
 
+      indexable sub entity,
+          has index;
+
+      traversable sub indexable,
+          plays from,
+          plays to;
+
+      vertex sub traversable;
+      node sub traversable;
+
+      link sub relation, relates from, relates to;
+      indirect-link sub link, relates from, relates to;
+      reachable sub link, relates from, relates to;
+
+      index sub attribute, value string;
+
+      reachability-transitivityA sub rule,
+      when {
+          (from: $x, to: $y) isa link;
+      }, then {
+          (from: $x, to: $y) isa reachable;
+      };
+
+      reachability-transitivityB sub rule,
+      when {
+          (from: $x, to: $z) isa link;
+          (from: $z, to: $y) isa reachable;
+      }, then {
+          (from: $x, to: $y) isa reachable;
+      };
+
+      indirect-link-rule sub rule,
+      when {
+          (from: $x, to: $y) isa reachable;
+          not {(from: $x, to: $y) isa link;};
+      }, then {
+          (from: $x, to: $y) isa indirect-link;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+
+      $aa isa node, has index "aa";
+      $bb isa node, has index "bb";
+      $cc isa node, has index "cc";
+      $dd isa node, has index "dd";
+
+      (from: $aa, to: $bb) isa link;
+      (from: $bb, to: $cc) isa link;
+      (from: $cc, to: $cc) isa link;
+      (from: $cc, to: $dd) isa link;
+      """
+    Then for graql query
+      """
+      match
+        (from: $x, to: $y) isa indirect-link;
+        $x has index "aa";
+      get;
+      """
+    Then answer size in reasoned keyspace is: 2
+    Then answer set is equivalent for graql query
+      """
+      match
+        (from: $x, to: $y) isa reachable;
+        $x has index "aa";
+        not {$y has index "bb";};
+      get;
+      """
 
 
   #####################
@@ -1116,3 +1188,87 @@ Feature: Negation Resolution
     Then answer size in reasoned keyspace is: 11
     Then answers are consistent across 5 executions in reasoned keyspace
     Then materialised and reasoned keyspaces are the same size
+
+
+  Scenario: a rule can use negation to exclude things that have any transitive relations to a specific concept
+    Given for each session, graql define
+      """
+      define
+
+      indexable sub entity,
+          has index;
+
+      traversable sub indexable,
+          plays from,
+          plays to;
+
+      vertex sub traversable;
+      node sub traversable;
+
+      link sub relation, relates from, relates to;
+      reachable sub link, relates from, relates to;
+      unreachable sub link, relates from, relates to;
+
+      index sub attribute, value string;
+
+      reachability-transitivityA sub rule,
+      when {
+          (from: $x, to: $y) isa link;
+      }, then {
+          (from: $x, to: $y) isa reachable;
+      };
+
+      reachability-transitivityB sub rule,
+      when {
+          (from: $x, to: $z) isa link;
+          (from: $z, to: $y) isa reachable;
+      }, then {
+          (from: $x, to: $y) isa reachable;
+      };
+
+      unreachability-rule sub rule,
+      when {
+          $x isa vertex;
+          $y isa vertex;
+          not {(from: $x, to: $y) isa reachable;};
+      }, then {
+          (from: $x, to: $y) isa unreachable;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+
+      $aa isa node, has index "aa";
+      $bb isa node, has index "bb";
+      $cc isa node, has index "cc";
+      $dd isa node, has index "dd";
+      $ee isa node, has index "ee";
+      $ff isa node, has index "ff";
+      $gg isa node, has index "gg";
+      $hh isa node, has index "hh";
+
+      (from: $aa, to: $bb) isa link;
+      (from: $bb, to: $cc) isa link;
+      (from: $cc, to: $cc) isa link;
+      (from: $cc, to: $dd) isa link;
+      (from: $ee, to: $ff) isa link;
+      (from: $ff, to: $gg) isa link;
+      """
+    Then for graql query
+      """
+      match
+        (from: $x, to: $y) isa unreachable;
+        $x has index "aa";
+      get;
+      """
+    # ee, ff, gg are linked to each other, but not to aa. hh is not linked to anything
+    Then answer size in reasoned keyspace is: 4
+    Then answer set is equivalent for graql query
+      """
+      match
+        $x has index "aa";
+        { $y has index "ee"; } or { $y has index "ff"; } or
+        { $y has index "gg"; } or { $y has index "hh"; };
+      get;
+      """
