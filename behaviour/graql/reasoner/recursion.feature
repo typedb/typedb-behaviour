@@ -636,8 +636,8 @@ Feature: Recursion Resolution
     Then answer set is equivalent for graql query
       """
       match
-        $Y isa person, has name $nameY;
         $X isa person, has name $nameX;
+        $Y isa person, has name $nameY;
         {$nameX == 'a';$nameY == 'aa';} or
         {$nameX == 'a';$nameY == 'ab';} or {$nameX == 'a';$nameY == 'aaa';} or
         {$nameX == 'a';$nameY == 'aab';} or {$nameX == 'a';$nameY == 'aaaa';} or
