@@ -23,6 +23,16 @@ Feature: Graql Rule Validation
     Given connection open sessions for keyspaces:
       | test_rule_validation |
     Given transaction is initialised
+    Given graql define
+      """
+      define
+      person sub entity, plays employee, has name, key email;
+      employment sub relation, relates employee, has start-date;
+      name sub attribute, value string;
+      email sub attribute, value string;
+      start-date sub attribute, value datetime;
+      """
+    Given the integrity is validated
 
 
   # Note: These tests verify only the ability to create rules, and are not concerned with their application.
@@ -607,9 +617,7 @@ Feature: Graql Rule Validation
     Given graql define
       """
       define
-      person sub entity, has name;
       dog sub entity;
-      name sub attribute, value string;
       """
     Given the integrity is validated
     Then graql define throws

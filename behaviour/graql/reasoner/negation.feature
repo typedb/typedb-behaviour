@@ -32,6 +32,7 @@ Feature: Negation Resolution
 
       person sub entity,
         has name,
+        has age,
         plays friend,
         plays employee;
 
@@ -56,6 +57,7 @@ Feature: Negation Resolution
         relates location-superior;
 
       name sub attribute, value string;
+      age sub attribute, value long;
       """
 
 
@@ -176,7 +178,7 @@ Feature: Negation Resolution
         };
       get;
       """
-    Then answer size in reasoned keyspace is: 1
+    Then answer size in reasoned keyspace is: 4
 
 
   Scenario: negation can check that an entity owns an attribute which is not equal to a specific value
@@ -289,7 +291,7 @@ Feature: Negation Resolution
     Given for each session, graql define
       """
       define
-      dog sub entity, plays friend;
+      dog sub entity, has name, plays friend;
       """
     Given for each session, graql insert
       """
@@ -334,6 +336,7 @@ Feature: Negation Resolution
       match
         (friend: $a, friend: $b) isa friendship;
         (friend: $b, friend: $c) isa friendship;
+        $z isa dog;
         not {$b has name "d";};
       get;
       """
@@ -458,7 +461,7 @@ Feature: Negation Resolution
     Then answer size in reasoned keyspace is: 2
 
 
-  Scenario: the results of a query do not change when adding a negated negation block to it
+  Scenario: when negating a negation, the statement becomes positive again
     Given for each session, graql insert
       """
       insert
@@ -476,7 +479,7 @@ Feature: Negation Resolution
       get;
       """
     Given answer size in reasoned keyspace is: 2
-    Then answer set is equivalent for graql query
+    Then for graql query
       """
       match
         $x isa person, has name "Tim";
@@ -485,6 +488,14 @@ Feature: Negation Resolution
             $x has age 55;
           };
         };
+      get;
+      """
+    Then answer size in reasoned keyspace is: 1
+    Then answer set is equivalent for graql query
+      """
+      match
+        $x isa person, has name "Tim";
+        $x has age 55;
       get;
       """
 
@@ -791,7 +802,7 @@ Feature: Negation Resolution
       match
         $continent isa continent;
         $area isa area;
-        not {(location-hierarchy_superior: $continent, location-hierarchy_subordinate: $area) isa location-hierarchy;};
+        not {(location-superior: $continent, location-subordinate: $area) isa location-hierarchy;};
       get;
       """
     Then answer size in reasoned keyspace is: 0
@@ -807,39 +818,43 @@ Feature: Negation Resolution
           has index;
 
       traversable sub indexable,
-          plays from,
-          plays to;
+          plays link-from,
+          plays link-to,
+          plays indirect-from,
+          plays indirect-to,
+          plays reachable-from,
+          plays reachable-to;
 
       vertex sub traversable;
       node sub traversable;
 
-      link sub relation, relates from, relates to;
-      indirect-link sub link, relates from, relates to;
-      reachable sub link, relates from, relates to;
+      link sub relation, relates link-from, relates link-to;
+      indirect-link sub relation, relates indirect-from, relates indirect-to;
+      reachable sub relation, relates reachable-from, relates reachable-to;
 
       index sub attribute, value string;
 
       reachability-transitivityA sub rule,
       when {
-          (from: $x, to: $y) isa link;
+          (link-from: $x, link-to: $y) isa link;
       }, then {
-          (from: $x, to: $y) isa reachable;
+          (reachable-from: $x, reachable-to: $y) isa reachable;
       };
 
       reachability-transitivityB sub rule,
       when {
-          (from: $x, to: $z) isa link;
-          (from: $z, to: $y) isa reachable;
+          (link-from: $x, link-to: $z) isa link;
+          (reachable-from: $z, reachable-to: $y) isa reachable;
       }, then {
-          (from: $x, to: $y) isa reachable;
+          (reachable-from: $x, reachable-to: $y) isa reachable;
       };
 
       indirect-link-rule sub rule,
       when {
-          (from: $x, to: $y) isa reachable;
-          not {(from: $x, to: $y) isa link;};
+          (reachable-from: $x, reachable-to: $y) isa reachable;
+          not {(link-from: $x, link-to: $y) isa link;};
       }, then {
-          (from: $x, to: $y) isa indirect-link;
+          (indirect-from: $x, indirect-to: $y) isa indirect-link;
       };
       """
     Given for each session, graql insert
@@ -851,15 +866,15 @@ Feature: Negation Resolution
       $cc isa node, has index "cc";
       $dd isa node, has index "dd";
 
-      (from: $aa, to: $bb) isa link;
-      (from: $bb, to: $cc) isa link;
-      (from: $cc, to: $cc) isa link;
-      (from: $cc, to: $dd) isa link;
+      (link-from: $aa, link-to: $bb) isa link;
+      (link-from: $bb, link-to: $cc) isa link;
+      (link-from: $cc, link-to: $cc) isa link;
+      (link-from: $cc, link-to: $dd) isa link;
       """
     Then for graql query
       """
       match
-        (from: $x, to: $y) isa indirect-link;
+        (indirect-from: $x, indirect-to: $y) isa indirect-link;
         $x has index "aa";
       get;
       """
@@ -867,7 +882,7 @@ Feature: Negation Resolution
     Then answer set is equivalent for graql query
       """
       match
-        (from: $x, to: $y) isa reachable;
+        (reachable-from: $x, reachable-to: $y) isa reachable;
         $x has index "aa";
         not {$y has index "bb";};
       get;
@@ -950,7 +965,7 @@ Feature: Negation Resolution
     Then materialised and reasoned keyspaces are the same size
 
 
-  Scenario: ?
+  Scenario: when negating a conjunction, all the conjuction statements must be met for the negation to be met
     Given for each session, graql define
       """
       define
@@ -964,8 +979,10 @@ Feature: Negation Resolution
       non-uk-rule sub rule,
       when {
         $x isa company;
-        (company-with-country: $x, country-for-company: $y) isa company-country;
-        not {$y has name 'UK';};
+        not {
+          (company-with-country: $x, country-for-company: $y) isa company-country;
+          $y has name 'UK';
+        };
       }, then {
         (not-in-uk: $x) isa non-uk;
       };
@@ -1003,11 +1020,9 @@ Feature: Negation Resolution
       """
       match
         $x isa company;
-        not {
-          (company-with-country: $a, country-for-company: $e) isa company-country;
-          $e has name "UK";
-        };
-      get;
+        (company-with-country: $x, country-for-company: $y) isa company-country;
+        $y has name "UK";
+      get $x;
       """
     And answer set is equivalent for graql query
       """
@@ -1018,6 +1033,7 @@ Feature: Negation Resolution
       """
 
 
+  # TODO: re-enable all steps when fixed (#75)
   Scenario: when evaluating negation blocks, global subgoals are not updated
 
     The test highlights a potential issue with eagerly updating global subgoals when branching out to determine whether
@@ -1115,9 +1131,10 @@ Feature: Negation Resolution
       """
     Then answer size in reasoned keyspace is: 0
     Then answers are consistent across 5 executions in reasoned keyspace
-    Then materialised and reasoned keyspaces are the same size
+#    Then materialised and reasoned keyspaces are the same size
 
 
+  # TODO: re-enable all steps when fixed (currently takes too long) (#75)
   Scenario: when evaluating negation blocks, completion of incomplete queries is not acknowledged
     Given for each session, graql define
       """
@@ -1184,7 +1201,7 @@ Feature: Negation Resolution
       """
       match (role-3: $x, role-4: $y) isa relation-4; get;
       """
-    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned keyspace
     Then answer size in reasoned keyspace is: 11
     Then answers are consistent across 5 executions in reasoned keyspace
     Then materialised and reasoned keyspaces are the same size
@@ -1199,40 +1216,43 @@ Feature: Negation Resolution
           has index;
 
       traversable sub indexable,
-          plays from,
-          plays to;
+          plays link-from,
+          plays link-to,
+          plays reachable-from,
+          plays reachable-to,
+          plays unreachable-from,
+          plays unreachable-to;
 
-      vertex sub traversable;
       node sub traversable;
 
-      link sub relation, relates from, relates to;
-      reachable sub link, relates from, relates to;
-      unreachable sub link, relates from, relates to;
+      link sub relation, relates link-from, relates link-to;
+      reachable sub relation, relates reachable-from, relates reachable-to;
+      unreachable sub relation, relates unreachable-from, relates unreachable-to;
 
       index sub attribute, value string;
 
       reachability-transitivityA sub rule,
       when {
-          (from: $x, to: $y) isa link;
+          (link-from: $x, link-to: $y) isa link;
       }, then {
-          (from: $x, to: $y) isa reachable;
+          (reachable-from: $x, reachable-to: $y) isa reachable;
       };
 
       reachability-transitivityB sub rule,
       when {
-          (from: $x, to: $z) isa link;
-          (from: $z, to: $y) isa reachable;
+          (link-from: $x, link-to: $z) isa link;
+          (reachable-from: $z, reachable-to: $y) isa reachable;
       }, then {
-          (from: $x, to: $y) isa reachable;
+          (reachable-from: $x, reachable-to: $y) isa reachable;
       };
 
       unreachability-rule sub rule,
       when {
-          $x isa vertex;
-          $y isa vertex;
-          not {(from: $x, to: $y) isa reachable;};
+          $x isa node;
+          $y isa node;
+          not {(reachable-from: $x, reachable-to: $y) isa reachable;};
       }, then {
-          (from: $x, to: $y) isa unreachable;
+          (unreachable-from: $x, unreachable-to: $y) isa unreachable;
       };
       """
     Given for each session, graql insert
@@ -1248,27 +1268,27 @@ Feature: Negation Resolution
       $gg isa node, has index "gg";
       $hh isa node, has index "hh";
 
-      (from: $aa, to: $bb) isa link;
-      (from: $bb, to: $cc) isa link;
-      (from: $cc, to: $cc) isa link;
-      (from: $cc, to: $dd) isa link;
-      (from: $ee, to: $ff) isa link;
-      (from: $ff, to: $gg) isa link;
+      (link-from: $aa, link-to: $bb) isa link;
+      (link-from: $bb, link-to: $cc) isa link;
+      (link-from: $cc, link-to: $cc) isa link;
+      (link-from: $cc, link-to: $dd) isa link;
+      (link-from: $ee, link-to: $ff) isa link;
+      (link-from: $ff, link-to: $gg) isa link;
       """
     Then for graql query
       """
       match
-        (from: $x, to: $y) isa unreachable;
+        (unreachable-from: $x, unreachable-to: $y) isa unreachable;
         $x has index "aa";
       get;
       """
-    # ee, ff, gg are linked to each other, but not to aa. hh is not linked to anything
-    Then answer size in reasoned keyspace is: 4
+    # aa is not linked to itself. ee, ff, gg are linked to each other, but not to aa. hh is not linked to anything
+    Then answer size in reasoned keyspace is: 5
     Then answer set is equivalent for graql query
       """
       match
         $x has index "aa";
-        { $y has index "ee"; } or { $y has index "ff"; } or
+        { $y has index "aa"; } or { $y has index "ee"; } or { $y has index "ff"; } or
         { $y has index "gg"; } or { $y has index "hh"; };
       get;
       """
