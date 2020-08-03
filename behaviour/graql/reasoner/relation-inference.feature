@@ -17,15 +17,15 @@
 
 Feature: Relation Inference Resolution
 
-  Background: Set up keyspaces for resolution testing
+  Background: Set up databases for resolution testing
 
     Given connection has been opened
-    Given connection delete all keyspaces
-    Given connection open sessions for keyspaces:
+    Given connection delete all databases
+    Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised keyspace is named: materialised
-    Given reasoned keyspace is named: reasoned
+    Given materialised database is named: materialised
+    Given reasoned database is named: reasoned
     Given for each session, graql define
       """
       define
@@ -82,7 +82,7 @@ Feature: Relation Inference Resolution
       $y isa dog;
       $z isa person;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -90,8 +90,8 @@ Feature: Relation Inference Resolution
         ($x) isa employment;
       get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
     Then for graql query
       """
       match
@@ -99,8 +99,8 @@ Feature: Relation Inference Resolution
         ($x) isa employment;
       get;
       """
-    Then answer size in reasoned keyspace is: 0
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 0
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: a relation can be inferred based on an attribute ownership
@@ -120,7 +120,7 @@ Feature: Relation Inference Resolution
       $x isa person, has name "Haikal";
       $y isa person, has name "Michael";
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -128,8 +128,8 @@ Feature: Relation Inference Resolution
         ($x) isa employment;
       get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
     Then for graql query
       """
       match
@@ -137,8 +137,8 @@ Feature: Relation Inference Resolution
         ($x) isa employment;
       get;
       """
-    Then answer size in reasoned keyspace is: 0
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 0
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: a rule can infer a relation with an attribute as a roleplayer
@@ -162,7 +162,7 @@ Feature: Relation Inference Resolution
       $x isa item, has name "3kg jar of Nutella";
       $y 14.99 isa price;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -172,9 +172,9 @@ Feature: Relation Inference Resolution
         $p 14.99 isa price;
       get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
-    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: a rule can infer a relation based on ownership of any instance of a specific attribute type
@@ -200,7 +200,7 @@ Feature: Relation Inference Resolution
       $p2 isa person, has name "Prasanth";
       $y 1664 isa year;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -208,9 +208,9 @@ Feature: Relation Inference Resolution
         ($x, employee: $p, employer: $y) isa employment;
       get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
-    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
+    Then materialised and reasoned databases are the same size
 
 
   ###############
@@ -239,18 +239,18 @@ Feature: Relation Inference Resolution
       $d isa person, has name "Damien";
       $e isa person, has name "Eustace";
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match $r isa friendship; get;
       """
-    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned database
     # When there is 1 concept we have {aa}.
     # Adding a 2nd concept gives us 2 new relations - where each relation contains b, and one other concept (a or b).
     # Adding a 3rd concept gives us 3 new relations - where each relation contains c, and one other concept (a, b or c).
     # Generally, the total number of relations is the sum of all integers from 1 to n inclusive.
-    Then answer size in reasoned keyspace is: 15
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 15
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: when matching all possible pairs inferred from n concepts, the answer size is the square of n
@@ -274,15 +274,15 @@ Feature: Relation Inference Resolution
       $d isa person, has name "Damien";
       $e isa person, has name "Eustace";
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match ($x, $y) isa friendship; get;
       """
-    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned database
     # Here there are n choices for x, and n choices for y, so the total answer size is n^2
-    Then answer size in reasoned keyspace is: 25
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 25
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: when a relation is reflexive, matching concepts are related to themselves
@@ -304,16 +304,16 @@ Feature: Relation Inference Resolution
       $g isa person, has name "Gawain";
       $h isa person, has name "Hattie";
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
         (employee: $x, employer: $x) isa employment;
       get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 3
-    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 3
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: inferred reflexive relations can be retrieved using multiple variables to refer to the same concept
@@ -333,16 +333,16 @@ Feature: Relation Inference Resolution
       insert
       $i isa person, has name "Irma";
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
         (employee: $x, employer: $y) isa employment;
       get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
-    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: inferred relations between distinct concepts are not retrieved when matching concepts related to themselves
@@ -364,15 +364,15 @@ Feature: Relation Inference Resolution
       $r isa person, has name "Robert";
       $j isa person, has name "Jane";
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
         (employee: $x, employer: $x) isa employment;
       get;
       """
-    Then answer size in reasoned keyspace is: 0
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 0
+    Then materialised and reasoned databases are the same size
 
 
   ############
@@ -429,28 +429,28 @@ Feature: Relation Inference Resolution
       (robot-pet: $a, robot-pet-owner: $b) isa robot-pet-ownership;
       (coworker: $b, coworker: $c) isa coworkers;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
         (coworker: $x, coworker: $x) isa coworkers;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned database
     # (p,p) is a coworkers since people work with themselves.
     # Applying the robot work rule we see that (r1,p) is a pet ownership, and (p,p) and (p,r2) are coworker relations,
     # so (r1,p) and (r1,r2) are both coworker relations.
     # Coworker relations are symmetric, so (r2,p), (p,r1) and (r2,r1) are all coworker relations.
     # Applying the robot work rule a 2nd time, (r1,p) is a pet ownership and (p,r1) are coworkers,
     # therefore (r1,r1) is a reflexive coworker relation. So the answers are [p] and [r1].
-    Then answer size in reasoned keyspace is: 2
+    Then answer size in reasoned database is: 2
     Then for graql query
       """
       match
         (coworker: $x, coworker: $y) isa coworkers;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned database
     # $x | $y |
     # p  | p  |
     # p  | r2 |
@@ -460,8 +460,8 @@ Feature: Relation Inference Resolution
     # p  | r1 |
     # r2 | r1 |
     # r1 | r1 |
-    Then answer size in reasoned keyspace is: 8
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 8
+    Then materialised and reasoned databases are the same size
 
 
   ################
@@ -489,14 +489,14 @@ Feature: Relation Inference Resolution
       (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
       (location-subordinate: $y, location-superior: $y) isa location-hierarchy;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match $x isa location-hierarchy; get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 3
-    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 3
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when 3-hop transitivity is resolvable
@@ -524,15 +524,15 @@ Feature: Relation Inference Resolution
       (location-subordinate: $b, location-superior: $c) isa location-hierarchy;
       (location-subordinate: $c, location-superior: $d) isa location-hierarchy;
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match (location-subordinate: $x1, location-superior: $x2) isa location-hierarchy; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 6
-    Then answers are consistent across 5 executions in reasoned keyspace
-#    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 6
+    Then answers are consistent across 5 executions in reasoned database
+#    Then materialised and reasoned databases are the same size
 
 
   Scenario: when a transitive rule's `then` matches a query, but its `when` is unmet, the material answers are returned
@@ -586,14 +586,14 @@ Feature: Relation Inference Resolution
 
       (location-subordinate: $x3, location-superior: $x4) isa location-hierarchy;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match (location-subordinate: $x, location-superior: $y) isa location-hierarchy; get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
-    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
+    Then materialised and reasoned databases are the same size
 
 
   #######################
@@ -618,13 +618,13 @@ Feature: Relation Inference Resolution
       $x isa person;
       $c isa company;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match (employee: $x, employee: $y) isa employment; get;
       """
-    Then answer size in reasoned keyspace is: 0
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 0
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: a relation with two roleplayers inferred by the same rule is retrieved when matching only one of the roles
@@ -645,14 +645,14 @@ Feature: Relation Inference Resolution
       $x isa person;
       $c isa company;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match (employee: $x) isa employment; get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
-    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: when matching an inferred relation with repeated roles, answers contain all permutations of the roleplayers
@@ -675,22 +675,22 @@ Feature: Relation Inference Resolution
       $y isa person, has name "Bob";
       $z isa person, has name "Charlie";
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
         (friend: $a, friend: $b, friend: $c) isa friendship;
       get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 6
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 6
     Then answer set is equivalent for graql query
       """
       match
         $r (friend: $a, friend: $b, friend: $c) isa friendship;
       get $a, $b, $c;
       """
-    Then materialised and reasoned keyspaces are the same size
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when fixed (#75), currently they are very slow
@@ -724,7 +724,7 @@ Feature: Relation Inference Resolution
       (choice1: $x, choice2: $y) isa selection;
       (choice1: $y, choice2: $z) isa selection;
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match
@@ -733,9 +733,9 @@ Feature: Relation Inference Resolution
         $y has name $n;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned database
     # (a,a), (b,b), (c,c)
-    Then answer size in reasoned keyspace is: 3
+    Then answer size in reasoned database is: 3
     Then for graql query
       """
       match
@@ -745,8 +745,8 @@ Feature: Relation Inference Resolution
         $n == 'a';
       get $x, $y;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
     Then answer set is equivalent for graql query
       """
       match
@@ -755,7 +755,7 @@ Feature: Relation Inference Resolution
         $y has name 'a';
       get;
       """
-#    Then materialised and reasoned keyspaces are the same size
+#    Then materialised and reasoned databases are the same size
 
 
   #######################
@@ -785,7 +785,7 @@ Feature: Relation Inference Resolution
       (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
       (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -795,10 +795,10 @@ Feature: Relation Inference Resolution
         ($b, $c);
       get;
       """
-#    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned database
     # $c in {'Turku Airport', 'Finland'}
-    Then answer size in reasoned keyspace is: 2
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 2
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when fixed (#75)
@@ -824,7 +824,7 @@ Feature: Relation Inference Resolution
       (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
       (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Given for graql query
       """
       match
@@ -833,8 +833,8 @@ Feature: Relation Inference Resolution
         $b isa place, has name "Turku";
       get;
       """
-#    Given all answers are correct in reasoned keyspace
-    Given answer size in reasoned keyspace is: 1
+#    Given all answers are correct in reasoned database
+    Given answer size in reasoned database is: 1
     Then for graql query
       """
       match
@@ -844,10 +844,10 @@ Feature: Relation Inference Resolution
         ($c, $d);
       get;
       """
-#    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned database
     # (2 db relations + 1 inferred) x 2 for variable swap
-    Then answer size in reasoned keyspace is: 6
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 6
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when fixed (#75)
@@ -885,22 +885,22 @@ Feature: Relation Inference Resolution
       (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
       (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Given for graql query
       """
       match
         ($a, $b) isa relation;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned database
     # Despite there being more inferred relations, the answer size is still 6 (as in the previous scenario)
     # because the query is only interested in the related concepts, not in the relation instances themselves
-    Then answer size in reasoned keyspace is: 6
+    Then answer size in reasoned database is: 6
     Then answer set is equivalent for graql query
       """
       match ($a, $b); get;
       """
-#    Then materialised and reasoned keyspaces are the same size
+#    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when fixed (#75)
@@ -926,7 +926,7 @@ Feature: Relation Inference Resolution
       (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
       (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -934,7 +934,7 @@ Feature: Relation Inference Resolution
         ($b, $c);
       get;
       """
-#    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned database
     # a   | b   | c   |
     # AIR | TUR | FIN |
     # AIR | FIN | TUR |
@@ -948,8 +948,8 @@ Feature: Relation Inference Resolution
     # FIN | TUR | AIR |
     # FIN | AIR | FIN |
     # FIN | TUR | FIN |
-    Then answer size in reasoned keyspace is: 12
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 12
+    Then materialised and reasoned databases are the same size
 
 
   #####################
@@ -997,14 +997,14 @@ Feature: Relation Inference Resolution
       (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
       (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match (big-location-subordinate: $x, big-location-superior: $y) isa big-location-hierarchy; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
-    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when resolvable (currently takes too long)
@@ -1071,14 +1071,14 @@ Feature: Relation Inference Resolution
       (role21:$v, role22:$w) isa relation2;
       (role11:$w, role12:$q) isa relation1;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match (role31: $x, role32: $y) isa relation3; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
-    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: circular rule dependencies can be resolved
@@ -1140,22 +1140,22 @@ Feature: Relation Inference Resolution
       (role11:$x, role12:$x) isa relation1;
       (role11:$x, role12:$y) isa relation1;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match (role31: $x, role32: $y) isa relation3; get;
       """
-    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned database
     # Each of the two material relation1 instances should infer a single relation3 via 1-to-2 and 2-to-3
-    Then answer size in reasoned keyspace is: 2
+    Then answer size in reasoned database is: 2
     Then for graql query
       """
       match (role21: $x, role22: $y) isa relation2; get;
       """
-    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned database
     # Relation-3-to-2 should not make any additional inferences - it should merely assert that the relations exist
-    Then answer size in reasoned keyspace is: 2
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 2
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when we have a solution for materialisation of infinite graphs (#75)
@@ -1186,14 +1186,14 @@ Feature: Relation Inference Resolution
       # If only Yusuf didn't dream about himself...
       (dreamer: $x, dream-subject: $x) isa dream;
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match $x isa dream; get; limit 10;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 10
-#    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 10
+#    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when materialisation is possible (may be an infinite graph?) (#75)
@@ -1289,17 +1289,17 @@ Feature: Relation Inference Resolution
       (supertype: $f, subtype: $rr) isa inheritance;
       (supertype: $f, subtype: $rr2) isa inheritance;
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match $p isa pair, has name 'ff'; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 16
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 16
     Then for graql query
       """
       match $p isa pair; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 64
-#    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 64
+#    Then materialised and reasoned databases are the same size

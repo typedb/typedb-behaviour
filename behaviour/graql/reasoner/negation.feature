@@ -17,15 +17,15 @@
 
 Feature: Negation Resolution
 
-  Background: Set up keyspaces for resolution testing
+  Background: Set up databases for resolution testing
 
     Given connection has been opened
-    Given connection delete all keyspaces
-    Given connection open sessions for keyspaces:
+    Given connection delete all databases
+    Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised keyspace is named: materialised
-    Given reasoned keyspace is named: reasoned
+    Given materialised database is named: materialised
+    Given reasoned database is named: reasoned
     Given for each session, graql define
       """
       define
@@ -80,19 +80,19 @@ Feature: Negation Resolution
       $x isa person, has age 10;
       $y isa person, has age 20;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match $x has name "Not Ten", has age 20; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
     Then for graql query
       """
       match $x has name "Not Ten", has age 10; get;
       """
-    Then answer size in reasoned keyspace is: 0
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 0
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: a negation with a roleplayer but no relation variable checks that no relations have that roleplayer
@@ -127,7 +127,7 @@ Feature: Negation Resolution
       $z isa person, has name "Edward";
       $c isa company, has name "Apple";
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -135,10 +135,10 @@ Feature: Negation Resolution
         not {(manager: $x) isa employment;};
       get;
       """
-    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned database
     # Anna is not retrieved because she is someone's manager
-    Then answer size in reasoned keyspace is: 2
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 2
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: a negation with a roleplayer and relation variable checks that the relation doesn't have that roleplayer
@@ -173,7 +173,7 @@ Feature: Negation Resolution
       $z isa person, has name "Edward";
       $c isa company, has name "Apple";
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -181,10 +181,10 @@ Feature: Negation Resolution
         not {$r (manager: $x) isa employment;};
       get;
       """
-    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned database
     # Anna is retrieved because she is not a manager in her own employee-employment relation
-    Then answer size in reasoned keyspace is: 3
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 3
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: a negation with unbound roleplayer variables checks that the relation doesn't have any player for that role
@@ -219,7 +219,7 @@ Feature: Negation Resolution
       $z isa person, has name "Edward";
       $c isa company, has name "Apple";
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -227,9 +227,9 @@ Feature: Negation Resolution
         not {$r (manager: $z) isa employment;};
       get;
       """
-    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned database
     # Carol is not retrieved because her employment relation has a manager
-    Then answer size in reasoned keyspace is: 2
+    Then answer size in reasoned database is: 2
     Then for graql query
       """
       match
@@ -238,6 +238,6 @@ Feature: Negation Resolution
       get;
       """
     # Now the negation block is harder to fulfil. Carol is not her own manager, so she is retrieved again
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 3
-    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 3
+    Then materialised and reasoned databases are the same size

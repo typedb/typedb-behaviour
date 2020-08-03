@@ -19,10 +19,10 @@ Feature: Concept Entity
 
   Background:
     Given connection has been opened
-    Given connection delete all keyspaces
-    Given connection does not have any keyspace
-    Given connection create keyspace: grakn
-    Given connection open schema session for keyspace: grakn
+    Given connection delete all databases
+    Given connection does not have any database
+    Given connection create database: grakn
+    Given connection open schema session for database: grakn
     Given session opens transaction of type: write
     # Write schema for the test scenarios
     Given put attribute type: username, with value type: string
@@ -32,7 +32,7 @@ Feature: Concept Entity
     Given entity(person) set has attribute type: email
     Given transaction commits
     Given connection close all sessions
-    Given connection open data session for keyspace: grakn
+    Given connection open data session for database: grakn
     Given session opens transaction of type: write
 
   Scenario: Entity can be created

@@ -19,10 +19,10 @@ Feature: Concept Relation Type and Role Type
 
   Background:
     Given connection has been opened
-    Given connection delete all keyspaces
-    Given connection does not have any keyspace
-    Given connection create keyspace: grakn
-    Given connection open schema session for keyspace: grakn
+    Given connection delete all databases
+    Given connection does not have any database
+    Given connection create database: grakn
+    Given connection open schema session for database: grakn
     Given session opens transaction of type: write
 
   Scenario: Relation and role types can be created
@@ -99,14 +99,14 @@ Feature: Concept Relation Type and Role Type
     When entity(person) set plays role: marriage:wife
     When transaction commits
     When connection close all sessions
-    When connection open data session for keyspace: grakn
+    When connection open data session for database: grakn
     When session opens transaction of type: write
     When $m = relation(marriage) create new instance
     When $a = entity(person) create new instance
     When relation $m set player for role(wife): $a
     When transaction commits
     When connection close all sessions
-    When connection open schema session for keyspace: grakn
+    When connection open schema session for database: grakn
     When session opens transaction of type: write
     Then delete relation type: marriage; throws exception
 

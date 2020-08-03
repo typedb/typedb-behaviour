@@ -15,21 +15,21 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-Feature: Connection Keyspace
+Feature: Connection Database
 
   Background:
     Given connection has been opened
-    Given connection delete all keyspaces
-    Given connection does not have any keyspace
+    Given connection delete all databases
+    Given connection does not have any database
 
-  Scenario: create one keyspace
-    When  connection create keyspace:
+  Scenario: create one database
+    When  connection create database:
       | alice   |
-    Then  connection has keyspace:
+    Then  connection has database:
       | alice   |
 
-  Scenario: create many keyspaces
-    When  connection create keyspaces:
+  Scenario: create many databases
+    When  connection create databases:
       | alice   |
       | bob     |
       | charlie |
@@ -42,35 +42,7 @@ Feature: Connection Keyspace
       | judy    |
       | mike    |
       | neil    |
-    Then  connection has keyspaces:
-      | alice   |
-      | bob     |
-      | charlie |
-      | dylan   |
-      | eve     |
-      | frank   |
-      | george  |
-      | heidi   |
-      | ivan    |
-      | judy    |
-      | mike    |
-      | neil    |
-
-  Scenario: create many keyspaces in parallel
-    When  connection create keyspaces in parallel:
-      | alice   |
-      | bob     |
-      | charlie |
-      | dylan   |
-      | eve     |
-      | frank   |
-      | george  |
-      | heidi   |
-      | ivan    |
-      | judy    |
-      | mike    |
-      | neil    |
-    Then  connection has keyspaces:
+    Then  connection has databases:
       | alice   |
       | bob     |
       | charlie |
@@ -84,19 +56,47 @@ Feature: Connection Keyspace
       | mike    |
       | neil    |
 
-  Scenario: delete one keyspace
+  Scenario: create many databases in parallel
+    When  connection create databases in parallel:
+      | alice   |
+      | bob     |
+      | charlie |
+      | dylan   |
+      | eve     |
+      | frank   |
+      | george  |
+      | heidi   |
+      | ivan    |
+      | judy    |
+      | mike    |
+      | neil    |
+    Then  connection has databases:
+      | alice   |
+      | bob     |
+      | charlie |
+      | dylan   |
+      | eve     |
+      | frank   |
+      | george  |
+      | heidi   |
+      | ivan    |
+      | judy    |
+      | mike    |
+      | neil    |
+
+  Scenario: delete one database
       # This step should be rewritten once we can create keypsaces without opening sessions
-    Given connection create keyspace:
+    Given connection create database:
       | alice   |
-    When  connection delete keyspace:
+    When  connection delete database:
       | alice   |
-    Then  connection does not have keyspace:
+    Then  connection does not have database:
       | alice   |
-    Then  connection does not have any keyspace
+    Then  connection does not have any database
 
-  Scenario: connection can delete many keyspaces
+  Scenario: connection can delete many databases
       # This step should be rewritten once we can create keypsaces without opening sessions
-    Given connection create keyspaces:
+    Given connection create databases:
       | alice   |
       | bob     |
       | charlie |
@@ -109,7 +109,7 @@ Feature: Connection Keyspace
       | judy    |
       | mike    |
       | neil    |
-    When  connection delete keyspaces:
+    When  connection delete databases:
       | alice   |
       | bob     |
       | charlie |
@@ -122,7 +122,7 @@ Feature: Connection Keyspace
       | judy    |
       | mike    |
       | neil    |
-    Then  connection does not have keyspaces:
+    Then  connection does not have databases:
       | alice   |
       | bob     |
       | charlie |
@@ -135,11 +135,11 @@ Feature: Connection Keyspace
       | judy    |
       | mike    |
       | neil    |
-    Then  connection does not have any keyspace
+    Then  connection does not have any database
 
-  Scenario: delete many keyspaces in parallel
+  Scenario: delete many databases in parallel
       # This step should be rewritten once we can create keypsaces without opening sessions
-    Given connection create keyspaces in parallel:
+    Given connection create databases in parallel:
       | alice   |
       | bob     |
       | charlie |
@@ -152,7 +152,7 @@ Feature: Connection Keyspace
       | judy    |
       | mike    |
       | neil    |
-    When  connection delete keyspaces in parallel:
+    When  connection delete databases in parallel:
       | alice   |
       | bob     |
       | charlie |
@@ -165,7 +165,7 @@ Feature: Connection Keyspace
       | judy    |
       | mike    |
       | neil    |
-    Then  connection does not have keyspaces:
+    Then  connection does not have databases:
       | alice   |
       | bob     |
       | charlie |
@@ -178,4 +178,4 @@ Feature: Connection Keyspace
       | judy    |
       | mike    |
       | neil    |
-    Then  connection does not have any keyspace
+    Then  connection does not have any database

@@ -19,23 +19,23 @@ Feature: Connection Session
 
   Background:
     Given connection has been opened
-    Given connection delete all keyspaces
-    Given connection does not have any keyspace
+    Given connection delete all databases
+    Given connection does not have any database
 
-  Scenario: for one keyspace, open one session
-    When connection create keyspace:
+  Scenario: for one database, open one session
+    When connection create database:
       | grakn   |
-    When connection open session for keyspace:
+    When connection open session for database:
       | grakn   |
     Then session is null: false
     Then session is open: true
-    Then session has keyspace:
+    Then session has database:
       | grakn   |
 
-  Scenario: for one keyspace, open many sessions
-    When connection create keyspace:
+  Scenario: for one database, open many sessions
+    When connection create database:
       | grakn   |
-    When connection open sessions for keyspaces:
+    When connection open sessions for databases:
       | grakn   |
       | grakn   |
       | grakn   |
@@ -50,7 +50,7 @@ Feature: Connection Session
       | grakn   |
     Then sessions are null: false
     Then sessions are open: true
-    Then sessions have keyspaces:
+    Then sessions have databases:
       | grakn   |
       | grakn   |
       | grakn   |
@@ -64,10 +64,10 @@ Feature: Connection Session
       | grakn   |
       | grakn   |
 
-  Scenario: for one keyspace, open many sessions in parallel
-    When connection create keyspace:
+  Scenario: for one database, open many sessions in parallel
+    When connection create database:
       | grakn   |
-    When connection open sessions in parallel for keyspaces:
+    When connection open sessions in parallel for databases:
       | grakn   |
       | grakn   |
       | grakn   |
@@ -82,7 +82,7 @@ Feature: Connection Session
       | grakn   |
     Then sessions in parallel are null: false
     Then sessions in parallel are open: true
-    Then sessions in parallel have keyspaces:
+    Then sessions in parallel have databases:
       | grakn   |
       | grakn   |
       | grakn   |
@@ -96,8 +96,8 @@ Feature: Connection Session
       | grakn   |
       | grakn   |
 
-  Scenario: for many keyspaces, open many sessions
-    When connection create keyspaces:
+  Scenario: for many databases, open many sessions
+    When connection create databases:
       | alice   |
       | bob     |
       | charlie |
@@ -110,7 +110,7 @@ Feature: Connection Session
       | judy    |
       | mike    |
       | neil    |
-    When connection open sessions for keyspaces:
+    When connection open sessions for databases:
       | alice   |
       | bob     |
       | charlie |
@@ -125,7 +125,7 @@ Feature: Connection Session
       | neil    |
     Then sessions are null: false
     Then sessions are open: true
-    Then sessions have keyspaces:
+    Then sessions have databases:
       | alice   |
       | bob     |
       | charlie |
@@ -139,8 +139,8 @@ Feature: Connection Session
       | mike    |
       | neil    |
 
-  Scenario: for many keyspaces, open many sessions in parallel
-    When connection create keyspaces:
+  Scenario: for many databases, open many sessions in parallel
+    When connection create databases:
       | alice   |
       | bob     |
       | charlie |
@@ -153,7 +153,7 @@ Feature: Connection Session
       | judy    |
       | mike    |
       | neil    |
-    When connection open sessions in parallel for keyspaces:
+    When connection open sessions in parallel for databases:
       | alice   |
       | bob     |
       | charlie |
@@ -168,7 +168,7 @@ Feature: Connection Session
       | neil    |
     Then sessions in parallel are null: false
     Then sessions in parallel are open: true
-    Then sessions in parallel have keyspaces:
+    Then sessions in parallel have databases:
       | alice   |
       | bob     |
       | charlie |

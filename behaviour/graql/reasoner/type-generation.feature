@@ -17,15 +17,15 @@
 
 Feature: Type Generation Resolution
 
-  Background: Set up keyspaces for resolution testing
+  Background: Set up databases for resolution testing
 
     Given connection has been opened
-    Given connection delete all keyspaces
-    Given connection open sessions for keyspaces:
+    Given connection delete all databases
+    Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised keyspace is named: materialised
-    Given reasoned keyspace is named: reasoned
+    Given materialised database is named: materialised
+    Given reasoned database is named: reasoned
 
 
   # TODO: re-enable all steps once attribute re-attachment is resolvable
@@ -48,20 +48,20 @@ Feature: Type Generation Resolution
       insert
       $x isa baseEntity;
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match $x isa derivedEntity; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
     Then for graql query
       """
       match $x isa $type; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 4
-#    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 4
+#    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps once attribute re-attachment is resolvable
@@ -100,26 +100,26 @@ Feature: Type Generation Resolution
       $y isa subEntity;    # -> derivedEntity, directDerivedEntity
       $z isa subSubEntity; # -> derivedEntity
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match $x isa derivedEntity; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
     Then for graql query
       """
       match $x isa! derivedEntity; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
     Then for graql query
       """
       match $x isa directDerivedEntity; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
-#    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
+#    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps once attribute re-attachment is resolvable
@@ -157,22 +157,22 @@ Feature: Type Generation Resolution
       (role1:$x, role2:$y) isa baseRelation;
       (role1:$y, role2:$x) isa baseRelation;
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match $x isa baseEntity; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
     Then for graql query
       """
       match
         $x isa derivedEntity;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
-#    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
+#    Then materialised and reasoned databases are the same size
 
 
   @ignore
@@ -203,19 +203,19 @@ Feature: Type Generation Resolution
       insert
       $x isa baseEntity, has baseAttribute "derived";
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match $x isa baseEntity; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
     Then for graql query
       """
       match $x isa baseAttribute; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
     Then for graql query
       """
       match
@@ -223,9 +223,9 @@ Feature: Type Generation Resolution
         $x isa baseEntity;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
-#    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
+#    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps once attribute re-attachment is resolvable
@@ -277,23 +277,23 @@ Feature: Type Generation Resolution
       (baseRole: $y) isa subRelation;
       (baseRole: $z) isa subSubRelation;
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match ($x) isa derivedRelation; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
     Then for graql query
       """
       match ($x) isa! derivedRelation; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
     Then for graql query
       """
       match ($x) isa directDerivedRelation; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
-#    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
+#    Then materialised and reasoned databases are the same size
