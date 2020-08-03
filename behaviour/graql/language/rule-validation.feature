@@ -69,7 +69,7 @@ Feature: Graql Rule Validation
     Given graql define
       """
       define
-      haikal-is-employed,
+      haikal-is-employed
       when {
         $p isa person, has name "Haikal";
       }, then {
