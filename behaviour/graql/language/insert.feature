@@ -1187,6 +1187,7 @@ Feature: Graql Insert Query
       | string   | colour     | 92.8         |
       | string   | colour     | false        |
       | string   | colour     | 2019-12-26   |
+      | long     | shoe-size  | 28.5         |
       | long     | shoe-size  | "28"         |
       | long     | shoe-size  | true         |
       | long     | shoe-size  | 2019-12-26   |
@@ -1701,6 +1702,384 @@ Feature: Graql Insert Query
     When get answers of graql query
       """
       match $x isa! person; get;
+      """
+    Then answer size is: 0
+
+
+  #####################################
+  # MATERIALISATION OF INFERRED FACTS #
+  #####################################
+
+  # Note: These tests have been placed here because Resolution Testing was not built to handle these kinds of cases
+
+  Scenario: when inserting a thing that has inferred concepts, those concepts are not automatically materialised
+    Given graql define
+      """
+      define
+      person has score;
+      score sub attribute, value double;
+      ganesh-rule sub rule,
+      when {
+        $x isa person, has score $s;
+        $s > 0.0;
+      }, then {
+        $x has name "Ganesh";
+      };
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $x isa person, has ref 0, has score 1.0;
+      """
+    Given the integrity is validated
+    When concept identifiers are
+      |     | check | value       |
+      | GAN | value | name:Ganesh |
+    When get answers of graql query
+      """
+      match $x isa name; get;
+      """
+    Then uniquely identify answer concepts
+      | x   |
+      | GAN |
+    When graql delete
+      """
+      match
+        $x isa person;
+      delete
+        $x isa person;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x isa name; get;
+      """
+    # If the name 'Ganesh' had been materialised, then it would still exist in the knowledge graph.
+    Then answer size is: 0
+
+
+  Scenario: when inserting a thing with an inferred attribute ownership, the ownership is not automatically persisted
+    Given graql define
+      """
+      define
+      person has score;
+      score sub attribute, value double;
+      copy-scores-to-all-people sub rule,
+      when {
+        $x isa person, has score $s;
+        $y isa person;
+        $x != $y;
+      }, then {
+        $y has score $s;
+      };
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $x isa person, has ref 0, has name "Chris", has score 10.0;
+      $y isa person, has ref 1, has name "Freya";
+      """
+    Given the integrity is validated
+    When concept identifiers are
+      |     | check | value      |
+      | CHR | key   | ref:0      |
+      | FRE | key   | ref:1      |
+      | TEN | value | score:10.0 |
+    When get answers of graql query
+      """
+      match $x isa person, has score $score; get;
+      """
+    Then uniquely identify answer concepts
+      | x   | score |
+      | CHR | TEN   |
+      | FRE | TEN   |
+    When graql delete
+      """
+      match
+        $x isa person, has name "Chris";
+      delete
+        $x isa person;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x isa score; get;
+      """
+    # The score '10.0' still exists, we never deleted it
+    Then uniquely identify answer concepts
+      | x   |
+      | TEN |
+    When get answers of graql query
+      """
+      match $x isa person, has score $score; get;
+      """
+    # But Freya's ownership of score 10.0 was never materialised and is now gone
+    Then answer size is: 0
+
+
+  Scenario: when inserting things connected to an inferred attribute, the inferred attribute gets materialised
+
+    By explicitly inserting (x,y) is a relation, we are making explicit the fact that x and y both exist.
+
+    Given graql define
+      """
+      define
+
+      name-initial sub relation,
+        relates lettered-name,
+        relates initial;
+
+      score sub attribute, value double;
+      letter sub attribute, value string,
+        plays initial;
+
+      name plays lettered-name;
+      person has score;
+
+      ganesh-rule sub rule,
+      when {
+        $x isa person, has score $s;
+        $s > 0.0;
+      }, then {
+        $x has name "Ganesh";
+      };
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $x isa person, has ref 0, has score 1.0;
+      $y 'G' isa letter;
+      """
+    Given the integrity is validated
+    When concept identifiers are
+      |     | check | value       |
+      | GAN | value | name:Ganesh |
+      | G   | value | letter:G    |
+    When get answers of graql query
+      """
+      match $x isa name; get;
+      """
+    Then uniquely identify answer concepts
+      | x   |
+      | GAN |
+    # At this step we materialise the inferred name 'Ganesh' because the material name-initial relation depends on it.
+    When graql insert
+      """
+      match
+        $p isa person, has name $x;
+        $x 'Ganesh' isa name;
+        $y 'G' isa letter;
+      insert
+        (lettered-name: $x, initial: $y) isa name-initial;
+      """
+    Then the integrity is validated
+    When graql delete
+      """
+      match
+        $x isa person;
+      delete
+        $x isa person;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x isa person; get;
+      """
+    Then answer size is: 0
+    When get answers of graql query
+      """
+      match $x isa name; get;
+      """
+    # We deleted the person called 'Ganesh', but the name still exists because it was materialised on match-insert
+    Then uniquely identify answer concepts
+      | x   |
+      | GAN |
+    When get answers of graql query
+      """
+      match (lettered-name: $x, initial: $y) isa name-initial; get;
+      """
+    # And the inserted relation still exists too
+    Then uniquely identify answer concepts
+      | x   | y   |
+      | GAN | G   |
+
+
+  Scenario: when inserting things connected to an inferred relation, the inferred relation gets materialised
+    Given graql undefine
+      """
+      undefine
+      employment key ref;
+      """
+    Given the integrity is validated
+    Given graql define
+      """
+      define
+
+      contract sub entity,
+        plays contract-of-employment;
+
+      employment-contract sub relation,
+        relates contracted-employment,
+        relates contract-of-employment;
+
+      employment plays contracted-employment;
+
+      henry-is-employed sub rule,
+      when {
+        $x isa person, has name "Henry";
+      }, then {
+        (employee: $x) isa employment;
+      };
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $x isa person, has name "Henry", has ref 0;
+      $c isa contract;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x isa employment; get;
+      """
+    Then answer size is: 1
+    # At this step we materialise the inferred employment because the material employment-contract depends on it.
+    When graql insert
+      """
+      match
+        $e isa employment;
+        $c isa contract;
+      insert
+        (contracted-employment: $e, contract-of-employment: $c) isa employment-contract;
+      """
+    Then the integrity is validated
+    When graql undefine
+      """
+      undefine
+      henry-is-employed sub rule;
+      """
+    Then the integrity is validated
+    When get answers of graql query
+      """
+      match $x isa employment; get;
+      """
+    # We deleted the rule that infers the employment, but it still exists because it was materialised on match-insert
+    Then answer size is: 1
+    When get answers of graql query
+      """
+      match (contracted-employment: $x, contract-of-employment: $y) isa employment-contract; get;
+      """
+    # And the inserted relation still exists too
+    Then answer size is: 1
+
+
+  Scenario: when inserting things connected to a chain of inferred concepts, the whole chain is materialised
+    Given graql define
+      """
+      define
+
+      vertex sub entity,
+        key index;
+
+      link sub relation, relates coordinate;
+      vertex plays coordinate;
+
+      reachable sub relation,
+        relates coordinate,
+        plays connected-path;
+
+      road-proposal sub relation,
+        relates connected-path,
+        plays proposal-to-construct;
+
+      road-construction sub relation, relates proposal-to-construct;
+
+      index sub attribute, value string;
+
+      a-linked-point-is-reachable sub rule,
+      when {
+        ($x, $y) isa link;
+      }, then {
+        (coordinate: $x, coordinate: $y) isa reachable;
+      };
+
+      a-point-reachable-from-a-linked-point-is-reachable sub rule,
+      when {
+        ($x, $z) isa link;
+        ($z, $y) isa reachable;
+      }, then {
+        (coordinate: $x, coordinate: $y) isa reachable;
+      };
+
+      propose-roads-between-reachable-points sub rule,
+      when {
+        $r isa reachable;
+      }, then {
+        ($r) isa road-proposal;
+      };
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+
+      $a isa vertex, has index "a";
+      $b isa vertex, has index "b";
+      $c isa vertex, has index "c";
+      $d isa vertex, has index "d";
+
+      (coordinate: $a, coordinate: $b) isa link;
+      (coordinate: $b, coordinate: $c) isa link;
+      (coordinate: $c, coordinate: $c) isa link;
+      (coordinate: $c, coordinate: $d) isa link;
+      """
+    Given the integrity is validated
+    When graql insert
+      """
+      match
+        $a isa vertex, has index "a";
+        $d isa vertex, has index "d";
+        $reach ($a, $d) isa reachable;
+        $r ($reach) isa road-proposal;
+      insert
+        (proposal-to-construct: $r) isa road-construction;
+      """
+    Then the integrity is validated
+    When graql delete
+      """
+      match
+        $r (coordinate: $c) isa link;
+        $c isa vertex, has index "c";
+      delete
+        $r isa link;
+      """
+    Then the integrity is validated
+    # After deleting all the links to 'c', our rules no longer infer that 'd' is reachable from 'a'. But in fact we
+    # materialised this reachable link when we did our match-insert, because it played a role in our road-proposal,
+    # which itself plays a role in the road-construction that we explicitly inserted:
+    When get answers of graql query
+      """
+      match
+        $a isa vertex, has index "a";
+        $d isa vertex, has index "d";
+        $reach ($a, $d) isa reachable;
+      get;
+      """
+    Then answer size is: 1
+    # On the other hand, the fact that 'c' was reachable from 'a' was not -directly- used; although it was needed
+    # in order to infer that (a,d) was reachable, it did not, itself, play a role in any relation that we materialised,
+    # so it is now gone.
+    When get answers of graql query
+      """
+      match
+        $a isa vertex, has index "a";
+        $c isa vertex, has index "c";
+        $reach ($a, $c) isa reachable;
+      get;
       """
     Then answer size is: 0
 

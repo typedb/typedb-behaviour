@@ -747,6 +747,27 @@ Feature: Graql Match Clause
     Then answer size is: 0
 
 
+  Scenario: when one entity exists, and we match two variables both of that entity type, the entity is returned
+    Given graql insert
+      """
+      insert $x isa person, has ref 0;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x isa person;
+        $y isa person;
+      get;
+      """
+    When concept identifiers are
+      |     | check | value |
+      | PER | key   | ref:0 |
+    Then uniquely identify answer concepts
+      | x   | y   |
+      | PER | PER |
+
+
   Scenario: an error is thrown when matching that a variable has a specific type, when that type is in fact a role
     Then graql get throws
       """
@@ -1620,6 +1641,58 @@ Feature: Graql Match Clause
       | x   |
       | DON |
       | RAL |
+
+
+  Scenario: when the answers of a value comparison include both a `double` and a `long`, both answers are returned
+    Given graql define
+      """
+      define
+      length sub attribute, value double;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $a 24 isa age;
+      $b 19 isa age;
+      $c 20.9 isa length;
+      $d 19.9 isa length;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x isa attribute;
+        $x > 20;
+      get;
+      """
+    And concept identifiers are
+      |      | check  | value       |
+      | A24  | value  | age:24      |
+      | A19  | value  | age:19      |
+      | L209 | value  | length:20.9 |
+      | L199 | value  | length:19.9 |
+    Then uniquely identify answer concepts
+      | x    |
+      | A24  |
+      | L209 |
+
+
+  Scenario: when one entity exists, and we match two variables with concept inequality, an empty answer is returned
+    Given graql insert
+      """
+      insert $x isa person, has ref 0;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x isa person;
+        $y isa person;
+        $x != $y;
+      get;
+      """
+    Then answer size is: 0
 
 
   Scenario: concept comparison of unbound variables throws an error
