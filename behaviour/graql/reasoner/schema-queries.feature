@@ -17,15 +17,15 @@
 
 Feature: Schema Query Resolution (Variable Types)
 
-  Background: Set up keyspaces for resolution testing
+  Background: Set up databases for resolution testing
 
     Given connection has been opened
-    Given connection delete all keyspaces
-    Given connection open sessions for keyspaces:
+    Given connection delete all databases
+    Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised keyspace is named: materialised
-    Given reasoned keyspace is named: reasoned
+    Given materialised database is named: materialised
+    Given reasoned database is named: reasoned
     Given for each session, graql define
       """
       define
@@ -87,34 +87,34 @@ Feature: Schema Query Resolution (Variable Types)
       $y isa person;
       $z isa person;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Given for graql query
       """
       match $x isa entity; get;
       """
-    Given answer size in reasoned keyspace is: 3
+    Given answer size in reasoned database is: 3
     Given for graql query
       """
       match $x isa relation; get;
       """
     # (xx, yy, zz, xy, xz, yz)
-    Given answer size in reasoned keyspace is: 6
+    Given answer size in reasoned database is: 6
     Given for graql query
       """
       match $x isa attribute; get;
       """
-    Given answer size in reasoned keyspace is: 1
+    Given answer size in reasoned database is: 1
     Then for graql query
       """
       match $x isa $type; get;
       """
-#    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned database
     # 3 people x 3 types of person {person,entity,thing}
     # 6 friendships x 3 types of friendship {friendship, relation, thing}
     # 1 name x 3 types of name {name,attribute,thing}
     # = 9 + 18 + 3 = 30
-    Then answer size in reasoned keyspace is: 30
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 30
+    Then materialised and reasoned databases are the same size
 
 
   @ignore
@@ -140,21 +140,21 @@ Feature: Schema Query Resolution (Variable Types)
       $y isa person, has name "Richard";
       $z isa person, has name "Rupert";
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Given for graql query
       """
       match ($u, $v) isa relation; get;
       """
     # (xx, yy, zz, xy, xz, yz, yx, zx, zy)
-    Given answer size in reasoned keyspace is: 9
+    Given answer size in reasoned database is: 9
     Then for graql query
       """
       match ($u, $v) isa $type; get;
       """
-#    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned database
     # 3 possible $u x 3 possible $v x 3 possible $type {friendship,relation,thing}
-    Then answer size in reasoned keyspace is: 27
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 27
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps once schema queries are resolvable (#75)
@@ -202,15 +202,15 @@ Feature: Schema Query Resolution (Variable Types)
       $x isa person, has name "Sharon";
       $y isa person, has name "Tobias";
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Given for graql query
       """
       match
         $x isa relation;
       get;
       """
-    Given all answers are correct in reasoned keyspace
-    Given answer size in reasoned keyspace is: 6
+    Given all answers are correct in reasoned database
+    Given answer size in reasoned database is: 6
     Then for graql query
       """
       match
@@ -218,11 +218,11 @@ Feature: Schema Query Resolution (Variable Types)
         $type has contract;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned database
     # friendship can't have a contract... at least, not in this pristine test world
     # note: enforcing 'has contract' also eliminates 'relation' and 'thing' as possible types
-    Then answer size in reasoned keyspace is: 4
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 4
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps once schema queries are resolvable (#75)
@@ -252,13 +252,13 @@ Feature: Schema Query Resolution (Variable Types)
       $y isa person, has name "Richard";
       $z isa person, has name "Rupert";
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Given for graql query
       """
       match $x isa relation; get;
       """
     # 3 friendships, 3 employments
-    Given answer size in reasoned keyspace is: 6
+    Given answer size in reasoned database is: 6
     Then for graql query
       """
       match
@@ -266,10 +266,10 @@ Feature: Schema Query Resolution (Variable Types)
         $type sub relation;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned database
     # 3 friendships, 3 employments, 6 relations
-    Then answer size in reasoned keyspace is: 12
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 12
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps once schema queries are resolvable (#75)
@@ -317,15 +317,15 @@ Feature: Schema Query Resolution (Variable Types)
       $x isa person, has name "Sharon";
       $y isa person, has name "Tobias";
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Given for graql query
       """
       match
         $x isa relation;
       get;
       """
-    Given all answers are correct in reasoned keyspace
-    Given answer size in reasoned keyspace is: 6
+    Given all answers are correct in reasoned database
+    Given answer size in reasoned database is: 6
     Then for graql query
       """
       match
@@ -333,11 +333,11 @@ Feature: Schema Query Resolution (Variable Types)
         $type plays documented-thing;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned database
     # friendship can't be a documented-thing
     # note: enforcing 'plays documented-thing' also eliminates 'relation' and 'thing' as possible types
-    Then answer size in reasoned keyspace is: 4
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 4
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: implement this once roles are scoped to relations
@@ -370,15 +370,15 @@ Feature: Schema Query Resolution (Variable Types)
       $z isa colonel;
       $w isa colonel;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Given for graql query
       """
       match
         (employee: $x, employer: $y) isa employment;
       get;
       """
-    Given all answers are correct in reasoned keyspace
-    Given answer size in reasoned keyspace is: 3
+    Given all answers are correct in reasoned database
+    Given answer size in reasoned database is: 3
     Then for graql query
       """
       match
@@ -386,9 +386,9 @@ Feature: Schema Query Resolution (Variable Types)
         $x isa $type;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned database
     # 3 colonels * 5 supertypes of colonel (colonel, military-person, person, entity, thing)
-    Then answer size in reasoned keyspace is: 15
+    Then answer size in reasoned database is: 15
     Then for graql query
       """
       match
@@ -396,11 +396,11 @@ Feature: Schema Query Resolution (Variable Types)
         $x isa $type;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned database
     # (3 colonels * 5 supertypes of colonel * 1 company)
     # + (1 company * 3 supertypes of company * 3 colonels)
-    Then answer size in reasoned keyspace is: 24
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 24
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps once schema queries are resolvable (#75)
@@ -447,7 +447,7 @@ Feature: Schema Query Resolution (Variable Types)
       (employee: $s3, employer: $c2) isa employment;
       (employee: $s4, employer: $c2prime) isa employment;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -460,10 +460,10 @@ Feature: Schema Query Resolution (Variable Types)
         $y != $x;
       get $x, $y;
       """
-#    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned database
     # All companies match when $type is company (or entity)
     # Query returns {ab,ac,ad,bc,bd,cd} and each of them with the variables flipped
-    Then answer size in reasoned keyspace is: 12
+    Then answer size in reasoned database is: 12
     Then for graql query
       """
       match
@@ -482,8 +482,8 @@ Feature: Schema Query Resolution (Variable Types)
     # $type is forced to be either finance-company or retail-company, restricting the answer space
     # Query returns {ab,cd} and each of them with the variables flipped
     # Note: the two Captain Obvious rules should not affect the answer, as the concepts retain their original types
-    Then answer size in reasoned keyspace is: 4
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 4
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when type generation is supported in resolution test framework (#75)
@@ -514,7 +514,7 @@ Feature: Schema Query Resolution (Variable Types)
       insert
       $x isa person, has name "Romeo";
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Given for graql query
       """
       match
@@ -522,9 +522,9 @@ Feature: Schema Query Resolution (Variable Types)
         $type sub entity;
       get $x, $type;
       """
-#    Given all answers are correct in reasoned keyspace
+#    Given all answers are correct in reasoned database
     # entity, person, duelist, poet
-    Given answer size in reasoned keyspace is: 4
+    Given answer size in reasoned database is: 4
     Then for graql query
       """
       match
@@ -534,10 +534,10 @@ Feature: Schema Query Resolution (Variable Types)
         $type2 != $type;
       get $x, $type;
       """
-#    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned database
     # entity, person, poet
-    Then answer size in reasoned keyspace is: 3
-#    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 3
+#    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when type generation is supported in resolution test framework (#75)
@@ -568,7 +568,7 @@ Feature: Schema Query Resolution (Variable Types)
       insert
       $x isa person, has name "Romeo";
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Given for graql query
       """
       match
@@ -576,9 +576,9 @@ Feature: Schema Query Resolution (Variable Types)
         $type sub entity;
       get $x, $type;
       """
-#    Given all answers are correct in reasoned keyspace
+#    Given all answers are correct in reasoned database
     # entity, person, duelist, poet
-    Given answer size in reasoned keyspace is: 4
+    Given answer size in reasoned database is: 4
     Then for graql query
       """
       match
@@ -588,7 +588,7 @@ Feature: Schema Query Resolution (Variable Types)
         $type2 != $type;
       get $x, $type;
       """
-#    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned database
     # entity, person, poet
-    Then answer size in reasoned keyspace is: 3
-#    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 3
+#    Then materialised and reasoned databases are the same size

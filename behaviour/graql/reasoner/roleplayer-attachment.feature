@@ -17,15 +17,15 @@
 
 Feature: Roleplayer Attachment Resolution
 
-  Background: Set up keyspaces for resolution testing
+  Background: Set up databases for resolution testing
 
     Given connection has been opened
-    Given connection delete all keyspaces
-    Given connection open sessions for keyspaces:
+    Given connection delete all databases
+    Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised keyspace is named: materialised
-    Given reasoned keyspace is named: reasoned
+    Given materialised database is named: materialised
+    Given reasoned database is named: reasoned
     Given for each session, graql define
       """
       define
@@ -85,16 +85,16 @@ Feature: Roleplayer Attachment Resolution
       (ruled-person: $x) isa dominion;
       (ruled-person: $y) isa dominion;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
         (ruled-person: $x, ruler: $y) isa dominion;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
-    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when fixed (#75)
@@ -124,16 +124,16 @@ Feature: Roleplayer Attachment Resolution
       (ruled-person: $x) isa dominion;
       (ruled-person: $y) isa dominion;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
         (ruled-person: $x, ruler: $y);
       get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
-    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when fixed (#75)
@@ -159,22 +159,22 @@ Feature: Roleplayer Attachment Resolution
 
       (navigator: $y, chef: $x) isa ship-crew;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
         (captain: $x, navigator: $y) isa ship-crew;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
     Then answer set is equivalent for graql query
       """
       match
         (captain: $x, navigator: $y, chef: $x) isa ship-crew;
       get;
       """
-    Then materialised and reasoned keyspaces are the same size
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when fixed (#75)
@@ -200,15 +200,15 @@ Feature: Roleplayer Attachment Resolution
 
       (navigator: $y, captain: $x) isa ship-crew;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
         (captain: $x, captain: $x) isa ship-crew;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
     Then for graql query
       """
       match
@@ -216,17 +216,17 @@ Feature: Roleplayer Attachment Resolution
       get;
       """
     # too many captains - no match
-    Then answer size in reasoned keyspace is: 0
+    Then answer size in reasoned database is: 0
     Then for graql query
       """
       match
         (captain: $x) isa ship-crew;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned database
     # we have more captains than we need, but there is still only 1 matching relation instance
-    Then answer size in reasoned keyspace is: 1
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 1
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when fixed (#75)
@@ -252,18 +252,18 @@ Feature: Roleplayer Attachment Resolution
 
       (captain: $x, navigator: $y) isa ship-crew;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
         (navigator: $x, navigator: $y) isa ship-crew;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned database
     # x        | y        |
     # Maria    | Isabella |
     # Isabella | Maria    |
-    Then answer size in reasoned keyspace is: 2
+    Then answer size in reasoned database is: 2
     Then answer set is equivalent for graql query
       """
       match
@@ -271,4 +271,4 @@ Feature: Roleplayer Attachment Resolution
         $x != $y;
       get;
       """
-    Then materialised and reasoned keyspaces are the same size
+    Then materialised and reasoned databases are the same size

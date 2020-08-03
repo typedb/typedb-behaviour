@@ -17,15 +17,15 @@
 
 Feature: Type Hierarchy Resolution
 
-  Background: Set up keyspaces for resolution testing
+  Background: Set up databases for resolution testing
 
     Given connection has been opened
-    Given connection delete all keyspaces
-    Given connection open sessions for keyspaces:
+    Given connection delete all databases
+    Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised keyspace is named: materialised
-    Given reasoned keyspace is named: reasoned
+    Given materialised database is named: materialised
+    Given reasoned database is named: reasoned
 
 
   Scenario: subtypes trigger rules based on their parents; parent types don't trigger rules based on their children
@@ -76,7 +76,7 @@ Feature: Type Hierarchy Resolution
       (performer:$x, writer:$v) isa performance;  # child - child    -> satisfies rule
       (performer:$y, writer:$v) isa performance;  # person - child   -> doesn't satisfy rule
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -85,9 +85,9 @@ Feature: Type Hierarchy Resolution
         (actor: $x, film-writer: $y) isa film-production;
       get;
       """
-    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned database
     # Answers are (actor:$x, film-writer:$z) and (actor:$x, film-writer:$v)
-    Then answer size in reasoned keyspace is: 2
+    Then answer size in reasoned database is: 2
     Then for graql query
       """
       match
@@ -97,8 +97,8 @@ Feature: Type Hierarchy Resolution
         $y has name 'a';
       get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
     Then for graql query
       """
       match
@@ -107,9 +107,9 @@ Feature: Type Hierarchy Resolution
         (actor: $x, film-writer: $y) isa film-production;
       get;
       """
-    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned database
     # Answer is (actor:$x, film-writer:$v) ONLY
-    Then answer size in reasoned keyspace is: 1
+    Then answer size in reasoned database is: 1
     Then for graql query
       """
       match
@@ -119,8 +119,8 @@ Feature: Type Hierarchy Resolution
         $y has name 'a';
       get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
     Then for graql query
       """
       match
@@ -129,9 +129,9 @@ Feature: Type Hierarchy Resolution
         (actor: $x, film-writer: $y) isa film-production;
       get;
       """
-    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned database
     # Answers are (actor:$x, film-writer:$z) and (actor:$x, film-writer:$v)
-    Then answer size in reasoned keyspace is: 2
+    Then answer size in reasoned database is: 2
     Then for graql query
       """
       match
@@ -141,9 +141,9 @@ Feature: Type Hierarchy Resolution
         $y has name 'a';
       get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
-    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: when matching different roles to those that are actually inferred, no answers are returned
@@ -181,20 +181,20 @@ Feature: Type Hierarchy Resolution
       $y isa person;
       (child: $x, parent: $y) isa family;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     # Matching a sibling of the actual role
     Then for graql query
       """
       match (child: $x, father: $y) isa large-family; get;
       """
-    Then answer size in reasoned keyspace is: 0
+    Then answer size in reasoned database is: 0
     # Matching two siblings when only one is present
     Then for graql query
       """
       match (mother: $x, father: $y) isa large-family; get;
       """
-    Then answer size in reasoned keyspace is: 0
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 0
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: when a sub-relation is inferred, it can be retrieved by matching its super-relation and sub-roles
@@ -237,15 +237,15 @@ Feature: Type Hierarchy Resolution
       $y isa person;
       (writer:$x, performer:$y) isa performance;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     # sub-roles, super-relation
     Then for graql query
       """
       match (scifi-writer:$x, scifi-actor:$y) isa film-production; get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
-    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: when a sub-relation is inferred, it can be retrieved by matching its sub-relation and super-roles
@@ -288,15 +288,15 @@ Feature: Type Hierarchy Resolution
       $y isa person;
       (writer:$x, performer:$y) isa performance;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     # super-roles, sub-relation
     Then for graql query
       """
       match (film-writer:$x, actor:$y) isa scifi-production; get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
-    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: when a sub-relation is inferred, it can be retrieved by matching its super-relation and super-roles
@@ -339,15 +339,15 @@ Feature: Type Hierarchy Resolution
       $y isa person;
       (writer:$x, performer:$y) isa performance;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     # super-roles, super-relation
     Then for graql query
       """
       match (film-writer:$x, actor:$y) isa film-production; get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
-    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: when a rule is recursive, its inferences respect type hierarchies
@@ -408,7 +408,7 @@ Feature: Type Hierarchy Resolution
       (performer:$x, writer:$v) isa performance;  # child - child    -> satisfies rule
       (performer:$y, writer:$v) isa performance;  # person - child   -> doesn't satisfy rule
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -417,9 +417,9 @@ Feature: Type Hierarchy Resolution
         (actor: $x, film-writer: $y) isa film-production;
       get;
       """
-    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned database
     # Answers are (actor:$x, film-writer:$z) and (actor:$x, film-writer:$v)
-    Then answer size in reasoned keyspace is: 2
+    Then answer size in reasoned database is: 2
     Then for graql query
       """
       match
@@ -429,8 +429,8 @@ Feature: Type Hierarchy Resolution
         $y has name 'a';
       get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
     Then for graql query
       """
       match
@@ -439,9 +439,9 @@ Feature: Type Hierarchy Resolution
         (actor: $x, film-writer: $y) isa film-production;
       get;
       """
-    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned database
     # Answer is (actor:$x, film-writer:$v) ONLY
-    Then answer size in reasoned keyspace is: 1
+    Then answer size in reasoned database is: 1
     Then for graql query
       """
       match
@@ -451,8 +451,8 @@ Feature: Type Hierarchy Resolution
         $y has name 'a';
       get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
     Then for graql query
       """
       match
@@ -461,9 +461,9 @@ Feature: Type Hierarchy Resolution
         (actor: $x, film-writer: $y) isa film-production;
       get;
       """
-    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned database
     # Answers are (actor:$x, film-writer:$z) and (actor:$x, film-writer:$v)
-    Then answer size in reasoned keyspace is: 2
+    Then answer size in reasoned database is: 2
     Then for graql query
       """
       match
@@ -473,9 +473,9 @@ Feature: Type Hierarchy Resolution
         $y has name 'a';
       get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
-    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: querying for a super-relation gives the same answer as querying for its inferred sub-relation
@@ -518,15 +518,15 @@ Feature: Type Hierarchy Resolution
       $y isa person;
       (parent:$x, child:$y) isa family;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
         (home-owner: $x, resident: $y) isa residence;
       get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
     Then for graql query
       """
       match
@@ -534,9 +534,9 @@ Feature: Type Hierarchy Resolution
         (parent-home-owner: $x, child-resident: $y) isa family-residence;
       get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
-    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps once attribute re-attachment is resolvable
@@ -562,15 +562,15 @@ Feature: Type Hierarchy Resolution
       insert
       $x isa panda;
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match
         $x isa person;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
     Then for graql query
       """
       match
@@ -578,6 +578,6 @@ Feature: Type Hierarchy Resolution
         $x isa drunk-person;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
-#    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
+#    Then materialised and reasoned databases are the same size

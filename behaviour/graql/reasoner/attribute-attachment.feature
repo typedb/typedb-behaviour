@@ -17,15 +17,15 @@
 
 Feature: Attribute Attachment Resolution
 
-  Background: Set up keyspaces for resolution testing
+  Background: Set up databases for resolution testing
 
     Given connection has been opened
-    Given connection delete all keyspaces
-    Given connection open sessions for keyspaces:
+    Given connection delete all databases
+    Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised keyspace is named: materialised
-    Given reasoned keyspace is named: reasoned
+    Given materialised database is named: materialised
+    Given reasoned database is named: reasoned
     Given for each session, graql define
       """
       define
@@ -80,20 +80,20 @@ Feature: Attribute Attachment Resolution
       $geX isa person, has string-attribute "banana";
       $geY isa person;
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match $x isa person, has string-attribute $y; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
     Then for graql query
       """
       match $x isa string-attribute; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
-#    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
+#    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps once re-attachment of unrelated attributes is resolvable
@@ -132,21 +132,21 @@ Feature: Attribute Attachment Resolution
       $geX isa person, has string-attribute "banana";
       $geY isa person;
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match $x isa person; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
     Then for graql query
       """
       match $x isa person, has attribute $y; get;
       """
     # four attributes for each entity
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 6
-#    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 6
+#    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps once re-attachment of unrelated attributes is resolvable
@@ -167,27 +167,27 @@ Feature: Attribute Attachment Resolution
       insert
       $geX isa person, has string-attribute "banana";
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match $x isa person, has sub-string-attribute $y; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
     Then for graql query
       """
       match $x isa sub-string-attribute; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
     Then for graql query
       """
       match $x isa string-attribute; $y isa sub-string-attribute; get;
       """
     # 2 SA instances - one base, one sub hence two answers
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
-#    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
+#    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps once re-attachment of unrelated attributes is resolvable
@@ -209,20 +209,20 @@ Feature: Attribute Attachment Resolution
       $geX isa person, has string-attribute "banana";
       $geY isa person;
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match $x isa person, has unrelated-attribute $y; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
     Then for graql query
       """
       match $x isa unrelated-attribute; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
-#    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
+#    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps once attribute re-attachment is resolvable
@@ -255,14 +255,14 @@ Feature: Attribute Attachment Resolution
       $geY isa person;
       (leader:$geX, team-member:$geX) isa team;
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match $x has string-attribute $y; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 3
-#    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 3
+#    Then materialised and reasoned databases are the same size
 
 
   Scenario: a rule can infer an attribute value that did not previously exist in the graph
@@ -294,26 +294,26 @@ Feature: Attribute Attachment Resolution
       $aeY isa soft-drink;
       $r "Ocado" isa retailer;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match $x has retailer 'Ocado'; get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
     Then for graql query
       """
       match $x has retailer $r; get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 4
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 4
     Then for graql query
       """
       match $x has retailer 'Tesco'; get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
-    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: a rule can make a thing own an attribute that had no prior owners
@@ -337,11 +337,11 @@ Feature: Attribute Attachment Resolution
       $aeY isa soft-drink;
       $r "Ocado" isa retailer;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match $x isa soft-drink, has retailer 'Ocado'; get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
-    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
+    Then materialised and reasoned databases are the same size

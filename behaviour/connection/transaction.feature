@@ -19,13 +19,13 @@ Feature: Connection Transaction
 
   Background:
     Given connection has been opened
-    Given connection delete all keyspaces
-    Given connection does not have any keyspace
+    Given connection delete all databases
+    Given connection does not have any database
 
-  Scenario: one keyspace, one session, one transaction to read
-    When connection create keyspace:
+  Scenario: one database, one session, one transaction to read
+    When connection create database:
       | grakn   |
-    Given connection open session for keyspace:
+    Given connection open session for database:
       | grakn   |
     When for each session, open transaction of type:
       | read    |
@@ -34,10 +34,10 @@ Feature: Connection Transaction
     Then for each session, transaction has type:
       | read    |
 
-  Scenario: one keyspace, one session, one transaction to write
-    When connection create keyspace:
+  Scenario: one database, one session, one transaction to write
+    When connection create database:
       | grakn   |
-    Given connection open session for keyspace:
+    Given connection open session for database:
       | grakn   |
     When for each session, open transaction of type:
       | write   |
@@ -46,30 +46,30 @@ Feature: Connection Transaction
     Then for each session, transaction has type:
       | write   |
 
-  Scenario: one keyspace, one session, one committed write transaction is closed
-    When connection create keyspace:
+  Scenario: one database, one session, one committed write transaction is closed
+    When connection create database:
       | grakn   |
-    Given connection open session for keyspace:
-      | grakn   |
-    When for each session, open transaction of type:
-      | write   |
-    Then for each session, transaction commits
-    Then for each session, transaction commits; throws exception
-
-  Scenario: one keyspace, one session, re-committing transaction throws
-    When connection create keyspace:
-      | grakn   |
-    Given connection open session for keyspace:
+    Given connection open session for database:
       | grakn   |
     When for each session, open transaction of type:
       | write   |
     Then for each session, transaction commits
     Then for each session, transaction commits; throws exception
 
-  Scenario: one keyspace, one session, transaction close is idempotent
-    When connection create keyspace:
+  Scenario: one database, one session, re-committing transaction throws
+    When connection create database:
       | grakn   |
-    Given connection open session for keyspace:
+    Given connection open session for database:
+      | grakn   |
+    When for each session, open transaction of type:
+      | write   |
+    Then for each session, transaction commits
+    Then for each session, transaction commits; throws exception
+
+  Scenario: one database, one session, transaction close is idempotent
+    When connection create database:
+      | grakn   |
+    Given connection open session for database:
       | grakn   |
     When for each session, open transaction of type:
       | write   |
@@ -79,10 +79,10 @@ Feature: Connection Transaction
     Then for each session, transaction is open: false
 
   @ignore-grakn-core
-  Scenario: one keyspace, one session, many transactions to read
-    When connection create keyspace:
+  Scenario: one database, one session, many transactions to read
+    When connection create database:
       | grakn   |
-    Given connection open session for keyspace:
+    Given connection open session for database:
       | grakn   |
     When for each session, open transactions of type:
       | read    |
@@ -114,10 +114,10 @@ Feature: Connection Transaction
       | read    |
 
   @ignore-grakn-core
-  Scenario: one keyspace, one session, many transactions to write
-    When connection create keyspace:
+  Scenario: one database, one session, many transactions to write
+    When connection create database:
       | grakn   |
-    Given connection open session for keyspace:
+    Given connection open session for database:
       | grakn   |
     When for each session, open transactions of type:
       | write   |
@@ -149,10 +149,10 @@ Feature: Connection Transaction
       | write   |
 
   @ignore-grakn-core
-  Scenario: one keyspace, one session, many transactions to read and write
-    When connection create keyspace:
+  Scenario: one database, one session, many transactions to read and write
+    When connection create database:
       | grakn   |
-    Given connection open session for keyspace:
+    Given connection open session for database:
       | grakn   |
     When for each session, open transactions of type:
       | read    |
@@ -183,10 +183,10 @@ Feature: Connection Transaction
       | read    |
       | write   |
 
-  Scenario: one keyspace, one session, many transactions in parallel to read
-    When connection create keyspace:
+  Scenario: one database, one session, many transactions in parallel to read
+    When connection create database:
       | grakn   |
-    Given connection open session for keyspace:
+    Given connection open session for database:
       | grakn   |
     When for each session, open transactions in parallel of type:
       | read    |
@@ -217,10 +217,10 @@ Feature: Connection Transaction
       | read    |
       | read    |
 
-  Scenario: one keyspace, one session, many transactions in parallel to write
-    When connection create keyspace:
+  Scenario: one database, one session, many transactions in parallel to write
+    When connection create database:
       | grakn   |
-    Given connection open session for keyspace:
+    Given connection open session for database:
       | grakn   |
     When for each session, open transactions in parallel of type:
       | write   |
@@ -251,10 +251,10 @@ Feature: Connection Transaction
       | write   |
       | write   |
 
-  Scenario: one keyspace, one session, many transactions in parallel to read and write
-    When connection create keyspace:
+  Scenario: one database, one session, many transactions in parallel to read and write
+    When connection create database:
       | grakn   |
-    Given connection open session for keyspace:
+    Given connection open session for database:
       | grakn   |
     When for each session, open transactions in parallel of type:
       | read    |
@@ -285,10 +285,10 @@ Feature: Connection Transaction
       | read    |
       | write   |
 
-  Scenario: one keyspace, many sessions, one transaction to read
-    When connection create keyspace:
+  Scenario: one database, many sessions, one transaction to read
+    When connection create database:
       | grakn   |
-    Given connection open sessions for keyspace:
+    Given connection open sessions for database:
       | grakn   |
       | grakn   |
       | grakn   |
@@ -308,10 +308,10 @@ Feature: Connection Transaction
     Then for each session, transaction has type:
       | read    |
 
-  Scenario: one keyspace, many sessions, one transaction to write
-    When connection create keyspace:
+  Scenario: one database, many sessions, one transaction to write
+    When connection create database:
       | grakn   |
-    Given connection open sessions for keyspace:
+    Given connection open sessions for database:
       | grakn   |
       | grakn   |
       | grakn   |
@@ -332,10 +332,10 @@ Feature: Connection Transaction
       | write   |
 
   @ignore-grakn-core
-  Scenario: one keyspace, many sessions, many transactions to read
-    When connection create keyspace:
+  Scenario: one database, many sessions, many transactions to read
+    When connection create database:
       | grakn   |
-    Given connection open sessions for keyspace:
+    Given connection open sessions for database:
       | grakn   |
       | grakn   |
       | grakn   |
@@ -378,10 +378,10 @@ Feature: Connection Transaction
       | read    |
 
   @ignore-grakn-core
-  Scenario: one keyspace, many sessions, many transactions to write
-    When connection create keyspace:
+  Scenario: one database, many sessions, many transactions to write
+    When connection create database:
       | grakn   |
-    Given connection open sessions for keyspace:
+    Given connection open sessions for database:
       | grakn   |
       | grakn   |
       | grakn   |
@@ -424,10 +424,10 @@ Feature: Connection Transaction
       | write   |
 
   @ignore-grakn-core
-  Scenario: one keyspace, many sessions, many transactions to read and write
-    When connection create keyspace:
+  Scenario: one database, many sessions, many transactions to read and write
+    When connection create database:
       | grakn   |
-    Given connection open sessions for keyspace:
+    Given connection open sessions for database:
       | grakn   |
       | grakn   |
       | grakn   |
@@ -469,10 +469,10 @@ Feature: Connection Transaction
       | read    |
       | write   |
 
-  Scenario: one keyspace, many sessions, many transactions in parallel to read
-    When connection create keyspace:
+  Scenario: one database, many sessions, many transactions in parallel to read
+    When connection create database:
       | grakn   |
-    Given connection open sessions for keyspace:
+    Given connection open sessions for database:
       | grakn   |
       | grakn   |
       | grakn   |
@@ -514,10 +514,10 @@ Feature: Connection Transaction
       | read    |
       | read    |
 
-  Scenario: one keyspace, many sessions, many transactions in parallel to write
-    When connection create keyspace:
+  Scenario: one database, many sessions, many transactions in parallel to write
+    When connection create database:
       | grakn   |
-    Given connection open sessions for keyspace:
+    Given connection open sessions for database:
       | grakn   |
       | grakn   |
       | grakn   |
@@ -559,10 +559,10 @@ Feature: Connection Transaction
       | write   |
       | write   |
 
-  Scenario: one keyspace, many sessions, many transactions in parallel to read and write
-    When connection create keyspace:
+  Scenario: one database, many sessions, many transactions in parallel to read and write
+    When connection create database:
       | grakn   |
-    Given connection open sessions for keyspace:
+    Given connection open sessions for database:
       | grakn   |
       | grakn   |
       | grakn   |
@@ -604,16 +604,16 @@ Feature: Connection Transaction
       | read    |
       | write   |
 
-#  Scenario: one keyspace, many sessions in parallel, one transactions to read
+#  Scenario: one database, many sessions in parallel, one transactions to read
 #
-#  Scenario: one keyspace, many sessions in parallel, one transactions to write
+#  Scenario: one database, many sessions in parallel, one transactions to write
 #
-#  Scenario: one keyspace, many sessions in parallel, many transactions to read
+#  Scenario: one database, many sessions in parallel, many transactions to read
 #
-#  Scenario: one keyspace, many sessions in parallel, many transactions to write
+#  Scenario: one database, many sessions in parallel, many transactions to write
 #
-#  Scenario: one keyspace, many sessions in parallel, many transactions in parallel to read
+#  Scenario: one database, many sessions in parallel, many transactions in parallel to read
 #
-#  Scenario: one keyspace, many sessions in parallel, many transactions in parallel to write
+#  Scenario: one database, many sessions in parallel, many transactions in parallel to write
 
 

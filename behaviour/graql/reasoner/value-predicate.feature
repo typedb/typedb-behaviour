@@ -17,15 +17,15 @@
 
 Feature: Value Predicate Resolution
 
-  Background: Set up keyspaces for resolution testing
+  Background: Set up databases for resolution testing
 
     Given connection has been opened
-    Given connection delete all keyspaces
-    Given connection open sessions for keyspaces:
+    Given connection delete all databases
+    Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised keyspace is named: materialised
-    Given reasoned keyspace is named: reasoned
+    Given materialised database is named: materialised
+    Given reasoned database is named: reasoned
     Given for each session, graql define
       """
       define
@@ -83,17 +83,17 @@ Feature: Value Predicate Resolution
       insert
       $se isa tortoise, has age 1;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match $x has is-old $r; get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
-    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
+    Then materialised and reasoned databases are the same size
 
 
-  # TODO: re-enable all steps once materialised keyspace counts duplicate attributes only once
+  # TODO: re-enable all steps once materialised database counts duplicate attributes only once
   Scenario Outline: when querying for inferred attributes with `<op>`, the answers matching the predicate are returned
     Given for each session, graql define
       """
@@ -110,7 +110,7 @@ Feature: Value Predicate Resolution
       $x isa person;
       $y isa person;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -118,9 +118,9 @@ Feature: Value Predicate Resolution
         $n <op> 1667;
       get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: <answer-size>
-#    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: <answer-size>
+#    Then materialised and reasoned databases are the same size
 
     Examples:
       | op  | answer-size |
@@ -148,7 +148,7 @@ Feature: Value Predicate Resolution
       $x isa person, has name "Alice";
       $y isa person, has name "Bob";
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -157,9 +157,9 @@ Feature: Value Predicate Resolution
         $m <op> $n;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: <answer-size>
-#    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: <answer-size>
+#    Then materialised and reasoned databases are the same size
 
     Examples:
       | op  | answer-size |
@@ -188,7 +188,7 @@ Feature: Value Predicate Resolution
       $x isa person, has name "Alice";
       $y isa person, has name "Bob";
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -198,9 +198,9 @@ Feature: Value Predicate Resolution
         $n <op> 1667;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: <answer-size>
-#    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: <answer-size>
+#    Then materialised and reasoned databases are the same size
 
     Examples:
       | op  | answer-size |
@@ -241,7 +241,7 @@ Feature: Value Predicate Resolution
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -250,12 +250,12 @@ Feature: Value Predicate Resolution
         $unwanted == "Ocado";
       get;
       """
-    Given all answers are correct in reasoned keyspace
+    Given all answers are correct in reasoned database
     # x     | r     |
     # Fanta | Tesco |
     # Tango | Tesco |
-    Then answer size in reasoned keyspace is: 2
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 2
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: inferred attributes can be matched by equality to a variable that is not equal to a specified value
@@ -287,7 +287,7 @@ Feature: Value Predicate Resolution
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -296,12 +296,12 @@ Feature: Value Predicate Resolution
         $r == $wanted;
       get;
       """
-    Given all answers are correct in reasoned keyspace
+    Given all answers are correct in reasoned database
     # x     | r     |
     # Fanta | Ocado |
     # Tango | Ocado |
-    Then answer size in reasoned keyspace is: 2
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 2
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when fixed (#75)
@@ -338,7 +338,7 @@ Feature: Value Predicate Resolution
       """
       insert $x isa soft-drink, has name "Fanta";
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -346,9 +346,9 @@ Feature: Value Predicate Resolution
         $rx contains "land";
       get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
-#    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
+#    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when fixed (#75)
@@ -387,7 +387,7 @@ Feature: Value Predicate Resolution
       $x isa soft-drink, has name "Fanta";
       $y isa soft-drink, has name "Tango";
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match
@@ -397,7 +397,7 @@ Feature: Value Predicate Resolution
         $ry contains 'land';
       get;
       """
-#    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned database
     # x     | rx        | y     | ry        |
     # Fanta | Iceland   | Tango | Iceland   |
     # Tango | Iceland   | Fanta | Iceland   |
@@ -407,8 +407,8 @@ Feature: Value Predicate Resolution
     # Fanta | Poundland | Fanta | Poundland |
     # Tango | Iceland   | Tango | Iceland   |
     # Tango | Poundland | Tango | Poundland |
-    Then answer size in reasoned keyspace is: 8
-#    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 8
+#    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when fixed (#75)
@@ -447,7 +447,7 @@ Feature: Value Predicate Resolution
       $x isa soft-drink, has name "Fanta";
       $y isa soft-drink, has name "Tango";
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match
@@ -457,7 +457,7 @@ Feature: Value Predicate Resolution
         $ry contains 'land';
       get;
       """
-#    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned database
     # x     | rx        | y     | ry        |
     # Fanta | Iceland   | Tango | Poundland |
     # Tango | Iceland   | Fanta | Poundland |
@@ -475,8 +475,8 @@ Feature: Value Predicate Resolution
     # Tango | Londis    | Tango | Poundland |
     # Fanta | Londis    | Fanta | Iceland   |
     # Tango | Londis    | Tango | Iceland   |
-    Then answer size in reasoned keyspace is: 16
-#    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 16
+#    Then materialised and reasoned databases are the same size
 
 
   Scenario: in a rule, `not { $x == $y; }` is the same as saying `$x !== $y`
@@ -508,7 +508,7 @@ Feature: Value Predicate Resolution
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Given for graql query
       """
       match
@@ -516,11 +516,11 @@ Feature: Value Predicate Resolution
         $r !== "Ocado";
       get;
       """
-    Given all answers are correct in reasoned keyspace
+    Given all answers are correct in reasoned database
     # x     | r     |
     # Fanta | Tesco |
     # Tango | Tesco |
-    Given answer size in reasoned keyspace is: 2
+    Given answer size in reasoned database is: 2
     Then for graql query
       """
       match
@@ -528,9 +528,9 @@ Feature: Value Predicate Resolution
         not { $r == "Ocado"; };
       get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
-    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: in a rule, `not { $x !== $y; }` is the same as saying `$x == $y`
@@ -562,7 +562,7 @@ Feature: Value Predicate Resolution
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Given for graql query
       """
       match
@@ -570,11 +570,11 @@ Feature: Value Predicate Resolution
         $r == "Ocado";
       get;
       """
-    Given all answers are correct in reasoned keyspace
+    Given all answers are correct in reasoned database
     # x     | r     |
     # Fanta | Ocado |
     # Tango | Ocado |
-    Given answer size in reasoned keyspace is: 2
+    Given answer size in reasoned database is: 2
     Then for graql query
       """
       match
@@ -582,9 +582,9 @@ Feature: Value Predicate Resolution
         not { $r !== "Ocado"; };
       get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
-    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: move to negation.feature
@@ -617,7 +617,7 @@ Feature: Value Predicate Resolution
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -628,12 +628,12 @@ Feature: Value Predicate Resolution
         };
       get;
       """
-    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned database
     # x     | r     |
     # Fanta | Tesco |
     # Tango | Tesco |
-    Then answer size in reasoned keyspace is: 2
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 2
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps once attribute re-attachment is resolvable
@@ -665,7 +665,7 @@ Feature: Value Predicate Resolution
       $y isa person, has name "Bob", has string-attribute "Safeway";
       $z isa soft-drink, has name "Tango";
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match
@@ -674,13 +674,13 @@ Feature: Value Predicate Resolution
         $re !== $sa;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned database
     # The string-attributes are transferred to each other, so in fact both people have both Tesco and Safeway
     # x     | re    | y     | sa      |
     # Tango | Tesco | Alice | Safeway |
     # Tango | Tesco | Bob   | Safeway |
-    Then answer size in reasoned keyspace is: 2
-#    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 2
+#    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps once attribute re-attachment is resolvable
@@ -713,7 +713,7 @@ Feature: Value Predicate Resolution
       $y isa person, has name "Bob", has string-attribute "Safeway";
       $z isa soft-drink, has name "Tango";
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match
@@ -722,13 +722,13 @@ Feature: Value Predicate Resolution
         not { $re == $sa; };
       get;
       """
-#    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned database
     # The string-attributes are transferred to each other, so in fact both people have both Tesco and Safeway
     # x     | re    | y     | sa      |
     # Tango | Tesco | Alice | Safeway |
     # Tango | Tesco | Bob   | Safeway |
-    Then answer size in reasoned keyspace is: 2
-#    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 2
+#    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps once implicit attribute variables are resolvable
@@ -756,7 +756,7 @@ Feature: Value Predicate Resolution
       $x isa person, has string-attribute "Tesco";
       $y isa soft-drink, has name "Tesco";
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -765,7 +765,7 @@ Feature: Value Predicate Resolution
         $ax != $ay;
       get;
       """
-    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned database
     # x   | ax  | y   | ay  |
     # PER | STA | SOF | NAM |
     # PER | STA | SOF | RET |
@@ -773,8 +773,8 @@ Feature: Value Predicate Resolution
     # SOF | RET | PER | STA |
     # SOF | NAM | SOF | RET |
     # SOF | RET | SOF | NAM |
-    Then answer size in reasoned keyspace is: 6
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 6
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when fixed (#75)
@@ -840,7 +840,7 @@ Feature: Value Predicate Resolution
       $p3 "low price" isa price-range;
       $p4 "cheap" isa price-range;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -848,8 +848,8 @@ Feature: Value Predicate Resolution
         ($x, priced-item: $y) isa price-classification;
       get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
     Then for graql query
       """
       match
@@ -857,8 +857,8 @@ Feature: Value Predicate Resolution
         ($x, priced-item: $y) isa price-classification;
       get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
     Then for graql query
       """
       match
@@ -866,8 +866,8 @@ Feature: Value Predicate Resolution
         ($x, priced-item: $y) isa price-classification;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
     Then for graql query
       """
       match
@@ -875,8 +875,8 @@ Feature: Value Predicate Resolution
         ($x, priced-item: $y) isa price-classification;
       get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
     Then for graql query
       """
       match
@@ -884,10 +884,10 @@ Feature: Value Predicate Resolution
         ($x, priced-item: $y) isa price-classification;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned database
     # sum of all previous answers
-    Then answer size in reasoned keyspace is: 5
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 5
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when resolvable (currently it takes too long to resolve) (#75)
@@ -942,12 +942,12 @@ Feature: Value Predicate Resolution
       (original:$x, reply:$x4) isa reply-of;
       (original:$x, reply:$x5) isa reply-of;
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match (predecessor:$x1, successor:$x2) isa message-succession; get;
       """
-#    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned database
     # the (n-1)th triangle number, where n is the number of replies to the first post
-    Then answer size in reasoned keyspace is: 10
-#    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 10
+#    Then materialised and reasoned databases are the same size
