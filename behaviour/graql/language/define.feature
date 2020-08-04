@@ -37,6 +37,19 @@ Feature: Graql Define Query
       """
     Given the integrity is validated
 
+  Scenario: uncommitted transaction writes are not persisted
+    Given graql define without commit
+      """
+      define dog sub entity;
+      """
+    Given transaction is reopened without commit
+    When get answers of graql query
+      """
+      match $x type dog; get;
+      """
+    Then the answer size is: 0
+
+
 
   ############
   # ENTITIES #
