@@ -1033,6 +1033,65 @@ Feature: Negation Resolution
       """
 
 
+  Scenario: when nesting multiple negations and conjunctions, they are correctly resolved
+    Given for each session, graql define
+      """
+      define
+      country sub entity, has name, plays country-for-company;
+      company plays company-with-country, plays not-in-uk;
+      company-country sub relation,
+        relates company-with-country,
+        relates country-for-company;
+      non-uk sub relation,
+        relates not-in-uk;
+      non-uk-rule sub rule,
+      when {
+        $x isa company;
+        not {
+          (company-with-country: $x, country-for-company: $y) isa company-country;
+          $y has name 'UK';
+        };
+      }, then {
+        (not-in-uk: $x) isa non-uk;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+      $a isa company, has name "a";
+      $b isa company, has name "b";
+      $c isa company, has name "c";
+      $d isa company, has name "d";
+
+      $e isa country, has name 'UK';
+      $f isa country, has name 'France';
+
+      (company-with-country: $a, country-for-company: $e) isa company-country;
+      (company-with-country: $b, country-for-company: $e) isa company-country;
+      (company-with-country: $c, country-for-company: $f) isa company-country;
+      """
+    Then for graql query
+      """
+      match
+        $x isa company;
+        not {
+          (not-in-uk: $x) isa non-uk;
+          not {
+            $x has name "c";
+          };
+        };
+      get;
+      """
+    Then answer size in reasoned keyspace is: 3
+    Then answer set is equivalent for graql query
+      """
+      match
+        $x isa company;
+        not { $x has name "c"; }
+      get;
+      """
+
+
   # TODO: re-enable all steps when fixed (#75)
   Scenario: when evaluating negation blocks, global subgoals are not updated
 
