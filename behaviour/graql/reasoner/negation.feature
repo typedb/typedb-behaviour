@@ -1087,7 +1087,7 @@ Feature: Negation Resolution
       """
       match
         $x isa company;
-        not { $x has name "c"; }
+        not { $x has name "d"; }
       get;
       """
 
