@@ -2084,6 +2084,134 @@ Feature: Graql Insert Query
     Then answer size is: 0
 
 
+  @ignore
+  # TODO: re-enable when fixed (grakn#5866)
+  Scenario: when matching two types and inserting one of them, the number of entities of that type doubles each time
+    Given graql undefine
+      """
+      undefine
+      person key ref;
+      company key ref;
+      employment key ref;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $x isa person;
+      $y isa company;
+      """
+    Given the integrity is validated
+    When graql insert
+      """
+      match
+        $x isa person;
+        $y isa company;
+      insert
+        $z isa person;
+        (employee: $z, employer: $y) isa employment;
+      """
+    When graql insert
+      """
+      match
+        $x isa person;
+        $y isa company;
+      insert
+        $z isa person;
+        (employee: $z, employer: $y) isa employment;
+      """
+    When graql insert
+      """
+      match
+        $x isa person;
+        $y isa company;
+      insert
+        $z isa person;
+        (employee: $z, employer: $y) isa employment;
+      """
+    When graql insert
+      """
+      match
+        $x isa person;
+        $y isa company;
+      insert
+        $z isa person;
+        (employee: $z, employer: $y) isa employment;
+      """
+    When graql insert
+      """
+      match
+        $x isa person;
+        $y isa company;
+      insert
+        $z isa person;
+        (employee: $z, employer: $y) isa employment;
+      """
+    When graql insert
+      """
+      match
+        $x isa person;
+        $y isa company;
+      insert
+        $z isa person;
+        (employee: $z, employer: $y) isa employment;
+      """
+    Then get answers of graql query
+      """
+      match $x isa person; get;
+      """
+    Then answer size is: 64
+    Then get answers of graql query
+      """
+      match $x isa employment; get;
+      """
+    # The original person is still unemployed.
+    Then answer size is: 63
+
+
+  Scenario: match-insert can be used to repeatedly duplicate all entities
+    Given graql undefine
+      """
+      undefine person key ref;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert $x isa person;
+      """
+    Given the integrity is validated
+    When graql insert
+      """
+      match $x isa person; insert $z isa person;
+      """
+    When graql insert
+      """
+      match $x isa person; insert $z isa person;
+      """
+    When graql insert
+      """
+      match $x isa person; insert $z isa person;
+      """
+    When graql insert
+      """
+      match $x isa person; insert $z isa person;
+      """
+    When graql insert
+      """
+      match $x isa person; insert $z isa person;
+      """
+    When graql insert
+      """
+      match $x isa person; insert $z isa person;
+      """
+    Then the integrity is validated
+    Then get answers of graql query
+      """
+      match $x isa person; get;
+      """
+    Then answer size is: 64
+
+
   ####################
   # TRANSACTIONALITY #
   ####################
