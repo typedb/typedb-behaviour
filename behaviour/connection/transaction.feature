@@ -624,7 +624,7 @@ Feature: Connection Transaction
       | grakn   |
     When for each session, open transaction of type:
       | read    |
-    Then for each transaction, define query; throws exception containing "write transaction"
+    Then for each transaction, define query; throws exception containing "is read only"
       """
       define person sub entity;
       """
