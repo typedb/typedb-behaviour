@@ -179,3 +179,37 @@ Feature: Connection Keyspace
       | mike    |
       | neil    |
     Then  connection does not have any keyspace
+
+
+  Scenario: delete a keyspace causes open sessions to fail
+    When connection create keyspace:
+      | grakn   |
+    When connection open session for keyspace:
+      | grakn   |
+    When  connection delete keyspace:
+      | grakn   |
+    Then  connection does not have keyspace:
+      | grakn   |
+    Then for each session, open transaction(s) of type; throws exception
+      | write   |
+
+
+  Scenario: delete a keyspace causes open transactions to fail
+    When connection create keyspace:
+      | grakn   |
+    When connection open session for keyspace:
+      | grakn   |
+    When for each session, open transaction(s) of type:
+      | write   |
+    When connection delete keyspace:
+      | grakn   |
+    Then connection does not have keyspace:
+      | grakn   |
+    Then for each transaction, define query; throws exception containing "transaction is closed"
+      """
+      define person sub entity;
+      """
+
+  Scenario: delete a nonexistant keyspace throws an error
+    When connection delete keyspace; throws exception
+      | grakn   |

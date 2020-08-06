@@ -42,13 +42,11 @@ Feature: Graql Define Query
       """
       define dog sub entity;
       """
-    Given transaction is reopened without commit
-    When get answers of graql query
+    Given transaction is closed and opened without commit
+    When graql get throws
       """
       match $x type dog; get;
       """
-    Then the answer size is: 0
-
 
 
   ############
