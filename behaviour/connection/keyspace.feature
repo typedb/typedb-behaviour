@@ -22,163 +22,163 @@ Feature: Connection Keyspace
     Given connection delete all keyspaces
     Given connection does not have any keyspace
 
-#  Scenario: create one keyspace
-#    When  connection create keyspace:
-#      | alice   |
-#    Then  connection has keyspace:
-#      | alice   |
-#
-#  Scenario: create many keyspaces
-#    When  connection create keyspaces:
-#      | alice   |
-#      | bob     |
-#      | charlie |
-#      | dylan   |
-#      | eve     |
-#      | frank   |
-#      | george  |
-#      | heidi   |
-#      | ivan    |
-#      | judy    |
-#      | mike    |
-#      | neil    |
-#    Then  connection has keyspaces:
-#      | alice   |
-#      | bob     |
-#      | charlie |
-#      | dylan   |
-#      | eve     |
-#      | frank   |
-#      | george  |
-#      | heidi   |
-#      | ivan    |
-#      | judy    |
-#      | mike    |
-#      | neil    |
-#
-#  Scenario: create many keyspaces in parallel
-#    When  connection create keyspaces in parallel:
-#      | alice   |
-#      | bob     |
-#      | charlie |
-#      | dylan   |
-#      | eve     |
-#      | frank   |
-#      | george  |
-#      | heidi   |
-#      | ivan    |
-#      | judy    |
-#      | mike    |
-#      | neil    |
-#    Then  connection has keyspaces:
-#      | alice   |
-#      | bob     |
-#      | charlie |
-#      | dylan   |
-#      | eve     |
-#      | frank   |
-#      | george  |
-#      | heidi   |
-#      | ivan    |
-#      | judy    |
-#      | mike    |
-#      | neil    |
-#
-#  Scenario: delete one keyspace
-#      # This step should be rewritten once we can create keypsaces without opening sessions
-#    Given connection create keyspace:
-#      | alice   |
-#    When  connection delete keyspace:
-#      | alice   |
-#    Then  connection does not have keyspace:
-#      | alice   |
-#    Then  connection does not have any keyspace
-#
-#  Scenario: connection can delete many keyspaces
-#      # This step should be rewritten once we can create keypsaces without opening sessions
-#    Given connection create keyspaces:
-#      | alice   |
-#      | bob     |
-#      | charlie |
-#      | dylan   |
-#      | eve     |
-#      | frank   |
-#      | george  |
-#      | heidi   |
-#      | ivan    |
-#      | judy    |
-#      | mike    |
-#      | neil    |
-#    When  connection delete keyspaces:
-#      | alice   |
-#      | bob     |
-#      | charlie |
-#      | dylan   |
-#      | eve     |
-#      | frank   |
-#      | george  |
-#      | heidi   |
-#      | ivan    |
-#      | judy    |
-#      | mike    |
-#      | neil    |
-#    Then  connection does not have keyspaces:
-#      | alice   |
-#      | bob     |
-#      | charlie |
-#      | dylan   |
-#      | eve     |
-#      | frank   |
-#      | george  |
-#      | heidi   |
-#      | ivan    |
-#      | judy    |
-#      | mike    |
-#      | neil    |
-#    Then  connection does not have any keyspace
-#
-#  Scenario: delete many keyspaces in parallel
-#      # This step should be rewritten once we can create keypsaces without opening sessions
-#    Given connection create keyspaces in parallel:
-#      | alice   |
-#      | bob     |
-#      | charlie |
-#      | dylan   |
-#      | eve     |
-#      | frank   |
-#      | george  |
-#      | heidi   |
-#      | ivan    |
-#      | judy    |
-#      | mike    |
-#      | neil    |
-#    When  connection delete keyspaces in parallel:
-#      | alice   |
-#      | bob     |
-#      | charlie |
-#      | dylan   |
-#      | eve     |
-#      | frank   |
-#      | george  |
-#      | heidi   |
-#      | ivan    |
-#      | judy    |
-#      | mike    |
-#      | neil    |
-#    Then  connection does not have keyspaces:
-#      | alice   |
-#      | bob     |
-#      | charlie |
-#      | dylan   |
-#      | eve     |
-#      | frank   |
-#      | george  |
-#      | heidi   |
-#      | ivan    |
-#      | judy    |
-#      | mike    |
-#      | neil    |
-#    Then  connection does not have any keyspace
+  Scenario: create one keyspace
+    When  connection create keyspace:
+      | alice   |
+    Then  connection has keyspace:
+      | alice   |
+
+  Scenario: create many keyspaces
+    When  connection create keyspaces:
+      | alice   |
+      | bob     |
+      | charlie |
+      | dylan   |
+      | eve     |
+      | frank   |
+      | george  |
+      | heidi   |
+      | ivan    |
+      | judy    |
+      | mike    |
+      | neil    |
+    Then  connection has keyspaces:
+      | alice   |
+      | bob     |
+      | charlie |
+      | dylan   |
+      | eve     |
+      | frank   |
+      | george  |
+      | heidi   |
+      | ivan    |
+      | judy    |
+      | mike    |
+      | neil    |
+
+  Scenario: create many keyspaces in parallel
+    When  connection create keyspaces in parallel:
+      | alice   |
+      | bob     |
+      | charlie |
+      | dylan   |
+      | eve     |
+      | frank   |
+      | george  |
+      | heidi   |
+      | ivan    |
+      | judy    |
+      | mike    |
+      | neil    |
+    Then  connection has keyspaces:
+      | alice   |
+      | bob     |
+      | charlie |
+      | dylan   |
+      | eve     |
+      | frank   |
+      | george  |
+      | heidi   |
+      | ivan    |
+      | judy    |
+      | mike    |
+      | neil    |
+
+  Scenario: delete one keyspace
+      # This step should be rewritten once we can create keypsaces without opening sessions
+    Given connection create keyspace:
+      | alice   |
+    When  connection delete keyspace:
+      | alice   |
+    Then  connection does not have keyspace:
+      | alice   |
+    Then  connection does not have any keyspace
+
+  Scenario: connection can delete many keyspaces
+      # This step should be rewritten once we can create keypsaces without opening sessions
+    Given connection create keyspaces:
+      | alice   |
+      | bob     |
+      | charlie |
+      | dylan   |
+      | eve     |
+      | frank   |
+      | george  |
+      | heidi   |
+      | ivan    |
+      | judy    |
+      | mike    |
+      | neil    |
+    When  connection delete keyspaces:
+      | alice   |
+      | bob     |
+      | charlie |
+      | dylan   |
+      | eve     |
+      | frank   |
+      | george  |
+      | heidi   |
+      | ivan    |
+      | judy    |
+      | mike    |
+      | neil    |
+    Then  connection does not have keyspaces:
+      | alice   |
+      | bob     |
+      | charlie |
+      | dylan   |
+      | eve     |
+      | frank   |
+      | george  |
+      | heidi   |
+      | ivan    |
+      | judy    |
+      | mike    |
+      | neil    |
+    Then  connection does not have any keyspace
+
+  Scenario: delete many keyspaces in parallel
+      # This step should be rewritten once we can create keypsaces without opening sessions
+    Given connection create keyspaces in parallel:
+      | alice   |
+      | bob     |
+      | charlie |
+      | dylan   |
+      | eve     |
+      | frank   |
+      | george  |
+      | heidi   |
+      | ivan    |
+      | judy    |
+      | mike    |
+      | neil    |
+    When  connection delete keyspaces in parallel:
+      | alice   |
+      | bob     |
+      | charlie |
+      | dylan   |
+      | eve     |
+      | frank   |
+      | george  |
+      | heidi   |
+      | ivan    |
+      | judy    |
+      | mike    |
+      | neil    |
+    Then  connection does not have keyspaces:
+      | alice   |
+      | bob     |
+      | charlie |
+      | dylan   |
+      | eve     |
+      | frank   |
+      | george  |
+      | heidi   |
+      | ivan    |
+      | judy    |
+      | mike    |
+      | neil    |
+    Then  connection does not have any keyspace
 
 
   Scenario: delete a keyspace causes open sessions to fail
