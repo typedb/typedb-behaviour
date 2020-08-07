@@ -617,3 +617,15 @@ Feature: Connection Transaction
 #  Scenario: one keyspace, many sessions in parallel, many transactions in parallel to write
 
 
+  Scenario: write in a read transaction throws
+    When connection create keyspace:
+      | grakn   |
+    Given connection open session for keyspace:
+      | grakn   |
+    When for each session, open transaction of type:
+      | read    |
+    Then for each transaction, define query; throws exception containing "is read only"
+      """
+      define person sub entity;
+      """
+
