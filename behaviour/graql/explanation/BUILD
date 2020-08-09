@@ -21,3 +21,11 @@ exports_files([
     "reasoner.feature",
     "language.feature",
 ])
+
+filegroup(
+    name = "features",
+    srcs = [
+        "reasoner.feature",
+        "language.feature",
+    ],
+)

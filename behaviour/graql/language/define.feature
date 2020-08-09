@@ -1930,22 +1930,12 @@ Feature: Graql Define Query
     Then the integrity is validated
 
 
-  Scenario: defining a type as abstract is idempotent
-    Given graql define
+  Scenario: defining a type as abstract repeatedly throws an error
+    Given graql define throws
       """
       define animal sub entity, abstract, abstract, abstract;
       """
-    Given the integrity is validated
-    When get answers of graql query
-      """
-      match $x type animal; $x abstract; get;
-      """
-    Then concept identifiers are
-      |     | check | value  |
-      | ANI | label | animal |
-    Then uniquely identify answer concepts
-      | x   |
-      | ANI |
+    Then the integrity is validated
 
 
   ###################

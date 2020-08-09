@@ -27,3 +27,17 @@ exports_files([
     "rule-validation.feature",
     "undefine.feature",
 ])
+
+filegroup(
+    name = "features",
+    srcs = [
+        "compute.feature",
+        "define.feature",
+        "delete.feature",
+        "get.feature",
+        "insert.feature",
+        "match.feature",
+        "rule-validation.feature",
+        "undefine.feature",
+    ],
+)
