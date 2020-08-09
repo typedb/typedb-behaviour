@@ -17,15 +17,14 @@
 
 package(default_visibility = ["//visibility:public"])
 
-exports_files([
+files = [
     "reasoner.feature",
     "language.feature",
-])
+]
 
 filegroup(
     name = "features",
-    srcs = [
-        "reasoner.feature",
-        "language.feature",
-    ],
+    srcs = files,
 )
+
+exports_files(files)
