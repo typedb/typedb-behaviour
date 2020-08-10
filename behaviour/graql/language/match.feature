@@ -110,11 +110,11 @@ Feature: Graql Match Clause
       match writer sub $x; get;
       """
     And concept identifiers are
-      |     | check | value   |
-      | WRI | label | writer  |
-      | PER | label | person  |
-      | ENT | label | entity  |
-      | THI | label | thing   |
+      |     | check | value  |
+      | WRI | label | writer |
+      | PER | label | person |
+      | ENT | label | entity |
+      | THI | label | thing  |
     Then uniquely identify answer concepts
       | x   |
       | WRI |
@@ -230,9 +230,9 @@ Feature: Graql Match Clause
       match writer sub! $x; get;
       """
     And concept identifiers are
-      |     | check | value   |
-      | WRI | label | writer  |
-      | PER | label | person  |
+      |     | check | value  |
+      | WRI | label | writer |
+      | PER | label | person |
     Then uniquely identify answer concepts
       | x   |
       | WRI |
@@ -261,7 +261,7 @@ Feature: Graql Match Clause
       """
     Then each answer satisfies
       """
-      match $x sub $z; $x id <answer.x.id>; $z id <answer.z.id>; get;
+      match $x sub $z; $x iid <answer.x.iid>; $z iid <answer.z.iid>; get;
       """
 
 
@@ -586,8 +586,8 @@ Feature: Graql Match Clause
       match $x relates friend; get;
       """
     And concept identifiers are
-      |     | check | value            |
-      | FRE | label | friendship       |
+      |     | check | value      |
+      | FRE | label | friendship |
     Then uniquely identify answer concepts
       | x   |
       | FRE |
@@ -608,12 +608,12 @@ Feature: Graql Match Clause
       | EMR |
 
 
-  Scenario: when matching by a concept id that doesn't exist, an empty result is returned
+  Scenario: when matching by a concept iid that doesn't exist, an empty result is returned
     When get answers of graql query
       """
       match
-        $x id V1337;
-        $y id V456;
+        $x iid 83cb2;
+        $y iid 4ba92;
       get;
       """
     Then answer size is: 0
@@ -687,7 +687,7 @@ Feature: Graql Match Clause
       | WRI |
 
 
-  Scenario: `id` matches the instance with the specified internal id
+  Scenario: `iid` matches the instance with the specified internal iid
     Given graql insert
       """
       insert
@@ -700,7 +700,7 @@ Feature: Graql Match Clause
       """
     Then each answer satisfies
       """
-      match $x id <answer.x.id>; get;
+      match $x iid <answer.x.iid>; get;
       """
 
 
@@ -712,10 +712,10 @@ Feature: Graql Match Clause
     Then the integrity is validated
 
 
-  Scenario: when matching by a type id that doesn't exist, an empty result is returned
+  Scenario: when matching by a type iid that doesn't exist, an empty result is returned
     When get answers of graql query
       """
-      match $x isa $type; $type id V1337; get;
+      match $x isa $type; $type iid 83cb2; get;
       """
     Then answer size is: 0
 
@@ -1103,15 +1103,15 @@ Feature: Graql Match Clause
     Then answer size is: 0
 
 
-  Scenario: when querying for a non-existent relation type id, an empty result is returned
+  Scenario: when querying for a non-existent relation type iid, an empty result is returned
     When get answers of graql query
       """
-      match ($x, $y) isa $type; $type id V1337; get;
+      match ($x, $y) isa $type; $type iid 83cb2; get;
       """
     Then answer size is: 0
     When get answers of graql query
       """
-      match $r ($x, $y) isa $type; $r id V1337; get;
+      match $r ($x, $y) isa $type; $r iid 4ba92; get;
       """
     Then answer size is: 0
 
@@ -1241,15 +1241,15 @@ Feature: Graql Match Clause
       | NIN |
 
 
-  Scenario: when querying for a non-existent attribute type id, an empty result is returned
+  Scenario: when querying for a non-existent attribute type iid, an empty result is returned
     When get answers of graql query
       """
-      match $x has name $y; $x id V1337; get;
+      match $x has name $y; $x iid 83cb2; get;
       """
     Then answer size is: 0
     When get answers of graql query
       """
-      match $x has name $y; $y id V1337; get;
+      match $x has name $y; $y iid 83cb2; get;
       """
     Then answer size is: 0
 
@@ -1667,11 +1667,11 @@ Feature: Graql Match Clause
       get;
       """
     And concept identifiers are
-      |      | check  | value       |
-      | A24  | value  | age:24      |
-      | A19  | value  | age:19      |
-      | L209 | value  | length:20.9 |
-      | L199 | value  | length:19.9 |
+      |      | check | value       |
+      | A24  | value | age:24      |
+      | A19  | value | age:19      |
+      | L209 | value | length:20.9 |
+      | L199 | value | length:19.9 |
     Then uniquely identify answer concepts
       | x    |
       | A24  |
@@ -1809,7 +1809,7 @@ Feature: Graql Match Clause
 
   Scenario: when the entire match clause is a negation, an error is thrown
 
-    At least one negated pattern variable must be bound outside the negation block, so this query is invalid.
+  At least one negated pattern variable must be bound outside the negation block, so this query is invalid.
 
     Then graql get throws
       """

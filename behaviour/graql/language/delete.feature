@@ -847,8 +847,10 @@ Feature: Graql Delete Query
 #  We only delete role player edges until the `match` is no longer satisfied
 #
 #  For example
-#  ```match $r ($role1: $x, director: $y) isa directed-by; // concrete instance matches: $r (production: $x, director: $y) isa directed-by;
-#  delete $r ($role1: $x);```
+#
+#  match $r ($role1: $x, director: $y) isa directed-by; // concrete instance matches: $r (production: $x, director: $y) isa directed-by;
+#  delete $r ($role1: $x)
+#
 #  We will match `$role1` = ROLE meta type. Using this first answer we will remove $x from $r via the `production role`.
 #  This means the match clause is no longer satisfiable, and should throw the next (identical, up to role type) answer that is matched.
 #
@@ -885,10 +887,11 @@ Feature: Graql Delete Query
 #  **Sometimes this means multiple duplicate role players will be unassigned **
 #
 #  For example
-#  ```
+#
 #  // concrete instance:  $r (production: $x, production: $x, production: $x, director: $y) isa directed-by;
 #  match $r ($role1: $x, director: $y) isa directed-by; $type sub work;
-#  delete $r ($role1: $x);```
+#  delete $r ($role1: $x);
+#
 #  First, we will match `$role1` = ROLE meta role. Using this answer we will remove a single $x from $r via the `production`.
 #  Next, we will match `$role1` = WORK role, and we delete another `production` player. This repeats again for $role=`production`.
   Scenario: when deleting duplicate role players with a single variable role, both duplicates are removed

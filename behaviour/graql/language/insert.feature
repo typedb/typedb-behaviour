@@ -385,13 +385,13 @@ Feature: Graql Insert Query
       | VAL1 |
       | VAL2 |
 
-  Examples:
-    | attr              | type     | val1       | val2       |
-    | subject-taken     | string   | "Maths"    | "Physics"  |
-    | lucky-number      | long     | 10         | 3          |
-    | recite-pi-attempt | double   | 3.146      | 3.14158    |
-    | is-alive          | boolean  | true       | false      |
-    | work-start-date   | datetime | 2018-01-01 | 2020-01-01 |
+    Examples:
+      | attr              | type     | val1       | val2       |
+      | subject-taken     | string   | "Maths"    | "Physics"  |
+      | lucky-number      | long     | 10         | 3          |
+      | recite-pi-attempt | double   | 3.146      | 3.14158    |
+      | is-alive          | boolean  | true       | false      |
+      | work-start-date   | datetime | 2018-01-01 | 2020-01-01 |
 
 
   Scenario: inserting an attribute onto a thing that can't have that attribute throws an error
@@ -1061,16 +1061,16 @@ Feature: Graql Insert Query
       $y 2 isa length;
       """
     When concept identifiers are
-      |     | check | value      |
-      | L2  | value | length:2.0 |
+      |    | check | value      |
+      | L2 | value | length:2.0 |
     When get answers of graql query
       """
       match $x isa length; get;
       """
     Then answer size is: 1
     Then uniquely identify answer concepts
-      | x   |
-      | L2  |
+      | x  |
+      | L2 |
 
 
   Scenario: inserting the same integer twice as a `double` in separate transactions creates a single concept
@@ -1093,16 +1093,16 @@ Feature: Graql Insert Query
       """
     Then the integrity is validated
     When concept identifiers are
-      |     | check | value      |
-      | L2  | value | length:2.0 |
+      |    | check | value      |
+      | L2 | value | length:2.0 |
     When get answers of graql query
       """
       match $x isa length; get;
       """
     Then answer size is: 1
     Then uniquely identify answer concepts
-      | x   |
-      | L2  |
+      | x  |
+      | L2 |
 
 
   Scenario: inserting attribute values [2] and [2.0] with the same attribute type creates a single concept
@@ -1163,7 +1163,6 @@ Feature: Graql Insert Query
       | datetime | start-date | 2019-12-26       | 2019-12-26T00:00 |
       | datetime | start-date | 2019-12-26T00:00 | 2019-12-26       |
       | datetime | start-date | 2019-12-26T00:00 | 2019-12-26T00:00 |
-
 
 
   Scenario Outline: inserting [<value>] as a `<type>` throws an error
@@ -1814,7 +1813,7 @@ Feature: Graql Insert Query
 
   Scenario: when inserting things connected to an inferred attribute, the inferred attribute gets materialised
 
-    By explicitly inserting (x,y) is a relation, we are making explicit the fact that x and y both exist.
+  By explicitly inserting (x,y) is a relation, we are making explicit the fact that x and y both exist.
 
     Given graql define
       """
@@ -1896,8 +1895,8 @@ Feature: Graql Insert Query
       """
     # And the inserted relation still exists too
     Then uniquely identify answer concepts
-      | x   | y   |
-      | GAN | G   |
+      | x   | y |
+      | GAN | G |
 
 
   Scenario: when inserting things connected to an inferred relation, the inferred relation gets materialised
@@ -2276,7 +2275,7 @@ Feature: Graql Insert Query
   # EDGE CASES #
   ##############
 
-  Scenario: the 'id' property is used internally by Grakn and cannot be manually assigned
+  Scenario: the 'iid' property is used internally by Grakn and cannot be manually assigned
     Given graql define
       """
       define
@@ -2287,5 +2286,5 @@ Feature: Graql Insert Query
       """
       insert
       $x isa bird;
-      $x id V123;
+      $x iid V123;
       """
