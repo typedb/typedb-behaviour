@@ -617,6 +617,7 @@ Feature: Connection Transaction
 #  Scenario: one database, many sessions in parallel, many transactions in parallel to write
 
 
+  @ignore-grakn-2.0
   Scenario: write in a read transaction throws
     When connection create database:
       | grakn   |
