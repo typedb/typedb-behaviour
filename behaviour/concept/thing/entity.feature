@@ -28,7 +28,7 @@ Feature: Concept Entity
     Given put attribute type: username, with value type: string
     Given put attribute type: email, with value type: string
     Given put entity type: person
-    Given entity(person) set has key type: username
+    Given entity(person) set has has type @key: username
     Given entity(person) set has attribute type: email
     Given transaction commits
     Given connection close all sessions
@@ -106,7 +106,7 @@ Feature: Concept Entity
     Then attribute $alice get owners do not contain: $a
     Then transaction commits; throws exception
 
-  Scenario: Entity that has its key removed cannot be committed
+  Scenario: Entity that has its has removed @key cannot be committed
     When $a = entity(person) create new instance
     When $alice = attribute(username) as(string) put: alice
     When entity $a set has: $alice
@@ -123,7 +123,7 @@ Feature: Concept Entity
     When entity $a remove has: $alice
     Then transaction commits; throws exception
 
-  Scenario: Entity cannot have more than one key for a given key type
+  Scenario: Entity cannot have more than one has for @key a given has type @key
     When $a = entity(person) create new instance
     When $alice = attribute(username) as(string) put: alice
     When $bob = attribute(username) as(string) put: bob
@@ -135,7 +135,7 @@ Feature: Concept Entity
     When $bob = attribute(username) as(string) get: bob
     Then entity $a set has: $bob; throws exception
 
-  Scenario: Entity cannot have a key that has been taken
+  Scenario: Entity cannot have a has that @key has been taken
     When $a = entity(person) create new instance
     When $alice = attribute(username) as(string) put: alice
     When entity $a set has: $alice

@@ -27,10 +27,10 @@ Feature: Graql Delete Query
       define
       person sub entity,
         plays friend,
-        key name;
+        has name @key;
       friendship sub relation,
         relates friend,
-        key ref;
+        has ref @key;
       name sub attribute, value string;
       ref sub attribute, value long;
       """
@@ -898,7 +898,7 @@ Feature: Graql Delete Query
     Given graql define
       """
       define
-      ship-crew sub relation, relates captain, relates navigator, relates chef, key ref;
+      ship-crew sub relation, relates captain, relates navigator, relates chef, has ref @key;
       person plays captain, plays navigator, plays chef;
       """
     Given the integrity is validated
@@ -1465,7 +1465,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
 
 
-  Scenario: deleting a key ownership throws on commit
+  Scenario: deleting a has ownership @key throws on commit
     Given graql insert
       """
       insert
@@ -1484,8 +1484,8 @@ Feature: Graql Delete Query
 
 
   @ignore
-  # TODO: re-enable when deleting an attribute instance that is owned as a key throws an error
-  Scenario: deleting an attribute instance that is owned as a key throws an error
+  # TODO: re-enable when deleting an attribute instance that is owned as a has throws @key an error
+  Scenario: deleting an attribute instance that is owned as a has throws @key an error
     Given graql insert
       """
       insert
