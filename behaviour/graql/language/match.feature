@@ -747,6 +747,27 @@ Feature: Graql Match Clause
     Then answer size is: 0
 
 
+  Scenario: when one entity exists, and we match two variables both of that entity type, the entity is returned
+    Given graql insert
+      """
+      insert $x isa person, has ref 0;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x isa person;
+        $y isa person;
+      get;
+      """
+    When concept identifiers are
+      |     | check | value |
+      | PER | key   | ref:0 |
+    Then uniquely identify answer concepts
+      | x   | y   |
+      | PER | PER |
+
+
   Scenario: an error is thrown when matching that a variable has a specific type, when that type is in fact a role
     Then graql get throws
       """
@@ -1622,6 +1643,58 @@ Feature: Graql Match Clause
       | RAL |
 
 
+  Scenario: when the answers of a value comparison include both a `double` and a `long`, both answers are returned
+    Given graql define
+      """
+      define
+      length sub attribute, value double;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $a 24 isa age;
+      $b 19 isa age;
+      $c 20.9 isa length;
+      $d 19.9 isa length;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x isa attribute;
+        $x > 20;
+      get;
+      """
+    And concept identifiers are
+      |      | check  | value       |
+      | A24  | value  | age:24      |
+      | A19  | value  | age:19      |
+      | L209 | value  | length:20.9 |
+      | L199 | value  | length:19.9 |
+    Then uniquely identify answer concepts
+      | x    |
+      | A24  |
+      | L209 |
+
+
+  Scenario: when one entity exists, and we match two variables with concept inequality, an empty answer is returned
+    Given graql insert
+      """
+      insert $x isa person, has ref 0;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x isa person;
+        $y isa person;
+        $x != $y;
+      get;
+      """
+    Then answer size is: 0
+
+
   Scenario: concept comparison of unbound variables throws an error
     Then graql get throws
       """
@@ -1660,51 +1733,6 @@ Feature: Graql Match Clause
       | x   |
       | JEF |
       | AMA |
-
-
-  Scenario: a negation matches if the negated block has no matches
-    Given graql insert
-      """
-      insert
-      $x isa person, has name "Jeff", has ref 0;
-      """
-    Given the integrity is validated
-    When get answers of graql query
-      """
-      match
-        $x isa person;
-        not {
-          $e (employee: $x) isa employment;
-        };
-      get;
-      """
-    And concept identifiers are
-      |     | check | value |
-      | JEF | key   | ref:0 |
-    Then uniquely identify answer concepts
-      | x   |
-      | JEF |
-
-
-  Scenario: a negation does not match if the negated block has any matches
-    Given graql insert
-      """
-      insert
-      $x isa person, has name "Jeff", has ref 0;
-      $c isa company, has name "Amazon", has ref 1;
-      $e (employee: $x, employer: $c) isa employment, has ref 2;
-      """
-    Given the integrity is validated
-    When get answers of graql query
-      """
-      match
-        $x isa person;
-        not {
-          $e (employee: $x) isa employment;
-        };
-      get;
-      """
-    Then answer size is: 0
 
 
   ##################
@@ -1771,3 +1799,62 @@ Feature: Graql Match Clause
       """
     # 2 permutations x 3 types {friendship,relation,thing}
     Then answer size is: 6
+
+
+  #######################
+  # NEGATION VALIDATION #
+  #######################
+
+  # Negation resolution is handled by Reasoner, but query validation is handled by the language.
+
+  Scenario: when the entire match clause is a negation, an error is thrown
+
+    At least one negated pattern variable must be bound outside the negation block, so this query is invalid.
+
+    Then graql get throws
+      """
+      match
+        not { $x has attribute "value"; };
+      get;
+      """
+    Then the integrity is validated
+
+
+  Scenario: when matching a negation whose pattern variables are all unbound outside it, an error is thrown
+    Then graql get throws
+      """
+      match
+        $r isa entity;
+        not {
+          ($r2, $i);
+          $i isa entity;
+        };
+      get;
+      """
+    Then the integrity is validated
+
+
+  Scenario: the first variable in a negation can be unbound, as long as it is connected to a bound variable
+    Then get answers of graql query
+      """
+      match
+        $r isa attribute;
+        not {
+          $x isa entity, has attribute $r;
+        };
+      get;
+      """
+    Then the integrity is validated
+
+
+  Scenario: negations cannot contain disjunctions
+    Then graql get throws
+      """
+      match
+        $x isa entity;
+        not {
+          { $x has attribute 1; } or { $x has attribute 2; };
+        };
+      get;
+      """
+    Then the integrity is validated

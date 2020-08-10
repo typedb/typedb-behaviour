@@ -617,3 +617,16 @@ Feature: Connection Transaction
 #  Scenario: one database, many sessions in parallel, many transactions in parallel to write
 
 
+  @ignore-grakn-2.0
+  Scenario: write in a read transaction throws
+    When connection create database:
+      | grakn   |
+    Given connection open session for database:
+      | grakn   |
+    When for each session, open transaction of type:
+      | read    |
+    Then for each transaction, define query; throws exception containing "is read only"
+      """
+      define person sub entity;
+      """
+
