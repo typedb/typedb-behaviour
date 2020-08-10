@@ -65,7 +65,7 @@ Feature: Graql Rule Validation
       | RUL |
 
 
-  Scenario: `sub rule` is not required in order to define a rule, and can be omitted
+  Scenario: 'sub rule' is not required in order to define a rule, and can be omitted
     Given graql define
       """
       define
@@ -92,7 +92,7 @@ Feature: Graql Rule Validation
 
 
   # Keys are validated at commit time, so integrity will not be harmed by writing one in a rule.
-  Scenario: a rule can infer a `key`
+  Scenario: a rule can infer a 'key'
     Given graql define
       """
       define
@@ -118,7 +118,7 @@ Feature: Graql Rule Validation
       | RUL |
 
 
-  Scenario: when a rule has no `when` clause, an error is thrown
+  Scenario: when a rule has no 'when' clause, an error is thrown
     Then graql define throws
       """
       define
@@ -132,7 +132,7 @@ Feature: Graql Rule Validation
     Then the integrity is validated
 
 
-  Scenario: when a rule has no `then` clause, an error is thrown
+  Scenario: when a rule has no 'then' clause, an error is thrown
     Then graql define throws
       """
       define
@@ -146,7 +146,7 @@ Feature: Graql Rule Validation
     Then the integrity is validated
 
 
-  Scenario: when a rule's `when` clause is empty, an error is thrown
+  Scenario: when a rule's 'when' clause is empty, an error is thrown
     Then graql define throws
       """
       define
@@ -161,7 +161,7 @@ Feature: Graql Rule Validation
     Then the integrity is validated
 
 
-  Scenario: when a rule's `then` clause is empty, an error is thrown
+  Scenario: when a rule's 'then' clause is empty, an error is thrown
     Then graql define throws
       """
       define
@@ -176,7 +176,7 @@ Feature: Graql Rule Validation
     Then the integrity is validated
 
 
-  Scenario: a rule can have negation in its `when` clause
+  Scenario: a rule can have negation in its 'when' clause
     Given graql define
       """
       define
@@ -294,7 +294,7 @@ Feature: Graql Rule Validation
     Then the integrity is validated
 
 
-  Scenario: a rule can use conjunction in its `when` clause
+  Scenario: a rule can use conjunction in its 'when' clause
     Given graql define
       """
       define
@@ -345,7 +345,7 @@ Feature: Graql Rule Validation
     Then the integrity is validated
 
 
-  Scenario: when a rule contains an unbound variable in the `then` clause, an error is thrown
+  Scenario: when a rule contains an unbound variable in the 'then' clause, an error is thrown
     Given graql define
       """
       define
@@ -366,7 +366,7 @@ Feature: Graql Rule Validation
     Then the integrity is validated
 
 
-  Scenario: when a rule has an undefined attribute set in its `then` clause, an error is thrown
+  Scenario: when a rule has an undefined attribute set in its 'then' clause, an error is thrown
     Given graql define throws
       """
       define
@@ -396,7 +396,7 @@ Feature: Graql Rule Validation
 
 
   @ignore
-  # TODO: re-enable when rules with attribute values set in `then` that don't match their type throw on commit
+  # TODO: re-enable when rules with attribute values set in 'then' that don't match their type throw on commit
   Scenario: when a rule creates an attribute value that doesn't match the attribute's type, an error is thrown
     Given graql define
       """
@@ -487,7 +487,7 @@ Feature: Graql Rule Validation
     Then the integrity is validated
 
 
-  Scenario: when a rule negates its conclusion in the `when`, causing a loop, an error is thrown
+  Scenario: when a rule negates its conclusion in the 'when', causing a loop, an error is thrown
     Then graql define throws
       """
       define
@@ -506,7 +506,7 @@ Feature: Graql Rule Validation
 
   @ignore
   # TODO: re-enable when subrules are not allowed
-  Scenario: attempting to `sub` another rule label throws an error
+  Scenario: attempting to 'sub' another rule label throws an error
     Then graql define throws
     """
     define

@@ -53,7 +53,7 @@ Feature: Graql Match Clause
   # SCHEMA QUERIES #
   ##################
 
-  Scenario: `type` matches only the specified type, and does not match subtypes
+  Scenario: 'type' matches only the specified type, and does not match subtypes
     Given graql define
       """
       define
@@ -73,7 +73,7 @@ Feature: Graql Match Clause
       | PER |
 
 
-  Scenario: `sub` can be used to match the specified type and all its subtypes, including indirect subtypes
+  Scenario: 'sub' can be used to match the specified type and all its subtypes, including indirect subtypes
     Given graql define
       """
       define
@@ -97,7 +97,7 @@ Feature: Graql Match Clause
       | SCW |
 
 
-  Scenario: `sub` can be used to match the specified type and all its supertypes, including indirect supertypes
+  Scenario: 'sub' can be used to match the specified type and all its supertypes, including indirect supertypes
     Given graql define
       """
       define
@@ -123,7 +123,7 @@ Feature: Graql Match Clause
       | THI |
 
 
-  Scenario: `sub` can be used to retrieve all instances of types that are subtypes of a given type
+  Scenario: 'sub' can be used to retrieve all instances of types that are subtypes of a given type
     Given graql define
       """
       define
@@ -191,7 +191,7 @@ Feature: Graql Match Clause
       | GAR | WOR  |
 
 
-  Scenario: `sub!` matches the specified type and its direct subtypes
+  Scenario: 'sub!' matches the specified type and its direct subtypes
     Given graql define
       """
       define
@@ -217,7 +217,7 @@ Feature: Graql Match Clause
       | MUS |
 
 
-  Scenario: `sub!` can be used to match the specified type and its direct supertype
+  Scenario: 'sub!' can be used to match the specified type and its direct supertype
     Given graql define
       """
       define
@@ -265,7 +265,7 @@ Feature: Graql Match Clause
       """
 
 
-  Scenario: `has` matches types that have the specified attribute type
+  Scenario: 'has' matches types that have the specified attribute type
     When get answers of graql query
       """
       match $x has age; get;
@@ -278,7 +278,7 @@ Feature: Graql Match Clause
       | PER |
 
 
-  Scenario: `has` does not match types that have only a subtype of the specified attribute type
+  Scenario: 'has' does not match types that have only a subtype of the specified attribute type
     Given graql define
       """
       define
@@ -300,7 +300,7 @@ Feature: Graql Match Clause
       | COM |
 
 
-  Scenario: `has` does not match types that have only a supertype of the specified attribute type
+  Scenario: 'has' does not match types that have only a supertype of the specified attribute type
     Given graql define
       """
       define
@@ -322,7 +322,7 @@ Feature: Graql Match Clause
 
   @ignore
   # TODO: re-enable when we can retrieve attribute types that a specified type has (issue #4664)
-  Scenario: `has` can be used to match attribute types that a particular type has
+  Scenario: 'has' can be used to match attribute types that a particular type has
     When get answers of graql query
       """
       match person has $x; get;
@@ -339,7 +339,7 @@ Feature: Graql Match Clause
       | REF |
 
 
-  Scenario: `has` can be used to retrieve all instances of types that can own a given attribute type
+  Scenario: 'has' can be used to retrieve all instances of types that can own a given attribute type
     Given graql define
       """
       define
@@ -378,7 +378,7 @@ Feature: Graql Match Clause
       | EMP | tEMP |
 
 
-  Scenario: `plays` matches types that can play the specified role
+  Scenario: 'plays' matches types that can play the specified role
     When get answers of graql query
       """
       match $x plays friend; get;
@@ -391,7 +391,7 @@ Feature: Graql Match Clause
       | PER |
 
 
-  Scenario: `plays` does not match types that only play a subrole of the specified role
+  Scenario: 'plays' does not match types that only play a subrole of the specified role
     Given graql define
       """
       define
@@ -411,7 +411,7 @@ Feature: Graql Match Clause
       | PER |
 
 
-  Scenario: `plays` does not match types that only play a super-role of the specified role
+  Scenario: 'plays' does not match types that only play a super-role of the specified role
     Given graql define
       """
       define
@@ -431,7 +431,7 @@ Feature: Graql Match Clause
       | FRP |
 
 
-  Scenario: `plays` can be used to match roles that a particular type can play
+  Scenario: 'plays' can be used to match roles that a particular type can play
     When get answers of graql query
       """
       match person plays $x; get;
@@ -446,7 +446,7 @@ Feature: Graql Match Clause
       | EMP |
 
 
-  Scenario: `plays` can be used to retrieve all instances of types that can play a specific role
+  Scenario: 'plays' can be used to retrieve all instances of types that can play a specific role
     Given graql define
       """
       define
@@ -482,7 +482,7 @@ Feature: Graql Match Clause
       | DOG | tDOG |
 
 
-  Scenario: `key` matches types that have the specified attribute type as a key
+  Scenario: 'key' matches types that have the specified attribute type as a key
     Given graql define
       """
       define
@@ -504,7 +504,7 @@ Feature: Graql Match Clause
 
   @ignore
   # TODO: re-enable when we can retrieve attribute types that a specified type has (issue #4664)
-  Scenario: `key` can be used to find all attribute types that the specified type uses as key
+  Scenario: 'key' can be used to find all attribute types that the specified type uses as key
     When get answers of graql query
       """
       match person key $x; get;
@@ -517,7 +517,7 @@ Feature: Graql Match Clause
       | REF |
 
 
-  Scenario: `has` matches types that have the specified attribute type, even if they use it as a key
+  Scenario: 'has' matches types that have the specified attribute type, even if they use it as a key
     Given graql define
       """
       define
@@ -540,7 +540,7 @@ Feature: Graql Match Clause
       | CAT |
 
 
-  Scenario: `relates` matches relation types where the specified role can be played
+  Scenario: 'relates' matches relation types where the specified role can be played
     When get answers of graql query
       """
       match $x relates employee; get;
@@ -553,7 +553,7 @@ Feature: Graql Match Clause
       | EMP |
 
 
-  Scenario: `relates` with `as` matches relation types where the specified role is played as a subrole of the specified super-role
+  Scenario: 'relates' with 'as' matches relation types where the specified role is played as a subrole of the specified super-role
     Given graql define
       """
       define
@@ -573,7 +573,7 @@ Feature: Graql Match Clause
       | CLF |
 
 
-  Scenario: `relates` does not match relation types that block the specified roleplayer with `as`
+  Scenario: 'relates' does not match relation types that block the specified roleplayer with 'as'
     Given graql define
       """
       define
@@ -593,7 +593,7 @@ Feature: Graql Match Clause
       | FRE |
 
 
-  Scenario: `relates` can be used to retrieve all the roles of a relation type
+  Scenario: 'relates' can be used to retrieve all the roles of a relation type
     When get answers of graql query
       """
       match employment relates $x; get;
@@ -623,7 +623,7 @@ Feature: Graql Match Clause
   # THINGS #
   ##########
 
-  Scenario: `isa` matches things of the specified type and all its subtypes
+  Scenario: 'isa' matches things of the specified type and all its subtypes
     Given graql define
       """
       define
@@ -657,7 +657,7 @@ Feature: Graql Match Clause
       | GOO |
 
 
-  Scenario: `isa!` only matches things of the specified type, and does not match subtypes
+  Scenario: 'isa!' only matches things of the specified type, and does not match subtypes
     Given graql define
       """
       define
@@ -687,7 +687,7 @@ Feature: Graql Match Clause
       | WRI |
 
 
-  Scenario: `iid` matches the instance with the specified internal iid
+  Scenario: 'iid' matches the instance with the specified internal iid
     Given graql insert
       """
       insert
@@ -728,7 +728,7 @@ Feature: Graql Match Clause
     Then the integrity is validated
 
 
-  Scenario: when matching a non-existent type label to a variable from a generic `isa` query, an error is thrown
+  Scenario: when matching a non-existent type label to a variable from a generic 'isa' query, an error is thrown
     Then graql get throws
       """
       match $x isa $type; $type type polok; get;
@@ -1120,7 +1120,7 @@ Feature: Graql Match Clause
   # ATTRIBUTES #
   ##############
 
-  Scenario Outline: `<type>` attributes can be matched by value
+  Scenario Outline: '<type>' attributes can be matched by value
     Given graql define
       """
       define <attr> sub attribute, value <type>, key ref;
@@ -1151,7 +1151,7 @@ Feature: Graql Match Clause
       | use-by-date | datetime | 2020-06-16 |
 
 
-  Scenario Outline: when matching a `<type>` attribute by a value that doesn't exist, an empty answer is returned
+  Scenario Outline: when matching a '<type>' attribute by a value that doesn't exist, an empty answer is returned
     Given graql define
       """
       define <attr> sub attribute, value <type>, key ref;
@@ -1172,7 +1172,7 @@ Feature: Graql Match Clause
       | use-by-date | datetime | 2020-06-16 |
 
 
-  Scenario: `contains` matches strings that contain the specified substring
+  Scenario: 'contains' matches strings that contain the specified substring
     Given graql insert
       """
       insert
@@ -1195,7 +1195,7 @@ Feature: Graql Match Clause
       | FUN |
 
 
-  Scenario: `contains` performs a case-insensitive match
+  Scenario: 'contains' performs a case-insensitive match
     Given graql insert
       """
       insert
@@ -1218,7 +1218,7 @@ Feature: Graql Match Clause
       | MRB |
 
 
-  Scenario: `like` matches strings that match the specified regex
+  Scenario: 'like' matches strings that match the specified regex
     Given graql insert
       """
       insert
@@ -1258,7 +1258,7 @@ Feature: Graql Match Clause
   # ATTRIBUTE OWNERSHIP #
   #######################
 
-  Scenario: `has` can be used to match things that own any instance of the specified attribute
+  Scenario: 'has' can be used to match things that own any instance of the specified attribute
     Given graql insert
       """
       insert
@@ -1282,7 +1282,7 @@ Feature: Graql Match Clause
       | GRA |
 
 
-  Scenario: using the `attribute` meta label, `has` can match things that own any attribute with a specified value
+  Scenario: using the 'attribute' meta label, 'has' can match things that own any attribute with a specified value
     Given graql define
       """
       define
@@ -1312,7 +1312,7 @@ Feature: Graql Match Clause
       | SS9 |
 
 
-  Scenario: when an attribute instance is fully specified, `has` matches its owners
+  Scenario: when an attribute instance is fully specified, 'has' matches its owners
     Given graql define
       """
       define
@@ -1348,7 +1348,7 @@ Feature: Graql Match Clause
       | GRA |
 
 
-  Scenario: `has` matches an attribute's owner even if it owns more attributes of the same type
+  Scenario: 'has' matches an attribute's owner even if it owns more attributes of the same type
     Given graql define
       """
       define
@@ -1437,7 +1437,7 @@ Feature: Graql Match Clause
     Then answer size is: 1
 
 
-  Scenario: `has $attr == $x` matches owners of any instance `$y` of `$attr` where `$y` and `$x` are equal by value
+  Scenario: 'has $attr == $x' matches owners of any instance '$y' of '$attr' where '$y' and '$x' are equal by value
     Given graql insert
       """
       insert
@@ -1458,7 +1458,7 @@ Feature: Graql Match Clause
       | SUS |
 
 
-  Scenario: `has $attr > $x` matches owners of any instance `$y` of `$attr` where `$y > $x`
+  Scenario: 'has $attr > $x' matches owners of any instance '$y' of '$attr' where '$y > $x'
     Given graql insert
       """
       insert
@@ -1479,7 +1479,7 @@ Feature: Graql Match Clause
       | DON |
 
 
-  Scenario: `has $attr < $x` matches owners of any instance `$y` of `$attr` where `$y < $x`
+  Scenario: 'has $attr < $x' matches owners of any instance '$y' of '$attr' where '$y < $x'
     Given graql insert
       """
       insert
@@ -1500,7 +1500,7 @@ Feature: Graql Match Clause
       | SUS |
 
 
-  Scenario: `has $attr !== $x` matches owners of any instance `$y` of `$attr` where `$y !== $x`
+  Scenario: 'has $attr !== $x' matches owners of any instance '$y' of '$attr' where '$y !== $x'
     Given graql insert
       """
       insert
@@ -1523,7 +1523,7 @@ Feature: Graql Match Clause
       | SUS |
 
 
-  Scenario: value comparisons can be performed between a `double` and a `long`
+  Scenario: value comparisons can be performed between a 'double' and a 'long'
     Given graql define
       """
       define
@@ -1616,7 +1616,7 @@ Feature: Graql Match Clause
 
   @ignore
   # TODO: re-enable when variables used in multiple value predicates are resolvable (grakn#5845)
-  Scenario: an attribute variable used in both `==` and `>=` predicates is correctly resolved
+  Scenario: an attribute variable used in both '==' and '>=' predicates is correctly resolved
     Given graql insert
       """
       insert
@@ -1643,7 +1643,7 @@ Feature: Graql Match Clause
       | RAL |
 
 
-  Scenario: when the answers of a value comparison include both a `double` and a `long`, both answers are returned
+  Scenario: when the answers of a value comparison include both a 'double' and a 'long', both answers are returned
     Given graql define
       """
       define

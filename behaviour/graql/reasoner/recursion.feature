@@ -414,7 +414,7 @@ Feature: Recursion Resolution
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
   Scenario: non-regular transitivity requiring iterative generation of tuples
 
-    from Vieille - Recursive Axioms in Deductive Databases p. 192
+  from Vieille - Recursive Axioms in Deductive Databases p. 192
 
     Given for each session, graql define
       """
@@ -519,7 +519,7 @@ Feature: Recursion Resolution
   # Note: some of the commented steps intermittently succeed; may be caused by inconsistent query planning
   Scenario: ancestor test
 
-    from Bancilhon - An Amateur's Introduction to Recursive Query Processing Strategies p. 25
+  from Bancilhon - An Amateur's Introduction to Recursive Query Processing Strategies p. 25
 
     Given for each session, graql define
       """
@@ -663,7 +663,7 @@ Feature: Recursion Resolution
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
   Scenario: ancestor-friend test
 
-    from Vieille - Recursive Axioms in Deductive Databases (QSQ approach) p. 186
+  from Vieille - Recursive Axioms in Deductive Databases (QSQ approach) p. 186
 
     Given for each session, graql define
       """
@@ -767,7 +767,7 @@ Feature: Recursion Resolution
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
   Scenario: same-generation test
 
-    from Vieille - Recursive Query Processing: The power of logic p. 25
+  from Vieille - Recursive Query Processing: The power of logic p. 25
 
     Given for each session, graql define
       """
@@ -851,7 +851,7 @@ Feature: Recursion Resolution
   # TODO: re-enable all steps when resolvable ('all answers correct' takes too long, 'same size' test fails) (#75)
   Scenario: TC test
 
-    from Vieille - Recursive Query Processing: The power of logic p. 18
+  from Vieille - Recursive Query Processing: The power of logic p. 18
 
     Given for each session, graql define
       """
@@ -926,14 +926,14 @@ Feature: Recursion Resolution
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
   Scenario: given a directed graph, all pairs of vertices (x,y) such that y is reachable from x can be found
 
-    test 5.2 from Green - Datalog and Recursive Query Processing
+  test 5.2 from Green - Datalog and Recursive Query Processing
 
-    It defines a node configuration:
+  It defines a node configuration:
 
-                /^\
-    aa -> bb -> cc -> dd
+  /^\
+  aa -> bb -> cc -> dd
 
-    and finds all pairs (from, to) such that `to` is reachable from `from`.
+  and finds all pairs (from, to) such that 'to' is reachable from 'from'.
 
     Given for each session, graql define
       """
@@ -1029,12 +1029,12 @@ Feature: Recursion Resolution
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
   Scenario: given an undirected graph, all vertices connected to a given vertex can be found
 
-    For this test, the graph looks like the following:
+  For this test, the graph looks like the following:
 
-             /^\
-    a -- b -- c -- d
+  /^\
+  a -- b -- c -- d
 
-    We find the set of vertices connected to 'a', which is in fact all of the vertices, including 'a' itself.
+  We find the set of vertices connected to 'a', which is in fact all of the vertices, including 'a' itself.
 
     Given for each session, graql define
       """
@@ -1102,7 +1102,7 @@ Feature: Recursion Resolution
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
   Scenario: same-generation - Cao test
 
-    test 6.6 from Cao p.76
+  test 6.6 from Cao p.76
 
     Given for each session, graql define
       """
@@ -1182,7 +1182,7 @@ Feature: Recursion Resolution
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
   Scenario: reverse same-generation test
 
-    from Abiteboul - Foundations of databases p. 312/Cao test 6.14 p. 89
+  from Abiteboul - Foundations of databases p. 312/Cao test 6.14 p. 89
 
     Given for each session, graql define
       """
@@ -1309,9 +1309,9 @@ Feature: Recursion Resolution
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
   Scenario: dual linear transitivity matrix test
 
-    test 6.1 from Cao - Methods for evaluating queries to Horn knowledge bases in first-order logic, p. 71
+  test 6.1 from Cao - Methods for evaluating queries to Horn knowledge bases in first-order logic, p. 71
 
-    Tests an `n` x `m` linear transitivity matrix (in this scenario, n = m = 5)
+  Tests an 'n' x 'm' linear transitivity matrix (in this scenario, n = m = 5)
 
     Given for each session, graql define
       """
@@ -1375,7 +1375,7 @@ Feature: Recursion Resolution
         (P-from: $x, P-to: $y) isa P;
       };
       """
-    # These insert statements can be procedurally generated based on `m` and `n`, the width and height of the matrix
+    # These insert statements can be procedurally generated based on 'm' and 'n', the width and height of the matrix
     Given for each session, graql insert
       """
       insert
@@ -1486,7 +1486,7 @@ Feature: Recursion Resolution
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
   Scenario: tail recursion test
 
-    test 6.3 from Cao - Methods for evaluating queries to Horn knowledge bases in first-order logic, p 75
+  test 6.3 from Cao - Methods for evaluating queries to Horn knowledge bases in first-order logic, p 75
 
     Given for each session, graql define
       """
@@ -1690,26 +1690,26 @@ Feature: Recursion Resolution
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
   Scenario: Nguyen's test
 
-    test3 from Madalinska-Bugaj, Nguyen - A Generalized QSQR Evaluation Method for Horn Knowledge Bases
-    (similar to test 6.5 from Cao):
+  test3 from Madalinska-Bugaj, Nguyen - A Generalized QSQR Evaluation Method for Horn Knowledge Bases
+  (similar to test 6.5 from Cao):
 
-    N(x, y) :- R(x, y)
-    N(x, y) :- P(x, z), N(z, w), Q(w, y)
+  N(x, y) :- R(x, y)
+  N(x, y) :- P(x, z), N(z, w), Q(w, y)
 
 
-    (c) -- P -- (d) -- R -- (e) -- Q -- (a0)
-    \  \                      /
-    P                      Q
-    \  /               /
-    (b0)   --  Q  --   (a1)
-    \                     /
-    P                    Q
-    \                   /
-    (b1)   --  Q  --   (a2)
-    .
-    .
-    .
-    bN   --  Q --    aN+1
+  (c) -- P -- (d) -- R -- (e) -- Q -- (a0)
+  \  \                      /
+  P                      Q
+  \  /               /
+  (b0)   --  Q  --   (a1)
+  \                     /
+  P                    Q
+  \                   /
+  (b1)   --  Q  --   (a2)
+  .
+  .
+  .
+  bN   --  Q --    aN+1
 
     Given for each session, graql define
       """
@@ -1875,7 +1875,7 @@ Feature: Recursion Resolution
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
   Scenario: linear transitivity matrix test
 
-    test 6.9 from Cao - Methods for evaluating queries to Horn knowledge bases in first-order logic p.82
+  test 6.9 from Cao - Methods for evaluating queries to Horn knowledge bases in first-order logic p.82
 
     Given for each session, graql define
       """

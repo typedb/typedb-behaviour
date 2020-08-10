@@ -187,7 +187,7 @@ Feature: Graql Insert Query
     Then answer size is: 3
 
 
-  Scenario: an insert can be performed using a direct type specifier, and it functions equivalently to `isa`
+  Scenario: an insert can be performed using a direct type specifier, and it functions equivalently to 'isa'
     When get answers of graql insert
       """
       insert $x isa! person, has name "Harry", has ref 0;
@@ -944,7 +944,7 @@ Feature: Graql Insert Query
   # ATTRIBUTE INSERTION #
   #######################
 
-  Scenario Outline: inserting an attribute of type `<type>` creates an instance of it
+  Scenario Outline: inserting an attribute of type '<type>' creates an instance of it
     Given graql define
       """
       define <attr> sub attribute, value <type>, key ref;
@@ -1047,7 +1047,7 @@ Feature: Graql Insert Query
       | AGE2 |
 
 
-  Scenario: inserting two `double` attribute values with the same integer value creates a single concept
+  Scenario: inserting two 'double' attribute values with the same integer value creates a single concept
     Given graql define
       """
       define
@@ -1073,7 +1073,7 @@ Feature: Graql Insert Query
       | L2 |
 
 
-  Scenario: inserting the same integer twice as a `double` in separate transactions creates a single concept
+  Scenario: inserting the same integer twice as a 'double' in separate transactions creates a single concept
     Given graql define
       """
       define
@@ -1126,7 +1126,7 @@ Feature: Graql Insert Query
     Then answer size is: 1
 
 
-  Scenario Outline: a `<type>` inserted as [<insert>] is retrieved when matching [<match>]
+  Scenario Outline: a '<type>' inserted as [<insert>] is retrieved when matching [<match>]
     Given graql define
       """
       define <attr> sub attribute, value <type>, key ref;
@@ -1165,7 +1165,7 @@ Feature: Graql Insert Query
       | datetime | start-date | 2019-12-26T00:00 | 2019-12-26T00:00 |
 
 
-  Scenario Outline: inserting [<value>] as a `<type>` throws an error
+  Scenario Outline: inserting [<value>] as a '<type>' throws an error
     Given graql define
       """
       define <attr> sub attribute, value <type>, key ref;
@@ -1392,7 +1392,7 @@ Feature: Graql Insert Query
       | DAN | key   | ref:1 |
 
 
-  Scenario: the answers of a match-insert only include the variables referenced in the `insert` block
+  Scenario: the answers of a match-insert only include the variables referenced in the 'insert' block
     Given graql insert
       """
       insert
@@ -1414,7 +1414,7 @@ Feature: Graql Insert Query
       |     | check | value |
       | MIC | key   | ref:1 |
       | TAR | key   | ref:3 |
-    # Should only contain variables mentioned in the insert (so excludes `$z`)
+    # Should only contain variables mentioned in the insert (so excludes '$z')
     Then uniquely identify answer concepts
       | x   | y   |
       | MIC | TAR |
@@ -2252,7 +2252,7 @@ Feature: Graql Insert Query
     Then answer size is: 0
 
 
-  Scenario: if any insert in a transaction fails with a `key` violation, none of the inserts are performed
+  Scenario: if any insert in a transaction fails with a 'key' violation, none of the inserts are performed
     Given graql insert without commit
       """
       insert

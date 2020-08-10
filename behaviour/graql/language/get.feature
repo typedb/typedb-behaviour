@@ -86,7 +86,7 @@ Feature: Graql Get Query
       | PER | LIS |
 
 
-  Scenario: match-get throws an error when there are unbound variables in the `get`
+  Scenario: match-get throws an error when there are unbound variables in the 'get'
     Then graql get throws
       """
       match $x isa person; get $y;
@@ -98,7 +98,7 @@ Feature: Graql Get Query
   # SORT #
   ########
 
-  Scenario Outline: the answers of a get can be sorted by an attribute of type `<type>`
+  Scenario Outline: the answers of a get can be sorted by an attribute of type '<type>'
     Given graql define
       """
       define
@@ -134,12 +134,12 @@ Feature: Graql Get Query
       | VAL3 |
       | VAL1 |
 
-  Examples:
-    | attr          | type     | val4       | val2             | val3             | val1       |
-    | colour        | string   | "blue"     | "green"          | "red"            | "yellow"   |
-    | score         | long     | -38        | -4               | 18               | 152        |
-    | correlation   | double   | -29.7      | -0.9             | 0.01             | 100.0      |
-    | date-of-birth | datetime | 1970-01-01 | 1999-12-31T23:00 | 1999-12-31T23:01 | 2020-02-29 |
+    Examples:
+      | attr          | type     | val4       | val2             | val3             | val1       |
+      | colour        | string   | "blue"     | "green"          | "red"            | "yellow"   |
+      | score         | long     | -38        | -4               | 18               | 152        |
+      | correlation   | double   | -29.7      | -0.9             | 0.01             | 100.0      |
+      | date-of-birth | datetime | 1970-01-01 | 1999-12-31T23:00 | 1999-12-31T23:01 | 2020-02-29 |
 
 
   Scenario: sort order can be ascending or descending
@@ -277,18 +277,18 @@ Feature: Graql Get Query
       offset 2;
       """
     And concept identifiers are
-      |      | check | value          |
-      | GAR  | key   | ref:0          |
-      | JEM  | key   | ref:1          |
-      | nGAR | value | name:Gary      |
-      | nJEM | value | name:Jemima    |
+      |      | check | value       |
+      | GAR  | key   | ref:0       |
+      | JEM  | key   | ref:1       |
+      | nGAR | value | name:Gary   |
+      | nJEM | value | name:Jemima |
     Then order of answer concepts is
       | x   | y    |
       | GAR | nGAR |
       | JEM | nJEM |
 
 
-  Scenario: `offset` and `limit` can be used together to restrict the answer set
+  Scenario: 'offset' and 'limit' can be used together to restrict the answer set
     Given graql insert
       """
       insert
@@ -466,7 +466,7 @@ Feature: Graql Get Query
   # AGGREGATE #
   #############
 
-  Scenario: `count` returns the total number of answers
+  Scenario: 'count' returns the total number of answers
     Given graql insert
       """
       insert
@@ -516,7 +516,7 @@ Feature: Graql Get Query
     Then aggregate value is: 6
 
 
-  Scenario: the `count` of an empty answer set is zero
+  Scenario: the 'count' of an empty answer set is zero
     When get answers of graql query
       """
       match
@@ -527,7 +527,7 @@ Feature: Graql Get Query
     Then aggregate value is: 0
 
 
-  Scenario Outline: the <agg_type> of an answer set of `<type>` values can be retrieved
+  Scenario Outline: the <agg_type> of an answer set of '<type>' values can be retrieved
     Given graql define
       """
       define
@@ -566,7 +566,7 @@ Feature: Graql Get Query
       | weight | double | 61.8 | 86.5 | 24.8 | median   | 61.8    |
 
 
-  Scenario: the sample standard deviation can be retrieved for an answer set of `double` values
+  Scenario: the sample standard deviation can be retrieved for an answer set of 'double' values
     Given graql define
       """
       define
@@ -593,7 +593,7 @@ Feature: Graql Get Query
     Then aggregate value is: 31.0537
 
 
-  Scenario: restricting the variables in the `get` does not affect the result of the `sum`
+  Scenario: restricting the variables in the 'get' does not affect the result of the 'sum'
     Given graql insert
       """
       insert
@@ -620,7 +620,7 @@ Feature: Graql Get Query
     Then aggregate value is: 65
 
 
-  Scenario Outline: duplicate attribute values are included in a `<agg_type>`
+  Scenario Outline: duplicate attribute values are included in a '<agg_type>'
     Given graql insert
       """
       insert
@@ -665,7 +665,7 @@ Feature: Graql Get Query
     Then aggregate value is: 36.5
 
 
-  Scenario Outline: when an answer set is empty, calling `<agg_type>` on it returns an empty answer
+  Scenario Outline: when an answer set is empty, calling '<agg_type>' on it returns an empty answer
     Given graql define
       """
       define
@@ -692,7 +692,7 @@ Feature: Graql Get Query
       | std      |
 
 
-  Scenario Outline: an error is thrown when getting the `<agg_type>` of an undefined variable in an aggregate query
+  Scenario Outline: an error is thrown when getting the '<agg_type>' of an undefined variable in an aggregate query
     Then graql get throws
       """
       match
@@ -727,7 +727,7 @@ Feature: Graql Get Query
     Then the integrity is validated
 
 
-  Scenario Outline: an error is thrown when getting the `<agg_type>` of attributes that have the inapplicable type, `<type>`
+  Scenario Outline: an error is thrown when getting the '<agg_type>' of attributes that have the inapplicable type, '<type>'
     Given graql define
       """
       define
@@ -750,26 +750,26 @@ Feature: Graql Get Query
       """
     Then the integrity is validated
 
-  Examples:
-    | attr       | type     | value      | agg_type |
-    | name       | string   | "Talia"    | sum      |
-    | name       | string   | "Talia"    | max      |
-    | name       | string   | "Talia"    | min      |
-    | name       | string   | "Talia"    | mean     |
-    | name       | string   | "Talia"    | median   |
-    | name       | string   | "Talia"    | std      |
-    | is-awake   | boolean  | true       | sum      |
-    | is-awake   | boolean  | true       | max      |
-    | is-awake   | boolean  | true       | min      |
-    | is-awake   | boolean  | true       | mean     |
-    | is-awake   | boolean  | true       | median   |
-    | is-awake   | boolean  | true       | std      |
-    | birth-date | datetime | 2000-01-01 | sum      |
-    | birth-date | datetime | 2000-01-01 | max      |
-    | birth-date | datetime | 2000-01-01 | min      |
-    | birth-date | datetime | 2000-01-01 | mean     |
-    | birth-date | datetime | 2000-01-01 | median   |
-    | birth-date | datetime | 2000-01-01 | std      |
+    Examples:
+      | attr       | type     | value      | agg_type |
+      | name       | string   | "Talia"    | sum      |
+      | name       | string   | "Talia"    | max      |
+      | name       | string   | "Talia"    | min      |
+      | name       | string   | "Talia"    | mean     |
+      | name       | string   | "Talia"    | median   |
+      | name       | string   | "Talia"    | std      |
+      | is-awake   | boolean  | true       | sum      |
+      | is-awake   | boolean  | true       | max      |
+      | is-awake   | boolean  | true       | min      |
+      | is-awake   | boolean  | true       | mean     |
+      | is-awake   | boolean  | true       | median   |
+      | is-awake   | boolean  | true       | std      |
+      | birth-date | datetime | 2000-01-01 | sum      |
+      | birth-date | datetime | 2000-01-01 | max      |
+      | birth-date | datetime | 2000-01-01 | min      |
+      | birth-date | datetime | 2000-01-01 | mean     |
+      | birth-date | datetime | 2000-01-01 | median   |
+      | birth-date | datetime | 2000-01-01 | std      |
 
 
   Scenario: when taking the sum of a set of attributes, where some are numeric and others are strings, an error is thrown
@@ -890,7 +890,7 @@ Feature: Graql Get Query
   # GROUP AGGREGATE #
   ###################
 
-  Scenario: the size of each answer group can be retrieved using a group `count`
+  Scenario: the size of each answer group can be retrieved using a group 'count'
     Given graql insert
       """
       insert
@@ -932,7 +932,7 @@ Feature: Graql Get Query
       | gCOL  | 3     |
 
 
-  Scenario: the size of answer groups is still computed correctly when restricting variables in the `get`
+  Scenario: the size of answer groups is still computed correctly when restricting variables in the 'get'
     Given graql insert
       """
       insert
@@ -946,12 +946,12 @@ Feature: Graql Get Query
       """
     Given the integrity is validated
     And concept identifiers are
-      |      | check | value |
-      | APP  | key   | ref:0 |
-      | GOO  | key   | ref:1 |
-      | ELE  | key   | ref:2 |
-      | FLY  | key   | ref:3 |
-      | LYU  | key   | ref:4 |
+      |     | check | value |
+      | APP | key   | ref:0 |
+      | GOO | key   | ref:1 |
+      | ELE | key   | ref:2 |
+      | FLY | key   | ref:3 |
+      | LYU | key   | ref:4 |
     When get answers of graql query
       """
       match
@@ -992,7 +992,7 @@ Feature: Graql Get Query
       | gGOO  | 2     |
 
 
-  Scenario: the maximum value for a particular variable within each answer group can be retrieved using a group `max`
+  Scenario: the maximum value for a particular variable within each answer group can be retrieved using a group 'max'
     Given graql insert
       """
       insert

@@ -757,7 +757,7 @@ Feature: Graql Define Query
   ##############
 
 
-  Scenario: an attribute with type `string` can be defined
+  Scenario: an attribute with type 'string' can be defined
     Given graql define
       """
       define favourite-food sub attribute, value string;
@@ -775,7 +775,7 @@ Feature: Graql Define Query
       | FAV |
 
 
-  Scenario: an attribute with type `long` can be defined
+  Scenario: an attribute with type 'long' can be defined
     Given graql define
       """
       define number-of-cows sub attribute, value long;
@@ -793,7 +793,7 @@ Feature: Graql Define Query
       | NOC |
 
 
-  Scenario: an attribute with type `double` can be defined
+  Scenario: an attribute with type 'double' can be defined
     Given graql define
       """
       define density sub attribute, value double;
@@ -811,7 +811,7 @@ Feature: Graql Define Query
       | DEN |
 
 
-  Scenario: an attribute with type `boolean` can be defined
+  Scenario: an attribute with type 'boolean' can be defined
     Given graql define
       """
       define can-fly sub attribute, value boolean;
@@ -829,7 +829,7 @@ Feature: Graql Define Query
       | CFL |
 
 
-  Scenario: an attribute with type `datetime` can be defined
+  Scenario: an attribute with type 'datetime' can be defined
     Given graql define
       """
       define flight-date sub attribute, value datetime;
@@ -1102,7 +1102,7 @@ Feature: Graql Define Query
       | VDR |
 
 
-  Scenario: a type can `has` an attribute of type `string`
+  Scenario: a type can 'has' an attribute of type 'string'
     Given graql define
       """
       define
@@ -1122,7 +1122,7 @@ Feature: Graql Define Query
       | PER |
 
 
-  Scenario: a type can `has` an attribute of type `long`
+  Scenario: a type can 'has' an attribute of type 'long'
     Given graql define
       """
       define
@@ -1142,7 +1142,7 @@ Feature: Graql Define Query
       | PER |
 
 
-  Scenario: a type can `has` an attribute of type `double`
+  Scenario: a type can 'has' an attribute of type 'double'
     Given graql define
       """
       define
@@ -1162,7 +1162,7 @@ Feature: Graql Define Query
       | PER |
 
 
-  Scenario: a type can `has` an attribute of type `boolean`
+  Scenario: a type can 'has' an attribute of type 'boolean'
     Given graql define
       """
       define
@@ -1182,7 +1182,7 @@ Feature: Graql Define Query
       | PER |
 
 
-  Scenario: a type can `has` an attribute of type `datetime`
+  Scenario: a type can 'has' an attribute of type 'datetime'
     Given graql define
       """
       define
@@ -1213,8 +1213,8 @@ Feature: Graql Define Query
       match $x has number-of-letters; get;
       """
     Then concept identifiers are
-      |     | check | value                |
-      | NOL | label | number-of-letters    |
+      |     | check | value             |
+      | NOL | label | number-of-letters |
     Then uniquely identify answer concepts
       | x   |
       | NOL |
@@ -1578,8 +1578,8 @@ Feature: Graql Define Query
       match $x has barcode; get;
       """
     Then concept identifiers are
-      |     | check | value      |
-      | PRD | label | product    |
+      |     | check | value   |
+      | PRD | label | product |
     Then uniquely identify answer concepts
       | x   |
       | PRD |
@@ -1705,7 +1705,7 @@ Feature: Graql Define Query
     Then the integrity is validated
 
 
-  Scenario: add attribute as `key` to a type that already `has` that attribute throws
+  Scenario: add attribute as 'key' to a type that already 'has' that attribute throws
     Then graql define throws
       """
       define person key name;
@@ -1845,7 +1845,7 @@ Feature: Graql Define Query
   # HIERARCHY MUTATION #
   ######################
 
-  Scenario: define new `sub` on entity type changes its supertype
+  Scenario: define new 'sub' on entity type changes its supertype
     Given graql define
       """
       define
@@ -1873,10 +1873,10 @@ Feature: Graql Define Query
       | GEN |
 
 
-  Scenario: define new `sub` on relation type changes its supertype
+  Scenario: define new 'sub' on relation type changes its supertype
 
 
-  Scenario: define new `sub` on attribute type changes its supertype
+  Scenario: define new 'sub' on attribute type changes its supertype
     Given graql define
       """
       define
@@ -2049,16 +2049,16 @@ Feature: Graql Define Query
   # TODO: write this once 'assign new supertype throws if .. data has attributes not present on the new supertype' is written
   Scenario: assign new supertype throws if that supertype has a key not present in the existing data (?)
 
-  # TODO: write this once 'define new `sub` on relation type changes its supertype' is written
+  # TODO: write this once 'define new 'sub' on relation type changes its supertype' is written
   Scenario: assign new super-relation throws if existing data has roleplayers not present on the new supertype (?)
 
-  # TODO: write this once 'define new `sub` on attribute type changes its supertype' passes
+  # TODO: write this once 'define new 'sub' on attribute type changes its supertype' passes
   Scenario: assign new super-attribute throws if it has a different value type to the current one (?)
 
   # TODO: write this if 'assign new super-attribute throws if it has a different value type ..' turns out to not throw
   Scenario: assign new super-attribute throws if it has existing data and a different value type to the new supertype (?)
 
-  # TODO: write this once 'define new `sub` on attribute type changes its supertype' passes
+  # TODO: write this once 'define new 'sub' on attribute type changes its supertype' passes
   Scenario: assign new super-attribute throws if new supertype has a regex and existing data doesn't match it (?)
 
   ###############################
@@ -2085,16 +2085,16 @@ Feature: Graql Define Query
       match $x type child, plays $r; get;
       """
     Then concept identifiers are
-      |             | check | value     |
-      | EMPLOYEE    | label | employee  |
-      | EMPLOYER    | label | employer  |
-      | EARNER      | label | earner    |
-      | CHILD       | label | child     |
+      |          | check | value    |
+      | EMPLOYEE | label | employee |
+      | EMPLOYER | label | employer |
+      | EARNER   | label | earner   |
+      | CHILD    | label | child    |
     Then uniquely identify answer concepts
-      | x     | r           |
-      | CHILD | EMPLOYEE    |
-      | CHILD | EMPLOYER    |
-      | CHILD | EARNER      |
+      | x     | r        |
+      | CHILD | EMPLOYEE |
+      | CHILD | EMPLOYER |
+      | CHILD | EARNER   |
 
 
   @ignore

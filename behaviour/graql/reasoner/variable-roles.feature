@@ -183,7 +183,7 @@ Feature: Variable Role Resolution
 #    Then materialised and reasoned databases are the same size
 
 
-  Scenario: converting a fixed role to a variable role bound with `type` does not modify the answer size
+  Scenario: converting a fixed role to a variable role bound with 'type' does not modify the answer size
 #    When materialised database is completed
     Given for graql query
       """

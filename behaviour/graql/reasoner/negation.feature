@@ -1097,15 +1097,15 @@ Feature: Negation Resolution
   # TODO: re-enable all steps when fixed (#75)
   Scenario: when evaluating negation blocks, global subgoals are not updated
 
-    The test highlights a potential issue with eagerly updating global subgoals when branching out to determine whether
-    negation conditions are met. When checking negation satisfiability, we are interested in a first answer that can
-    prove us wrong - we are not exhaustively exploring all answer options.
+  The test highlights a potential issue with eagerly updating global subgoals when branching out to determine whether
+  negation conditions are met. When checking negation satisfiability, we are interested in a first answer that can
+  prove us wrong - we are not exhaustively exploring all answer options.
 
-    Consequently, if we use the same subgoals as for the main loop, we can end up with a query which answers weren't
-    fully consumed but that was marked as visited.
+  Consequently, if we use the same subgoals as for the main loop, we can end up with a query which answers weren't
+  fully consumed but that was marked as visited.
 
-    As a result, if it happens that a negated query has multiple answers and is visited more than a single time
-    - because of the admissibility check, answers might be missed.
+  As a result, if it happens that a negated query has multiple answers and is visited more than a single time
+  - because of the admissibility check, answers might be missed.
 
     Given for each session, graql define
       """

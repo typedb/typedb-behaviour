@@ -535,10 +535,10 @@ Feature: Relation Inference Resolution
 #    Then materialised and reasoned databases are the same size
 
 
-  Scenario: when a transitive rule's `then` matches a query, but its `when` is unmet, the material answers are returned
+  Scenario: when a transitive rule's 'then' matches a query, but its 'when' is unmet, the material answers are returned
 
   This test is included because internally, Reasoner uses backward chaining to answer queries, meaning it has to
-  perform resolution steps even if the conditions of a rule are never met. In this case, `transitive-location`
+  perform resolution steps even if the conditions of a rule are never met. In this case, 'transitive-location'
   is never triggered because there are no location-hierarchy pairs that satisfy both conditions.
 
     Given for each session, graql define

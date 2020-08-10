@@ -200,11 +200,11 @@ Feature: Concept Inequality Resolution
   Tests a scenario in which the neq predicate binds free variables of two equivalent relations.
   Corresponds to the following pattern:
 
-                   x
-                  / \
-                 /   \
-                v     v
-               y  !=   z
+  x
+  / \
+  /   \
+  v     v
+  y  !=   z
 
 #    When materialised database is completed
     Then for graql query
@@ -241,14 +241,14 @@ Feature: Concept Inequality Resolution
 
   Scenario: pairs of inferred relations can be filtered by inequality of players in different roles
 
-    Tests a scenario in which the neq predicate binds free variables
-    of two non-equivalent relations. Corresponds to the following pattern:
+  Tests a scenario in which the neq predicate binds free variables
+  of two non-equivalent relations. Corresponds to the following pattern:
 
-                         y
-                        ^ \
-                       /   \
-                      /     v
-                     x  !=   z
+  y
+  ^ \
+  /   \
+  /     v
+  x  !=   z
 
 #    When materialised database is completed
     Then for graql query
@@ -280,18 +280,18 @@ Feature: Concept Inequality Resolution
 
   Scenario: inequality predicates can operate independently against multiple pairs of relations in the same query
 
-     Tests a scenario in which multiple neq predicates are present but bind at most a single var in a relation.
-     Corresponds to the following pattern:
+  Tests a scenario in which multiple neq predicates are present but bind at most a single var in a relation.
+  Corresponds to the following pattern:
 
-                  y    !=    z1
-                   ^        ^
-                    \      /
-                     \    /
-                      x[a]
-                     /    \
-                    /      \
-                   v        v
-                 y2    !=    z2
+  y    !=    z1
+  ^        ^
+  \      /
+  \    /
+  x[a]
+  /    \
+  /      \
+  v        v
+  y2    !=    z2
 
 #    When materialised database is completed
     Given for graql query
@@ -346,14 +346,14 @@ Feature: Concept Inequality Resolution
 
   Scenario: inequality predicates can operate independently against multiple roleplayers in the same relation
 
-     Tests a scenario in which a single relation has both variables bound with two different neq predicates.
-     Corresponds to the following pattern:
+  Tests a scenario in which a single relation has both variables bound with two different neq predicates.
+  Corresponds to the following pattern:
 
-                  x[a]  - != - >  z1
-                  |
-                  |
-                  v
-                  y     - != - >  z2
+  x[a]  - != - >  z1
+  |
+  |
+  v
+  y     - != - >  z2
 
 #    When materialised database is completed
     Given for graql query
@@ -407,7 +407,7 @@ Feature: Concept Inequality Resolution
   # TODO: re-enable once grakn#5821 is fixed (in some answers, $typeof_ax is 'base-attribute' which is incorrect)
   # TODO: re-enable all steps once implicit attribute variables are resolvable
   # TODO: migrate to concept-inequality.feature
-  Scenario: when restricting concept types of a pair of inferred attributes with `!=`, the answers have distinct types
+  Scenario: when restricting concept types of a pair of inferred attributes with '!=', the answers have distinct types
     Given for each session, graql define
       """
       define

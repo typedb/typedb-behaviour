@@ -113,7 +113,7 @@ Feature: Concept Relation
     Then entity $a get relations(marriage:wife) do not contain: $m
     Then relation $m get players for role(wife) do not contain: $a
     Then relation $m get players do not contain:
-      | wife    | $a |
+      | wife | $a |
     When transaction commits
     When session opens transaction of type: write
     When $m = relation(marriage) get instance with key(license): m
@@ -121,7 +121,7 @@ Feature: Concept Relation
     Then entity $a get relations(marriage:wife) do not contain: $m
     Then relation $m get players for role(wife) do not contain: $a
     Then relation $m get players do not contain:
-      | wife    | $a |
+      | wife | $a |
     When relation $m set player for role(wife): $a
     When transaction commits
     When session opens transaction of type: write
@@ -131,7 +131,7 @@ Feature: Concept Relation
     Then entity $a get relations(marriage:wife) do not contain: $m
     Then relation $m get players for role(wife) do not contain: $a
     Then relation $m get players do not contain:
-      | wife    | $a |
+      | wife | $a |
     When transaction commits
     When session opens transaction of type: read
     When $m = relation(marriage) get instance with key(license): m
@@ -139,7 +139,7 @@ Feature: Concept Relation
     Then entity $a get relations(marriage:wife) do not contain: $m
     Then relation $m get players for role(wife) do not contain: $a
     Then relation $m get players do not contain:
-      | wife    | $a |
+      | wife | $a |
 
   Scenario: Relation without role players get deleted
     When $m = relation(marriage) create new instance with key(license): m

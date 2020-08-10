@@ -29,7 +29,7 @@ Feature: Type Generation Resolution
 
 
   # TODO: re-enable all steps once attribute re-attachment is resolvable
-  Scenario: additional types for entities can be derived using `isa`
+  Scenario: additional types for entities can be derived using 'isa'
     Given for each session, graql define
       """
       define
@@ -65,7 +65,7 @@ Feature: Type Generation Resolution
 
 
   # TODO: re-enable all steps once attribute re-attachment is resolvable
-  Scenario: additional types for entities can be derived using direct `isa!`
+  Scenario: additional types for entities can be derived using direct 'isa!'
     Given for each session, graql define
       """
       define
@@ -229,7 +229,7 @@ Feature: Type Generation Resolution
 
 
   # TODO: re-enable all steps once attribute re-attachment is resolvable
-  Scenario: additional types for relations can be derived using direct `isa!`
+  Scenario: additional types for relations can be derived using direct 'isa!'
     Given for each session, graql define
       """
       define

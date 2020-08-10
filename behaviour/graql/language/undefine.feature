@@ -39,7 +39,7 @@ Feature: Graql Undefine Query
   # ENTITIES #
   ############
 
-  Scenario: calling `undefine` with `sub entity` on a subtype of `entity` deletes it
+  Scenario: calling 'undefine' with 'sub entity' on a subtype of 'entity' deletes it
     Given get answers of graql query
       """
       match $x sub entity; get;
@@ -69,7 +69,7 @@ Feature: Graql Undefine Query
       | ENT |
 
 
-  Scenario: when undefining `sub` on an entity type, specifying a type that isn't really its supertype, nothing happens
+  Scenario: when undefining 'sub' on an entity type, specifying a type that isn't really its supertype, nothing happens
     When graql undefine
       """
       undefine person sub thing;
@@ -87,7 +87,7 @@ Feature: Graql Undefine Query
       | PER |
 
 
-  Scenario: a sub-entity type can be removed using `sub` with its direct supertype, and its parent is preserved
+  Scenario: a sub-entity type can be removed using 'sub' with its direct supertype, and its parent is preserved
     Given graql define
       """
       define child sub person;
@@ -119,7 +119,7 @@ Feature: Graql Undefine Query
       | PER |
 
 
-  Scenario: if `entity` is not the direct supertype of an entity, undefining `sub entity` on it does nothing
+  Scenario: if 'entity' is not the direct supertype of an entity, undefining 'sub entity' on it does nothing
     Given graql define
       """
       define child sub person;
@@ -263,7 +263,7 @@ Feature: Graql Undefine Query
 
   @ignore
   # TODO: re-enable when removing a role from a relation cleans up the role
-  Scenario: a relation type is removed by disassociating its roles and their roleplayers, then undefining `sub relation`
+  Scenario: a relation type is removed by disassociating its roles and their roleplayers, then undefining 'sub relation'
     Given get answers of graql query
       """
       match $x sub relation; get;
@@ -788,7 +788,7 @@ Feature: Graql Undefine Query
   # ATTRIBUTES #
   ##############
 
-  Scenario Outline: calling `undefine` with `sub attribute` on an attribute type with value `<type>` removes it
+  Scenario Outline: calling 'undefine' with 'sub attribute' on an attribute type with value '<type>' removes it
     Given graql define
       """
       define <attr> sub attribute, value <type>;
@@ -1133,7 +1133,7 @@ Feature: Graql Undefine Query
 
   @ignore
   # TODO: need to decide how this should behave
-  Scenario: undefining an attribute owned with `key` by using `has` removes ownership / does nothing / throws (?)
+  Scenario: undefining an attribute owned with 'key' by using 'has' removes ownership / does nothing / throws (?)
     Then graql undefine throws
       """
       undefine person has email;
@@ -1141,7 +1141,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
 
 
-  Scenario: attempting to undefine an attribute owned with `has` by using `key` throws an error
+  Scenario: attempting to undefine an attribute owned with 'has' by using 'key' throws an error
     Then graql undefine throws
       """
       undefine person key name;
