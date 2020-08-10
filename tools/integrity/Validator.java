@@ -355,7 +355,7 @@ public class Validator {
 
      Outline:
 
-     Goal: given a keyspace, verify basic integrity checks are preserved, building up from very low level structures
+     Goal: given a database, verify basic integrity checks are preserved, building up from very low level structures
 
 
      Schema:

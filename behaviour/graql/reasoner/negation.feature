@@ -17,15 +17,15 @@
 
 Feature: Negation Resolution
 
-  Background: Set up keyspaces for resolution testing
+  Background: Set up databases for resolution testing
 
     Given connection has been opened
-    Given connection delete all keyspaces
-    Given connection open sessions for keyspaces:
+    Given connection delete all databases
+    Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised keyspace is named: materialised
-    Given reasoned keyspace is named: reasoned
+    Given materialised database is named: materialised
+    Given reasoned database is named: reasoned
     Given for each session, graql define
       """
       define
@@ -914,19 +914,19 @@ Feature: Negation Resolution
       $x isa person, has age 10;
       $y isa person, has age 20;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match $x has name "Not Ten", has age 20; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
     Then for graql query
       """
       match $x has name "Not Ten", has age 10; get;
       """
-    Then answer size in reasoned keyspace is: 0
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 0
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: a rule can be triggered based on not having any instances of a specified attribute type
@@ -1002,6 +1002,7 @@ Feature: Negation Resolution
       (company-with-country: $b, country-for-company: $e) isa company-country;
       (company-with-country: $c, country-for-company: $f) isa company-country;
       """
+    When materialised database is completed
     Given for graql query
       """
       match $x isa company; get;
@@ -1031,6 +1032,7 @@ Feature: Negation Resolution
         { $x has name "a"; } or { $x has name "b"; };
       get;
       """
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: when nesting multiple negations and conjunctions, they are correctly resolved
@@ -1183,7 +1185,7 @@ Feature: Negation Resolution
       (identified-fault: $f1, identifying-question: $q1) isa fault-identification;
       (identified-fault: $f2, identifying-question: $q2) isa fault-identification;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match (diagnosed-fault: $flt, parent-session: $ts) isa diagnosis; get;
@@ -1266,6 +1268,7 @@ Feature: Negation Resolution
     Then materialised and reasoned keyspaces are the same size
 
 
+  # TODO: re-enable all steps when fixed (currently takes too long) (#75)
   Scenario: a rule can use negation to exclude things that have any transitive relations to a specific concept
     Given for each session, graql define
       """
@@ -1334,6 +1337,7 @@ Feature: Negation Resolution
       (link-from: $ee, link-to: $ff) isa link;
       (link-from: $ff, link-to: $gg) isa link;
       """
+    # When materialised database is completed
     Then for graql query
       """
       match
@@ -1351,3 +1355,4 @@ Feature: Negation Resolution
         { $y has index "gg"; } or { $y has index "hh"; };
       get;
       """
+    # Then materialised and reasoned databases are the same size  

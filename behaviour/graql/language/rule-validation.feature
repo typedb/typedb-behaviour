@@ -19,8 +19,8 @@ Feature: Graql Rule Validation
 
   Background: Initialise a session and transaction for each scenario
     Given connection has been opened
-    Given connection delete all keyspaces
-    Given connection open sessions for keyspaces:
+    Given connection delete all databases
+    Given connection open sessions for databases:
       | test_rule_validation |
     Given transaction is initialised
     Given graql define

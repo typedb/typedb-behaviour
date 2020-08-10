@@ -19,10 +19,10 @@ Feature: Concept Attribute Type
 
   Background:
     Given connection has been opened
-    Given connection delete all keyspaces
-    Given connection does not have any keyspace
-    Given connection create keyspace: grakn
-    Given connection open schema session for keyspace: grakn
+    Given connection delete all databases
+    Given connection does not have any database
+    Given connection create database: grakn
+    Given connection open schema session for database: grakn
     Given session opens transaction of type: write
 
   Scenario: Attribute types can be created
@@ -109,12 +109,12 @@ Feature: Concept Attribute Type
     When put attribute type: name, with value type: string
     When transaction commits
     When connection close all sessions
-    When connection open data session for keyspace: grakn
+    When connection open data session for database: grakn
     When session opens transaction of type: write
     When $x = attribute(name) as(string) put: alice
     When transaction commits
     When connection close all sessions
-    When connection open schema session for keyspace: grakn
+    When connection open schema session for database: grakn
     When session opens transaction of type: write
     Then delete attribute type: name; throws exception
 

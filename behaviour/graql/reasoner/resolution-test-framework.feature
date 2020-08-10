@@ -17,15 +17,15 @@
 
 Feature: Resolution Test Framework
 
-  Background: Set up keyspaces for resolution testing
+  Background: Set up databases for resolution testing
 
     Given connection has been opened
-    Given connection delete all keyspaces
-    Given connection open sessions for keyspaces:
+    Given connection delete all databases
+    Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised keyspace is named: materialised
-    Given reasoned keyspace is named: reasoned
+    Given materialised database is named: materialised
+    Given reasoned database is named: reasoned
 
 
   Scenario: basic rule
@@ -50,13 +50,13 @@ Feature: Resolution Test Framework
       insert
       $x isa company;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match $co has name $n; get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: compounding rules
@@ -94,13 +94,13 @@ Feature: Resolution Test Framework
       $co isa company;
       """
 
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match $co has is-liable $l; get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: 2-hop transitivity
@@ -143,7 +143,7 @@ Feature: Resolution Test Framework
       (superior: $cit, subordinate: $ar) isa location-hierarchy;
       """
 
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -151,8 +151,8 @@ Feature: Resolution Test Framework
       (superior: $l, subordinate: $k) isa location-hierarchy;
       get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then materialised and reasoned databases are the same size
 
 
   @ignore
@@ -202,15 +202,15 @@ Feature: Resolution Test Framework
       (location-hierarchy_superior: $cit, location-hierarchy_subordinate: $ar) isa location-hierarchy;
       """
 
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match $lh (location-hierarchy_superior: $continent, location-hierarchy_subordinate: $area) isa location-hierarchy;
       $continent isa continent; $area isa area;
       get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: queried relation is a supertype of the inferred relation
@@ -255,13 +255,13 @@ Feature: Resolution Test Framework
       $b isa man;
       """
 
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match ($w, $m) isa family-relation; $w isa woman; get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then materialised and reasoned databases are the same size
 
 
   @ignore
@@ -296,7 +296,7 @@ Feature: Resolution Test Framework
       $c2 has name $n2; $n2 "another-company";
       """
 
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match $com isa company;
@@ -304,8 +304,8 @@ Feature: Resolution Test Framework
       not {$com has is-liable $liability;};
       get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: a rule containing a negation
@@ -342,13 +342,13 @@ Feature: Resolution Test Framework
       $c2 has name $n2; $n2 "another-company";
       """
 
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match $com isa company, has is-liable $lia; $lia true; get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: querying with multiple negations
@@ -383,10 +383,10 @@ Feature: Resolution Test Framework
       $c2 has name $n2; $n2 "another-company";
       """
 
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match $com isa company; not { $com has is-liable $lia; $lia true; }; not { $com has name $n; $n "the-company"; }; get;
       """
-    Then all answers are correct in reasoned keyspace
-    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then materialised and reasoned databases are the same size

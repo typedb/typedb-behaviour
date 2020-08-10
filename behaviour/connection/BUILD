@@ -18,7 +18,7 @@
 package(default_visibility = ["//visibility:public"])
 
 exports_files([
-    "keyspace.feature",
+    "database.feature",
     "session.feature",
     "transaction.feature",
 ])
