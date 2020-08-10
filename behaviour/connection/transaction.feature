@@ -618,9 +618,9 @@ Feature: Connection Transaction
 
 
   Scenario: write in a read transaction throws
-    When connection create keyspace:
+    When connection create database:
       | grakn   |
-    Given connection open session for keyspace:
+    Given connection open session for database:
       | grakn   |
     When for each session, open transaction of type:
       | read    |
