@@ -19,10 +19,10 @@ Feature: Concept Thing Type
 
   Background:
     Given connection has been opened
-    Given connection delete all keyspaces
-    Given connection does not have any keyspace
-    Given connection create keyspace: grakn
-    Given connection open schema session for keyspace: grakn
+    Given connection delete all databases
+    Given connection does not have any database
+    Given connection create database: grakn
+    Given connection open schema session for database: grakn
     Given session opens transaction of type: write
 
   Scenario: Root thing type can retrieve all types
@@ -74,7 +74,7 @@ Feature: Concept Thing Type
     When entity(person) set has key type: username
     When transaction commits
     When connection close all sessions
-    When connection open data session for keyspace: grakn
+    When connection open data session for database: grakn
     When session opens transaction of type: write
     When $att1 = attribute(is-alive) as(boolean) put: true
     When $att2 = attribute(age) as(long) put: 21

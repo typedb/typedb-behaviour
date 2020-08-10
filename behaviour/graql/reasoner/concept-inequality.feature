@@ -18,15 +18,15 @@
 # TODO: re-enable all steps in file when 3-hop transitivity is resolvable
 Feature: Concept Inequality Resolution
 
-  Background: Set up keyspaces for resolution testing
+  Background: Set up databases for resolution testing
 
     Given connection has been opened
-    Given connection delete all keyspaces
-    Given connection open sessions for keyspaces:
+    Given connection delete all databases
+    Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised keyspace is named: materialised
-    Given reasoned keyspace is named: reasoned
+    Given materialised database is named: materialised
+    Given reasoned database is named: reasoned
     Given for each session, graql define
       """
       define
@@ -81,13 +81,16 @@ Feature: Concept Inequality Resolution
           plays related-state,
           has name;
 
-      achieved sub relation,
+      transition sub relation,
+        relates related-state;
+
+      achieved sub transition,
           relates related-state;
 
-      prior sub relation,
+      prior sub transition,
           relates related-state;
 
-      holds sub relation,
+      holds sub transition,
           relates related-state;
 
       state-rule sub rule,
@@ -112,32 +115,32 @@ Feature: Concept Inequality Resolution
       (related-state: $s1) isa achieved;
       (related-state: $s2) isa achieved;
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match (related-state: $s) isa holds; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
     Then answer set is equivalent for graql query
       """
       match $s isa state, has name 's2'; get;
       """
-#    Then materialised and reasoned keyspaces are the same size
+#    Then materialised and reasoned databases are the same size
 
 
   Scenario: inferred binary relations can be filtered by concept inequality of their roleplayers
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Given for graql query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
       get;
       """
-#    Given all answers are correct in reasoned keyspace
+#    Given all answers are correct in reasoned database
     # materialised: [ab, ba, bc, cb]
     # inferred: [aa, ac, bb, ca, cc]
-    Given answer size in reasoned keyspace is: 9
+    Given answer size in reasoned database is: 9
     Then for graql query
       """
       match
@@ -145,10 +148,10 @@ Feature: Concept Inequality Resolution
         $x != $y;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned database
     # materialised: [ab, ba, bc, cb]
     # inferred: [ac, ca]
-    Then answer size in reasoned keyspace is: 6
+    Then answer size in reasoned database is: 6
     # verify that the answer pairs to the previous query have distinct names within each pair
     Then for graql query
       """
@@ -160,13 +163,13 @@ Feature: Concept Inequality Resolution
         $nx !== $ny;
       get $x, $y;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 6
-#    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 6
+#    Then materialised and reasoned databases are the same size
 
 
   Scenario: inferred binary relations can be filtered by inequality to a specific concept
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match
@@ -175,8 +178,8 @@ Feature: Concept Inequality Resolution
         $y has name 'c';
       get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
     # verify answers are [ac, bc]
     Then for graql query
       """
@@ -187,9 +190,9 @@ Feature: Concept Inequality Resolution
         {$x has name 'a';} or {$x has name 'b';};
       get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
-#    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
+#    Then materialised and reasoned databases are the same size
 
 
   Scenario: pairs of inferred relations can be filtered by inequality of players in the same role
@@ -203,7 +206,7 @@ Feature: Concept Inequality Resolution
                 v     v
                y  !=   z
 
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match
@@ -212,11 +215,11 @@ Feature: Concept Inequality Resolution
         $y != $z;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned database
     # [aab, aac, aba, abc, aca, acb,
     #  bab, bac, bba, bbc, bca, bcb,
     #  cab, cac, cba, cbc, cca, ccb]
-    Then answer size in reasoned keyspace is: 18
+    Then answer size in reasoned database is: 18
     # verify that $y and $z always have distinct names
     Then for graql query
       """
@@ -229,9 +232,9 @@ Feature: Concept Inequality Resolution
         $ny !== $nz;
       get $x, $y, $z;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 18
-#    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 18
+#    Then materialised and reasoned databases are the same size
 
 
 
@@ -247,7 +250,7 @@ Feature: Concept Inequality Resolution
                       /     v
                      x  !=   z
 
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match
@@ -256,8 +259,8 @@ Feature: Concept Inequality Resolution
         $x != $z;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 18
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 18
     # verify that $y and $z always have distinct names
     Then for graql query
       """
@@ -270,9 +273,9 @@ Feature: Concept Inequality Resolution
         $nx !== $nz;
       get $x, $y, $z;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 18
-#    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 18
+#    Then materialised and reasoned databases are the same size
 
 
   Scenario: inequality predicates can operate independently against multiple pairs of relations in the same query
@@ -290,7 +293,7 @@ Feature: Concept Inequality Resolution
                    v        v
                  y2    !=    z2
 
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Given for graql query
       """
       match
@@ -300,9 +303,9 @@ Feature: Concept Inequality Resolution
         (ball1: $x, ball2: $z2) isa selection;
       get;
       """
-#    Given all answers are correct in reasoned keyspace
+#    Given all answers are correct in reasoned database
     # For each of the [3] values of $x, there are 3^4 = 81 choices for {$y1, $z1, $y2, $z2}, for a total of 243
-    Given answer size in reasoned keyspace is: 243
+    Given answer size in reasoned database is: 243
     Then for graql query
       """
       match
@@ -315,9 +318,9 @@ Feature: Concept Inequality Resolution
         $y2 != $z2;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned database
     # Each neq predicate reduces the answer size by 1/3, cutting it to 162, then 108
-    Then answer size in reasoned keyspace is: 108
+    Then answer size in reasoned database is: 108
     # verify that $y1 and $z1 - as well as $y2 and $z2 - always have distinct names
     Then for graql query
       """
@@ -336,9 +339,9 @@ Feature: Concept Inequality Resolution
         $ny2 !== $nz2;
       get $x, $y1, $z1, $y2, $z2;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 108
-#    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 108
+#    Then materialised and reasoned databases are the same size
 
 
   Scenario: inequality predicates can operate independently against multiple roleplayers in the same relation
@@ -352,7 +355,7 @@ Feature: Concept Inequality Resolution
                   v
                   y     - != - >  z2
 
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Given for graql query
       """
       match
@@ -361,9 +364,9 @@ Feature: Concept Inequality Resolution
         (ball1: $y, ball2: $z2) isa selection;
       get;
       """
-#    Given all answers are correct in reasoned keyspace
+#    Given all answers are correct in reasoned database
     # There are 3^4 possible choices for the set {$x, $y, $z1, $z2}, for a total of 81
-    Given answer size in reasoned keyspace is: 81
+    Given answer size in reasoned database is: 81
     Then for graql query
       """
       match
@@ -375,9 +378,9 @@ Feature: Concept Inequality Resolution
         $y != $z2;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
+#    Then all answers are correct in reasoned database
     # Each neq predicate reduces the answer size by 1/3, cutting it to 54, then 36
-    Then answer size in reasoned keyspace is: 36
+    Then answer size in reasoned database is: 36
     # verify that $y1 and $z1 - as well as $y2 and $z2 - always have distinct names
     Then for graql query
       """
@@ -395,9 +398,9 @@ Feature: Concept Inequality Resolution
         $ny !== $nz2;
       get $x, $y, $z1, $z2;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 36
-#    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 36
+#    Then materialised and reasoned databases are the same size
 
 
   @ignore
@@ -431,7 +434,7 @@ Feature: Concept Inequality Resolution
       $x isa person, has string-attribute "Tesco";
       $y isa soft-drink, has name "Tesco";
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -442,7 +445,7 @@ Feature: Concept Inequality Resolution
         $typeof_ax != $typeof_ay;
       get;
       """
-    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned database
     # x   | ax  | y   | ay  |
     # PER | STA | SOF | NAM |
     # PER | STA | SOF | RET |
@@ -450,8 +453,8 @@ Feature: Concept Inequality Resolution
     # SOF | RET | PER | STA |
     # SOF | NAM | SOF | STA |
     # SOF | STA | SOF | NAM |
-    Then answer size in reasoned keyspace is: 6
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 6
+    Then materialised and reasoned databases are the same size
 
   @ignore
   # TODO: re-enable once grakn#5821 is fixed
@@ -504,7 +507,7 @@ Feature: Concept Inequality Resolution
       $y isa soft-drink, has name "Sprite";
       $z "Ocado" isa retailer;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -518,8 +521,8 @@ Feature: Concept Inequality Resolution
         $unwantedType type string-attribute;
       get $x, $value, $type;
       """
-    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned database
     # x      | value | type     |
     # Sprite | Tesco | retailer |
-    Then answer size in reasoned keyspace is: 1
-#    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 1
+#    Then materialised and reasoned databases are the same size

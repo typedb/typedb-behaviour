@@ -42,8 +42,8 @@ public class ValidatorIT {
 
     @Before
     public void openSession() {
-        String randomKeyspace = "ksp_" + (UUID.randomUUID()).toString().replace("-", "_").substring(10);
-        session = client.session(randomKeyspace);
+        String randomDatabase = "ksp_" + (UUID.randomUUID()).toString().replace("-", "_").substring(10);
+        session = client.session(randomDatabase);
         loadSchema(session);
     }
 

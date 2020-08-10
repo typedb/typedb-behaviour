@@ -20,15 +20,15 @@ Feature: Recursion Resolution
   In some cases, the inferences made by a rule are used to trigger further inferences by the same rule.
   This test feature verifies that so-called recursive inference works as intended.
 
-  Background: Set up keyspaces for resolution testing
+  Background: Set up databases for resolution testing
 
     Given connection has been opened
-    Given connection delete all keyspaces
-    Given connection open sessions for keyspaces:
+    Given connection delete all databases
+    Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised keyspace is named: materialised
-    Given reasoned keyspace is named: reasoned
+    Given materialised database is named: materialised
+    Given reasoned database is named: reasoned
     Given for each session, graql define
       """
       define
@@ -103,14 +103,14 @@ Feature: Recursion Resolution
       (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
       (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match (big-location-subordinate: $x, big-location-superior: $y) isa big-location-hierarchy; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
-    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when resolvable (currently takes too long)
@@ -177,14 +177,14 @@ Feature: Recursion Resolution
       (role21:$v, role22:$w) isa relation2;
       (role11:$w, role12:$q) isa relation1;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match (role31: $x, role32: $y) isa relation3; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
-    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: circular rule dependencies can be resolved
@@ -246,22 +246,22 @@ Feature: Recursion Resolution
       (role11:$x, role12:$x) isa relation1;
       (role11:$x, role12:$y) isa relation1;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match (role31: $x, role32: $y) isa relation3; get;
       """
-    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned database
     # Each of the two material relation1 instances should infer a single relation3 via 1-to-2 and 2-to-3
-    Then answer size in reasoned keyspace is: 2
+    Then answer size in reasoned database is: 2
     Then for graql query
       """
       match (role21: $x, role22: $y) isa relation2; get;
       """
-    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned database
     # Relation-3-to-2 should not make any additional inferences - it should merely assert that the relations exist
-    Then answer size in reasoned keyspace is: 2
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 2
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when we have a solution for materialisation of infinite graphs (#75)
@@ -292,14 +292,14 @@ Feature: Recursion Resolution
       # If only Yusuf didn't dream about himself...
       (dreamer: $x, dream-subject: $x) isa dream;
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match $x isa dream; get; limit 10;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 10
-#    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 10
+#    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when materialisation is possible (may be an infinite graph?) (#75)
@@ -395,20 +395,20 @@ Feature: Recursion Resolution
       (supertype: $f, subtype: $rr) isa inheritance;
       (supertype: $f, subtype: $rr2) isa inheritance;
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match $p isa pair, has name 'ff'; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 16
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 16
     Then for graql query
       """
       match $p isa pair; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 64
-#    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 64
+#    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
@@ -495,7 +495,7 @@ Feature: Recursion Resolution
       (H-role-A: $r, H-role-B: $s) isa H;
       (H-role-A: $u, H-role-B: $v) isa H;
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match
@@ -503,8 +503,8 @@ Feature: Recursion Resolution
         $x has index 'i';
       get $y;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 3
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 3
     Then answer set is equivalent for graql query
       """
       match
@@ -512,7 +512,7 @@ Feature: Recursion Resolution
         {$ind == 'j';} or {$ind == 's';} or {$ind == 'v';};
       get $y;
       """
-#    Then materialised and reasoned keyspaces are the same size
+#    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
@@ -571,7 +571,7 @@ Feature: Recursion Resolution
       (parent: $aaa, child: $aaaa) isa Parent;
       (parent: $c, child: $ca) isa Parent;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -580,8 +580,8 @@ Feature: Recursion Resolution
         $Y has name $name;
       get $Y, $name;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 3
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 3
     Then answer set is equivalent for graql query
       """
       match
@@ -596,8 +596,8 @@ Feature: Recursion Resolution
         $X has name 'aa';
       get $Y;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 4
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 4
     Then answer set is equivalent for graql query
       """
       match
@@ -611,8 +611,8 @@ Feature: Recursion Resolution
         (ancestor: $X, descendant: $Y) isa Ancestor;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 10
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 10
     Then answer set is equivalent for graql query
       """
       match
@@ -631,8 +631,8 @@ Feature: Recursion Resolution
         ($X, $Y) isa Ancestor;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 20
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 20
     Then answer set is equivalent for graql query
       """
       match
@@ -657,7 +657,7 @@ Feature: Recursion Resolution
         {$nameY == 'c';$nameX == 'ca';};
       get $X, $Y;
       """
-    Then materialised and reasoned keyspaces are the same size
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
@@ -713,7 +713,7 @@ Feature: Recursion Resolution
       (friend: $a, friend: $g) isa Friend;
       (friend: $c, friend: $d) isa Friend;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -722,8 +722,8 @@ Feature: Recursion Resolution
         $Y has name $name;
       get $Y;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
     Then answer set is equivalent for graql query
       """
       match
@@ -745,8 +745,8 @@ Feature: Recursion Resolution
         $Y has name 'd';
       get $X;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 3
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 3
     Then answer set is equivalent for graql query
       """
       match
@@ -761,7 +761,7 @@ Feature: Recursion Resolution
         $Y has name 'd';
       get $X;
       """
-    Then materialised and reasoned keyspaces are the same size
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
@@ -828,7 +828,7 @@ Feature: Recursion Resolution
 
       (parent: $h, child: $g) isa Parent;
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match
@@ -836,8 +836,8 @@ Feature: Recursion Resolution
         $x has name 'a';
       get $y;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 2
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
     Then answer set is equivalent for graql query
       """
       match
@@ -845,7 +845,7 @@ Feature: Recursion Resolution
         {$name == 'f';} or {$name == 'a';};
       get $y;
       """
-#    Then materialised and reasoned keyspaces are the same size
+#    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when resolvable ('all answers correct' takes too long, 'same size' test fails) (#75)
@@ -906,7 +906,7 @@ Feature: Recursion Resolution
       (P-roleA: $a1, P-roleB: $a) isa P;
       (P-roleA: $a2, P-roleB: $a1) isa P;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -914,13 +914,13 @@ Feature: Recursion Resolution
         $y has index 'a';
       get $x;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
     Then answer set is equivalent for graql query
       """
       match $x has index 'a2'; get;
       """
-#    Then materialised and reasoned keyspaces are the same size
+#    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
@@ -1002,13 +1002,13 @@ Feature: Recursion Resolution
       (from: $cc, to: $cc) isa link;
       (from: $cc, to: $dd) isa link;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match (from: $x, to: $y) isa reachable; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 7
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 7
     Then answer set is equivalent for graql query
       """
       match
@@ -1023,7 +1023,7 @@ Feature: Recursion Resolution
         {$indX == 'aa';$indY == 'dd';};
       get $x, $y;
       """
-    Then materialised and reasoned keyspaces are the same size
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
@@ -1079,7 +1079,7 @@ Feature: Recursion Resolution
       (coordinate: $c, coordinate: $c) isa link;
       (coordinate: $c, coordinate: $d) isa link;
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match
@@ -1087,8 +1087,8 @@ Feature: Recursion Resolution
         $x has index 'a';
       get $y;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 4
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 4
     Then answer set is equivalent for graql query
       """
       match
@@ -1096,7 +1096,7 @@ Feature: Recursion Resolution
         {$indY == 'a';} or {$indY == 'b';} or {$indY == 'c';} or {$indY == 'd';};
       get $y;
       """
-#    Then materialised and reasoned keyspaces are the same size
+#    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
@@ -1159,7 +1159,7 @@ Feature: Recursion Resolution
       (parent: $john, child: $peter) isa Parent;
       (parent: $john, child: $bill) isa Parent;
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match
@@ -1167,8 +1167,8 @@ Feature: Recursion Resolution
         $x has name 'ann';
       get $y;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 3
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 3
     Then answer set is equivalent for graql query
       """
       match
@@ -1176,7 +1176,7 @@ Feature: Recursion Resolution
         {$name == 'ann';} or {$name == 'bill';} or {$name == 'peter';};
       get $y;
       """
-#    Then materialised and reasoned keyspaces are the same size
+#    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
@@ -1265,7 +1265,7 @@ Feature: Recursion Resolution
       (down-from: $i, down-to: $d) isa down;
       (down-from: $p, down-to: $k) isa down;
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match
@@ -1273,8 +1273,8 @@ Feature: Recursion Resolution
         $x has name 'a';
       get $y;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 3
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 3
     Then answer set is equivalent for graql query
       """
       match
@@ -1288,8 +1288,8 @@ Feature: Recursion Resolution
         (RSG-from: $x, RSG-to: $y) isa RevSG;
       get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 11
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 11
     Then answer set is equivalent for graql query
       """
       match
@@ -1303,7 +1303,7 @@ Feature: Recursion Resolution
         {$nameX == 'f';$nameY == 'k';};
       get $x, $y;
       """
-#    Then materialised and reasoned keyspaces are the same size
+#    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
@@ -1464,7 +1464,7 @@ Feature: Recursion Resolution
       (R2-from: $b25, R2-to: $b35) isa R2;
       (R2-from: $b35, R2-to: $b45) isa R2;
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match
@@ -1472,15 +1472,15 @@ Feature: Recursion Resolution
         $x has index 'a0';
       get $y;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 5
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 5
     Then answer set is equivalent for graql query
       """
       match
         { $y isa a-entity; } or { $y isa end; };
       get;
       """
-#    Then materialised and reasoned keyspaces are the same size
+#    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
@@ -1670,7 +1670,7 @@ Feature: Recursion Resolution
       (Q-from: $b4_10, Q-to: $b5_10) isa Q;
       (Q-from: $b5_10, Q-to: $b6_10) isa Q;
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match
@@ -1678,13 +1678,13 @@ Feature: Recursion Resolution
         $x has index 'a0';
       get $y;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 60
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 60
     Then answer set is equivalent for graql query
       """
       match $y isa b-entity; get;
       """
-#    Then materialised and reasoned keyspaces are the same size
+#    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
@@ -1855,7 +1855,7 @@ Feature: Recursion Resolution
       (Q-rA: $a9, Q-rB: $b9) isa Q;
       (Q-rA: $b9, Q-rB: $a10) isa Q;
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match
@@ -1863,13 +1863,13 @@ Feature: Recursion Resolution
         $x has index 'c';
       get $y;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 11
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 11
     Then answer set is equivalent for graql query
       """
       match $y isa a-entity; get;
       """
-#    Then materialised and reasoned keyspaces are the same size
+#    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
@@ -2009,7 +2009,7 @@ Feature: Recursion Resolution
       (Q-from: $a5_3, Q-to: $a5_4) isa Q;
       (Q-from: $a5_4, Q-to: $a5_5) isa Q;
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Then for graql query
       """
       match
@@ -2017,10 +2017,10 @@ Feature: Recursion Resolution
         $x has index 'a';
       get $y;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 25
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 25
     Then answer set is equivalent for graql query
       """
       match $y isa a-entity; get;
       """
-#    Then materialised and reasoned keyspaces are the same size
+#    Then materialised and reasoned databases are the same size

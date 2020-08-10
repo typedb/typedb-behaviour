@@ -17,15 +17,15 @@
 
 Feature: Negation Resolution
 
-  Background: Set up keyspaces for resolution testing
+  Background: Set up databases for resolution testing
 
     Given connection has been opened
-    Given connection delete all keyspaces
-    Given connection open sessions for keyspaces:
+    Given connection delete all databases
+    Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised keyspace is named: materialised
-    Given reasoned keyspace is named: reasoned
+    Given materialised database is named: materialised
+    Given reasoned database is named: reasoned
     Given for each session, graql define
       """
       define
@@ -84,7 +84,7 @@ Feature: Negation Resolution
       """
       match $x isa person; get;
       """
-    Given answer size in reasoned keyspace is: 5
+    Given answer size in reasoned database is: 5
     Then for graql query
       """
       match
@@ -94,7 +94,7 @@ Feature: Negation Resolution
         };
       get;
       """
-    Then answer size in reasoned keyspace is: 3
+    Then answer size in reasoned database is: 3
 
 
   Scenario: negation can check that an entity does not play any role in any relation
@@ -114,7 +114,7 @@ Feature: Negation Resolution
       """
       match $x isa person; get;
       """
-    Given answer size in reasoned keyspace is: 5
+    Given answer size in reasoned database is: 5
     Then for graql query
       """
       match
@@ -124,7 +124,7 @@ Feature: Negation Resolution
         };
       get;
       """
-    Then answer size in reasoned keyspace is: 3
+    Then answer size in reasoned database is: 3
 
 
   Scenario: negation can check that an entity does not own any instance of a specific attribute type
@@ -141,7 +141,7 @@ Feature: Negation Resolution
       """
       match $x isa person; get;
       """
-    Given answer size in reasoned keyspace is: 5
+    Given answer size in reasoned database is: 5
     Then for graql query
       """
       match
@@ -151,7 +151,7 @@ Feature: Negation Resolution
         };
       get;
       """
-    Then answer size in reasoned keyspace is: 2
+    Then answer size in reasoned database is: 2
 
 
   Scenario: negation can check that an entity does not own a particular attribute
@@ -168,7 +168,7 @@ Feature: Negation Resolution
       """
       match $x isa person; get;
       """
-    Given answer size in reasoned keyspace is: 5
+    Given answer size in reasoned database is: 5
     Then for graql query
       """
       match
@@ -178,7 +178,7 @@ Feature: Negation Resolution
         };
       get;
       """
-    Then answer size in reasoned keyspace is: 4
+    Then answer size in reasoned database is: 4
 
 
   Scenario: negation can check that an entity owns an attribute which is not equal to a specific value
@@ -196,7 +196,7 @@ Feature: Negation Resolution
         not {$y 20;};
       get;
       """
-    Then answer size in reasoned keyspace is: 1
+    Then answer size in reasoned database is: 1
     Then answer set is equivalent for graql query
       """
       match
@@ -222,7 +222,7 @@ Feature: Negation Resolution
         not {$y isa name;};
       get;
       """
-    Then answer size in reasoned keyspace is: 2
+    Then answer size in reasoned database is: 2
     Then answer set is equivalent for graql query
       """
       match
@@ -264,7 +264,7 @@ Feature: Negation Resolution
     # cbab, cbcb, cbcd, cdcb, cdcd, cdzd,
     # dcba, dcbc, dcdc, dcdz, dzdc, dzdz,
     # zdcb, zdcd, zdzd
-    Given answer size in reasoned keyspace is: 24
+    Given answer size in reasoned database is: 24
     Then for graql query
       """
       match
@@ -275,7 +275,7 @@ Feature: Negation Resolution
       get;
       """
     # Eliminates (cdzd, zdzd)
-    Then answer size in reasoned keyspace is: 22
+    Then answer size in reasoned database is: 22
     Then answer set is equivalent for graql query
       """
       match
@@ -319,7 +319,7 @@ Feature: Negation Resolution
     # cba, cbc, cdc, cdz
     # dcb, dcd, dzd
     # zdc, zdz
-    Given answer size in reasoned keyspace is: 14
+    Given answer size in reasoned database is: 14
     Then for graql query
       """
       match
@@ -330,7 +330,7 @@ Feature: Negation Resolution
       get;
       """
     # (d,z) is a friendship so we eliminate results where $b is 'd': these are (cdc, cdz, zdc, zdz)
-    Then answer size in reasoned keyspace is: 10
+    Then answer size in reasoned database is: 10
     Then answer set is equivalent for graql query
       """
       match
@@ -362,7 +362,7 @@ Feature: Negation Resolution
     # employee | PER |
     # role     | COM |
     # employer | COM |
-    Given answer size in reasoned keyspace is: 4
+    Given answer size in reasoned database is: 4
     Then for graql query
       """
       match
@@ -370,7 +370,7 @@ Feature: Negation Resolution
         not {$r1 type role;};
       get;
       """
-    Then answer size in reasoned keyspace is: 2
+    Then answer size in reasoned database is: 2
 
 
   Scenario: a negated statement with multiple properties can be re-written as a negation of multiple statements
@@ -390,7 +390,7 @@ Feature: Negation Resolution
         $x has attribute $r;
       get;
       """
-    Given answer size in reasoned keyspace is: 8
+    Given answer size in reasoned database is: 8
     Then for graql query
       """
       match
@@ -400,7 +400,7 @@ Feature: Negation Resolution
         };
       get;
       """
-    Then answer size in reasoned keyspace is: 6
+    Then answer size in reasoned database is: 6
     Then answer set is equivalent for graql query
       """
       match
@@ -431,7 +431,7 @@ Feature: Negation Resolution
         $x has attribute $r;
       get;
       """
-    Given answer size in reasoned keyspace is: 8
+    Given answer size in reasoned database is: 8
     Given for graql query
       """
       match
@@ -439,7 +439,7 @@ Feature: Negation Resolution
         not { $x isa company; };
       get;
       """
-    Given answer size in reasoned keyspace is: 7
+    Given answer size in reasoned database is: 7
     Then for graql query
       """
       match
@@ -448,7 +448,7 @@ Feature: Negation Resolution
         not { $x has name "Tim"; };
       get;
       """
-    Then answer size in reasoned keyspace is: 3
+    Then answer size in reasoned database is: 3
     Then for graql query
       """
       match
@@ -458,7 +458,7 @@ Feature: Negation Resolution
         not { $r 55; };
       get;
       """
-    Then answer size in reasoned keyspace is: 2
+    Then answer size in reasoned database is: 2
 
 
   Scenario: when negating a negation, the statement becomes positive again
@@ -478,7 +478,7 @@ Feature: Negation Resolution
         $x isa person, has name "Tim";
       get;
       """
-    Given answer size in reasoned keyspace is: 2
+    Given answer size in reasoned database is: 2
     Then for graql query
       """
       match
@@ -490,7 +490,7 @@ Feature: Negation Resolution
         };
       get;
       """
-    Then answer size in reasoned keyspace is: 1
+    Then answer size in reasoned database is: 1
     Then answer set is equivalent for graql query
       """
       match
@@ -524,7 +524,7 @@ Feature: Negation Resolution
       """
       match $x isa person; get;
       """
-    Then answer size in reasoned keyspace is: 4
+    Then answer size in reasoned database is: 4
     Then for graql query
       """
       match
@@ -535,7 +535,7 @@ Feature: Negation Resolution
         };
       get;
       """
-    Then answer size in reasoned keyspace is: 3
+    Then answer size in reasoned database is: 3
 
 
   Scenario: when using negation to exclude entities of specific types, their subtypes are also excluded
@@ -568,7 +568,7 @@ Feature: Negation Resolution
         };
       get;
       """
-    Then answer size in reasoned keyspace is: 2
+    Then answer size in reasoned database is: 2
 
 
   Scenario: answers can be returned even if a statement in a conjunction in a negation is identical to a non-negated one
@@ -603,7 +603,7 @@ Feature: Negation Resolution
         };
       get;
       """
-    Then answer size in reasoned keyspace is: 3
+    Then answer size in reasoned database is: 3
 
 
   ##############################
@@ -642,7 +642,7 @@ Feature: Negation Resolution
       $z isa person, has name "Edward";
       $c isa company, has name "Apple";
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -650,10 +650,10 @@ Feature: Negation Resolution
         not {(manager: $x) isa employment;};
       get;
       """
-    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned database
     # Anna is not retrieved because she is someone's manager
-    Then answer size in reasoned keyspace is: 2
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 2
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: a negation with a roleplayer and inferred relation checks that the relation doesn't have that roleplayer
@@ -688,7 +688,7 @@ Feature: Negation Resolution
       $z isa person, has name "Edward";
       $c isa company, has name "Apple";
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -696,10 +696,10 @@ Feature: Negation Resolution
         not {$r (manager: $x) isa employment;};
       get;
       """
-    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned database
     # Anna is retrieved because she is not a manager in her own employee-employment relation
-    Then answer size in reasoned keyspace is: 3
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 3
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: negation with an unbound roleplayer variable checks that an inferred relation doesn't have that role played
@@ -734,7 +734,7 @@ Feature: Negation Resolution
       $z isa person, has name "Edward";
       $c isa company, has name "Apple";
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match
@@ -742,9 +742,9 @@ Feature: Negation Resolution
         not {$r (manager: $z) isa employment;};
       get;
       """
-    Then all answers are correct in reasoned keyspace
+    Then all answers are correct in reasoned database
     # Carol is not retrieved because her employment relation has a manager
-    Then answer size in reasoned keyspace is: 2
+    Then answer size in reasoned database is: 2
     Then for graql query
       """
       match
@@ -753,9 +753,9 @@ Feature: Negation Resolution
       get;
       """
     # Now the negation block is harder to fulfil. Carol is not her own manager, so she is retrieved again
-    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 3
-    Then materialised and reasoned keyspaces are the same size
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 3
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when 3-hop transitivity is resolvable
@@ -788,7 +788,7 @@ Feature: Negation Resolution
       (location-superior: $cntry, location-subordinate: $cit) isa location-hierarchy;
       (location-superior: $cit, location-subordinate: $ar) isa location-hierarchy;
       """
-#    When materialised keyspace is completed
+#    When materialised database is completed
     Given for graql query
       """
       match
@@ -796,7 +796,7 @@ Feature: Negation Resolution
         $area isa area;
       get;
       """
-    Then answer size in reasoned keyspace is: 1
+    Then answer size in reasoned database is: 1
     Then for graql query
       """
       match
@@ -805,8 +805,8 @@ Feature: Negation Resolution
         not {(location-superior: $continent, location-subordinate: $area) isa location-hierarchy;};
       get;
       """
-    Then answer size in reasoned keyspace is: 0
-#    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 0
+#    Then materialised and reasoned databases are the same size
 
 
   Scenario: negation can exclude a particular entity from a matched transitive relation
@@ -878,7 +878,7 @@ Feature: Negation Resolution
         $x has index "aa";
       get;
       """
-    Then answer size in reasoned keyspace is: 2
+    Then answer size in reasoned database is: 2
     Then answer set is equivalent for graql query
       """
       match
@@ -914,19 +914,19 @@ Feature: Negation Resolution
       $x isa person, has age 10;
       $y isa person, has age 20;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match $x has name "Not Ten", has age 20; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 1
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
     Then for graql query
       """
       match $x has name "Not Ten", has age 10; get;
       """
-    Then answer size in reasoned keyspace is: 0
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 0
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: a rule can be triggered based on not having any instances of a specified attribute type
@@ -950,19 +950,19 @@ Feature: Negation Resolution
       $y isa person, has age 20;
       $z isa person;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Given for graql query
       """
       match $x isa person; get;
       """
-    Given all answers are correct in reasoned keyspace
-    Given answer size in reasoned keyspace is: 3
+    Given all answers are correct in reasoned database
+    Given answer size in reasoned database is: 3
     Then for graql query
       """
       match $x isa person, has name "No Age"; get;
       """
-    Then answer size in reasoned keyspace is: 1
-    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 1
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: when negating a conjunction, all the conjuction statements must be met for the negation to be met
@@ -1002,11 +1002,12 @@ Feature: Negation Resolution
       (company-with-country: $b, country-for-company: $e) isa company-country;
       (company-with-country: $c, country-for-company: $f) isa company-country;
       """
+    When materialised database is completed
     Given for graql query
       """
       match $x isa company; get;
       """
-    Given answer size in reasoned keyspace is: 4
+    Given answer size in reasoned database is: 4
     Then for graql query
       """
       match
@@ -1015,7 +1016,7 @@ Feature: Negation Resolution
       get;
       """
     # Should exclude both the company in France and the company with no country
-    Then answer size in reasoned keyspace is: 2
+    Then answer size in reasoned database is: 2
     Then answer set is equivalent for graql query
       """
       match
@@ -1031,6 +1032,7 @@ Feature: Negation Resolution
         { $x has name "a"; } or { $x has name "b"; };
       get;
       """
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: when nesting multiple negations and conjunctions, they are correctly resolved
@@ -1082,7 +1084,7 @@ Feature: Negation Resolution
         };
       get;
       """
-    Then answer size in reasoned keyspace is: 3
+    Then answer size in reasoned database is: 3
     Then answer set is equivalent for graql query
       """
       match
@@ -1183,14 +1185,14 @@ Feature: Negation Resolution
       (identified-fault: $f1, identifying-question: $q1) isa fault-identification;
       (identified-fault: $f2, identifying-question: $q2) isa fault-identification;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match (diagnosed-fault: $flt, parent-session: $ts) isa diagnosis; get;
       """
-    Then answer size in reasoned keyspace is: 0
-    Then answers are consistent across 5 executions in reasoned keyspace
-#    Then materialised and reasoned keyspaces are the same size
+    Then answer size in reasoned database is: 0
+    Then answers are consistent across 5 executions in reasoned database
+#    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when fixed (currently takes too long) (#75)
@@ -1255,17 +1257,18 @@ Feature: Negation Resolution
 
       (symmetric-role: $c, symmetric-role: $b ) isa symmetric-relation;
       """
-    When materialised keyspace is completed
+    When materialised database is completed
     Then for graql query
       """
       match (role-3: $x, role-4: $y) isa relation-4; get;
       """
-#    Then all answers are correct in reasoned keyspace
-    Then answer size in reasoned keyspace is: 11
-    Then answers are consistent across 5 executions in reasoned keyspace
-    Then materialised and reasoned keyspaces are the same size
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 11
+    Then answers are consistent across 5 executions in reasoned database
+    Then materialised and reasoned databases are the same size
 
 
+  # TODO: re-enable all steps when fixed (currently takes too long) (#75)
   Scenario: a rule can use negation to exclude things that have any transitive relations to a specific concept
     Given for each session, graql define
       """
@@ -1334,6 +1337,7 @@ Feature: Negation Resolution
       (link-from: $ee, link-to: $ff) isa link;
       (link-from: $ff, link-to: $gg) isa link;
       """
+    # When materialised database is completed
     Then for graql query
       """
       match
@@ -1342,7 +1346,7 @@ Feature: Negation Resolution
       get;
       """
     # aa is not linked to itself. ee, ff, gg are linked to each other, but not to aa. hh is not linked to anything
-    Then answer size in reasoned keyspace is: 5
+    Then answer size in reasoned database is: 5
     Then answer set is equivalent for graql query
       """
       match
@@ -1351,3 +1355,4 @@ Feature: Negation Resolution
         { $y has index "gg"; } or { $y has index "hh"; };
       get;
       """
+    # Then materialised and reasoned databases are the same size  

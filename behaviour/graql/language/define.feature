@@ -18,8 +18,8 @@ Feature: Graql Define Query
 
   Background: Open connection and create a simple extensible schema
     Given connection has been opened
-    Given connection delete all keyspaces
-    Given connection open sessions for keyspaces:
+    Given connection delete all databases
+    Given connection open sessions for databases:
       | test_define |
     Given transaction is initialised
     Given the integrity is validated
@@ -743,53 +743,13 @@ Feature: Graql Define Query
       | REC |
 
 
-  Scenario: define `sub role` creates a role, provided it is used in a relation
-    Given graql define
-      """
-      define
-      team-member sub role;
-      team sub relation, relates team-member;
-      """
-    Given the integrity is validated
-    When get answers of graql query
-      """
-      match $x type team-member; get;
-      """
-    Then concept identifiers are
-      |     | check | value       |
-      | TMM | label | team-member |
-    Then uniquely identify answer concepts
-      | x   |
-      | TMM |
-
-
-  Scenario: define a role throws if it is not used in any relation
+  Scenario: when defining a role shared across unrelated relations, throw
     Given graql define throws
       """
       define
-      lonely-team-member sub role;
+      ownership sub relation, relates owner;
+      loan sub relation, relates owner;
       """
-
-
-  Scenario: define a subrole using `sub` creates child of parent role
-    Given graql define
-      """
-      define
-      team-member sub role;
-      team-leader sub team-member;
-      team sub relation, relates team-member, relates team-leader;
-      """
-    Given the integrity is validated
-    When get answers of graql query
-      """
-      match $x type team-leader; get;
-      """
-    Then concept identifiers are
-      |     | check | value       |
-      | TML | label | team-leader |
-    Then uniquely identify answer concepts
-      | x   |
-      | TML |
 
 
   ##############
@@ -1484,22 +1444,12 @@ Feature: Graql Define Query
     Then the integrity is validated
 
 
-  Scenario: defining a type as abstract is idempotent
-    Given graql define
+  Scenario: defining a type as abstract repeatedly throws an error
+    Given graql define throws
       """
       define animal sub entity, abstract, abstract, abstract;
       """
-    Given the integrity is validated
-    When get answers of graql query
-      """
-      match $x type animal; $x abstract; get;
-      """
-    Then concept identifiers are
-      |     | check | value  |
-      | ANI | label | animal |
-    Then uniquely identify answer concepts
-      | x   |
-      | ANI |
+    Then the integrity is validated
 
 
   ###################

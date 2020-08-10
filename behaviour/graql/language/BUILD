@@ -17,7 +17,7 @@
 
 package(default_visibility = ["//visibility:public"])
 
-exports_files([
+files = [
     "compute.feature",
     "define.feature",
     "delete.feature",
@@ -26,4 +26,10 @@ exports_files([
     "match.feature",
     "rule-validation.feature",
     "undefine.feature",
-])
+]
+
+filegroup(
+    name = "features",
+    srcs = files,
+)
+exports_files(files)
