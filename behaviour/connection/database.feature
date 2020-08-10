@@ -179,3 +179,37 @@ Feature: Connection Database
       | mike    |
       | neil    |
     Then  connection does not have any database
+
+
+  Scenario: delete a database causes open sessions to fail
+    When connection create database:
+      | grakn   |
+    When connection open session for database:
+      | grakn   |
+    When  connection delete database:
+      | grakn   |
+    Then  connection does not have database:
+      | grakn   |
+    Then for each session, open transaction of type; throws exception
+      | write   |
+
+
+  Scenario: delete a database causes open transactions to fail
+    When connection create database:
+      | grakn   |
+    When connection open session for database:
+      | grakn   |
+    When for each session, open transaction of type:
+      | write   |
+    When connection delete database:
+      | grakn   |
+    Then connection does not have database:
+      | grakn   |
+    Then for each transaction, define query; throws exception containing "transaction is closed"
+      """
+      define person sub entity;
+      """
+
+  Scenario: delete a nonexistant database throws an error
+    When connection delete database; throws exception
+      | grakn   |
