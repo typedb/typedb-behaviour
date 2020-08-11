@@ -37,7 +37,7 @@ Feature: Graql Reasoning Explanation
 
       company sub entity,
         has name,
-        key company-id;
+        has company-id @key;
 
       company-has-name sub rule,
       when {
@@ -72,9 +72,9 @@ Feature: Graql Reasoning Explanation
       | company-has-name | { $c isa company; }; | { $c has name "the-company"; }; |
 
     Then answers contain explanation tree
-      |   | children | vars  | identifiers | explanation      | pattern                                                           |
-      | 0 | 1        | co, n | CO, CON     | company-has-name | { $co id <answer.co.id>; $co has name $n; $n id <answer.n.id>; }; |
-      | 1 | -        | c     | CO          | lookup           | { $c isa company; $c id <answer.c.id>; };                         |
+      |   | children | vars  | identifiers | explanation      | pattern                                                               |
+      | 0 | 1        | co, n | CO, CON     | company-has-name | { $co iid <answer.co.iid>; $co has name $n; $n iid <answer.n.iid>; }; |
+      | 1 | -        | c     | CO          | lookup           | { $c isa company; $c iid <answer.c.iid>; };                           |
 
   @ignore-client-java
   Scenario: nested rule explanations are given when multiple rules are applied
@@ -92,7 +92,7 @@ Feature: Graql Reasoning Explanation
           value long;
 
       company sub entity,
-          key company-id,
+          has company-id @key,
           has name,
           has is-liable;
 
@@ -138,10 +138,10 @@ Feature: Graql Reasoning Explanation
       | company-is-liable | { $c2 isa company, has name $name; $name "the-company"; }; | { $c2 has is-liable true; };     |
 
     Then answers contain explanation tree
-      |   | children | vars     | identifiers | explanation       | pattern                                                                                                             |
-      | 0 | 1        | co, l    | CO, LIA     | company-is-liable | { $co id <answer.co.id>; $co has is-liable $l; $l id <answer.l.id>; };                                              |
-      | 1 | 2        | c2, name | CO, CON     | company-has-name  | { $c2 isa company; $c2 has name $name; $name == "the-company"; $c2 id <answer.c2.id>; $name id <answer.name.id>; }; |
-      | 2 | -        | c1       | CO          | lookup            | { $c1 isa company; $c1 id <answer.c1.id>; };                                                                        |
+      |   | children | vars     | identifiers | explanation       | pattern                                                                                                                 |
+      | 0 | 1        | co, l    | CO, LIA     | company-is-liable | { $co iid <answer.co.iid>; $co has is-liable $l; $l iid <answer.l.iid>; };                                              |
+      | 1 | 2        | c2, name | CO, CON     | company-has-name  | { $c2 isa company; $c2 has name $name; $name == "the-company"; $c2 iid <answer.c2.iid>; $name iid <answer.name.iid>; }; |
+      | 2 | -        | c1       | CO          | lookup            | { $c1 isa company; $c1 iid <answer.c1.iid>; };                                                                          |
 
   @ignore-client-java
   Scenario: a join explanation can be given directly and inside a rule explanation
@@ -153,7 +153,7 @@ Feature: Graql Reasoning Explanation
 
       location sub entity,
           abstract,
-          key name,
+          has name @key,
           plays superior,
           plays subordinate;
 
@@ -209,19 +209,19 @@ Feature: Graql Reasoning Explanation
       | location-hierarchy-transitivity | { (superior: $a, subordinate: $b) isa location-hierarchy; (superior: $b, subordinate: $c) isa location-hierarchy; }; | { (superior: $a, subordinate: $c) isa location-hierarchy; }; |
 
     Then answers contain explanation tree
-      |   | children | vars    | identifiers | explanation                     | pattern                                                                                                                                                                                          |
-      | 0 | 1, 2     | k, l, n | KC, UK, KCN | join                            | { $k isa area; $k has name $n; (superior: $l, subordinate: $k) isa location-hierarchy; $k id <answer.k.id>; $n id <answer.n.id>; $l id <answer.l.id>; };                                         |
-      | 1 | -        | k, n    | KC, KCN     | lookup                          | { $k isa area; $k has name $n; $n id <answer.n.id>; $k id <answer.k.id>; };                                                                                                                      |
-      | 2 | 3        | k, l    | KC, UK      | location-hierarchy-transitivity | { (superior: $l, subordinate: $k) isa location-hierarchy; $k isa area; $k id <answer.k.id>; $l id <answer.l.id>; };                                                                              |
-      | 3 | 4, 5     | a, b, c | UK, LDN, KC | join                            | { (superior: $a, subordinate: $b) isa location-hierarchy; (superior: $b, subordinate: $c) isa location-hierarchy; $c isa area; $a id <answer.a.id>; $b id <answer.b.id>; $c id <answer.c.id>; }; |
-      | 4 | -        | b, c    | LDN, KC     | lookup                          | { (superior: $b, subordinate: $c) isa location-hierarchy; $c isa area; $b id <answer.b.id>; $c id <answer.c.id>; };                                                                              |
-      | 5 | -        | a, b    | UK, LDN     | lookup                          | { (superior: $a, subordinate: $b) isa location-hierarchy; $b id <answer.b.id>; $a id <answer.a.id>; };                                                                                           |
+      |   | children | vars    | identifiers | explanation                     | pattern                                                                                                                                                                                                |
+      | 0 | 1, 2     | k, l, n | KC, UK, KCN | join                            | { $k isa area; $k has name $n; (superior: $l, subordinate: $k) isa location-hierarchy; $k iid <answer.k.iid>; $n iid <answer.n.iid>; $l iid <answer.l.iid>; };                                         |
+      | 1 | -        | k, n    | KC, KCN     | lookup                          | { $k isa area; $k has name $n; $n iid <answer.n.iid>; $k iid <answer.k.iid>; };                                                                                                                        |
+      | 2 | 3        | k, l    | KC, UK      | location-hierarchy-transitivity | { (superior: $l, subordinate: $k) isa location-hierarchy; $k isa area; $k iid <answer.k.iid>; $l iid <answer.l.iid>; };                                                                                |
+      | 3 | 4, 5     | a, b, c | UK, LDN, KC | join                            | { (superior: $a, subordinate: $b) isa location-hierarchy; (superior: $b, subordinate: $c) isa location-hierarchy; $c isa area; $a iid <answer.a.iid>; $b iid <answer.b.iid>; $c iid <answer.c.iid>; }; |
+      | 4 | -        | b, c    | LDN, KC     | lookup                          | { (superior: $b, subordinate: $c) isa location-hierarchy; $c isa area; $b iid <answer.b.iid>; $c iid <answer.c.iid>; };                                                                                |
+      | 5 | -        | a, b    | UK, LDN     | lookup                          | { (superior: $a, subordinate: $b) isa location-hierarchy; $b iid <answer.b.iid>; $a iid <answer.a.iid>; };                                                                                             |
 
     Then answers contain explanation tree
-      |   | children | vars    | identifiers  | explanation | pattern                                                                                                                                                  |
-      | 0 | 1, 2     | k, l, n | KC, LDN, KCN | join        | { $k isa area; $k has name $n; (superior: $l, subordinate: $k) isa location-hierarchy; $k id <answer.k.id>; $n id <answer.n.id>; $l id <answer.l.id>; }; |
-      | 1 | -        | k, n    | KC, KCN      | lookup      | { $k isa area; $k has name $n; $n id <answer.n.id>; $k id <answer.k.id>; };                                                                              |
-      | 2 | -        | k, l    | KC, LDN      | lookup      | { (superior: $l, subordinate: $k) isa location-hierarchy; $k isa area; $k id <answer.k.id>; $l id <answer.l.id>; };                                      |
+      |   | children | vars    | identifiers  | explanation | pattern                                                                                                                                                        |
+      | 0 | 1, 2     | k, l, n | KC, LDN, KCN | join        | { $k isa area; $k has name $n; (superior: $l, subordinate: $k) isa location-hierarchy; $k iid <answer.k.iid>; $n iid <answer.n.iid>; $l iid <answer.l.iid>; }; |
+      | 1 | -        | k, n    | KC, KCN      | lookup      | { $k isa area; $k has name $n; $n iid <answer.n.iid>; $k iid <answer.k.iid>; };                                                                                |
+      | 2 | -        | k, l    | KC, LDN      | lookup      | { (superior: $l, subordinate: $k) isa location-hierarchy; $k isa area; $k iid <answer.k.iid>; $l iid <answer.l.iid>; };                                        |
 
   @ignore-client-java
   Scenario: an answer with a more specific type can be retrieved from the cache with correct explanations
@@ -234,7 +234,7 @@ Feature: Graql Reasoning Explanation
       person-id sub attribute, value long;
 
       person sub entity,
-          key person-id,
+          has person-id @key,
           has name,
           plays sibling;
 
@@ -292,12 +292,12 @@ Feature: Graql Reasoning Explanation
       | ALI | BOB |
 
     Then answers contain explanation tree
-      |   | children  | vars          | identifiers           | explanation          | pattern                                                                                                                                                                                    |
-      | 0 | 1         | w, m          | ALI, BOB              | bobs-sister-is-alice | { (role: $m, role: $w) isa family-relation; $w isa woman; $w id <answer.w.id>; $m id <answer.m.id>; };                                                                                     |
-      | 1 | 2, 3      | p, nb, p1, na | BOB, BOBN, ALI, ALIN  | join                 | { $p isa man; $p has name $nb; $nb == "Bob"; $p id <answer.p.id>; $nb id <answer.nb.id>; $p1 isa woman; $p1 has name $na; $na == "Alice"; $p1 id <answer.p1.id>; $na id <answer.na.id>; }; |
-      | 2 | 4         | p, nb         | BOB, BOBN             | a-man-is-called-bob  | { $p isa man; $p has name $nb; $nb == "Bob"; $p id <answer.p.id>; $nb id <answer.nb.id>; };                                                                                                |
-      | 3 | -         | p1, na        | ALI, ALIN             | lookup               | { $p1 isa woman; $p1 has name $na; $na == "Alice"; $p1 id <answer.p1.id>; $na id <answer.na.id>; };                                                                                        |
-      | 4 | -         | man           | BOB                   | lookup               | { $man isa man; $man id <answer.man.id>; };                                                                                                                                                |
+      |   | children | vars          | identifiers          | explanation          | pattern                                                                                                                                                                                            |
+      | 0 | 1        | w, m          | ALI, BOB             | bobs-sister-is-alice | { (role: $m, role: $w) isa family-relation; $w isa woman; $w iid <answer.w.iid>; $m iid <answer.m.iid>; };                                                                                         |
+      | 1 | 2, 3     | p, nb, p1, na | BOB, BOBN, ALI, ALIN | join                 | { $p isa man; $p has name $nb; $nb == "Bob"; $p iid <answer.p.iid>; $nb iid <answer.nb.iid>; $p1 isa woman; $p1 has name $na; $na == "Alice"; $p1 iid <answer.p1.iid>; $na iid <answer.na.iid>; }; |
+      | 2 | 4        | p, nb         | BOB, BOBN            | a-man-is-called-bob  | { $p isa man; $p has name $nb; $nb == "Bob"; $p iid <answer.p.iid>; $nb iid <answer.nb.iid>; };                                                                                                    |
+      | 3 | -        | p1, na        | ALI, ALIN            | lookup               | { $p1 isa woman; $p1 has name $na; $na == "Alice"; $p1 iid <answer.p1.iid>; $na iid <answer.na.iid>; };                                                                                            |
+      | 4 | -        | man           | BOB                  | lookup               | { $man isa man; $man iid <answer.man.iid>; };                                                                                                                                                      |
 
     Then get answers of graql query
       """
@@ -309,17 +309,17 @@ Feature: Graql Reasoning Explanation
       | ALI | BOB |
 
     Then answers contain explanation tree
-      |   | children  | vars          | identifiers           | explanation          | pattern                                                                                                                                                                                    |
-      | 0 | 1         | w, m          | ALI, BOB              | bobs-sister-is-alice | { (sibling: $m, sibling: $w) isa siblingship; $w isa woman; $w id <answer.w.id>; $m id <answer.m.id>; };                                                                                   |
-      | 1 | 2, 3      | p, nb, p1, na | BOB, BOBN, ALI, ALIN  | join                 | { $p isa man; $p has name $nb; $nb == "Bob"; $p id <answer.p.id>; $nb id <answer.nb.id>; $p1 isa woman; $p1 has name $na; $na == "Alice"; $p1 id <answer.p1.id>; $na id <answer.na.id>; }; |
-      | 2 | 4         | p, nb         | BOB, BOBN             | a-man-is-called-bob  | { $p isa man; $p has name $nb; $nb == "Bob"; $p id <answer.p.id>; $nb id <answer.nb.id>; };                                                                                                |
-      | 3 | -         | p1, na        | ALI, ALIN             | lookup               | { $p1 isa woman; $p1 has name $na; $na == "Alice"; $p1 id <answer.p1.id>; $na id <answer.na.id>; };                                                                                        |
-      | 4 | -         | man           | BOB                   | lookup               | { $man isa man; $man id <answer.man.id>; };                                                                                                                                                |
+      |   | children | vars          | identifiers          | explanation          | pattern                                                                                                                                                                                            |
+      | 0 | 1        | w, m          | ALI, BOB             | bobs-sister-is-alice | { (sibling: $m, sibling: $w) isa siblingship; $w isa woman; $w iid <answer.w.iid>; $m iid <answer.m.iid>; };                                                                                       |
+      | 1 | 2, 3     | p, nb, p1, na | BOB, BOBN, ALI, ALIN | join                 | { $p isa man; $p has name $nb; $nb == "Bob"; $p iid <answer.p.iid>; $nb iid <answer.nb.iid>; $p1 isa woman; $p1 has name $na; $na == "Alice"; $p1 iid <answer.p1.iid>; $na iid <answer.na.iid>; }; |
+      | 2 | 4        | p, nb         | BOB, BOBN            | a-man-is-called-bob  | { $p isa man; $p has name $nb; $nb == "Bob"; $p iid <answer.p.iid>; $nb iid <answer.nb.iid>; };                                                                                                    |
+      | 3 | -        | p1, na        | ALI, ALIN            | lookup               | { $p1 isa woman; $p1 has name $na; $na == "Alice"; $p1 iid <answer.p1.iid>; $na iid <answer.na.iid>; };                                                                                            |
+      | 4 | -        | man           | BOB                  | lookup               | { $man isa man; $man iid <answer.man.iid>; };                                                                                                                                                      |
 
   @ignore-client-java
   Scenario: a query with a disjunction and negated inference has disjunctive and negation explanation but no rule explanation
 
-    A rule explanation is not be given since the rule was only used to infer facts that were later negated
+  A rule explanation is not be given since the rule was only used to infer facts that were later negated
 
     Given graql define
       """
@@ -335,7 +335,7 @@ Feature: Graql Reasoning Explanation
           value long;
 
       company sub entity,
-          key company-id,
+          has company-id @key,
           has name,
           has is-liable;
 
@@ -365,23 +365,23 @@ Feature: Graql Reasoning Explanation
       """
 
     Then concept identifiers are
-      |      | check | value                |
-      | ACO  | key   | company-id:1         |
-      | N2   | value | name:another-company |
+      |     | check | value                |
+      | ACO | key   | company-id:1         |
+      | N2  | value | name:another-company |
 
     Then uniquely identify answer concepts
       | com |
       | ACO |
 
     Then rules are
-      |                   | when                                                    | then                                |
-      | company-is-liable | { $c2 isa company, has name $n2; $n2 "the-company"; };  | { $c2 has is-liable $l; $l true; }; |
+      |                   | when                                                   | then                                |
+      | company-is-liable | { $c2 isa company, has name $n2; $n2 "the-company"; }; | { $c2 has is-liable $l; $l true; }; |
 
     Then answers contain explanation tree
-      |   | children  | vars    | identifiers | explanation | pattern                                                                                                                                                                                                                                                       |
-      | 0 | 1         | com     | ACO         | disjunction | { $com id <answer.com.id>; { $com isa company; $com has name $n1; $n1 == "the-company"; not { { $com has is-liable $liability; }; }; } or {$com isa company; $com has name $n2; $n2 == "another-company"; not { { $com has is-liable $liability; }; }; }; };  |
-      | 1 | 2         | com, n2 | ACO, N2     | negation    | { $com isa company; $com has name $n2; $n2 == "another-company"; $com id <answer.com.id>; $n2 id <answer.n2.id>; not { { $com has is-liable $liability; }; }; };                                                                                              |
-      | 2 | -         | com, n2 | ACO, N2     | lookup      | { $com isa company; $com has name $n2; $n2 == "another-company"; $com id <answer.com.id>; $n2 id <answer.n2.id>; };                                                                                                                                           |
+      |   | children | vars    | identifiers | explanation | pattern                                                                                                                                                                                                                                                        |
+      | 0 | 1        | com     | ACO         | disjunction | { $com iid <answer.com.iid>; { $com isa company; $com has name $n1; $n1 == "the-company"; not { { $com has is-liable $liability; }; }; } or {$com isa company; $com has name $n2; $n2 == "another-company"; not { { $com has is-liable $liability; }; }; }; }; |
+      | 1 | 2        | com, n2 | ACO, N2     | negation    | { $com isa company; $com has name $n2; $n2 == "another-company"; $com iid <answer.com.iid>; $n2 iid <answer.n2.iid>; not { { $com has is-liable $liability; }; }; };                                                                                           |
+      | 2 | -        | com, n2 | ACO, N2     | lookup      | { $com isa company; $com has name $n2; $n2 == "another-company"; $com iid <answer.com.iid>; $n2 iid <answer.n2.iid>; };                                                                                                                                        |
 
   @ignore-client-java
   Scenario: a rule containing a negation gives a rule explanation with a negation explanation inside
@@ -399,7 +399,7 @@ Feature: Graql Reasoning Explanation
           value long;
 
       company sub entity,
-          key company-id,
+          has company-id @key,
           has name,
           has is-liable;
 
@@ -429,9 +429,9 @@ Feature: Graql Reasoning Explanation
       """
 
     Then concept identifiers are
-      |      | check | value          |
-      | ACO  | key   | company-id:1   |
-      | LIA  | value | is-liable:true |
+      |     | check | value          |
+      | ACO | key   | company-id:1   |
+      | LIA | value | is-liable:true |
 
     Then uniquely identify answer concepts
       | com | lia |
@@ -442,15 +442,15 @@ Feature: Graql Reasoning Explanation
       | company-is-liable | { $c2 isa company; not { $c2 has name $n2; $n2 "the-company"; }; }; | { $c2 has is-liable $l; $l true; }; |
 
     Then answers contain explanation tree
-      |   | children  | vars      | identifiers | explanation       | pattern                                                                                                         |
-      | 0 | 1         | com, lia  | ACO, LIA    | company-is-liable | { $com isa company; $com has is-liable $lia; $lia == true; $com id <answer.com.id>; $lia id <answer.lia.id>; }; |
-      | 1 | 2         | c2        | ACO         | negation          | { $c2 isa company; $c2 id <answer.c2.id>; not { { $c2 has name $n2; $n2 == "the-company"; }; }; };              |
-      | 2 | -         | c2        | ACO         | lookup            | { $c2 isa company; $c2 id <answer.c2.id>; };                                                                    |
+      |   | children | vars     | identifiers | explanation       | pattern                                                                                                             |
+      | 0 | 1        | com, lia | ACO, LIA    | company-is-liable | { $com isa company; $com has is-liable $lia; $lia == true; $com iid <answer.com.iid>; $lia iid <answer.lia.iid>; }; |
+      | 1 | 2        | c2       | ACO         | negation          | { $c2 isa company; $c2 iid <answer.c2.iid>; not { { $c2 has name $n2; $n2 == "the-company"; }; }; };                |
+      | 2 | -        | c2       | ACO         | lookup            | { $c2 isa company; $c2 iid <answer.c2.iid>; };                                                                      |
 
   @ignore-client-java
   Scenario: a query containing multiple negations with inferred conjunctions inside has just one negation explanation
 
-    A rule explanation is not be given since the rule was only used to infer facts that were later negated
+  A rule explanation is not be given since the rule was only used to infer facts that were later negated
 
     Given graql define
       """
@@ -466,7 +466,7 @@ Feature: Graql Reasoning Explanation
           value long;
 
       company sub entity,
-          key company-id,
+          has company-id @key,
           has name,
           has is-liable;
 
@@ -494,8 +494,8 @@ Feature: Graql Reasoning Explanation
       """
 
     Then concept identifiers are
-      |      | check | value          |
-      | ACO  | key   | company-id:1   |
+      |     | check | value        |
+      | ACO | key   | company-id:1 |
 
     Then uniquely identify answer concepts
       | com |
@@ -506,6 +506,6 @@ Feature: Graql Reasoning Explanation
       | company-is-liable | { $c2 isa company; $c2 has name $n2; $n2 "the-company"; } | { $c2 has is-liable $l; $l true; }; |
 
     Then answers contain explanation tree
-      |   | children  | vars  | identifiers | explanation | pattern                                                                                                                                                   |
-      | 0 | 1         | com   | ACO         | negation    | { $com isa company; $com id <answer.com.id>; not { { $com has is-liable $lia; $lia == true; }; }; not { { $com has name $n; $n == "the-company"; }; }; }; |
-      | 1 | -         | com   | ACO         | lookup      | { $com isa company; $com id <answer.com.id>; };                                                                                                           |
+      |   | children | vars | identifiers | explanation | pattern                                                                                                                                                     |
+      | 0 | 1        | com  | ACO         | negation    | { $com isa company; $com iid <answer.com.iid>; not { { $com has is-liable $lia; $lia == true; }; }; not { { $com has name $n; $n == "the-company"; }; }; }; |
+      | 1 | -        | com  | ACO         | lookup      | { $com isa company; $com iid <answer.com.iid>; };                                                                                                           |

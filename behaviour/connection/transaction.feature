@@ -24,55 +24,55 @@ Feature: Connection Transaction
 
   Scenario: one database, one session, one transaction to read
     When connection create database:
-      | grakn   |
+      | grakn |
     Given connection open session for database:
-      | grakn   |
+      | grakn |
     When for each session, open transaction of type:
-      | read    |
+      | read |
     Then for each session, transaction is null: false
     Then for each session, transaction is open: true
     Then for each session, transaction has type:
-      | read    |
+      | read |
 
   Scenario: one database, one session, one transaction to write
     When connection create database:
-      | grakn   |
+      | grakn |
     Given connection open session for database:
-      | grakn   |
+      | grakn |
     When for each session, open transaction of type:
-      | write   |
+      | write |
     Then for each session, transaction is null: false
     Then for each session, transaction is open: true
     Then for each session, transaction has type:
-      | write   |
+      | write |
 
   Scenario: one database, one session, one committed write transaction is closed
     When connection create database:
-      | grakn   |
+      | grakn |
     Given connection open session for database:
-      | grakn   |
+      | grakn |
     When for each session, open transaction of type:
-      | write   |
+      | write |
     Then for each session, transaction commits
     Then for each session, transaction commits; throws exception
 
   Scenario: one database, one session, re-committing transaction throws
     When connection create database:
-      | grakn   |
+      | grakn |
     Given connection open session for database:
-      | grakn   |
+      | grakn |
     When for each session, open transaction of type:
-      | write   |
+      | write |
     Then for each session, transaction commits
     Then for each session, transaction commits; throws exception
 
   Scenario: one database, one session, transaction close is idempotent
     When connection create database:
-      | grakn   |
+      | grakn |
     Given connection open session for database:
-      | grakn   |
+      | grakn |
     When for each session, open transaction of type:
-      | write   |
+      | write |
     Then for each session, transaction closes
     Then for each session, transaction is open: false
     Then for each session, transaction closes
@@ -81,528 +81,528 @@ Feature: Connection Transaction
   @ignore-grakn-core
   Scenario: one database, one session, many transactions to read
     When connection create database:
-      | grakn   |
+      | grakn |
     Given connection open session for database:
-      | grakn   |
+      | grakn |
     When for each session, open transactions of type:
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
     Then for each session, transactions are null: false
     Then for each session, transactions are open: true
     Then for each session, transactions have type:
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
 
   @ignore-grakn-core
   Scenario: one database, one session, many transactions to write
     When connection create database:
-      | grakn   |
+      | grakn |
     Given connection open session for database:
-      | grakn   |
+      | grakn |
     When for each session, open transactions of type:
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
     Then for each session, transactions are null: false
     Then for each session, transactions are open: true
     Then for each session, transactions have type:
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
 
   @ignore-grakn-core
   Scenario: one database, one session, many transactions to read and write
     When connection create database:
-      | grakn   |
+      | grakn |
     Given connection open session for database:
-      | grakn   |
+      | grakn |
     When for each session, open transactions of type:
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
     Then for each session, transactions are null: false
     Then for each session, transactions are open: true
     Then for each session, transactions have type:
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
 
   Scenario: one database, one session, many transactions in parallel to read
     When connection create database:
-      | grakn   |
+      | grakn |
     Given connection open session for database:
-      | grakn   |
+      | grakn |
     When for each session, open transactions in parallel of type:
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
     Then for each session, transactions in parallel are null: false
     Then for each session, transactions in parallel are open: true
     Then for each session, transactions in parallel have type:
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
 
   Scenario: one database, one session, many transactions in parallel to write
     When connection create database:
-      | grakn   |
+      | grakn |
     Given connection open session for database:
-      | grakn   |
+      | grakn |
     When for each session, open transactions in parallel of type:
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
     Then for each session, transactions in parallel are null: false
     Then for each session, transactions in parallel are open: true
     Then for each session, transactions in parallel have type:
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
 
   Scenario: one database, one session, many transactions in parallel to read and write
     When connection create database:
-      | grakn   |
+      | grakn |
     Given connection open session for database:
-      | grakn   |
+      | grakn |
     When for each session, open transactions in parallel of type:
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
     Then for each session, transactions in parallel are null: false
     Then for each session, transactions in parallel are open: true
     Then for each session, transactions in parallel have type:
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
 
   Scenario: one database, many sessions, one transaction to read
     When connection create database:
-      | grakn   |
+      | grakn |
     Given connection open sessions for database:
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
     When for each session, open transaction of type:
-      | read    |
+      | read |
     Then for each session, transaction is null: false
     Then for each session, transaction is open: true
     Then for each session, transaction has type:
-      | read    |
+      | read |
 
   Scenario: one database, many sessions, one transaction to write
     When connection create database:
-      | grakn   |
+      | grakn |
     Given connection open sessions for database:
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
     When for each session, open transaction of type:
-      | write   |
+      | write |
     Then for each session, transaction is null: false
     Then for each session, transaction is open: true
     Then for each session, transaction has type:
-      | write   |
+      | write |
 
   @ignore-grakn-core
   Scenario: one database, many sessions, many transactions to read
     When connection create database:
-      | grakn   |
+      | grakn |
     Given connection open sessions for database:
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
     When for each session, open transactions of type:
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
     Then for each session, transactions are null: false
     Then for each session, transactions are open: true
     Then for each session, transactions have type:
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
 
   @ignore-grakn-core
   Scenario: one database, many sessions, many transactions to write
     When connection create database:
-      | grakn   |
+      | grakn |
     Given connection open sessions for database:
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
     When for each session, open transactions of type:
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
     Then for each session, transactions are null: false
     Then for each session, transactions are open: true
     Then for each session, transactions have type:
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
 
   @ignore-grakn-core
   Scenario: one database, many sessions, many transactions to read and write
     When connection create database:
-      | grakn   |
+      | grakn |
     Given connection open sessions for database:
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
     When for each session, open transactions of type:
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
     Then for each session, transactions are null: false
     Then for each session, transactions are open: true
     Then for each session, transactions have type:
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
 
   Scenario: one database, many sessions, many transactions in parallel to read
     When connection create database:
-      | grakn   |
+      | grakn |
     Given connection open sessions for database:
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
     When for each session, open transactions in parallel of type:
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
     Then for each session, transactions in parallel are null: false
     Then for each session, transactions in parallel are open: true
     Then for each session, transactions in parallel have type:
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
-      | read    |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
+      | read |
 
   Scenario: one database, many sessions, many transactions in parallel to write
     When connection create database:
-      | grakn   |
+      | grakn |
     Given connection open sessions for database:
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
     When for each session, open transactions in parallel of type:
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
     Then for each session, transactions in parallel are null: false
     Then for each session, transactions in parallel are open: true
     Then for each session, transactions in parallel have type:
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
-      | write   |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
+      | write |
 
   Scenario: one database, many sessions, many transactions in parallel to read and write
     When connection create database:
-      | grakn   |
+      | grakn |
     Given connection open sessions for database:
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
     When for each session, open transactions in parallel of type:
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
     Then for each session, transactions in parallel are null: false
     Then for each session, transactions in parallel are open: true
     Then for each session, transactions in parallel have type:
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
-      | read    |
-      | write   |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
 
 #  Scenario: one database, many sessions in parallel, one transactions to read
 #
@@ -616,4 +616,17 @@ Feature: Connection Transaction
 #
 #  Scenario: one database, many sessions in parallel, many transactions in parallel to write
 
+
+  @ignore-grakn-2.0
+  Scenario: write in a read transaction throws
+    When connection create database:
+      | grakn |
+    Given connection open session for database:
+      | grakn |
+    When for each session, open transaction of type:
+      | read |
+    Then for each transaction, define query; throws exception containing "is read only"
+      """
+      define person sub entity;
+      """
 

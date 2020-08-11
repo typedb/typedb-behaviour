@@ -30,18 +30,18 @@ Feature: Graql Match Clause
         plays employee,
         has name,
         has age,
-        key ref;
+        has ref @key;
       company sub entity,
         plays employer,
         has name,
-        key ref;
+        has ref @key;
       friendship sub relation,
         relates friend,
-        key ref;
+        has ref @key;
       employment sub relation,
         relates employee,
         relates employer,
-        key ref;
+        has ref @key;
       name sub attribute, value string;
       age sub attribute, value long;
       ref sub attribute, value long;
@@ -53,7 +53,7 @@ Feature: Graql Match Clause
   # SCHEMA QUERIES #
   ##################
 
-  Scenario: `type` matches only the specified type, and does not match subtypes
+  Scenario: 'type' matches only the specified type, and does not match subtypes
     Given graql define
       """
       define
@@ -73,7 +73,7 @@ Feature: Graql Match Clause
       | PER |
 
 
-  Scenario: `sub` can be used to match the specified type and all its subtypes, including indirect subtypes
+  Scenario: 'sub' can be used to match the specified type and all its subtypes, including indirect subtypes
     Given graql define
       """
       define
@@ -97,7 +97,7 @@ Feature: Graql Match Clause
       | SCW |
 
 
-  Scenario: `sub` can be used to match the specified type and all its supertypes, including indirect supertypes
+  Scenario: 'sub' can be used to match the specified type and all its supertypes, including indirect supertypes
     Given graql define
       """
       define
@@ -110,11 +110,11 @@ Feature: Graql Match Clause
       match writer sub $x; get;
       """
     And concept identifiers are
-      |     | check | value   |
-      | WRI | label | writer  |
-      | PER | label | person  |
-      | ENT | label | entity  |
-      | THI | label | thing   |
+      |     | check | value  |
+      | WRI | label | writer |
+      | PER | label | person |
+      | ENT | label | entity |
+      | THI | label | thing  |
     Then uniquely identify answer concepts
       | x   |
       | WRI |
@@ -123,7 +123,7 @@ Feature: Graql Match Clause
       | THI |
 
 
-  Scenario: `sub` can be used to retrieve all instances of types that are subtypes of a given type
+  Scenario: 'sub' can be used to retrieve all instances of types that are subtypes of a given type
     Given graql define
       """
       define
@@ -191,7 +191,7 @@ Feature: Graql Match Clause
       | GAR | WOR  |
 
 
-  Scenario: `sub!` matches the specified type and its direct subtypes
+  Scenario: 'sub!' matches the specified type and its direct subtypes
     Given graql define
       """
       define
@@ -217,7 +217,7 @@ Feature: Graql Match Clause
       | MUS |
 
 
-  Scenario: `sub!` can be used to match the specified type and its direct supertype
+  Scenario: 'sub!' can be used to match the specified type and its direct supertype
     Given graql define
       """
       define
@@ -230,9 +230,9 @@ Feature: Graql Match Clause
       match writer sub! $x; get;
       """
     And concept identifiers are
-      |     | check | value   |
-      | WRI | label | writer  |
-      | PER | label | person  |
+      |     | check | value  |
+      | WRI | label | writer |
+      | PER | label | person |
     Then uniquely identify answer concepts
       | x   |
       | WRI |
@@ -261,11 +261,11 @@ Feature: Graql Match Clause
       """
     Then each answer satisfies
       """
-      match $x sub $z; $x id <answer.x.id>; $z id <answer.z.id>; get;
+      match $x sub $z; $x iid <answer.x.iid>; $z iid <answer.z.iid>; get;
       """
 
 
-  Scenario: `has` matches types that have the specified attribute type
+  Scenario: 'has' matches types that have the specified attribute type
     When get answers of graql query
       """
       match $x has age; get;
@@ -278,7 +278,7 @@ Feature: Graql Match Clause
       | PER |
 
 
-  Scenario: `has` does not match types that have only a subtype of the specified attribute type
+  Scenario: 'has' does not match types that have only a subtype of the specified attribute type
     Given graql define
       """
       define
@@ -300,7 +300,7 @@ Feature: Graql Match Clause
       | COM |
 
 
-  Scenario: `has` does not match types that have only a supertype of the specified attribute type
+  Scenario: 'has' does not match types that have only a supertype of the specified attribute type
     Given graql define
       """
       define
@@ -322,7 +322,7 @@ Feature: Graql Match Clause
 
   @ignore
   # TODO: re-enable when we can retrieve attribute types that a specified type has (issue #4664)
-  Scenario: `has` can be used to match attribute types that a particular type has
+  Scenario: 'has' can be used to match attribute types that a particular type has
     When get answers of graql query
       """
       match person has $x; get;
@@ -339,7 +339,7 @@ Feature: Graql Match Clause
       | REF |
 
 
-  Scenario: `has` can be used to retrieve all instances of types that can own a given attribute type
+  Scenario: 'has' can be used to retrieve all instances of types that can own a given attribute type
     Given graql define
       """
       define
@@ -378,7 +378,7 @@ Feature: Graql Match Clause
       | EMP | tEMP |
 
 
-  Scenario: `plays` matches types that can play the specified role
+  Scenario: 'plays' matches types that can play the specified role
     When get answers of graql query
       """
       match $x plays friend; get;
@@ -391,7 +391,7 @@ Feature: Graql Match Clause
       | PER |
 
 
-  Scenario: `plays` does not match types that only play a subrole of the specified role
+  Scenario: 'plays' does not match types that only play a subrole of the specified role
     Given graql define
       """
       define
@@ -411,7 +411,7 @@ Feature: Graql Match Clause
       | PER |
 
 
-  Scenario: `plays` does not match types that only play a super-role of the specified role
+  Scenario: 'plays' does not match types that only play a super-role of the specified role
     Given graql define
       """
       define
@@ -431,7 +431,7 @@ Feature: Graql Match Clause
       | FRP |
 
 
-  Scenario: `plays` can be used to match roles that a particular type can play
+  Scenario: 'plays' can be used to match roles that a particular type can play
     When get answers of graql query
       """
       match person plays $x; get;
@@ -446,13 +446,13 @@ Feature: Graql Match Clause
       | EMP |
 
 
-  Scenario: `plays` can be used to retrieve all instances of types that can play a specific role
+  Scenario: 'plays' can be used to retrieve all instances of types that can play a specific role
     Given graql define
       """
       define
       dog sub entity,
         plays friend,
-        key ref;
+        has ref @key;
       """
     Given the integrity is validated
     Given graql insert
@@ -482,17 +482,17 @@ Feature: Graql Match Clause
       | DOG | tDOG |
 
 
-  Scenario: `key` matches types that have the specified attribute type as a key
+  Scenario: 'key' matches types that have the specified attribute type as a key
     Given graql define
       """
       define
       breed sub attribute, value string;
-      dog sub entity, key breed;
+      dog sub entity, has breed @key;
       """
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x key breed; get;
+      match $x has breed @key; get;
       """
     And concept identifiers are
       |     | check | value |
@@ -504,7 +504,7 @@ Feature: Graql Match Clause
 
   @ignore
   # TODO: re-enable when we can retrieve attribute types that a specified type has (issue #4664)
-  Scenario: `key` can be used to find all attribute types that the specified type uses as key
+  Scenario: 'key' can be used to find all attribute types that the specified type uses as key
     When get answers of graql query
       """
       match person key $x; get;
@@ -517,12 +517,12 @@ Feature: Graql Match Clause
       | REF |
 
 
-  Scenario: `has` matches types that have the specified attribute type, even if they use it as a key
+  Scenario: 'has' matches types that have the specified attribute type, even if they use it as a key
     Given graql define
       """
       define
       breed sub attribute, value string;
-      dog sub entity, key breed;
+      dog sub entity, has breed @key;
       cat sub entity, has breed;
       """
     Given the integrity is validated
@@ -540,7 +540,7 @@ Feature: Graql Match Clause
       | CAT |
 
 
-  Scenario: `relates` matches relation types where the specified role can be played
+  Scenario: 'relates' matches relation types where the specified role can be played
     When get answers of graql query
       """
       match $x relates employee; get;
@@ -553,7 +553,7 @@ Feature: Graql Match Clause
       | EMP |
 
 
-  Scenario: `relates` with `as` matches relation types where the specified role is played as a subrole of the specified super-role
+  Scenario: 'relates' with 'as' matches relation types where the specified role is played as a subrole of the specified super-role
     Given graql define
       """
       define
@@ -573,7 +573,7 @@ Feature: Graql Match Clause
       | CLF |
 
 
-  Scenario: `relates` does not match relation types that block the specified roleplayer with `as`
+  Scenario: 'relates' does not match relation types that block the specified roleplayer with 'as'
     Given graql define
       """
       define
@@ -586,14 +586,14 @@ Feature: Graql Match Clause
       match $x relates friend; get;
       """
     And concept identifiers are
-      |     | check | value            |
-      | FRE | label | friendship       |
+      |     | check | value      |
+      | FRE | label | friendship |
     Then uniquely identify answer concepts
       | x   |
       | FRE |
 
 
-  Scenario: `relates` can be used to retrieve all the roles of a relation type
+  Scenario: 'relates' can be used to retrieve all the roles of a relation type
     When get answers of graql query
       """
       match employment relates $x; get;
@@ -608,12 +608,12 @@ Feature: Graql Match Clause
       | EMR |
 
 
-  Scenario: when matching by a concept id that doesn't exist, an empty result is returned
+  Scenario: when matching by a concept iid that doesn't exist, an empty result is returned
     When get answers of graql query
       """
       match
-        $x id V1337;
-        $y id V456;
+        $x iid 83cb2;
+        $y iid 4ba92;
       get;
       """
     Then answer size is: 0
@@ -623,7 +623,7 @@ Feature: Graql Match Clause
   # THINGS #
   ##########
 
-  Scenario: `isa` matches things of the specified type and all its subtypes
+  Scenario: 'isa' matches things of the specified type and all its subtypes
     Given graql define
       """
       define
@@ -657,7 +657,7 @@ Feature: Graql Match Clause
       | GOO |
 
 
-  Scenario: `isa!` only matches things of the specified type, and does not match subtypes
+  Scenario: 'isa!' only matches things of the specified type, and does not match subtypes
     Given graql define
       """
       define
@@ -687,7 +687,7 @@ Feature: Graql Match Clause
       | WRI |
 
 
-  Scenario: `id` matches the instance with the specified internal id
+  Scenario: 'iid' matches the instance with the specified internal iid
     Given graql insert
       """
       insert
@@ -700,7 +700,7 @@ Feature: Graql Match Clause
       """
     Then each answer satisfies
       """
-      match $x id <answer.x.id>; get;
+      match $x iid <answer.x.iid>; get;
       """
 
 
@@ -712,10 +712,10 @@ Feature: Graql Match Clause
     Then the integrity is validated
 
 
-  Scenario: when matching by a type id that doesn't exist, an empty result is returned
+  Scenario: when matching by a type iid that doesn't exist, an empty result is returned
     When get answers of graql query
       """
-      match $x isa $type; $type id V1337; get;
+      match $x isa $type; $type iid 83cb2; get;
       """
     Then answer size is: 0
 
@@ -728,7 +728,7 @@ Feature: Graql Match Clause
     Then the integrity is validated
 
 
-  Scenario: when matching a non-existent type label to a variable from a generic `isa` query, an error is thrown
+  Scenario: when matching a non-existent type label to a variable from a generic 'isa' query, an error is thrown
     Then graql get throws
       """
       match $x isa $type; $type type polok; get;
@@ -745,6 +745,27 @@ Feature: Graql Match Clause
       get;
       """
     Then answer size is: 0
+
+
+  Scenario: when one entity exists, and we match two variables both of that entity type, the entity is returned
+    Given graql insert
+      """
+      insert $x isa person, has ref 0;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x isa person;
+        $y isa person;
+      get;
+      """
+    When concept identifiers are
+      |     | check | value |
+      | PER | key   | ref:0 |
+    Then uniquely identify answer concepts
+      | x   | y   |
+      | PER | PER |
 
 
   Scenario: an error is thrown when matching that a variable has a specific type, when that type is in fact a role
@@ -864,8 +885,8 @@ Feature: Graql Match Clause
     Given graql define
       """
       define
-      some-entity sub entity, plays player, key ref;
-      symmetric sub relation, relates player, key ref;
+      some-entity sub entity, plays player, has ref @key;
+      symmetric sub relation, relates player, has ref @key;
       """
     Given the integrity is validated
     Given graql insert
@@ -890,8 +911,8 @@ Feature: Graql Match Clause
     Given graql define
       """
       define
-      some-entity sub entity, plays player, key ref;
-      symmetric sub relation, relates player, key ref;
+      some-entity sub entity, plays player, has ref @key;
+      symmetric sub relation, relates player, has ref @key;
       """
     Given the integrity is validated
     Given graql insert
@@ -987,7 +1008,7 @@ Feature: Graql Match Clause
       define
       residency sub relation,
         relates resident,
-        key ref;
+        has ref @key;
       person plays resident;
       """
     Given the integrity is validated
@@ -1082,15 +1103,15 @@ Feature: Graql Match Clause
     Then answer size is: 0
 
 
-  Scenario: when querying for a non-existent relation type id, an empty result is returned
+  Scenario: when querying for a non-existent relation type iid, an empty result is returned
     When get answers of graql query
       """
-      match ($x, $y) isa $type; $type id V1337; get;
+      match ($x, $y) isa $type; $type iid 83cb2; get;
       """
     Then answer size is: 0
     When get answers of graql query
       """
-      match $r ($x, $y) isa $type; $r id V1337; get;
+      match $r ($x, $y) isa $type; $r iid 4ba92; get;
       """
     Then answer size is: 0
 
@@ -1099,10 +1120,10 @@ Feature: Graql Match Clause
   # ATTRIBUTES #
   ##############
 
-  Scenario Outline: `<type>` attributes can be matched by value
+  Scenario Outline: '<type>' attributes can be matched by value
     Given graql define
       """
-      define <attr> sub attribute, value <type>, key ref;
+      define <attr> sub attribute, value <type>, has ref @key;
       """
     Given the integrity is validated
     Given graql insert
@@ -1130,10 +1151,10 @@ Feature: Graql Match Clause
       | use-by-date | datetime | 2020-06-16 |
 
 
-  Scenario Outline: when matching a `<type>` attribute by a value that doesn't exist, an empty answer is returned
+  Scenario Outline: when matching a '<type>' attribute by a value that doesn't exist, an empty answer is returned
     Given graql define
       """
-      define <attr> sub attribute, value <type>, key ref;
+      define <attr> sub attribute, value <type>, has ref @key;
       """
     Given the integrity is validated
     When get answers of graql query
@@ -1151,7 +1172,7 @@ Feature: Graql Match Clause
       | use-by-date | datetime | 2020-06-16 |
 
 
-  Scenario: `contains` matches strings that contain the specified substring
+  Scenario: 'contains' matches strings that contain the specified substring
     Given graql insert
       """
       insert
@@ -1174,7 +1195,7 @@ Feature: Graql Match Clause
       | FUN |
 
 
-  Scenario: `contains` performs a case-insensitive match
+  Scenario: 'contains' performs a case-insensitive match
     Given graql insert
       """
       insert
@@ -1197,7 +1218,7 @@ Feature: Graql Match Clause
       | MRB |
 
 
-  Scenario: `like` matches strings that match the specified regex
+  Scenario: 'like' matches strings that match the specified regex
     Given graql insert
       """
       insert
@@ -1220,15 +1241,15 @@ Feature: Graql Match Clause
       | NIN |
 
 
-  Scenario: when querying for a non-existent attribute type id, an empty result is returned
+  Scenario: when querying for a non-existent attribute type iid, an empty result is returned
     When get answers of graql query
       """
-      match $x has name $y; $x id V1337; get;
+      match $x has name $y; $x iid 83cb2; get;
       """
     Then answer size is: 0
     When get answers of graql query
       """
-      match $x has name $y; $y id V1337; get;
+      match $x has name $y; $y iid 83cb2; get;
       """
     Then answer size is: 0
 
@@ -1237,7 +1258,7 @@ Feature: Graql Match Clause
   # ATTRIBUTE OWNERSHIP #
   #######################
 
-  Scenario: `has` can be used to match things that own any instance of the specified attribute
+  Scenario: 'has' can be used to match things that own any instance of the specified attribute
     Given graql insert
       """
       insert
@@ -1261,7 +1282,7 @@ Feature: Graql Match Clause
       | GRA |
 
 
-  Scenario: using the `attribute` meta label, `has` can match things that own any attribute with a specified value
+  Scenario: using the 'attribute' meta label, 'has' can match things that own any attribute with a specified value
     Given graql define
       """
       define
@@ -1291,12 +1312,12 @@ Feature: Graql Match Clause
       | SS9 |
 
 
-  Scenario: when an attribute instance is fully specified, `has` matches its owners
+  Scenario: when an attribute instance is fully specified, 'has' matches its owners
     Given graql define
       """
       define
       friendship has age;
-      graduation-date sub attribute, value datetime, has age, key ref;
+      graduation-date sub attribute, value datetime, has age, has ref @key;
       person has graduation-date;
       """
     Given the integrity is validated
@@ -1327,7 +1348,7 @@ Feature: Graql Match Clause
       | GRA |
 
 
-  Scenario: `has` matches an attribute's owner even if it owns more attributes of the same type
+  Scenario: 'has' matches an attribute's owner even if it owns more attributes of the same type
     Given graql define
       """
       define
@@ -1416,7 +1437,7 @@ Feature: Graql Match Clause
     Then answer size is: 1
 
 
-  Scenario: `has $attr == $x` matches owners of any instance `$y` of `$attr` where `$y` and `$x` are equal by value
+  Scenario: 'has $attr == $x' matches owners of any instance '$y' of '$attr' where '$y' and '$x' are equal by value
     Given graql insert
       """
       insert
@@ -1437,7 +1458,7 @@ Feature: Graql Match Clause
       | SUS |
 
 
-  Scenario: `has $attr > $x` matches owners of any instance `$y` of `$attr` where `$y > $x`
+  Scenario: 'has $attr > $x' matches owners of any instance '$y' of '$attr' where '$y > $x'
     Given graql insert
       """
       insert
@@ -1458,7 +1479,7 @@ Feature: Graql Match Clause
       | DON |
 
 
-  Scenario: `has $attr < $x` matches owners of any instance `$y` of `$attr` where `$y < $x`
+  Scenario: 'has $attr < $x' matches owners of any instance '$y' of '$attr' where '$y < $x'
     Given graql insert
       """
       insert
@@ -1479,7 +1500,7 @@ Feature: Graql Match Clause
       | SUS |
 
 
-  Scenario: `has $attr !== $x` matches owners of any instance `$y` of `$attr` where `$y !== $x`
+  Scenario: 'has $attr !== $x' matches owners of any instance '$y' of '$attr' where '$y !== $x'
     Given graql insert
       """
       insert
@@ -1502,7 +1523,7 @@ Feature: Graql Match Clause
       | SUS |
 
 
-  Scenario: value comparisons can be performed between a `double` and a `long`
+  Scenario: value comparisons can be performed between a 'double' and a 'long'
     Given graql define
       """
       define
@@ -1595,7 +1616,7 @@ Feature: Graql Match Clause
 
   @ignore
   # TODO: re-enable when variables used in multiple value predicates are resolvable (grakn#5845)
-  Scenario: an attribute variable used in both `==` and `>=` predicates is correctly resolved
+  Scenario: an attribute variable used in both '==' and '>=' predicates is correctly resolved
     Given graql insert
       """
       insert
@@ -1620,6 +1641,58 @@ Feature: Graql Match Clause
       | x   |
       | DON |
       | RAL |
+
+
+  Scenario: when the answers of a value comparison include both a 'double' and a 'long', both answers are returned
+    Given graql define
+      """
+      define
+      length sub attribute, value double;
+      """
+    Given the integrity is validated
+    Given graql insert
+      """
+      insert
+      $a 24 isa age;
+      $b 19 isa age;
+      $c 20.9 isa length;
+      $d 19.9 isa length;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x isa attribute;
+        $x > 20;
+      get;
+      """
+    And concept identifiers are
+      |      | check | value       |
+      | A24  | value | age:24      |
+      | A19  | value | age:19      |
+      | L209 | value | length:20.9 |
+      | L199 | value | length:19.9 |
+    Then uniquely identify answer concepts
+      | x    |
+      | A24  |
+      | L209 |
+
+
+  Scenario: when one entity exists, and we match two variables with concept inequality, an empty answer is returned
+    Given graql insert
+      """
+      insert $x isa person, has ref 0;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match
+        $x isa person;
+        $y isa person;
+        $x != $y;
+      get;
+      """
+    Then answer size is: 0
 
 
   Scenario: concept comparison of unbound variables throws an error
@@ -1660,51 +1733,6 @@ Feature: Graql Match Clause
       | x   |
       | JEF |
       | AMA |
-
-
-  Scenario: a negation matches if the negated block has no matches
-    Given graql insert
-      """
-      insert
-      $x isa person, has name "Jeff", has ref 0;
-      """
-    Given the integrity is validated
-    When get answers of graql query
-      """
-      match
-        $x isa person;
-        not {
-          $e (employee: $x) isa employment;
-        };
-      get;
-      """
-    And concept identifiers are
-      |     | check | value |
-      | JEF | key   | ref:0 |
-    Then uniquely identify answer concepts
-      | x   |
-      | JEF |
-
-
-  Scenario: a negation does not match if the negated block has any matches
-    Given graql insert
-      """
-      insert
-      $x isa person, has name "Jeff", has ref 0;
-      $c isa company, has name "Amazon", has ref 1;
-      $e (employee: $x, employer: $c) isa employment, has ref 2;
-      """
-    Given the integrity is validated
-    When get answers of graql query
-      """
-      match
-        $x isa person;
-        not {
-          $e (employee: $x) isa employment;
-        };
-      get;
-      """
-    Then answer size is: 0
 
 
   ##################
@@ -1771,3 +1799,62 @@ Feature: Graql Match Clause
       """
     # 2 permutations x 3 types {friendship,relation,thing}
     Then answer size is: 6
+
+
+  #######################
+  # NEGATION VALIDATION #
+  #######################
+
+  # Negation resolution is handled by Reasoner, but query validation is handled by the language.
+
+  Scenario: when the entire match clause is a negation, an error is thrown
+
+  At least one negated pattern variable must be bound outside the negation block, so this query is invalid.
+
+    Then graql get throws
+      """
+      match
+        not { $x has attribute "value"; };
+      get;
+      """
+    Then the integrity is validated
+
+
+  Scenario: when matching a negation whose pattern variables are all unbound outside it, an error is thrown
+    Then graql get throws
+      """
+      match
+        $r isa entity;
+        not {
+          ($r2, $i);
+          $i isa entity;
+        };
+      get;
+      """
+    Then the integrity is validated
+
+
+  Scenario: the first variable in a negation can be unbound, as long as it is connected to a bound variable
+    Then get answers of graql query
+      """
+      match
+        $r isa attribute;
+        not {
+          $x isa entity, has attribute $r;
+        };
+      get;
+      """
+    Then the integrity is validated
+
+
+  Scenario: negations cannot contain disjunctions
+    Then graql get throws
+      """
+      match
+        $x isa entity;
+        not {
+          { $x has attribute 1; } or { $x has attribute 2; };
+        };
+      get;
+      """
+    Then the integrity is validated

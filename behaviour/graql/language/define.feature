@@ -26,8 +26,8 @@ Feature: Graql Define Query
     Given graql define
       """
       define
-      person sub entity, plays employee, plays earner, has name, key email;
-      employment sub relation, relates employee, plays source-of-income, has start-date, key employment-reference-code;
+      person sub entity, plays employee, plays earner, has name, has email @key;
+      employment sub relation, relates employee, plays source-of-income, has start-date, has employment-reference-code @key;
       income sub relation, relates earner, relates source-of-income;
 
       name sub attribute, value string;
@@ -36,6 +36,17 @@ Feature: Graql Define Query
       employment-reference-code sub attribute, value string;
       """
     Given the integrity is validated
+
+  Scenario: uncommitted transaction writes are not persisted
+    When graql define without commit
+      """
+      define dog sub entity;
+      """
+    When transaction is closed and reopened
+    Then graql get throws
+      """
+      match $x type dog; get;
+      """
 
 
   ############
@@ -124,7 +135,7 @@ Feature: Graql Define Query
   Scenario: define that a type 'key' an entity type throws
     Then graql define throws
       """
-      define passport sub entity, key person;
+      define passport sub entity, has person @key;
       """
     Then the integrity is validated
 
@@ -236,7 +247,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x key email; get;
+      match $x has email @key; get;
       """
 
     Then concept identifiers are
@@ -261,7 +272,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x key email; get;
+      match $x has email @key; get;
       """
     Then concept identifiers are
       |     | check | value    |
@@ -331,12 +342,12 @@ Feature: Graql Define Query
       """
       define
       address sub attribute, value string;
-      house sub entity, key address, key address, key address;
+      house sub entity, has address @key, has address @key, has address @key;
       """
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x key address; get;
+      match $x has address @key; get;
       """
     Then concept identifiers are
       |     | check | value |
@@ -635,7 +646,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x key employment-reference-code; get;
+      match $x has employment-reference-code @key; get;
       """
     Then concept identifiers are
       |     | check | value               |
@@ -659,7 +670,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x key employment-reference-code; get;
+      match $x has employment-reference-code @key; get;
       """
     Then concept identifiers are
       |     | check | value                       |
@@ -746,7 +757,7 @@ Feature: Graql Define Query
   ##############
 
 
-  Scenario: an attribute with type `string` can be defined
+  Scenario: an attribute with type 'string' can be defined
     Given graql define
       """
       define favourite-food sub attribute, value string;
@@ -764,7 +775,7 @@ Feature: Graql Define Query
       | FAV |
 
 
-  Scenario: an attribute with type `long` can be defined
+  Scenario: an attribute with type 'long' can be defined
     Given graql define
       """
       define number-of-cows sub attribute, value long;
@@ -782,7 +793,7 @@ Feature: Graql Define Query
       | NOC |
 
 
-  Scenario: an attribute with type `double` can be defined
+  Scenario: an attribute with type 'double' can be defined
     Given graql define
       """
       define density sub attribute, value double;
@@ -800,7 +811,7 @@ Feature: Graql Define Query
       | DEN |
 
 
-  Scenario: an attribute with type `boolean` can be defined
+  Scenario: an attribute with type 'boolean' can be defined
     Given graql define
       """
       define can-fly sub attribute, value boolean;
@@ -818,7 +829,7 @@ Feature: Graql Define Query
       | CFL |
 
 
-  Scenario: an attribute with type `datetime` can be defined
+  Scenario: an attribute with type 'datetime' can be defined
     Given graql define
       """
       define flight-date sub attribute, value datetime;
@@ -1043,14 +1054,14 @@ Feature: Graql Define Query
       """
       define
       hex-value sub attribute, value string;
-      colour sub attribute, value string, key hex-value;
+      colour sub attribute, value string, has hex-value @key;
       grayscale-colour sub colour;
       """
     Given the integrity is validated
 
     When get answers of graql query
       """
-      match $x key hex-value; get;
+      match $x has hex-value @key; get;
       """
     Then concept identifiers are
       |     | check | value            |
@@ -1067,7 +1078,7 @@ Feature: Graql Define Query
       """
       define
       hex-value sub attribute, value string;
-      colour sub attribute, value string, key hex-value;
+      colour sub attribute, value string, has hex-value @key;
       dark-colour sub colour;
       dark-red-colour sub dark-colour;
       very-dark-red-colour sub dark-red-colour;
@@ -1075,7 +1086,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x key hex-value; get;
+      match $x has hex-value @key; get;
       """
     Then concept identifiers are
       |     | check | value                |
@@ -1091,7 +1102,7 @@ Feature: Graql Define Query
       | VDR |
 
 
-  Scenario: a type can `has` an attribute of type `string`
+  Scenario: a type can 'has' an attribute of type 'string'
     Given graql define
       """
       define
@@ -1111,7 +1122,7 @@ Feature: Graql Define Query
       | PER |
 
 
-  Scenario: a type can `has` an attribute of type `long`
+  Scenario: a type can 'has' an attribute of type 'long'
     Given graql define
       """
       define
@@ -1131,7 +1142,7 @@ Feature: Graql Define Query
       | PER |
 
 
-  Scenario: a type can `has` an attribute of type `double`
+  Scenario: a type can 'has' an attribute of type 'double'
     Given graql define
       """
       define
@@ -1151,7 +1162,7 @@ Feature: Graql Define Query
       | PER |
 
 
-  Scenario: a type can `has` an attribute of type `boolean`
+  Scenario: a type can 'has' an attribute of type 'boolean'
     Given graql define
       """
       define
@@ -1171,7 +1182,7 @@ Feature: Graql Define Query
       | PER |
 
 
-  Scenario: a type can `has` an attribute of type `datetime`
+  Scenario: a type can 'has' an attribute of type 'datetime'
     Given graql define
       """
       define
@@ -1202,508 +1213,11 @@ Feature: Graql Define Query
       match $x has number-of-letters; get;
       """
     Then concept identifiers are
-      |     | check | value                |
-      | NOL | label | number-of-letters    |
+      |     | check | value             |
+      | NOL | label | number-of-letters |
     Then uniquely identify answer concepts
       | x   |
       | NOL |
-
-
-  #########
-  # RULES #
-  #########
-
-  # Note: These tests verify only the ability to create rules, and are not concerned with their application.
-
-  Scenario: a rule can infer both an attribute and its ownership
-    Given graql define
-      """
-      define
-      nickname sub name;
-      person has nickname;
-      robert-has-nickname-bob sub rule,
-      when {
-        $p isa person, has name "Robert";
-      }, then {
-        $p has nickname "Bob";
-      };
-      """
-    Given the integrity is validated
-    When get answers of graql query
-      """
-      match $x sub rule; get;
-      """
-    Then concept identifiers are
-      |     | check | value                   |
-      | BOB | label | robert-has-nickname-bob |
-      | RUL | label | rule                    |
-    Then uniquely identify answer concepts
-      | x   |
-      | BOB |
-      | RUL |
-
-
-  Scenario: when defining a rule using `sub rule`, the rule is successfully created
-    Given graql define
-      """
-      define
-      haikal-is-employed sub rule,
-      when {
-        $p isa person, has name "Haikal";
-      }, then {
-        (employee: $p) isa employment;
-      };
-      """
-    Given the integrity is validated
-    When get answers of graql query
-      """
-      match $x sub rule; get;
-      """
-    Then concept identifiers are
-      |     | check | value              |
-      | HAI | label | haikal-is-employed |
-      | RUL | label | rule               |
-    Then uniquely identify answer concepts
-      | x   |
-      | HAI |
-      | RUL |
-
-
-  # Keys are validated at commit time, so integrity will not be harmed by writing one in a rule.
-  Scenario: a rule can infer a `key`
-    Given graql define
-      """
-      define
-      john-smiths-email sub rule,
-      when {
-        $p has name "John Smith";
-      }, then {
-        $p has email "john.smith@gmail.com";
-      };
-      """
-    Given the integrity is validated
-    When get answers of graql query
-      """
-      match $x sub rule; get;
-      """
-    Then concept identifiers are
-      |     | check | value             |
-      | JSE | label | john-smiths-email |
-      | RUL | label | rule              |
-    Then uniquely identify answer concepts
-      | x   |
-      | JSE |
-      | RUL |
-
-
-  Scenario: define a rule with no `when` clause throws
-    Then graql define throws
-      """
-      define
-      nickname sub name;
-      person has nickname;
-      has-nickname-bob sub rule,
-      then {
-        $p has nickname "Bob";
-      };
-      """
-    Then the integrity is validated
-
-
-  Scenario: define a rule with no `then` clause throws
-    Then graql define throws
-      """
-      define
-      nickname sub name;
-      person has nickname;
-      robert sub rule,
-      when {
-        $p has name "Robert";
-      };
-      """
-    Then the integrity is validated
-
-
-  Scenario: define a rule with an empty `when` clause throws
-    Then graql define throws
-      """
-      define
-      nickname sub name;
-      person has nickname;
-      has-nickname-bob sub rule,
-      when {
-      }, then {
-        $p has nickname "Bob";
-      };
-      """
-    Then the integrity is validated
-
-
-  Scenario: define a rule with an empty `then` clause throws
-    Then graql define throws
-      """
-      define
-      nickname sub name;
-      person has nickname;
-      robert sub rule,
-      when {
-        $p has name "Robert";
-      }, then {
-      };
-      """
-    Then the integrity is validated
-
-
-  Scenario: a rule can have negation in its `when` clause
-    Given graql define
-      """
-      define
-      only-child sub attribute, value boolean;
-      siblings sub relation, relates sibling;
-      person plays sibling, has only-child;
-      only-child-rule sub rule,
-      when {
-        $p isa person;
-        not {
-          (sibling: $p, sibling: $p2) isa siblings;
-        };
-      }, then {
-        $p has only-child true;
-      };
-      """
-    Given the integrity is validated
-    When get answers of graql query
-      """
-      match $x sub rule; get;
-      """
-    Then concept identifiers are
-      |     | check | value           |
-      | ONL | label | only-child-rule |
-      | RUL | label | rule            |
-    Then uniquely identify answer concepts
-      | x   |
-      | ONL |
-      | RUL |
-
-
-  Scenario: define a rule with a negation block whose pattern variables are all unbound outside the negation block throws
-    Then graql define throws
-      """
-      define
-      has-robert sub attribute, value boolean;
-      register sub entity, has has-robert;
-      register-has-no-robert sub rule,
-      when {
-        $register isa register;
-        not {
-          $p isa person, has name "Robert";
-        };
-      }, then {
-        $register has has-robert false;
-      };
-      """
-    Then the integrity is validated
-
-
-  Scenario: define a rule with nested negation throws on commit
-    Then graql define throws
-      """
-      define
-      nickname sub attribute, value string;
-      person has nickname;
-      unemployed-robert-maybe-doesnt-not-have-nickname-bob sub rule,
-      when {
-        $p isa person;
-        not {
-          (employee: $p) isa employment;
-          not {
-            $p has name "Robert";
-          };
-        };
-      }, then {
-        $p has nickname "Bob";
-      };
-      """
-    Then the integrity is validated
-
-
-  Scenario: define a rule with two negations throws on commit
-    Then graql define throws
-      """
-      define
-      nickname sub attribute, value string;
-      residence sub relation, relates resident;
-      person has nickname, plays resident;
-      unemployed-homeless-robert-has-nickname-bob sub rule,
-      when {
-        $p isa person, has name "Robert";
-        not {
-          (employee: $p) isa employment;
-        };
-        not {
-          (resident: $p) isa residence;
-        };
-      }, then {
-        $p has nickname "Bob";
-      };
-      """
-    Then the integrity is validated
-
-
-  Scenario: define a rule with two conclusions throws on commit
-    Given graql define
-      """
-      define
-      nickname sub name;
-      person has nickname;
-      """
-    Given the integrity is validated
-    Then graql define throws
-      """
-      define
-      robert-has-nicknames-bob-and-bobby sub rule,
-      when {
-        $p has name "Robert";
-      }, then {
-        $p has nickname "Bob";
-        $p has nickname "Bobby";
-      };
-      """
-    Then the integrity is validated
-
-
-  Scenario: a rule can use conjunction in its `when` clause
-    Given graql define
-      """
-      define
-      person plays named-robert;
-      both-named-robert sub relation, relates named-robert;
-      two-roberts-are-both-named-robert sub rule,
-      when {
-        $p isa person, has name "Robert";
-        $p2 isa person, has name "Robert";
-      }, then {
-        (named-robert: $p, named-robert: $p2) isa both-named-robert;
-      };
-      """
-    Given the integrity is validated
-    When get answers of graql query
-      """
-      match $x sub rule; get;
-      """
-    Then concept identifiers are
-      |     | check | value                             |
-      | BOB | label | two-roberts-are-both-named-robert |
-      | RUL | label | rule                              |
-    Then uniquely identify answer concepts
-      | x   |
-      | BOB |
-      | RUL |
-
-
-  Scenario: define a rule with disjunction throws on commit
-    Given graql define
-      """
-      define
-      nickname sub name;
-      person has nickname;
-      """
-    Given the integrity is validated
-    Then graql define throws
-      """
-      define
-      sophie-and-fiona-have-nickname-fi sub rule,
-      when {
-        $p isa person;
-        {$p has name "Sophie";} or {$p has name "Fiona";};
-      }, then {
-        $p has nickname "Fi";
-      };
-      """
-    Then the integrity is validated
-
-
-  Scenario: define rule with an unbound variable in the `then` throws on commit
-    Given graql define
-      """
-      define
-      nickname sub name;
-      person has nickname;
-      """
-    Given the integrity is validated
-    Then graql define throws
-      """
-      define
-      i-did-a-bad-typo sub rule,
-      when {
-        $p has name "I am a person";
-      }, then {
-        $q has nickname "Who am I?";
-      };
-      """
-    Then the integrity is validated
-
-
-  Scenario: define rule with an undefined attribute set in `then` throws on commit
-    Given graql define throws
-      """
-      define
-      boudicca-is-1960-years-old sub rule,
-      when {
-        $person isa person, has name "Boudicca";
-      }, then {
-        $person has age 1960;
-      };
-      """
-    Then the integrity is validated
-
-
-  Scenario: define rule with an attribute set in `then` on a type that can't have that attribute throws on commit
-    Given graql define throws
-      """
-      define
-      age sub attribute, value long;
-      boudicca-is-1960-years-old sub rule,
-      when {
-        $person isa person, has name "Boudicca";
-      }, then {
-        $person has age 1960;
-      };
-      """
-    Then the integrity is validated
-
-
-  @ignore
-  # TODO: re-enable when rules with attribute values set in `then` that don't match their type throw on commit
-  Scenario: define rule with an attribute value set in `then` that doesn't match the attribute's type throws on commit
-    Given graql define
-      """
-      define
-      nickname sub name;
-      person has nickname;
-      """
-    Given the integrity is validated
-    Then graql define throws
-      """
-      define
-      may-has-nickname-5 sub rule,
-      when {
-        $p has name "May";
-      }, then {
-        $p has nickname 5;
-      };
-      """
-    Then the integrity is validated
-
-
-  Scenario: define rule that infers a relation whose type is undefined throws on commit
-    Then graql define throws
-      """
-      define
-      bonnie-and-clyde-are-partners-in-crime sub rule,
-      when {
-        $bonnie isa person, has name "Bonnie";
-        $clyde isa person, has name "Clyde";
-      }, then {
-        (criminal: $bonnie, sidekick: $clyde) isa partners-in-crime;
-      };
-      """
-    Then the integrity is validated
-
-
-  Scenario: define rule that infers a relation with an incorrect roleplayer throws on commit
-    Then graql define throws
-      """
-      define
-      partners-in-crime sub relation, relates criminal, relates sidekick;
-      person plays criminal;
-      bonnie-and-clyde-are-partners-in-crime sub rule,
-      when {
-        $bonnie isa person, has name "Bonnie";
-        $clyde isa person, has name "Clyde";
-      }, then {
-        (criminal: $bonnie, sidekick: $clyde) isa partners-in-crime;
-      };
-      """
-    Then the integrity is validated
-
-
-  @ignore
-  # TODO: re-enable when rules cannot infer abstract relations
-  Scenario: define rule that infers an abstract relation throws on commit
-    Then graql define throws
-      """
-      define
-      partners-in-crime sub relation, abstract, relates criminal, relates sidekick;
-      person plays criminal, plays sidekick;
-      bonnie-and-clyde-are-partners-in-crime sub rule,
-      when {
-        $bonnie isa person, has name "Bonnie";
-        $clyde isa person, has name "Clyde";
-      }, then {
-        (criminal: $bonnie, sidekick: $clyde) isa partners-in-crime;
-      };
-      """
-    Then the integrity is validated
-
-
-  @ignore
-  # TODO: re-enable when rules cannot infer abstract attribute values
-  Scenario: define rule that infers an abstract attribute value throws on commit
-    Then graql define throws
-      """
-      define
-      number-of-devices sub attribute, value long, abstract;
-      person has number-of-devices;
-      karl-is-allergic-to-technology sub rule,
-      when {
-        $karl isa person, has name "Karl";
-      }, then {
-        $karl has number-of-devices 0;
-      };
-      """
-    Then the integrity is validated
-
-
-  Scenario: define a rule that negates its conclusion in the `when`, causing a loop, throws on commit
-    Then graql define throws
-      """
-      define
-      there-are-no-unemployed sub rule,
-      when {
-        $person isa person;
-        not {
-          (employee: $person) isa employment;
-        };
-      }, then {
-        (employee: $person) isa employment;
-      };
-      """
-    Then the integrity is validated
-
-
-  @ignore
-  # TODO: re-enable when subrules are not allowed
-  Scenario: define a subrule throws on commit
-    Then graql define throws
-    """
-    define
-    nickname sub name;
-    person has nickname;
-    robert-has-nickname-bob sub rule,
-    when {
-      $p isa person, has name "Robert";
-    }, then {
-      $p has nickname "Bob";
-    };
-    robert-has-nickname-bobby sub robert-has-nickname-bob,
-    when {
-      $p isa person, has name "Robert";
-    }, then {
-      $p has nickname "Bobby";
-    };
-    """
-    Then the integrity is validated
 
 
   ##################
@@ -1930,22 +1444,12 @@ Feature: Graql Define Query
     Then the integrity is validated
 
 
-  Scenario: defining a type as abstract is idempotent
-    Given graql define
+  Scenario: defining a type as abstract repeatedly throws an error
+    Given graql define throws
       """
       define animal sub entity, abstract, abstract, abstract;
       """
-    Given the integrity is validated
-    When get answers of graql query
-      """
-      match $x type animal; $x abstract; get;
-      """
-    Then concept identifiers are
-      |     | check | value  |
-      | ANI | label | animal |
-    Then uniquely identify answer concepts
-      | x   |
-      | ANI |
+    Then the integrity is validated
 
 
   ###################
@@ -2057,7 +1561,7 @@ Feature: Graql Define Query
     When graql define without commit
       """
       define
-      product key barcode;
+      product has barcode @key;
       """
     When graql insert
       """
@@ -2074,8 +1578,8 @@ Feature: Graql Define Query
       match $x has barcode; get;
       """
     Then concept identifiers are
-      |     | check | value      |
-      | PRD | label | product    |
+      |     | check | value   |
+      | PRD | label | product |
     Then uniquely identify answer concepts
       | x   |
       | PRD |
@@ -2101,7 +1605,7 @@ Feature: Graql Define Query
     Then graql define throws
       """
       define
-      product key barcode;
+      product has barcode @key;
       """
     Then the integrity is validated
 
@@ -2201,10 +1705,10 @@ Feature: Graql Define Query
     Then the integrity is validated
 
 
-  Scenario: add attribute as `key` to a type that already `has` that attribute throws
+  Scenario: add attribute as 'key' to a type that already 'has' that attribute throws
     Then graql define throws
       """
-      define person key name;
+      define person has name @key;
       """
     Then the integrity is validated
 
@@ -2341,7 +1845,7 @@ Feature: Graql Define Query
   # HIERARCHY MUTATION #
   ######################
 
-  Scenario: define new `sub` on entity type changes its supertype
+  Scenario: define new 'sub' on entity type changes its supertype
     Given graql define
       """
       define
@@ -2369,10 +1873,10 @@ Feature: Graql Define Query
       | GEN |
 
 
-  Scenario: define new `sub` on relation type changes its supertype
+  Scenario: define new 'sub' on relation type changes its supertype
 
 
-  Scenario: define new `sub` on attribute type changes its supertype
+  Scenario: define new 'sub' on attribute type changes its supertype
     Given graql define
       """
       define
@@ -2543,18 +2047,18 @@ Feature: Graql Define Query
   Scenario: assign new supertype throws if existing data plays a role that it can't with the new supertype
 
   # TODO: write this once 'assign new supertype throws if .. data has attributes not present on the new supertype' is written
-  Scenario: assign new supertype throws if that supertype has a key not present in the existing data (?)
+  Scenario: assign new supertype throws if that supertype has a has not @key present in the existing data (?)
 
-  # TODO: write this once 'define new `sub` on relation type changes its supertype' is written
+  # TODO: write this once 'define new 'sub' on relation type changes its supertype' is written
   Scenario: assign new super-relation throws if existing data has roleplayers not present on the new supertype (?)
 
-  # TODO: write this once 'define new `sub` on attribute type changes its supertype' passes
+  # TODO: write this once 'define new 'sub' on attribute type changes its supertype' passes
   Scenario: assign new super-attribute throws if it has a different value type to the current one (?)
 
   # TODO: write this if 'assign new super-attribute throws if it has a different value type ..' turns out to not throw
   Scenario: assign new super-attribute throws if it has existing data and a different value type to the new supertype (?)
 
-  # TODO: write this once 'define new `sub` on attribute type changes its supertype' passes
+  # TODO: write this once 'define new 'sub' on attribute type changes its supertype' passes
   Scenario: assign new super-attribute throws if new supertype has a regex and existing data doesn't match it (?)
 
   ###############################
@@ -2581,16 +2085,16 @@ Feature: Graql Define Query
       match $x type child, plays $r; get;
       """
     Then concept identifiers are
-      |             | check | value     |
-      | EMPLOYEE    | label | employee  |
-      | EMPLOYER    | label | employer  |
-      | EARNER      | label | earner    |
-      | CHILD       | label | child     |
+      |          | check | value    |
+      | EMPLOYEE | label | employee |
+      | EMPLOYER | label | employer |
+      | EARNER   | label | earner   |
+      | CHILD    | label | child    |
     Then uniquely identify answer concepts
-      | x     | r           |
-      | CHILD | EMPLOYEE    |
-      | CHILD | EMPLOYER    |
-      | CHILD | EARNER      |
+      | x     | r        |
+      | CHILD | EMPLOYEE |
+      | CHILD | EMPLOYER |
+      | CHILD | EARNER   |
 
 
   @ignore
@@ -2628,7 +2132,7 @@ Feature: Graql Define Query
       define
       child sub person;
       phone-number sub attribute, value long;
-      person sub entity, key phone-number;
+      person sub entity, has phone-number @key;
       """
     Given the integrity is validated
 

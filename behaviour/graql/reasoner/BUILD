@@ -17,10 +17,11 @@
 
 package(default_visibility = ["//visibility:public"])
 
-exports_files([
+files = [
     "attribute-attachment.feature",
     "concept-inequality.feature",
     "negation.feature",
+    "recursion.feature",
     "relation-inference.feature",
     "roleplayer-attachment.feature",
     "schema-queries.feature",
@@ -29,4 +30,10 @@ exports_files([
     "type-hierarchy.feature",
     "value-predicate.feature",
     "variable-roles.feature",
-])
+]
+
+filegroup(
+    name = "features",
+    srcs = files,
+)
+exports_files(files)

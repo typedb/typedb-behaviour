@@ -24,9 +24,9 @@ Feature: Connection Database
 
   Scenario: create one database
     When  connection create database:
-      | alice   |
+      | alice |
     Then  connection has database:
-      | alice   |
+      | alice |
 
   Scenario: create many databases
     When  connection create databases:
@@ -87,11 +87,11 @@ Feature: Connection Database
   Scenario: delete one database
       # This step should be rewritten once we can create keypsaces without opening sessions
     Given connection create database:
-      | alice   |
+      | alice |
     When  connection delete database:
-      | alice   |
+      | alice |
     Then  connection does not have database:
-      | alice   |
+      | alice |
     Then  connection does not have any database
 
   Scenario: connection can delete many databases
@@ -179,3 +179,37 @@ Feature: Connection Database
       | mike    |
       | neil    |
     Then  connection does not have any database
+
+
+  Scenario: delete a database causes open sessions to fail
+    When connection create database:
+      | grakn |
+    When connection open session for database:
+      | grakn |
+    When  connection delete database:
+      | grakn |
+    Then  connection does not have database:
+      | grakn |
+    Then for each session, open transaction of type; throws exception
+      | write |
+
+
+  Scenario: delete a database causes open transactions to fail
+    When connection create database:
+      | grakn |
+    When connection open session for database:
+      | grakn |
+    When for each session, open transaction of type:
+      | write |
+    When connection delete database:
+      | grakn |
+    Then connection does not have database:
+      | grakn |
+    Then for each transaction, define query; throws exception containing "transaction is closed"
+      """
+      define person sub entity;
+      """
+
+  Scenario: delete a nonexistant database throws an error
+    When connection delete database; throws exception
+      | grakn |

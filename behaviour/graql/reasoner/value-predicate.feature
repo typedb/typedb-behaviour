@@ -94,7 +94,7 @@ Feature: Value Predicate Resolution
 
 
   # TODO: re-enable all steps once materialised database counts duplicate attributes only once
-  Scenario Outline: when querying for inferred attributes with `<op>`, the answers matching the predicate are returned
+  Scenario Outline: when querying for inferred attributes with '<op>', the answers matching the predicate are returned
     Given for each session, graql define
       """
       define
@@ -133,7 +133,7 @@ Feature: Value Predicate Resolution
 
 
   # TODO: re-enable all steps when fixed (#75)
-  Scenario Outline: when both sides of a `<op>` comparison are inferred attributes, all answers satisfy the predicate
+  Scenario Outline: when both sides of a '<op>' comparison are inferred attributes, all answers satisfy the predicate
     Given for each session, graql define
       """
       define
@@ -172,7 +172,7 @@ Feature: Value Predicate Resolution
 
 
   # TODO: re-enable all steps when fixed (#75)
-  Scenario Outline: when comparing an inferred attribute and a bound variable with `<op>`, answers satisfy the predicate
+  Scenario Outline: when comparing an inferred attribute and a bound variable with '<op>', answers satisfy the predicate
     Given for each session, graql define
       """
       define
@@ -479,7 +479,7 @@ Feature: Value Predicate Resolution
 #    Then materialised and reasoned databases are the same size
 
 
-  Scenario: in a rule, `not { $x == $y; }` is the same as saying `$x !== $y`
+  Scenario: in a rule, 'not { $x == $y; }' is the same as saying '$x !== $y'
     Given for each session, graql define
       """
       define
@@ -533,7 +533,7 @@ Feature: Value Predicate Resolution
     Then materialised and reasoned databases are the same size
 
 
-  Scenario: in a rule, `not { $x !== $y; }` is the same as saying `$x == $y`
+  Scenario: in a rule, 'not { $x !== $y; }' is the same as saying '$x == $y'
     Given for each session, graql define
       """
       define
@@ -637,7 +637,7 @@ Feature: Value Predicate Resolution
 
 
   # TODO: re-enable all steps once attribute re-attachment is resolvable
-  Scenario: when matching a pair of unrelated inferred attributes with `!==`, the answers are unequal
+  Scenario: when matching a pair of unrelated inferred attributes with '!==', the answers are unequal
     Given for each session, graql define
       """
       define
@@ -733,7 +733,7 @@ Feature: Value Predicate Resolution
 
   # TODO: re-enable all steps once implicit attribute variables are resolvable
   # TODO: migrate to concept-inequality.feature
-  Scenario: when restricting the values of a pair of inferred attributes with `!=`, the answers have distinct types
+  Scenario: when restricting the values of a pair of inferred attributes with '!=', the answers have distinct types
     Given for each session, graql define
       """
       define

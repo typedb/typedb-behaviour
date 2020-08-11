@@ -27,10 +27,10 @@ Feature: Graql Delete Query
       define
       person sub entity,
         plays friend,
-        key name;
+        has name @key;
       friendship sub relation,
         relates friend,
-        key ref;
+        has ref @key;
       name sub attribute, value string;
       ref sub attribute, value long;
       """
@@ -401,9 +401,9 @@ Feature: Graql Delete Query
       match (friend: $x, friend: $y) isa friendship; get;
       """
     Then uniquely identify answer concepts
-      | x    | y     |
-      | BOB  | CAR   |
-      | CAR  | BOB   |
+      | x   | y   |
+      | BOB | CAR |
+      | CAR | BOB |
 
 
   Scenario: delete a role player from a relation using meta role removes the player from the relation
@@ -491,9 +491,9 @@ Feature: Graql Delete Query
       match (special-friend: $x, special-friend: $y) isa friendship; get;
       """
     Then uniquely identify answer concepts
-      | x     | y     |
-      | BOB   | CAR   |
-      | CAR   | BOB   |
+      | x   | y   |
+      | BOB | CAR |
+      | CAR | BOB |
 
 
   Scenario: delete an instance removes it from all relations
@@ -530,17 +530,17 @@ Feature: Graql Delete Query
       match $x isa person; get;
       """
     Then uniquely identify answer concepts
-      | x    |
-      | BOB  |
-      | CAR  |
+      | x   |
+      | BOB |
+      | CAR |
     When get answers of graql query
       """
       match $r (friend: $x) isa friendship; get;
       """
     Then uniquely identify answer concepts
-      | r    | x    |
-      | FR1  | BOB  |
-      | FR2  | CAR  |
+      | r   | x   |
+      | FR1 | BOB |
+      | FR2 | CAR |
 
 
   Scenario: delete duplicate role players from a relation removes duplicate player from relation
@@ -573,8 +573,8 @@ Feature: Graql Delete Query
       match $r (friend: $x) isa friendship; get;
       """
     Then uniquely identify answer concepts
-      | r     | x    |
-      | FR    | BOB  |
+      | r  | x   |
+      | FR | BOB |
 
 
   Scenario: when deleting multiple duplicate role players from a relation, it removes the number you asked to delete
@@ -607,9 +607,9 @@ Feature: Graql Delete Query
       match $r (friend: $x, friend: $y) isa friendship; get;
       """
     Then uniquely identify answer concepts
-      | r     | x    | y    |
-      | FR    | BOB  | ALEX |
-      | FR    | ALEX | BOB  |
+      | r  | x    | y    |
+      | FR | BOB  | ALEX |
+      | FR | ALEX | BOB  |
 
 
   Scenario: when deleting duplicate role players in multiple statements, it removes the total number you asked to delete
@@ -680,9 +680,9 @@ Feature: Graql Delete Query
       match $r (friend: $x, friend: $y) isa friendship; get;
       """
     Then uniquely identify answer concepts
-      | r     | x    | y    |
-      | FR    | BOB  | ALEX |
-      | FR    | ALEX | BOB  |
+      | r  | x    | y    |
+      | FR | BOB  | ALEX |
+      | FR | ALEX | BOB  |
 
 
   Scenario: delete role players in multiple statements are all deleted
@@ -843,13 +843,15 @@ Feature: Graql Delete Query
     Then the integrity is validated
 
 
-#  Even when a $role variable matches multiple roles (will always match `role` unless constrained)
-#  We only delete role player edges until the `match` is no longer satisfied
+#  Even when a $role variable matches multiple roles (will always match 'role' unless constrained)
+#  We only delete role player edges until the 'match' is no longer satisfied
 #
 #  For example
-#  ```match $r ($role1: $x, director: $y) isa directed-by; // concrete instance matches: $r (production: $x, director: $y) isa directed-by;
-#  delete $r ($role1: $x);```
-#  We will match `$role1` = ROLE meta type. Using this first answer we will remove $x from $r via the `production role`.
+#
+#  match $r ($role1: $x, director: $y) isa directed-by; // concrete instance matches: $r (production: $x, director: $y) isa directed-by;
+#  delete $r ($role1: $x)
+#
+#  We will match '$role1' = ROLE meta type. Using this first answer we will remove $x from $r via the 'production role'.
 #  This means the match clause is no longer satisfiable, and should throw the next (identical, up to role type) answer that is matched.
 #
 #  So, if the user does not specify a specific-enough roles, we may throw.
@@ -879,23 +881,24 @@ Feature: Graql Delete Query
       """
 
 
-#  Even when a $role variable matches multiple roles (will always match `role` unless constrained)
-#  We only delete role player edges until the `match` is no longer satisfied.
+#  Even when a $role variable matches multiple roles (will always match 'role' unless constrained)
+#  We only delete role player edges until the 'match' is no longer satisfied.
 #
 #  **Sometimes this means multiple duplicate role players will be unassigned **
 #
 #  For example
-#  ```
+#
 #  // concrete instance:  $r (production: $x, production: $x, production: $x, director: $y) isa directed-by;
 #  match $r ($role1: $x, director: $y) isa directed-by; $type sub work;
-#  delete $r ($role1: $x);```
-#  First, we will match `$role1` = ROLE meta role. Using this answer we will remove a single $x from $r via the `production`.
-#  Next, we will match `$role1` = WORK role, and we delete another `production` player. This repeats again for $role=`production`.
+#  delete $r ($role1: $x);
+#
+#  First, we will match '$role1' = ROLE meta role. Using this answer we will remove a single $x from $r via the 'production'.
+#  Next, we will match '$role1' = WORK role, and we delete another 'production' player. This repeats again for $role='production'.
   Scenario: when deleting duplicate role players with a single variable role, both duplicates are removed
     Given graql define
       """
       define
-      ship-crew sub relation, relates captain, relates navigator, relates chef, key ref;
+      ship-crew sub relation, relates captain, relates navigator, relates chef, has ref @key;
       person plays captain, plays navigator, plays chef;
       """
     Given the integrity is validated
@@ -912,9 +915,9 @@ Feature: Graql Delete Query
       match $rel (chef: $p) isa ship-crew; get;
       """
     When concept identifiers are
-      |       | check | value       |
-      | CREW  | key   | ref:0       |
-      | JOSH  | key   | name:Joshua |
+      |      | check | value       |
+      | CREW | key   | ref:0       |
+      | JOSH | key   | name:Joshua |
     Then uniquely identify answer concepts
       | rel  | p    |
       | CREW | JOSH |
@@ -1185,7 +1188,7 @@ Feature: Graql Delete Query
       """
     Given the integrity is validated
     Given concept identifiers are
-      |      | check | value      |
+      |     | check | value       |
       | WAT | key   | name:Watson |
       | nWA | value | name:Watson |
     Then uniquely identify answer concepts
@@ -1376,25 +1379,25 @@ Feature: Graql Delete Query
       match $f (friend: $x) isa friendship; get;
       """
     Then uniquely identify answer concepts
-      | f     | x     |
-      | F2    | ALEX  |
-      | F2    | JOHN  |
-      | REFL  | ALEX  |
+      | f    | x    |
+      | F2   | ALEX |
+      | F2   | JOHN |
+      | REFL | ALEX |
     When get answers of graql query
       """
       match $n isa name; get;
       """
     Then uniquely identify answer concepts
-      | n     |
-      | nJHN  |
-      | nALX  |
+      | n    |
+      | nJHN |
+      | nALX |
     When get answers of graql query
       """
       match $x isa person, has lastname $n; get;
       """
     Then uniquely identify answer concepts
-      | x     | n     |
-      | JOHN  | SMTH  |
+      | x    | n    |
+      | JOHN | SMTH |
 
 
   Scenario: delete everything in a complex pattern
@@ -1462,7 +1465,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
 
 
-  Scenario: deleting a key ownership throws on commit
+  Scenario: deleting a has ownership @key throws on commit
     Given graql insert
       """
       insert
@@ -1481,8 +1484,8 @@ Feature: Graql Delete Query
 
 
   @ignore
-  # TODO: re-enable when deleting an attribute instance that is owned as a key throws an error
-  Scenario: deleting an attribute instance that is owned as a key throws an error
+  # TODO: re-enable when deleting an attribute instance that is owned as a has throws @key an error
+  Scenario: deleting an attribute instance that is owned as a has throws @key an error
     Given graql insert
       """
       insert

@@ -24,77 +24,77 @@ Feature: Connection Session
 
   Scenario: for one database, open one session
     When connection create database:
-      | grakn   |
+      | grakn |
     When connection open session for database:
-      | grakn   |
+      | grakn |
     Then session is null: false
     Then session is open: true
     Then session has database:
-      | grakn   |
+      | grakn |
 
   Scenario: for one database, open many sessions
     When connection create database:
-      | grakn   |
+      | grakn |
     When connection open sessions for databases:
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
     Then sessions are null: false
     Then sessions are open: true
     Then sessions have databases:
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
 
   Scenario: for one database, open many sessions in parallel
     When connection create database:
-      | grakn   |
+      | grakn |
     When connection open sessions in parallel for databases:
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
     Then sessions in parallel are null: false
     Then sessions in parallel are open: true
     Then sessions in parallel have databases:
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
-      | grakn   |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
+      | grakn |
 
   Scenario: for many databases, open many sessions
     When connection create databases:
