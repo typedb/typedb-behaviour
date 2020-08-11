@@ -903,8 +903,6 @@ Feature: Graql Define Query
       | F_NAME |
 
 
-  @ignore
-  # TODO: re-enable when overriding an attribute's 'value' is forbidden
   Scenario: define attribute subtype throws if you try to override 'value'
     Then graql define throws
       """
