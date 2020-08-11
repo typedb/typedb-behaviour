@@ -30,18 +30,18 @@ Feature: Graql Match Clause
         plays employee,
         has name,
         has age,
-        has ref @key;
+        key ref;
       company sub entity,
         plays employer,
         has name,
-        has ref @key;
+        key ref;
       friendship sub relation,
         relates friend,
-        has ref @key;
+        key ref;
       employment sub relation,
         relates employee,
         relates employer,
-        has ref @key;
+        key ref;
       name sub attribute, value string;
       age sub attribute, value long;
       ref sub attribute, value long;
@@ -452,7 +452,7 @@ Feature: Graql Match Clause
       define
       dog sub entity,
         plays friend,
-        has ref @key;
+        key ref;
       """
     Given the integrity is validated
     Given graql insert
@@ -487,12 +487,12 @@ Feature: Graql Match Clause
       """
       define
       breed sub attribute, value string;
-      dog sub entity, has breed @key;
+      dog sub entity, key breed;
       """
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x has breed @key; get;
+      match $x key breed; get;
       """
     And concept identifiers are
       |     | check | value |
@@ -522,7 +522,7 @@ Feature: Graql Match Clause
       """
       define
       breed sub attribute, value string;
-      dog sub entity, has breed @key;
+      dog sub entity, key breed;
       cat sub entity, has breed;
       """
     Given the integrity is validated
@@ -885,8 +885,8 @@ Feature: Graql Match Clause
     Given graql define
       """
       define
-      some-entity sub entity, plays player, has ref @key;
-      symmetric sub relation, relates player, has ref @key;
+      some-entity sub entity, plays player, key ref;
+      symmetric sub relation, relates player, key ref;
       """
     Given the integrity is validated
     Given graql insert
@@ -911,8 +911,8 @@ Feature: Graql Match Clause
     Given graql define
       """
       define
-      some-entity sub entity, plays player, has ref @key;
-      symmetric sub relation, relates player, has ref @key;
+      some-entity sub entity, plays player, key ref;
+      symmetric sub relation, relates player, key ref;
       """
     Given the integrity is validated
     Given graql insert
@@ -1008,7 +1008,7 @@ Feature: Graql Match Clause
       define
       residency sub relation,
         relates resident,
-        has ref @key;
+        key ref;
       person plays resident;
       """
     Given the integrity is validated
@@ -1123,7 +1123,7 @@ Feature: Graql Match Clause
   Scenario Outline: '<type>' attributes can be matched by value
     Given graql define
       """
-      define <attr> sub attribute, value <type>, has ref @key;
+      define <attr> sub attribute, value <type>, key ref;
       """
     Given the integrity is validated
     Given graql insert
@@ -1154,7 +1154,7 @@ Feature: Graql Match Clause
   Scenario Outline: when matching a '<type>' attribute by a value that doesn't exist, an empty answer is returned
     Given graql define
       """
-      define <attr> sub attribute, value <type>, has ref @key;
+      define <attr> sub attribute, value <type>, key ref;
       """
     Given the integrity is validated
     When get answers of graql query
@@ -1317,7 +1317,7 @@ Feature: Graql Match Clause
       """
       define
       friendship has age;
-      graduation-date sub attribute, value datetime, has age, has ref @key;
+      graduation-date sub attribute, value datetime, has age, key ref;
       person has graduation-date;
       """
     Given the integrity is validated

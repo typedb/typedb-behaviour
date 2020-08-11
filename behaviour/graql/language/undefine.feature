@@ -26,7 +26,7 @@ Feature: Graql Undefine Query
     Given graql define
       """
       define
-      person sub entity, plays employee, has name, has email @key;
+      person sub entity, plays employee, has name, key email;
       employment sub relation, relates employee, relates employer;
       name sub attribute, value string;
       email sub attribute, value string, regex ".+@\w+\..+";
@@ -191,7 +191,7 @@ Feature: Graql Undefine Query
     Then answer size is: 0
 
 
-  Scenario: removing a has ownership @key from a super entity type also removes it from its subtypes
+  Scenario: removing a key ownership from a super entity type also removes it from its subtypes
     Given graql define
       """
       define child sub person; 
@@ -199,12 +199,12 @@ Feature: Graql Undefine Query
     Given the integrity is validated
     When graql undefine
       """
-      undefine person has email @key;
+      undefine person key email;
       """
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x type child; $x has email @key; get;
+      match $x type child; $x key email; get;
       """
     Then answer size is: 0
 
@@ -377,18 +377,18 @@ Feature: Graql Undefine Query
     Then answer size is: 0
 
 
-  Scenario: removing has ownerships @key from a super relation type also removes them from its subtypes
+  Scenario: removing key ownerships from a super relation type also removes them from its subtypes
     Given graql define
       """
       define
       employment-reference sub attribute, value string;
-      employment has employment-reference @key;
+      employment key employment-reference;
       contract-employment sub employment, relates employee, relates employer;
       """
     Given the integrity is validated
     Given get answers of graql query
       """
-      match $x has employment-reference @key; get;
+      match $x key employment-reference; get;
       """
     Given concept identifiers are
       |     | check | value               |
@@ -400,12 +400,12 @@ Feature: Graql Undefine Query
       | CEM |
     When graql undefine
       """
-      undefine employment has employment-reference @key;
+      undefine employment key employment-reference;
       """
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x has employment-reference @key; get;
+      match $x key employment-reference; get;
       """
     Then answer size is: 0
 
@@ -918,18 +918,18 @@ Feature: Graql Undefine Query
     Then answer size is: 0
 
 
-  Scenario: removing has ownerships @key from a super attribute type also removes them from its subtypes
+  Scenario: removing key ownerships from a super attribute type also removes them from its subtypes
     Given graql define
       """
       define
       first-name sub name;
       name-id sub attribute, value long;
-      name has name-id @key;
+      name key name-id;
       """
     Given the integrity is validated
     Given get answers of graql query
       """
-      match $x has name-id @key; get;
+      match $x key name-id; get;
       """
     Given concept identifiers are
       |     | check | value      |
@@ -941,12 +941,12 @@ Feature: Graql Undefine Query
       | FNA |
     When graql undefine
       """
-      undefine name has name-id @key;
+      undefine name key name-id;
       """
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x has name-id @key; get;
+      match $x key name-id; get;
       """
     Then answer size is: 0
 
@@ -1094,11 +1094,11 @@ Feature: Graql Undefine Query
     Then the integrity is validated
 
 
-  Scenario: undefining a has ownership @key removes it
+  Scenario: undefining a key ownership removes it
     Given get answers of graql query
       """
       match
-        $x has email @key;
+        $x key email;
         $x type person;
       get;
       """
@@ -1110,23 +1110,23 @@ Feature: Graql Undefine Query
       | PER |
     When graql undefine
       """
-      undefine person has email @key;
+      undefine person key email;
       """
     Then the integrity is validated
     When get answers of graql query
       """
       match
-        $x has email @key;
+        $x key email;
         $x type person;
       get;
       """
     Then answer size is: 0
 
 
-  Scenario: attempting to undefine a has ownership @key that doesn't exist throws an error
+  Scenario: attempting to undefine a key ownership that doesn't exist throws an error
     Then graql undefine throws
       """
-      undefine employment has email @key;
+      undefine employment key email;
       """
     Then the integrity is validated
 
@@ -1144,7 +1144,7 @@ Feature: Graql Undefine Query
   Scenario: attempting to undefine an attribute owned with 'has' by using 'key' throws an error
     Then graql undefine throws
       """
-      undefine person has name @key;
+      undefine person key name;
       """
     Then the integrity is validated
 
@@ -1190,7 +1190,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
 
 
-  Scenario: undefining a type's has ownership @key throws an error if it has existing instances
+  Scenario: undefining a type's key ownership throws an error if it has existing instances
     Given graql insert
       """
       insert $x isa person, has name "Daniel", has email "daniel@grakn.ai";
@@ -1198,7 +1198,7 @@ Feature: Graql Undefine Query
     Given the integrity is validated
     Then graql undefine throws
       """
-      undefine person has email @key;
+      undefine person key email;
       """
     Then the integrity is validated
 
@@ -1558,7 +1558,7 @@ Feature: Graql Undefine Query
     When graql undefine
       """
       undefine
-      person sub entity, has name, has email @key, plays employee;
+      person sub entity, has name, key email, plays employee;
       employment sub relation, relates employee, relates employer;
       name sub attribute;
       """

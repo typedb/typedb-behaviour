@@ -26,7 +26,7 @@ Feature: Graql Rule Validation
     Given graql define
       """
       define
-      person sub entity, plays employee, has name, has email @key;
+      person sub entity, plays employee, has name, key email;
       employment sub relation, relates employee, has start-date;
       name sub attribute, value string;
       email sub attribute, value string;
