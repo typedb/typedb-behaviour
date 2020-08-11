@@ -128,9 +128,13 @@ Feature: Concept Entity
     When $alice = attribute(username) as(string) put: alice
     When $bob = attribute(username) as(string) put: bob
     When entity $a set has: $alice
-    When transaction commits
-    When session opens transaction of type: write
     Then entity $a set has: $bob; throws exception
+    When session opens transaction of type: write
+    When $a = entity(person) create new instance
+    When $alice = attribute(username) as(string) put: alice
+    When $bob = attribute(username) as(string) put: bob
+    When entity $a set has: $alice
+    When transaction commits
     When session opens transaction of type: write
     When $a = entity(person) get instance with key(username): alice
     When $bob = attribute(username) as(string) get: bob
@@ -143,6 +147,7 @@ Feature: Concept Entity
     When transaction commits
     When session opens transaction of type: write
     When $b = entity(person) create new instance
+    When $alice = attribute(username) as(string) get: alice
     Then entity $b set has: $alice; throws exception
 
   Scenario: Entity can have attribute
