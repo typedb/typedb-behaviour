@@ -36,7 +36,7 @@ Feature: Graql Reasoning Explanation
           value string;
 
       person sub entity,
-        has name @key;
+        owns name;
       """
 
     When graql insert
@@ -72,7 +72,7 @@ Feature: Graql Reasoning Explanation
 
       location sub entity,
           abstract,
-          has name @key,
+          owns name,
           plays superior,
           plays subordinate;
 
@@ -128,7 +128,7 @@ Feature: Graql Reasoning Explanation
 
       location sub entity,
           abstract,
-          has name @key,
+          owns name,
           plays superior,
           plays subordinate;
 
@@ -192,8 +192,8 @@ Feature: Graql Reasoning Explanation
           value long;
 
       company sub entity,
-          has company-id @key,
-          has name;
+          owns company-id,
+          owns name;
       """
 
     When graql insert
@@ -241,8 +241,8 @@ Feature: Graql Reasoning Explanation
           value long;
 
       company sub entity,
-          has company-id @key,
-          has name;
+          owns company-id,
+          owns name;
       """
 
     When graql insert
@@ -290,8 +290,8 @@ Feature: Graql Reasoning Explanation
           value long;
 
       company sub entity,
-          has company-id @key,
-          has name;
+          owns company-id,
+          owns name;
       """
 
     When graql insert

@@ -34,7 +34,7 @@ Feature: Type Hierarchy Resolution
       define
 
       person sub entity,
-          has name,
+          owns name,
           plays writer,
           plays performer,
           plays film-writer,
@@ -356,7 +356,7 @@ Feature: Type Hierarchy Resolution
       define
 
       person sub entity,
-          has name,
+          owns name,
           plays writer,
           plays performer,
           plays film-writer,

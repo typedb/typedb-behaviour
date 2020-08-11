@@ -33,26 +33,26 @@ Feature: Value Predicate Resolution
       person sub entity,
         plays leader,
         plays team-member,
-        has string-attribute,
-        has unrelated-attribute,
-        has sub-string-attribute,
-        has name,
-        has age,
-        has is-old;
+        owns string-attribute,
+        owns unrelated-attribute,
+        owns sub-string-attribute,
+        owns name,
+        owns age,
+        owns is-old;
 
       tortoise sub entity,
-        has age,
-        has is-old;
+        owns age,
+        owns is-old;
 
       soft-drink sub entity,
-        has name,
-        has retailer,
-        has price;
+        owns name,
+        owns retailer,
+        owns price;
 
       team sub relation,
         relates leader,
         relates team-member,
-        has string-attribute;
+        owns string-attribute;
 
       string-attribute sub attribute, value string;
       retailer sub attribute, value string;
@@ -99,7 +99,7 @@ Feature: Value Predicate Resolution
       """
       define
       lucky-number sub attribute, value long;
-      person has lucky-number;
+      person owns lucky-number;
       rule-1337 sub rule, when { $x isa person; }, then { $x has lucky-number $n; $n 1337; };
       rule-1667 sub rule, when { $x isa person; }, then { $x has lucky-number $n; $n 1667; };
       rule-1997 sub rule, when { $x isa person; }, then { $x has lucky-number $n; $n 1997; };
@@ -138,7 +138,7 @@ Feature: Value Predicate Resolution
       """
       define
       lucky-number sub attribute, value long;
-      person has lucky-number;
+      person owns lucky-number;
       rule-1337 sub rule, when { $x isa person; }, then { $x has lucky-number $n; $n 1337; };
       rule-1667 sub rule, when { $x isa person; }, then { $x has lucky-number $n; $n 1667; };
       """
@@ -177,7 +177,7 @@ Feature: Value Predicate Resolution
       """
       define
       lucky-number sub attribute, value long;
-      person has lucky-number;
+      person owns lucky-number;
       rule-1337 sub rule, when { $x isa person; }, then { $x has lucky-number $n; $n 1337; };
       rule-1667 sub rule, when { $x isa person; }, then { $x has lucky-number $n; $n 1667; };
       rule-1997 sub rule, when { $x isa person; }, then { $x has lucky-number $n; $n 1997; };
@@ -901,7 +901,7 @@ Feature: Value Predicate Resolution
           plays reply,
           plays predecessor,
           plays successor,
-          has creation-date;
+          owns creation-date;
 
       reply-of sub relation,
           relates original,

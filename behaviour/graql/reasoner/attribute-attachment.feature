@@ -33,23 +33,23 @@ Feature: Attribute Attachment Resolution
       person sub entity,
           plays leader,
           plays team-member,
-          has string-attribute,
-          has unrelated-attribute,
-          has sub-string-attribute,
-          has age,
-          has is-old;
+          owns string-attribute,
+          owns unrelated-attribute,
+          owns sub-string-attribute,
+          owns age,
+          owns is-old;
 
       tortoise sub entity,
-          has age,
-          has is-old;
+          owns age,
+          owns is-old;
 
       soft-drink sub entity,
-          has retailer;
+          owns retailer;
 
       team sub relation,
           relates leader,
           relates team-member,
-          has string-attribute;
+          owns string-attribute;
 
       string-attribute sub attribute, value string;
       retailer sub attribute, value string;

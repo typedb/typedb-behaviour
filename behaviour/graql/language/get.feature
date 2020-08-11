@@ -28,20 +28,20 @@ Feature: Graql Get Query
       person sub entity,
         plays friend,
         plays employee,
-        has name,
-        has age,
-        has ref @key;
+        owns name,
+        owns age,
+        owns ref;
       company sub entity,
         plays employer,
-        has name,
-        has ref @key;
+        owns name,
+        owns ref;
       friendship sub relation,
         relates friend,
-        has ref @key;
+        owns ref;
       employment sub relation,
         relates employee,
         relates employer,
-        has ref @key;
+        owns ref;
       name sub attribute, value string;
       age sub attribute, value long;
       ref sub attribute, value long;
@@ -102,7 +102,7 @@ Feature: Graql Get Query
     Given graql define
       """
       define
-      <attr> sub attribute, value <type>, has ref @key;
+      <attr> sub attribute, value <type>, owns ref;
       """
     Given the integrity is validated
     Given graql insert
@@ -532,7 +532,7 @@ Feature: Graql Get Query
       """
       define
       <attr> sub attribute, value <type>;
-      person has <attr>;
+      person owns <attr>;
       """
     Given the integrity is validated
     Given graql insert
@@ -571,7 +571,7 @@ Feature: Graql Get Query
       """
       define
       weight sub attribute, value double;
-      person has weight;
+      person owns weight;
       """
     Given the integrity is validated
     Given graql insert
@@ -670,7 +670,7 @@ Feature: Graql Get Query
       """
       define
       income sub attribute, value double;
-      person has income;
+      person owns income;
       """
     Given the integrity is validated
     When get answers of graql query
@@ -732,7 +732,7 @@ Feature: Graql Get Query
       """
       define
       <attr> sub attribute, value <type>;
-      person has <attr>;
+      person owns <attr>;
       """
     Given the integrity is validated
     Given graql insert

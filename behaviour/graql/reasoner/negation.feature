@@ -31,17 +31,17 @@ Feature: Negation Resolution
       define
 
       person sub entity,
-        has name,
-        has age,
+        owns name,
+        owns age,
         plays friend,
         plays employee;
 
       company sub entity,
-        has name,
+        owns name,
         plays employer;
 
       place sub entity,
-        has name,
+        owns name,
         plays location-subordinate,
         plays location-superior;
 
@@ -291,7 +291,7 @@ Feature: Negation Resolution
     Given for each session, graql define
       """
       define
-      dog sub entity, has name, plays friend;
+      dog sub entity, owns name, plays friend;
       """
     Given for each session, graql insert
       """
@@ -815,7 +815,7 @@ Feature: Negation Resolution
       define
 
       indexable sub entity,
-          has index;
+          owns index;
 
       traversable sub indexable,
           plays link-from,
@@ -898,7 +898,7 @@ Feature: Negation Resolution
     Given for each session, graql define
       """
       define
-      person has age;
+      person owns age;
       age sub attribute, value long;
       not-ten sub rule,
       when {
@@ -933,7 +933,7 @@ Feature: Negation Resolution
     Given for each session, graql define
       """
       define
-      person has age;
+      person owns age;
       age sub attribute, value long;
       not-ten sub rule,
       when {
@@ -969,7 +969,7 @@ Feature: Negation Resolution
     Given for each session, graql define
       """
       define
-      country sub entity, has name, plays country-for-company;
+      country sub entity, owns name, plays country-for-company;
       company plays company-with-country, plays not-in-uk;
       company-country sub relation,
         relates company-with-country,
@@ -1039,7 +1039,7 @@ Feature: Negation Resolution
     Given for each session, graql define
       """
       define
-      country sub entity, has name, plays country-for-company;
+      country sub entity, owns name, plays country-for-company;
       company plays company-with-country, plays not-in-uk;
       company-country sub relation,
         relates company-with-country,
@@ -1118,7 +1118,7 @@ Feature: Negation Resolution
           plays identified-fault,
           plays diagnosed-fault;
       question sub entity,
-          has response,
+          owns response,
           plays identifying-question,
           plays question-logged,
           plays question-not-answered;
@@ -1202,9 +1202,9 @@ Feature: Negation Resolution
       define
       resource sub attribute, value string;
 
-      entity-1 sub entity, has resource, plays role-2, plays role-4;
-      entity-2 sub entity, has resource, plays role-1, plays role-3, plays role-4;
-      entity-3 sub entity, has resource, plays role-1, plays role-3, plays role-4, plays symmetric-role;
+      entity-1 sub entity, owns resource, plays role-2, plays role-4;
+      entity-2 sub entity, owns resource, plays role-1, plays role-3, plays role-4;
+      entity-3 sub entity, owns resource, plays role-1, plays role-3, plays role-4, plays symmetric-role;
 
       relation-2 sub relation, relates role-1, relates role-2;
       relation-3 sub relation, relates role-3, relates role-4;
@@ -1275,7 +1275,7 @@ Feature: Negation Resolution
       define
 
       indexable sub entity,
-          has index;
+          owns index;
 
       traversable sub indexable,
           plays link-from,

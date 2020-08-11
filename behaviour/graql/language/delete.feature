@@ -27,10 +27,10 @@ Feature: Graql Delete Query
       define
       person sub entity,
         plays friend,
-        has name @key;
+        owns name;
       friendship sub relation,
         relates friend,
-        has ref @key;
+        owns ref;
       name sub attribute, value string;
       ref sub attribute, value long;
       """
@@ -898,7 +898,7 @@ Feature: Graql Delete Query
     Given graql define
       """
       define
-      ship-crew sub relation, relates captain, relates navigator, relates chef, has ref @key;
+      ship-crew sub relation, relates captain, relates navigator, relates chef, owns ref;
       person plays captain, plays navigator, plays chef;
       """
     Given the integrity is validated
@@ -945,7 +945,7 @@ Feature: Graql Delete Query
       """
       define
       age sub attribute, value long;
-      person has age;
+      person owns age;
       """
     Given the integrity is validated
     Given graql insert
@@ -984,7 +984,7 @@ Feature: Graql Delete Query
       """
       define
       lastname sub attribute, value string;
-      person sub entity, has lastname;
+      person sub entity, owns lastname;
       """
     Given the integrity is validated
     Given get answers of graql insert
@@ -1047,7 +1047,7 @@ Feature: Graql Delete Query
       define
       address sub attribute, value string;
       postcode sub address;
-      person has postcode;
+      person owns postcode;
       """
     Given the integrity is validated
     Given get answers of graql insert
@@ -1096,7 +1096,7 @@ Feature: Graql Delete Query
       define
       address sub attribute, value string;
       postcode sub address;
-      person has postcode;
+      person owns postcode;
       """
     Given the integrity is validated
     Given graql insert
@@ -1138,7 +1138,7 @@ Feature: Graql Delete Query
       define
       address sub attribute, value string;
       postcode sub address;
-      person has address;
+      person owns address;
       """
     Given the integrity is validated
     Given graql insert
@@ -1162,7 +1162,7 @@ Feature: Graql Delete Query
       define
       address sub attribute, value string;
       postcode sub address;
-      person has postcode;
+      person owns postcode;
       """
     Given the integrity is validated
     Given graql insert
@@ -1231,7 +1231,7 @@ Feature: Graql Delete Query
       """
       define
       duration sub attribute, value long;
-      friendship has duration;
+      friendship owns duration;
       """
     Given the integrity is validated
     Given graql insert
@@ -1273,7 +1273,7 @@ Feature: Graql Delete Query
       """
       define
       duration sub attribute, value long;
-      friendship has duration;
+      friendship owns duration;
       """
     Given the integrity is validated
     Given graql insert
@@ -1334,7 +1334,7 @@ Feature: Graql Delete Query
       """
       define
       lastname sub attribute, value string;
-      person sub entity, has lastname;
+      person sub entity, owns lastname;
       """
     Given the integrity is validated
     Given graql insert
@@ -1405,7 +1405,7 @@ Feature: Graql Delete Query
       """
       define
       lastname sub attribute, value string;
-      person sub entity, has lastname;
+      person sub entity, owns lastname;
       """
     Given the integrity is validated
     Given graql insert

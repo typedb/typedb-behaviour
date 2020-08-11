@@ -31,16 +31,16 @@ Feature: Roleplayer Attachment Resolution
       define
 
       person sub entity,
-        has name,
+        owns name,
         plays friend,
         plays employee;
 
       company sub entity,
-        has name,
+        owns name,
         plays employer;
 
       place sub entity,
-        has name,
+        owns name,
         plays location-subordinate,
         plays location-superior;
 

@@ -32,7 +32,7 @@ Feature: Variable Role Resolution
       define
 
       entity1 sub entity,
-          has name,
+          owns name,
           plays role1,
           plays role2,
           plays ternary-role1,

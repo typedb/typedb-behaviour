@@ -26,7 +26,7 @@ Feature: Graql Undefine Query
     Given graql define
       """
       define
-      person sub entity, plays employee, has name, has email @key;
+      person sub entity, plays employee, owns name, owns email;
       employment sub relation, relates employee, relates employer;
       name sub attribute, value string;
       email sub attribute, value string, regex ".+@\w+\..+";
@@ -181,12 +181,12 @@ Feature: Graql Undefine Query
     Given the integrity is validated
     When graql undefine
       """
-      undefine person has name;
+      undefine person owns name;
       """
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x type child; $x has name; get;
+      match $x type child; $x owns name; get;
       """
     Then answer size is: 0
 
@@ -199,12 +199,12 @@ Feature: Graql Undefine Query
     Given the integrity is validated
     When graql undefine
       """
-      undefine person has email @key;
+      undefine person owns email;
       """
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x type child; $x has email @key; get;
+      match $x type child; $x owns email; get;
       """
     Then answer size is: 0
 
@@ -349,13 +349,13 @@ Feature: Graql Undefine Query
       """
       define
       start-date sub attribute, value datetime;
-      employment has start-date;
+      employment owns start-date;
       contract-employment sub employment, relates employee, relates employer;
       """
     Given the integrity is validated
     Given get answers of graql query
       """
-      match $x has start-date; get;
+      match $x owns start-date; get;
       """
     Given concept identifiers are
       |     | check | value               |
@@ -367,12 +367,12 @@ Feature: Graql Undefine Query
       | CEM |
     When graql undefine
       """
-      undefine employment has start-date;
+      undefine employment owns start-date;
       """
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x has start-date; get;
+      match $x owns start-date; get;
       """
     Then answer size is: 0
 
@@ -382,13 +382,13 @@ Feature: Graql Undefine Query
       """
       define
       employment-reference sub attribute, value string;
-      employment has employment-reference @key;
+      employment owns employment-reference;
       contract-employment sub employment, relates employee, relates employer;
       """
     Given the integrity is validated
     Given get answers of graql query
       """
-      match $x has employment-reference @key; get;
+      match $x owns employment-reference; get;
       """
     Given concept identifiers are
       |     | check | value               |
@@ -400,12 +400,12 @@ Feature: Graql Undefine Query
       | CEM |
     When graql undefine
       """
-      undefine employment has employment-reference @key;
+      undefine employment owns employment-reference;
       """
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x has employment-reference @key; get;
+      match $x owns employment-reference; get;
       """
     Then answer size is: 0
 
@@ -639,7 +639,7 @@ Feature: Graql Undefine Query
     Given graql define
       """
       define
-      company sub entity, has name, plays employer;
+      company sub entity, owns name, plays employer;
       """
     Given the integrity is validated
     Given graql insert
@@ -891,12 +891,12 @@ Feature: Graql Undefine Query
       define
       first-name sub name;
       locale sub attribute, value string;
-      name has locale;
+      name owns locale;
       """
     Given the integrity is validated
     Given get answers of graql query
       """
-      match $x has locale; get;
+      match $x owns locale; get;
       """
     Given concept identifiers are
       |     | check | value      |
@@ -908,12 +908,12 @@ Feature: Graql Undefine Query
       | FNA |
     When graql undefine
       """
-      undefine name has locale;
+      undefine name owns locale;
       """
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x has locale; get;
+      match $x owns locale; get;
       """
     Then answer size is: 0
 
@@ -924,12 +924,12 @@ Feature: Graql Undefine Query
       define
       first-name sub name;
       name-id sub attribute, value long;
-      name has name-id @key;
+      name owns name-id;
       """
     Given the integrity is validated
     Given get answers of graql query
       """
-      match $x has name-id @key; get;
+      match $x owns name-id; get;
       """
     Given concept identifiers are
       |     | check | value      |
@@ -941,12 +941,12 @@ Feature: Graql Undefine Query
       | FNA |
     When graql undefine
       """
-      undefine name has name-id @key;
+      undefine name owns name-id;
       """
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x has name-id @key; get;
+      match $x owns name-id; get;
       """
     Then answer size is: 0
 
@@ -955,13 +955,13 @@ Feature: Graql Undefine Query
     Given graql define
       """
       define
-      name has name;
+      name owns name;
       """
     Given the integrity is validated
     When graql undefine
       """
       undefine
-      name has name;
+      name owns name;
       name sub attribute;
       """
     Then the integrity is validated
@@ -1048,7 +1048,7 @@ Feature: Graql Undefine Query
     Given get answers of graql query
       """
       match
-        $x has name;
+        $x owns name;
         $x type person;
       get;
       """
@@ -1060,13 +1060,13 @@ Feature: Graql Undefine Query
       | PER |
     When graql undefine
       """
-      undefine person has name;
+      undefine person owns name;
       """
     Then the integrity is validated
     When get answers of graql query
       """
       match
-        $x has name;
+        $x owns name;
         $x type person;
       get;
       """
@@ -1076,7 +1076,7 @@ Feature: Graql Undefine Query
   Scenario: attempting to undefine an attribute ownership that was not actually owned to begin with throws an error
     Then graql undefine throws
       """
-      undefine employment has name;
+      undefine employment owns name;
       """
     Then the integrity is validated
 
@@ -1089,7 +1089,7 @@ Feature: Graql Undefine Query
     Given the integrity is validated
     Then graql undefine throws
       """
-      undefine child has name;
+      undefine child owns name;
       """
     Then the integrity is validated
 
@@ -1098,7 +1098,7 @@ Feature: Graql Undefine Query
     Given get answers of graql query
       """
       match
-        $x has email @key;
+        $x owns email;
         $x type person;
       get;
       """
@@ -1110,13 +1110,13 @@ Feature: Graql Undefine Query
       | PER |
     When graql undefine
       """
-      undefine person has email @key;
+      undefine person owns email;
       """
     Then the integrity is validated
     When get answers of graql query
       """
       match
-        $x has email @key;
+        $x owns email;
         $x type person;
       get;
       """
@@ -1126,7 +1126,7 @@ Feature: Graql Undefine Query
   Scenario: attempting to undefine a has ownership @key that doesn't exist throws an error
     Then graql undefine throws
       """
-      undefine employment has email @key;
+      undefine employment owns email;
       """
     Then the integrity is validated
 
@@ -1136,7 +1136,7 @@ Feature: Graql Undefine Query
   Scenario: undefining an attribute owned with 'key' by using 'has' removes ownership / does nothing / throws (?)
     Then graql undefine throws
       """
-      undefine person has email;
+      undefine person owns email;
       """
     Then the integrity is validated
 
@@ -1144,15 +1144,15 @@ Feature: Graql Undefine Query
   Scenario: attempting to undefine an attribute owned with 'has' by using 'key' throws an error
     Then graql undefine throws
       """
-      undefine person has name @key;
+      undefine person owns name;
       """
     Then the integrity is validated
 
 
-  Scenario: when an attribute owner has instances, but none of them own that attribute, the ownership can be removed
+  Scenario: when an attribute owner owns instances, but none of them own that attribute, the ownership can be removed
     Given get answers of graql query
       """
-      match $x has name; get;
+      match $x owns name; get;
       """
     Given concept identifiers are
       |     | check | value  |
@@ -1167,12 +1167,12 @@ Feature: Graql Undefine Query
     Given the integrity is validated
     When graql undefine
       """
-      undefine person has name;
+      undefine person owns name;
       """
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x has name; get;
+      match $x owns name; get;
       """
     Then answer size is: 0
 
@@ -1185,7 +1185,7 @@ Feature: Graql Undefine Query
     Given the integrity is validated
     Then graql undefine throws
       """
-      undefine person has name;
+      undefine person owns name;
       """
     Then the integrity is validated
 
@@ -1198,7 +1198,7 @@ Feature: Graql Undefine Query
     Given the integrity is validated
     Then graql undefine throws
       """
-      undefine person has email @key;
+      undefine person owns email;
       """
     Then the integrity is validated
 
@@ -1429,7 +1429,7 @@ Feature: Graql Undefine Query
       define
       vehicle-registration sub attribute, value string, abstract;
       car-registration sub vehicle-registration;
-      person has vehicle-registration;
+      person owns vehicle-registration;
       """
     Given the integrity is validated
     When graql undefine
@@ -1482,7 +1482,7 @@ Feature: Graql Undefine Query
     When graql undefine
       """
       undefine
-      person sub entity, has name;
+      person sub entity, owns name;
       name sub attribute;
       """
     Then the integrity is validated
@@ -1558,7 +1558,7 @@ Feature: Graql Undefine Query
     When graql undefine
       """
       undefine
-      person sub entity, has name, has email @key, plays employee;
+      person sub entity, owns name, owns email, plays employee;
       employment sub relation, relates employee, relates employer;
       name sub attribute;
       """

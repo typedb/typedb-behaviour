@@ -32,10 +32,10 @@ Feature: Concept Inequality Resolution
       define
 
       person sub entity,
-          has name;
+          owns name;
 
       ball sub entity,
-          has name,
+          owns name,
           plays ball1,
           plays ball2;
 
@@ -79,7 +79,7 @@ Feature: Concept Inequality Resolution
 
       state sub entity,
           plays related-state,
-          has name;
+          owns name;
 
       transition sub relation,
         relates related-state;
@@ -412,13 +412,13 @@ Feature: Concept Inequality Resolution
       """
       define
       soft-drink sub entity,
-        has name,
-        has retailer;
+        owns name,
+        owns retailer;
       base-attribute sub attribute, value string, abstract;
       string-attribute sub base-attribute;
       name sub base-attribute;
       retailer sub base-attribute;
-      person has string-attribute;
+      person owns string-attribute;
 
       tesco-sells-all-soft-drinks sub rule,
       when {
@@ -465,12 +465,12 @@ Feature: Concept Inequality Resolution
       """
       define
       soft-drink sub entity,
-        has name,
-        has retailer;
+        owns name,
+        owns retailer;
       base-attribute sub attribute, value string, abstract;
       string-attribute sub base-attribute;
       retailer sub base-attribute;
-      person has string-attribute;
+      person owns string-attribute;
 
       transfer-string-attribute-to-other-people sub rule,
       when {

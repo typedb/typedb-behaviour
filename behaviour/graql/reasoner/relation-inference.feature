@@ -31,16 +31,16 @@ Feature: Relation Inference Resolution
       define
 
       person sub entity,
-        has name,
+        owns name,
         plays friend,
         plays employee;
 
       company sub entity,
-        has name,
+        owns name,
         plays employer;
 
       place sub entity,
-        has name,
+        owns name,
         plays location-subordinate,
         plays location-superior;
 
@@ -145,7 +145,7 @@ Feature: Relation Inference Resolution
     Given for each session, graql define
       """
       define
-      item sub entity, has name, plays listed-item;
+      item sub entity, owns name, plays listed-item;
       price sub attribute, value double, plays item-price;
       item-listing sub relation, relates listed-item, relates item-price;
       nutella-price sub rule,
@@ -394,7 +394,7 @@ Feature: Relation Inference Resolution
           plays coworker,
           plays employee,
           plays employer,
-          has name;
+          owns name;
 
       coworkers sub relation,
           relates coworker;

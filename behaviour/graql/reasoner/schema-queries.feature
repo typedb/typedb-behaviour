@@ -31,16 +31,16 @@ Feature: Schema Query Resolution (Variable Types)
       define
 
       person sub entity,
-        has name,
+        owns name,
         plays friend,
         plays employee;
 
       company sub entity,
-        has name,
+        owns name,
         plays employer;
 
       place sub entity,
-        has name,
+        owns name,
         plays location-subordinate,
         plays location-superior;
 
@@ -166,14 +166,14 @@ Feature: Schema Query Resolution (Variable Types)
       residency sub relation,
         relates resident,
         relates residence,
-        has contract;
+        owns contract;
 
       contract sub attribute, value string;
 
       person plays resident;
       place plays residence;
 
-      employment has contract;
+      employment owns contract;
 
       everyone-has-friends sub rule,
       when {
@@ -215,7 +215,7 @@ Feature: Schema Query Resolution (Variable Types)
       """
       match
         $x isa $type;
-        $type has contract;
+        $type owns contract;
       get;
       """
 #    Then all answers are correct in reasoned database

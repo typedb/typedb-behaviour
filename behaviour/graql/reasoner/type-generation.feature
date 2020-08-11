@@ -183,10 +183,10 @@ Feature: Type Generation Resolution
       define
 
       baseEntity sub entity,
-          has baseAttribute;
+          owns baseAttribute;
 
       derivedEntity sub entity,
-          has baseAttribute;
+          owns baseAttribute;
 
       baseAttribute sub attribute, value string;
 

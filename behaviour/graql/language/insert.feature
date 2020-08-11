@@ -29,19 +29,19 @@ Feature: Graql Insert Query
 
       person sub entity,
         plays employee,
-        has name,
-        has age,
-        has ref @key;
+        owns name,
+        owns age,
+        owns ref;
 
       company sub entity,
         plays employer,
-        has name,
-        has ref @key;
+        owns name,
+        owns ref;
 
       employment sub relation,
         relates employee,
         relates employer,
-        has ref @key;
+        owns ref;
 
       name sub attribute,
         value string;
@@ -147,7 +147,7 @@ Feature: Graql Insert Query
       """
       define
       breed sub attribute, value string;
-      dog sub entity, has breed;
+      dog sub entity, owns breed;
       """
     Given the integrity is validated
     Given get answers of graql query
@@ -323,7 +323,7 @@ Feature: Graql Insert Query
     Given graql define
       """
       define
-      dog sub entity, has name;
+      dog sub entity, owns name;
       """
     Given the integrity is validated
     Given graql insert
@@ -360,8 +360,8 @@ Feature: Graql Insert Query
     Given graql define
       """
       define
-      <attr> sub attribute, value <type>, has ref @key;
-      person has <attr>;
+      <attr> sub attribute, value <type>, owns ref;
+      person owns <attr>;
       """
     Given the integrity is validated
     When graql insert
@@ -475,7 +475,7 @@ Feature: Graql Insert Query
     Given graql define
       """
       define
-      colour sub attribute, value string, has hex-value;
+      colour sub attribute, value string, owns hex-value;
       hex-value sub attribute, value string;
       """
     Given the integrity is validated
@@ -514,7 +514,7 @@ Feature: Graql Insert Query
     Given graql define
       """
       define
-      colour sub attribute, value string, has hex-value;
+      colour sub attribute, value string, owns hex-value;
       hex-value sub attribute, value string;
       """
     Given the integrity is validated
@@ -556,8 +556,8 @@ Feature: Graql Insert Query
       residence sub relation,
         relates resident,
         relates place-of-residence,
-        has tenure-days,
-        has ref @key;
+        owns tenure-days,
+        owns ref;
       person plays resident;
       address sub attribute, value string, plays place-of-residence;
       tenure-days sub attribute, value long;
@@ -669,8 +669,8 @@ Feature: Graql Insert Query
       residence sub relation,
         relates resident,
         relates place-of-residence,
-        has is-permanent,
-        has ref @key;
+        owns is-permanent,
+        owns ref;
       person plays resident;
       address sub attribute, value string, plays place-of-residence;
       is-permanent sub attribute, value boolean;
@@ -947,7 +947,7 @@ Feature: Graql Insert Query
   Scenario Outline: inserting an attribute of type '<type>' creates an instance of it
     Given graql define
       """
-      define <attr> sub attribute, value <type>, has ref @key;
+      define <attr> sub attribute, value <type>, owns ref;
       """
     Given the integrity is validated
     Given get answers of graql query
@@ -1012,7 +1012,7 @@ Feature: Graql Insert Query
       """
       define
       person sub entity,
-        has value;
+        owns value;
       value sub attribute,
         value string,
         regex "\d{2}\.[true][false]";
@@ -1129,7 +1129,7 @@ Feature: Graql Insert Query
   Scenario Outline: a '<type>' inserted as [<insert>] is retrieved when matching [<match>]
     Given graql define
       """
-      define <attr> sub attribute, value <type>, has ref @key;
+      define <attr> sub attribute, value <type>, owns ref;
       """
     Given the integrity is validated
     When get answers of graql insert
@@ -1168,7 +1168,7 @@ Feature: Graql Insert Query
   Scenario Outline: inserting [<value>] as a '<type>' throws an error
     Given graql define
       """
-      define <attr> sub attribute, value <type>, has ref @key;
+      define <attr> sub attribute, value <type>, owns ref;
       """
     Given the integrity is validated
     Then graql insert throws
@@ -1281,7 +1281,7 @@ Feature: Graql Insert Query
     Given graql define
       """
       define
-      cat sub entity, has dref @key;
+      cat sub entity, owns dref;
       dref sub attribute, value double;
       """
     Given the integrity is validated
@@ -1300,7 +1300,7 @@ Feature: Graql Insert Query
     Given graql define
       """
       define
-      name has ref @key;
+      name owns ref;
       """
     Given the integrity is validated
     When graql insert
@@ -1363,7 +1363,7 @@ Feature: Graql Insert Query
     Given graql define
       """
       define
-      language sub entity, has name, has is-cool, has ref @key;
+      language sub entity, owns name, owns is-cool, owns ref;
       is-cool sub attribute, value boolean;
       """
     Given the integrity is validated
@@ -1425,7 +1425,7 @@ Feature: Graql Insert Query
       """
       define
       height sub attribute, value long;
-      person has height;
+      person owns height;
       """
     Given graql insert
       """
@@ -1708,7 +1708,7 @@ Feature: Graql Insert Query
     Given graql define
       """
       define
-      person has score;
+      person owns score;
       score sub attribute, value double;
       ganesh-rule sub rule,
       when {
@@ -1755,7 +1755,7 @@ Feature: Graql Insert Query
     Given graql define
       """
       define
-      person has score;
+      person owns score;
       score sub attribute, value double;
       copy-scores-to-all-people sub rule,
       when {
@@ -1828,7 +1828,7 @@ Feature: Graql Insert Query
         plays initial;
 
       name plays lettered-name;
-      person has score;
+      person owns score;
 
       ganesh-rule sub rule,
       when {
@@ -1903,7 +1903,7 @@ Feature: Graql Insert Query
     Given graql undefine
       """
       undefine
-      employment has ref @key;
+      employment owns ref;
       """
     Given the integrity is validated
     Given graql define
@@ -1975,7 +1975,7 @@ Feature: Graql Insert Query
       define
 
       vertex sub entity,
-        has index @key;
+        owns index;
 
       link sub relation, relates coordinate;
       vertex plays coordinate;
@@ -2082,9 +2082,9 @@ Feature: Graql Insert Query
     Given graql undefine
       """
       undefine
-      person has ref @key;
-      company has ref @key;
-      employment has ref @key;
+      person owns ref;
+      company owns ref;
+      employment owns ref;
       """
     Given the integrity is validated
     Given graql insert
@@ -2164,7 +2164,7 @@ Feature: Graql Insert Query
   Scenario: match-insert can be used to repeatedly duplicate all entities
     Given graql undefine
       """
-      undefine person has ref @key;
+      undefine person owns ref;
       """
     Given the integrity is validated
     Given graql insert

@@ -34,16 +34,16 @@ Feature: Recursion Resolution
       define
 
       person sub entity,
-        has name,
+        owns name,
         plays friend,
         plays employee;
 
       company sub entity,
-        has name,
+        owns name,
         plays employer;
 
       place sub entity,
-        has name,
+        owns name,
         plays location-subordinate,
         plays location-superior;
 
@@ -313,7 +313,7 @@ Feature: Recursion Resolution
           plays supertype,
           plays prep,
           plays pobj,
-          has name;
+          owns name;
 
       f sub word;
       o sub word;
@@ -330,8 +330,8 @@ Feature: Recursion Resolution
       pair sub relation,
           relates prep,
           relates pobj,
-          has typ,
-          has name;
+          owns typ,
+          owns name;
 
       name sub attribute, value string;
       typ sub attribute, value string;
@@ -421,7 +421,7 @@ Feature: Recursion Resolution
       define
 
       entity2 sub entity,
-        has index;
+        owns index;
 
       R sub relation, relates R-role-A, relates R-role-B;
       entity2 plays R-role-A, plays R-role-B;
@@ -526,7 +526,7 @@ Feature: Recursion Resolution
       define
 
       person sub entity,
-        has name;
+        owns name;
 
       Parent sub relation, relates parent, relates child;
       person plays parent, plays child;
@@ -670,7 +670,7 @@ Feature: Recursion Resolution
       define
 
       person sub entity,
-          has name;
+          owns name;
 
       Friend sub relation, relates friend;
       person plays friend, plays friend;
@@ -774,7 +774,7 @@ Feature: Recursion Resolution
       define
 
       entity2 sub entity,
-          has name;
+          owns name;
       Human sub entity2;
 
       Parent sub relation, relates parent, relates child;
@@ -858,7 +858,7 @@ Feature: Recursion Resolution
       define
 
       entity2 sub entity,
-          has index;
+          owns index;
       q sub entity2;
 
       N-TC sub relation, relates N-TC-roleB, relates N-TC-roleA;
@@ -940,7 +940,7 @@ Feature: Recursion Resolution
       define
 
       indexable sub entity,
-          has index;
+          owns index;
 
       traversable sub indexable,
           plays from,
@@ -1041,7 +1041,7 @@ Feature: Recursion Resolution
       define
 
       vertex sub entity,
-        has index @key;
+        owns index;
 
       link sub relation, relates coordinate;
       vertex plays coordinate;
@@ -1109,7 +1109,7 @@ Feature: Recursion Resolution
       define
 
       person sub entity,
-        has name;
+        owns name;
 
       Parent sub relation, relates parent, relates child;
       person plays parent, plays child;
@@ -1189,7 +1189,7 @@ Feature: Recursion Resolution
       define
 
       person sub entity,
-        has name;
+        owns name;
 
       Parent sub relation, relates parent, relates child;
       person plays parent, plays child;
@@ -1318,7 +1318,7 @@ Feature: Recursion Resolution
       define
 
       entity2 sub entity,
-        has index @key,
+        owns index,
         plays P-from, plays P-to,
         plays Q1-from, plays Q1-to,
         plays Q2-from, plays Q2-to,
@@ -1493,7 +1493,7 @@ Feature: Recursion Resolution
       define
 
       entity2 sub entity,
-        has index @key;
+        owns index;
       a-entity sub entity2;
       b-entity sub entity2;
 
@@ -1716,7 +1716,7 @@ Feature: Recursion Resolution
       define
 
       entity2 sub entity,
-        has index @key;
+        owns index;
       a-entity sub entity2;
       b-entity sub entity2;
       S sub entity2;
@@ -1882,7 +1882,7 @@ Feature: Recursion Resolution
       define
 
       entity2 sub entity,
-        has index @key,
+        owns index,
         plays S-from,
         plays S-to;
       a-entity sub entity2;

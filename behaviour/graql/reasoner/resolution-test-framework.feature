@@ -36,7 +36,7 @@ Feature: Resolution Test Framework
       name sub attribute, value string;
 
       company sub entity,
-        has name;
+        owns name;
 
       company-has-name sub rule,
       when {
@@ -71,8 +71,8 @@ Feature: Resolution Test Framework
           value boolean;
 
       company sub entity,
-          has name,
-          has is-liable;
+          owns name,
+          owns is-liable;
 
       company-has-name sub rule,
       when {
@@ -113,7 +113,7 @@ Feature: Resolution Test Framework
 
       location sub entity,
           abstract,
-          has name,
+          owns name,
           plays superior,
           plays subordinate;
 
@@ -169,7 +169,7 @@ Feature: Resolution Test Framework
 
       location sub entity,
           abstract,
-          has name,
+          owns name,
           plays location-hierarchy_superior,
           plays location-hierarchy_subordinate;
 
@@ -221,7 +221,7 @@ Feature: Resolution Test Framework
       name sub attribute, value string;
 
       person sub entity,
-          has name,
+          owns name,
           plays sibling;
 
       man sub person;
@@ -277,8 +277,8 @@ Feature: Resolution Test Framework
           value boolean;
 
       company sub entity,
-          has name,
-          has is-liable;
+          owns name,
+          owns is-liable;
 
       company-is-liable sub rule,
       when {
@@ -320,8 +320,8 @@ Feature: Resolution Test Framework
           value boolean;
 
       company sub entity,
-          has name,
-          has is-liable;
+          owns name,
+          owns is-liable;
 
       company-is-liable sub rule,
       when {
@@ -363,8 +363,8 @@ Feature: Resolution Test Framework
           value boolean;
 
       company sub entity,
-          has name,
-          has is-liable;
+          owns name,
+          owns is-liable;
 
       company-is-liable sub rule,
       when {

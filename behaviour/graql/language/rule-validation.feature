@@ -26,8 +26,8 @@ Feature: Graql Rule Validation
     Given graql define
       """
       define
-      person sub entity, plays employee, has name, has email @key;
-      employment sub relation, relates employee, has start-date;
+      person sub entity, plays employee, owns name, owns email;
+      employment sub relation, relates employee, owns start-date;
       name sub attribute, value string;
       email sub attribute, value string;
       start-date sub attribute, value datetime;
@@ -42,7 +42,7 @@ Feature: Graql Rule Validation
       """
       define
       nickname sub name;
-      person has nickname;
+      person owns nickname;
       robert-has-nickname-bob sub rule,
       when {
         $p isa person, has name "Robert";
@@ -123,7 +123,7 @@ Feature: Graql Rule Validation
       """
       define
       nickname sub name;
-      person has nickname;
+      person owns nickname;
       has-nickname-bob sub rule,
       then {
         $p has nickname "Bob";
@@ -137,7 +137,7 @@ Feature: Graql Rule Validation
       """
       define
       nickname sub name;
-      person has nickname;
+      person owns nickname;
       robert sub rule,
       when {
         $p has name "Robert";
@@ -151,7 +151,7 @@ Feature: Graql Rule Validation
       """
       define
       nickname sub name;
-      person has nickname;
+      person owns nickname;
       has-nickname-bob sub rule,
       when {
       }, then {
@@ -166,7 +166,7 @@ Feature: Graql Rule Validation
       """
       define
       nickname sub name;
-      person has nickname;
+      person owns nickname;
       robert sub rule,
       when {
         $p has name "Robert";
@@ -182,7 +182,7 @@ Feature: Graql Rule Validation
       define
       only-child sub attribute, value boolean;
       siblings sub relation, relates sibling;
-      person plays sibling, has only-child;
+      person plays sibling, owns only-child;
       only-child-rule sub rule,
       when {
         $p isa person;
@@ -213,7 +213,7 @@ Feature: Graql Rule Validation
       """
       define
       has-robert sub attribute, value boolean;
-      register sub entity, has has-robert;
+      register sub entity, owns has-robert;
       register-has-no-robert sub rule,
       when {
         $register isa register;
@@ -232,7 +232,7 @@ Feature: Graql Rule Validation
       """
       define
       nickname sub attribute, value string;
-      person has nickname;
+      person owns nickname;
       unemployed-robert-maybe-doesnt-not-have-nickname-bob sub rule,
       when {
         $p isa person;
@@ -255,7 +255,7 @@ Feature: Graql Rule Validation
       define
       nickname sub attribute, value string;
       residence sub relation, relates resident;
-      person has nickname, plays resident;
+      person owns nickname, plays resident;
       unemployed-homeless-robert-has-nickname-bob sub rule,
       when {
         $p isa person, has name "Robert";
@@ -277,7 +277,7 @@ Feature: Graql Rule Validation
       """
       define
       nickname sub name;
-      person has nickname;
+      person owns nickname;
       """
     Given the integrity is validated
     Then graql define throws
@@ -328,7 +328,7 @@ Feature: Graql Rule Validation
       """
       define
       nickname sub name;
-      person has nickname;
+      person owns nickname;
       """
     Given the integrity is validated
     Then graql define throws
@@ -350,7 +350,7 @@ Feature: Graql Rule Validation
       """
       define
       nickname sub name;
-      person has nickname;
+      person owns nickname;
       """
     Given the integrity is validated
     Then graql define throws
@@ -402,7 +402,7 @@ Feature: Graql Rule Validation
       """
       define
       nickname sub name;
-      person has nickname;
+      person owns nickname;
       """
     Given the integrity is validated
     Then graql define throws
@@ -476,7 +476,7 @@ Feature: Graql Rule Validation
       """
       define
       number-of-devices sub attribute, value long, abstract;
-      person has number-of-devices;
+      person owns number-of-devices;
       karl-is-allergic-to-technology sub rule,
       when {
         $karl isa person, has name "Karl";
@@ -511,7 +511,7 @@ Feature: Graql Rule Validation
     """
     define
     nickname sub name;
-    person has nickname;
+    person owns nickname;
     robert-has-nickname-bob sub rule,
     when {
       $p isa person, has name "Robert";
