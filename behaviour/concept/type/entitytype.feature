@@ -99,17 +99,20 @@ Feature: Concept Entity Type
     When entity(person) set abstract: true
     When put entity type: company
     Then entity(person) is abstract: true
-    Then entity(person) create new instance; throws exception
-    Then entity(company) is abstract: false
     When transaction commits
     When session opens transaction of type: write
+    Then entity(person) create new instance; throws exception
+    When session opens transaction of type: write
+    Then entity(company) is abstract: false
     Then entity(person) is abstract: true
     Then entity(person) create new instance; throws exception
+    When session opens transaction of type: write
     Then entity(company) is abstract: false
     When entity(company) set abstract: true
     Then entity(company) is abstract: true
-    Then entity(company) create new instance; throws exception
     When transaction commits
+    When session opens transaction of type: write
+    Then entity(company) create new instance; throws exception
     When session opens transaction of type: write
     Then entity(company) is abstract: true
     Then entity(company) create new instance; throws exception
@@ -219,8 +222,9 @@ Feature: Concept Entity Type
 
   Scenario: Entity types cannot subtype itself
     When put entity type: person
-    Then entity(person) set supertype: person; throws exception
     When transaction commits
+    When session opens transaction of type: write
+    Then entity(person) set supertype: person; throws exception
     When session opens transaction of type: write
     Then entity(person) set supertype: person; throws exception
 
@@ -266,7 +270,10 @@ Feature: Concept Entity Type
     When entity(person) set has key type: name
     When entity(person) set has key type: timestamp
     When entity(person) set has key type: timestamp
+    When transaction commits
+    When session opens transaction of type: write
     Then entity(person) set has key type: is-open; throws exception
+    When session opens transaction of type: write
     Then entity(person) set has key type: rating; throws exception
 
   Scenario: Entity types can have attributes
@@ -705,31 +712,70 @@ Feature: Concept Entity Type
     When entity(person) set has key type: email
     When put entity type: customer
     When entity(customer) set supertype: person
+    When transaction commits
+    When session opens transaction of type: write
     Then entity(customer) set has key type: email; throws exception
+    When session opens transaction of type: write
     Then entity(customer) set has attribute type: email; throws exception
 
-  Scenario: Entity types cannot redeclare inherited/overridden key/has attribute types
+  Scenario: Entity types cannot redeclare inherited key attribute types
     When put attribute type: email, with value type: string
     When attribute(email) set abstract: true
-    When put attribute type: name, with value type: string
-    When attribute(name) set abstract: true
     When put attribute type: customer-email, with value type: string
     When attribute(customer-email) set supertype: email
+    When put entity type: person
+    When entity(person) set abstract: true
+    When entity(person) set has key type: email
+    When put entity type: customer
+    When entity(customer) set supertype: person
+    When entity(customer) set has key type: customer-email
+    When put entity type: subscriber
+    When entity(subscriber) set supertype: customer
+    Then entity(subscriber) set has key type: email; throws exception
+
+  Scenario: Entity types cannot redeclare overridden key attribute types
+    When put attribute type: email, with value type: string
+    When attribute(email) set abstract: true
+    When put attribute type: customer-email, with value type: string
+    When attribute(customer-email) set supertype: email
+    When put entity type: person
+    When entity(person) set abstract: true
+    When entity(person) set has key type: email
+    When put entity type: customer
+    When entity(customer) set supertype: person
+    When entity(customer) set has key type: customer-email
+    When put entity type: subscriber
+    When entity(subscriber) set supertype: customer
+    Then entity(subscriber) set has key type: customer-email; throws exception
+
+  Scenario: Entity types cannot redeclare inherited has attribute types
+    When put attribute type: name, with value type: string
+    When attribute(name) set abstract: true
     When put attribute type: customer-name, with value type: string
     When attribute(customer-name) set supertype: name
     When put entity type: person
     When entity(person) set abstract: true
-    When entity(person) set has key type: email
     When entity(person) set has attribute type: name
     When put entity type: customer
     When entity(customer) set supertype: person
-    When entity(customer) set has key type: customer-email
     When entity(customer) set has attribute type: customer-name
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
-    Then entity(subscriber) set has key type: email; throws exception
-    Then entity(subscriber) set has key type: customer-email; throws exception
     Then entity(subscriber) set has attribute type: name; throws exception
+
+  Scenario: Entity types cannot redeclare overridden has attribute types
+    When put attribute type: name, with value type: string
+    When attribute(name) set abstract: true
+    When put attribute type: customer-name, with value type: string
+    When attribute(customer-name) set supertype: name
+    When put entity type: person
+    When entity(person) set abstract: true
+    When entity(person) set has attribute type: name
+    When put entity type: customer
+    When entity(customer) set supertype: person
+    When entity(customer) set has attribute type: customer-name
+    When put entity type: subscriber
+    When entity(subscriber) set supertype: customer
     Then entity(subscriber) set has attribute type: customer-name; throws exception
 
   Scenario: Entity types cannot override declared keys and attributes
@@ -745,7 +791,10 @@ Feature: Concept Entity Type
     When entity(person) set abstract: true
     When entity(person) set has key type: username
     When entity(person) set has attribute type: name
+    When transaction commits
+    When session opens transaction of type: write
     Then entity(person) set has key type: email as username; throws exception
+    When session opens transaction of type: write
     Then entity(person) set has attribute type: first-name as name; throws exception
 
   Scenario: Entity types cannot override inherited keys as attributes
@@ -770,7 +819,10 @@ Feature: Concept Entity Type
     When entity(person) set has attribute type: name
     When put entity type: customer
     When entity(customer) set supertype: person
+    When transaction commits
+    When session opens transaction of type: write
     Then entity(customer) set has key type: reference as username; throws exception
+    When session opens transaction of type: write
     Then entity(customer) set has attribute type: rating as name; throws exception
 
   Scenario: Entity types can play role types
@@ -1025,7 +1077,10 @@ Feature: Concept Entity Type
     When entity(man) set plays role: fathership:father as parent
     When put entity type: boy
     When entity(boy) set supertype: man
+    When transaction commits
+    When session opens transaction of type: write
     Then entity(boy) set plays role: parentship:parent; throws exception
+    When session opens transaction of type: write
     Then entity(boy) set plays role: fathership:father; throws exception
 
   Scenario: Entity types cannot override declared playing role types

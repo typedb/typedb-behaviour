@@ -181,6 +181,8 @@ Feature: Connection Database
     Then  connection does not have any database
 
 
+  # TODO: currently this fails in spectacular fashion in 2.0, killing the entire JVM with a segfault (#96)
+  @ignore-grakn-2.0
   Scenario: delete a database causes open sessions to fail
     When connection create database:
       | grakn |
@@ -194,6 +196,8 @@ Feature: Connection Database
       | write |
 
 
+  # TODO: re-enable when grakn 2.0 supports graql
+  @ignore-grakn-2.0
   Scenario: delete a database causes open transactions to fail
     When connection create database:
       | grakn |
@@ -210,6 +214,6 @@ Feature: Connection Database
       define person sub entity;
       """
 
-  Scenario: delete a nonexistant database throws an error
+  Scenario: delete a nonexistent database throws an error
     When connection delete database; throws exception
       | grakn |
