@@ -35,10 +35,10 @@ Feature: Type Hierarchy Resolution
 
       person sub entity,
           owns name,
-          plays writer,
-          plays performer,
-          plays film-writer,
-          plays actor;
+          plays performance:writer,
+          plays performance:performer,
+          plays film-production:writer,
+          plays film-production:actor;
 
       child sub person;
 
@@ -47,7 +47,7 @@ Feature: Type Hierarchy Resolution
           relates performer;
 
       film-production sub relation,
-          relates film-writer,
+          relates writer,
           relates actor;
 
       name sub attribute, value string;
@@ -59,7 +59,7 @@ Feature: Type Hierarchy Resolution
           (performer:$x, writer:$y) isa performance;
       },
       then {
-          (actor:$x, film-writer:$y) isa film-production;
+          (actor:$x, writer:$y) isa film-production;
       };
       """
     Given for each session, graql insert
@@ -82,18 +82,18 @@ Feature: Type Hierarchy Resolution
       match
         $x isa person;
         $y isa person;
-        (actor: $x, film-writer: $y) isa film-production;
+        (actor: $x, writer: $y) isa film-production;
       get;
       """
     Then all answers are correct in reasoned database
-    # Answers are (actor:$x, film-writer:$z) and (actor:$x, film-writer:$v)
+    # Answers are (actor:$x, writer:$z) and (actor:$x, writer:$v)
     Then answer size in reasoned database is: 2
     Then for graql query
       """
       match
         $x isa person;
         $y isa person;
-        (actor: $x, film-writer: $y) isa film-production;
+        (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
       get;
       """
@@ -104,18 +104,18 @@ Feature: Type Hierarchy Resolution
       match
         $x isa person;
         $y isa child;
-        (actor: $x, film-writer: $y) isa film-production;
+        (actor: $x, writer: $y) isa film-production;
       get;
       """
     Then all answers are correct in reasoned database
-    # Answer is (actor:$x, film-writer:$v) ONLY
+    # Answer is (actor:$x, writer:$v) ONLY
     Then answer size in reasoned database is: 1
     Then for graql query
       """
       match
         $x isa person;
         $y isa child;
-        (actor: $x, film-writer: $y) isa film-production;
+        (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
       get;
       """
@@ -126,18 +126,18 @@ Feature: Type Hierarchy Resolution
       match
         $x isa child;
         $y isa person;
-        (actor: $x, film-writer: $y) isa film-production;
+        (actor: $x, writer: $y) isa film-production;
       get;
       """
     Then all answers are correct in reasoned database
-    # Answers are (actor:$x, film-writer:$z) and (actor:$x, film-writer:$v)
+    # Answers are (actor:$x, writer:$z) and (actor:$x, writer:$v)
     Then answer size in reasoned database is: 2
     Then for graql query
       """
       match
         $x isa child;
         $y isa person;
-        (actor: $x, film-writer: $y) isa film-production;
+        (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
       get;
       """
@@ -152,10 +152,10 @@ Feature: Type Hierarchy Resolution
       define
 
       person sub entity,
-          plays child,
-          plays parent,
-          plays mother,
-          plays father;
+          plays family:child,
+          plays family:parent,
+          plays large-family:mother,
+          plays large-family:father;
 
       family sub relation,
           relates child,
@@ -203,23 +203,23 @@ Feature: Type Hierarchy Resolution
       define
 
       person sub entity,
-          plays writer,
-          plays performer,
-          plays film-writer,
-          plays actor,
-          plays scifi-writer,
-          plays scifi-actor;
+          plays performance:writer,
+          plays performance:performer,
+          plays film-production:writer,
+          plays film-production:actor,
+          plays scifi-production:scifi-writer,
+          plays scifi-production:scifi-actor;
 
       performance sub relation,
           relates writer,
           relates performer;
 
       film-production sub relation,
-          relates film-writer,
+          relates writer,
           relates actor;
 
       scifi-production sub film-production,
-          relates scifi-writer as film-writer,
+          relates scifi-writer as writer,
           relates scifi-actor as actor;
 
       performance-to-scifi sub rule,
@@ -254,19 +254,19 @@ Feature: Type Hierarchy Resolution
       define
 
       person sub entity,
-          plays writer,
-          plays performer,
-          plays film-writer,
-          plays actor,
-          plays scifi-writer,
-          plays scifi-actor;
+          plays performance:writer,
+          plays performance:performer,
+          plays film-production:writer,
+          plays film-production:actor,
+          plays scifi-production:scifi-writer,
+          plays scifi-production:scifi-actor;
 
       performance sub relation,
           relates writer,
           relates performer;
 
       film-production sub relation,
-          relates film-writer,
+          relates writer,
           relates actor;
 
       scifi-production sub film-production,
@@ -292,7 +292,7 @@ Feature: Type Hierarchy Resolution
     # super-roles, sub-relation
     Then for graql query
       """
-      match (film-writer:$x, actor:$y) isa scifi-production; get;
+      match (writer:$x, actor:$y) isa scifi-production; get;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -305,19 +305,19 @@ Feature: Type Hierarchy Resolution
       define
 
       person sub entity,
-          plays writer,
-          plays performer,
-          plays film-writer,
-          plays actor,
-          plays scifi-writer,
-          plays scifi-actor;
+          plays performance:writer,
+          plays performance:performer,
+          plays film-production:writer,
+          plays film-production:actor,
+          plays scifi-production:scifi-writer,
+          plays scifi-production:scifi-actor;
 
       performance sub relation,
           relates writer,
           relates performer;
 
       film-production sub relation,
-          relates film-writer,
+          relates writer,
           relates actor;
 
       scifi-production sub film-production,
@@ -343,7 +343,7 @@ Feature: Type Hierarchy Resolution
     # super-roles, super-relation
     Then for graql query
       """
-      match (film-writer:$x, actor:$y) isa film-production; get;
+      match (writer:$x, actor:$y) isa film-production; get;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -357,10 +357,10 @@ Feature: Type Hierarchy Resolution
 
       person sub entity,
           owns name,
-          plays writer,
-          plays performer,
-          plays film-writer,
-          plays actor;
+          plays performance:writer,
+          plays performance:performer,
+          plays film-production:writer,
+          plays film-production:actor;
 
       child sub person;
 
@@ -369,7 +369,7 @@ Feature: Type Hierarchy Resolution
           relates performer;
 
       film-production sub relation,
-          relates film-writer,
+          relates writer,
           relates actor;
 
       name sub attribute, value string;
@@ -381,7 +381,7 @@ Feature: Type Hierarchy Resolution
           (performer:$x, writer:$y) isa performance;
       },
       then {
-          (actor:$x, film-writer:$y) isa film-production;
+          (actor:$x, writer:$y) isa film-production;
       };
 
       performance-to-performance sub rule,
@@ -414,18 +414,18 @@ Feature: Type Hierarchy Resolution
       match
         $x isa person;
         $y isa person;
-        (actor: $x, film-writer: $y) isa film-production;
+        (actor: $x, writer: $y) isa film-production;
       get;
       """
     Then all answers are correct in reasoned database
-    # Answers are (actor:$x, film-writer:$z) and (actor:$x, film-writer:$v)
+    # Answers are (actor:$x, writer:$z) and (actor:$x, writer:$v)
     Then answer size in reasoned database is: 2
     Then for graql query
       """
       match
         $x isa person;
         $y isa person;
-        (actor: $x, film-writer: $y) isa film-production;
+        (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
       get;
       """
@@ -436,18 +436,18 @@ Feature: Type Hierarchy Resolution
       match
         $x isa person;
         $y isa child;
-        (actor: $x, film-writer: $y) isa film-production;
+        (actor: $x, writer: $y) isa film-production;
       get;
       """
     Then all answers are correct in reasoned database
-    # Answer is (actor:$x, film-writer:$v) ONLY
+    # Answer is (actor:$x, writer:$v) ONLY
     Then answer size in reasoned database is: 1
     Then for graql query
       """
       match
         $x isa person;
         $y isa child;
-        (actor: $x, film-writer: $y) isa film-production;
+        (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
       get;
       """
@@ -458,18 +458,18 @@ Feature: Type Hierarchy Resolution
       match
         $x isa child;
         $y isa person;
-        (actor: $x, film-writer: $y) isa film-production;
+        (actor: $x, writer: $y) isa film-production;
       get;
       """
     Then all answers are correct in reasoned database
-    # Answers are (actor:$x, film-writer:$z) and (actor:$x, film-writer:$v)
+    # Answers are (actor:$x, writer:$z) and (actor:$x, writer:$v)
     Then answer size in reasoned database is: 2
     Then for graql query
       """
       match
         $x isa child;
         $y isa person;
-        (actor: $x, film-writer: $y) isa film-production;
+        (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
       get;
       """
@@ -484,12 +484,12 @@ Feature: Type Hierarchy Resolution
       define
 
       person sub entity,
-          plays home-owner,
-          plays resident,
-          plays parent-home-owner,
-          plays child-resident,
-          plays parent,
-          plays child;
+          plays residence:home-owner,
+          plays residence:resident,
+          plays family-residence:parent-home-owner,
+          plays family-residence:child-resident,
+          plays family:parent,
+          plays family:child;
 
       residence sub relation,
           relates home-owner,

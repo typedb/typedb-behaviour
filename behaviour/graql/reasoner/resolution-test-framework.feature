@@ -114,8 +114,8 @@ Feature: Resolution Test Framework
       location sub entity,
           abstract,
           owns name,
-          plays superior,
-          plays subordinate;
+          plays location-hierarchy:superior,
+          plays location-hierarchy:subordinate;
 
       area sub location;
       city sub location;
@@ -222,7 +222,7 @@ Feature: Resolution Test Framework
 
       person sub entity,
           owns name,
-          plays sibling;
+          plays siblingship:sibling;
 
       man sub person;
       woman sub person;

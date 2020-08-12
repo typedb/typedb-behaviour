@@ -28,13 +28,13 @@ Feature: Graql Insert Query
       define
 
       person sub entity,
-        plays employee,
+        plays employment:employee,
         owns name,
         owns age,
         owns ref @key;
 
       company sub entity,
-        plays employer,
+        plays employment:employer,
         owns name,
         owns ref @key;
 
@@ -555,11 +555,11 @@ Feature: Graql Insert Query
       define
       residence sub relation,
         relates resident,
-        relates place-of-residence,
+        relates place,
         owns tenure-days,
         owns ref @key;
-      person plays resident;
-      address sub attribute, value string, plays place-of-residence;
+      person plays residence:resident;
+      address sub attribute, value string, plays residence:place;
       tenure-days sub attribute, value long;
       """
     Given the integrity is validated
@@ -668,11 +668,11 @@ Feature: Graql Insert Query
       define
       residence sub relation,
         relates resident,
-        relates place-of-residence,
+        relates place,
         owns is-permanent,
         owns ref @key;
-      person plays resident;
-      address sub attribute, value string, plays place-of-residence;
+      person plays residence:resident;
+      address sub attribute, value string, plays residence:place;
       is-permanent sub attribute, value boolean;
       """
     Given the integrity is validated
@@ -831,14 +831,14 @@ Feature: Graql Insert Query
     When graql define
       """
       define
-      tennis-group sub relation, relates tennis-player;
-      person plays tennis-player;
+      tennis-group sub relation, relates player;
+      person plays tennis-group:player;
       """
     When the integrity is validated
     Then graql insert throws
       """
       insert
-      $r (tennis-player: $p) isa employment, has ref 0;
+      $r (player: $p) isa employment, has ref 0;
       $p isa person, has ref 1;
       """
     Then the integrity is validated
@@ -859,15 +859,15 @@ Feature: Graql Insert Query
       """
       define
       animal sub entity;
-      cat sub animal, plays sphinx-model;
-      sphinx-production sub relation, relates sphinx-model, relates sphinx-builder;
-      person plays sphinx-builder;
+      cat sub animal, plays sphinx-production:model;
+      sphinx-production sub relation, relates model, relates builder;
+      person plays sphinx-production:builder;
       """
     When the integrity is validated
     Then graql insert throws
       """
       insert
-      $r (sphinx-model: $x, sphinx-builder: $y) isa sphinx-production;
+      $r (model: $x, builder: $y) isa sphinx-production;
       $x isa animal;
       $y isa person, has ref 0;
       """
@@ -896,13 +896,13 @@ Feature: Graql Insert Query
     Given graql define
       """
       define
-      gym-membership sub relation, relates gym-member;
-      person plays gym-member;
+      gym-membership sub relation, relates member;
+      person plays gym-membership:member;
       jennifer-has-a-gym-membership sub rule,
       when {
         $p isa person, has name "Jennifer";
       }, then {
-        (gym-member: $p) isa gym-membership;
+        (member: $p) isa gym-membership;
       };
       """
     Given the integrity is validated
@@ -913,7 +913,7 @@ Feature: Graql Insert Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match (gym-member: $p) isa gym-membership; get $p;
+      match (member: $p) isa gym-membership; get $p;
       """
     Then concept identifiers are
       |     | check | value |
@@ -923,12 +923,12 @@ Feature: Graql Insert Query
       match
         $p has name "Jennifer";
       insert
-        $r (gym-member: $p) isa gym-membership;
+        $r (member: $p) isa gym-membership;
       """
     Then the integrity is validated
     Then get answers of graql query
       """
-      match (gym-member: $p) isa gym-membership; get $p;
+      match (member: $p) isa gym-membership; get $p;
       """
     Then uniquely identify answer concepts
       | p   |
@@ -1461,8 +1461,8 @@ Feature: Graql Insert Query
     Given graql define
       """
       define
-      season-ticket-ownership sub relation, relates season-ticket-holder;
-      person plays season-ticket-holder;
+      season-ticket-ownership sub relation, relates holder;
+      person plays season-ticket-ownership:holder;
       """
     Given the integrity is validated
     Given get answers of graql query
@@ -1475,7 +1475,7 @@ Feature: Graql Insert Query
       match
         $p isa person;
       insert
-        $r (season-ticket-holder: $p) isa season-ticket-ownership;
+        $r (holder: $p) isa season-ticket-ownership;
       """
     When the integrity is validated
     Then get answers of graql query
@@ -1825,9 +1825,9 @@ Feature: Graql Insert Query
 
       score sub attribute, value double;
       letter sub attribute, value string,
-        plays initial;
+        plays name-initial:initial;
 
-      name plays lettered-name;
+      name plays name-initial:lettered-name;
       person owns score;
 
       ganesh-rule sub rule,
@@ -1911,13 +1911,13 @@ Feature: Graql Insert Query
       define
 
       contract sub entity,
-        plays contract-of-employment;
+        plays employment-contract:contract;
 
       employment-contract sub relation,
-        relates contracted-employment,
-        relates contract-of-employment;
+        relates employment,
+        relates contract;
 
-      employment plays contracted-employment;
+      employment plays employment-contract:employment;
 
       henry-is-employed sub rule,
       when {
@@ -1946,7 +1946,7 @@ Feature: Graql Insert Query
         $e isa employment;
         $c isa contract;
       insert
-        (contracted-employment: $e, contract-of-employment: $c) isa employment-contract;
+        (employment: $e, contract: $c) isa employment-contract;
       """
     Then the integrity is validated
     When graql undefine
@@ -1963,7 +1963,7 @@ Feature: Graql Insert Query
     Then answer size is: 1
     When get answers of graql query
       """
-      match (contracted-employment: $x, contract-of-employment: $y) isa employment-contract; get;
+      match (contracted: $x, contract: $y) isa employment-contract; get;
       """
     # And the inserted relation still exists too
     Then answer size is: 1
@@ -1978,15 +1978,15 @@ Feature: Graql Insert Query
         owns index @key;
 
       link sub relation, relates coordinate;
-      vertex plays coordinate;
+      vertex plays reachable:coordinate;
 
       reachable sub relation,
         relates coordinate,
-        plays connected-path;
+        plays road-proposal:connected-path;
 
       road-proposal sub relation,
         relates connected-path,
-        plays proposal-to-construct;
+        plays road-construction:proposal-to-construct;
 
       road-construction sub relation, relates proposal-to-construct;
 

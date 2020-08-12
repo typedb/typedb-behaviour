@@ -129,12 +129,12 @@ Feature: Type Generation Resolution
       define
 
       baseEntity sub entity,
-          plays role1,
-          plays role2;
+          plays baseRelation:role1,
+          plays baseRelation:role2;
 
       derivedEntity sub entity,
-          plays role1,
-          plays role2;
+          plays baseRelation:role1,
+          plays baseRelation:role2;
 
       baseRelation sub relation,
           relates role1,
@@ -235,8 +235,8 @@ Feature: Type Generation Resolution
       define
 
       baseEntity sub entity,
-          plays baseRole,
-          plays derivedRelationRole;
+          plays baseRelation:baseRole,
+          plays derivedRelation:derivedRelationRole;
 
       baseRelation sub relation,
           relates baseRole;

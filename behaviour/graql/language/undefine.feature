@@ -26,7 +26,7 @@ Feature: Graql Undefine Query
     Given graql define
       """
       define
-      person sub entity, plays employee, owns name, owns email @key;
+      person sub entity, plays employment:employee, owns name, owns email @key;
       employment sub relation, relates employee, relates employer;
       name sub attribute, value string;
       email sub attribute, value string, regex ".+@\w+\..+";
@@ -163,12 +163,12 @@ Feature: Graql Undefine Query
     Given the integrity is validated
     When graql undefine
       """
-      undefine person plays employee;
+      undefine person plays employment:employee;
       """
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x type child; $x plays employee; get;
+      match $x type child; $x plays employment:employee; get;
       """
     Then answer size is: 0
 
@@ -281,7 +281,7 @@ Feature: Graql Undefine Query
       undefine
       employment relates employee;
       employment relates employer;
-      person plays employee;
+      person plays employment:employee;
       employment sub relation;
       """
     Then the integrity is validated
@@ -318,7 +318,7 @@ Feature: Graql Undefine Query
       """
       define
       employment-terms sub relation, relates employment-with-terms;
-      employment plays employment-with-terms;
+      employment plays employment-terms:employment-with-terms;
       contract-employment sub employment, relates employee, relates employer;
       """
     Given the integrity is validated
@@ -334,7 +334,7 @@ Feature: Graql Undefine Query
       | EWT |
     When graql undefine
       """
-      undefine employment plays employment-with-terms;
+      undefine employment plays employment-terms:employment-with-terms;
       """
     Then the integrity is validated
     When get answers of graql query
@@ -423,7 +423,7 @@ Feature: Graql Undefine Query
       undefine
       employment relates employee;
       employment relates employer;
-      person plays employee;
+      person plays employment:employee;
       employment sub relation;
       """
     Then the integrity is validated
@@ -456,7 +456,7 @@ Feature: Graql Undefine Query
       undefine
       employment relates employee;
       employment relates employer;
-      person plays employee;
+      person plays employment:employee;
       employment sub relation;
       """
     Then the integrity is validated
@@ -473,7 +473,7 @@ Feature: Graql Undefine Query
       undefine
       employment relates employee;
       employment relates employer;
-      person plays employee;
+      person plays employment:employee;
       employment sub relation;
       """
     Then the integrity is validated
@@ -508,7 +508,7 @@ Feature: Graql Undefine Query
     When graql undefine
       """
       undefine
-      person plays employee;
+      person plays employment:employee;
       employment relates employee;
       """
     Then the integrity is validated
@@ -533,12 +533,12 @@ Feature: Graql Undefine Query
   Scenario: undefining all players of a role produces a valid schema
     When graql undefine
       """
-      undefine person plays employee;
+      undefine person plays employment:employee;
       """
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x plays employee; get;
+      match $x plays employment:employee; get;
       """
     Then answer size is: 0
 
@@ -564,7 +564,7 @@ Feature: Graql Undefine Query
     When graql undefine
       """
       undefine
-      person plays employee;
+      person plays employment:employee;
       employment relates employee;
       """
     Then the integrity is validated
@@ -604,7 +604,7 @@ Feature: Graql Undefine Query
     When graql undefine without commit
       """
       undefine
-      person plays employee;
+      person plays employment:employee;
       employment relates employee;
       """
     Then the integrity is validated
@@ -639,7 +639,7 @@ Feature: Graql Undefine Query
     Given graql define
       """
       define
-      company sub entity, owns name, plays employer;
+      company sub entity, owns name, plays employment:employer;
       """
     Given the integrity is validated
     Given graql insert
@@ -740,12 +740,12 @@ Feature: Graql Undefine Query
     Given the integrity is validated
     When graql undefine
       """
-      undefine person plays employee;
+      undefine person plays employment:employee;
       """
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x plays employee; get;
+      match $x plays employment:employee; get;
       """
     Then answer size is: 0
     Then graql insert throws
@@ -772,7 +772,7 @@ Feature: Graql Undefine Query
       | EMP |
     When graql undefine
       """
-      undefine person plays employer;
+      undefine person plays employment:employer;
       """
     Then the integrity is validated
     When get answers of graql query
@@ -860,7 +860,7 @@ Feature: Graql Undefine Query
       define
       first-name sub name;
       employment relates manager-name;
-      name plays manager-name;
+      name plays employment:manager-name;
       """
     Given the integrity is validated
     Given get answers of graql query
@@ -875,7 +875,7 @@ Feature: Graql Undefine Query
       | MNA |
     When graql undefine
       """
-      undefine name plays manager-name;
+      undefine name plays employment:manager-name;
       """
     Then the integrity is validated
     When get answers of graql query
@@ -1211,7 +1211,7 @@ Feature: Graql Undefine Query
     Given graql define
       """
       define
-      company sub entity, plays employer;
+      company sub entity, plays employment:employer;
       a-rule sub rule, when
       { $c isa company; $y isa person; },
       then
@@ -1558,7 +1558,7 @@ Feature: Graql Undefine Query
     When graql undefine
       """
       undefine
-      person sub entity, owns name, owns email @key, plays employee;
+      person sub entity, owns name, owns email @key, plays employment:employee;
       employment sub relation, relates employee, relates employer;
       name sub attribute;
       """

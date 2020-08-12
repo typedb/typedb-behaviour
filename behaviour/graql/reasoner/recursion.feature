@@ -35,17 +35,17 @@ Feature: Recursion Resolution
 
       person sub entity,
         owns name,
-        plays friend,
-        plays employee;
+        plays friendship:friend,
+        plays employment:employee;
 
       company sub entity,
         owns name,
-        plays employer;
+        plays employment:employer;
 
       place sub entity,
         owns name,
-        plays location-subordinate,
-        plays location-superior;
+        plays location-hierarchy:subordinate,
+        plays location-hierarchy:superior;
 
       friendship sub relation,
         relates friend;
@@ -55,8 +55,8 @@ Feature: Recursion Resolution
         relates employer;
 
       location-hierarchy sub relation,
-        relates location-subordinate,
-        relates location-superior;
+        relates subordinate,
+        relates superior;
 
       name sub attribute, value string;
       """
@@ -69,12 +69,12 @@ Feature: Recursion Resolution
       define
 
       big-place sub place,
-        plays big-location-subordinate,
-        plays big-location-superior;
+        plays big-location-hierarchy:big-subordinate,
+        plays big-location-hierarchy:big-superior;
 
       big-location-hierarchy sub location-hierarchy,
-        relates big-location-subordinate as location-subordinate,
-        relates big-location-superior as location-superior;
+        relates big-subordinate as subordinate,
+        relates big-superior as superior;
 
       transitive-location sub rule,
       when {
@@ -120,12 +120,12 @@ Feature: Recursion Resolution
       define
 
       entity1 sub entity,
-          plays role11,
-          plays role12,
-          plays role21,
-          plays role22,
-          plays role31,
-          plays role32;
+          plays relation1:role11,
+          plays relation1:role12,
+          plays relation2:role21,
+          plays relation2:role22,
+          plays relation3:role31,
+          plays relation3:role32;
 
       relation1 sub relation,
           relates role11,
@@ -193,12 +193,12 @@ Feature: Recursion Resolution
       define
 
       entity1 sub entity,
-          plays role11,
-          plays role12,
-          plays role21,
-          plays role22,
-          plays role31,
-          plays role32;
+          plays relation1:role11,
+          plays relation1:role12,
+          plays relation2:role21,
+          plays relation2:role22,
+          plays relation3:role31,
+          plays relation3:role32;
 
       relation1 sub relation,
           relates role11,
@@ -272,10 +272,10 @@ Feature: Recursion Resolution
 
       dream sub relation,
         relates dreamer,
-        relates dream-subject,
-        plays dream-subject;
+        relates subject,
+        plays dream:subject;
 
-      person plays dreamer, plays dream-subject;
+      person plays dream:dreamer, plays dream:subject;
 
       inception sub rule,
       when {
@@ -309,10 +309,10 @@ Feature: Recursion Resolution
       define
 
       word sub entity,
-          plays subtype,
-          plays supertype,
-          plays prep,
-          plays pobj,
+          plays inheritance:subtype,
+          plays inheritance:supertype,
+          plays pair:prep,
+          plays pair:pobj,
           owns name;
 
       f sub word;
@@ -423,39 +423,39 @@ Feature: Recursion Resolution
       entity2 sub entity,
         owns index;
 
-      R sub relation, relates R-role-A, relates R-role-B;
-      entity2 plays R-role-A, plays R-role-B;
+      R sub relation, relates role-A, relates role-B;
+      entity2 plays R:role-A, plays R:role-B;
 
-      E sub relation, relates E-role-A, relates E-role-B;
-      entity2 plays E-role-A, plays E-role-B;
+      E sub relation, relates role-A, relates role-B;
+      entity2 plays E:role-A, plays E:role-B;
 
-      F sub relation, relates F-role-A, relates F-role-B;
-      entity2 plays F-role-A, plays F-role-B;
+      F sub relation, relates role-A, relates role-B;
+      entity2 plays F:role-A, plays F:role-B;
 
-      G sub relation, relates G-role-A, relates G-role-B;
-      entity2 plays G-role-A, plays G-role-B;
+      G sub relation, relates role-A, relates role-B;
+      entity2 plays G:role-A, plays G:role-B;
 
-      H sub relation, relates H-role-A, relates H-role-B;
-      entity2 plays H-role-A, plays H-role-B;
+      H sub relation, relates role-A, relates role-B;
+      entity2 plays H:role-A, plays H:role-B;
 
       index sub attribute, value string;
 
       rule-1 sub rule,
       when {
-        (E-role-A: $x, E-role-B: $y) isa E;
+        (role-A: $x, role-B: $y) isa E;
       }, then {
-        (R-role-A: $x, R-role-B: $y) isa R;
+        (role-A: $x, role-B: $y) isa R;
       };
 
       rule-2 sub rule,
       when {
-        (F-role-A: $x, F-role-B: $t) isa F;
-        (R-role-A: $t, R-role-B: $u) isa R;
-        (G-role-A: $u, G-role-B: $v) isa G;
-        (R-role-A: $v, R-role-B: $w) isa R;
-        (H-role-A: $w, H-role-B: $y) isa H;
+        (role-A: $x, role-B: $t) isa F;
+        (role-A: $t, role-B: $u) isa R;
+        (role-A: $u, role-B: $v) isa G;
+        (role-A: $v, role-B: $w) isa R;
+        (role-A: $w, role-B: $y) isa H;
       }, then {
-        (R-role-A: $x, R-role-B: $y) isa R;
+        (role-A: $x, role-B: $y) isa R;
       };
       """
     Given for each session, graql insert
@@ -477,23 +477,23 @@ Feature: Recursion Resolution
       $u isa entity2, has index "u";
       $v isa entity2, has index "v";
 
-      (E-role-A: $i, E-role-B: $j) isa E;
-      (E-role-A: $l, E-role-B: $m) isa E;
-      (E-role-A: $n, E-role-B: $o) isa E;
-      (E-role-A: $q, E-role-B: $r) isa E;
-      (E-role-A: $t, E-role-B: $u) isa E;
+      (role-A: $i, role-B: $j) isa E;
+      (role-A: $l, role-B: $m) isa E;
+      (role-A: $n, role-B: $o) isa E;
+      (role-A: $q, role-B: $r) isa E;
+      (role-A: $t, role-B: $u) isa E;
 
-      (F-role-A: $i, F-role-B: $i) isa F;
-      (F-role-A: $i, F-role-B: $k) isa F;
-      (F-role-A: $k, F-role-B: $l) isa F;
+      (role-A: $i, role-B: $i) isa F;
+      (role-A: $i, role-B: $k) isa F;
+      (role-A: $k, role-B: $l) isa F;
 
-      (G-role-A: $m, G-role-B: $n) isa G;
-      (G-role-A: $p, G-role-B: $q) isa G;
-      (G-role-A: $s, G-role-B: $t) isa G;
+      (role-A: $m, role-B: $n) isa G;
+      (role-A: $p, role-B: $q) isa G;
+      (role-A: $s, role-B: $t) isa G;
 
-      (H-role-A: $o, H-role-B: $p) isa H;
-      (H-role-A: $r, H-role-B: $s) isa H;
-      (H-role-A: $u, H-role-B: $v) isa H;
+      (role-A: $o, role-B: $p) isa H;
+      (role-A: $r, role-B: $s) isa H;
+      (role-A: $u, role-B: $v) isa H;
       """
 #    When materialised database is completed
     Then for graql query
@@ -529,10 +529,10 @@ Feature: Recursion Resolution
         owns name;
 
       Parent sub relation, relates parent, relates child;
-      person plays parent, plays child;
+      person plays Parent:parent, plays Parent:child;
 
       Ancestor sub relation, relates ancestor, relates descendant;
-      person plays ancestor, plays descendant;
+      person plays Ancestor:ancestor, plays Ancestor:descendant;
 
       name sub attribute, value string;
 
@@ -673,13 +673,13 @@ Feature: Recursion Resolution
           owns name;
 
       Friend sub relation, relates friend;
-      person plays friend, plays friend;
+      person plays friendship:friend, plays friendship:friend;
 
       Parent sub relation, relates parent, relates child;
-      person plays parent, plays child;
+      person plays Parent:parent, plays Parent:child;
 
       Ancestor-friend sub relation, relates ancestor, relates ancestor-friend;
-      person plays ancestor, plays ancestor-friend;
+      person plays Ancestor-friend:ancestor, plays Ancestor-friend:ancestor-friend;
 
       name sub attribute, value string;
 
@@ -778,10 +778,10 @@ Feature: Recursion Resolution
       Human sub entity2;
 
       Parent sub relation, relates parent, relates child;
-      entity2 plays parent, plays child;
+      entity2 plays Parent:parent, plays Parent:child;
 
       SameGen sub relation, relates SG-role;
-      entity2 plays SG-role;
+      entity2 plays SameGen:SG-role;
 
       name sub attribute, value string;
 
@@ -861,14 +861,14 @@ Feature: Recursion Resolution
           owns index;
       q sub entity2;
 
-      N-TC sub relation, relates N-TC-roleB, relates N-TC-roleA;
-      entity2 plays N-TC-roleB, plays N-TC-roleA;
+      N-TC sub relation, relates roleB, relates roleA;
+      entity2 plays N-TC:roleB, plays N-TC:roleA;
 
-      TC sub relation, relates TC-roleA, relates TC-roleB;
-      entity2 plays TC-roleA, plays TC-roleB;
+      TC sub relation, relates roleA, relates roleB;
+      entity2 plays TC:roleA, plays TC:roleB;
 
-      P sub relation, relates P-roleA, relates P-roleB;
-      entity2 plays P-roleA, plays P-roleB;
+      P sub relation, relates roleA, relates roleB;
+      entity2 plays P:roleA, plays P:roleB;
 
       index sub attribute, value string;
 
@@ -877,7 +877,7 @@ Feature: Recursion Resolution
         $x isa q;
         (TC-roleA: $x, TC-roleB: $y) isa TC;
       }, then {
-        (N-TC-roleA: $x, N-TC-roleB: $y) isa N-TC;
+        (roleA: $x, roleB: $y) isa N-TC;
       };
 
       rule-2 sub rule,
@@ -943,16 +943,17 @@ Feature: Recursion Resolution
           owns index;
 
       traversable sub indexable,
-          plays from,
-          plays to;
+          plays pair:from,
+          plays pair:to;
 
       vertex sub traversable;
       node sub traversable;
 
-      link sub relation, relates from, relates to;
-      indirect-link sub relation, relates from, relates to;
-      reachable sub relation, relates from, relates to;
-      unreachable sub relation, relates from, relates to;
+      pair sub relation, relates from, relates to;
+      link sub pair, relates from, relates to;
+      indirect-link sub pair, relates from, relates to;
+      reachable sub pair, relates from, relates to;
+      unreachable sub pair, relates from, relates to;
 
       index sub attribute, value string;
 
@@ -1044,7 +1045,7 @@ Feature: Recursion Resolution
         owns index @key;
 
       link sub relation, relates coordinate;
-      vertex plays coordinate;
+      vertex plays reachable:coordinate;
 
       reachable sub link, relates coordinate;
 
@@ -1112,21 +1113,21 @@ Feature: Recursion Resolution
         owns name;
 
       Parent sub relation, relates parent, relates child;
-      person plays parent, plays child;
+      person plays Parent:parent, plays Parent:child;
 
-      Sibling sub relation, relates sibA, relates sibB;
-      person plays sibA, plays sibB;
+      Sibling sub relation, relates A, relates B;
+      person plays Sibling:A, plays Sibling:B;
 
-      SameGen sub relation, relates SG-role-A, relates SG-role-B;
-      person plays SG-role-A, plays SG-role-B;
+      SameGen sub relation, relates A, relates B;
+      person plays SameGen:A, plays SameGen:B;
 
       name sub attribute, value string;
 
       rule-1 sub rule,
       when {
-        (sibA: $x, sibB: $y) isa Sibling;
+        (A: $x, B: $y) isa Sibling;
       }, then {
-        (SG-role-A: $x, SG-role-B: $y) isa SameGen;
+        (A: $x, B: $y) isa SameGen;
       };
 
       rule-2 sub rule,
@@ -1135,7 +1136,7 @@ Feature: Recursion Resolution
         ($u, $v) isa SameGen;
         (parent: $y, child: $v) isa Parent;
       }, then {
-        (SG-role-A: $x, SG-role-B: $y) isa SameGen;
+        (A: $x, B: $y) isa SameGen;
       };
 
       rule-3 sub rule,
@@ -1143,7 +1144,7 @@ Feature: Recursion Resolution
         (parent: $z, child: $x) isa Parent;
         (parent: $z, child: $y) isa Parent;
       }, then {
-        (sibA: $x, sibB: $y) isa Sibling;
+        (A: $x, B: $y) isa Sibling;
       };
       """
     Given for each session, graql insert
@@ -1192,36 +1193,36 @@ Feature: Recursion Resolution
         owns name;
 
       Parent sub relation, relates parent, relates child;
-      person plays parent, plays child;
+      person plays Parent:parent, plays Parent:child;
 
-      RevSG sub relation, relates RSG-from, relates RSG-to;
-      person plays RSG-from, plays RSG-to;
+      RevSG sub relation, relates from, relates to;
+      person plays RevSG:from, plays RevSG:to;
 
-      up sub relation, relates up-from, relates up-to;
-      person plays up-from, plays up-to;
+      up sub relation, relates from, relates to;
+      person plays up:from, plays up:to;
 
-      down sub relation, relates down-from, relates down-to;
-      person plays down-from, plays down-to;
+      down sub relation, relates from, relates to;
+      person plays down:from, plays down:to;
 
-      flat sub relation, relates flat-to, relates flat-from;
-      person plays flat-from, plays flat-to;
+      flat sub relation, relates to, relates from;
+      person plays flat:from, plays flat:to;
 
       name sub attribute, value string;
 
       rule-1 sub rule,
       when {
-        (flat-from: $x, flat-to: $y) isa flat;
+        (from: $x, to: $y) isa flat;
       }, then {
-        (RSG-from: $x, RSG-to: $y) isa RevSG;
+        (from: $x, to: $y) isa RevSG;
       };
 
       rule-2 sub rule,
       when {
-        (up-from: $x, up-to: $x1) isa up;
-        (RSG-from: $y1, RSG-to: $x1) isa RevSG;
-        (down-from: $y1, down-to: $y) isa down;
+        (from: $x, to: $x1) isa up;
+        (from: $y1, to: $x1) isa RevSG;
+        (from: $y1, to: $y) isa down;
       }, then {
-        (RSG-from: $x, RSG-to: $y) isa RevSG;
+        (from: $x, to: $y) isa RevSG;
       };
       """
     Given for each session, graql insert
@@ -1319,60 +1320,60 @@ Feature: Recursion Resolution
 
       entity2 sub entity,
         owns index @key,
-        plays P-from, plays P-to,
-        plays Q1-from, plays Q1-to,
-        plays Q2-from, plays Q2-to,
-        plays R1-from, plays R1-to,
-        plays R2-from, plays R2-to;
+        plays P:from, plays P:to,
+        plays Q1:from, plays Q1:to,
+        plays Q2:from, plays Q2:to,
+        plays R1:from, plays R1:to,
+        plays R2:from, plays R2:to;
 
       start sub entity2;
       end sub entity2;
       a-entity sub entity2;
       b-entity sub entity2;
 
-      R1 sub relation, relates R1-from, relates R1-to;
-      R2 sub relation, relates R2-from, relates R2-to;
-      Q1 sub relation, relates Q1-from, relates Q1-to;
-      Q2 sub relation, relates Q2-from, relates Q2-to;
-      P sub relation, relates P-from, relates P-to;
+      R1 sub relation, relates from, relates to;
+      R2 sub relation, relates from, relates to;
+      Q1 sub relation, relates from, relates to;
+      Q2 sub relation, relates from, relates to;
+      P sub relation, relates from, relates to;
 
       index sub attribute, value string;
 
       rule-1 sub rule,
       when {
-        (R1-from: $x, R1-to: $y) isa R1;
+        (from: $x, to: $y) isa R1;
       }, then {
-        (Q1-from: $x, Q1-to: $y) isa Q1;
+        (from: $x, to: $y) isa Q1;
       };
 
       rule-2 sub rule,
       when {
-        (R1-from: $x, R1-to: $z) isa R1;
-        (Q1-from: $z, Q1-to: $y) isa Q1;
+        (from: $x, to: $z) isa R1;
+        (from: $z, to: $y) isa Q1;
       }, then {
-        (Q1-from: $x, Q1-to: $y) isa Q1;
+        (from: $x, to: $y) isa Q1;
       };
 
       rule-3 sub rule,
       when {
-        (R2-from: $x, R2-to: $y) isa R2;
+        (from: $x, to: $y) isa R2;
       }, then {
-        (Q2-from: $x, Q2-to: $y) isa Q2;
+        (from: $x, to: $y) isa Q2;
       };
 
       rule-4 sub rule,
       when {
-        (R2-from: $x, R2-to: $z) isa R2;
-        (Q2-from: $z, Q2-to: $y) isa Q2;
+        (from: $x, to: $z) isa R2;
+        (from: $z, to: $y) isa Q2;
       }, then {
-        (Q2-from: $x, Q2-to: $y) isa Q2;
+        (from: $x, to: $y) isa Q2;
       };
 
       rule-5 sub rule,
       when {
-        (Q1-from: $x, Q1-to: $y) isa Q1;
+        (from: $x, to: $y) isa Q1;
       }, then {
-        (P-from: $x, P-to: $y) isa P;
+        (from: $x, to: $y) isa P;
       };
       """
     # These insert statements can be procedurally generated based on 'm' and 'n', the width and height of the matrix
@@ -1497,27 +1498,27 @@ Feature: Recursion Resolution
       a-entity sub entity2;
       b-entity sub entity2;
 
-      P sub relation, relates P-from, relates P-to;
-      entity2 plays P-from, plays P-to;
+      P sub relation, relates from, relates to;
+      entity2 plays P:from, plays P:to;
 
-      Q sub relation, relates Q-from, relates Q-to;
-      entity2 plays Q-from, plays Q-to;
+      Q sub relation, relates from, relates to;
+      entity2 plays Q:from, plays Q:to;
 
       index sub attribute, value string;
 
       rule-1 sub rule,
       when {
-        (Q-from: $x, Q-to: $y) isa Q;
+        (from: $x, to: $y) isa Q;
       }, then {
-        (P-from: $x, P-to: $y) isa P;
+        (from: $x, to: $y) isa P;
       };
 
       rule-2 sub rule,
       when {
-        (Q-from: $x, Q-to: $z) isa Q;
-        (P-from: $z, P-to: $y) isa P;
+        (from: $x, to: $z) isa Q;
+        (from: $z, to: $y) isa P;
       }, then {
-        (P-from: $x, P-to: $y) isa P;
+        (from: $x, to: $y) isa P;
       };
       """
     Given for each session, graql insert
@@ -1721,39 +1722,39 @@ Feature: Recursion Resolution
       b-entity sub entity2;
       S sub entity2;
 
-      R sub relation, relates R-rA, relates R-rB;
-      entity2 plays R-rA, plays R-rB;
+      R sub relation, relates rA, relates rB;
+      entity2 plays R:rA, plays R:rB;
 
-      N sub relation, relates N-rA, relates N-rB;
-      entity2 plays N-rA, plays N-rB;
+      N sub relation, relates rA, relates rB;
+      entity2 plays N:rA, plays N:rB;
 
-      Q sub relation, relates Q-rA, relates Q-rB;
-      entity2 plays Q-rA, plays Q-rB;
+      Q sub relation, relates rA, relates rB;
+      entity2 plays Q:rA, plays Q:rB;
 
-      P sub relation, relates P-rA, relates P-rB;
-      entity2 plays P-rA, plays P-rB;
+      P sub relation, relates rA, relates rB;
+      entity2 plays P:rA, plays P:rB;
 
       index sub attribute, value string;
 
       rule-1 sub rule,
       when {
-        (R-rA: $x, R-rB: $y) isa R;
+        (rA: $x, rB: $y) isa R;
       }, then {
-        (N-rA: $x, N-rB: $y) isa N;
+        (rA: $x, rB: $y) isa N;
       };
 
       rule-2 sub rule,
       when {
-        (P-rA: $x, P-rB: $z) isa P;
-        (N-rA: $z, N-rB: $w) isa N;
-        (Q-rA: $w, Q-rB: $y) isa Q;
+        (rA: $x, rB: $z) isa P;
+        (rA: $z, rB: $w) isa N;
+        (rA: $w, rB: $y) isa Q;
       }, then {
-        (N-rA: $x, N-rB: $y) isa N;
+        (rA: $x, rB: $y) isa N;
       };
 
       rule-3 sub rule,
       when {
-        (N-rA: $x, N-rB: $y) isa N;
+        (rA: $x, rB: $y) isa N;
         $x has index 'c';
       }, then {
         $y isa S;
@@ -1883,40 +1884,40 @@ Feature: Recursion Resolution
 
       entity2 sub entity,
         owns index @key,
-        plays S-from,
-        plays S-to;
+        plays S:from,
+        plays S:to;
       a-entity sub entity2;
 
-      P sub relation, relates P-from, relates P-to;
-      entity2 plays P-from, plays P-to;
+      P sub relation, relates from, relates to;
+      entity2 plays P:from, plays P:to;
 
-      Q sub relation, relates Q-from, relates Q-to;
-      entity2 plays Q-from, plays Q-to;
+      Q sub relation, relates from, relates to;
+      entity2 plays Q:from, plays Q:to;
 
-      S sub relation, relates S-from, relates S-to;
+      S sub relation, relates from, relates to;
 
       index sub attribute, value string;
 
       rule-1 sub rule,
       when {
-        (Q-from: $x, Q-to: $y) isa Q;
+        (from: $x, to: $y) isa Q;
       }, then {
-        (P-from: $x, P-to: $y) isa P;
+        (from: $x, to: $y) isa P;
       };
 
       rule-2 sub rule,
       when {
-        (Q-from: $x, Q-to: $z) isa Q;
-        (P-from: $z, P-to: $y) isa P;
+        (from: $x, to: $z) isa Q;
+        (from: $z, to: $y) isa P;
       }, then {
-        (P-from: $x, P-to: $y) isa P;
+        (from: $x, to: $y) isa P;
       };
 
       rule-3 sub rule,
       when {
-        (P-from: $x, P-to: $y) isa P;
+        (from: $x, to: $y) isa P;
       }, then {
-        (S-from: $x, S-to: $y) isa S;
+        (from: $x, to: $y) isa S;
       };
       """
     Given for each session, graql insert

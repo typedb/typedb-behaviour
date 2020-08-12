@@ -31,8 +31,8 @@ Feature: Attribute Attachment Resolution
       define
 
       person sub entity,
-          plays leader,
-          plays team-member,
+          plays team:leader,
+          plays team:member,
           owns string-attribute,
           owns unrelated-attribute,
           owns sub-string-attribute,
@@ -48,7 +48,7 @@ Feature: Attribute Attachment Resolution
 
       team sub relation,
           relates leader,
-          relates team-member,
+          relates member,
           owns string-attribute;
 
       string-attribute sub attribute, value string;

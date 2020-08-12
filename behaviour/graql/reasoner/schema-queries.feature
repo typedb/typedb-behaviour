@@ -32,17 +32,17 @@ Feature: Schema Query Resolution (Variable Types)
 
       person sub entity,
         owns name,
-        plays friend,
-        plays employee;
+        plays friendship:friend,
+        plays employment:employee;
 
       company sub entity,
         owns name,
-        plays employer;
+        plays employment:employer;
 
       place sub entity,
         owns name,
-        plays location-subordinate,
-        plays location-superior;
+        plays location-hierarchy:subordinate,
+        plays location-hierarchy:superior;
 
       friendship sub relation,
         relates friend;
@@ -52,8 +52,8 @@ Feature: Schema Query Resolution (Variable Types)
         relates employer;
 
       location-hierarchy sub relation,
-        relates location-subordinate,
-        relates location-superior;
+        relates subordinate,
+        relates superior;
 
       name sub attribute, value string;
       """
@@ -170,8 +170,8 @@ Feature: Schema Query Resolution (Variable Types)
 
       contract sub attribute, value string;
 
-      person plays resident;
-      place plays residence;
+      person plays residency:resident;
+      place plays residency:residence;
 
       employment owns contract;
 
@@ -281,14 +281,14 @@ Feature: Schema Query Resolution (Variable Types)
       residency sub relation,
         relates resident,
         relates residence,
-        plays documented-thing;
+        plays legal-documentation:subject;
 
       legal-documentation sub relation,
-        relates documented-thing,
-        relates consenting-party;
+        relates subject,
+        relates party;
 
-      person plays consenting-party, plays resident;
-      employment plays documented-thing;
+      person plays legal-documentation:party, plays residency:resident;
+      employment plays legal-documentation:subject;
 
       everyone-has-friends sub rule,
       when {
@@ -330,12 +330,12 @@ Feature: Schema Query Resolution (Variable Types)
       """
       match
         $x isa $type;
-        $type plays documented-thing;
+        $type plays legal-documentation:subject;
       get;
       """
 #    Then all answers are correct in reasoned database
     # friendship can't be a documented-thing
-    # note: enforcing 'plays documented-thing' also eliminates 'relation' and 'thing' as possible types
+    # note: enforcing 'plays legal-documentation:subject' also eliminates 'relation' and 'thing' as possible types
     Then answer size in reasoned database is: 4
     Then materialised and reasoned databases are the same size
 
@@ -352,7 +352,7 @@ Feature: Schema Query Resolution (Variable Types)
 
       military-person sub person;
       colonel sub military-person,
-        plays employee;
+        plays employment:employee;
 
       armed-forces-employ-the-military sub rule,
       when {

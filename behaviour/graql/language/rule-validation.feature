@@ -26,7 +26,7 @@ Feature: Graql Rule Validation
     Given graql define
       """
       define
-      person sub entity, plays employee, owns name, owns email @key;
+      person sub entity, plays employment:employee, owns name, owns email @key;
       employment sub relation, relates employee, owns start-date;
       name sub attribute, value string;
       email sub attribute, value string;
@@ -182,7 +182,7 @@ Feature: Graql Rule Validation
       define
       only-child sub attribute, value boolean;
       siblings sub relation, relates sibling;
-      person plays sibling, owns only-child;
+      person plays siblings:sibling, owns only-child;
       only-child-rule sub rule,
       when {
         $p isa person;
@@ -255,7 +255,7 @@ Feature: Graql Rule Validation
       define
       nickname sub attribute, value string;
       residence sub relation, relates resident;
-      person owns nickname, plays resident;
+      person owns nickname, plays residence:resident;
       unemployed-homeless-robert-has-nickname-bob sub rule,
       when {
         $p isa person, has name "Robert";
@@ -298,7 +298,7 @@ Feature: Graql Rule Validation
     Given graql define
       """
       define
-      person plays named-robert;
+      person plays both-named-robert:named-robert;
       both-named-robert sub relation, relates named-robert;
       two-roberts-are-both-named-robert sub rule,
       when {
@@ -438,7 +438,7 @@ Feature: Graql Rule Validation
       """
       define
       partners-in-crime sub relation, relates criminal, relates sidekick;
-      person plays criminal;
+      person plays partners-in-crime:criminal;
       bonnie-and-clyde-are-partners-in-crime sub rule,
       when {
         $bonnie isa person, has name "Bonnie";
@@ -457,7 +457,7 @@ Feature: Graql Rule Validation
       """
       define
       partners-in-crime sub relation, abstract, relates criminal, relates sidekick;
-      person plays criminal, plays sidekick;
+      person plays partners-in-crime:criminal, plays partners-in-crime:sidekick;
       bonnie-and-clyde-are-partners-in-crime sub rule,
       when {
         $bonnie isa person, has name "Bonnie";
@@ -557,12 +557,12 @@ Feature: Graql Rule Validation
       define
 
       baseEntity sub entity,
-          plays role1,
-          plays role2;
+          plays baseRelation:role1,
+          plays baseRelation:role2;
 
       derivedEntity sub entity,
-          plays role1,
-          plays role2;
+          plays baseRelation:role1,
+          plays baseRelation:role2;
 
       baseRelation sub relation,
           relates role1,
@@ -590,8 +590,8 @@ Feature: Graql Rule Validation
       define
 
       baseEntity sub entity,
-          plays role1,
-          plays role2;
+          plays baseRelation:role1,
+          plays baseRelation:role2;
 
       baseRelation sub relation,
           relates role1,

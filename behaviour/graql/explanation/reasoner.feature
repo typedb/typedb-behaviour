@@ -154,8 +154,8 @@ Feature: Graql Reasoning Explanation
       location sub entity,
           abstract,
           owns name @key,
-          plays superior,
-          plays subordinate;
+          plays location-hierarchy:superior,
+          plays location-hierarchy:subordinate;
 
       area sub location;
       city sub location;
@@ -236,7 +236,7 @@ Feature: Graql Reasoning Explanation
       person sub entity,
           owns person-id @key,
           owns name,
-          plays sibling;
+          plays siblingship:sibling;
 
       man sub person;
       woman sub person;

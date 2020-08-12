@@ -26,7 +26,7 @@ Feature: Graql Delete Query
       """
       define
       person sub entity,
-        plays friend,
+        plays friendship:friend,
         owns name @key;
       friendship sub relation,
         relates friend,
@@ -453,7 +453,7 @@ Feature: Graql Delete Query
       define
       special-friendship sub friendship,
         relates special-friend as friend;
-      person plays special-friend;
+      person plays special-friendship:special-friend;
       """
     Given the integrity is validated
     When get answers of graql insert
@@ -860,7 +860,7 @@ Feature: Graql Delete Query
       """
       define
       ship-crew sub relation, relates captain, relates navigator, relates chef;
-      person plays captain, plays navigator, plays chef;
+      person plays ship-crew:captain, plays ship-crew:navigator, plays ship-crew:chef;
       """
     Given the integrity is validated
     Given graql insert
@@ -899,7 +899,7 @@ Feature: Graql Delete Query
       """
       define
       ship-crew sub relation, relates captain, relates navigator, relates chef, owns ref @key;
-      person plays captain, plays navigator, plays chef;
+      person plays ship-crew:captain, plays ship-crew:navigator, plays ship-crew:chef;
       """
     Given the integrity is validated
     Given graql insert

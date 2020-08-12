@@ -26,13 +26,13 @@ Feature: Graql Get Query
       """
       define
       person sub entity,
-        plays friend,
-        plays employee,
+        plays friendship:friend,
+        plays employment:employee,
         owns name,
         owns age,
         owns ref @key;
       company sub entity,
-        plays employer,
+        plays employment:employer,
         owns name,
         owns ref @key;
       friendship sub relation,

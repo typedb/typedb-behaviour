@@ -32,17 +32,17 @@ Feature: Relation Inference Resolution
 
       person sub entity,
         owns name,
-        plays friend,
-        plays employee;
+        plays friendship:friend,
+        plays employment:employee;
 
       company sub entity,
         owns name,
-        plays employer;
+        plays employment:employer;
 
       place sub entity,
         owns name,
-        plays location-subordinate,
-        plays location-superior;
+        plays location-hierarchy:subordinate,
+        plays location-hierarchy:superior;
 
       friendship sub relation,
         relates friend;
@@ -52,8 +52,8 @@ Feature: Relation Inference Resolution
         relates employer;
 
       location-hierarchy sub relation,
-        relates location-subordinate,
-        relates location-superior;
+        relates subordinate,
+        relates superior;
 
       name sub attribute, value string;
       """
@@ -145,15 +145,15 @@ Feature: Relation Inference Resolution
     Given for each session, graql define
       """
       define
-      item sub entity, owns name, plays listed-item;
-      price sub attribute, value double, plays item-price;
-      item-listing sub relation, relates listed-item, relates item-price;
+      item sub entity, owns name, plays item-listing:item;
+      price sub attribute, value double, plays item-listing:price;
+      item-listing sub relation, relates item, relates price;
       nutella-price sub rule,
       when {
         $x isa item, has name "3kg jar of Nutella";
         $y 14.99 isa price;
       }, then {
-        (listed-item: $x, item-price: $y) isa item-listing;
+        (item: $x, price: $y) isa item-listing;
       };
       """
     Given for each session, graql insert
@@ -166,7 +166,7 @@ Feature: Relation Inference Resolution
     Then for graql query
       """
       match
-        $r (listed-item: $i, item-price: $p) isa item-listing;
+        $r (item: $i, price: $p) isa item-listing;
         $i isa item, has name $n;
         $n "3kg jar of Nutella" isa name;
         $p 14.99 isa price;
@@ -181,7 +181,7 @@ Feature: Relation Inference Resolution
     Given for each session, graql define
       """
       define
-      year sub attribute, value long, plays favourite-year;
+      year sub attribute, value long, plays employment:favourite-year;
       employment relates favourite-year;
       kronenbourg-employs-anyone-with-a-name sub rule,
       when {
@@ -289,7 +289,7 @@ Feature: Relation Inference Resolution
     Given for each session, graql define
       """
       define
-      person plays employer;
+      person plays employment:employer;
       self-employment sub rule,
       when {
         $x isa person;
@@ -320,7 +320,7 @@ Feature: Relation Inference Resolution
     Given for each session, graql define
       """
       define
-      person plays employer;
+      person plays employment:employer;
       self-employment sub rule,
       when {
         $x isa person;
@@ -349,7 +349,7 @@ Feature: Relation Inference Resolution
     Given for each session, graql define
       """
       define
-      person plays employer;
+      person plays employment:employer;
       robert-employs-jane sub rule,
       when {
         $x has name "Robert";
@@ -385,23 +385,23 @@ Feature: Relation Inference Resolution
       """
       define
 
-      person plays coworker,
-          plays employer,
-          plays robot-pet-owner;
+      person plays coworkers:coworker,
+          plays employment:employer,
+          plays robot-pet-ownership:owner;
 
       robot sub entity,
-          plays robot-pet,
-          plays coworker,
-          plays employee,
-          plays employer,
+          plays robot-pet-ownership:pet,
+          plays coworkers:coworker,
+          plays employment:employee,
+          plays employment:employer,
           owns name;
 
       coworkers sub relation,
           relates coworker;
 
       robot-pet-ownership sub relation,
-          relates robot-pet,
-          relates robot-pet-owner;
+          relates pet,
+          relates owner;
 
       people-work-with-themselves sub rule,
       when {
@@ -413,7 +413,7 @@ Feature: Relation Inference Resolution
 
       robots-work-with-their-owners-coworkers sub rule,
       when {
-          (robot-pet: $c, robot-pet-owner: $m) isa robot-pet-ownership;
+          (pet: $c, owner: $m) isa robot-pet-ownership;
           (coworker: $m, coworker: $op) isa coworkers;
       },
       then {
@@ -426,7 +426,7 @@ Feature: Relation Inference Resolution
       $a isa robot, has name 'r1';
       $b isa person, has name 'p';
       $c isa robot, has name 'r2';
-      (robot-pet: $a, robot-pet-owner: $b) isa robot-pet-ownership;
+      (pet: $a, owner: $b) isa robot-pet-ownership;
       (coworker: $b, coworker: $c) isa coworkers;
       """
     When materialised database is completed
@@ -474,10 +474,10 @@ Feature: Relation Inference Resolution
       define
       transitive-location sub rule,
       when {
-        (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
-        (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
+        (subordinate: $x, superior: $y) isa location-hierarchy;
+        (subordinate: $y, superior: $z) isa location-hierarchy;
       }, then {
-        (location-subordinate: $x, location-superior: $z) isa location-hierarchy;
+        (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
     Given for each session, graql insert
@@ -485,9 +485,9 @@ Feature: Relation Inference Resolution
       insert
       $x isa place, has name "Delhi";
       $y isa place, has name "India";
-      (location-subordinate: $x, location-superior: $x) isa location-hierarchy;
-      (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
-      (location-subordinate: $y, location-superior: $y) isa location-hierarchy;
+      (subordinate: $x, superior: $x) isa location-hierarchy;
+      (subordinate: $x, superior: $y) isa location-hierarchy;
+      (subordinate: $y, superior: $y) isa location-hierarchy;
       """
     When materialised database is completed
     Then for graql query
@@ -506,10 +506,10 @@ Feature: Relation Inference Resolution
       define
       transitive-location sub rule,
       when {
-        (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
-        (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
+        (subordinate: $x, superior: $y) isa location-hierarchy;
+        (subordinate: $y, superior: $z) isa location-hierarchy;
       }, then {
-        (location-subordinate: $x, location-superior: $z) isa location-hierarchy;
+        (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
     Given for each session, graql insert
@@ -520,14 +520,14 @@ Feature: Relation Inference Resolution
       $c isa place, has name "Poland";
       $d isa place, has name "Europe";
 
-      (location-subordinate: $a, location-superior: $b) isa location-hierarchy;
-      (location-subordinate: $b, location-superior: $c) isa location-hierarchy;
-      (location-subordinate: $c, location-superior: $d) isa location-hierarchy;
+      (subordinate: $a, superior: $b) isa location-hierarchy;
+      (subordinate: $b, superior: $c) isa location-hierarchy;
+      (subordinate: $c, superior: $d) isa location-hierarchy;
       """
 #    When materialised database is completed
     Then for graql query
       """
-      match (location-subordinate: $x1, location-superior: $x2) isa location-hierarchy; get;
+      match (subordinate: $x1, superior: $x2) isa location-hierarchy; get;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 6
@@ -546,24 +546,24 @@ Feature: Relation Inference Resolution
       define
 
       planned-trip sub relation,
-        relates planned-source,
-        relates planned-destination;
+        relates source,
+        relates destination;
 
       cycle-route sub relation,
-        relates cycle-route-start,
-        relates cycle-route-end;
+        relates start,
+        relates end;
 
-      place plays planned-source,
-        plays planned-destination,
-        plays cycle-route-start,
-        plays cycle-route-end;
+      place plays planned-trip:source,
+        plays planned-trip:destination,
+        plays cycle-route:start,
+        plays cycle-route:end;
 
       transitive-location sub rule,
       when {
-        (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
-        (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
+        (subordinate: $x, superior: $y) isa location-hierarchy;
+        (subordinate: $y, superior: $z) isa location-hierarchy;
       }, then {
-        (location-subordinate: $x, location-superior: $z) isa location-hierarchy;
+        (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
     Given for each session, graql insert
@@ -576,20 +576,20 @@ Feature: Relation Inference Resolution
       $x3 isa place, has name "Tower Hill";
       $x4 isa place, has name "London";
 
-      (cycle-route-start: $x1, cycle-route-end: $x2a) isa cycle-route;
-      (cycle-route-start: $x1, cycle-route-end: $x2b) isa cycle-route;
-      (cycle-route-start: $x1, cycle-route-end: $x2c) isa cycle-route;
+      (start: $x1, end: $x2a) isa cycle-route;
+      (start: $x1, end: $x2b) isa cycle-route;
+      (start: $x1, end: $x2c) isa cycle-route;
 
-      (planned-source: $x2a, planned-destination: $x3) isa planned-trip;
-      (planned-source: $x2b, planned-destination: $x3) isa planned-trip;
-      (planned-source: $x2c, planned-destination: $x3) isa planned-trip;
+      (source: $x2a, destination: $x3) isa planned-trip;
+      (source: $x2b, destination: $x3) isa planned-trip;
+      (source: $x2c, destination: $x3) isa planned-trip;
 
-      (location-subordinate: $x3, location-superior: $x4) isa location-hierarchy;
+      (subordinate: $x3, superior: $x4) isa location-hierarchy;
       """
     When materialised database is completed
     Then for graql query
       """
-      match (location-subordinate: $x, location-superior: $y) isa location-hierarchy; get;
+      match (subordinate: $x, superior: $y) isa location-hierarchy; get;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -699,7 +699,7 @@ Feature: Relation Inference Resolution
       """
       define
       selection sub relation, relates choice1, relates choice2;
-      person plays choice1, plays choice2;
+      person plays selection:choice1, plays selection:choice2;
       symmetric-selection sub rule,
       when {
         (choice1: $x, choice2: $y) isa selection;
@@ -769,10 +769,10 @@ Feature: Relation Inference Resolution
       define
       transitive-location sub rule,
       when {
-        (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
-        (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
+        (subordinate: $x, superior: $y) isa location-hierarchy;
+        (subordinate: $y, superior: $z) isa location-hierarchy;
       }, then {
-        (location-subordinate: $x, location-superior: $z) isa location-hierarchy;
+        (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
     Given for each session, graql insert
@@ -782,8 +782,8 @@ Feature: Relation Inference Resolution
       $y isa place, has name "Turku";
       $z isa place, has name "Finland";
 
-      (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
-      (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
+      (subordinate: $x, superior: $y) isa location-hierarchy;
+      (subordinate: $y, superior: $z) isa location-hierarchy;
       """
     When materialised database is completed
     Then for graql query
@@ -808,10 +808,10 @@ Feature: Relation Inference Resolution
       define
       transitive-location sub rule,
       when {
-        (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
-        (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
+        (subordinate: $x, superior: $y) isa location-hierarchy;
+        (subordinate: $y, superior: $z) isa location-hierarchy;
       }, then {
-        (location-subordinate: $x, location-superior: $z) isa location-hierarchy;
+        (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
     Given for each session, graql insert
@@ -821,8 +821,8 @@ Feature: Relation Inference Resolution
       $y isa place, has name "Turku";
       $z isa place, has name "Finland";
 
-      (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
-      (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
+      (subordinate: $x, superior: $y) isa location-hierarchy;
+      (subordinate: $y, superior: $z) isa location-hierarchy;
       """
     When materialised database is completed
     Given for graql query
@@ -858,19 +858,19 @@ Feature: Relation Inference Resolution
 
       loc-hie sub relation, relates loc-sub, relates loc-sup;
 
-      place plays loc-sub, plays loc-sup;
+      place plays loc-hie:loc-sub, plays loc-hie:loc-sup;
 
       transitive-location sub rule,
       when {
-        (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
-        (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
+        (subordinate: $x, superior: $y) isa location-hierarchy;
+        (subordinate: $y, superior: $z) isa location-hierarchy;
       }, then {
-        (location-subordinate: $x, location-superior: $z) isa location-hierarchy;
+        (subordinate: $x, superior: $z) isa location-hierarchy;
       };
 
       long-role-names-suck sub rule,
       when {
-        (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
+        (subordinate: $x, superior: $y) isa location-hierarchy;
       }, then {
         (loc-sub: $x, loc-sup: $y) isa loc-hie;
       };
@@ -882,8 +882,8 @@ Feature: Relation Inference Resolution
       $y isa place, has name "Turku";
       $z isa place, has name "Finland";
 
-      (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
-      (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
+      (subordinate: $x, superior: $y) isa location-hierarchy;
+      (subordinate: $y, superior: $z) isa location-hierarchy;
       """
     When materialised database is completed
     Given for graql query
@@ -910,10 +910,10 @@ Feature: Relation Inference Resolution
       define
       transitive-location sub rule,
       when {
-        (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
-        (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
+        (subordinate: $x, superior: $y) isa location-hierarchy;
+        (subordinate: $y, superior: $z) isa location-hierarchy;
       }, then {
-        (location-subordinate: $x, location-superior: $z) isa location-hierarchy;
+        (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
     Given for each session, graql insert
@@ -923,8 +923,8 @@ Feature: Relation Inference Resolution
       $y isa place, has name "Turku";
       $z isa place, has name "Finland";
 
-      (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
-      (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
+      (subordinate: $x, superior: $y) isa location-hierarchy;
+      (subordinate: $y, superior: $z) isa location-hierarchy;
       """
     When materialised database is completed
     Then for graql query

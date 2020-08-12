@@ -33,15 +33,15 @@ Feature: Variable Role Resolution
 
       entity1 sub entity,
           owns name,
-          plays role1,
-          plays role2,
-          plays ternary-role1,
-          plays ternary-role2,
-          plays ternary-role3,
-          plays quat-role1,
-          plays quat-role2,
-          plays quat-role3,
-          plays quat-role4;
+          plays binary-base:role1,
+          plays binary-base:role2,
+          plays ternary-base:ternary-role1,
+          plays ternary-base:ternary-role2,
+          plays ternary-base:ternary-role3,
+          plays quaternary-base:quat-role1,
+          plays quaternary-base:quat-role2,
+          plays quaternary-base:quat-role3,
+          plays quaternary-base:quat-role4;
 
       binary-base sub relation,
           relates role1,

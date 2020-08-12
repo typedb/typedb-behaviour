@@ -26,13 +26,13 @@ Feature: Graql Match Clause
       """
       define
       person sub entity,
-        plays friend,
-        plays employee,
+        plays friendship:friend,
+        plays employment:employee,
         owns name,
         owns age,
         owns ref @key;
       company sub entity,
-        plays employer,
+        plays employment:employer,
         owns name,
         owns ref @key;
       friendship sub relation,
@@ -381,7 +381,7 @@ Feature: Graql Match Clause
   Scenario: 'plays' matches types that can play the specified role
     When get answers of graql query
       """
-      match $x plays friend; get;
+      match $x plays friendship:friend; get;
       """
     And concept identifiers are
       |     | check | value  |
@@ -396,12 +396,12 @@ Feature: Graql Match Clause
       """
       define
       close-friendship sub relation, relates close-friend as friend;
-      friendly-person sub entity, plays close-friend;
+      friendly-person sub entity, plays close-friendship:close-friend;
       """
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x plays friend; get;
+      match $x plays friendship:friend; get;
       """
     And concept identifiers are
       |     | check | value  |
@@ -416,12 +416,12 @@ Feature: Graql Match Clause
       """
       define
       close-friendship sub relation, relates close-friend as friend;
-      friendly-person sub entity, plays close-friend;
+      friendly-person sub entity, plays close-friendship:close-friend;
       """
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x plays close-friend; get;
+      match $x plays close-friendship:close-friend; get;
       """
     And concept identifiers are
       |     | check | value           |
@@ -451,7 +451,7 @@ Feature: Graql Match Clause
       """
       define
       dog sub entity,
-        plays friend,
+        plays friendship:friend,
         owns ref @key;
       """
     Given the integrity is validated
@@ -467,7 +467,7 @@ Feature: Graql Match Clause
       """
       match
         $x isa $type;
-        $type plays friend;
+        $type plays friendship:friend;
       get;
       """
     When concept identifiers are
@@ -558,7 +558,7 @@ Feature: Graql Match Clause
       """
       define
       close-friendship sub relation, relates close-friend as friend;
-      friendly-person sub entity, plays close-friend;
+      friendly-person sub entity, plays close-friendship:close-friend;
       """
     Given the integrity is validated
     When get answers of graql query
@@ -578,7 +578,7 @@ Feature: Graql Match Clause
       """
       define
       close-friendship sub relation, relates close-friend as friend;
-      friendly-person sub entity, plays close-friend;
+      friendly-person sub entity, plays close-friendship:close-friend;
       """
     Given the integrity is validated
     When get answers of graql query
@@ -612,8 +612,8 @@ Feature: Graql Match Clause
     When get answers of graql query
       """
       match
-        $x iid 83cb2;
-        $y iid 4ba92;
+        $x iid 0x83cb2;
+        $y iid 0x4ba92;
       get;
       """
     Then answer size is: 0
@@ -715,7 +715,7 @@ Feature: Graql Match Clause
   Scenario: when matching by a type iid that doesn't exist, an empty result is returned
     When get answers of graql query
       """
-      match $x isa $type; $type iid 83cb2; get;
+      match $x isa $type; $type iid 0x83cb2; get;
       """
     Then answer size is: 0
 
@@ -885,7 +885,7 @@ Feature: Graql Match Clause
     Given graql define
       """
       define
-      some-entity sub entity, plays player, owns ref @key;
+      some-entity sub entity, plays symmetric:player, owns ref @key;
       symmetric sub relation, relates player, owns ref @key;
       """
     Given the integrity is validated
@@ -911,7 +911,7 @@ Feature: Graql Match Clause
     Given graql define
       """
       define
-      some-entity sub entity, plays player, owns ref @key;
+      some-entity sub entity, plays symmetric:player, owns ref @key;
       symmetric sub relation, relates player, owns ref @key;
       """
     Given the integrity is validated
@@ -958,8 +958,8 @@ Feature: Graql Match Clause
         relates sender,
         relates recipient;
 
-      person plays sender,
-        plays recipient;
+      person plays gift-delivery:sender,
+        plays gift-delivery:recipient;
       """
     Given the integrity is validated
     Given graql insert
@@ -1009,7 +1009,7 @@ Feature: Graql Match Clause
       residency sub relation,
         relates resident,
         owns ref @key;
-      person plays resident;
+      person plays residency:resident;
       """
     Given the integrity is validated
     Given graql insert
@@ -1106,12 +1106,12 @@ Feature: Graql Match Clause
   Scenario: when querying for a non-existent relation type iid, an empty result is returned
     When get answers of graql query
       """
-      match ($x, $y) isa $type; $type iid 83cb2; get;
+      match ($x, $y) isa $type; $type iid 0x83cb2; get;
       """
     Then answer size is: 0
     When get answers of graql query
       """
-      match $r ($x, $y) isa $type; $r iid 4ba92; get;
+      match $r ($x, $y) isa $type; $r iid 0x4ba92; get;
       """
     Then answer size is: 0
 
@@ -1244,12 +1244,12 @@ Feature: Graql Match Clause
   Scenario: when querying for a non-existent attribute type iid, an empty result is returned
     When get answers of graql query
       """
-      match $x has name $y; $x iid 83cb2; get;
+      match $x has name $y; $x iid 0x83cb2; get;
       """
     Then answer size is: 0
     When get answers of graql query
       """
-      match $x has name $y; $y iid 83cb2; get;
+      match $x has name $y; $y iid 0x83cb2; get;
       """
     Then answer size is: 0
 

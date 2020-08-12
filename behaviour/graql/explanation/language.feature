@@ -73,8 +73,8 @@ Feature: Graql Reasoning Explanation
       location sub entity,
           abstract,
           owns name @key,
-          plays superior,
-          plays subordinate;
+          plays location-hierarchy:superior,
+          plays location-hierarchy:subordinate;
 
       area sub location;
       city sub location;
@@ -129,8 +129,8 @@ Feature: Graql Reasoning Explanation
       location sub entity,
           abstract,
           owns name @key,
-          plays superior,
-          plays subordinate;
+          plays location-hierarchy:superior,
+          plays location-hierarchy:subordinate;
 
       area sub location;
       city sub location;

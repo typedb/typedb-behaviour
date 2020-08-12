@@ -36,8 +36,8 @@ Feature: Concept Inequality Resolution
 
       ball sub entity,
           owns name,
-          plays ball1,
-          plays ball2;
+          plays selection:ball1,
+          plays selection:ball2;
 
       # Represents a selection of balls from a bag, with replacement after each selection
       selection sub relation,
@@ -78,20 +78,20 @@ Feature: Concept Inequality Resolution
       define
 
       state sub entity,
-          plays related-state,
+          plays transition:state,
           owns name;
 
       transition sub relation,
-        relates related-state;
+        relates state;
 
       achieved sub transition,
-          relates related-state;
+          relates state;
 
       prior sub transition,
-          relates related-state;
+          relates state;
 
       holds sub transition,
-          relates related-state;
+          relates state;
 
       state-rule sub rule,
       when {

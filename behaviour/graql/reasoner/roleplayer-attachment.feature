@@ -32,17 +32,17 @@ Feature: Roleplayer Attachment Resolution
 
       person sub entity,
         owns name,
-        plays friend,
-        plays employee;
+        plays friendship:friend,
+        plays employment:employee;
 
       company sub entity,
         owns name,
-        plays employer;
+        plays employment:employer;
 
       place sub entity,
         owns name,
-        plays location-subordinate,
-        plays location-superior;
+        plays location-hierarchy:subordinate,
+        plays location-hierarchy:superior;
 
       friendship sub relation,
         relates friend;
@@ -52,8 +52,8 @@ Feature: Roleplayer Attachment Resolution
         relates employer;
 
       location-hierarchy sub relation,
-        relates location-subordinate,
-        relates location-superior;
+        relates subordinate,
+        relates superior;
 
       name sub attribute, value string;
       """
@@ -64,8 +64,8 @@ Feature: Roleplayer Attachment Resolution
       """
       define
       dominion sub relation, relates ruler, relates ruled-person;
-      giant-turtle sub entity, plays ruler;
-      person plays ruled-person;
+      giant-turtle sub entity, plays dominion:ruler;
+      person plays dominion:ruled-person;
 
       giant-turtles-rule-the-world sub rule,
       when {
@@ -103,8 +103,8 @@ Feature: Roleplayer Attachment Resolution
       """
       define
       dominion sub relation, relates ruler, relates ruled-person;
-      giant-turtle sub entity, plays ruler;
-      person plays ruled-person;
+      giant-turtle sub entity, plays dominion:ruler;
+      person plays dominion:ruled-person;
 
       giant-turtles-rule-the-world sub rule,
       when {
@@ -142,7 +142,7 @@ Feature: Roleplayer Attachment Resolution
       """
       define
       ship-crew sub relation, relates captain, relates navigator, relates chef;
-      person plays captain, plays navigator, plays chef;
+      person plays ship-crew:captain, plays ship-crew:navigator, plays ship-crew:chef;
 
       i-am-the-cook-therefore-i-am-the-captain sub rule,
       when {
@@ -183,7 +183,7 @@ Feature: Roleplayer Attachment Resolution
       """
       define
       ship-crew sub relation, relates captain, relates navigator, relates chef;
-      person plays captain, plays navigator, plays chef;
+      person plays ship-crew:captain, plays ship-crew:navigator, plays ship-crew:chef;
 
       i-really-am-the-captain sub rule,
       when {
@@ -235,7 +235,7 @@ Feature: Roleplayer Attachment Resolution
       """
       define
       ship-crew sub relation, relates captain, relates navigator, relates chef;
-      person plays captain, plays navigator, plays chef;
+      person plays ship-crew:captain, plays ship-crew:navigator, plays ship-crew:chef;
 
       the-captain-is-required-to-assist-the-navigator sub rule,
       when {

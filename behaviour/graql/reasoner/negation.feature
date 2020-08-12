@@ -33,17 +33,17 @@ Feature: Negation Resolution
       person sub entity,
         owns name,
         owns age,
-        plays friend,
-        plays employee;
+        plays friendship:friend,
+        plays employment:employee;
 
       company sub entity,
         owns name,
-        plays employer;
+        plays employment:employer;
 
       place sub entity,
         owns name,
-        plays location-subordinate,
-        plays location-superior;
+        plays location-hierarchy:subordinate,
+        plays location-hierarchy:superior;
 
       friendship sub relation,
         relates friend;
@@ -53,8 +53,8 @@ Feature: Negation Resolution
         relates employer;
 
       location-hierarchy sub relation,
-        relates location-subordinate,
-        relates location-superior;
+        relates subordinate,
+        relates superior;
 
       name sub attribute, value string;
       age sub attribute, value long;
@@ -235,7 +235,7 @@ Feature: Negation Resolution
     Given for each session, graql define
       """
       define
-      dog sub entity, plays friend;
+      dog sub entity, plays friendship:friend;
       """
     Given for each session, graql insert
       """
@@ -291,7 +291,7 @@ Feature: Negation Resolution
     Given for each session, graql define
       """
       define
-      dog sub entity, owns name, plays friend;
+      dog sub entity, owns name, plays friendship:friend;
       """
     Given for each session, graql insert
       """
@@ -615,7 +615,7 @@ Feature: Negation Resolution
       """
       define
       employment relates manager;
-      person plays manager;
+      person plays employment:manager;
 
       apple-employs-everyone sub rule,
       when {
@@ -661,7 +661,7 @@ Feature: Negation Resolution
       """
       define
       employment relates manager;
-      person plays manager;
+      person plays employment:manager;
 
       apple-employs-everyone sub rule,
       when {
@@ -707,7 +707,7 @@ Feature: Negation Resolution
       """
       define
       employment relates manager;
-      person plays manager;
+      person plays employment:manager;
 
       apple-employs-everyone sub rule,
       when {
@@ -771,10 +771,10 @@ Feature: Negation Resolution
 
       location-hierarchy-transitivity sub rule,
       when {
-          (location-superior: $a, location-subordinate: $b) isa location-hierarchy;
-          (location-superior: $b, location-subordinate: $c) isa location-hierarchy;
+          (superior: $a, subordinate: $b) isa location-hierarchy;
+          (superior: $b, subordinate: $c) isa location-hierarchy;
       }, then {
-          (location-superior: $a, location-subordinate: $c) isa location-hierarchy;
+          (superior: $a, subordinate: $c) isa location-hierarchy;
       };
       """
     Given for each session, graql insert
@@ -784,9 +784,9 @@ Feature: Negation Resolution
       $cit isa city, has name "London";
       $cntry isa country, has name "UK";
       $cont isa continent, has name "Europe";
-      (location-superior: $cont, location-subordinate: $cntry) isa location-hierarchy;
-      (location-superior: $cntry, location-subordinate: $cit) isa location-hierarchy;
-      (location-superior: $cit, location-subordinate: $ar) isa location-hierarchy;
+      (superior: $cont, subordinate: $cntry) isa location-hierarchy;
+      (superior: $cntry, subordinate: $cit) isa location-hierarchy;
+      (superior: $cit, subordinate: $ar) isa location-hierarchy;
       """
 #    When materialised database is completed
     Given for graql query
@@ -802,7 +802,7 @@ Feature: Negation Resolution
       match
         $continent isa continent;
         $area isa area;
-        not {(location-superior: $continent, location-subordinate: $area) isa location-hierarchy;};
+        not {(superior: $continent, subordinate: $area) isa location-hierarchy;};
       get;
       """
     Then answer size in reasoned database is: 0
@@ -818,19 +818,19 @@ Feature: Negation Resolution
           owns index;
 
       traversable sub indexable,
-          plays link-from,
-          plays link-to,
-          plays indirect-from,
-          plays indirect-to,
-          plays reachable-from,
-          plays reachable-to;
+          plays link:from,
+          plays link:to,
+          plays indirect:from,
+          plays indirect:to,
+          plays reachable:from,
+          plays reachable:to;
 
       vertex sub traversable;
       node sub traversable;
 
-      link sub relation, relates link-from, relates link-to;
-      indirect-link sub relation, relates indirect-from, relates indirect-to;
-      reachable sub relation, relates reachable-from, relates reachable-to;
+      link sub relation, relates from, relates to;
+      indirect-link sub relation, relates from, relates to;
+      reachable sub relation, relates from, relates to;
 
       index sub attribute, value string;
 
@@ -969,11 +969,11 @@ Feature: Negation Resolution
     Given for each session, graql define
       """
       define
-      country sub entity, owns name, plays country-for-company;
-      company plays company-with-country, plays not-in-uk;
+      country sub entity, owns name, plays company-country:country;
+      company plays company-country:company, plays non-uk:not-in-uk;
       company-country sub relation,
-        relates company-with-country,
-        relates country-for-company;
+        relates company,
+        relates country;
       non-uk sub relation,
         relates not-in-uk;
       non-uk-rule sub rule,
@@ -1039,11 +1039,11 @@ Feature: Negation Resolution
     Given for each session, graql define
       """
       define
-      country sub entity, owns name, plays country-for-company;
-      company plays company-with-country, plays not-in-uk;
+      country sub entity, owns name, plays company-country:country;
+      company plays company-country:company, plays non-uk:not-in-uk;
       company-country sub relation,
-        relates company-with-country,
-        relates country-for-company;
+        relates company,
+        relates country;
       non-uk sub relation,
         relates not-in-uk;
       non-uk-rule sub rule,
@@ -1112,16 +1112,16 @@ Feature: Negation Resolution
       define
 
       session sub entity,
-          plays parent-session;
+          plays reported-fault:parent-session;
       fault sub entity,
-          plays relevant-fault,
-          plays identified-fault,
-          plays diagnosed-fault;
+          plays reported-fault:relevant-fault,
+          plays fault-identification:identified-fault,
+          plays diagnosis:diagnosed-fault;
       question sub entity,
           owns response,
-          plays identifying-question,
-          plays question-logged,
-          plays question-not-answered;
+          plays fault-identification:identifying-question,
+          plays logged-question:question-logged,
+          plays unanswered-question:question-not-answered;
 
       response sub attribute, value string;
 
@@ -1202,9 +1202,9 @@ Feature: Negation Resolution
       define
       resource sub attribute, value string;
 
-      entity-1 sub entity, owns resource, plays role-2, plays role-4;
-      entity-2 sub entity, owns resource, plays role-1, plays role-3, plays role-4;
-      entity-3 sub entity, owns resource, plays role-1, plays role-3, plays role-4, plays symmetric-role;
+      entity-1 sub entity, owns resource, plays relation-2:role-2, plays relation-3:role-4;
+      entity-2 sub entity, owns resource, plays relation-2:role-1, plays relation-3:role-3, plays relation-3:role-4;
+      entity-3 sub entity, owns resource, plays relation-2:role-1, plays relation-3:role-3, plays relation-3:role-4, plays symmetric-relation:symmetric-role;
 
       relation-2 sub relation, relates role-1, relates role-2;
       relation-3 sub relation, relates role-3, relates role-4;
@@ -1278,18 +1278,18 @@ Feature: Negation Resolution
           owns index;
 
       traversable sub indexable,
-          plays link-from,
-          plays link-to,
-          plays reachable-from,
-          plays reachable-to,
-          plays unreachable-from,
-          plays unreachable-to;
+          plays link:from,
+          plays link:to,
+          plays reachable:from,
+          plays reachable:to,
+          plays unreachable:from,
+          plays unreachable:to;
 
       node sub traversable;
 
-      link sub relation, relates link-from, relates link-to;
-      reachable sub relation, relates reachable-from, relates reachable-to;
-      unreachable sub relation, relates unreachable-from, relates unreachable-to;
+      link sub relation, relates from, relates to;
+      reachable sub relation, relates from, relates to;
+      unreachable sub relation, relates from, relates to;
 
       index sub attribute, value string;
 

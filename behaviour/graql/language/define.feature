@@ -26,9 +26,9 @@ Feature: Graql Define Query
     Given graql define
       """
       define
-      person sub entity, plays employee, plays earner, owns name, owns email @key;
-      employment sub relation, relates employee, plays source-of-income, owns start-date, owns employment-reference-code @key;
-      income sub relation, relates earner, relates source-of-income;
+      person sub entity, plays employer:employee, plays income:earner, owns name, owns email @key;
+      employment sub relation, relates employee, plays income:source, owns start-date, owns employment-reference-code @key;
+      income sub relation, relates earner, relates source;
 
       name sub attribute, value string;
       email sub attribute, value string;
@@ -119,7 +119,7 @@ Feature: Graql Define Query
   Scenario: define that a type 'plays' an undefined role throws
     Then graql define throws
       """
-      define house sub entity, plays constructed-thing;
+      define house sub entity, plays constructed:something;
       """
     Then the integrity is validated
 
@@ -149,7 +149,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x plays employee; get;
+      match $x plays employment:employee; get;
       """
     Then concept identifiers are
       |     | check | value  |
@@ -173,7 +173,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x plays employee; get;
+      match $x plays employment:employee; get;
       """
     Then concept identifiers are
       |     | check | value    |
@@ -300,14 +300,14 @@ Feature: Graql Define Query
     Given graql define
       """
       define
-      house sub entity, plays home, plays home, plays home;
-      home-ownership sub relation, relates home, relates home-owner;
-      person plays home-owner;
+      house sub entity, plays home-ownership:home, plays home-ownership:home, plays home-ownership:home;
+      home-ownership sub relation, relates home, relates owner;
+      person plays home-ownership:owner;
       """
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x plays home; get;
+      match $x plays home-ownership:home; get;
       """
     Then concept identifiers are
       |     | check | value |
@@ -548,7 +548,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x plays source-of-income; get;
+      match $x plays income:source; get;
       """
     Then concept identifiers are
       |     | check | value               |
@@ -572,7 +572,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x plays source-of-income; get;
+      match $x plays income:source; get;
       """
     Then concept identifiers are
       |     | check | value                       |
@@ -709,7 +709,7 @@ Feature: Graql Define Query
       """
       define
       parenthood sub relation, relates parent, relates child, relates child, relates parent, relates child;
-      person plays parent, plays child;
+      person plays parenthood:parent, plays parenthood:child;
       """
     Given the integrity is validated
     When get answers of graql query
@@ -728,12 +728,12 @@ Feature: Graql Define Query
     Given graql define
       """
       define
-      recursive-function sub relation, relates function, plays function;
+      recursive-function sub relation, relates function, plays recursive-function:function;
       """
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x relates function; $x plays function; get;
+      match $x relates function; $x plays recursive-function:function; get;
       """
     Then concept identifiers are
       |     | check | value              |
@@ -941,16 +941,16 @@ Feature: Graql Define Query
     Given graql define
       """
       define
-      car sub entity, plays listed-car;
+      car sub entity, plays car-sales-listing:listed-car;
       car-sales-listing sub relation, relates listed-car, relates available-colour;
-      colour sub attribute, value string, plays available-colour;
+      colour sub attribute, value string, plays car-sales-listing:available-colour;
       grayscale-colour sub colour;
       """
     Given the integrity is validated
 
     When get answers of graql query
       """
-      match $x plays available-colour; get;
+      match $x plays car-sales-listing:available-colour; get;
       """
     Then concept identifiers are
       |     | check | value            |
@@ -966,9 +966,9 @@ Feature: Graql Define Query
     Given graql define
       """
       define
-      person plays contact-person;
-      phone-contact sub relation, relates contact-person, relates contact-phone-number;
-      phone-number sub attribute, value string, plays contact-phone-number;
+      person plays phone-contact:person;
+      phone-contact sub relation, relates person, relates number;
+      phone-number sub attribute, value string, plays phone-contact:number;
       uk-phone-number sub phone-number;
       uk-landline-number sub uk-phone-number;
       uk-premium-landline-number sub uk-landline-number;
@@ -977,7 +977,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x plays contact-phone-number; get;
+      match $x plays phone-contact:number; get;
       """
     Then concept identifiers are
       |     | check | value                      |
@@ -1480,7 +1480,7 @@ Feature: Graql Define Query
       """
       define
       person sub relation, relates body-part;
-      arm sub entity, plays body-part;
+      arm sub entity, plays person:body-part;
       """
     Then the integrity is validated
 
@@ -1524,12 +1524,12 @@ Feature: Graql Define Query
   Scenario: define additional 'plays' on a type adds role to it
     Given graql define
       """
-      define employment plays employee;
+      define employment plays employment:employee;
       """
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x plays employee; get;
+      match $x plays employment:employee; get;
       """
     Then concept identifiers are
       |     | check | value      |
@@ -1612,7 +1612,7 @@ Feature: Graql Define Query
     Given graql define
       """
       define
-      company sub entity, plays employer;
+      company sub entity, plays employment:employer;
       employment relates employer;
       """
     Given the integrity is validated
@@ -1910,10 +1910,10 @@ Feature: Graql Define Query
     Given graql define
       """
       define
-      species sub entity, owns name, plays the-species;
-      species-membership sub relation, relates the-species, relates member-of-species;
+      species sub entity, owns name, plays species-membership:species;
+      species-membership sub relation, relates species, relates member;
       lifespan sub attribute, value double;
-      organism sub entity, owns lifespan, plays member-of-species;
+      organism sub entity, owns lifespan, plays species-membership:member;
       child sub person;
       """
     Given the integrity is validated
@@ -1976,7 +1976,7 @@ Feature: Graql Define Query
     Given graql define
       """
       define
-      bird sub entity, plays flier;
+      bird sub entity, plays flying:flier;
       pigeon sub bird;
       flying sub relation, relates flier;
       """
@@ -1989,7 +1989,7 @@ Feature: Graql Define Query
     Given graql define
       """
       define
-      animal sub entity, plays flier;
+      animal sub entity, plays flying:flier;
       pigeon sub animal;
       """
     When get answers of graql query
@@ -2074,7 +2074,7 @@ Feature: Graql Define Query
       """
       define
       child sub person;
-      person sub entity, plays employer;
+      person sub entity, plays employment:employer;
       """
     Given the integrity is validated
 

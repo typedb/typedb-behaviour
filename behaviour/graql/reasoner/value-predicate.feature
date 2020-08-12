@@ -31,8 +31,8 @@ Feature: Value Predicate Resolution
       define
 
       person sub entity,
-        plays leader,
-        plays team-member,
+        plays team:leader,
+        plays team:member,
         owns string-attribute,
         owns unrelated-attribute,
         owns sub-string-attribute,
@@ -51,7 +51,7 @@ Feature: Value Predicate Resolution
 
       team sub relation,
         relates leader,
-        relates team-member,
+        relates member,
         owns string-attribute;
 
       string-attribute sub attribute, value string;
@@ -783,14 +783,14 @@ Feature: Value Predicate Resolution
       """
       define
 
-      soft-drink plays priced-item;
+      soft-drink plays price-classification:item;
 
       price-range sub attribute, value string,
-        plays price-category;
+        plays price-classification:category;
 
       price-classification sub relation,
-        relates priced-item,
-        relates price-category;
+        relates item,
+        relates category;
 
       expensive-drinks sub rule,
       when {
@@ -897,10 +897,10 @@ Feature: Value Predicate Resolution
       define
 
       post sub entity,
-          plays original,
-          plays reply,
-          plays predecessor,
-          plays successor,
+          plays reply-of:original,
+          plays reply-of:reply,
+          plays message-succession:predecessor,
+          plays message-succession:successor,
           owns creation-date;
 
       reply-of sub relation,
