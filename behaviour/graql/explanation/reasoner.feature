@@ -37,7 +37,7 @@ Feature: Graql Reasoning Explanation
 
       company sub entity,
         owns name,
-        owns company-id;
+        owns company-id @key;
 
       company-has-name sub rule,
       when {
@@ -92,7 +92,7 @@ Feature: Graql Reasoning Explanation
           value long;
 
       company sub entity,
-          owns company-id,
+          owns company-id @key,
           owns name,
           owns is-liable;
 
@@ -153,7 +153,7 @@ Feature: Graql Reasoning Explanation
 
       location sub entity,
           abstract,
-          owns name,
+          owns name @key,
           plays superior,
           plays subordinate;
 
@@ -234,7 +234,7 @@ Feature: Graql Reasoning Explanation
       person-id sub attribute, value long;
 
       person sub entity,
-          owns person-id,
+          owns person-id @key,
           owns name,
           plays sibling;
 
@@ -335,7 +335,7 @@ Feature: Graql Reasoning Explanation
           value long;
 
       company sub entity,
-          owns company-id,
+          owns company-id @key,
           owns name,
           owns is-liable;
 
@@ -399,7 +399,7 @@ Feature: Graql Reasoning Explanation
           value long;
 
       company sub entity,
-          owns company-id,
+          owns company-id @key,
           owns name,
           owns is-liable;
 
@@ -466,7 +466,7 @@ Feature: Graql Reasoning Explanation
           value long;
 
       company sub entity,
-          owns company-id,
+          owns company-id @key,
           owns name,
           owns is-liable;
 

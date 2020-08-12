@@ -27,10 +27,10 @@ Feature: Graql Delete Query
       define
       person sub entity,
         plays friend,
-        owns name;
+        owns name @key;
       friendship sub relation,
         relates friend,
-        owns ref;
+        owns ref @key;
       name sub attribute, value string;
       ref sub attribute, value long;
       """
@@ -898,7 +898,7 @@ Feature: Graql Delete Query
     Given graql define
       """
       define
-      ship-crew sub relation, relates captain, relates navigator, relates chef, owns ref;
+      ship-crew sub relation, relates captain, relates navigator, relates chef, owns ref @key;
       person plays captain, plays navigator, plays chef;
       """
     Given the integrity is validated

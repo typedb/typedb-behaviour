@@ -26,8 +26,8 @@ Feature: Graql Define Query
     Given graql define
       """
       define
-      person sub entity, plays employee, plays earner, owns name, owns email;
-      employment sub relation, relates employee, plays source-of-income, owns start-date, owns employment-reference-code;
+      person sub entity, plays employee, plays earner, owns name, owns email @key;
+      employment sub relation, relates employee, plays source-of-income, owns start-date, owns employment-reference-code @key;
       income sub relation, relates earner, relates source-of-income;
 
       name sub attribute, value string;
@@ -135,7 +135,7 @@ Feature: Graql Define Query
   Scenario: define that a type 'key' an entity type throws
     Then graql define throws
       """
-      define passport sub entity, owns person;
+      define passport sub entity, owns person @key;
       """
     Then the integrity is validated
 
@@ -247,7 +247,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x owns email; get;
+      match $x owns email @key; get;
       """
 
     Then concept identifiers are
@@ -272,7 +272,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x owns email; get;
+      match $x owns email @key; get;
       """
     Then concept identifiers are
       |     | check | value    |
@@ -342,12 +342,12 @@ Feature: Graql Define Query
       """
       define
       address sub attribute, value string;
-      house sub entity, owns address, owns address, owns address;
+      house sub entity, owns address @key, owns address @key, owns address @key;
       """
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x owns address; get;
+      match $x owns address @key; get;
       """
     Then concept identifiers are
       |     | check | value |
@@ -646,7 +646,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x owns employment-reference-code; get;
+      match $x owns employment-reference-code @key; get;
       """
     Then concept identifiers are
       |     | check | value               |
@@ -670,7 +670,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x owns employment-reference-code; get;
+      match $x owns employment-reference-code @key; get;
       """
     Then concept identifiers are
       |     | check | value                       |
@@ -1052,14 +1052,14 @@ Feature: Graql Define Query
       """
       define
       hex-value sub attribute, value string;
-      colour sub attribute, value string, owns hex-value;
+      colour sub attribute, value string, owns hex-value @key;
       grayscale-colour sub colour;
       """
     Given the integrity is validated
 
     When get answers of graql query
       """
-      match $x owns hex-value; get;
+      match $x owns hex-value @key; get;
       """
     Then concept identifiers are
       |     | check | value            |
@@ -1076,7 +1076,7 @@ Feature: Graql Define Query
       """
       define
       hex-value sub attribute, value string;
-      colour sub attribute, value string, owns hex-value;
+      colour sub attribute, value string, owns hex-value @key;
       dark-colour sub colour;
       dark-red-colour sub dark-colour;
       very-dark-red-colour sub dark-red-colour;
@@ -1084,7 +1084,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x owns hex-value; get;
+      match $x owns hex-value @key; get;
       """
     Then concept identifiers are
       |     | check | value                |
@@ -1559,7 +1559,7 @@ Feature: Graql Define Query
     When graql define without commit
       """
       define
-      product owns barcode;
+      product owns barcode @key;
       """
     When graql insert
       """
@@ -1603,7 +1603,7 @@ Feature: Graql Define Query
     Then graql define throws
       """
       define
-      product owns barcode;
+      product owns barcode @key;
       """
     Then the integrity is validated
 
@@ -1706,7 +1706,7 @@ Feature: Graql Define Query
   Scenario: add attribute as 'key' to a type that already 'has' that attribute throws
     Then graql define throws
       """
-      define person owns name;
+      define person owns name @key;
       """
     Then the integrity is validated
 
@@ -2130,7 +2130,7 @@ Feature: Graql Define Query
       define
       child sub person;
       phone-number sub attribute, value long;
-      person sub entity, owns phone-number;
+      person sub entity, owns phone-number @key;
       """
     Given the integrity is validated
 

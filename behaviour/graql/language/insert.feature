@@ -31,17 +31,17 @@ Feature: Graql Insert Query
         plays employee,
         owns name,
         owns age,
-        owns ref;
+        owns ref @key;
 
       company sub entity,
         plays employer,
         owns name,
-        owns ref;
+        owns ref @key;
 
       employment sub relation,
         relates employee,
         relates employer,
-        owns ref;
+        owns ref @key;
 
       name sub attribute,
         value string;
@@ -360,7 +360,7 @@ Feature: Graql Insert Query
     Given graql define
       """
       define
-      <attr> sub attribute, value <type>, owns ref;
+      <attr> sub attribute, value <type>, owns ref @key;
       person owns <attr>;
       """
     Given the integrity is validated
@@ -557,7 +557,7 @@ Feature: Graql Insert Query
         relates resident,
         relates place-of-residence,
         owns tenure-days,
-        owns ref;
+        owns ref @key;
       person plays resident;
       address sub attribute, value string, plays place-of-residence;
       tenure-days sub attribute, value long;
@@ -670,7 +670,7 @@ Feature: Graql Insert Query
         relates resident,
         relates place-of-residence,
         owns is-permanent,
-        owns ref;
+        owns ref @key;
       person plays resident;
       address sub attribute, value string, plays place-of-residence;
       is-permanent sub attribute, value boolean;
@@ -947,7 +947,7 @@ Feature: Graql Insert Query
   Scenario Outline: inserting an attribute of type '<type>' creates an instance of it
     Given graql define
       """
-      define <attr> sub attribute, value <type>, owns ref;
+      define <attr> sub attribute, value <type>, owns ref @key;
       """
     Given the integrity is validated
     Given get answers of graql query
@@ -1129,7 +1129,7 @@ Feature: Graql Insert Query
   Scenario Outline: a '<type>' inserted as [<insert>] is retrieved when matching [<match>]
     Given graql define
       """
-      define <attr> sub attribute, value <type>, owns ref;
+      define <attr> sub attribute, value <type>, owns ref @key;
       """
     Given the integrity is validated
     When get answers of graql insert
@@ -1168,7 +1168,7 @@ Feature: Graql Insert Query
   Scenario Outline: inserting [<value>] as a '<type>' throws an error
     Given graql define
       """
-      define <attr> sub attribute, value <type>, owns ref;
+      define <attr> sub attribute, value <type>, owns ref @key;
       """
     Given the integrity is validated
     Then graql insert throws
@@ -1281,7 +1281,7 @@ Feature: Graql Insert Query
     Given graql define
       """
       define
-      cat sub entity, owns dref;
+      cat sub entity, owns dref @key;
       dref sub attribute, value double;
       """
     Given the integrity is validated
@@ -1300,7 +1300,7 @@ Feature: Graql Insert Query
     Given graql define
       """
       define
-      name owns ref;
+      name owns ref @key;
       """
     Given the integrity is validated
     When graql insert
@@ -1363,7 +1363,7 @@ Feature: Graql Insert Query
     Given graql define
       """
       define
-      language sub entity, owns name, owns is-cool, owns ref;
+      language sub entity, owns name, owns is-cool, owns ref @key;
       is-cool sub attribute, value boolean;
       """
     Given the integrity is validated
@@ -1903,7 +1903,7 @@ Feature: Graql Insert Query
     Given graql undefine
       """
       undefine
-      employment owns ref;
+      employment owns ref @key;
       """
     Given the integrity is validated
     Given graql define
@@ -1975,7 +1975,7 @@ Feature: Graql Insert Query
       define
 
       vertex sub entity,
-        owns index;
+        owns index @key;
 
       link sub relation, relates coordinate;
       vertex plays coordinate;
@@ -2082,9 +2082,9 @@ Feature: Graql Insert Query
     Given graql undefine
       """
       undefine
-      person owns ref;
-      company owns ref;
-      employment owns ref;
+      person owns ref @key;
+      company owns ref @key;
+      employment owns ref @key;
       """
     Given the integrity is validated
     Given graql insert
@@ -2164,7 +2164,7 @@ Feature: Graql Insert Query
   Scenario: match-insert can be used to repeatedly duplicate all entities
     Given graql undefine
       """
-      undefine person owns ref;
+      undefine person owns ref @key;
       """
     Given the integrity is validated
     Given graql insert

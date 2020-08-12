@@ -30,18 +30,18 @@ Feature: Graql Get Query
         plays employee,
         owns name,
         owns age,
-        owns ref;
+        owns ref @key;
       company sub entity,
         plays employer,
         owns name,
-        owns ref;
+        owns ref @key;
       friendship sub relation,
         relates friend,
-        owns ref;
+        owns ref @key;
       employment sub relation,
         relates employee,
         relates employer,
-        owns ref;
+        owns ref @key;
       name sub attribute, value string;
       age sub attribute, value long;
       ref sub attribute, value long;
@@ -102,7 +102,7 @@ Feature: Graql Get Query
     Given graql define
       """
       define
-      <attr> sub attribute, value <type>, owns ref;
+      <attr> sub attribute, value <type>, owns ref @key;
       """
     Given the integrity is validated
     Given graql insert

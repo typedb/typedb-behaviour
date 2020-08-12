@@ -1041,7 +1041,7 @@ Feature: Recursion Resolution
       define
 
       vertex sub entity,
-        owns index;
+        owns index @key;
 
       link sub relation, relates coordinate;
       vertex plays coordinate;
@@ -1318,7 +1318,7 @@ Feature: Recursion Resolution
       define
 
       entity2 sub entity,
-        owns index,
+        owns index @key,
         plays P-from, plays P-to,
         plays Q1-from, plays Q1-to,
         plays Q2-from, plays Q2-to,
@@ -1493,7 +1493,7 @@ Feature: Recursion Resolution
       define
 
       entity2 sub entity,
-        owns index;
+        owns index @key;
       a-entity sub entity2;
       b-entity sub entity2;
 
@@ -1716,7 +1716,7 @@ Feature: Recursion Resolution
       define
 
       entity2 sub entity,
-        owns index;
+        owns index @key;
       a-entity sub entity2;
       b-entity sub entity2;
       S sub entity2;
@@ -1882,7 +1882,7 @@ Feature: Recursion Resolution
       define
 
       entity2 sub entity,
-        owns index,
+        owns index @key,
         plays S-from,
         plays S-to;
       a-entity sub entity2;
