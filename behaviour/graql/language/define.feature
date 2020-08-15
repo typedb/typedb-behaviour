@@ -1454,25 +1454,15 @@ Feature: Graql Define Query
   # SCHEMA MUTATION #
   ###################
 
-  Scenario: re-define existing type keeps its properties intact and is idempotent
-    Given graql define
+  Scenario: defining an existing type repeatedly throws an error
+    Given graql define throws
       """
       define
       person sub entity, owns name;
       person sub entity, owns name;
       person sub entity, owns name;
       """
-    Given the integrity is validated
-    When get answers of graql query
-      """
-      match $x type person; $x owns email; get;
-      """
-    Then concept identifiers are
-      |     | check | value  |
-      | PER | label | person |
-    Then uniquely identify answer concepts
-      | x   |
-      | PER |
+    Then the integrity is validated
 
 
   Scenario: change entity type to relation type throws
