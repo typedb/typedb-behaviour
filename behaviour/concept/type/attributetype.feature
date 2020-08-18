@@ -571,3 +571,65 @@ Feature: Concept Attribute Type
     Then attribute(last-name) get has attribute types contain:
       | hash         |
       | abbreviation |
+
+  Scenario: Attribute types can be owned as attributes
+    When put attribute type: age, with value type: long
+    When put attribute type: name, with value type: string
+    When attribute(name) set abstract: true
+    When put attribute type: boy-name, with value type: string
+    When attribute(boy-name) set supertype: name
+    When put attribute type: girl-name, with value type: string
+    When attribute(girl-name) set supertype: name
+    When put entity type: person
+    When entity(person) set abstract: true
+    When entity(person) set has attribute type: name
+    When entity(person) set has attribute type: age
+    When put entity type: boy
+    When entity(boy) set supertype: person
+    When entity(boy) set has attribute type: boy-name as name
+    When put entity type: girl
+    When entity(girl) set supertype: person
+    When entity(girl) set has attribute type: girl-name as name
+    Then attribute(age) get attribute owners contain:
+      | person |
+      | boy    |
+      | girl   |
+    Then attribute(name) get attribute owners contain:
+      | person |
+    Then attribute(name) get attribute owners do not contain:
+      | boy    |
+      | girl   |
+    Then transaction commits
+    When session opens transaction of type: write
+    Then attribute(age) get attribute owners contain:
+      | person |
+      | boy    |
+      | girl   |
+    Then attribute(name) get attribute owners contain:
+      | person |
+    Then attribute(name) get attribute owners do not contain:
+      | boy    |
+      | girl   |
+
+  Scenario: Attribute types can be owned as keys
+    When put attribute type: email, with value type: string
+    When put entity type: company
+    When entity(company) set has attribute type: email
+    When put entity type: person
+    When entity(person) set has key type: email
+    Then attribute(email) get attribute owners contain:
+      | company |
+      | person  |
+    Then attribute(email) get key owners contain:
+      | person |
+    Then attribute(email) get key owners do not contain:
+      | company |
+    Then transaction commits
+    When session opens transaction of type: write
+    Then attribute(email) get attribute owners contain:
+      | company |
+      | person  |
+    Then attribute(email) get key owners contain:
+      | person |
+    Then attribute(email) get key owners do not contain:
+      | company |
