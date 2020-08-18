@@ -461,27 +461,27 @@ Feature: Concept Attribute Type
   Scenario: Attribute types can have keys
     When put attribute type: country-code, with value type: string
     When put attribute type: country-name, with value type: string
-    When attribute(country-name) set has key type: country-code
-    Then attribute(country-name) get has key types contain:
+    When attribute(country-name) set owns key type: country-code
+    Then attribute(country-name) get owns key types contain:
       | country-code |
     When transaction commits
     When session opens transaction of type: read
-    Then attribute(country-name) get has key types contain:
+    Then attribute(country-name) get owns key types contain:
       | country-code |
 
   Scenario: Attribute types can remove keys
     When put attribute type: country-code-1, with value type: string
     When put attribute type: country-code-2, with value type: string
     When put attribute type: country-name, with value type: string
-    When attribute(country-name) set has key type: country-code-1
-    When attribute(country-name) set has key type: country-code-2
-    When attribute(country-name) remove has key type: country-code-1
-    Then attribute(country-name) get has key types do not contain:
+    When attribute(country-name) set owns key type: country-code-1
+    When attribute(country-name) set owns key type: country-code-2
+    When attribute(country-name) remove owns key type: country-code-1
+    Then attribute(country-name) get owns key types do not contain:
       | country-code-1 |
     When transaction commits
     When session opens transaction of type: write
-    When attribute(country-name) remove has key type: country-code-2
-    Then attribute(country-name) get has key types do not contain:
+    When attribute(country-name) remove owns key type: country-code-2
+    Then attribute(country-name) get owns key types do not contain:
       | country-code-1 |
       | country-code-2 |
 
@@ -489,14 +489,14 @@ Feature: Concept Attribute Type
     When put attribute type: utc-zone-code, with value type: string
     When put attribute type: utc-zone-hour, with value type: double
     When put attribute type: timestamp, with value type: datetime
-    When attribute(timestamp) set has attribute type: utc-zone-code
-    When attribute(timestamp) set has attribute type: utc-zone-hour
-    Then attribute(timestamp) get has attribute types contain:
+    When attribute(timestamp) set owns attribute type: utc-zone-code
+    When attribute(timestamp) set owns attribute type: utc-zone-hour
+    Then attribute(timestamp) get owns attribute types contain:
       | utc-zone-code |
       | utc-zone-hour |
     When transaction commits
     When session opens transaction of type: read
-    Then attribute(timestamp) get has attribute types contain:
+    Then attribute(timestamp) get owns attribute types contain:
       | utc-zone-code |
       | utc-zone-hour |
 
@@ -504,15 +504,15 @@ Feature: Concept Attribute Type
     When put attribute type: utc-zone-code, with value type: string
     When put attribute type: utc-zone-hour, with value type: double
     When put attribute type: timestamp, with value type: datetime
-    When attribute(timestamp) set has attribute type: utc-zone-code
-    When attribute(timestamp) set has attribute type: utc-zone-hour
-    When attribute(timestamp) remove has attribute type: utc-zone-hour
-    Then attribute(timestamp) get has attribute types do not contain:
+    When attribute(timestamp) set owns attribute type: utc-zone-code
+    When attribute(timestamp) set owns attribute type: utc-zone-hour
+    When attribute(timestamp) remove owns attribute type: utc-zone-hour
+    Then attribute(timestamp) get owns attribute types do not contain:
       | utc-zone-hour |
     When transaction commits
     When session opens transaction of type: write
-    When attribute(timestamp) remove has attribute type: utc-zone-code
-    Then attribute(timestamp) get has attribute types do not contain:
+    When attribute(timestamp) remove owns attribute type: utc-zone-code
+    Then attribute(timestamp) get owns attribute types do not contain:
       | utc-zone-code |
       | utc-zone-hour |
 
@@ -520,18 +520,18 @@ Feature: Concept Attribute Type
     When put attribute type: country-code, with value type: string
     When put attribute type: country-abbreviation, with value type: string
     When put attribute type: country-name, with value type: string
-    When attribute(country-name) set has key type: country-code
-    When attribute(country-name) set has attribute type: country-abbreviation
-    Then attribute(country-name) get has key types contain:
+    When attribute(country-name) set owns key type: country-code
+    When attribute(country-name) set owns attribute type: country-abbreviation
+    Then attribute(country-name) get owns key types contain:
       | country-code |
-    Then attribute(country-name) get has attribute types contain:
+    Then attribute(country-name) get owns attribute types contain:
       | country-code         |
       | country-abbreviation |
     When transaction commits
     When session opens transaction of type: read
-    Then attribute(country-name) get has key types contain:
+    Then attribute(country-name) get owns key types contain:
       | country-code |
-    Then attribute(country-name) get has attribute types contain:
+    Then attribute(country-name) get owns attribute types contain:
       | country-code         |
       | country-abbreviation |
 
@@ -540,35 +540,35 @@ Feature: Concept Attribute Type
     When put attribute type: abbreviation, with value type: string
     When put attribute type: name, with value type: string
     When attribute(name) set abstract: true
-    When attribute(name) set has key type: hash
-    When attribute(name) set has attribute type: abbreviation
+    When attribute(name) set owns key type: hash
+    When attribute(name) set owns attribute type: abbreviation
     When put attribute type: real-name, with value type: string
     When attribute(real-name) set abstract: true
     When attribute(real-name) set supertype: name
-    Then attribute(real-name) get has key types contain:
+    Then attribute(real-name) get owns key types contain:
       | hash |
-    Then attribute(real-name) get has attribute types contain:
+    Then attribute(real-name) get owns attribute types contain:
       | hash         |
       | abbreviation |
     When transaction commits
     When session opens transaction of type: write
-    Then attribute(real-name) get has key types contain:
+    Then attribute(real-name) get owns key types contain:
       | hash |
-    Then attribute(real-name) get has attribute types contain:
+    Then attribute(real-name) get owns attribute types contain:
       | hash         |
       | abbreviation |
     When put attribute type: last-name, with value type: string
     When attribute(last-name) set supertype: real-name
     When transaction commits
     When session opens transaction of type: read
-    Then attribute(real-name) get has key types contain:
+    Then attribute(real-name) get owns key types contain:
       | hash |
-    Then attribute(real-name) get has attribute types contain:
+    Then attribute(real-name) get owns attribute types contain:
       | hash         |
       | abbreviation |
-    Then attribute(last-name) get has key types contain:
+    Then attribute(last-name) get owns key types contain:
       | hash |
-    Then attribute(last-name) get has attribute types contain:
+    Then attribute(last-name) get owns attribute types contain:
       | hash         |
       | abbreviation |
 
@@ -582,14 +582,14 @@ Feature: Concept Attribute Type
     When attribute(girl-name) set supertype: name
     When put entity type: person
     When entity(person) set abstract: true
-    When entity(person) set has attribute type: name
-    When entity(person) set has attribute type: age
+    When entity(person) set owns attribute type: name
+    When entity(person) set owns attribute type: age
     When put entity type: boy
     When entity(boy) set supertype: person
-    When entity(boy) set has attribute type: boy-name as name
+    When entity(boy) set owns attribute type: boy-name as name
     When put entity type: girl
     When entity(girl) set supertype: person
-    When entity(girl) set has attribute type: girl-name as name
+    When entity(girl) set owns attribute type: girl-name as name
     Then attribute(age) get attribute owners contain:
       | person |
       | boy    |
@@ -614,9 +614,9 @@ Feature: Concept Attribute Type
   Scenario: Attribute types can be owned as keys
     When put attribute type: email, with value type: string
     When put entity type: company
-    When entity(company) set has attribute type: email
+    When entity(company) set owns attribute type: email
     When put entity type: person
-    When entity(person) set has key type: email
+    When entity(person) set owns key type: email
     Then attribute(email) get attribute owners contain:
       | company |
       | person  |
