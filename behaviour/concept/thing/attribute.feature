@@ -33,12 +33,12 @@ Feature: Concept Attribute
     Given put attribute type: email, with value type: string
     Given attribute(email) as(string) set regex: \S+@\S+\.\S+
     Given put entity type: person
-    Given entity(person) set has attribute type: is-alive
-    Given entity(person) set has attribute type: age
-    Given entity(person) set has attribute type: score
-    Given entity(person) set has attribute type: name
-    Given entity(person) set has attribute type: email
-    Given entity(person) set has attribute type: birth-date
+    Given entity(person) set owns attribute type: is-alive
+    Given entity(person) set owns attribute type: age
+    Given entity(person) set owns attribute type: score
+    Given entity(person) set owns attribute type: name
+    Given entity(person) set owns attribute type: email
+    Given entity(person) set owns attribute type: birth-date
     Given transaction commits
     Given connection close all sessions
     Given connection open data session for database: grakn
