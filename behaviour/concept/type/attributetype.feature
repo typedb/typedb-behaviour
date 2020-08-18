@@ -469,18 +469,18 @@ Feature: Concept Attribute Type
     Then attribute(country-name) get owns key types contain:
       | country-code |
 
-  Scenario: Attribute types can remove keys
+  Scenario: Attribute types can unset keys
     When put attribute type: country-code-1, with value type: string
     When put attribute type: country-code-2, with value type: string
     When put attribute type: country-name, with value type: string
     When attribute(country-name) set owns key type: country-code-1
     When attribute(country-name) set owns key type: country-code-2
-    When attribute(country-name) remove owns key type: country-code-1
+    When attribute(country-name) unset owns key type: country-code-1
     Then attribute(country-name) get owns key types do not contain:
       | country-code-1 |
     When transaction commits
     When session opens transaction of type: write
-    When attribute(country-name) remove owns key type: country-code-2
+    When attribute(country-name) unset owns key type: country-code-2
     Then attribute(country-name) get owns key types do not contain:
       | country-code-1 |
       | country-code-2 |
@@ -500,18 +500,18 @@ Feature: Concept Attribute Type
       | utc-zone-code |
       | utc-zone-hour |
 
-  Scenario: Attribute types can remove attributes
+  Scenario: Attribute types can unset attributes
     When put attribute type: utc-zone-code, with value type: string
     When put attribute type: utc-zone-hour, with value type: double
     When put attribute type: timestamp, with value type: datetime
     When attribute(timestamp) set owns attribute type: utc-zone-code
     When attribute(timestamp) set owns attribute type: utc-zone-hour
-    When attribute(timestamp) remove owns attribute type: utc-zone-hour
+    When attribute(timestamp) unset owns attribute type: utc-zone-hour
     Then attribute(timestamp) get owns attribute types do not contain:
       | utc-zone-hour |
     When transaction commits
     When session opens transaction of type: write
-    When attribute(timestamp) remove owns attribute type: utc-zone-code
+    When attribute(timestamp) unset owns attribute type: utc-zone-code
     Then attribute(timestamp) get owns attribute types do not contain:
       | utc-zone-code |
       | utc-zone-hour |

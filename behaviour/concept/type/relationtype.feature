@@ -56,7 +56,7 @@ Feature: Concept Relation Type and Role Type
     When put relation type: parentship
     When relation(parentship) set relates role: parent
     When relation(parentship) set relates role: child
-    When relation(parentship) remove related role: parent
+    When relation(parentship) unset related role: parent
     Then relation(parentship) get related roles do not contain:
       | parent |
     Then relation(relation) get role(role) get subtypes do not contain:
@@ -68,7 +68,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(relation) get role(role) get subtypes do not contain:
       | parentship:parent |
       | parentship:child  |
-    When relation(marriage) remove related role: spouse
+    When relation(marriage) unset related role: spouse
     Then relation(marriage) get related roles do not contain:
       | spouse |
     When relation(marriage) set relates role: husband
@@ -103,7 +103,7 @@ Feature: Concept Relation Type and Role Type
     When session opens transaction of type: write
     When $m = relation(marriage) create new instance
     When $a = entity(person) create new instance
-    When relation $m set player for role(wife): $a
+    When relation $m add player for role(wife): $a
     When transaction commits
     When connection close all sessions
     When connection open schema session for database: grakn
@@ -437,19 +437,19 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) get owns key types contain:
       | license |
 
-  Scenario: Relation types can remove keys
+  Scenario: Relation types can unset keys
     When put attribute type: license, with value type: string
     When put attribute type: certificate, with value type: string
     When put relation type: marriage
     When relation(marriage) set relates role: spouse
     When relation(marriage) set owns key type: license
     When relation(marriage) set owns key type: certificate
-    When relation(marriage) remove owns key type: license
+    When relation(marriage) unset owns key type: license
     Then relation(marriage) get owns key types do not contain:
       | license |
     When transaction commits
     When session opens transaction of type: write
-    When relation(marriage) remove owns key type: certificate
+    When relation(marriage) unset owns key type: certificate
     Then relation(marriage) get owns key types do not contain:
       | license     |
       | certificate |
@@ -483,19 +483,19 @@ Feature: Concept Relation Type and Role Type
       | date     |
       | religion |
 
-  Scenario: Relation types can remove attributes
+  Scenario: Relation types can unset attributes
     When put attribute type: date, with value type: datetime
     When put attribute type: religion, with value type: string
     When put relation type: marriage
     When relation(marriage) set relates role: spouse
     When relation(marriage) set owns attribute type: date
     When relation(marriage) set owns attribute type: religion
-    When relation(marriage) remove owns attribute type: religion
+    When relation(marriage) unset owns attribute type: religion
     Then relation(marriage) get owns attribute types do not contain:
       | religion |
     When transaction commits
     When session opens transaction of type: write
-    When relation(marriage) remove owns attribute type: date
+    When relation(marriage) unset owns attribute type: date
     Then relation(marriage) get owns attribute types do not contain:
       | date     |
       | religion |
@@ -936,7 +936,7 @@ Feature: Concept Relation Type and Role Type
       | locates:located     |
       | organises:organised |
 
-  Scenario: Relation types can remove playing role types
+  Scenario: Relation types can unset playing role types
     When put relation type: locates
     When relation(locates) set relates role: location
     When relation(locates) set relates role: located
@@ -948,12 +948,12 @@ Feature: Concept Relation Type and Role Type
     When relation(marriage) set relates role: wife
     When relation(marriage) set plays role: locates:located
     When relation(marriage) set plays role: organises:organised
-    When relation(marriage) remove plays role: locates:located
+    When relation(marriage) unset plays role: locates:located
     Then relation(marriage) get playing roles do not contain:
       | locates:located |
     When transaction commits
     When session opens transaction of type: write
-    When relation(marriage) remove plays role: organises:organised
+    When relation(marriage) unset plays role: organises:organised
     Then relation(marriage) get playing roles do not contain:
       | locates:located     |
       | organises:organised |

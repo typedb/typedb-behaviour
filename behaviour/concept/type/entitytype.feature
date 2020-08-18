@@ -243,18 +243,18 @@ Feature: Concept Entity Type
       | email    |
       | username |
 
-  Scenario: Entity types can remove keys
+  Scenario: Entity types can unset keys
     When put attribute type: email, with value type: string
     When put attribute type: username, with value type: string
     When put entity type: person
     When entity(person) set owns key type: email
     When entity(person) set owns key type: username
-    When entity(person) remove owns key type: email
+    When entity(person) unset owns key type: email
     Then entity(person) get owns key types do not contain:
       | email |
     When transaction commits
     When session opens transaction of type: write
-    When entity(person) remove owns key type: username
+    When entity(person) unset owns key type: username
     Then entity(person) get owns key types do not contain:
       | email    |
       | username |
@@ -291,18 +291,18 @@ Feature: Concept Entity Type
       | name |
       | age  |
 
-  Scenario: Entity types can remove attributes
+  Scenario: Entity types can unset attributes
     When put attribute type: name, with value type: string
     When put attribute type: age, with value type: long
     When put entity type: person
     When entity(person) set owns attribute type: name
     When entity(person) set owns attribute type: age
-    When entity(person) remove owns attribute type: age
+    When entity(person) unset owns attribute type: age
     Then entity(person) get owns attribute types do not contain:
       | age |
     When transaction commits
     When session opens transaction of type: write
-    When entity(person) remove owns attribute type: name
+    When entity(person) unset owns attribute type: name
     Then entity(person) get owns attribute types do not contain:
       | name |
       | age  |
@@ -855,21 +855,21 @@ Feature: Concept Entity Type
     Then relation(marriage) get role(wife) get players contain:
       | person |
 
-  Scenario: Entity types can remove playing role types
+  Scenario: Entity types can unset playing role types
     When put relation type: marriage
     When relation(marriage) set relates role: husband
     When relation(marriage) set relates role: wife
     When put entity type: person
     When entity(person) set plays role: marriage:husband
     When entity(person) set plays role: marriage:wife
-    Then entity(person) remove plays role: marriage:husband
+    Then entity(person) unset plays role: marriage:husband
     Then entity(person) get playing roles do not contain:
       | marriage:husband |
     Then relation(marriage) get role(husband) get players do not contain:
       | person |
     When transaction commits
     When session opens transaction of type: write
-    Then entity(person) remove plays role: marriage:wife
+    Then entity(person) unset plays role: marriage:wife
     Then entity(person) get playing roles do not contain:
       | marriage:husband |
       | marriage:wife    |

@@ -86,11 +86,11 @@ Feature: Concept Entity
     Then entity $a get keys contain: $alice
     Then attribute $alice get owners contain: $a
 
-  Scenario: Entity can remove keys
+  Scenario: Entity can unset keys
     When $a = entity(person) create new instance
     When $alice = attribute(username) as(string) put: alice
     When entity $a set has: $alice
-    When entity $a remove has: $alice
+    When entity $a unset has: $alice
     Then entity $a get attributes(username) as(string) do not contain: $alice
     Then entity $a get keys do not contain: $alice
     Then attribute $alice get owners do not contain: $a
@@ -100,17 +100,17 @@ Feature: Concept Entity
     When $a = entity(person) get instance with key(username): alice
     When $alice = attribute(username) as(string) get: alice
     Then entity $a get attributes(username) as(string) contain: $alice
-    When entity $a remove has: $alice
+    When entity $a unset has: $alice
     Then entity $a get attributes(username) as(string) do not contain: $alice
     Then entity $a get keys do not contain: $alice
     Then attribute $alice get owners do not contain: $a
     Then transaction commits; throws exception
 
-  Scenario: Entity that has its key removed cannot be committed
+  Scenario: Entity that has its key unset cannot be committed
     When $a = entity(person) create new instance
     When $alice = attribute(username) as(string) put: alice
     When entity $a set has: $alice
-    When entity $a remove has: $alice
+    When entity $a unset has: $alice
     Then transaction commits; throws exception
     When session opens transaction of type: write
     When $a = entity(person) create new instance
@@ -120,7 +120,7 @@ Feature: Concept Entity
     When session opens transaction of type: write
     When $a = entity(person) get instance with key(username): alice
     When $alice = attribute(username) as(string) get: alice
-    When entity $a remove has: $alice
+    When entity $a unset has: $alice
     Then transaction commits; throws exception
 
   Scenario: Entity cannot have more than one key for a given key type
@@ -165,11 +165,11 @@ Feature: Concept Entity
     Then entity $a get attributes contain: $email
     Then attribute $email get owners contain: $a
 
-  Scenario: Entity can remove attribute
+  Scenario: Entity can unset attribute
     When $a = entity(person) create new instance with key(username): alice
     When $email = attribute(email) as(string) put: alice@email.com
     When entity $a set has: $email
-    When entity $a remove has: $email
+    When entity $a unset has: $email
     Then entity $a get attributes(email) as(string) do not contain: $email
     Then entity $a get attributes do not contain: $email
     Then attribute $email get owners do not contain: $a
@@ -188,7 +188,7 @@ Feature: Concept Entity
     Then entity $a get attributes(email) as(string) contain: $email
     Then entity $a get attributes contain: $email
     Then attribute $email get owners contain: $a
-    When entity $a remove has: $email
+    When entity $a unset has: $email
     Then entity $a get attributes(email) as(string) do not contain: $email
     Then entity $a get attributes do not contain: $email
     Then attribute $email get owners do not contain: $a
@@ -204,7 +204,7 @@ Feature: Concept Entity
     When $a = entity(person) get instance with key(username): alice
     When $email = attribute(email) as(string) get: alice@email.com
     When entity $a set has: $email
-    When entity $a remove has: $email
+    When entity $a unset has: $email
     Then entity $a get attributes(email) as(string) do not contain: $email
     Then entity $a get attributes do not contain: $email
     Then attribute $email get owners do not contain: $a
