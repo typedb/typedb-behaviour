@@ -68,7 +68,7 @@ unuseddeps_deps()
 
 #####################################################################
 # Load @graknlabs_bazel_distribution (from @graknlabs_dependencies) #
-####################################################################
+#####################################################################
 load("@graknlabs_dependencies//distribution:deps.bzl", distribution_deps = "deps")
 distribution_deps()
 
