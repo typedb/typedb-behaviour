@@ -971,25 +971,12 @@ Feature: Graql Undefine Query
       """
 
 
-  Scenario: undefining the value type of an attribute does nothing
-    When graql undefine
+  Scenario: undefining the value type of an attribute throws an error
+    When graql undefine throws
       """
       undefine name value string;
       """
     Then the integrity is validated
-    When get answers of graql query
-      """
-      match
-        $x type name;
-        $x value string;
-      get;
-      """
-    When concept identifiers are
-      |     | check | value |
-      | NAM | label | name  |
-    Then uniquely identify answer concepts
-      | x   |
-      | NAM |
 
 
   Scenario: all existing instances of an attribute type must be deleted in order to undefine it
