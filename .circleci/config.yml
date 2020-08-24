@@ -37,14 +37,22 @@ commands:
           command: bazel run //tools:grakn-extractor -- dist/grakn-core-all-linux
       - run: nohup ./dist/grakn-core-all-linux/grakn server start
 
+  install-artifact-credentials:
+    steps:
+      - run: |
+          ARTIFACT_USERNAME=$REPO_GRAKN_USERNAME \
+          ARTIFACT_PASSWORD=$REPO_GRAKN_PASSWORD \
+          bazel run @graknlabs_dependencies//distribution/artifact:create-netrc
+
 jobs:
   build:
     machine: 
       image: ubuntu-1604:201903-01
     working_directory: ~/verification
     steps:
-      - install-bazel
       - checkout
+      - install-bazel
+      - install-artifact-credentials
       - run-bazel:
           command: bazel build //...
       - run:
@@ -59,8 +67,9 @@ jobs:
       image: ubuntu-1604:201903-01
     working_directory: ~/verification
     steps:
-      - install-bazel
       - checkout
+      - install-bazel
+      - install-artifact-credentials
       - run: bazel run @graknlabs_dependencies//tool/checkstyle:test-coverage
       - run-bazel:
           command: bazel test $(bazel query 'kind(checkstyle_test, //...)')
@@ -70,8 +79,9 @@ jobs:
       image: ubuntu-1604:201903-01
     working_directory: ~/verification
     steps:
-      - install-bazel
       - checkout
+      - install-bazel
+      - install-artifact-credentials
       - run-bazel:
           command: bazel test //tools/operator/... --test_output=errors
 
@@ -80,8 +90,9 @@ jobs:
       image: ubuntu-1604:201903-01
     working_directory: ~/verification
     steps:
-      - install-bazel
       - checkout
+      - install-bazel
+      - install-artifact-credentials
       - run-grakn
       - run: bazel test //tools/integrity/... --test_output=errors --spawn_strategy=local
 
