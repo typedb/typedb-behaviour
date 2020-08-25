@@ -36,25 +36,7 @@ build:
           dependencies/maven/update.sh
           git diff --exit-code dependencies/maven/artifacts.snapshot
           bazel run @graknlabs_dependencies//tool/unuseddeps:unused-deps -- list
-      test-tools-operator:
-        machine: graknlabs-ubuntu-20.04
-        script: |
-          ARTIFACT_USERNAME=$REPO_GRAKN_USERNAME \
-          ARTIFACT_PASSWORD=$REPO_GRAKN_PASSWORD \
-          bazel run @graknlabs_dependencies//distribution/artifact:create-netrc
-          bazel test //tools/operator/... --test_output=errors
-      test-tools-integrity:
-        machine: graknlabs-ubuntu-20.04
-        script: |
-          ARTIFACT_USERNAME=$REPO_GRAKN_USERNAME \
-          ARTIFACT_PASSWORD=$REPO_GRAKN_PASSWORD \
-          bazel run @graknlabs_dependencies//distribution/artifact:create-netrc
-          bazel run //tools:grakn-extractor -- dist/grakn-core-all-linux
-          nohup ./dist/grakn-core-all-linux/grakn server start
-          bazel test //tools/integrity/... --test_output=errors --spawn_strategy=local
     execution:
       - build
       - build-dependency
-      - test-tools-operator
-      - test-tools-integrity
       
