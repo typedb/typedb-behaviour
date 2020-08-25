@@ -25,8 +25,6 @@ build:
           ARTIFACT_PASSWORD=$REPO_GRAKN_PASSWORD \
           bazel run @graknlabs_dependencies//distribution/artifact:create-netrc
           bazel build //...
-          bazel run @graknlabs_dependencies//tool/checkstyle:test-coverage
-          bazel test --config=rbe $(bazel query 'kind(checkstyle_test, //...)') --test_output=errors
       build-dependency:
         machine: graknlabs-ubuntu-20.04
         script: |
