@@ -17,24 +17,11 @@
 
 build:
   correctness:
-    jobs:
+    job:
       build:
         machine: graknlabs-ubuntu-20.04
         script: |
-          ARTIFACT_USERNAME=$REPO_GRAKN_USERNAME \
-          ARTIFACT_PASSWORD=$REPO_GRAKN_PASSWORD \
-          bazel run @graknlabs_dependencies//distribution/artifact:create-netrc
           bazel build //...
-      build-dependency:
-        machine: graknlabs-ubuntu-20.04
-        script: |
-          ARTIFACT_USERNAME=$REPO_GRAKN_USERNAME \
-          ARTIFACT_PASSWORD=$REPO_GRAKN_PASSWORD \
-          bazel run @graknlabs_dependencies//distribution/artifact:create-netrc
           dependencies/maven/update.sh
           git diff --exit-code dependencies/maven/artifacts.snapshot
-          bazel run @graknlabs_dependencies//tool/unuseddeps:unused-deps -- list
-    execution:
-      - build
-      - build-dependency
       
