@@ -23,6 +23,8 @@ workspace(name = "graknlabs_verification")
 load("//dependencies/graknlabs:repositories.bzl", "graknlabs_dependencies")
 graknlabs_dependencies()
 
+load("@graknlabs_dependencies//dependencies/maven:artifacts.bzl", graknlabs_dependencies_artifacts = "artifacts")
+
 # Load Antlr
 load("@graknlabs_dependencies//builder/antlr:deps.bzl", antlr_deps = "deps")
 antlr_deps()
@@ -30,9 +32,7 @@ load("@rules_antlr//antlr:deps.bzl", "antlr_dependencies")
 antlr_dependencies()
 
 # Load Bazel
-load("@graknlabs_dependencies//builder/bazel:deps.bzl","bazel_common", "bazel_deps", "bazel_toolchain")
-bazel_common()
-bazel_deps()
+load("@graknlabs_dependencies//builder/bazel:deps.bzl", "bazel_toolchain")
 bazel_toolchain()
 
 # Load gRPC
@@ -66,11 +66,11 @@ checkstyle_deps()
 load("@graknlabs_dependencies//tool/unuseddeps:deps.bzl", unuseddeps_deps = "deps")
 unuseddeps_deps()
 
-#####################################################################
-# Load @graknlabs_bazel_distribution (from @graknlabs_dependencies) #
-#####################################################################
-load("@graknlabs_dependencies//distribution:deps.bzl", distribution_deps = "deps")
-distribution_deps()
+######################################
+# Load @graknlabs_bazel_distribution #
+######################################
+load("@graknlabs_dependencies//dependencies/graknlabs:repositories.bzl", "graknlabs_bazel_distribution")
+graknlabs_bazel_distribution()
 
 ##########################
 # Load @graknlabs_common #
@@ -91,12 +91,19 @@ load("@graknlabs_graql//dependencies/maven:artifacts.bzl", graknlabs_graql_artif
 ###############################
 load("//dependencies/graknlabs:repositories.bzl", "graknlabs_client_java")
 graknlabs_client_java()
+
 load("@graknlabs_client_java//dependencies/maven:artifacts.bzl", graknlabs_client_java_artifacts = "artifacts")
 
-load("@graknlabs_client_java//dependencies/graknlabs:dependencies.bzl", "graknlabs_protocol")
+##########################################################
+# Load @graknlabs_protocol (from @graknlabs_client_java) #
+##########################################################
+load("@graknlabs_client_java//dependencies/graknlabs:repositories.bzl", "graknlabs_protocol")
 graknlabs_protocol()
 
-load("@graknlabs_client_java//dependencies/graknlabs:dependencies.bzl", "graknlabs_grabl_tracing")
+###############################################################
+# Load @graknlabs_grabl_tracing (from @graknlabs_client_java) #
+###############################################################
+load("@graknlabs_client_java//dependencies/graknlabs:repositories.bzl", "graknlabs_grabl_tracing")
 graknlabs_grabl_tracing()
 
 load("@graknlabs_grabl_tracing//dependencies/maven:artifacts.bzl", graknlabs_grabl_tracing_artifacts = "artifacts")
