@@ -141,18 +141,23 @@ Feature: Concept Attribute Type
     When put attribute type: name, with value type: string
     When attribute(name) set abstract: true
     Then attribute(name) is abstract: true
+    When transaction commits
+    When session opens transaction of type: write
     Then attribute(name) as(string) put: alice; throws exception
+    When session opens transaction of type: write
     When put attribute type: email, with value type: string
     Then attribute(email) is abstract: false
     When transaction commits
     When session opens transaction of type: write
     Then attribute(name) is abstract: true
     Then attribute(name) as(string) put: alice; throws exception
+    When session opens transaction of type: write
     Then attribute(email) is abstract: false
     When attribute(email) set abstract: true
     Then attribute(email) is abstract: true
-    Then attribute(email) as(string) put: alice@email.com; throws exception
     When transaction commits
+    When session opens transaction of type: write
+    Then attribute(email) as(string) put: alice@email.com; throws exception
     When session opens transaction of type: write
     Then attribute(email) is abstract: true
     Then attribute(email) as(string) put: alice@email.com; throws exception
@@ -268,25 +273,25 @@ Feature: Concept Attribute Type
     When put attribute type: rating, with value type: double
     When put attribute type: name, with value type: string
     When put attribute type: timestamp, with value type: datetime
-    Then attribute(is-open) set supertype: is-open; throws exception
-    Then attribute(age) set supertype: age; throws exception
-    Then attribute(rating) set supertype: rating; throws exception
-    Then attribute(name) set supertype: name; throws exception
-    Then attribute(timestamp) set supertype: timestamp; throws exception
     When transaction commits
     When session opens transaction of type: write
     Then attribute(is-open) set supertype: is-open; throws exception
+    When session opens transaction of type: write
     Then attribute(age) set supertype: age; throws exception
+    When session opens transaction of type: write
     Then attribute(rating) set supertype: rating; throws exception
+    When session opens transaction of type: write
     Then attribute(name) set supertype: name; throws exception
+    When session opens transaction of type: write
     Then attribute(timestamp) set supertype: timestamp; throws exception
 
   Scenario: Attribute types cannot subtype non abstract attribute types
     When put attribute type: name, with value type: string
     When put attribute type: first-name, with value type: string
     When put attribute type: last-name, with value type: string
-    Then attribute(first-name) set supertype: name; throws exception
     When transaction commits
+    When session opens transaction of type: write
+    Then attribute(first-name) set supertype: name; throws exception
     When session opens transaction of type: write
     Then attribute(last-name) set supertype: name; throws exception
 
@@ -296,25 +301,46 @@ Feature: Concept Attribute Type
     When put attribute type: rating, with value type: double
     When put attribute type: name, with value type: string
     When put attribute type: timestamp, with value type: datetime
+    When transaction commits
+    When session opens transaction of type: write
     Then attribute(is-open) set supertype: age; throws exception
+    When session opens transaction of type: write
     Then attribute(is-open) set supertype: rating; throws exception
+    When session opens transaction of type: write
     Then attribute(is-open) set supertype: name; throws exception
+    When session opens transaction of type: write
     Then attribute(is-open) set supertype: timestamp; throws exception
+    When session opens transaction of type: write
     Then attribute(age) set supertype: is-open; throws exception
+    When session opens transaction of type: write
     Then attribute(age) set supertype: rating; throws exception
+    When session opens transaction of type: write
     Then attribute(age) set supertype: name; throws exception
+    When session opens transaction of type: write
     Then attribute(age) set supertype: timestamp; throws exception
+    When session opens transaction of type: write
     Then attribute(rating) set supertype: is-open; throws exception
+    When session opens transaction of type: write
     Then attribute(rating) set supertype: age; throws exception
+    When session opens transaction of type: write
     Then attribute(rating) set supertype: name; throws exception
+    When session opens transaction of type: write
     Then attribute(rating) set supertype: timestamp; throws exception
+    When session opens transaction of type: write
     Then attribute(name) set supertype: is-open; throws exception
+    When session opens transaction of type: write
     Then attribute(name) set supertype: age; throws exception
+    When session opens transaction of type: write
     Then attribute(name) set supertype: rating; throws exception
+    When session opens transaction of type: write
     Then attribute(name) set supertype: timestamp; throws exception
+    When session opens transaction of type: write
     Then attribute(timestamp) set supertype: is-open; throws exception
+    When session opens transaction of type: write
     Then attribute(timestamp) set supertype: age; throws exception
+    When session opens transaction of type: write
     Then attribute(timestamp) set supertype: rating; throws exception
+    When session opens transaction of type: write
     Then attribute(timestamp) set supertype: name; throws exception
 
   Scenario: Attribute types can get the root type as the same value class

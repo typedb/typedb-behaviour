@@ -160,7 +160,10 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) is abstract: true
     Then relation(marriage) get role(husband) is abstract: true
     Then relation(marriage) get role(wife) is abstract: true
+    When transaction commits
+    When session opens transaction of type: write
     Then relation(marriage) create new instance; throws exception
+    When session opens transaction of type: write
     Then relation(parentship) is abstract: false
     Then relation(parentship) get role(parent) is abstract: false
     Then relation(parentship) get role(child) is abstract: false
@@ -169,7 +172,10 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) is abstract: true
     Then relation(marriage) get role(husband) is abstract: true
     Then relation(marriage) get role(wife) is abstract: true
+    When transaction commits
+    When session opens transaction of type: write
     Then relation(marriage) create new instance; throws exception
+    When session opens transaction of type: write
     Then relation(parentship) is abstract: false
     Then relation(parentship) get role(parent) is abstract: false
     Then relation(parentship) get role(child) is abstract: false
@@ -177,8 +183,9 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) is abstract: true
     Then relation(parentship) get role(parent) is abstract: true
     Then relation(parentship) get role(child) is abstract: true
-    Then relation(parentship) create new instance; throws exception
     When transaction commits
+    When session opens transaction of type: write
+    Then relation(parentship) create new instance; throws exception
     When session opens transaction of type: read
     Then relation(parentship) is abstract: true
     Then relation(parentship) get role(parent) is abstract: true
@@ -357,7 +364,6 @@ Feature: Concept Relation Type and Role Type
   Scenario: Relation types cannot subtype itself
     When put relation type: marriage
     When relation(marriage) set relates role: wife
-    Then relation(marriage) set supertype: marriage; throws exception
     When transaction commits
     When session opens transaction of type: write
     Then relation(marriage) set supertype: marriage; throws exception
@@ -454,7 +460,7 @@ Feature: Concept Relation Type and Role Type
       | license     |
       | certificate |
 
-  Scenario: Relation types cannot have keys of attributes that are not keyable
+  Scenario: Relation types can have keys of all keyable attributes
     When put attribute type: is-permanent, with value type: boolean
     When put attribute type: contract-years, with value type: long
     When put attribute type: salary, with value type: double
@@ -464,7 +470,14 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set owns key type: contract-years
     When relation(employment) set owns key type: reference
     When relation(employment) set owns key type: start-date
+
+  Scenario: Relation types cannot have keys of attributes that are not keyable
+    When put attribute type: is-permanent, with value type: boolean
+    When put relation type: employment
     Then relation(employment) set owns key type: is-permanent; throws exception
+    When session opens transaction of type: write
+    When put attribute type: salary, with value type: double
+    When put relation type: employment
     Then relation(employment) set owns key type: salary; throws exception
 
   Scenario: Relation types can have attributes
@@ -836,32 +849,68 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set owns attribute type: employment-hours
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
+    When transaction commits
+    When session opens transaction of type: write
     Then relation(contractor-employment) set owns key type: employment-reference; throws exception
+    When session opens transaction of type: write
     Then relation(contractor-employment) set owns attribute type: employment-hours; throws exception
 
-  Scenario: Relation types cannot redeclare inherited/overridden key/owns attribute types
+  Scenario: Relation types cannot redeclare inherited key attribute types
     When put attribute type: employment-reference, with value type: string
     When attribute(employment-reference) set abstract: true
-    When put attribute type: employment-hours, with value type: long
-    When attribute(employment-hours) set abstract: true
+    When put relation type: employment
+    When relation(employment) set abstract: true
+    When relation(employment) set relates role: employee
+    When relation(employment) set owns key type: employment-reference
+    When put relation type: contractor-employment
+    When relation(contractor-employment) set supertype: employment
+    When put relation type: parttime-employment
+    When relation(parttime-employment) set supertype: contractor-employment
+    Then relation(parttime-employment) set owns key type: employment-reference; throws exception
+
+  Scenario: Relation types cannot redeclare overridden key attribute types
+    When put attribute type: employment-reference, with value type: string
+    When attribute(employment-reference) set abstract: true
     When put attribute type: contractor-reference, with value type: string
     When attribute(contractor-reference) set supertype: employment-reference
+    When put relation type: employment
+    When relation(employment) set abstract: true
+    When relation(employment) set relates role: employee
+    When relation(employment) set owns key type: employment-reference
+    When put relation type: contractor-employment
+    When relation(contractor-employment) set supertype: employment
+    When relation(contractor-employment) set owns key type: contractor-reference as employment-reference
+    When put relation type: parttime-employment
+    When relation(parttime-employment) set supertype: contractor-employment
+    Then relation(parttime-employment) set owns key type: contractor-reference; throws exception
+
+  Scenario: Relation types cannot redeclare inherited owns attribute types
+    When put attribute type: employment-hours, with value type: long
+    When attribute(employment-hours) set abstract: true
+    When put relation type: employment
+    When relation(employment) set abstract: true
+    When relation(employment) set relates role: employee
+    When relation(employment) set owns attribute type: employment-hours
+    When put relation type: contractor-employment
+    When relation(contractor-employment) set supertype: employment
+    When put relation type: parttime-employment
+    When relation(parttime-employment) set supertype: contractor-employment
+    Then relation(parttime-employment) set owns attribute type: employment-hours; throws exception
+
+  Scenario: Relation types cannot redeclare overridden owns attribute types
+    When put attribute type: employment-hours, with value type: long
+    When attribute(employment-hours) set abstract: true
     When put attribute type: contractor-hours, with value type: long
     When attribute(contractor-hours) set supertype: employment-hours
     When put relation type: employment
     When relation(employment) set abstract: true
     When relation(employment) set relates role: employee
-    When relation(employment) set owns key type: employment-reference
     When relation(employment) set owns attribute type: employment-hours
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    When relation(contractor-employment) set owns key type: contractor-reference as employment-reference
     When relation(contractor-employment) set owns attribute type: contractor-hours as employment-hours
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
-    Then relation(parttime-employment) set owns key type: employment-reference; throws exception
-    Then relation(parttime-employment) set owns key type: contractor-reference; throws exception
-    Then relation(parttime-employment) set owns attribute type: employment-hours; throws exception
     Then relation(parttime-employment) set owns attribute type: contractor-hours; throws exception
 
   Scenario: Relation types cannot override declared keys and attributes
@@ -879,7 +928,10 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set relates role: employer
     When relation(employment) set owns key type: reference
     When relation(employment) set owns attribute type: hours
+    When transaction commits
+    When session opens transaction of type: write
     Then relation(employment) set owns key type: social-security-number as reference; throws exception
+    When session opens transaction of type: write
     Then relation(employment) set owns attribute type: max-hours as hours; throws exception
 
   Scenario: Relation types cannot override inherited keys as attributes
@@ -908,7 +960,10 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set owns attribute type: employment-hours
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
+    When transaction commits
+    When session opens transaction of type: write
     Then relation(contractor-employment) set owns key type: contractor-reference as employment-reference; throws exception
+    When session opens transaction of type: write
     Then relation(contractor-employment) set owns attribute type: contractor-hours as employment-hours; throws exception
 
   Scenario: Relation types can play role types
@@ -1100,7 +1155,10 @@ Feature: Concept Relation Type and Role Type
     When relation(contractor-employment) set plays role: contractor-locates:contractor-located as located
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
+    When transaction commits
+    When session opens transaction of type: write
     Then relation(parttime-employment) set plays role: locates:located; throws exception
+    When session opens transaction of type: write
     Then relation(parttime-employment) set plays role: contractor-locates:contractor-located; throws exception
 
   Scenario: Relation types cannot override declared playing role types
