@@ -44,5 +44,5 @@ def graknlabs_client_java():
     git_repository(
         name = "graknlabs_client_java",
         remote = "https://github.com/alexjpwalker/client-java",
-        commit = "918be3a15467f1414a5a94c4e2b667e6fe8b0d4d",
+        commit = "1e8d058725fe69f8402872f49e2447513feadb2a",
     )
