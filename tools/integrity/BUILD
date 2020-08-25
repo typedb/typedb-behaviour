@@ -28,7 +28,6 @@ java_library(
     deps = [
         "@graknlabs_client_java//:client-java",
         "@graknlabs_graql//java:graql",
-        "@graknlabs_common//:common",
         "@maven//:com_google_guava_guava",
         "@maven//:org_slf4j_slf4j_api",
     ],
