@@ -18,7 +18,7 @@
 #
 
 package(default_visibility = ["//visibility:public"])
-load("@graknlabs_dependencies//distribution/artifact:rules.bzl", "artifact_extractor")
+load("@graknlabs_bazel_distribution//artifact:rules.bzl", "artifact_extractor")
 
 artifact_extractor(
     name = "grakn-extractor",
