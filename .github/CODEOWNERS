@@ -1,6 +1,6 @@
 /*                  @haikalpribadi
 /dependencies       @haikalpribadi
-/behaviour          @haikalpribadi
-/behaviour/graql    @flyingsilverfin
-/behaviour/graql/reasoner   @jmsfltchr
+/graql              @flyingsilverfin @alexjpwalker
+/graql/reasoner     @jmsfltchr
+BUILD               @haikalpribadi
 WORKSPACE           @haikalpribadi

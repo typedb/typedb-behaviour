@@ -1,1 +1,0 @@
-# Grakn Behaviour Specification
