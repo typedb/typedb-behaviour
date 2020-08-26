@@ -1,1 +1,1 @@
-# Grakn Behaviour Verification
+# Grakn Behaviour Specification
