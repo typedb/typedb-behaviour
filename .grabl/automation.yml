@@ -15,3 +15,13 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+build:
+  correctness:
+    job:
+      build:
+        machine: graknlabs-ubuntu-20.04
+        script: |
+          bazel build //...
+          dependencies/maven/update.sh
+          git diff --exit-code dependencies/maven/artifacts.snapshot
+      

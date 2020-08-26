@@ -16,33 +16,3 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
-
-def graknlabs_dependencies():
-    git_repository(
-        name = "graknlabs_dependencies",
-        remote = "https://github.com/graknlabs/dependencies",
-        commit = "a83649f0d777440c86ffbf4ecb4bb33fd0312bf3",  # sync-marker: do not remove this comment, this is used for sync-dependencies by @graknlabs_dependencies
-    )
-
-def graknlabs_common():
-    git_repository(
-        name = "graknlabs_common",
-        remote = "https://github.com/graknlabs/common",
-        commit = "72ab1a6de9489eb43b8081eda53d29aab9e908c3" # sync-marker: do not remove this comment, this is used for sync-dependencies by @graknlabs_common
-    )
-
-def graknlabs_graql():
-    git_repository(
-        name = "graknlabs_graql",
-        remote = "https://github.com/graknlabs/graql",
-        commit = "221c3ec6c0e0b0702dc4c299ac2e39d9f6ca3a18" # sync-marker: do not remove this comment, this is used for sync-dependencies by @graknlabs_graql
-    )
-
-def graknlabs_client_java():
-    git_repository(
-        name = "graknlabs_client_java",
-        remote = "https://github.com/alexjpwalker/client-java",
-        commit = "918be3a15467f1414a5a94c4e2b667e6fe8b0d4d",
-    )
