@@ -63,7 +63,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x type person; get;
+      match $x type person;
       """
     And concept identifiers are
       |     | check | value  |
@@ -83,7 +83,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x sub person; get;
+      match $x sub person;
       """
     And concept identifiers are
       |     | check | value        |
@@ -107,7 +107,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match writer sub $x; get;
+      match writer sub $x;
       """
     And concept identifiers are
       |     | check | value  |
@@ -157,7 +157,6 @@ Feature: Graql Match Clause
       match
         $x isa $type;
         $type sub worker;
-      get;
       """
     When concept identifiers are
       |     | check | value                        |
@@ -203,7 +202,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x sub! person; get;
+      match $x sub! person;
       """
     And concept identifiers are
       |     | check | value    |
@@ -227,7 +226,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match writer sub! $x; get;
+      match writer sub! $x;
       """
     And concept identifiers are
       |     | check | value  |
@@ -257,18 +256,17 @@ Feature: Graql Match Clause
         $x sub $y;
         $y sub $z;
         $z sub sub1;
-      get;
       """
     Then each answer satisfies
       """
-      match $x sub $z; $x iid <answer.x.iid>; $z iid <answer.z.iid>; get;
+      match $x sub $z; $x iid <answer.x.iid>; $z iid <answer.z.iid>;
       """
 
 
   Scenario: 'has' matches types that have the specified attribute type
     When get answers of graql query
       """
-      match $x owns age; get;
+      match $x owns age;
       """
     And concept identifiers are
       |     | check | value  |
@@ -288,7 +286,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x owns name; get;
+      match $x owns name;
       """
     And concept identifiers are
       |     | check | value   |
@@ -310,7 +308,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x owns club-name; get;
+      match $x owns club-name;
       """
     And concept identifiers are
       |     | check | value |
@@ -325,7 +323,7 @@ Feature: Graql Match Clause
   Scenario: 'has' can be used to match attribute types that a particular type has
     When get answers of graql query
       """
-      match person has $x; get;
+      match person has $x;
       """
     And concept identifiers are
       |     | check | value |
@@ -360,7 +358,6 @@ Feature: Graql Match Clause
       match
         $x isa $type;
         $type owns name;
-      get;
       """
     When concept identifiers are
       |      | check | value      |
@@ -381,7 +378,7 @@ Feature: Graql Match Clause
   Scenario: 'plays' matches types that can play the specified role
     When get answers of graql query
       """
-      match $x plays friendship:friend; get;
+      match $x plays friendship:friend;
       """
     And concept identifiers are
       |     | check | value  |
@@ -401,7 +398,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x plays friendship:friend; get;
+      match $x plays friendship:friend;
       """
     And concept identifiers are
       |     | check | value  |
@@ -421,7 +418,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x plays close-friendship:close-friend; get;
+      match $x plays close-friendship:close-friend;
       """
     And concept identifiers are
       |     | check | value           |
@@ -434,7 +431,7 @@ Feature: Graql Match Clause
   Scenario: 'plays' can be used to match roles that a particular type can play
     When get answers of graql query
       """
-      match person plays $x; get;
+      match person plays $x;
       """
     And concept identifiers are
       |     | check | value    |
@@ -468,7 +465,6 @@ Feature: Graql Match Clause
       match
         $x isa $type;
         $type plays friendship:friend;
-      get;
       """
     When concept identifiers are
       |      | check | value  |
@@ -492,7 +488,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x owns breed @key; get;
+      match $x owns breed @key;
       """
     And concept identifiers are
       |     | check | value |
@@ -507,7 +503,7 @@ Feature: Graql Match Clause
   Scenario: 'key' can be used to find all attribute types that the specified type uses as key
     When get answers of graql query
       """
-      match person key $x; get;
+      match person key $x;
       """
     And concept identifiers are
       |     | check | value |
@@ -528,7 +524,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x owns breed; get;
+      match $x owns breed;
       """
     And concept identifiers are
       |     | check | value |
@@ -543,7 +539,7 @@ Feature: Graql Match Clause
   Scenario: 'relates' matches relation types where the specified role can be played
     When get answers of graql query
       """
-      match $x relates employee; get;
+      match $x relates employee;
       """
     And concept identifiers are
       |     | check | value      |
@@ -563,7 +559,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x relates close-friend as friend; get;
+      match $x relates close-friend as friend;
       """
     And concept identifiers are
       |     | check | value            |
@@ -583,7 +579,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x relates friend; get;
+      match $x relates friend;
       """
     And concept identifiers are
       |     | check | value      |
@@ -596,7 +592,7 @@ Feature: Graql Match Clause
   Scenario: 'relates' can be used to retrieve all the roles of a relation type
     When get answers of graql query
       """
-      match employment relates $x; get;
+      match employment relates $x;
       """
     And concept identifiers are
       |     | check | value    |
@@ -614,7 +610,6 @@ Feature: Graql Match Clause
       match
         $x iid 0x83cb2;
         $y iid 0x4ba92;
-      get;
       """
     Then answer size is: 0
 
@@ -643,7 +638,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x isa writer; get;
+      match $x isa writer;
       """
     And concept identifiers are
       |     | check | value |
@@ -677,7 +672,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x isa! writer; get;
+      match $x isa! writer;
       """
     And concept identifiers are
       |     | check | value |
@@ -696,18 +691,18 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Then each answer satisfies
       """
-      match $x iid <answer.x.iid>; get;
+      match $x iid <answer.x.iid>;
       """
 
 
   Scenario: when matching by a type whose label doesn't exist, an error is thrown
     Then graql get throws
       """
-      match $x isa ganesh; get;
+      match $x isa ganesh;
       """
     Then the integrity is validated
 
@@ -715,7 +710,7 @@ Feature: Graql Match Clause
   Scenario: when matching by a type iid that doesn't exist, an empty result is returned
     When get answers of graql query
       """
-      match $x isa $type; $type iid 0x83cb2; get;
+      match $x isa $type; $type iid 0x83cb2;
       """
     Then answer size is: 0
 
@@ -723,7 +718,7 @@ Feature: Graql Match Clause
   Scenario: when matching by a relation type whose label doesn't exist, an error is thrown
     Then graql get throws
       """
-      match ($x, $y) isa $type; $type type jakas-relacja; get;
+      match ($x, $y) isa $type; $type type jakas-relacja;
       """
     Then the integrity is validated
 
@@ -731,7 +726,7 @@ Feature: Graql Match Clause
   Scenario: when matching a non-existent type label to a variable from a generic 'isa' query, an error is thrown
     Then graql get throws
       """
-      match $x isa $type; $type type polok; get;
+      match $x isa $type; $type type polok;
       """
     Then the integrity is validated
 
@@ -742,7 +737,6 @@ Feature: Graql Match Clause
       match
         $x isa person;
         $x isa company;
-      get;
       """
     Then answer size is: 0
 
@@ -758,7 +752,6 @@ Feature: Graql Match Clause
       match
         $x isa person;
         $y isa person;
-      get;
       """
     When concept identifiers are
       |     | check | value |
@@ -771,7 +764,7 @@ Feature: Graql Match Clause
   Scenario: an error is thrown when matching that a variable has a specific type, when that type is in fact a role
     Then graql get throws
       """
-      match $x isa friend; get;
+      match $x isa friend;
       """
     Then the integrity is validated
 
@@ -789,7 +782,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     Then graql get throws
       """
-      match $x isa metre-rule; get;
+      match $x isa metre-rule;
       """
     Then the integrity is validated
 
@@ -810,7 +803,7 @@ Feature: Graql Match Clause
     When the integrity is validated
     Then get answers of graql query
       """
-      match $x isa person; $r (employee: $x) isa relation; get;
+      match $x isa person; $r (employee: $x) isa relation;
       """
     And concept identifiers are
       |      | check | value |
@@ -822,7 +815,7 @@ Feature: Graql Match Clause
       | REF0 | REF2 |
     When get answers of graql query
       """
-      match $y isa company; $r (employer: $y) isa relation; get;
+      match $y isa company; $r (employer: $y) isa relation;
       """
     Then uniquely identify answer concepts
       | y    | r    |
@@ -841,7 +834,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x isa person; $r ($x) isa relation; get;
+      match $x isa person; $r ($x) isa relation;
       """
     When concept identifiers are
       |      | check | value |
@@ -863,7 +856,7 @@ Feature: Graql Match Clause
     When the integrity is validated
     Then get answers of graql query
       """
-      match $r ($x, $y) isa employment; get;
+      match $r ($x, $y) isa employment;
       """
     And concept identifiers are
       |      | check | value |
@@ -896,7 +889,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $r (player: $x, player: $x) isa relation; get;
+      match $r (player: $x, player: $x) isa relation;
       """
     And concept identifiers are
       |      | check | value |
@@ -922,7 +915,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $r (player: $x) isa relation; get;
+      match $r (player: $x) isa relation;
       """
     And concept identifiers are
       |      | check | value |
@@ -944,7 +937,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match (friend: $x, friend: $x) isa friendship; get;
+      match (friend: $x, friend: $x) isa friendship;
       """
     Then answer size is: 0
 
@@ -981,7 +974,6 @@ Feature: Graql Match Clause
       match
         (sender: $a, recipient: $b) isa gift-delivery;
         (sender: $b, recipient: $c) isa gift-delivery;
-      get;
       """
     When concept identifiers are
       |     | check | value |
@@ -997,7 +989,6 @@ Feature: Graql Match Clause
         (sender: $a, recipient: $b) isa gift-delivery;
         (sender: $b, recipient: $c) isa gift-delivery;
         (sender: $c, recipient: $d) isa gift-delivery;
-      get;
       """
     Then answer size is: 0
 
@@ -1029,7 +1020,7 @@ Feature: Graql Match Clause
       | RES | key   | ref:3 |
     Given get answers of graql query
       """
-      match $r isa relation; get;
+      match $r isa relation;
       """
     Given uniquely identify answer concepts
       | r   |
@@ -1038,14 +1029,14 @@ Feature: Graql Match Clause
       | RES |
     When get answers of graql query
       """
-      match ($x) isa relation; get;
+      match ($x) isa relation;
       """
     Then uniquely identify answer concepts
       | x   |
       | PER |
     When get answers of graql query
       """
-      match ($x); get;
+      match ($x);
       """
     Then uniquely identify answer concepts
       | x   |
@@ -1055,7 +1046,7 @@ Feature: Graql Match Clause
   Scenario: an error is thrown when matching an entity type as if it were a role
     Then graql get throws
       """
-      match (person: $x) isa relation; get;
+      match (person: $x) isa relation;
       """
     Then the integrity is validated
 
@@ -1063,7 +1054,7 @@ Feature: Graql Match Clause
   Scenario: an error is thrown when matching an entity as if it were a relation
     Then graql get throws
       """
-      match ($x) isa person; get;
+      match ($x) isa person;
       """
     Then the integrity is validated
 
@@ -1071,7 +1062,7 @@ Feature: Graql Match Clause
   Scenario: an error is thrown when matching a non-existent type label as if it were a relation type
     Then graql get throws
       """
-      match ($x) isa bottle-of-rum; get;
+      match ($x) isa bottle-of-rum;
       """
     Then the integrity is validated
 
@@ -1079,7 +1070,7 @@ Feature: Graql Match Clause
   Scenario: when matching a role that doesn't exist, an error is thrown
     Then graql get throws
       """
-      match (rolein-rolein-rolein: $rolein) isa relation; get;
+      match (rolein-rolein-rolein: $rolein) isa relation;
       """
     Then the integrity is validated
 
@@ -1087,7 +1078,7 @@ Feature: Graql Match Clause
   Scenario: when matching a role in a relation type that doesn't have that role, an empty result is returned
     When get answers of graql query
       """
-      match (friend: $x) isa employment; get;
+      match (friend: $x) isa employment;
       """
     Then answer size is: 0
 
@@ -1098,7 +1089,6 @@ Feature: Graql Match Clause
       match
         $x isa company;
         ($x) isa friendship;
-      get;
       """
     Then answer size is: 0
 
@@ -1106,12 +1096,12 @@ Feature: Graql Match Clause
   Scenario: when querying for a non-existent relation type iid, an empty result is returned
     When get answers of graql query
       """
-      match ($x, $y) isa $type; $type iid 0x83cb2; get;
+      match ($x, $y) isa $type; $type iid 0x83cb2;
       """
     Then answer size is: 0
     When get answers of graql query
       """
-      match $r ($x, $y) isa $type; $r iid 0x4ba92; get;
+      match $r ($x, $y) isa $type; $r iid 0x4ba92;
       """
     Then answer size is: 0
 
@@ -1133,7 +1123,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $a <value>; get;
+      match $a <value>;
       """
     And concept identifiers are
       |     | check | value |
@@ -1159,7 +1149,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $a <value>; get;
+      match $a <value>;
       """
     Then answer size is: 0
 
@@ -1183,7 +1173,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x contains "Fun"; get;
+      match $x contains "Fun";
       """
     And concept identifiers are
       |     | check | value                            |
@@ -1206,7 +1196,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x contains "Bean"; get;
+      match $x contains "Bean";
       """
     And concept identifiers are
       |     | check | value                         |
@@ -1229,7 +1219,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x like "^[0-9]+$"; get;
+      match $x like "^[0-9]+$";
       """
     And concept identifiers are
       |     | check | value       |
@@ -1244,12 +1234,12 @@ Feature: Graql Match Clause
   Scenario: when querying for a non-existent attribute type iid, an empty result is returned
     When get answers of graql query
       """
-      match $x has name $y; $x iid 0x83cb2; get;
+      match $x has name $y; $x iid 0x83cb2;
       """
     Then answer size is: 0
     When get answers of graql query
       """
-      match $x has name $y; $y iid 0x83cb2; get;
+      match $x has name $y; $y iid 0x83cb2;
       """
     Then answer size is: 0
 
@@ -1300,7 +1290,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x has attribute 9; get;
+      match $x has attribute 9;
       """
     And concept identifiers are
       |     | check | value |
@@ -1334,7 +1324,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x has age 21; get;
+      match $x has age 21;
       """
     And concept identifiers are
       |     | check | value |
@@ -1364,7 +1354,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x has lucky-number 20; get;
+      match $x has lucky-number 20;
       """
     And concept identifiers are
       |     | check | value |
@@ -1377,7 +1367,7 @@ Feature: Graql Match Clause
   Scenario: an error is thrown when matching by attribute ownership, when the owned thing is actually an entity
     Then graql get throws
       """
-      match $x has person "Luke"; get;
+      match $x has person "Luke";
       """
     Then the integrity is validated
 
@@ -1385,7 +1375,7 @@ Feature: Graql Match Clause
   Scenario: when matching by an attribute ownership, if the owner can't actually own it, an empty result is returned
     When get answers of graql query
       """
-      match $x isa company, has age $n; get;
+      match $x isa company, has age $n;
       """
     Then answer size is: 0
 
@@ -1393,7 +1383,7 @@ Feature: Graql Match Clause
   Scenario: an error is thrown when matching by attribute ownership, when the owned type label doesn't exist
     Then graql get throws
       """
-      match $x has bananananananana "rama"; get;
+      match $x has bananananananana "rama";
       """
     Then the integrity is validated
 
@@ -1424,7 +1414,6 @@ Feature: Graql Match Clause
       match
         $x isa person, has graduation-date $date;
         $r (employee: $x) isa employment, has start-date $date;
-      get;
       """
     Then answer size is: 0
     Then get answers of graql query
@@ -1432,7 +1421,6 @@ Feature: Graql Match Clause
       match
         $x isa person, has graduation-date $date;
         $r (employee: $x) isa employment, has start-date == $date;
-      get;
       """
     Then answer size is: 1
 
@@ -1448,7 +1436,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x has age == 16; get;
+      match $x has age == 16;
       """
     And concept identifiers are
       |     | check | value |
@@ -1469,7 +1457,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x has age > 18; get;
+      match $x has age > 18;
       """
     And concept identifiers are
       |     | check | value |
@@ -1490,7 +1478,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x has age < 18; get;
+      match $x has age < 18;
       """
     And concept identifiers are
       |     | check | value |
@@ -1511,7 +1499,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x has age !== 18; get;
+      match $x has age !== 18;
       """
     And concept identifiers are
       |     | check | value |
@@ -1543,7 +1531,6 @@ Feature: Graql Match Clause
       match
         $x isa house-number;
         $x == 1.0;
-      get;
       """
     Then answer size is: 1
     When get answers of graql query
@@ -1551,7 +1538,6 @@ Feature: Graql Match Clause
       match
         $x isa length;
         $x == 2;
-      get;
       """
     Then answer size is: 1
     When get answers of graql query
@@ -1559,7 +1545,6 @@ Feature: Graql Match Clause
       match
         $x isa house-number;
         $x 1.0;
-      get;
       """
     Then answer size is: 1
     When get answers of graql query
@@ -1567,7 +1552,6 @@ Feature: Graql Match Clause
       match
         $x isa length;
         $x 2;
-      get;
       """
     Then answer size is: 1
     When get answers of graql query
@@ -1575,7 +1559,6 @@ Feature: Graql Match Clause
       match
         $x isa attribute;
         $x >= 1;
-      get;
       """
     Then answer size is: 2
     When get answers of graql query
@@ -1583,7 +1566,6 @@ Feature: Graql Match Clause
       match
         $x isa attribute;
         $x < 2.0;
-      get;
       """
     Then answer size is: 1
 
@@ -1604,7 +1586,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x has lucky-number > 25; get;
+      match $x has lucky-number > 25;
       """
     And concept identifiers are
       |     | check | value |
@@ -1664,7 +1646,6 @@ Feature: Graql Match Clause
       match
         $x isa attribute;
         $x > 20;
-      get;
       """
     And concept identifiers are
       |      | check | value       |
@@ -1690,7 +1671,6 @@ Feature: Graql Match Clause
         $x isa person;
         $y isa person;
         $x != $y;
-      get;
       """
     Then answer size is: 0
 
@@ -1698,14 +1678,14 @@ Feature: Graql Match Clause
   Scenario: concept comparison of unbound variables throws an error
     Then graql get throws
       """
-      match $x != $y; get;
+      match $x != $y;
       """
 
 
   Scenario: value comparison of unbound variables throws an error
     Then graql get throws
       """
-      match $x !== $y; get;
+      match $x !== $y;
       """
 
 
@@ -1723,7 +1703,7 @@ Feature: Graql Match Clause
     Given the integrity is validated
     When get answers of graql query
       """
-      match {$x isa person;} or {$x isa company;}; get;
+      match {$x isa person;} or {$x isa company;};
       """
     And concept identifiers are
       |     | check | value |
@@ -1750,22 +1730,22 @@ Feature: Graql Match Clause
     Given the integrity is validated
     Given get answers of graql query
       """
-      match $x isa entity; get;
+      match $x isa entity;
       """
     Given answer size is: 2
     Given get answers of graql query
       """
-      match $r isa relation; get;
+      match $r isa relation;
       """
     Given answer size is: 1
     Given get answers of graql query
       """
-      match $x isa attribute; get;
+      match $x isa attribute;
       """
     Given answer size is: 5
     When get answers of graql query
       """
-      match $x isa $type; get;
+      match $x isa $type;
       """
     # 2 entities x 3 types {person,entity,thing}
     # 1 relation x 3 types {friendship,relation,thing}
@@ -1784,18 +1764,18 @@ Feature: Graql Match Clause
     Given the integrity is validated
     Given get answers of graql query
       """
-      match $r isa relation; get;
+      match $r isa relation;
       """
     Given answer size is: 1
     Given get answers of graql query
       """
-      match ($x, $y) isa relation; get;
+      match ($x, $y) isa relation;
       """
     # 2 permutations of the roleplayers
     Given answer size is: 2
     When get answers of graql query
       """
-      match ($x, $y) isa $type; get;
+      match ($x, $y) isa $type;
       """
     # 2 permutations x 3 types {friendship,relation,thing}
     Then answer size is: 6
@@ -1813,9 +1793,7 @@ Feature: Graql Match Clause
 
     Then graql get throws
       """
-      match
-        not { $x has attribute "value"; };
-      get;
+      match not { $x has attribute "value"; };
       """
     Then the integrity is validated
 
@@ -1829,7 +1807,6 @@ Feature: Graql Match Clause
           ($r2, $i);
           $i isa entity;
         };
-      get;
       """
     Then the integrity is validated
 
@@ -1842,7 +1819,6 @@ Feature: Graql Match Clause
         not {
           $x isa entity, has attribute $r;
         };
-      get;
       """
     Then the integrity is validated
 
@@ -1855,6 +1831,5 @@ Feature: Graql Match Clause
         not {
           { $x has attribute 1; } or { $x has attribute 2; };
         };
-      get;
       """
     Then the integrity is validated

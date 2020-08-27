@@ -118,13 +118,13 @@ Feature: Concept Inequality Resolution
 #    When materialised database is completed
     Then for graql query
       """
-      match (related-state: $s) isa holds; get;
+      match (related-state: $s) isa holds;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
     Then answer set is equivalent for graql query
       """
-      match $s isa state, has name 's2'; get;
+      match $s isa state, has name 's2';
       """
 #    Then materialised and reasoned databases are the same size
 
@@ -133,9 +133,7 @@ Feature: Concept Inequality Resolution
 #    When materialised database is completed
     Given for graql query
       """
-      match
-        (ball1: $x, ball2: $y) isa selection;
-      get;
+      match (ball1: $x, ball2: $y) isa selection;
       """
 #    Given all answers are correct in reasoned database
     # materialised: [ab, ba, bc, cb]
@@ -146,7 +144,6 @@ Feature: Concept Inequality Resolution
       match
         (ball1: $x, ball2: $y) isa selection;
         $x != $y;
-      get;
       """
 #    Then all answers are correct in reasoned database
     # materialised: [ab, ba, bc, cb]
@@ -176,7 +173,6 @@ Feature: Concept Inequality Resolution
         (ball1: $x, ball2: $y) isa selection;
         $x != $y;
         $y has name 'c';
-      get;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
@@ -188,7 +184,6 @@ Feature: Concept Inequality Resolution
         $x != $y;
         $y has name 'c';
         {$x has name 'a';} or {$x has name 'b';};
-      get;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
@@ -213,7 +208,6 @@ Feature: Concept Inequality Resolution
         (ball1: $x, ball2: $y) isa selection;
         (ball1: $x, ball2: $z) isa selection;
         $y != $z;
-      get;
       """
 #    Then all answers are correct in reasoned database
     # [aab, aac, aba, abc, aca, acb,
@@ -257,7 +251,6 @@ Feature: Concept Inequality Resolution
         (ball1: $x, ball2: $y) isa selection;
         (ball1: $y, ball2: $z) isa selection;
         $x != $z;
-      get;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 18
@@ -301,7 +294,6 @@ Feature: Concept Inequality Resolution
         (ball1: $x, ball2: $z1) isa selection;
         (ball1: $x, ball2: $y2) isa selection;
         (ball1: $x, ball2: $z2) isa selection;
-      get;
       """
 #    Given all answers are correct in reasoned database
     # For each of the [3] values of $x, there are 3^4 = 81 choices for {$y1, $z1, $y2, $z2}, for a total of 243
@@ -316,7 +308,6 @@ Feature: Concept Inequality Resolution
 
         $y1 != $z1;
         $y2 != $z2;
-      get;
       """
 #    Then all answers are correct in reasoned database
     # Each neq predicate reduces the answer size by 1/3, cutting it to 162, then 108
@@ -362,7 +353,6 @@ Feature: Concept Inequality Resolution
         (ball1: $x, ball2: $y) isa selection;
         (ball1: $x, ball2: $z1) isa selection;
         (ball1: $y, ball2: $z2) isa selection;
-      get;
       """
 #    Given all answers are correct in reasoned database
     # There are 3^4 possible choices for the set {$x, $y, $z1, $z2}, for a total of 81
@@ -376,7 +366,6 @@ Feature: Concept Inequality Resolution
 
         $x != $z1;
         $y != $z2;
-      get;
       """
 #    Then all answers are correct in reasoned database
     # Each neq predicate reduces the answer size by 1/3, cutting it to 54, then 36
@@ -443,7 +432,6 @@ Feature: Concept Inequality Resolution
         $ax isa! $typeof_ax;
         $ay isa! $typeof_ay;
         $typeof_ax != $typeof_ay;
-      get;
       """
     Then all answers are correct in reasoned database
     # x   | ax  | y   | ay  |

@@ -45,7 +45,7 @@ Feature: Graql Define Query
     When transaction is closed and reopened
     Then graql get throws
       """
-      match $x type dog; get;
+      match $x type dog;
       """
 
 
@@ -61,7 +61,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x type dog; get;
+      match $x type dog;
       """
     Then concept identifiers are
       |     | check | value |
@@ -80,7 +80,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x sub person; get;
+      match $x sub person;
       """
     Then concept identifiers are
       |     | check | value  |
@@ -149,7 +149,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x plays employment:employee; get;
+      match $x plays employment:employee;
       """
     Then concept identifiers are
       |     | check | value  |
@@ -173,7 +173,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x plays employment:employee; get;
+      match $x plays employment:employee;
       """
     Then concept identifiers are
       |     | check | value    |
@@ -198,7 +198,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x owns name; get;
+      match $x owns name;
       """
     Then concept identifiers are
       |     | check | value  |
@@ -222,7 +222,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x owns name; get;
+      match $x owns name;
       """
     Then concept identifiers are
       |     | check | value    |
@@ -247,7 +247,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x owns email @key; get;
+      match $x owns email @key;
       """
 
     Then concept identifiers are
@@ -272,7 +272,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x owns email @key; get;
+      match $x owns email @key;
       """
     Then concept identifiers are
       |     | check | value    |
@@ -307,7 +307,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x plays home-ownership:home; get;
+      match $x plays home-ownership:home;
       """
     Then concept identifiers are
       |     | check | value |
@@ -327,7 +327,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x owns price; get;
+      match $x owns price;
       """
     Then concept identifiers are
       |     | check | value |
@@ -347,7 +347,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x owns address @key; get;
+      match $x owns address @key;
       """
     Then concept identifiers are
       |     | check | value |
@@ -425,7 +425,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x type pet-ownership; get;
+      match $x type pet-ownership;
       """
     Then concept identifiers are
       |     | check | value         |
@@ -444,7 +444,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x sub employment; get;
+      match $x sub employment;
       """
     Then concept identifiers are
       |     | check | value          |
@@ -475,7 +475,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x relates employee; get;
+      match $x relates employee;
       """
     Then concept identifiers are
       |     | check | value                |
@@ -519,7 +519,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x relates employee; get;
+      match $x relates employee;
       """
     Then concept identifiers are
       |     | check | value                |
@@ -532,7 +532,7 @@ Feature: Graql Define Query
 
     # TODO - employee role should be retrieving part-timer as well
     # Then query 1 has 2 answers
-    # And answers of query 1 satisfy: match $x sub employment; get;
+    # And answers of query 1 satisfy: match $x sub employment;
 
 
   # @ignore
@@ -548,7 +548,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x plays income:source; get;
+      match $x plays income:source;
       """
     Then concept identifiers are
       |     | check | value               |
@@ -572,7 +572,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x plays income:source; get;
+      match $x plays income:source;
       """
     Then concept identifiers are
       |     | check | value                       |
@@ -597,7 +597,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x owns start-date; get;
+      match $x owns start-date;
       """
     Then concept identifiers are
       |     | check | value               |
@@ -621,7 +621,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x owns start-date; get;
+      match $x owns start-date;
       """
     Then concept identifiers are
       |     | check | value                       |
@@ -646,7 +646,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x owns employment-reference-code @key; get;
+      match $x owns employment-reference-code @key;
       """
     Then concept identifiers are
       |     | check | value               |
@@ -670,7 +670,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x owns employment-reference-code @key; get;
+      match $x owns employment-reference-code @key;
       """
     Then concept identifiers are
       |     | check | value                       |
@@ -694,7 +694,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x type connection; get;
+      match $x type connection;
       """
     Then concept identifiers are
       |     | check | value      |
@@ -714,7 +714,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x relates parent; $x relates child; get;
+      match $x relates parent; $x relates child;
       """
     Then concept identifiers are
       |     | check | value      |
@@ -733,7 +733,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x relates function; $x plays recursive-function:function; get;
+      match $x relates function; $x plays recursive-function:function;
       """
     Then concept identifiers are
       |     | check | value              |
@@ -765,7 +765,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x type favourite-food; get;
+      match $x type favourite-food;
       """
     Then concept identifiers are
       |     | check | value          |
@@ -783,7 +783,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x type number-of-cows; get;
+      match $x type number-of-cows;
       """
     Then concept identifiers are
       |     | check | value          |
@@ -801,7 +801,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x type density; get;
+      match $x type density;
       """
     Then concept identifiers are
       |     | check | value   |
@@ -819,7 +819,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x type can-fly; get;
+      match $x type can-fly;
       """
     Then concept identifiers are
       |     | check | value   |
@@ -837,7 +837,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x type flight-date; get;
+      match $x type flight-date;
       """
     Then concept identifiers are
       |     | check | value       |
@@ -872,7 +872,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x sub name; get;
+      match $x sub name;
       """
     Then concept identifiers are
       |        | check | value      |
@@ -893,7 +893,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x type first-name, value string; get;
+      match $x type first-name, value string;
       """
     Then concept identifiers are
       |        | check | value      |
@@ -919,7 +919,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x regex "^(yes|no|maybe)$"; get;
+      match $x regex "^(yes|no|maybe)$";
       """
     Then concept identifiers are
       |     | check | value    |
@@ -950,7 +950,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x plays car-sales-listing:available-colour; get;
+      match $x plays car-sales-listing:available-colour;
       """
     Then concept identifiers are
       |     | check | value            |
@@ -977,7 +977,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x plays phone-contact:number; get;
+      match $x plays phone-contact:number;
       """
     Then concept identifiers are
       |     | check | value                      |
@@ -1005,7 +1005,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x owns brightness; get;
+      match $x owns brightness;
       """
     Then concept identifiers are
       |     | check | value            |
@@ -1031,7 +1031,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x owns country-calling-code; get;
+      match $x owns country-calling-code;
       """
     Then concept identifiers are
       |     | check | value                      |
@@ -1059,7 +1059,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x owns hex-value @key; get;
+      match $x owns hex-value @key;
       """
     Then concept identifiers are
       |     | check | value            |
@@ -1084,7 +1084,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x owns hex-value @key; get;
+      match $x owns hex-value @key;
       """
     Then concept identifiers are
       |     | check | value                |
@@ -1110,7 +1110,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x owns first-word; get;
+      match $x owns first-word;
       """
     Then concept identifiers are
       |     | check | value  |
@@ -1130,7 +1130,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x owns number-of-fingers; get;
+      match $x owns number-of-fingers;
       """
     Then concept identifiers are
       |     | check | value  |
@@ -1150,7 +1150,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x owns height; get;
+      match $x owns height;
       """
     Then concept identifiers are
       |     | check | value  |
@@ -1170,7 +1170,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x owns is-sleeping; get;
+      match $x owns is-sleeping;
       """
     Then concept identifiers are
       |     | check | value  |
@@ -1190,7 +1190,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x owns graduation-date; get;
+      match $x owns graduation-date;
       """
     Then concept identifiers are
       |     | check | value  |
@@ -1208,7 +1208,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x owns number-of-letters; get;
+      match $x owns number-of-letters;
       """
     Then concept identifiers are
       |     | check | value             |
@@ -1230,7 +1230,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x type animal; $x abstract; get;
+      match $x type animal; $x abstract;
       """
     Then concept identifiers are
       |     | check | value  |
@@ -1251,7 +1251,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x sub animal; get;
+      match $x sub animal;
       """
     Then concept identifiers are
       |     | check | value  |
@@ -1274,7 +1274,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x sub animal; get;
+      match $x sub animal;
       """
     Then concept identifiers are
       |     | check | value  |
@@ -1294,7 +1294,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x type membership; $x abstract; get;
+      match $x type membership; $x abstract;
       """
     Then concept identifiers are
       |     | check | value      |
@@ -1315,7 +1315,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x sub membership; get;
+      match $x sub membership;
       """
     Then concept identifiers are
       |     | check | value          |
@@ -1338,7 +1338,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x sub requirement; get;
+      match $x sub requirement;
       """
     Then concept identifiers are
       |     | check | value            |
@@ -1358,7 +1358,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x type number-of-limbs; $x abstract; get;
+      match $x type number-of-limbs; $x abstract;
       """
     Then concept identifiers are
       |     | check | value           |
@@ -1379,7 +1379,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x sub number-of-limbs; get;
+      match $x sub number-of-limbs;
       """
     Then concept identifiers are
       |     | check | value           |
@@ -1402,7 +1402,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x sub number-of-limbs; get;
+      match $x sub number-of-limbs;
       """
     Then concept identifiers are
       |     | check | value                      |
@@ -1499,7 +1499,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x owns name; get;
+      match $x owns name;
       """
     Then concept identifiers are
       |     | check | value      |
@@ -1519,7 +1519,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x plays employment:employee; get;
+      match $x plays employment:employee;
       """
     Then concept identifiers are
       |     | check | value      |
@@ -1563,7 +1563,7 @@ Feature: Graql Define Query
     When the integrity is validated
     When get answers of graql query
       """
-      match $x owns barcode; get;
+      match $x owns barcode;
       """
     Then concept identifiers are
       |     | check | value   |
@@ -1608,7 +1608,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x relates employer; get;
+      match $x relates employer;
       """
     Then concept identifiers are
       |     | check | value      |
@@ -1632,7 +1632,7 @@ Feature: Graql Define Query
     When the integrity is validated
     When get answers of graql query
       """
-      match $x regex "^A.*$"; get;
+      match $x regex "^A.*$";
       """
     Then concept identifiers are
       |     | check | value |
@@ -1740,7 +1740,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x sub person; $x abstract; get;
+      match $x sub person; $x abstract;
       """
     Then concept identifiers are
       |     | check | value  |
@@ -1758,7 +1758,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x sub employment; $x abstract; get;
+      match $x sub employment; $x abstract;
       """
     Then concept identifiers are
       |     | check | value      |
@@ -1776,7 +1776,7 @@ Feature: Graql Define Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x sub name; $x abstract; get;
+      match $x sub name; $x abstract;
       """
     Then concept identifiers are
       |     | check | value |
@@ -1849,7 +1849,7 @@ Feature: Graql Define Query
     When the integrity is validated
     When get answers of graql query
       """
-      match $x sub apple-product; get;
+      match $x sub apple-product;
       """
     Then concept identifiers are
       |     | check | value         |
@@ -1886,7 +1886,7 @@ Feature: Graql Define Query
       """
     When get answers of graql query
       """
-      match $x sub shoe-size; get;
+      match $x sub shoe-size;
       """
     Then concept identifiers are
       |     | check | value     |
@@ -1915,7 +1915,7 @@ Feature: Graql Define Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x sub organism; get;
+      match $x sub organism;
       """
     When concept identifiers are
       |     | check | value    |
@@ -1950,7 +1950,7 @@ Feature: Graql Define Query
       """
     When get answers of graql query
       """
-      match $x sub pigeon; get;
+      match $x sub pigeon;
       """
     Then concept identifiers are
       |     | check | value  |
@@ -1984,7 +1984,7 @@ Feature: Graql Define Query
       """
     When get answers of graql query
       """
-      match $x sub pigeon; get;
+      match $x sub pigeon;
       """
     Then concept identifiers are
       |     | check | value  |
@@ -2018,7 +2018,7 @@ Feature: Graql Define Query
       """
     When get answers of graql query
       """
-      match $x sub pigeon; get;
+      match $x sub pigeon;
       """
     Then concept identifiers are
       |     | check | value  |
@@ -2070,7 +2070,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x type child, plays $r; get;
+      match $x type child, plays $r;
       """
     Then concept identifiers are
       |          | check | value    |
@@ -2086,7 +2086,7 @@ Feature: Graql Define Query
 
 
   @ignore
-  # TODO: re-enable when we can query schema 'has' and 'key' with variables eg: 'match $x type ___, has key $a; get;'
+  # TODO: re-enable when we can query schema 'has' and 'key' with variables eg: 'match $x type ___, has key $a;'
   Scenario: define additional 'has' is visible from all children
     Given graql define
     """
@@ -2099,7 +2099,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x type child, has $y; get;
+      match $x type child, has $y;
       """
     Then concept identifiers are
       |       | check | value        |
@@ -2113,7 +2113,7 @@ Feature: Graql Define Query
 
 
   @ignore
-  # TODO: re-enable when we can query schema 'has' and 'key' with variables eg: 'match $x type ___, has key $a; get;'
+  # TODO: re-enable when we can query schema 'has' and 'key' with variables eg: 'match $x type ___, has key $a;'
   Scenario: define additional 'key' is visible from all children
     Given graql define
       """
@@ -2126,7 +2126,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x type child, key $y; get;
+      match $x type child, key $y;
       """
     Then concept identifiers are
       |       | check | value |
@@ -2151,7 +2151,7 @@ Feature: Graql Define Query
 
     When get answers of graql query
       """
-      match $x type part-time-employment, relates $r; get;
+      match $x type part-time-employment, relates $r;
       """
     Then concept identifiers are
       |           | check | value                |

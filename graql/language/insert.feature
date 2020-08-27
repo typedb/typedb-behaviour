@@ -68,7 +68,7 @@ Feature: Graql Insert Query
 
     When get answers of graql query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Then concept identifiers are
       |     | check | value |
@@ -89,7 +89,7 @@ Feature: Graql Insert Query
 
     When get answers of graql query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Then concept identifiers are
       |      | check | value |
@@ -112,9 +112,7 @@ Feature: Graql Insert Query
     When the integrity is validated
     Then get answers of graql query
       """
-      match
-        $x has name "Bond";
-      get;
+      match $x has name "Bond";
       """
     Then concept identifiers are
       |      | check | value |
@@ -124,18 +122,14 @@ Feature: Graql Insert Query
       | BOND |
     Then get answers of graql query
       """
-      match
-        $x has name "James Bond";
-      get;
+      match $x has name "James Bond";
       """
     Then uniquely identify answer concepts
       | x    |
       | BOND |
     Then get answers of graql query
       """
-      match
-        $x has name "Bond", has name "James Bond";
-      get;
+      match $x has name "Bond", has name "James Bond";
       """
     Then uniquely identify answer concepts
       | x    |
@@ -152,7 +146,7 @@ Feature: Graql Insert Query
     Given the integrity is validated
     Given get answers of graql query
       """
-      match $x isa dog; get;
+      match $x isa dog;
       """
     Given answer size is: 0
     When graql insert
@@ -162,7 +156,7 @@ Feature: Graql Insert Query
     When the integrity is validated
     Then get answers of graql query
       """
-      match $x isa dog; get;
+      match $x isa dog;
       """
     Then answer size is: 1
     Then graql insert
@@ -172,7 +166,7 @@ Feature: Graql Insert Query
     Then the integrity is validated
     Then get answers of graql query
       """
-      match $x isa dog; get;
+      match $x isa dog;
       """
     Then answer size is: 2
     Then graql insert
@@ -182,7 +176,7 @@ Feature: Graql Insert Query
     Then the integrity is validated
     Then get answers of graql query
       """
-      match $x isa dog; get;
+      match $x isa dog;
       """
     Then answer size is: 3
 
@@ -231,7 +225,7 @@ Feature: Graql Insert Query
   Scenario: when inserting a new thing that owns new attributes, both the thing and the attributes get created
     Given get answers of graql query
       """
-      match $x isa thing; get;
+      match $x isa thing;
       """
     Given answer size is: 0
     When graql insert
@@ -241,7 +235,7 @@ Feature: Graql Insert Query
     When the integrity is validated
     Then get answers of graql query
       """
-      match $x isa thing; get;
+      match $x isa thing;
       """
     Then concept identifiers are
       |      | check | value           |
@@ -265,7 +259,7 @@ Feature: Graql Insert Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x has name "John"; get;
+      match $x has name "John";
       """
     Then answer size is: 0
 
@@ -283,7 +277,7 @@ Feature: Graql Insert Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x has name "Kyle"; get;
+      match $x has name "Kyle";
       """
     Then concept identifiers are
       |      | check | value |
@@ -338,7 +332,7 @@ Feature: Graql Insert Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $p isa dog; get;
+      match $p isa dog;
       """
     Then answer size is: 5
     Then graql insert
@@ -351,7 +345,7 @@ Feature: Graql Insert Query
     Then the integrity is validated
     Then get answers of graql query
       """
-      match $p isa dog; get;
+      match $p isa dog;
       """
     Then answer size is: 10
 
@@ -416,7 +410,7 @@ Feature: Graql Insert Query
     Given the integrity is validated
     Given get answers of graql query
       """
-      match $p has name "Spiderman"; get;
+      match $p has name "Spiderman";
       """
     Given answer size is: 0
     When graql insert
@@ -429,7 +423,7 @@ Feature: Graql Insert Query
     When the integrity is validated
     Then get answers of graql query
       """
-      match $p has name "Spiderman"; get;
+      match $p has name "Spiderman";
       """
     Then concept identifiers are
       |     | check | value |
@@ -448,7 +442,7 @@ Feature: Graql Insert Query
     Given the integrity is validated
     Given get answers of graql query
       """
-      match $p has name "Spiderman"; get;
+      match $p has name "Spiderman";
       """
     Given answer size is: 0
     When graql insert
@@ -461,7 +455,7 @@ Feature: Graql Insert Query
     When the integrity is validated
     Then get answers of graql query
       """
-      match $p has name "Spiderman"; get;
+      match $p has name "Spiderman";
       """
     Then concept identifiers are
       |     | check | value |
@@ -487,7 +481,7 @@ Feature: Graql Insert Query
     Given the integrity is validated
     Given get answers of graql query
       """
-      match $c has hex-value "#FF0000"; get;
+      match $c has hex-value "#FF0000";
       """
     Given answer size is: 0
     When graql insert
@@ -500,7 +494,7 @@ Feature: Graql Insert Query
     When the integrity is validated
     Then get answers of graql query
       """
-      match $c has hex-value "#FF0000"; get;
+      match $c has hex-value "#FF0000";
       """
     Then concept identifiers are
       |     | check | value      |
@@ -526,7 +520,7 @@ Feature: Graql Insert Query
     Given the integrity is validated
     Given get answers of graql query
       """
-      match $c has hex-value "#FF0000"; get;
+      match $c has hex-value "#FF0000";
       """
     Given answer size is: 0
     When graql insert
@@ -539,7 +533,7 @@ Feature: Graql Insert Query
     When the integrity is validated
     Then get answers of graql query
       """
-      match $c has hex-value "#FF0000"; get;
+      match $c has hex-value "#FF0000";
       """
     Then concept identifiers are
       |     | check | value      |
@@ -573,7 +567,7 @@ Feature: Graql Insert Query
     When the integrity is validated
     When get answers of graql query
       """
-      match $td isa tenure-days; get;
+      match $td isa tenure-days;
       """
     Then answer size is: 0
     Then graql insert
@@ -615,7 +609,7 @@ Feature: Graql Insert Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $p has age 32; get;
+      match $p has age 32;
       """
     Then concept identifiers are
       |      | check | value |
@@ -630,7 +624,7 @@ Feature: Graql Insert Query
     Then the integrity is validated
     Then get answers of graql query
       """
-      match $p has age 32; get;
+      match $p has age 32;
       """
     Then uniquely identify answer concepts
       | p    |
@@ -651,7 +645,7 @@ Feature: Graql Insert Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $r (employee: $p) isa employment; get;
+      match $r (employee: $p) isa employment;
       """
     Then concept identifiers are
       |     | check | value |
@@ -687,7 +681,7 @@ Feature: Graql Insert Query
     When the integrity is validated
     Then get answers of graql query
       """
-      match $r (place-of-residence: $addr) isa residence, has is-permanent $perm; get;
+      match $r (place-of-residence: $addr) isa residence, has is-permanent $perm;
       """
     Then concept identifiers are
       |     | check | value                         |
@@ -752,7 +746,7 @@ Feature: Graql Insert Query
     When the integrity is validated
     Then get answers of graql query
       """
-      match $r (employer: $c, employee: $p) isa employment; get;
+      match $r (employer: $c, employee: $p) isa employment;
       """
     Then concept identifiers are
       |      | check | value |
@@ -785,7 +779,7 @@ Feature: Graql Insert Query
     When the integrity is validated
     Then get answers of graql query
       """
-      match $r (employer: $c, employee: $p) isa employment; get;
+      match $r (employer: $c, employee: $p) isa employment;
       """
     Then concept identifiers are
       |      | check | value |
@@ -816,7 +810,7 @@ Feature: Graql Insert Query
     When the integrity is validated
     Then get answers of graql query
       """
-      match $r (employee: $p, employee: $p) isa employment; get;
+      match $r (employee: $p, employee: $p) isa employment;
       """
     Then concept identifiers are
       |      | check | value |
@@ -952,7 +946,7 @@ Feature: Graql Insert Query
     Given the integrity is validated
     Given get answers of graql query
       """
-      match $x <value> isa <attr>; get;
+      match $x <value> isa <attr>;
       """
     Given answer size is: 0
     When graql insert
@@ -962,7 +956,7 @@ Feature: Graql Insert Query
     When the integrity is validated
     When get answers of graql query
       """
-      match $x <value> isa <attr>; get;
+      match $x <value> isa <attr>;
       """
     Then concept identifiers are
       |     | check | value |
@@ -1040,7 +1034,7 @@ Feature: Graql Insert Query
       | AGE2 | value | age:2 |
     When get answers of graql query
       """
-      match $x isa age; get;
+      match $x isa age;
       """
     Then uniquely identify answer concepts
       | x    |
@@ -1065,7 +1059,7 @@ Feature: Graql Insert Query
       | L2 | value | length:2.0 |
     When get answers of graql query
       """
-      match $x isa length; get;
+      match $x isa length;
       """
     Then answer size is: 1
     Then uniquely identify answer concepts
@@ -1097,7 +1091,7 @@ Feature: Graql Insert Query
       | L2 | value | length:2.0 |
     When get answers of graql query
       """
-      match $x isa length; get;
+      match $x isa length;
       """
     Then answer size is: 1
     Then uniquely identify answer concepts
@@ -1121,7 +1115,7 @@ Feature: Graql Insert Query
     When the integrity is validated
     When get answers of graql query
       """
-      match $x isa length; get;
+      match $x isa length;
       """
     Then answer size is: 1
 
@@ -1145,7 +1139,7 @@ Feature: Graql Insert Query
       | RF0 |
     When get answers of graql query
       """
-      match $x <match> isa <attr>; get;
+      match $x <match> isa <attr>;
       """
     Then uniquely identify answer concepts
       | x   |
@@ -1241,7 +1235,7 @@ Feature: Graql Insert Query
 
     When get answers of graql query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Then concept identifiers are
       |     | check | value |
@@ -1384,7 +1378,7 @@ Feature: Graql Insert Query
     When the integrity is validated
     Then get answers of graql query
       """
-      match $x has is-cool true; get;
+      match $x has is-cool true;
       """
     Then concept identifiers are
       |     | check | value |
@@ -1467,7 +1461,7 @@ Feature: Graql Insert Query
     Given the integrity is validated
     Given get answers of graql query
       """
-      match $p isa person; get;
+      match $p isa person;
       """
     Given answer size is: 0
     When graql insert
@@ -1480,7 +1474,7 @@ Feature: Graql Insert Query
     When the integrity is validated
     Then get answers of graql query
       """
-      match $r isa season-ticket-ownership; get;
+      match $r isa season-ticket-ownership;
       """
     Then answer size is: 0
 
@@ -1504,7 +1498,7 @@ Feature: Graql Insert Query
       | BEC | STE | THE |
     Given get answers of graql query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Given uniquely identify answer concepts
       | x   |
@@ -1521,7 +1515,7 @@ Feature: Graql Insert Query
     When the integrity is validated
     Then get answers of graql query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Then uniquely identify answer concepts
       | x   |
@@ -1557,7 +1551,7 @@ Feature: Graql Insert Query
       | HOM | BUR | SMI | NPP | eHOM | eBUR | eSMI |
     Given get answers of graql query
       """
-      match $r (employee: $x, employer: $c) isa employment; get;
+      match $r (employee: $x, employer: $c) isa employment;
       """
     Given uniquely identify answer concepts
       | r    | x   | c   |
@@ -1574,7 +1568,7 @@ Feature: Graql Insert Query
     When the integrity is validated
     Then get answers of graql query
       """
-      match $r (employee: $x, employer: $c) isa employment; get;
+      match $r (employee: $x, employer: $c) isa employment;
       """
     Then uniquely identify answer concepts
       | r    | x   | c   |
@@ -1602,7 +1596,7 @@ Feature: Graql Insert Query
       | ASH | MIS | BRO |
     Given get answers of graql query
       """
-      match $x isa name; get;
+      match $x isa name;
       """
     Given uniquely identify answer concepts
       | x   |
@@ -1619,7 +1613,7 @@ Feature: Graql Insert Query
     When the integrity is validated
     Then get answers of graql query
       """
-      match $x isa name; get;
+      match $x isa name;
       """
     Then uniquely identify answer concepts
       | x   |
@@ -1645,7 +1639,7 @@ Feature: Graql Insert Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Then answer size is: 1
 
@@ -1688,12 +1682,12 @@ Feature: Graql Insert Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x isa! child; get;
+      match $x isa! child;
       """
     Then answer size is: 1
     When get answers of graql query
       """
-      match $x isa! person; get;
+      match $x isa! person;
       """
     Then answer size is: 0
 
@@ -1730,7 +1724,7 @@ Feature: Graql Insert Query
       | GAN | value | name:Ganesh |
     When get answers of graql query
       """
-      match $x isa name; get;
+      match $x isa name;
       """
     Then uniquely identify answer concepts
       | x   |
@@ -1745,7 +1739,7 @@ Feature: Graql Insert Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x isa name; get;
+      match $x isa name;
       """
     # If the name 'Ganesh' had been materialised, then it would still exist in the knowledge graph.
     Then answer size is: 0
@@ -1781,7 +1775,7 @@ Feature: Graql Insert Query
       | TEN | value | score:10.0 |
     When get answers of graql query
       """
-      match $x isa person, has score $score; get;
+      match $x isa person, has score $score;
       """
     Then uniquely identify answer concepts
       | x   | score |
@@ -1797,7 +1791,7 @@ Feature: Graql Insert Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x isa score; get;
+      match $x isa score;
       """
     # The score '10.0' still exists, we never deleted it
     Then uniquely identify answer concepts
@@ -1805,7 +1799,7 @@ Feature: Graql Insert Query
       | TEN |
     When get answers of graql query
       """
-      match $x isa person, has score $score; get;
+      match $x isa person, has score $score;
       """
     # But Freya's ownership of score 10.0 was never materialised and is now gone
     Then answer size is: 0
@@ -1852,7 +1846,7 @@ Feature: Graql Insert Query
       | G   | value | letter:G    |
     When get answers of graql query
       """
-      match $x isa name; get;
+      match $x isa name;
       """
     Then uniquely identify answer concepts
       | x   |
@@ -1878,12 +1872,12 @@ Feature: Graql Insert Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Then answer size is: 0
     When get answers of graql query
       """
-      match $x isa name; get;
+      match $x isa name;
       """
     # We deleted the person called 'Ganesh', but the name still exists because it was materialised on match-insert
     Then uniquely identify answer concepts
@@ -1891,7 +1885,7 @@ Feature: Graql Insert Query
       | GAN |
     When get answers of graql query
       """
-      match (lettered-name: $x, initial: $y) isa name-initial; get;
+      match (lettered-name: $x, initial: $y) isa name-initial;
       """
     # And the inserted relation still exists too
     Then uniquely identify answer concepts
@@ -1936,7 +1930,7 @@ Feature: Graql Insert Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x isa employment; get;
+      match $x isa employment;
       """
     Then answer size is: 1
     # At this step we materialise the inferred employment because the material employment-contract depends on it.
@@ -1957,13 +1951,13 @@ Feature: Graql Insert Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x isa employment; get;
+      match $x isa employment;
       """
     # We deleted the rule that infers the employment, but it still exists because it was materialised on match-insert
     Then answer size is: 1
     When get answers of graql query
       """
-      match (contracted: $x, contract: $y) isa employment-contract; get;
+      match (contracted: $x, contract: $y) isa employment-contract;
       """
     # And the inserted relation still exists too
     Then answer size is: 1
@@ -2059,7 +2053,6 @@ Feature: Graql Insert Query
         $a isa vertex, has index "a";
         $d isa vertex, has index "d";
         $reach ($a, $d) isa reachable;
-      get;
       """
     Then answer size is: 1
     # On the other hand, the fact that 'c' was reachable from 'a' was not -directly- used; although it was needed
@@ -2071,7 +2064,6 @@ Feature: Graql Insert Query
         $a isa vertex, has index "a";
         $c isa vertex, has index "c";
         $reach ($a, $c) isa reachable;
-      get;
       """
     Then answer size is: 0
 
@@ -2150,12 +2142,12 @@ Feature: Graql Insert Query
       """
     Then get answers of graql query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Then answer size is: 64
     Then get answers of graql query
       """
-      match $x isa employment; get;
+      match $x isa employment;
       """
     # The original person is still unemployed.
     Then answer size is: 63
@@ -2199,7 +2191,7 @@ Feature: Graql Insert Query
     Then the integrity is validated
     Then get answers of graql query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Then answer size is: 64
 
@@ -2222,7 +2214,7 @@ Feature: Graql Insert Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x isa person, has name "Derek"; get;
+      match $x isa person, has name "Derek";
       """
     Then answer size is: 0
 
@@ -2247,7 +2239,7 @@ Feature: Graql Insert Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x isa person, has name "Derek"; get;
+      match $x isa person, has name "Derek";
       """
     Then answer size is: 0
 
@@ -2266,7 +2258,7 @@ Feature: Graql Insert Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x isa person, has name "Derek"; get;
+      match $x isa person, has name "Derek";
       """
     Then answer size is: 0
 

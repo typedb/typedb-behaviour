@@ -165,17 +165,13 @@ Feature: Variable Role Resolution
 #    When materialised database is completed
     Given for graql query
       """
-      match
-        (role1: $a, role2: $b) isa binary-base;
-      get;
+      match (role1: $a, role2: $b) isa binary-base;
       """
 #    Given all answers are correct in reasoned database
     Given answer size in reasoned database is: 9
     Then for graql query
       """
-      match
-        (role1: $a, $r1: $b) isa binary-base;
-      get;
+      match (role1: $a, $r1: $b) isa binary-base;
       """
     # $r1 in {role, role2} (2 options => double answer size)
 #    Then all answers are correct in reasoned database
@@ -187,9 +183,7 @@ Feature: Variable Role Resolution
 #    When materialised database is completed
     Given for graql query
       """
-      match
-        (role1: $a, $r1: $b) isa binary-base;
-      get;
+      match (role1: $a, $r1: $b) isa binary-base;
       """
 #    Given all answers are correct in reasoned database
     Given answer size in reasoned database is: 18
@@ -210,17 +204,13 @@ Feature: Variable Role Resolution
 #    When materialised database is completed
     Given for graql query
       """
-      match
-        (role1: $a, role2: $b) isa binary-base;
-      get;
+      match (role1: $a, role2: $b) isa binary-base;
       """
 #    Given all answers are correct in reasoned database
     Given answer size in reasoned database is: 9
     Then for graql query
       """
-      match
-        (role: $a, $r1: $b) isa binary-base;
-      get;
+      match (role: $a, $r1: $b) isa binary-base;
       """
     # $r1 in {role, role1, role2} (3 options => triple answer size)
 #    Then all answers are correct in reasoned database
@@ -234,9 +224,7 @@ Feature: Variable Role Resolution
 #    When materialised database is completed
     Given for graql query
       """
-      match
-        (role: $a, $r1: $b) isa binary-base;
-      get;
+      match (role: $a, $r1: $b) isa binary-base;
       """
 #    Given all answers are correct in reasoned database
     Then answer size in reasoned database is: 27
@@ -259,9 +247,7 @@ Feature: Variable Role Resolution
 #    When materialised database is completed
     Given for graql query
       """
-      match
-        (role: $a, $r1: $b) isa binary-base;
-      get;
+      match (role: $a, $r1: $b) isa binary-base;
       """
 #    Given all answers are correct in reasoned database
     Then answer size in reasoned database is: 27
@@ -288,7 +274,6 @@ Feature: Variable Role Resolution
         ($r1: $a, $r2: $b) isa binary-base;
         $r1 type role;
         $r2 type role2;
-      get;
       """
     # $r1 must be 'role' and $r2 must be 'role2'
 #    Then all answers are correct in reasoned database
@@ -299,7 +284,6 @@ Feature: Variable Role Resolution
       match
         (role: $a, $r2: $b) isa binary-base;
         $r2 type role2;
-      get;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 9
@@ -310,17 +294,13 @@ Feature: Variable Role Resolution
 #    When materialised database is completed
     Given for graql query
       """
-      match
-        (role1: $a, role2: $b) isa binary-base;
-      get;
+      match (role1: $a, role2: $b) isa binary-base;
       """
 #    Given all answers are correct in reasoned database
     Given answer size in reasoned database is: 9
     Then for graql query
       """
-      match
-        ($r1: $a, $r2: $b) isa binary-base;
-      get;
+      match ($r1: $a, $r2: $b) isa binary-base;
       """
     # r1    | r2    |
     # role  | role  |
@@ -388,25 +368,20 @@ Feature: Variable Role Resolution
       match
         (ternary-role1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
         $a1 has name 'a';
-      get;
       """
 #    Then all answers are correct in reasoned database
     # This query is equivalent to matching ($r2: $a2, $r3: $a3) isa binary-base, as role1 and $a1 each have only 1 value
     Then answer size in reasoned database is: 63
     Then for graql query
       """
-      match
-        (ternary-role1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
-      get;
+      match (ternary-role1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
       """
 #    Then all answers are correct in reasoned database
     # Now the bound role 'role1' is in {a, b, c}, tripling the answer size
     Then answer size in reasoned database is: 189
     Then for graql query
       """
-      match
-        ($r1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
-      get;
+      match ($r1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
       """
 #    Then all answers are correct in reasoned database
     # r1    | r2    | r3    |
@@ -434,25 +409,20 @@ Feature: Variable Role Resolution
       match
         (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
         $a1 has name 'a';
-      get;
       """
 #    Then all answers are correct in reasoned database
     # This query is equivalent to matching ($r2: $a2, $r3: $a3, $r4: $a4) isa ternary-base
     Then answer size in reasoned database is: 918
     Then for graql query
       """
-      match
-        (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
-      get;
+      match (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
       """
 #    Then all answers are correct in reasoned database
     # Now the bound role 'role1' is in {a, b, c}, tripling the answer size
     Then answer size in reasoned database is: 2754
     Then for graql query
       """
-      match
-        ($r1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
-      get;
+      match ($r1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
       """
 #    Then all answers are correct in reasoned database
     # {r1,r2,r3,r4}
@@ -479,25 +449,20 @@ Feature: Variable Role Resolution
       match
         (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
         $a1 has name 'a';
-      get;
       """
 #    Then all answers are correct in reasoned database
     # This query is equivalent to matching ($r2: $a2, $r3: $a3, $r4: $a4) isa ternary
     Then answer size in reasoned database is: 272
     Then for graql query
       """
-      match
-        (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
-      get;
+      match (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
       """
 #    Then all answers are correct in reasoned database
     # Now the bound role 'role1' is in {a, b}, doubling the answer size
     Then answer size in reasoned database is: 544
     Then for graql query
       """
-      match
-        ($r1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
-      get;
+      match ($r1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
       """
 #    Then all answers are correct in reasoned database
     # {r1,r2,r3,r4} | 209 patterns (see 'quaternary-base' scenario for details)

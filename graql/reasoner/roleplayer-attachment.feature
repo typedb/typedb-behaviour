@@ -88,9 +88,7 @@ Feature: Roleplayer Attachment Resolution
     When materialised database is completed
     Then for graql query
       """
-      match
-        (ruled-person: $x, ruler: $y) isa dominion;
-      get;
+      match (ruled-person: $x, ruler: $y) isa dominion;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
@@ -127,9 +125,7 @@ Feature: Roleplayer Attachment Resolution
     When materialised database is completed
     Then for graql query
       """
-      match
-        (ruled-person: $x, ruler: $y);
-      get;
+      match (ruled-person: $x, ruler: $y);
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
@@ -162,17 +158,13 @@ Feature: Roleplayer Attachment Resolution
     When materialised database is completed
     Then for graql query
       """
-      match
-        (captain: $x, navigator: $y) isa ship-crew;
-      get;
+      match (captain: $x, navigator: $y) isa ship-crew;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
     Then answer set is equivalent for graql query
       """
-      match
-        (captain: $x, navigator: $y, chef: $x) isa ship-crew;
-      get;
+      match (captain: $x, navigator: $y, chef: $x) isa ship-crew;
       """
     Then materialised and reasoned databases are the same size
 
@@ -203,25 +195,19 @@ Feature: Roleplayer Attachment Resolution
     When materialised database is completed
     Then for graql query
       """
-      match
-        (captain: $x, captain: $x) isa ship-crew;
-      get;
+      match (captain: $x, captain: $x) isa ship-crew;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
     Then for graql query
       """
-      match
-        (captain: $x, captain: $x, captain: $x) isa ship-crew;
-      get;
+      match (captain: $x, captain: $x, captain: $x) isa ship-crew;
       """
     # too many captains - no match
     Then answer size in reasoned database is: 0
     Then for graql query
       """
-      match
-        (captain: $x) isa ship-crew;
-      get;
+      match (captain: $x) isa ship-crew;
       """
 #    Then all answers are correct in reasoned database
     # we have more captains than we need, but there is still only 1 matching relation instance
@@ -255,9 +241,7 @@ Feature: Roleplayer Attachment Resolution
     When materialised database is completed
     Then for graql query
       """
-      match
-        (navigator: $x, navigator: $y) isa ship-crew;
-      get;
+      match (navigator: $x, navigator: $y) isa ship-crew;
       """
 #    Then all answers are correct in reasoned database
     # x        | y        |
@@ -269,6 +253,5 @@ Feature: Roleplayer Attachment Resolution
       match
         (navigator: $x, navigator: $y) isa ship-crew;
         $x != $y;
-      get;
       """
     Then materialised and reasoned databases are the same size

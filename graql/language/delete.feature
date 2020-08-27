@@ -75,19 +75,19 @@ Feature: Graql Delete Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Then uniquely identify answer concepts
       | x   |
       | BOB |
     When get answers of graql query
       """
-      match $x isa friendship; get;
+      match $x isa friendship;
       """
     Then answer size is: 0
     When get answers of graql query
       """
-      match $x isa name; get;
+      match $x isa name;
       """
     Then uniquely identify answer concepts
       | x    |
@@ -125,7 +125,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Then uniquely identify answer concepts
       | x   |
@@ -162,7 +162,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Then uniquely identify answer concepts
       | x   |
@@ -199,7 +199,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x isa friendship; get;
+      match $x isa friendship;
       """
     Then answer size is: 0
 
@@ -227,7 +227,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x isa name; get;
+      match $x isa name;
       """
     Then answer size is: 0
 
@@ -262,7 +262,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Then uniquely identify answer concepts
       | x   |
@@ -294,7 +294,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Then answer size is: 0
 
@@ -398,7 +398,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match (friend: $x, friend: $y) isa friendship; get;
+      match (friend: $x, friend: $y) isa friendship;
       """
     Then uniquely identify answer concepts
       | x   | y   |
@@ -439,7 +439,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match (friend: $x, friend: $y) isa friendship; get;
+      match (friend: $x, friend: $y) isa friendship;
       """
     Then uniquely identify answer concepts
       | x   | y   |
@@ -488,7 +488,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match (special-friend: $x, special-friend: $y) isa friendship; get;
+      match (special-friend: $x, special-friend: $y) isa friendship;
       """
     Then uniquely identify answer concepts
       | x   | y   |
@@ -527,7 +527,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Then uniquely identify answer concepts
       | x   |
@@ -535,7 +535,7 @@ Feature: Graql Delete Query
       | CAR |
     When get answers of graql query
       """
-      match $r (friend: $x) isa friendship; get;
+      match $r (friend: $x) isa friendship;
       """
     Then uniquely identify answer concepts
       | r   | x   |
@@ -570,7 +570,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $r (friend: $x) isa friendship; get;
+      match $r (friend: $x) isa friendship;
       """
     Then uniquely identify answer concepts
       | r  | x   |
@@ -604,7 +604,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $r (friend: $x, friend: $y) isa friendship; get;
+      match $r (friend: $x, friend: $y) isa friendship;
       """
     Then uniquely identify answer concepts
       | r  | x    | y    |
@@ -641,7 +641,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $r (friend: $x, friend: $y) isa friendship; get;
+      match $r (friend: $x, friend: $y) isa friendship;
       """
     Then uniquely identify answer concepts
       | r  | x    | y    |
@@ -677,7 +677,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $r (friend: $x, friend: $y) isa friendship; get;
+      match $r (friend: $x, friend: $y) isa friendship;
       """
     Then uniquely identify answer concepts
       | r  | x    | y    |
@@ -718,7 +718,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $r (friend: $x) isa friendship; get;
+      match $r (friend: $x) isa friendship;
       """
     Then uniquely identify answer concepts
       | r  | x   |
@@ -775,7 +775,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $r isa friendship; get;
+      match $r isa friendship;
       """
     Then answer size is: 0
 
@@ -810,7 +810,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $r isa friendship; get;
+      match $r isa friendship;
       """
     Then answer size is: 0
 
@@ -912,7 +912,7 @@ Feature: Graql Delete Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $rel (chef: $p) isa ship-crew; get;
+      match $rel (chef: $p) isa ship-crew;
       """
     When concept identifiers are
       |      | check | value       |
@@ -931,7 +931,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $rel (chef: $p) isa ship-crew; get;
+      match $rel (chef: $p) isa ship-crew;
       """
     Then answer size is: 0
 
@@ -956,7 +956,7 @@ Feature: Graql Delete Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x has age 18; get;
+      match $x has age 18;
       """
     When concept identifiers are
       |     | check | value     |
@@ -974,7 +974,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x has age 18; get;
+      match $x has age 18;
       """
     Then answer size is: 0
 
@@ -1019,7 +1019,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Then uniquely identify answer concepts
       | x    |
@@ -1027,14 +1027,14 @@ Feature: Graql Delete Query
       | JOHN |
     When get answers of graql query
       """
-      match $n isa lastname; get;
+      match $n isa lastname;
       """
     Then uniquely identify answer concepts
       | n    |
       | lnST |
     When get answers of graql query
       """
-      match $x isa person, has lastname $n; get;
+      match $x isa person, has lastname $n;
       """
     Then uniquely identify answer concepts
       | x    | n    |
@@ -1066,7 +1066,7 @@ Feature: Graql Delete Query
       | SHER |
     When get answers of graql query
       """
-      match $x has attribute $a; get;
+      match $x has attribute $a;
       """
     Then uniquely identify answer concepts
       | x    | a    |
@@ -1083,7 +1083,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x has attribute $a; get;
+      match $x has attribute $a;
       """
     Then uniquely identify answer concepts
       | x    | a    |
@@ -1112,7 +1112,7 @@ Feature: Graql Delete Query
       | pcW1 | value | postcode:W1U8ED |
     When get answers of graql query
       """
-      match $x has address $a; get;
+      match $x has address $a;
       """
     Then uniquely identify answer concepts
       | x    | a    |
@@ -1127,7 +1127,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x has address $a; get;
+      match $x has address $a;
       """
     Then answer size is: 0
 
@@ -1204,7 +1204,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Then answer size is: 0
 
@@ -1244,7 +1244,7 @@ Feature: Graql Delete Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x has duration $d; get;
+      match $x has duration $d;
       """
     When concept identifiers are
       |      | check | value         |
@@ -1263,7 +1263,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x has duration $d; get;
+      match $x has duration $d;
       """
     Then answer size is: 0
 
@@ -1285,7 +1285,7 @@ Feature: Graql Delete Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x has duration $d; get;
+      match $x has duration $d;
       """
     When concept identifiers are
       |      | check | value         |
@@ -1304,12 +1304,12 @@ Feature: Graql Delete Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x has duration $d; get;
+      match $x has duration $d;
       """
     Then answer size is: 0
     When get answers of graql query
       """
-      match $r isa friendship; get;
+      match $r isa friendship;
       """
     Then answer size is: 0
 
@@ -1376,7 +1376,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $f (friend: $x) isa friendship; get;
+      match $f (friend: $x) isa friendship;
       """
     Then uniquely identify answer concepts
       | f    | x    |
@@ -1385,7 +1385,7 @@ Feature: Graql Delete Query
       | REFL | ALEX |
     When get answers of graql query
       """
-      match $n isa name; get;
+      match $n isa name;
       """
     Then uniquely identify answer concepts
       | n    |
@@ -1393,7 +1393,7 @@ Feature: Graql Delete Query
       | nALX |
     When get answers of graql query
       """
-      match $x isa person, has lastname $n; get;
+      match $x isa person, has lastname $n;
       """
     Then uniquely identify answer concepts
       | x    | n    |
@@ -1448,7 +1448,7 @@ Feature: Graql Delete Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x isa person, has lastname $n; get;
+      match $x isa person, has lastname $n;
       """
     Then answer size is: 0
 
@@ -1494,7 +1494,7 @@ Feature: Graql Delete Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x isa name; get;
+      match $x isa name;
       """
     When concept identifiers are
       |     | check | value        |

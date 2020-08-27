@@ -53,7 +53,7 @@ Feature: Graql Rule Validation
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x sub rule; get;
+      match $x sub rule;
       """
     Then concept identifiers are
       |     | check | value                   |
@@ -79,7 +79,7 @@ Feature: Graql Rule Validation
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x sub rule; get;
+      match $x sub rule;
       """
     Then concept identifiers are
       |     | check | value              |
@@ -106,7 +106,7 @@ Feature: Graql Rule Validation
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x sub rule; get;
+      match $x sub rule;
       """
     Then concept identifiers are
       |     | check | value             |
@@ -196,7 +196,7 @@ Feature: Graql Rule Validation
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x sub rule; get;
+      match $x sub rule;
       """
     Then concept identifiers are
       |     | check | value           |
@@ -311,7 +311,7 @@ Feature: Graql Rule Validation
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x sub rule; get;
+      match $x sub rule;
       """
     Then concept identifiers are
       |     | check | value                             |

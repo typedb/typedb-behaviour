@@ -88,7 +88,6 @@ Feature: Relation Inference Resolution
       match
         $x isa person;
         ($x) isa employment;
-      get;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
@@ -97,7 +96,6 @@ Feature: Relation Inference Resolution
       match
         $x isa dog;
         ($x) isa employment;
-      get;
       """
     Then answer size in reasoned database is: 0
     Then materialised and reasoned databases are the same size
@@ -126,7 +124,6 @@ Feature: Relation Inference Resolution
       match
         $x has name "Haikal";
         ($x) isa employment;
-      get;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -135,7 +132,6 @@ Feature: Relation Inference Resolution
       match
         $x has name "Michael";
         ($x) isa employment;
-      get;
       """
     Then answer size in reasoned database is: 0
     Then materialised and reasoned databases are the same size
@@ -170,7 +166,6 @@ Feature: Relation Inference Resolution
         $i isa item, has name $n;
         $n "3kg jar of Nutella" isa name;
         $p 14.99 isa price;
-      get;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -206,7 +201,6 @@ Feature: Relation Inference Resolution
       match
         $x 1664 isa year;
         ($x, employee: $p, employer: $y) isa employment;
-      get;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
@@ -242,7 +236,7 @@ Feature: Relation Inference Resolution
     When materialised database is completed
     Then for graql query
       """
-      match $r isa friendship; get;
+      match $r isa friendship;
       """
     Then all answers are correct in reasoned database
     # When there is 1 concept we have {aa}.
@@ -277,7 +271,7 @@ Feature: Relation Inference Resolution
     When materialised database is completed
     Then for graql query
       """
-      match ($x, $y) isa friendship; get;
+      match ($x, $y) isa friendship;
       """
     Then all answers are correct in reasoned database
     # Here there are n choices for x, and n choices for y, so the total answer size is n^2
@@ -307,9 +301,7 @@ Feature: Relation Inference Resolution
     When materialised database is completed
     Then for graql query
       """
-      match
-        (employee: $x, employer: $x) isa employment;
-      get;
+      match (employee: $x, employer: $x) isa employment;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 3
@@ -336,9 +328,7 @@ Feature: Relation Inference Resolution
     When materialised database is completed
     Then for graql query
       """
-      match
-        (employee: $x, employer: $y) isa employment;
-      get;
+      match (employee: $x, employer: $y) isa employment;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -367,9 +357,7 @@ Feature: Relation Inference Resolution
     When materialised database is completed
     Then for graql query
       """
-      match
-        (employee: $x, employer: $x) isa employment;
-      get;
+      match (employee: $x, employer: $x) isa employment;
       """
     Then answer size in reasoned database is: 0
     Then materialised and reasoned databases are the same size
@@ -432,9 +420,7 @@ Feature: Relation Inference Resolution
     When materialised database is completed
     Then for graql query
       """
-      match
-        (coworker: $x, coworker: $x) isa coworkers;
-      get;
+      match (coworker: $x, coworker: $x) isa coworkers;
       """
 #    Then all answers are correct in reasoned database
     # (p,p) is a coworkers since people work with themselves.
@@ -446,9 +432,7 @@ Feature: Relation Inference Resolution
     Then answer size in reasoned database is: 2
     Then for graql query
       """
-      match
-        (coworker: $x, coworker: $y) isa coworkers;
-      get;
+      match (coworker: $x, coworker: $y) isa coworkers;
       """
 #    Then all answers are correct in reasoned database
     # $x | $y |
@@ -492,7 +476,7 @@ Feature: Relation Inference Resolution
     When materialised database is completed
     Then for graql query
       """
-      match $x isa location-hierarchy; get;
+      match $x isa location-hierarchy;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 3
@@ -527,7 +511,7 @@ Feature: Relation Inference Resolution
 #    When materialised database is completed
     Then for graql query
       """
-      match (subordinate: $x1, superior: $x2) isa location-hierarchy; get;
+      match (subordinate: $x1, superior: $x2) isa location-hierarchy;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 6
@@ -589,7 +573,7 @@ Feature: Relation Inference Resolution
     When materialised database is completed
     Then for graql query
       """
-      match (subordinate: $x, superior: $y) isa location-hierarchy; get;
+      match (subordinate: $x, superior: $y) isa location-hierarchy;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -621,7 +605,7 @@ Feature: Relation Inference Resolution
     When materialised database is completed
     Then for graql query
       """
-      match (employee: $x, employee: $y) isa employment; get;
+      match (employee: $x, employee: $y) isa employment;
       """
     Then answer size in reasoned database is: 0
     Then materialised and reasoned databases are the same size
@@ -648,7 +632,7 @@ Feature: Relation Inference Resolution
     When materialised database is completed
     Then for graql query
       """
-      match (employee: $x) isa employment; get;
+      match (employee: $x) isa employment;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -678,9 +662,7 @@ Feature: Relation Inference Resolution
     When materialised database is completed
     Then for graql query
       """
-      match
-        (friend: $a, friend: $b, friend: $c) isa friendship;
-      get;
+      match (friend: $a, friend: $b, friend: $c) isa friendship;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 6
@@ -731,7 +713,6 @@ Feature: Relation Inference Resolution
         (choice1: $x, choice2: $y) isa selection;
         $x has name $n;
         $y has name $n;
-      get;
       """
 #    Then all answers are correct in reasoned database
     # (a,a), (b,b), (c,c)
@@ -753,7 +734,6 @@ Feature: Relation Inference Resolution
         (choice1: $x, choice2: $y) isa selection;
         $x has name 'a';
         $y has name 'a';
-      get;
       """
 #    Then materialised and reasoned databases are the same size
 
@@ -793,7 +773,6 @@ Feature: Relation Inference Resolution
         ($a, $b);
         $b isa place, has name "Turku";
         ($b, $c);
-      get;
       """
 #    Then all answers are correct in reasoned database
     # $c in {'Turku Airport', 'Finland'}
@@ -831,7 +810,6 @@ Feature: Relation Inference Resolution
         $a isa place, has name "Turku Airport";
         ($a, $b);
         $b isa place, has name "Turku";
-      get;
       """
 #    Given all answers are correct in reasoned database
     Given answer size in reasoned database is: 1
@@ -842,7 +820,6 @@ Feature: Relation Inference Resolution
         ($a, $b);
         $b isa place, has name "Turku";
         ($c, $d);
-      get;
       """
 #    Then all answers are correct in reasoned database
     # (2 db relations + 1 inferred) x 2 for variable swap
@@ -888,9 +865,7 @@ Feature: Relation Inference Resolution
     When materialised database is completed
     Given for graql query
       """
-      match
-        ($a, $b) isa relation;
-      get;
+      match ($a, $b) isa relation;
       """
 #    Then all answers are correct in reasoned database
     # Despite there being more inferred relations, the answer size is still 6 (as in the previous scenario)
@@ -898,7 +873,7 @@ Feature: Relation Inference Resolution
     Then answer size in reasoned database is: 6
     Then answer set is equivalent for graql query
       """
-      match ($a, $b); get;
+      match ($a, $b);
       """
 #    Then materialised and reasoned databases are the same size
 
@@ -932,7 +907,6 @@ Feature: Relation Inference Resolution
       match
         ($a, $b);
         ($b, $c);
-      get;
       """
 #    Then all answers are correct in reasoned database
     # a   | b   | c   |

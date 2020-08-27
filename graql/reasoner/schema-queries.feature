@@ -90,23 +90,23 @@ Feature: Schema Query Resolution (Variable Types)
     When materialised database is completed
     Given for graql query
       """
-      match $x isa entity; get;
+      match $x isa entity;
       """
     Given answer size in reasoned database is: 3
     Given for graql query
       """
-      match $x isa relation; get;
+      match $x isa relation;
       """
     # (xx, yy, zz, xy, xz, yz)
     Given answer size in reasoned database is: 6
     Given for graql query
       """
-      match $x isa attribute; get;
+      match $x isa attribute;
       """
     Given answer size in reasoned database is: 1
     Then for graql query
       """
-      match $x isa $type; get;
+      match $x isa $type;
       """
 #    Then all answers are correct in reasoned database
     # 3 people x 3 types of person {person,entity,thing}
@@ -143,13 +143,13 @@ Feature: Schema Query Resolution (Variable Types)
     When materialised database is completed
     Given for graql query
       """
-      match ($u, $v) isa relation; get;
+      match ($u, $v) isa relation;
       """
     # (xx, yy, zz, xy, xz, yz, yx, zx, zy)
     Given answer size in reasoned database is: 9
     Then for graql query
       """
-      match ($u, $v) isa $type; get;
+      match ($u, $v) isa $type;
       """
 #    Then all answers are correct in reasoned database
     # 3 possible $u x 3 possible $v x 3 possible $type {friendship,relation,thing}
@@ -205,9 +205,7 @@ Feature: Schema Query Resolution (Variable Types)
     When materialised database is completed
     Given for graql query
       """
-      match
-        $x isa relation;
-      get;
+      match $x isa relation;
       """
     Given all answers are correct in reasoned database
     Given answer size in reasoned database is: 6
@@ -216,7 +214,6 @@ Feature: Schema Query Resolution (Variable Types)
       match
         $x isa $type;
         $type owns contract;
-      get;
       """
 #    Then all answers are correct in reasoned database
     # friendship can't have a contract... at least, not in this pristine test world
@@ -255,7 +252,7 @@ Feature: Schema Query Resolution (Variable Types)
     When materialised database is completed
     Given for graql query
       """
-      match $x isa relation; get;
+      match $x isa relation;
       """
     # 3 friendships, 3 employments
     Given answer size in reasoned database is: 6
@@ -264,7 +261,6 @@ Feature: Schema Query Resolution (Variable Types)
       match
         $x isa $type;
         $type sub relation;
-      get;
       """
 #    Then all answers are correct in reasoned database
     # 3 friendships, 3 employments, 6 relations
@@ -320,9 +316,7 @@ Feature: Schema Query Resolution (Variable Types)
     When materialised database is completed
     Given for graql query
       """
-      match
-        $x isa relation;
-      get;
+      match $x isa relation;
       """
     Given all answers are correct in reasoned database
     Given answer size in reasoned database is: 6
@@ -331,7 +325,6 @@ Feature: Schema Query Resolution (Variable Types)
       match
         $x isa $type;
         $type plays legal-documentation:subject;
-      get;
       """
 #    Then all answers are correct in reasoned database
     # friendship can't be a documented-thing
@@ -373,9 +366,7 @@ Feature: Schema Query Resolution (Variable Types)
     When materialised database is completed
     Given for graql query
       """
-      match
-        (employee: $x, employer: $y) isa employment;
-      get;
+      match (employee: $x, employer: $y) isa employment;
       """
     Given all answers are correct in reasoned database
     Given answer size in reasoned database is: 3
@@ -384,7 +375,6 @@ Feature: Schema Query Resolution (Variable Types)
       match
         (employee: $x, employer: $y) isa employment;
         $x isa $type;
-      get;
       """
 #    Then all answers are correct in reasoned database
     # 3 colonels * 5 supertypes of colonel (colonel, military-person, person, entity, thing)
@@ -394,7 +384,6 @@ Feature: Schema Query Resolution (Variable Types)
       match
         ($x, $y) isa employment;
         $x isa $type;
-      get;
       """
 #    Then all answers are correct in reasoned database
     # (3 colonels * 5 supertypes of colonel * 1 company)

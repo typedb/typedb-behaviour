@@ -53,7 +53,7 @@ Feature: Resolution Test Framework
     When materialised database is completed
     Then for graql query
       """
-      match $co has name $n; get;
+      match $co has name $n;
       """
     Then all answers are correct in reasoned database
     Then materialised and reasoned databases are the same size
@@ -97,7 +97,7 @@ Feature: Resolution Test Framework
     When materialised database is completed
     Then for graql query
       """
-      match $co has is-liable $l; get;
+      match $co has is-liable $l;
       """
     Then all answers are correct in reasoned database
     Then materialised and reasoned databases are the same size
@@ -149,7 +149,6 @@ Feature: Resolution Test Framework
       match
       $k isa entity, has name "King's Cross";
       (superior: $l, subordinate: $k) isa location-hierarchy;
-      get;
       """
     Then all answers are correct in reasoned database
     Then materialised and reasoned databases are the same size
@@ -207,7 +206,6 @@ Feature: Resolution Test Framework
       """
       match $lh (location-hierarchy_superior: $continent, location-hierarchy_subordinate: $area) isa location-hierarchy;
       $continent isa continent; $area isa area;
-      get;
       """
     Then all answers are correct in reasoned database
     Then materialised and reasoned databases are the same size
@@ -258,7 +256,7 @@ Feature: Resolution Test Framework
     When materialised database is completed
     Then for graql query
       """
-      match ($w, $m) isa family-relation; $w isa woman; get;
+      match ($w, $m) isa family-relation; $w isa woman;
       """
     Then all answers are correct in reasoned database
     Then materialised and reasoned databases are the same size
@@ -302,7 +300,6 @@ Feature: Resolution Test Framework
       match $com isa company;
       {$com has name $n1; $n1 "the-company";} or {$com has name $n2; $n2 "another-company";};
       not {$com has is-liable $liability;};
-      get;
       """
     Then all answers are correct in reasoned database
     Then materialised and reasoned databases are the same size
@@ -345,7 +342,7 @@ Feature: Resolution Test Framework
     When materialised database is completed
     Then for graql query
       """
-      match $com isa company, has is-liable $lia; $lia true; get;
+      match $com isa company, has is-liable $lia; $lia true;
       """
     Then all answers are correct in reasoned database
     Then materialised and reasoned databases are the same size
@@ -386,7 +383,7 @@ Feature: Resolution Test Framework
     When materialised database is completed
     Then for graql query
       """
-      match $com isa company; not { $com has is-liable $lia; $lia true; }; not { $com has name $n; $n "the-company"; }; get;
+      match $com isa company; not { $com has is-liable $lia; $lia true; }; not { $com has name $n; $n "the-company"; };
       """
     Then all answers are correct in reasoned database
     Then materialised and reasoned databases are the same size

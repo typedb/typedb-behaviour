@@ -86,7 +86,7 @@ Feature: Value Predicate Resolution
     When materialised database is completed
     Then for graql query
       """
-      match $x has is-old $r; get;
+      match $x has is-old $r;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -116,7 +116,6 @@ Feature: Value Predicate Resolution
       match
         $x isa person, has lucky-number $n;
         $n <op> 1667;
-      get;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: <answer-size>
@@ -155,7 +154,6 @@ Feature: Value Predicate Resolution
         $x isa person, has name "Alice", has lucky-number $m;
         $y isa person, has name "Bob", has lucky-number $n;
         $m <op> $n;
-      get;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: <answer-size>
@@ -196,7 +194,6 @@ Feature: Value Predicate Resolution
         $y isa person, has name "Bob", has lucky-number $n;
         $m <op> $n;
         $n <op> 1667;
-      get;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: <answer-size>
@@ -248,7 +245,6 @@ Feature: Value Predicate Resolution
         $x has retailer $r;
         $r !== $unwanted;
         $unwanted == "Ocado";
-      get;
       """
     Given all answers are correct in reasoned database
     # x     | r     |
@@ -294,7 +290,6 @@ Feature: Value Predicate Resolution
         $x has retailer $r;
         $wanted == "Ocado";
         $r == $wanted;
-      get;
       """
     Given all answers are correct in reasoned database
     # x     | r     |
@@ -344,7 +339,6 @@ Feature: Value Predicate Resolution
       match
         $x has retailer $rx;
         $rx contains "land";
-      get;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
@@ -395,7 +389,6 @@ Feature: Value Predicate Resolution
         $y has retailer $ry;
         $rx == $ry;
         $ry contains 'land';
-      get;
       """
 #    Then all answers are correct in reasoned database
     # x     | rx        | y     | ry        |
@@ -455,7 +448,6 @@ Feature: Value Predicate Resolution
         $y has retailer $ry;
         $rx !== $ry;
         $ry contains 'land';
-      get;
       """
 #    Then all answers are correct in reasoned database
     # x     | rx        | y     | ry        |
@@ -514,7 +506,6 @@ Feature: Value Predicate Resolution
       match
         $x has retailer $r;
         $r !== "Ocado";
-      get;
       """
     Given all answers are correct in reasoned database
     # x     | r     |
@@ -526,7 +517,6 @@ Feature: Value Predicate Resolution
       match
         $x has retailer $r;
         not { $r == "Ocado"; };
-      get;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
@@ -568,7 +558,6 @@ Feature: Value Predicate Resolution
       match
         $x has retailer $r;
         $r == "Ocado";
-      get;
       """
     Given all answers are correct in reasoned database
     # x     | r     |
@@ -580,7 +569,6 @@ Feature: Value Predicate Resolution
       match
         $x has retailer $r;
         not { $r !== "Ocado"; };
-      get;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
@@ -626,7 +614,6 @@ Feature: Value Predicate Resolution
           $r == $unwanted;
           $unwanted == "Ocado";
         };
-      get;
       """
     Then all answers are correct in reasoned database
     # x     | r     |
@@ -672,7 +659,6 @@ Feature: Value Predicate Resolution
         $x has retailer $re;
         $y has string-attribute $sa;
         $re !== $sa;
-      get;
       """
 #    Then all answers are correct in reasoned database
     # The string-attributes are transferred to each other, so in fact both people have both Tesco and Safeway
@@ -720,7 +706,6 @@ Feature: Value Predicate Resolution
         $x has retailer $re;
         $y has string-attribute $sa;
         not { $re == $sa; };
-      get;
       """
 #    Then all answers are correct in reasoned database
     # The string-attributes are transferred to each other, so in fact both people have both Tesco and Safeway
@@ -763,7 +748,6 @@ Feature: Value Predicate Resolution
         $x has base-attribute $ax;
         $y has base-attribute $ay;
         $ax != $ay;
-      get;
       """
     Then all answers are correct in reasoned database
     # x   | ax  | y   | ay  |
@@ -846,7 +830,6 @@ Feature: Value Predicate Resolution
       match
         $x "not expensive" isa price-range;
         ($x, priced-item: $y) isa price-classification;
-      get;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
@@ -855,7 +838,6 @@ Feature: Value Predicate Resolution
       match
         $x "low price" isa price-range;
         ($x, priced-item: $y) isa price-classification;
-      get;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -864,7 +846,6 @@ Feature: Value Predicate Resolution
       match
         $x "cheap" isa price-range;
         ($x, priced-item: $y) isa price-classification;
-      get;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -873,7 +854,6 @@ Feature: Value Predicate Resolution
       match
         $x "expensive" isa price-range;
         ($x, priced-item: $y) isa price-classification;
-      get;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -882,7 +862,6 @@ Feature: Value Predicate Resolution
       match
         $x isa price-range;
         ($x, priced-item: $y) isa price-classification;
-      get;
       """
 #    Then all answers are correct in reasoned database
     # sum of all previous answers
@@ -945,7 +924,7 @@ Feature: Value Predicate Resolution
 #    When materialised database is completed
     Then for graql query
       """
-      match (predecessor:$x1, successor:$x2) isa message-succession; get;
+      match (predecessor:$x1, successor:$x2) isa message-succession;
       """
 #    Then all answers are correct in reasoned database
     # the (n-1)th triangle number, where n is the number of replies to the first post

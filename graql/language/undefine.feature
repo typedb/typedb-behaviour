@@ -42,7 +42,7 @@ Feature: Graql Undefine Query
   Scenario: calling 'undefine' with 'sub entity' on a subtype of 'entity' deletes it
     Given get answers of graql query
       """
-      match $x sub entity; get;
+      match $x sub entity;
       """
     Given concept identifiers are
       |     | check | value         |
@@ -61,7 +61,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x sub entity; get;
+      match $x sub entity;
       """
     Then uniquely identify answer concepts
       | x   |
@@ -77,7 +77,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x type person; get;
+      match $x type person;
       """
     When concept identifiers are
       |     | check | value  |
@@ -95,7 +95,7 @@ Feature: Graql Undefine Query
     Given the integrity is validated
     Given get answers of graql query
       """
-      match $x sub person; get;
+      match $x sub person;
       """
     Given concept identifiers are
       |     | check | value  |
@@ -112,7 +112,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x sub person; get;
+      match $x sub person;
       """
     Then uniquely identify answer concepts
       | x   |
@@ -132,7 +132,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x type child; get;
+      match $x type child;
       """
     When concept identifiers are
       |     | check | value |
@@ -168,7 +168,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x type child; $x plays employment:employee; get;
+      match $x type child; $x plays employment:employee;
       """
     Then answer size is: 0
 
@@ -186,7 +186,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x type child; $x owns name; get;
+      match $x type child; $x owns name;
       """
     Then answer size is: 0
 
@@ -204,7 +204,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x type child; $x owns email @key; get;
+      match $x type child; $x owns email @key;
       """
     Then answer size is: 0
 
@@ -212,7 +212,7 @@ Feature: Graql Undefine Query
   Scenario: all existing instances of an entity type must be deleted in order to undefine it
     Given get answers of graql query
       """
-      match $x sub entity; get;
+      match $x sub entity;
       """
     Given concept identifiers are
       |     | check | value         |
@@ -249,7 +249,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x sub entity; get;
+      match $x sub entity;
       """
     Then uniquely identify answer concepts
       | x   |
@@ -266,7 +266,7 @@ Feature: Graql Undefine Query
   Scenario: a relation type is removed by disassociating its roles and their roleplayers, then undefining 'sub relation'
     Given get answers of graql query
       """
-      match $x sub relation; get;
+      match $x sub relation;
       """
     Given concept identifiers are
       |     | check | value      |
@@ -287,7 +287,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x sub relation; get;
+      match $x sub relation;
       """
     Then uniquely identify answer concepts
       | x   |
@@ -324,7 +324,7 @@ Feature: Graql Undefine Query
     Given the integrity is validated
     Given get answers of graql query
       """
-      match contract-employment plays $x; get;
+      match contract-employment plays $x;
       """
     Given concept identifiers are
       |     | check | value                 |
@@ -339,7 +339,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match contract-employment plays $x; get;
+      match contract-employment plays $x;
       """
     Then answer size is: 0
 
@@ -355,7 +355,7 @@ Feature: Graql Undefine Query
     Given the integrity is validated
     Given get answers of graql query
       """
-      match $x owns start-date; get;
+      match $x owns start-date;
       """
     Given concept identifiers are
       |     | check | value               |
@@ -372,7 +372,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x owns start-date; get;
+      match $x owns start-date;
       """
     Then answer size is: 0
 
@@ -388,7 +388,7 @@ Feature: Graql Undefine Query
     Given the integrity is validated
     Given get answers of graql query
       """
-      match $x owns employment-reference @key; get;
+      match $x owns employment-reference @key;
       """
     Given concept identifiers are
       |     | check | value               |
@@ -405,7 +405,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x owns employment-reference @key; get;
+      match $x owns employment-reference @key;
       """
     Then answer size is: 0
 
@@ -434,7 +434,7 @@ Feature: Graql Undefine Query
   Scenario: all existing instances of a relation type must be deleted in order to undefine it
     Given get answers of graql query
       """
-      match $x sub relation; get;
+      match $x sub relation;
       """
     Given concept identifiers are
       |     | check | value      |
@@ -479,7 +479,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x sub relation; get;
+      match $x sub relation;
       """
     Then uniquely identify answer concepts
       | x   |
@@ -495,7 +495,7 @@ Feature: Graql Undefine Query
   Scenario: a role is removed by removing it from its relation type and disassociating its roleplayers
     Given get answers of graql query
       """
-      match employment relates $x; get;
+      match employment relates $x;
       """
     Given concept identifiers are
       |     | check | value    |
@@ -514,7 +514,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match employment relates $x; get;
+      match employment relates $x;
       """
     Then uniquely identify answer concepts
       | x   |
@@ -538,7 +538,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x plays employment:employee; get;
+      match $x plays employment:employee;
       """
     Then answer size is: 0
 
@@ -570,7 +570,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x relates employee; get;
+      match $x relates employee;
       """
     Then answer size is: 0
     Then graql insert throws
@@ -610,7 +610,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x relates employee; get;
+      match $x relates employee;
       """
     Then answer size is: 0
     Then graql insert throws
@@ -674,7 +674,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match employment relates $x; get;
+      match employment relates $x;
       """
     When concept identifiers are
       |     | check | value    |
@@ -699,7 +699,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x type part-time; $x relates $role; get;
+      match $x type part-time; $x relates $role;
       """
     Then concept identifiers are
       |           | check | value     |
@@ -745,7 +745,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x plays employment:employee; get;
+      match $x plays employment:employee;
       """
     Then answer size is: 0
     Then graql insert throws
@@ -762,7 +762,7 @@ Feature: Graql Undefine Query
   Scenario: attempting to undefine a playable role that was not actually playable to begin with does nothing
     Given get answers of graql query
       """
-      match person plays $x; get;
+      match person plays $x;
       """
     Given concept identifiers are
       |     | check | value    |
@@ -777,7 +777,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match person plays $x; get;
+      match person plays $x;
       """
     Then uniquely identify answer concepts
       | x   |
@@ -796,7 +796,7 @@ Feature: Graql Undefine Query
     Given the integrity is validated
     Given get answers of graql query
       """
-      match $x type <attr>; get;
+      match $x type <attr>;
       """
     Given answer size is: 1
     When graql undefine
@@ -806,7 +806,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     Then graql get throws
       """
-      match $x type <attr>; get;
+      match $x type <attr>;
       """
 
     Examples:
@@ -831,7 +831,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x isa email; get;
+      match $x isa email;
       """
     Then answer size is: 1
 
@@ -844,7 +844,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x regex ".+@\w+\..+"; get;
+      match $x regex ".+@\w+\..+";
       """
     When concept identifiers are
       |     | check | value |
@@ -865,7 +865,7 @@ Feature: Graql Undefine Query
     Given the integrity is validated
     Given get answers of graql query
       """
-      match first-name plays $x; get;
+      match first-name plays $x;
       """
     Given concept identifiers are
       |     | check | value        |
@@ -880,7 +880,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match first-name plays $x; get;
+      match first-name plays $x;
       """
     Then answer size is: 0
 
@@ -896,7 +896,7 @@ Feature: Graql Undefine Query
     Given the integrity is validated
     Given get answers of graql query
       """
-      match $x owns locale; get;
+      match $x owns locale;
       """
     Given concept identifiers are
       |     | check | value      |
@@ -913,7 +913,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x owns locale; get;
+      match $x owns locale;
       """
     Then answer size is: 0
 
@@ -929,7 +929,7 @@ Feature: Graql Undefine Query
     Given the integrity is validated
     Given get answers of graql query
       """
-      match $x owns name-id @key; get;
+      match $x owns name-id @key;
       """
     Given concept identifiers are
       |     | check | value      |
@@ -946,7 +946,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x owns name-id @key; get;
+      match $x owns name-id @key;
       """
     Then answer size is: 0
 
@@ -967,7 +967,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     Then graql get throws
       """
-      match $x type name; get;
+      match $x type name;
       """
 
 
@@ -982,7 +982,7 @@ Feature: Graql Undefine Query
   Scenario: all existing instances of an attribute type must be deleted in order to undefine it
     Given get answers of graql query
       """
-      match $x sub attribute; get;
+      match $x sub attribute;
       """
     Given concept identifiers are
       |     | check | value     |
@@ -1019,7 +1019,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x sub attribute; get;
+      match $x sub attribute;
       """
     Then uniquely identify answer concepts
       | x   |
@@ -1037,7 +1037,6 @@ Feature: Graql Undefine Query
       match
         $x owns name;
         $x type person;
-      get;
       """
     Given concept identifiers are
       |     | check | value  |
@@ -1055,7 +1054,6 @@ Feature: Graql Undefine Query
       match
         $x owns name;
         $x type person;
-      get;
       """
     Then answer size is: 0
 
@@ -1087,7 +1085,6 @@ Feature: Graql Undefine Query
       match
         $x owns email @key;
         $x type person;
-      get;
       """
     Given concept identifiers are
       |     | check | value  |
@@ -1105,7 +1102,6 @@ Feature: Graql Undefine Query
       match
         $x owns email @key;
         $x type person;
-      get;
       """
     Then answer size is: 0
 
@@ -1139,7 +1135,7 @@ Feature: Graql Undefine Query
   Scenario: when an attribute owner owns instances, but none of them own that attribute, the ownership can be removed
     Given get answers of graql query
       """
-      match $x owns name; get;
+      match $x owns name;
       """
     Given concept identifiers are
       |     | check | value  |
@@ -1159,7 +1155,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x owns name; get;
+      match $x owns name;
       """
     Then answer size is: 0
 
@@ -1207,7 +1203,7 @@ Feature: Graql Undefine Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x sub rule; get;
+      match $x sub rule;
       """
     Then concept identifiers are
       |        | check | value  |
@@ -1224,7 +1220,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     Then get answers of graql query
       """
-      match $x sub rule; get;
+      match $x sub rule;
       """
     Then answer size is: 1
 
@@ -1325,7 +1321,6 @@ Feature: Graql Undefine Query
       match
         $x type abstract-type;
         not { $x abstract; };
-      get;
       """
     Given answer size is: 0
     Given graql insert throws
@@ -1343,7 +1338,6 @@ Feature: Graql Undefine Query
       match
         $x type abstract-type;
         not { $x abstract; };
-      get;
       """
     Then concept identifiers are
       |     | check | value         |
@@ -1358,7 +1352,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x isa abstract-type; get;
+      match $x isa abstract-type;
       """
     Then answer size is: 1
 
@@ -1374,7 +1368,6 @@ Feature: Graql Undefine Query
       match
         $x type person;
         not { $x abstract; };
-      get;
       """
     When concept identifiers are
       |     | check | value  |
@@ -1400,7 +1393,6 @@ Feature: Graql Undefine Query
       match
         $x type abstract-type;
         not { $x abstract; };
-      get;
       """
     When concept identifiers are
       |     | check | value         |
@@ -1430,7 +1422,6 @@ Feature: Graql Undefine Query
       match
         $x type vehicle-registration;
         not { $x abstract; };
-      get;
       """
     Then answer size is: 1
 
@@ -1450,7 +1441,7 @@ Feature: Graql Undefine Query
       | ATT | label | attribute     |
     Given get answers of graql query
       """
-      match $x sub entity; get;
+      match $x sub entity;
       """
     Given uniquely identify answer concepts
       | x   |
@@ -1459,7 +1450,7 @@ Feature: Graql Undefine Query
       | ENT |
     Given get answers of graql query
       """
-      match $x sub attribute; get;
+      match $x sub attribute;
       """
     Given uniquely identify answer concepts
       | x   |
@@ -1475,7 +1466,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x sub entity; get;
+      match $x sub entity;
       """
     Then uniquely identify answer concepts
       | x   |
@@ -1483,7 +1474,7 @@ Feature: Graql Undefine Query
       | ENT |
     When get answers of graql query
       """
-      match $x sub attribute; get;
+      match $x sub attribute;
       """
     Then uniquely identify answer concepts
       | x   |
@@ -1509,7 +1500,7 @@ Feature: Graql Undefine Query
       | ATT | label | attribute     |
     Given get answers of graql query
       """
-      match $x sub entity; get;
+      match $x sub entity;
       """
     Given uniquely identify answer concepts
       | x   |
@@ -1518,7 +1509,7 @@ Feature: Graql Undefine Query
       | ENT |
     Given get answers of graql query
       """
-      match $x sub relation; get;
+      match $x sub relation;
       """
     Given uniquely identify answer concepts
       | x   |
@@ -1526,7 +1517,7 @@ Feature: Graql Undefine Query
       | REL |
     Given get answers of graql query
       """
-      match $x sub attribute; get;
+      match $x sub attribute;
       """
     Given uniquely identify answer concepts
       | x   |
@@ -1535,7 +1526,7 @@ Feature: Graql Undefine Query
       | ATT |
     Given get answers of graql query
       """
-      match $x sub role; get;
+      match $x sub role;
       """
     Given uniquely identify answer concepts
       | x   |
@@ -1552,7 +1543,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
     When get answers of graql query
       """
-      match $x sub entity; get;
+      match $x sub entity;
       """
     Then uniquely identify answer concepts
       | x   |
@@ -1560,14 +1551,14 @@ Feature: Graql Undefine Query
       | ENT |
     When get answers of graql query
       """
-      match $x sub relation; get;
+      match $x sub relation;
       """
     Then uniquely identify answer concepts
       | x   |
       | REL |
     When get answers of graql query
       """
-      match $x sub attribute; get;
+      match $x sub attribute;
       """
     Then uniquely identify answer concepts
       | x   |
@@ -1575,7 +1566,7 @@ Feature: Graql Undefine Query
       | ATT |
     When get answers of graql query
       """
-      match $x sub role; get;
+      match $x sub role;
       """
     Then uniquely identify answer concepts
       | x   |

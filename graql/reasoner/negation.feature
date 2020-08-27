@@ -82,7 +82,7 @@ Feature: Negation Resolution
       """
     Given for graql query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Given answer size in reasoned database is: 5
     Then for graql query
@@ -92,7 +92,6 @@ Feature: Negation Resolution
         not {
           $e (employee: $x) isa employment;
         };
-      get;
       """
     Then answer size in reasoned database is: 3
 
@@ -112,7 +111,7 @@ Feature: Negation Resolution
       """
     Given for graql query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Given answer size in reasoned database is: 5
     Then for graql query
@@ -122,7 +121,6 @@ Feature: Negation Resolution
         not {
           ($x) isa relation;
         };
-      get;
       """
     Then answer size in reasoned database is: 3
 
@@ -139,7 +137,7 @@ Feature: Negation Resolution
       """
     Given for graql query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Given answer size in reasoned database is: 5
     Then for graql query
@@ -149,7 +147,6 @@ Feature: Negation Resolution
         not {
           $x has name $val;
         };
-      get;
       """
     Then answer size in reasoned database is: 2
 
@@ -166,7 +163,7 @@ Feature: Negation Resolution
       """
     Given for graql query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Given answer size in reasoned database is: 5
     Then for graql query
@@ -176,7 +173,6 @@ Feature: Negation Resolution
         not {
           $x has name "Bob";
         };
-      get;
       """
     Then answer size in reasoned database is: 4
 
@@ -194,7 +190,6 @@ Feature: Negation Resolution
       match
         $x has age $y;
         not {$y 20;};
-      get;
       """
     Then answer size in reasoned database is: 1
     Then answer set is equivalent for graql query
@@ -202,7 +197,6 @@ Feature: Negation Resolution
       match
         $x has age $y;
         $y 10;
-      get;
       """
 
 
@@ -220,14 +214,11 @@ Feature: Negation Resolution
       match
         $x has attribute $y;
         not {$y isa name;};
-      get;
       """
     Then answer size in reasoned database is: 2
     Then answer set is equivalent for graql query
       """
-      match
-        $x has age $y;
-      get;
+      match $x has age $y;
       """
 
 
@@ -257,7 +248,6 @@ Feature: Negation Resolution
         (friend: $a, friend: $b) isa friendship;
         (friend: $b, friend: $c) isa friendship;
         (friend: $c, friend: $d) isa friendship;
-      get;
       """
     # abab, abcb, abcd,
     # baba, babc, bcba, bcbc, bcdc, bcdz,
@@ -272,7 +262,6 @@ Feature: Negation Resolution
         (friend: $b, friend: $c) isa friendship;
         (friend: $c, friend: $d) isa friendship;
         not {$c isa dog;};
-      get;
       """
     # Eliminates (cdzd, zdzd)
     Then answer size in reasoned database is: 22
@@ -283,7 +272,6 @@ Feature: Negation Resolution
         (friend: $b, friend: $c) isa friendship;
         (friend: $c, friend: $d) isa friendship;
         $c isa person;
-      get;
       """
 
 
@@ -312,7 +300,6 @@ Feature: Negation Resolution
       match
         (friend: $a, friend: $b) isa friendship;
         (friend: $b, friend: $c) isa friendship;
-      get;
       """
     # aba, abc
     # bab, bcb, bcd
@@ -327,7 +314,6 @@ Feature: Negation Resolution
         not {(friend: $b, friend: $z) isa friendship;};
         (friend: $b, friend: $c) isa friendship;
         $z isa dog;
-      get;
       """
     # (d,z) is a friendship so we eliminate results where $b is 'd': these are (cdc, cdz, zdc, zdz)
     Then answer size in reasoned database is: 10
@@ -338,7 +324,6 @@ Feature: Negation Resolution
         (friend: $b, friend: $c) isa friendship;
         $z isa dog;
         not {$b has name "d";};
-      get;
       """
 
 
@@ -353,9 +338,7 @@ Feature: Negation Resolution
       """
     Given for graql query
       """
-      match
-        ($r1: $x) isa employment;
-      get;
+      match ($r1: $x) isa employment;
       """
     # r1       | x   |
     # role     | PER |
@@ -368,7 +351,6 @@ Feature: Negation Resolution
       match
         ($r1: $x) isa employment;
         not {$r1 type role;};
-      get;
       """
     Then answer size in reasoned database is: 2
 
@@ -386,9 +368,7 @@ Feature: Negation Resolution
       """
     Given for graql query
       """
-      match
-        $x has attribute $r;
-      get;
+      match $x has attribute $r;
       """
     Given answer size in reasoned database is: 8
     Then for graql query
@@ -398,7 +378,6 @@ Feature: Negation Resolution
         not {
           $x isa person, has name "Tim", has age 55;
         };
-      get;
       """
     Then answer size in reasoned database is: 6
     Then answer set is equivalent for graql query
@@ -410,7 +389,6 @@ Feature: Negation Resolution
           $x has name "Tim";
           $x has age 55;
         };
-      get;
       """
 
 
@@ -427,9 +405,7 @@ Feature: Negation Resolution
       """
     Given for graql query
       """
-      match
-        $x has attribute $r;
-      get;
+      match $x has attribute $r;
       """
     Given answer size in reasoned database is: 8
     Given for graql query
@@ -437,7 +413,6 @@ Feature: Negation Resolution
       match
         $x has attribute $r;
         not { $x isa company; };
-      get;
       """
     Given answer size in reasoned database is: 7
     Then for graql query
@@ -446,7 +421,6 @@ Feature: Negation Resolution
         $x has attribute $r;
         not { $x isa company; };
         not { $x has name "Tim"; };
-      get;
       """
     Then answer size in reasoned database is: 3
     Then for graql query
@@ -456,7 +430,6 @@ Feature: Negation Resolution
         not { $x isa company; };
         not { $x has name "Tim"; };
         not { $r 55; };
-      get;
       """
     Then answer size in reasoned database is: 2
 
@@ -474,9 +447,7 @@ Feature: Negation Resolution
       """
     Given for graql query
       """
-      match
-        $x isa person, has name "Tim";
-      get;
+      match $x isa person, has name "Tim";
       """
     Given answer size in reasoned database is: 2
     Then for graql query
@@ -488,7 +459,6 @@ Feature: Negation Resolution
             $x has age 55;
           };
         };
-      get;
       """
     Then answer size in reasoned database is: 1
     Then answer set is equivalent for graql query
@@ -496,7 +466,6 @@ Feature: Negation Resolution
       match
         $x isa person, has name "Tim";
         $x has age 55;
-      get;
       """
 
 
@@ -522,7 +491,7 @@ Feature: Negation Resolution
       """
     Given for graql query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Then answer size in reasoned database is: 4
     Then for graql query
@@ -533,7 +502,6 @@ Feature: Negation Resolution
           (employee: $x, employer: $y) isa employment;
           $y isa pizza-company;
         };
-      get;
       """
     Then answer size in reasoned database is: 3
 
@@ -566,7 +534,6 @@ Feature: Negation Resolution
           (employee: $x, employer: $y) isa employment;
           $y isa company;
         };
-      get;
       """
     Then answer size in reasoned database is: 2
 
@@ -601,7 +568,6 @@ Feature: Negation Resolution
           (employee: $x, employer: $y) isa employment;
           $y isa pizza-company;
         };
-      get;
       """
     Then answer size in reasoned database is: 3
 
@@ -648,7 +614,6 @@ Feature: Negation Resolution
       match
         (employee: $x, employer: $y) isa employment;
         not {(manager: $x) isa employment;};
-      get;
       """
     Then all answers are correct in reasoned database
     # Anna is not retrieved because she is someone's manager
@@ -694,7 +659,6 @@ Feature: Negation Resolution
       match
         $r (employee: $x, employer: $y) isa employment;
         not {$r (manager: $x) isa employment;};
-      get;
       """
     Then all answers are correct in reasoned database
     # Anna is retrieved because she is not a manager in her own employee-employment relation
@@ -740,7 +704,6 @@ Feature: Negation Resolution
       match
         $r (employee: $x, employer: $y) isa employment;
         not {$r (manager: $z) isa employment;};
-      get;
       """
     Then all answers are correct in reasoned database
     # Carol is not retrieved because her employment relation has a manager
@@ -750,7 +713,6 @@ Feature: Negation Resolution
       match
         $r (employee: $x, employer: $y) isa employment;
         not {$r (employee: $z, manager: $z) isa employment;};
-      get;
       """
     # Now the negation block is harder to fulfil. Carol is not her own manager, so she is retrieved again
     Then all answers are correct in reasoned database
@@ -794,7 +756,6 @@ Feature: Negation Resolution
       match
         $continent isa continent;
         $area isa area;
-      get;
       """
     Then answer size in reasoned database is: 1
     Then for graql query
@@ -803,7 +764,6 @@ Feature: Negation Resolution
         $continent isa continent;
         $area isa area;
         not {(superior: $continent, subordinate: $area) isa location-hierarchy;};
-      get;
       """
     Then answer size in reasoned database is: 0
 #    Then materialised and reasoned databases are the same size
@@ -876,7 +836,6 @@ Feature: Negation Resolution
       match
         (indirect-from: $x, indirect-to: $y) isa indirect-link;
         $x has index "aa";
-      get;
       """
     Then answer size in reasoned database is: 2
     Then answer set is equivalent for graql query
@@ -885,7 +844,6 @@ Feature: Negation Resolution
         (reachable-from: $x, reachable-to: $y) isa reachable;
         $x has index "aa";
         not {$y has index "bb";};
-      get;
       """
 
 
@@ -917,13 +875,13 @@ Feature: Negation Resolution
     When materialised database is completed
     Then for graql query
       """
-      match $x has name "Not Ten", has age 20; get;
+      match $x has name "Not Ten", has age 20;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
     Then for graql query
       """
-      match $x has name "Not Ten", has age 10; get;
+      match $x has name "Not Ten", has age 10;
       """
     Then answer size in reasoned database is: 0
     Then materialised and reasoned databases are the same size
@@ -953,13 +911,13 @@ Feature: Negation Resolution
     When materialised database is completed
     Given for graql query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Given all answers are correct in reasoned database
     Given answer size in reasoned database is: 3
     Then for graql query
       """
-      match $x isa person, has name "No Age"; get;
+      match $x isa person, has name "No Age";
       """
     Then answer size in reasoned database is: 1
     Then materialised and reasoned databases are the same size
@@ -1005,7 +963,7 @@ Feature: Negation Resolution
     When materialised database is completed
     Given for graql query
       """
-      match $x isa company; get;
+      match $x isa company;
       """
     Given answer size in reasoned database is: 4
     Then for graql query
@@ -1013,7 +971,6 @@ Feature: Negation Resolution
       match
         $x isa company;
         not { (not-in-uk: $x) isa non-uk; };
-      get;
       """
     # Should exclude both the company in France and the company with no country
     Then answer size in reasoned database is: 2
@@ -1030,7 +987,6 @@ Feature: Negation Resolution
       match
         $x isa company;
         { $x has name "a"; } or { $x has name "b"; };
-      get;
       """
     Then materialised and reasoned databases are the same size
 
@@ -1082,7 +1038,6 @@ Feature: Negation Resolution
             $x has name "c";
           };
         };
-      get;
       """
     Then answer size in reasoned database is: 3
     Then answer set is equivalent for graql query
@@ -1090,7 +1045,6 @@ Feature: Negation Resolution
       match
         $x isa company;
         not { $x has name "d"; };
-      get;
       """
 
 
@@ -1188,7 +1142,7 @@ Feature: Negation Resolution
     When materialised database is completed
     Then for graql query
       """
-      match (diagnosed-fault: $flt, parent-session: $ts) isa diagnosis; get;
+      match (diagnosed-fault: $flt, parent-session: $ts) isa diagnosis;
       """
     Then answer size in reasoned database is: 0
     Then answers are consistent across 5 executions in reasoned database
@@ -1260,7 +1214,7 @@ Feature: Negation Resolution
     When materialised database is completed
     Then for graql query
       """
-      match (role-3: $x, role-4: $y) isa relation-4; get;
+      match (role-3: $x, role-4: $y) isa relation-4;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 11
@@ -1343,7 +1297,6 @@ Feature: Negation Resolution
       match
         (unreachable-from: $x, unreachable-to: $y) isa unreachable;
         $x has index "aa";
-      get;
       """
     # aa is not linked to itself. ee, ff, gg are linked to each other, but not to aa. hh is not linked to anything
     Then answer size in reasoned database is: 5
@@ -1353,6 +1306,5 @@ Feature: Negation Resolution
         $x has index "aa";
         { $y has index "aa"; } or { $y has index "ee"; } or { $y has index "ff"; } or
         { $y has index "gg"; } or { $y has index "hh"; };
-      get;
       """
     # Then materialised and reasoned databases are the same size  

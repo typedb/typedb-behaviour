@@ -56,7 +56,7 @@ Feature: Graql Get Query
   Scenario: match-get returns an empty answer if there are no matches
     When get answers of graql query
       """
-      match $x isa person, has name "Anonymous Coward"; get;
+      match $x isa person, has name "Anonymous Coward";
       """
     Then answer size is: 0
 
@@ -116,9 +116,7 @@ Feature: Graql Get Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match
-        $x isa <attr>;
-      get;
+      match $x isa <attr>;
       sort $x asc;
       """
     And concept identifiers are
@@ -154,9 +152,7 @@ Feature: Graql Get Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match
-        $x isa person, has name $y;
-      get;
+      match $x isa person, has name $y;
       sort $y asc;
       """
     And concept identifiers are
@@ -177,9 +173,7 @@ Feature: Graql Get Query
       | JEM | nJEM |
     When get answers of graql query
       """
-      match
-        $x isa person, has name $y;
-      get;
+      match $x isa person, has name $y;
       sort $y desc;
       """
     Then order of answer concepts is
@@ -202,9 +196,7 @@ Feature: Graql Get Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match
-        $x isa person, has name $y;
-      get;
+      match $x isa person, has name $y;
       sort $y;
       """
     And concept identifiers are
@@ -237,9 +229,7 @@ Feature: Graql Get Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match
-        $x isa person, has name $y;
-      get;
+      match $x isa person, has name $y;
       sort $y asc;
       limit 3;
       """
@@ -270,9 +260,7 @@ Feature: Graql Get Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match
-        $x isa person, has name $y;
-      get;
+      match $x isa person, has name $y;
       sort $y asc;
       offset 2;
       """
@@ -300,9 +288,7 @@ Feature: Graql Get Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match
-        $x isa person, has name $y;
-      get;
+      match $x isa person, has name $y;
       sort $y asc;
       offset 1;
       limit 2;
@@ -331,9 +317,7 @@ Feature: Graql Get Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match
-        $x isa person, has name $y;
-      get;
+      match $x isa person, has name $y;
       sort $y asc;
       limit 0;
       """
@@ -352,9 +336,7 @@ Feature: Graql Get Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match
-        $x isa person, has name $y;
-      get;
+      match $x isa person, has name $y;
       sort $y asc;
       offset 5;
       """
@@ -381,9 +363,7 @@ Feature: Graql Get Query
       | SEC | value | name:secret agent |
     Then get answers of graql query
       """
-      match
-        $x isa name;
-      get;
+      match $x isa name;
       sort $x asc;
       """
     Then order of answer concepts is
@@ -408,9 +388,7 @@ Feature: Graql Get Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match
-        $x isa person, has age $y;
-      get;
+      match $x isa person, has age $y;
       sort $y asc;
       limit 2;
       """
@@ -425,9 +403,7 @@ Feature: Graql Get Query
       | A2P2 | AGE2 |
     When get answers of graql query
       """
-      match
-        $x isa person, has age $y;
-      get;
+      match $x isa person, has age $y;
       sort $y asc;
       offset 2;
       limit 2;
@@ -482,7 +458,6 @@ Feature: Graql Get Query
         $x isa person;
         $y isa name;
         $f isa friendship;
-      get;
       """
     Then answer size is: 9
     When get answers of graql query
@@ -491,7 +466,6 @@ Feature: Graql Get Query
         $x isa person;
         $y isa name;
         $f isa friendship;
-      get;
       count;
       """
     Then aggregate value is: 9
@@ -501,7 +475,6 @@ Feature: Graql Get Query
         $x isa person;
         $y isa name;
         $f (friend: $x) isa friendship;
-      get;
       """
     Then answer size is: 6
     When get answers of graql query
@@ -510,7 +483,6 @@ Feature: Graql Get Query
         $x isa person;
         $y isa name;
         $f (friend: $x) isa friendship;
-      get;
       count;
       """
     Then aggregate value is: 6
@@ -519,9 +491,7 @@ Feature: Graql Get Query
   Scenario: the 'count' of an empty answer set is zero
     When get answers of graql query
       """
-      match
-        $x isa person, has name "Voldemort";
-      get;
+      match $x isa person, has name "Voldemort";
       count;
       """
     Then aggregate value is: 0
@@ -545,9 +515,7 @@ Feature: Graql Get Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match
-        $x isa person, has <attr> $y;
-      get;
+      match $x isa person, has <attr> $y;
       <agg_type> $y;
       """
     Then aggregate value is: <agg_val>
@@ -584,9 +552,7 @@ Feature: Graql Get Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match
-        $x isa person, has weight $y;
-      get;
+      match $x isa person, has weight $y;
       std $y;
       """
     # Note: This is the sample standard deviation, NOT the population standard deviation
@@ -604,9 +570,7 @@ Feature: Graql Get Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match
-        $x isa person, has name $y, has age $z;
-      get;
+      match $x isa person, has name $y, has age $z;
       sum $z;
       """
     Then aggregate value is: 65
@@ -631,9 +595,7 @@ Feature: Graql Get Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match
-        $x isa person, has age $y;
-      get;
+      match $x isa person, has age $y;
       <agg_type> $y;
       """
     Then aggregate value is: <agg_val>
@@ -657,9 +619,7 @@ Feature: Graql Get Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match
-        $x isa person, has age $y;
-      get;
+      match $x isa person, has age $y;
       median $y;
       """
     Then aggregate value is: 36.5
@@ -675,9 +635,7 @@ Feature: Graql Get Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match
-        $x isa person, has income $y;
-      get;
+      match $x isa person, has income $y;
       <agg_type> $y;
       """
     Then aggregate answer is empty
@@ -695,9 +653,7 @@ Feature: Graql Get Query
   Scenario Outline: an error is thrown when getting the '<agg_type>' of an undefined variable in an aggregate query
     Then graql get throws
       """
-      match
-        $x isa person;
-      get;
+      match $x isa person;
       <agg_type> $y;
       """
 
@@ -719,9 +675,7 @@ Feature: Graql Get Query
     When the integrity is validated
     Then graql get throws
       """
-      match
-        $x isa person;
-      get;
+      match $x isa person;
       min $x;
       """
     Then the integrity is validated
@@ -743,9 +697,7 @@ Feature: Graql Get Query
     Given the integrity is validated
     Then graql get throws
       """
-      match
-        $x isa person, has <attr> $y;
-      get;
+      match $x isa person, has <attr> $y;
       <agg_type> $y;
       """
     Then the integrity is validated
@@ -782,9 +734,7 @@ Feature: Graql Get Query
     When the integrity is validated
     Then graql get throws
       """
-      match
-        $x isa person, has attribute $y;
-      get;
+      match $x isa person, has attribute $y;
       sum $y;
       """
     Then the integrity is validated
@@ -793,9 +743,7 @@ Feature: Graql Get Query
   Scenario: when taking the sum of an empty set, even if any matches would definitely be strings, no error is thrown and an empty answer is returned
     When get answers of graql query
       """
-      match
-        $x isa person, has name $y;
-      get;
+      match $x isa person, has name $y;
       sum $y;
       """
     Then aggregate answer is empty
@@ -818,7 +766,7 @@ Feature: Graql Get Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match ($x, $y) isa friendship; get;
+      match ($x, $y) isa friendship;
       """
     And concept identifiers are
       |     | check | value |
@@ -843,7 +791,6 @@ Feature: Graql Get Query
     When get answers of graql query
       """
       match ($x, $y) isa friendship;
-      get;
       group $x;
       """
     And group identifiers are
@@ -903,7 +850,7 @@ Feature: Graql Get Query
     Given the integrity is validated
     When get answers of graql query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     And concept identifiers are
       |     | check | value |
@@ -914,7 +861,6 @@ Feature: Graql Get Query
     When get answers of graql query
       """
       match ($x, $y) isa friendship;
-      get;
       group $x;
       count;
       """
@@ -1016,7 +962,6 @@ Feature: Graql Get Query
         $x isa company;
         $y isa person, has age $z;
         ($x, $y) isa employment;
-      get;
       group $x;
       max $z;
       """

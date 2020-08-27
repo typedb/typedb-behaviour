@@ -83,13 +83,13 @@ Feature: Attribute Attachment Resolution
 #    When materialised database is completed
     Then for graql query
       """
-      match $x isa person, has string-attribute $y; get;
+      match $x isa person, has string-attribute $y;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
     Then for graql query
       """
-      match $x isa string-attribute; get;
+      match $x isa string-attribute;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -135,13 +135,13 @@ Feature: Attribute Attachment Resolution
 #    When materialised database is completed
     Then for graql query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
     Then for graql query
       """
-      match $x isa person, has attribute $y; get;
+      match $x isa person, has attribute $y;
       """
     # four attributes for each entity
 #    Then all answers are correct in reasoned database
@@ -170,19 +170,19 @@ Feature: Attribute Attachment Resolution
 #    When materialised database is completed
     Then for graql query
       """
-      match $x isa person, has sub-string-attribute $y; get;
+      match $x isa person, has sub-string-attribute $y;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
     Then for graql query
       """
-      match $x isa sub-string-attribute; get;
+      match $x isa sub-string-attribute;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
     Then for graql query
       """
-      match $x isa string-attribute; $y isa sub-string-attribute; get;
+      match $x isa string-attribute; $y isa sub-string-attribute;
       """
     # 2 SA instances - one base, one sub hence two answers
 #    Then all answers are correct in reasoned database
@@ -212,13 +212,13 @@ Feature: Attribute Attachment Resolution
 #    When materialised database is completed
     Then for graql query
       """
-      match $x isa person, has unrelated-attribute $y; get;
+      match $x isa person, has unrelated-attribute $y;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
     Then for graql query
       """
-      match $x isa unrelated-attribute; get;
+      match $x isa unrelated-attribute;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -258,7 +258,7 @@ Feature: Attribute Attachment Resolution
 #    When materialised database is completed
     Then for graql query
       """
-      match $x has string-attribute $y; get;
+      match $x has string-attribute $y;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 3
@@ -297,19 +297,19 @@ Feature: Attribute Attachment Resolution
     When materialised database is completed
     Then for graql query
       """
-      match $x has retailer 'Ocado'; get;
+      match $x has retailer 'Ocado';
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
     Then for graql query
       """
-      match $x has retailer $r; get;
+      match $x has retailer $r;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 4
     Then for graql query
       """
-      match $x has retailer 'Tesco'; get;
+      match $x has retailer 'Tesco';
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
@@ -340,7 +340,7 @@ Feature: Attribute Attachment Resolution
     When materialised database is completed
     Then for graql query
       """
-      match $x isa soft-drink, has retailer 'Ocado'; get;
+      match $x isa soft-drink, has retailer 'Ocado';
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2

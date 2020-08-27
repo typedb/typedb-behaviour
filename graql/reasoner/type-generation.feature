@@ -51,13 +51,13 @@ Feature: Type Generation Resolution
 #    When materialised database is completed
     Then for graql query
       """
-      match $x isa derivedEntity; get;
+      match $x isa derivedEntity;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
     Then for graql query
       """
-      match $x isa $type; get;
+      match $x isa $type;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 4
@@ -103,19 +103,19 @@ Feature: Type Generation Resolution
 #    When materialised database is completed
     Then for graql query
       """
-      match $x isa derivedEntity; get;
+      match $x isa derivedEntity;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
     Then for graql query
       """
-      match $x isa! derivedEntity; get;
+      match $x isa! derivedEntity;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
     Then for graql query
       """
-      match $x isa directDerivedEntity; get;
+      match $x isa directDerivedEntity;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -160,15 +160,13 @@ Feature: Type Generation Resolution
 #    When materialised database is completed
     Then for graql query
       """
-      match $x isa baseEntity; get;
+      match $x isa baseEntity;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
     Then for graql query
       """
-      match
-        $x isa derivedEntity;
-      get;
+      match $x isa derivedEntity;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
@@ -206,13 +204,13 @@ Feature: Type Generation Resolution
 #    When materialised database is completed
     Then for graql query
       """
-      match $x isa baseEntity; get;
+      match $x isa baseEntity;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
     Then for graql query
       """
-      match $x isa baseAttribute; get;
+      match $x isa baseAttribute;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -221,7 +219,6 @@ Feature: Type Generation Resolution
       match
         $x isa derivedEntity;
         $x isa baseEntity;
-      get;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -280,19 +277,19 @@ Feature: Type Generation Resolution
 #    When materialised database is completed
     Then for graql query
       """
-      match ($x) isa derivedRelation; get;
+      match ($x) isa derivedRelation;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
     Then for graql query
       """
-      match ($x) isa! derivedRelation; get;
+      match ($x) isa! derivedRelation;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
     Then for graql query
       """
-      match ($x) isa directDerivedRelation; get;
+      match ($x) isa directDerivedRelation;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1

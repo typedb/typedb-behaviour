@@ -106,7 +106,7 @@ Feature: Recursion Resolution
     When materialised database is completed
     Then for graql query
       """
-      match (big-location-subordinate: $x, big-location-superior: $y) isa big-location-hierarchy; get;
+      match (big-location-subordinate: $x, big-location-superior: $y) isa big-location-hierarchy;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -180,7 +180,7 @@ Feature: Recursion Resolution
     When materialised database is completed
     Then for graql query
       """
-      match (role31: $x, role32: $y) isa relation3; get;
+      match (role31: $x, role32: $y) isa relation3;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -249,14 +249,14 @@ Feature: Recursion Resolution
     When materialised database is completed
     Then for graql query
       """
-      match (role31: $x, role32: $y) isa relation3; get;
+      match (role31: $x, role32: $y) isa relation3;
       """
     Then all answers are correct in reasoned database
     # Each of the two material relation1 instances should infer a single relation3 via 1-to-2 and 2-to-3
     Then answer size in reasoned database is: 2
     Then for graql query
       """
-      match (role21: $x, role22: $y) isa relation2; get;
+      match (role21: $x, role22: $y) isa relation2;
       """
     Then all answers are correct in reasoned database
     # Relation-3-to-2 should not make any additional inferences - it should merely assert that the relations exist
@@ -295,7 +295,7 @@ Feature: Recursion Resolution
 #    When materialised database is completed
     Then for graql query
       """
-      match $x isa dream; get; limit 10;
+      match $x isa dream; limit 10;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 10
@@ -398,13 +398,13 @@ Feature: Recursion Resolution
 #    When materialised database is completed
     Then for graql query
       """
-      match $p isa pair, has name 'ff'; get;
+      match $p isa pair, has name 'ff';
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 16
     Then for graql query
       """
-      match $p isa pair; get;
+      match $p isa pair;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 64
@@ -607,9 +607,7 @@ Feature: Recursion Resolution
       """
     Then for graql query
       """
-      match
-        (ancestor: $X, descendant: $Y) isa Ancestor;
-      get;
+      match (ancestor: $X, descendant: $Y) isa Ancestor;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 10
@@ -627,9 +625,7 @@ Feature: Recursion Resolution
       """
     Then for graql query
       """
-      match
-        ($X, $Y) isa Ancestor;
-      get;
+      match ($X, $Y) isa Ancestor;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 20
@@ -918,7 +914,7 @@ Feature: Recursion Resolution
     Then answer size in reasoned database is: 1
     Then answer set is equivalent for graql query
       """
-      match $x has index 'a2'; get;
+      match $x has index 'a2';
       """
 #    Then materialised and reasoned databases are the same size
 
@@ -1006,7 +1002,7 @@ Feature: Recursion Resolution
     When materialised database is completed
     Then for graql query
       """
-      match (from: $x, to: $y) isa reachable; get;
+      match (from: $x, to: $y) isa reachable;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 7
@@ -1285,9 +1281,7 @@ Feature: Recursion Resolution
       """
     Then for graql query
       """
-      match
-        (RSG-from: $x, RSG-to: $y) isa RevSG;
-      get;
+      match (RSG-from: $x, RSG-to: $y) isa RevSG;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 11
@@ -1477,9 +1471,7 @@ Feature: Recursion Resolution
     Then answer size in reasoned database is: 5
     Then answer set is equivalent for graql query
       """
-      match
-        { $y isa a-entity; } or { $y isa end; };
-      get;
+      match { $y isa a-entity; } or { $y isa end; };
       """
 #    Then materialised and reasoned databases are the same size
 
@@ -1683,7 +1675,7 @@ Feature: Recursion Resolution
     Then answer size in reasoned database is: 60
     Then answer set is equivalent for graql query
       """
-      match $y isa b-entity; get;
+      match $y isa b-entity;
       """
 #    Then materialised and reasoned databases are the same size
 
@@ -1868,7 +1860,7 @@ Feature: Recursion Resolution
     Then answer size in reasoned database is: 11
     Then answer set is equivalent for graql query
       """
-      match $y isa a-entity; get;
+      match $y isa a-entity;
       """
 #    Then materialised and reasoned databases are the same size
 
@@ -2022,6 +2014,6 @@ Feature: Recursion Resolution
     Then answer size in reasoned database is: 25
     Then answer set is equivalent for graql query
       """
-      match $y isa a-entity; get;
+      match $y isa a-entity;
       """
 #    Then materialised and reasoned databases are the same size

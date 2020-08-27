@@ -83,7 +83,6 @@ Feature: Type Hierarchy Resolution
         $x isa person;
         $y isa person;
         (actor: $x, writer: $y) isa film-production;
-      get;
       """
     Then all answers are correct in reasoned database
     # Answers are (actor:$x, writer:$z) and (actor:$x, writer:$v)
@@ -95,7 +94,6 @@ Feature: Type Hierarchy Resolution
         $y isa person;
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
-      get;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
@@ -105,7 +103,6 @@ Feature: Type Hierarchy Resolution
         $x isa person;
         $y isa child;
         (actor: $x, writer: $y) isa film-production;
-      get;
       """
     Then all answers are correct in reasoned database
     # Answer is (actor:$x, writer:$v) ONLY
@@ -117,7 +114,6 @@ Feature: Type Hierarchy Resolution
         $y isa child;
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
-      get;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -127,7 +123,6 @@ Feature: Type Hierarchy Resolution
         $x isa child;
         $y isa person;
         (actor: $x, writer: $y) isa film-production;
-      get;
       """
     Then all answers are correct in reasoned database
     # Answers are (actor:$x, writer:$z) and (actor:$x, writer:$v)
@@ -139,7 +134,6 @@ Feature: Type Hierarchy Resolution
         $y isa person;
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
-      get;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
@@ -185,13 +179,13 @@ Feature: Type Hierarchy Resolution
     # Matching a sibling of the actual role
     Then for graql query
       """
-      match (child: $x, father: $y) isa large-family; get;
+      match (child: $x, father: $y) isa large-family;
       """
     Then answer size in reasoned database is: 0
     # Matching two siblings when only one is present
     Then for graql query
       """
-      match (mother: $x, father: $y) isa large-family; get;
+      match (mother: $x, father: $y) isa large-family;
       """
     Then answer size in reasoned database is: 0
     Then materialised and reasoned databases are the same size
@@ -241,7 +235,7 @@ Feature: Type Hierarchy Resolution
     # sub-roles, super-relation
     Then for graql query
       """
-      match (scifi-writer:$x, scifi-actor:$y) isa film-production; get;
+      match (scifi-writer:$x, scifi-actor:$y) isa film-production;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -292,7 +286,7 @@ Feature: Type Hierarchy Resolution
     # super-roles, sub-relation
     Then for graql query
       """
-      match (writer:$x, actor:$y) isa scifi-production; get;
+      match (writer:$x, actor:$y) isa scifi-production;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -343,7 +337,7 @@ Feature: Type Hierarchy Resolution
     # super-roles, super-relation
     Then for graql query
       """
-      match (writer:$x, actor:$y) isa film-production; get;
+      match (writer:$x, actor:$y) isa film-production;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -415,7 +409,6 @@ Feature: Type Hierarchy Resolution
         $x isa person;
         $y isa person;
         (actor: $x, writer: $y) isa film-production;
-      get;
       """
     Then all answers are correct in reasoned database
     # Answers are (actor:$x, writer:$z) and (actor:$x, writer:$v)
@@ -427,7 +420,6 @@ Feature: Type Hierarchy Resolution
         $y isa person;
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
-      get;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
@@ -437,7 +429,6 @@ Feature: Type Hierarchy Resolution
         $x isa person;
         $y isa child;
         (actor: $x, writer: $y) isa film-production;
-      get;
       """
     Then all answers are correct in reasoned database
     # Answer is (actor:$x, writer:$v) ONLY
@@ -449,7 +440,6 @@ Feature: Type Hierarchy Resolution
         $y isa child;
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
-      get;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -459,7 +449,6 @@ Feature: Type Hierarchy Resolution
         $x isa child;
         $y isa person;
         (actor: $x, writer: $y) isa film-production;
-      get;
       """
     Then all answers are correct in reasoned database
     # Answers are (actor:$x, writer:$z) and (actor:$x, writer:$v)
@@ -471,7 +460,6 @@ Feature: Type Hierarchy Resolution
         $y isa person;
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
-      get;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
@@ -521,9 +509,7 @@ Feature: Type Hierarchy Resolution
     When materialised database is completed
     Then for graql query
       """
-      match
-        (home-owner: $x, resident: $y) isa residence;
-      get;
+      match (home-owner: $x, resident: $y) isa residence;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -532,7 +518,6 @@ Feature: Type Hierarchy Resolution
       match
         (home-owner: $x, resident: $y) isa residence;
         (parent-home-owner: $x, child-resident: $y) isa family-residence;
-      get;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -565,9 +550,7 @@ Feature: Type Hierarchy Resolution
 #    When materialised database is completed
     Then for graql query
       """
-      match
-        $x isa person;
-      get;
+      match $x isa person;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -576,7 +559,6 @@ Feature: Type Hierarchy Resolution
       match
         $x isa person;
         $x isa drunk-person;
-      get;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
