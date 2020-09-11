@@ -17,3 +17,13 @@
 
 workspace(name = "graknlabs_behaviour")
 
+################################
+# Load @graknlabs_dependencies #
+################################
+
+load("//dependencies/graknlabs:repositories.bzl", "graknlabs_dependencies")
+graknlabs_dependencies()
+
+# Load //tool/checkstyle
+load("@graknlabs_dependencies//tool/checkstyle:deps.bzl", checkstyle_deps = "deps")
+checkstyle_deps()

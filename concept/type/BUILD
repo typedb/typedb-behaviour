@@ -17,9 +17,17 @@
 
 package(default_visibility = ["//visibility:public"])
 
+load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
+
 exports_files([
     "attributetype.feature",
     "entitytype.feature",
     "relationtype.feature",
     "thingtype.feature",
 ])
+
+checkstyle_test(
+    name = "checkstyle",
+    include = glob(["*"]),
+    license_type = "agpl",
+)
