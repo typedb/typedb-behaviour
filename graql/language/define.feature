@@ -470,11 +470,12 @@ Feature: Graql Define Query
       | FUN |
 
 
-  Scenario: defining a relation type throws an error if it has no roleplayers and is not abstract
-    Then graql define; throws exception
+  Scenario: defining a relation type throws on commit if it has no roleplayers and is not abstract
+    Then graql define
       """
       define useless-relation sub relation;
       """
+    Then transaction commits; throws exception
     Then the integrity is validated
 
 
