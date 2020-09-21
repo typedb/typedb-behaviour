@@ -16,12 +16,13 @@
 #
 Feature: Graql Insert Query
 
-  Background: Open connection
+  Background: Open connection and create a simple extensible schema
     Given connection has been opened
     Given connection delete all databases
-    Given connection open sessions for databases:
-      | test_insert |
-    Given transaction is initialised
+    Given connection does not have any database
+    Given connection create database: grakn
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given the integrity is validated
     Given graql define
       """
@@ -52,25 +53,30 @@ Feature: Graql Insert Query
       ref sub attribute,
         value long;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
 
 
   ####################
   # INSERTING THINGS #
   ####################
 
-  Scenario: inserting a thing creates an instance of it
+  Scenario: new entities can be inserted
     When graql insert
       """
       insert $x isa person, has ref 0;
       """
-    When the integrity is validated
-
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa person;
       """
-    Then concept identifiers are
+    When concept identifiers are
       |     | check | value |
       | PER | key   | ref:0 |
     Then uniquely identify answer concepts
@@ -85,13 +91,14 @@ Feature: Graql Insert Query
       $x isa person, has ref 0;
       $y isa person, has ref 1;
       """
-    When the integrity is validated
-
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa person;
       """
-    Then concept identifiers are
+    When concept identifiers are
       |      | check | value |
       | REF0 | key   | ref:0 |
       | REF1 | key   | ref:1 |
@@ -109,25 +116,27 @@ Feature: Graql Insert Query
       $x has name "James Bond";
       $x isa person, has ref 0;
       """
-    When the integrity is validated
-    Then get answers of graql query
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
+    When get answers of graql query
       """
       match $x has name "Bond";
       """
-    Then concept identifiers are
+    When concept identifiers are
       |      | check | value |
       | BOND | key   | ref:0 |
     Then uniquely identify answer concepts
       | x    |
       | BOND |
-    Then get answers of graql query
+    When get answers of graql query
       """
       match $x has name "James Bond";
       """
     Then uniquely identify answer concepts
       | x    |
       | BOND |
-    Then get answers of graql query
+    When get answers of graql query
       """
       match $x has name "Bond", has name "James Bond";
       """
@@ -137,13 +146,20 @@ Feature: Graql Insert Query
 
 
   Scenario: when running multiple identical insert queries in series, new things get created each time
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
       breed sub attribute, value string;
       dog sub entity, owns breed;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given get answers of graql query
       """
       match $x isa dog;
@@ -153,8 +169,10 @@ Feature: Graql Insert Query
       """
       insert $x isa dog, has breed "Labrador";
       """
-    When the integrity is validated
-    Then get answers of graql query
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: write
+    When get answers of graql query
       """
       match $x isa dog;
       """
@@ -163,8 +181,10 @@ Feature: Graql Insert Query
       """
       insert $x isa dog, has breed "Labrador";
       """
+    Then transaction commits
     Then the integrity is validated
-    Then get answers of graql query
+    When session opens transaction of type: write
+    When get answers of graql query
       """
       match $x isa dog;
       """
@@ -173,8 +193,10 @@ Feature: Graql Insert Query
       """
       insert $x isa dog, has breed "Labrador";
       """
+    Then transaction commits
     Then the integrity is validated
-    Then get answers of graql query
+    When session opens transaction of type: read
+    When get answers of graql query
       """
       match $x isa dog;
       """
@@ -196,14 +218,21 @@ Feature: Graql Insert Query
 
 
   Scenario: attempting to insert an instance of an abstract type throws an error
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
       factory sub entity, abstract;
       electronics-factory sub factory;
       """
+    Given transaction commits
     Given the integrity is validated
-    Then graql insert throws
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
+    Then graql insert; throws exception
       """
       insert $x isa factory;
       """
@@ -211,7 +240,7 @@ Feature: Graql Insert Query
 
 
   Scenario: attempting to insert an instance of type 'thing' throws an error
-    Then graql insert throws
+    Then graql insert; throws exception
       """
       insert $x isa thing;
       """
@@ -232,12 +261,14 @@ Feature: Graql Insert Query
       """
       insert $x isa person, has name "Wilhelmina", has age 25, has ref 0;
       """
-    When the integrity is validated
-    Then get answers of graql query
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
+    When get answers of graql query
       """
       match $x isa thing;
       """
-    Then concept identifiers are
+    When concept identifiers are
       |      | check | value           |
       | WIL  | key   | ref:0           |
       | nWIL | value | name:Wilhelmina |
@@ -256,7 +287,9 @@ Feature: Graql Insert Query
       """
       insert $name "John" isa name;
       """
+    Given transaction commits
     Given the integrity is validated
+    When session opens transaction of type: read
     When get answers of graql query
       """
       match $x has name "John";
@@ -269,17 +302,21 @@ Feature: Graql Insert Query
       """
       insert $name "Kyle" isa name;
       """
+    Given transaction commits
     Given the integrity is validated
+    When session opens transaction of type: write
     Given graql insert
       """
       insert $x isa person, has name "Kyle", has ref 0;
       """
+    Given transaction commits
     Given the integrity is validated
+    When session opens transaction of type: read
     When get answers of graql query
       """
       match $x has name "Kyle";
       """
-    Then concept identifiers are
+    When concept identifiers are
       |      | check | value |
       | KYLE | key   | ref:0 |
     Then uniquely identify answer concepts
@@ -294,8 +331,10 @@ Feature: Graql Insert Query
       $p1 isa person, has name "Jack", has age 10, has ref 0;
       $p2 isa person, has name "Jill", has age 10, has ref 1;
       """
-    When the integrity is validated
-    Then get answers of graql query
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
+    When get answers of graql query
       """
       match
       $p1 isa person, has age $a;
@@ -303,7 +342,7 @@ Feature: Graql Insert Query
       $p1 != $p2;
       get $p1, $p2;
       """
-    Then concept identifiers are
+    When concept identifiers are
       |      | check | value |
       | JACK | key   | ref:0 |
       | JILL | key   | ref:1 |
@@ -314,12 +353,19 @@ Feature: Graql Insert Query
 
 
   Scenario: after inserting a new owner for every existing ownership of an attribute, its number of owners doubles
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
       dog sub entity, owns name;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
@@ -329,21 +375,27 @@ Feature: Graql Insert Query
       $p4 isa dog, has name "Ingrid";
       $p5 isa dog, has name "Jacob";
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     When get answers of graql query
       """
       match $p isa dog;
       """
     Then answer size is: 5
-    Then graql insert
+    When graql insert
       """
       match
         $p has name $name;
       insert
         $p2 isa dog, has name $name;
       """
+    Then transaction commits
     Then the integrity is validated
-    Then get answers of graql query
+    When session opens transaction of type: write
+    When get answers of graql query
       """
       match $p isa dog;
       """
@@ -351,13 +403,20 @@ Feature: Graql Insert Query
 
 
   Scenario Outline: an insert can attach multiple distinct values of the same <type> attribute to a single owner
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
       <attr> sub attribute, value <type>, owns ref @key;
       person owns <attr>;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     When graql insert
       """
       insert
@@ -365,12 +424,14 @@ Feature: Graql Insert Query
       $y <val2> isa <attr>, has ref 1;
       $p isa person, has name "Imogen", has ref 2, has <attr> <val1>, has <attr> <val2>;
       """
-    When the integrity is validated
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
     When get answers of graql query
       """
       match $p isa person, has <attr> $x; get $x;
       """
-    Then concept identifiers are
+    When concept identifiers are
       |      | check | value |
       | VAL1 | key   | ref:0 |
       | VAL2 | key   | ref:1 |
@@ -389,7 +450,7 @@ Feature: Graql Insert Query
 
 
   Scenario: inserting an attribute onto a thing that can't have that attribute throws an error
-    Then graql insert throws
+    Then graql insert; throws exception
       """
       insert
       $x isa company, has ref 0, has age 10;
@@ -407,7 +468,9 @@ Feature: Graql Insert Query
       insert
       $p isa person, has name "Peter Parker", has ref 0;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: write
     Given get answers of graql query
       """
       match $p has name "Spiderman";
@@ -420,12 +483,14 @@ Feature: Graql Insert Query
       insert
         $p has name "Spiderman";
       """
-    When the integrity is validated
-    Then get answers of graql query
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
+    When get answers of graql query
       """
       match $p has name "Spiderman";
       """
-    Then concept identifiers are
+    When concept identifiers are
       |     | check | value |
       | PET | key   | ref:0 |
     Then uniquely identify answer concepts
@@ -433,13 +498,15 @@ Feature: Graql Insert Query
       | PET |
 
 
-  Scenario: when inserting an additional attribute value on an entity, the entity type can be optionally specified
+  Scenario: when inserting an additional attribute ownership on an entity, the entity type can be optionally specified
     Given graql insert
       """
       insert
       $p isa person, has name "Peter Parker", has ref 0;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: write
     Given get answers of graql query
       """
       match $p has name "Spiderman";
@@ -452,12 +519,14 @@ Feature: Graql Insert Query
       insert
         $p isa person, has name "Spiderman";
       """
-    When the integrity is validated
-    Then get answers of graql query
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
+    When get answers of graql query
       """
       match $p has name "Spiderman";
       """
-    Then concept identifiers are
+    When concept identifiers are
       |     | check | value |
       | PET | key   | ref:0 |
     Then uniquely identify answer concepts
@@ -465,20 +534,29 @@ Feature: Graql Insert Query
       | PET |
 
 
-  Scenario: when an attribute owns an attribute, an additional value can be inserted on it
+  Scenario: when an attribute owns an attribute, an instance of that attribute can be inserted onto it
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
       colour sub attribute, value string, owns hex-value;
       hex-value sub attribute, value string;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
       $c "red" isa colour;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: write
     Given get answers of graql query
       """
       match $c has hex-value "#FF0000";
@@ -491,12 +569,14 @@ Feature: Graql Insert Query
       insert
         $c has hex-value "#FF0000";
       """
-    When the integrity is validated
-    Then get answers of graql query
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
+    When get answers of graql query
       """
       match $c has hex-value "#FF0000";
       """
-    Then concept identifiers are
+    When concept identifiers are
       |     | check | value      |
       | COL | value | colour:red |
     Then uniquely identify answer concepts
@@ -504,20 +584,29 @@ Feature: Graql Insert Query
       | COL |
 
 
-  Scenario: when inserting an additional attribute value on an attribute, the type of the owning attribute can be optionally specified
+  Scenario: when inserting an additional attribute ownership on an attribute, the owner type can be optionally specified
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
       colour sub attribute, value string, owns hex-value;
       hex-value sub attribute, value string;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
       $c "red" isa colour;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: write
     Given get answers of graql query
       """
       match $c has hex-value "#FF0000";
@@ -530,12 +619,14 @@ Feature: Graql Insert Query
       insert
         $c isa colour, has hex-value "#FF0000";
       """
-    When the integrity is validated
-    Then get answers of graql query
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
+    When get answers of graql query
       """
       match $c has hex-value "#FF0000";
       """
-    Then concept identifiers are
+    When concept identifiers are
       |     | check | value      |
       | COL | value | colour:red |
     Then uniquely identify answer concepts
@@ -544,6 +635,9 @@ Feature: Graql Insert Query
 
 
   Scenario: when linking an attribute that doesn't exist yet to a relation, the attribute gets created
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
@@ -556,32 +650,41 @@ Feature: Graql Insert Query
       address sub attribute, value string, plays residence:place;
       tenure-days sub attribute, value long;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     When graql insert
       """
       insert
       $p isa person, has name "Homer", has ref 0;
       $addr "742 Evergreen Terrace" isa address;
-      $r (resident: $p, place-of-residence: $addr) isa residence, has ref 0;
+      $r (resident: $p, place: $addr) isa residence, has ref 0;
       """
-    When the integrity is validated
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: write
     When get answers of graql query
       """
       match $td isa tenure-days;
       """
     Then answer size is: 0
-    Then graql insert
+    When graql insert
       """
       match
         $r isa residence;
       insert
         $r has tenure-days 365;
       """
-    Then get answers of graql query
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
+    When get answers of graql query
       """
       match $r isa residence, has tenure-days $a; get $a;
       """
-    Then concept identifiers are
+    When concept identifiers are
       |     | check | value           |
       | RES | key   | ref:0           |
       | TEN | value | tenure-days:365 |
@@ -591,38 +694,52 @@ Feature: Graql Insert Query
 
 
   Scenario: an attribute ownership currently inferred by a rule can be explicitly inserted
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
-      lucy-is-aged-32 sub rule,
+      rule lucy-is-aged-32:
       when {
         $p isa person, has name "Lucy";
-      }, then {
+      } then {
         $p has age 32;
       };
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert $p isa person, has name "Lucy", has ref 0;
       """
+    Given transaction commits
     Given the integrity is validated
-    When get answers of graql query
+    Given session opens transaction of type: write
+    Given get answers of graql query
       """
       match $p has age 32;
       """
-    Then concept identifiers are
+    Given concept identifiers are
       |      | check | value |
       | LUCY | key   | ref:0 |
-    Then graql insert
+    Given uniquely identify answer concepts
+      | p    |
+      | LUCY |
+    Given graql insert
       """
       match
         $p has name "Lucy";
       insert
         $p has age 32;
       """
+    Then transaction commits
     Then the integrity is validated
-    Then get answers of graql query
+    When session opens transaction of type: read
+    When get answers of graql query
       """
       match $p has age 32;
       """
@@ -635,19 +752,21 @@ Feature: Graql Insert Query
   # RELATIONS #
   #############
 
-  Scenario: inserting a relation creates an instance of it
-    Given graql insert
+  Scenario: new relations can be inserted
+    When graql insert
       """
       insert
       $p isa person, has ref 0;
       $r (employee: $p) isa employment, has ref 1;
       """
-    Given the integrity is validated
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
     When get answers of graql query
       """
       match $r (employee: $p) isa employment;
       """
-    Then concept identifiers are
+    When concept identifiers are
       |     | check | value |
       | PER | key   | ref:0 |
       | EMP | key   | ref:1 |
@@ -657,6 +776,9 @@ Feature: Graql Insert Query
 
 
   Scenario: when inserting a relation that owns an attribute and has an attribute roleplayer, both attributes are created
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
@@ -669,21 +791,27 @@ Feature: Graql Insert Query
       address sub attribute, value string, plays residence:place;
       is-permanent sub attribute, value boolean;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     When graql insert
       """
       insert
       $p isa person, has name "Homer", has ref 0;
       $perm true isa is-permanent;
-      $r (resident: $p, place-of-residence: $addr) isa residence, has is-permanent $perm, has ref 0;
+      $r (resident: $p, place: $addr) isa residence, has is-permanent $perm, has ref 0;
       $addr "742 Evergreen Terrace" isa address;
       """
-    When the integrity is validated
-    Then get answers of graql query
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
+    When get answers of graql query
       """
       match $r (place-of-residence: $addr) isa residence, has is-permanent $perm;
       """
-    Then concept identifiers are
+    When concept identifiers are
       |     | check | value                         |
       | RES | key   | ref:0                         |
       | ADD | value | address:742 Evergreen Terrace |
@@ -693,7 +821,7 @@ Feature: Graql Insert Query
       | RES | ADD  | PER  |
 
 
-  Scenario: when inserting a relation with multiple role players, they are all added
+  Scenario: relations can be inserted with multiple role players
     When graql insert
       """
       insert
@@ -702,7 +830,9 @@ Feature: Graql Insert Query
       $c isa company, has name "Morrisons", has ref 2;
       $r (employer: $c, employee: $p1, employee: $p2) isa employment, has ref 3;
       """
-    When the integrity is validated
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
     When get answers of graql query
       """
       match
@@ -710,7 +840,7 @@ Feature: Graql Insert Query
         $c has name $cname;
       get $cname;
       """
-    Then concept identifiers are
+    When concept identifiers are
       |     | check | value          |
       | MOR | value | name:Morrisons |
     Then uniquely identify answer concepts
@@ -723,18 +853,20 @@ Feature: Graql Insert Query
         $p has name $pname;
       get $pname;
       """
-    Then concept identifiers are
+    When concept identifiers are
       |     | check | value       |
       | GOR | value | name:Gordon |
       | HEL | value | name:Helen  |
 
 
-  Scenario: an additional role player can be inserted into a relation
+  Scenario: an additional role player can be inserted onto an existing relation
     Given graql insert
       """
       insert $p isa person, has ref 0; $r (employee: $p) isa employment, has ref 1;
       """
+    Given transaction commits
     Given the integrity is validated
+    When session opens transaction of type: write
     When graql insert
       """
       match
@@ -743,12 +875,14 @@ Feature: Graql Insert Query
         $r (employer: $c) isa employment;
         $c isa company, has ref 2;
       """
-    When the integrity is validated
-    Then get answers of graql query
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
+    When get answers of graql query
       """
       match $r (employer: $c, employee: $p) isa employment;
       """
-    Then concept identifiers are
+    When concept identifiers are
       |      | check | value |
       | REF0 | key   | ref:0 |
       | REF1 | key   | ref:1 |
@@ -767,7 +901,9 @@ Feature: Graql Insert Query
       $s (employee: $p) isa employment, has ref 2;
       $c isa company, has name "The Boring Company", has ref 3;
       """
+    Given transaction commits
     Given the integrity is validated
+    When session opens transaction of type: write
     When graql insert
       """
       match
@@ -776,12 +912,14 @@ Feature: Graql Insert Query
       insert
         $r (employer: $c) isa employment;
       """
-    When the integrity is validated
-    Then get answers of graql query
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
+    When get answers of graql query
       """
       match $r (employer: $c, employee: $p) isa employment;
       """
-    Then concept identifiers are
+    When concept identifiers are
       |      | check | value |
       | RUTH | key   | ref:0 |
       | EMP1 | key   | ref:1 |
@@ -793,12 +931,14 @@ Feature: Graql Insert Query
       | RUTH | COMP | EMP2 |
 
 
-  Scenario: an additional duplicate role player can be inserted into a relation
+  Scenario: an additional duplicate role player can be inserted into an existing relation
     Given graql insert
       """
       insert $p isa person, has ref 0; $r (employee: $p) isa employment, has ref 1;
       """
+    Given transaction commits
     Given the integrity is validated
+    When session opens transaction of type: write
     When graql insert
       """
       match
@@ -807,12 +947,14 @@ Feature: Graql Insert Query
       insert
         $r (employee: $p) isa employment;
       """
-    When the integrity is validated
-    Then get answers of graql query
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
+    When get answers of graql query
       """
       match $r (employee: $p, employee: $p) isa employment;
       """
-    Then concept identifiers are
+    When concept identifiers are
       |      | check | value |
       | REF0 | key   | ref:0 |
       | REF1 | key   | ref:1 |
@@ -821,25 +963,8 @@ Feature: Graql Insert Query
       | REF0 | REF1 |
 
 
-  Scenario: inserting a roleplayer in a relation that can't have that roleplayer throws on commit
-    When graql define
-      """
-      define
-      tennis-group sub relation, relates player;
-      person plays tennis-group:player;
-      """
-    When the integrity is validated
-    Then graql insert throws
-      """
-      insert
-      $r (player: $p) isa employment, has ref 0;
-      $p isa person, has ref 1;
-      """
-    Then the integrity is validated
-
-
-  Scenario: inserting a roleplayer that can't play the role throws on commit
-    Then graql insert throws
+  Scenario: when inserting a roleplayer that can't play the role, an error is thrown
+    Then graql insert; throws exception
       """
       insert
       $r (employer: $p) isa employment, has ref 0;
@@ -848,8 +973,11 @@ Feature: Graql Insert Query
     Then the integrity is validated
 
 
-  Scenario: inserting a roleplayer that is only the parent of a valid type is invalid and throws on commit
-    When graql define
+  Scenario: parent types are not necessarily allowed to play the roles that their children play
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
+    Given graql define
       """
       define
       animal sub entity;
@@ -857,8 +985,12 @@ Feature: Graql Insert Query
       sphinx-production sub relation, relates model, relates builder;
       person plays sphinx-production:builder;
       """
-    When the integrity is validated
-    Then graql insert throws
+    Given transaction commits
+    Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
+    Then graql insert; throws exception
       """
       insert
       $r (model: $x, builder: $y) isa sphinx-production;
@@ -868,8 +1000,8 @@ Feature: Graql Insert Query
     Then the integrity is validated
 
 
-  Scenario: inserting a relation with no role players throws on commit
-    Then graql insert throws
+  Scenario: when inserting a relation with no role players, an error is thrown
+    Then graql insert; throws exception
       """
       insert
       $x isa employment, has ref 0;
@@ -877,39 +1009,49 @@ Feature: Graql Insert Query
     Then the integrity is validated
 
 
-  Scenario: inserting a relation with an empty variable as a roleplayer throws an error
-    Then graql insert throws
+  Scenario: when inserting a relation with an unbound variable as a roleplayer, an error is thrown
+    Then graql insert; throws exception
       """
       insert
       $r (employee: $x, employer: $y) isa employment, has ref 0;
       $y isa company, has name "Sports Direct", has ref 1;
       """
+    Then the integrity is validated
 
 
   Scenario: a relation currently inferred by a rule can be explicitly inserted
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
       gym-membership sub relation, relates member;
       person plays gym-membership:member;
-      jennifer-has-a-gym-membership sub rule,
+      rule jennifer-has-a-gym-membership:
       when {
         $p isa person, has name "Jennifer";
-      }, then {
+      } then {
         (member: $p) isa gym-membership;
       };
       """
+    Given transaction commits
     Given the integrity is validated
-    Given graql insert
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
+    When graql insert
       """
       insert $p isa person, has name "Jennifer", has ref 0;
       """
-    Given the integrity is validated
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: write
     When get answers of graql query
       """
       match (member: $p) isa gym-membership; get $p;
       """
-    Then concept identifiers are
+    When concept identifiers are
       |     | check | value |
       | JEN | key   | ref:0 |
     Then graql insert
@@ -919,15 +1061,17 @@ Feature: Graql Insert Query
       insert
         $r (member: $p) isa gym-membership;
       """
+    Then transaction commits
     Then the integrity is validated
-    Then get answers of graql query
+    When session opens transaction of type: read
+    When get answers of graql query
       """
       match (member: $p) isa gym-membership; get $p;
       """
     Then uniquely identify answer concepts
       | p   |
       | JEN |
-    Then get answers of graql query
+    When get answers of graql query
       """
       match $r isa gym-membership; get $r;
       """
@@ -939,11 +1083,18 @@ Feature: Graql Insert Query
   #######################
 
   Scenario Outline: inserting an attribute of type '<type>' creates an instance of it
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define <attr> sub attribute, value <type>, owns ref @key;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given get answers of graql query
       """
       match $x <value> isa <attr>;
@@ -953,12 +1104,14 @@ Feature: Graql Insert Query
       """
       insert $x <value> isa <attr>, has ref 0;
       """
-    When the integrity is validated
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
     When get answers of graql query
       """
       match $x <value> isa <attr>;
       """
-    Then concept identifiers are
+    When concept identifiers are
       |     | check | value |
       | ATT | key   | ref:0 |
     Then uniquely identify answer concepts
@@ -974,34 +1127,10 @@ Feature: Graql Insert Query
       | published-date | datetime | 2020-01-01 |
 
 
-  Scenario: inserting a subtype of an attribute with the same value creates a separate instance
-    Given graql define
-      """
-      define first-name sub name;
-      """
-    Given the integrity is validated
-    When graql insert
-      """
-      insert
-      $x "Alan" isa name;
-      $y "Alan" isa first-name;
-      """
-    When the integrity is validated
-    When get answers of graql query
-      """
-      match $x isa name; get $x;
-      """
-    Then concept identifiers are
-      |     | check | value           |
-      | NAM | value | name:Alan       |
-      | FNA | value | first-name:Alan |
-    Then uniquely identify answer concepts
-      | x   |
-      | NAM |
-      | FNA |
-
-
   Scenario: insert a regex attribute throws error if not conforming to regex
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
@@ -1011,9 +1140,12 @@ Feature: Graql Insert Query
         value string,
         regex "\d{2}\.[true][false]";
       """
+    Given transaction commits
     Given the integrity is validated
-
-    Then graql insert throws
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
+    Then graql insert; throws exception
       """
       insert
         $x isa person, has value $a, has ref 0;
@@ -1022,13 +1154,16 @@ Feature: Graql Insert Query
     Then the integrity is validated
 
 
-  Scenario: inserting two attributes with the same type and value creates a single concept
+  Scenario: inserting two attributes with the same type and value creates only one concept
     When graql insert
       """
       insert
       $x 2 isa age;
       $y 2 isa age;
       """
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
     When concept identifiers are
       |      | check | value |
       | AGE2 | value | age:2 |
@@ -1042,18 +1177,28 @@ Feature: Graql Insert Query
 
 
   Scenario: inserting two 'double' attribute values with the same integer value creates a single concept
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
       length sub attribute, value double;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     When graql insert
       """
       insert
       $x 2 isa length;
       $y 2 isa length;
       """
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
     When concept identifiers are
       |    | check | value      |
       | L2 | value | length:2.0 |
@@ -1068,24 +1213,35 @@ Feature: Graql Insert Query
 
 
   Scenario: inserting the same integer twice as a 'double' in separate transactions creates a single concept
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
       length sub attribute, value double;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     When graql insert
       """
       insert
       $x 2 isa length;
       """
+    Then transaction commits
     Then the integrity is validated
+    When session opens transaction of type: write
     When graql insert
       """
       insert
       $y 2 isa length;
       """
+    Then transaction commits
     Then the integrity is validated
+    When session opens transaction of type: read
     When concept identifiers are
       |    | check | value      |
       | L2 | value | length:2.0 |
@@ -1100,19 +1256,28 @@ Feature: Graql Insert Query
 
 
   Scenario: inserting attribute values [2] and [2.0] with the same attribute type creates a single concept
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
       length sub attribute, value double;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     When graql insert
       """
       insert
       $x 2 isa length;
       $y 2.0 isa length;
       """
-    When the integrity is validated
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa length;
@@ -1121,16 +1286,25 @@ Feature: Graql Insert Query
 
 
   Scenario Outline: a '<type>' inserted as [<insert>] is retrieved when matching [<match>]
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define <attr> sub attribute, value <type>, owns ref @key;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     When get answers of graql insert
       """
       insert $x <insert> isa <attr>, has ref 0;
       """
+    Then transaction commits
     Then the integrity is validated
+    When session opens transaction of type: read
     When concept identifiers are
       |     | check | value |
       | RF0 | key   | ref:0 |
@@ -1160,12 +1334,19 @@ Feature: Graql Insert Query
 
 
   Scenario Outline: inserting [<value>] as a '<type>' throws an error
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define <attr> sub attribute, value <type>, owns ref @key;
       """
+    Given transaction commits
     Given the integrity is validated
-    Then graql insert throws
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
+    Then graql insert; throws exception
       """
       insert $x <value> isa <attr>, has ref 0;
       """
@@ -1199,7 +1380,7 @@ Feature: Graql Insert Query
 
 
   Scenario: inserting an attribute with no value throws an error
-    Then graql insert throws
+    Then graql insert; throws exception
       """
       insert $x isa age;
       """
@@ -1207,7 +1388,7 @@ Feature: Graql Insert Query
 
 
   Scenario: inserting an attribute value with no type throws an error
-    Then graql insert throws
+    Then graql insert; throws exception
       """
       insert $x 18;
       """
@@ -1215,7 +1396,7 @@ Feature: Graql Insert Query
 
 
   Scenario: inserting an attribute with a predicate throws an error
-    Then graql insert throws
+    Then graql insert; throws exception
       """
       insert $x > 18 isa age;
       """
@@ -1231,13 +1412,14 @@ Feature: Graql Insert Query
       """
       insert $x isa person, has ref 0;
       """
-    When the integrity is validated
-
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa person;
       """
-    Then concept identifiers are
+    When concept identifiers are
       |     | check | value |
       | PER | key   | ref:0 |
     Then uniquely identify answer concepts
@@ -1245,24 +1427,24 @@ Feature: Graql Insert Query
       | PER |
 
 
-  Scenario: when a type has a key, attempting to insert it without that has throws @key on commit
-    Then graql insert throws
+  Scenario: when a type has a key, attempting to insert it without that key throws on commit
+    Then graql insert; throws exception
       """
       insert $x isa person;
       """
     Then the integrity is validated
 
 
-  Scenario: inserting two distinct values of the same has on @key a thing throws on commit
-    Then graql insert throws
+  Scenario: inserting two distinct values of the same key on a thing throws on commit
+    Then graql insert; throws exception
       """
       insert $x isa person, has ref 0, has ref 1;
       """
     Then the integrity is validated
 
 
-  Scenario: instances of a has must @key be unique among all instances of a type
-    Then graql insert throws
+  Scenario: instances of a key must be unique among all instances of a type
+    Then graql insert; throws exception
       """
       insert
       $x isa person, has ref 0;
@@ -1271,38 +1453,28 @@ Feature: Graql Insert Query
     Then the integrity is validated
 
 
-  Scenario: [2] and [2.0] are considered to be the same double value when validating has uniqueness @key
-    Given graql define
-      """
-      define
-      cat sub entity, owns dref @key;
-      dref sub attribute, value double;
-      """
-    Given the integrity is validated
-    Then graql insert throws
-      """
-      insert
-      $x isa cat, has dref 2;
-      $y isa cat, has dref 2.0;
-      """
-    Then the integrity is validated
-
-
-  # TODO - fix this; should fail but it does not!
-  @ignore
-  Scenario: insert an attribute that already exists throws errors when inserted with different keys
+  Scenario: an error is thrown when inserting a second key on an attribute that already has one
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
       name owns ref @key;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     When graql insert
       """
       insert $a "john" isa name, has ref 0;
       """
-    When the integrity is validated
-    Then graql insert throws
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: write
+    Then graql insert; throws exception
       """
       insert $a "john" isa name, has ref 1;
       """
@@ -1320,9 +1492,8 @@ Feature: Graql Insert Query
       $x isa person, has name "Bruce Wayne", has ref 0;
       $z isa company, has name "Wayne Enterprises", has ref 0;
       """
-    When the integrity is validated
-    Then answer size is: 1
-    Then concept identifiers are
+    Then the integrity is validated
+    When concept identifiers are
       |     | check | value |
       | BRU | key   | ref:0 |
       | WAY | key   | ref:0 |
@@ -1339,8 +1510,8 @@ Feature: Graql Insert Query
       insert
         $x isa $type, has name "Microsoft", has ref 0;
       """
-    When the integrity is validated
-    Then concept identifiers are
+    Then the integrity is validated
+    When concept identifiers are
       |     | check | value   |
       | MIC | key   | ref:0   |
       | COM | label | company |
@@ -1354,20 +1525,29 @@ Feature: Graql Insert Query
   ################
 
   Scenario: match-insert triggers one insert per answer of the match clause
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
       language sub entity, owns name, owns is-cool, owns ref @key;
       is-cool sub attribute, value boolean;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
       $x isa language, has name "Norwegian", has ref 0;
       $y isa language, has name "Danish", has ref 1;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: write
     When graql insert
       """
       match
@@ -1375,12 +1555,14 @@ Feature: Graql Insert Query
       insert
         $x has is-cool true;
       """
-    When the integrity is validated
-    Then get answers of graql query
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
+    When get answers of graql query
       """
       match $x has is-cool true;
       """
-    Then concept identifiers are
+    When concept identifiers are
       |     | check | value |
       | NOR | key   | ref:0 |
       | DAN | key   | ref:1 |
@@ -1395,7 +1577,9 @@ Feature: Graql Insert Query
       $r (employee: $x, employer: $y) isa employment, has ref 2;
       $z isa person, has name "Tarja", has ref 3;
       """
+    Given transaction commits
     Given the integrity is validated
+    When session opens transaction of type: write
     When get answers of graql insert
       """
       match
@@ -1404,7 +1588,8 @@ Feature: Graql Insert Query
       insert
         (employer: $x, employee: $y) isa employment, has ref 10;
       """
-    Then concept identifiers are
+    Then the integrity is validated
+    When concept identifiers are
       |     | check | value |
       | MIC | key   | ref:1 |
       | TAR | key   | ref:3 |
@@ -1415,12 +1600,20 @@ Feature: Graql Insert Query
 
 
   Scenario: match-insert can take an attribute's value and copy it to an attribute of a different type
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
       height sub attribute, value long;
       person owns height;
       """
+    Given transaction commits
+    Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
@@ -1428,7 +1621,9 @@ Feature: Graql Insert Query
       $y isa person, has name "Donald", has age 25, has ref 1;
       $z isa person, has name "Ralph", has age 18, has ref 2;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: write
     Given graql insert
       """
       match
@@ -1436,14 +1631,16 @@ Feature: Graql Insert Query
       insert
         $x has height 16;
       """
-    Given the integrity is validated
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
     When get answers of graql query
       """
       match
         $x has height $z;
       get $x;
       """
-    And concept identifiers are
+    When concept identifiers are
       |     | check | value |
       | SUS | key   | ref:0 |
     Then uniquely identify answer concepts
@@ -1452,13 +1649,20 @@ Feature: Graql Insert Query
 
 
   Scenario: if match-insert matches nothing, then nothing is inserted
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
       season-ticket-ownership sub relation, relates holder;
       person plays season-ticket-ownership:holder;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given get answers of graql query
       """
       match $p isa person;
@@ -1471,8 +1675,10 @@ Feature: Graql Insert Query
       insert
         $r (holder: $p) isa season-ticket-ownership;
       """
-    When the integrity is validated
-    Then get answers of graql query
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
+    When get answers of graql query
       """
       match $r isa season-ticket-ownership;
       """
@@ -1487,7 +1693,6 @@ Feature: Graql Insert Query
       $y isa person, has name "Steven", has ref 1;
       $z isa person, has name "Theresa", has ref 2;
       """
-    Given the integrity is validated
     Given concept identifiers are
       |     | check | value |
       | BEC | key   | ref:0 |
@@ -1496,6 +1701,9 @@ Feature: Graql Insert Query
     Given uniquely identify answer concepts
       | x   | y   | z   |
       | BEC | STE | THE |
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: write
     Given get answers of graql query
       """
       match $x isa person;
@@ -1512,8 +1720,10 @@ Feature: Graql Insert Query
       insert
         $x isa person;
       """
-    When the integrity is validated
-    Then get answers of graql query
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
+    When get answers of graql query
       """
       match $x isa person;
       """
@@ -1536,7 +1746,6 @@ Feature: Graql Insert Query
       $yr (employee: $y, employer: $c) isa employment, has ref 5;
       $zr (employee: $z, employer: $c) isa employment, has ref 6;
       """
-    Given the integrity is validated
     Given concept identifiers are
       |      | check | value |
       | HOM  | key   | ref:0 |
@@ -1549,6 +1758,9 @@ Feature: Graql Insert Query
     Given uniquely identify answer concepts
       | x   | y   | z   | c   | xr   | yr   | zr   |
       | HOM | BUR | SMI | NPP | eHOM | eBUR | eSMI |
+    Given transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: write
     Given get answers of graql query
       """
       match $r (employee: $x, employer: $c) isa employment;
@@ -1565,8 +1777,10 @@ Feature: Graql Insert Query
       insert
         $x isa employment;
       """
-    When the integrity is validated
-    Then get answers of graql query
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: write
+    When get answers of graql query
       """
       match $r (employee: $x, employer: $c) isa employment;
       """
@@ -1585,7 +1799,6 @@ Feature: Graql Insert Query
       $y "Misty" isa name;
       $z "Brock" isa name;
       """
-    Given the integrity is validated
     Given concept identifiers are
       |     | check | value      |
       | ASH | value | name:Ash   |
@@ -1594,6 +1807,9 @@ Feature: Graql Insert Query
     Given uniquely identify answer concepts
       | x   | y   | z   |
       | ASH | MIS | BRO |
+    Given transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: write
     Given get answers of graql query
       """
       match $x isa name;
@@ -1610,8 +1826,10 @@ Feature: Graql Insert Query
       insert
         $x isa name;
       """
-    When the integrity is validated
-    Then get answers of graql query
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: write
+    When get answers of graql query
       """
       match $x isa name;
       """
@@ -1628,7 +1846,9 @@ Feature: Graql Insert Query
       insert
       $x isa person, has ref 0;
       """
-    Given the integrity is validated
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: write
     Then graql insert
       """
       match
@@ -1636,7 +1856,9 @@ Feature: Graql Insert Query
       insert
         $x isa person;
       """
+    Then transaction commits
     Then the integrity is validated
+    When session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa person;
@@ -1650,8 +1872,10 @@ Feature: Graql Insert Query
       insert
       $x isa person, has ref 0;
       """
-    Given the integrity is validated
-    Then graql insert throws
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: write
+    Then graql insert; throws exception
       """
       match
         $x isa person;
@@ -1662,16 +1886,25 @@ Feature: Graql Insert Query
 
 
   Scenario: inserting a new type on an existing instance has no effect, if the old type is a subtype of the new one
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define child sub person;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert $x isa child, has ref 0;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: write
     When graql insert
       """
       match
@@ -1679,7 +1912,9 @@ Feature: Graql Insert Query
       insert
         $x isa person;
       """
+    Then transaction commits
     Then the integrity is validated
+    When session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa! child;
@@ -1699,26 +1934,35 @@ Feature: Graql Insert Query
   # Note: These tests have been placed here because Resolution Testing was not built to handle these kinds of cases
 
   Scenario: when inserting a thing that has inferred concepts, those concepts are not automatically materialised
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
       person owns score;
       score sub attribute, value double;
-      ganesh-rule sub rule,
+      rule ganesh-rule:
       when {
         $x isa person, has score $s;
         $s > 0.0;
-      }, then {
+      } then {
         $x has name "Ganesh";
       };
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
       $x isa person, has ref 0, has score 1.0;
       """
-    Given the integrity is validated
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: write
     When concept identifiers are
       |     | check | value       |
       | GAN | value | name:Ganesh |
@@ -1736,7 +1980,9 @@ Feature: Graql Insert Query
       delete
         $x isa person;
       """
+    Then transaction commits
     Then the integrity is validated
+    When session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa name;
@@ -1746,28 +1992,37 @@ Feature: Graql Insert Query
 
 
   Scenario: when inserting a thing with an inferred attribute ownership, the ownership is not automatically persisted
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
       person owns score;
       score sub attribute, value double;
-      copy-scores-to-all-people sub rule,
+      rule copy-scores-to-all-people:
       when {
         $x isa person, has score $s;
         $y isa person;
         $x != $y;
-      }, then {
+      } then {
         $y has score $s;
       };
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
       $x isa person, has ref 0, has name "Chris", has score 10.0;
       $y isa person, has ref 1, has name "Freya";
       """
-    Given the integrity is validated
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: write
     When concept identifiers are
       |     | check | value      |
       | CHR | key   | ref:0      |
@@ -1788,7 +2043,9 @@ Feature: Graql Insert Query
       delete
         $x isa person;
       """
+    Then transaction commits
     Then the integrity is validated
+    When session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa score;
@@ -1809,6 +2066,9 @@ Feature: Graql Insert Query
 
   By explicitly inserting (x,y) is a relation, we are making explicit the fact that x and y both exist.
 
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
@@ -1824,22 +2084,28 @@ Feature: Graql Insert Query
       name plays name-initial:lettered-name;
       person owns score;
 
-      ganesh-rule sub rule,
+      rule ganesh-rule:
       when {
         $x isa person, has score $s;
         $s > 0.0;
-      }, then {
+      } then {
         $x has name "Ganesh";
       };
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
       $x isa person, has ref 0, has score 1.0;
       $y 'G' isa letter;
       """
-    Given the integrity is validated
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: write
     When concept identifiers are
       |     | check | value       |
       | GAN | value | name:Ganesh |
@@ -1861,7 +2127,9 @@ Feature: Graql Insert Query
       insert
         (lettered-name: $x, initial: $y) isa name-initial;
       """
+    Then transaction commits
     Then the integrity is validated
+    When session opens transaction of type: write
     When graql delete
       """
       match
@@ -1869,7 +2137,9 @@ Feature: Graql Insert Query
       delete
         $x isa person;
       """
+    Then transaction commits
     Then the integrity is validated
+    When session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa person;
@@ -1894,12 +2164,17 @@ Feature: Graql Insert Query
 
 
   Scenario: when inserting things connected to an inferred relation, the inferred relation gets materialised
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql undefine
       """
       undefine
       employment owns ref @key;
       """
-    Given the integrity is validated
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: write
     Given graql define
       """
       define
@@ -1913,21 +2188,27 @@ Feature: Graql Insert Query
 
       employment plays employment-contract:employment;
 
-      henry-is-employed sub rule,
+      rule henry-is-employed:
       when {
         $x isa person, has name "Henry";
-      }, then {
+      } then {
         (employee: $x) isa employment;
       };
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
       $x isa person, has name "Henry", has ref 0;
       $c isa contract;
       """
-    Given the integrity is validated
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: write
     When get answers of graql query
       """
       match $x isa employment;
@@ -1942,13 +2223,19 @@ Feature: Graql Insert Query
       insert
         (employment: $e, contract: $c) isa employment-contract;
       """
+    Then transaction commits
     Then the integrity is validated
+    When connection close all sessions
+    When connection open schema session for database: grakn
+    When session opens transaction of type: write
     When graql undefine
       """
       undefine
-      henry-is-employed sub rule;
+      rule henry-is-employed;
       """
+    Then transaction commits
     Then the integrity is validated
+    When session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa employment;
@@ -1964,6 +2251,9 @@ Feature: Graql Insert Query
 
 
   Scenario: when inserting things connected to a chain of inferred concepts, the whole chain is materialised
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
@@ -1986,29 +2276,33 @@ Feature: Graql Insert Query
 
       index sub attribute, value string;
 
-      a-linked-point-is-reachable sub rule,
+      rule a-linked-point-is-reachable:
       when {
         ($x, $y) isa link;
-      }, then {
+      } then {
         (coordinate: $x, coordinate: $y) isa reachable;
       };
 
-      a-point-reachable-from-a-linked-point-is-reachable sub rule,
+      rule a-point-reachable-from-a-linked-point-is-reachable:
       when {
         ($x, $z) isa link;
         ($z, $y) isa reachable;
-      }, then {
+      } then {
         (coordinate: $x, coordinate: $y) isa reachable;
       };
 
-      propose-roads-between-reachable-points sub rule,
+      rule propose-roads-between-reachable-points:
       when {
         $r isa reachable;
-      }, then {
+      } then {
         ($r) isa road-proposal;
       };
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
@@ -2023,7 +2317,9 @@ Feature: Graql Insert Query
       (coordinate: $c, coordinate: $c) isa link;
       (coordinate: $c, coordinate: $d) isa link;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: write
     When graql insert
       """
       match
@@ -2034,7 +2330,9 @@ Feature: Graql Insert Query
       insert
         (proposal-to-construct: $r) isa road-construction;
       """
+    Then transaction commits
     Then the integrity is validated
+    When session opens transaction of type: write
     When graql delete
       """
       match
@@ -2043,7 +2341,9 @@ Feature: Graql Insert Query
       delete
         $r isa link;
       """
+    Then transaction commits
     Then the integrity is validated
+    When session opens transaction of type: read
     # After deleting all the links to 'c', our rules no longer infer that 'd' is reachable from 'a'. But in fact we
     # materialised this reachable link when we did our match-insert, because it played a role in our road-proposal,
     # which itself plays a role in the road-construction that we explicitly inserted:
@@ -2068,9 +2368,10 @@ Feature: Graql Insert Query
     Then answer size is: 0
 
 
-  @ignore
-  # TODO: re-enable when fixed (grakn#5866)
   Scenario: when matching two types and inserting one of them, the number of entities of that type doubles each time
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql undefine
       """
       undefine
@@ -2078,14 +2379,20 @@ Feature: Graql Insert Query
       company owns ref @key;
       employment owns ref @key;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
       $x isa person;
       $y isa company;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: write
     When graql insert
       """
       match
@@ -2095,6 +2402,9 @@ Feature: Graql Insert Query
         $z isa person;
         (employee: $z, employer: $y) isa employment;
       """
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: write
     When graql insert
       """
       match
@@ -2104,6 +2414,9 @@ Feature: Graql Insert Query
         $z isa person;
         (employee: $z, employer: $y) isa employment;
       """
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: write
     When graql insert
       """
       match
@@ -2113,6 +2426,9 @@ Feature: Graql Insert Query
         $z isa person;
         (employee: $z, employer: $y) isa employment;
       """
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: write
     When graql insert
       """
       match
@@ -2122,6 +2438,9 @@ Feature: Graql Insert Query
         $z isa person;
         (employee: $z, employer: $y) isa employment;
       """
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: write
     When graql insert
       """
       match
@@ -2131,6 +2450,9 @@ Feature: Graql Insert Query
         $z isa person;
         (employee: $z, employer: $y) isa employment;
       """
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: write
     When graql insert
       """
       match
@@ -2140,12 +2462,15 @@ Feature: Graql Insert Query
         $z isa person;
         (employee: $z, employer: $y) isa employment;
       """
-    Then get answers of graql query
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
+    When get answers of graql query
       """
       match $x isa person;
       """
     Then answer size is: 64
-    Then get answers of graql query
+    When get answers of graql query
       """
       match $x isa employment;
       """
@@ -2154,42 +2479,69 @@ Feature: Graql Insert Query
 
 
   Scenario: match-insert can be used to repeatedly duplicate all entities
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql undefine
       """
       undefine person owns ref @key;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert $x isa person;
       """
-    Given the integrity is validated
-    When graql insert
-      """
-      match $x isa person; insert $z isa person;
-      """
-    When graql insert
-      """
-      match $x isa person; insert $z isa person;
-      """
-    When graql insert
-      """
-      match $x isa person; insert $z isa person;
-      """
-    When graql insert
-      """
-      match $x isa person; insert $z isa person;
-      """
-    When graql insert
-      """
-      match $x isa person; insert $z isa person;
-      """
-    When graql insert
-      """
-      match $x isa person; insert $z isa person;
-      """
+    Then transaction commits
     Then the integrity is validated
-    Then get answers of graql query
+    When session opens transaction of type: write
+    When graql insert
+      """
+      match $x isa person; insert $z isa person;
+      """
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: write
+    When graql insert
+      """
+      match $x isa person; insert $z isa person;
+      """
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: write
+    When graql insert
+      """
+      match $x isa person; insert $z isa person;
+      """
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: write
+    When graql insert
+      """
+      match $x isa person; insert $z isa person;
+      """
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: write
+    When graql insert
+      """
+      match $x isa person; insert $z isa person;
+      """
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: write
+    When graql insert
+      """
+      match $x isa person; insert $z isa person;
+      """
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
+    Then the integrity is validated
+    When get answers of graql query
       """
       match $x isa person;
       """
@@ -2201,17 +2553,18 @@ Feature: Graql Insert Query
   ####################
 
   Scenario: if any insert in a transaction fails with a syntax error, none of the inserts are performed
-    Given graql insert without commit
+    Given graql insert
       """
       insert
       $x isa person, has name "Derek", has ref 0;
       """
-    Given graql insert throws
+    When graql insert; throws exception
       """
       insert
       $y qwertyuiop;
       """
-    Given the integrity is validated
+    Then the integrity is validated
+    When session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa person, has name "Derek";
@@ -2220,23 +2573,30 @@ Feature: Graql Insert Query
 
 
   Scenario: if any insert in a transaction fails with a semantic error, none of the inserts are performed
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
       capacity sub attribute, value long;
       """
+    Given transaction commits
     Given the integrity is validated
-    Given graql insert without commit
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
+    Given graql insert
       """
       insert
       $x isa person, has name "Derek", has ref 0;
       """
-    Given graql insert throws
+    When graql insert; throws exception
       """
       insert
       $y isa person, has name "Emily", has capacity 1000;
       """
-    Given the integrity is validated
+    Then the integrity is validated
     When get answers of graql query
       """
       match $x isa person, has name "Derek";
@@ -2245,17 +2605,18 @@ Feature: Graql Insert Query
 
 
   Scenario: if any insert in a transaction fails with a 'key' violation, none of the inserts are performed
-    Given graql insert without commit
+    Given graql insert
       """
       insert
       $x isa person, has name "Derek", has ref 0;
       """
-    Given graql insert throws
+    When graql insert; throws exception
       """
       insert
       $y isa person, has name "Emily", has ref 0;
       """
-    Given the integrity is validated
+    Then the integrity is validated
+    When session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa person, has name "Derek";
@@ -2268,15 +2629,23 @@ Feature: Graql Insert Query
   ##############
 
   Scenario: the 'iid' property is used internally by Grakn and cannot be manually assigned
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
       bird sub entity;
       """
+    Given transaction commits
     Given the integrity is validated
-    Then graql insert throws
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    When session opens transaction of type: write
+    Then graql insert; throws exception
       """
       insert
       $x isa bird;
       $x iid V123;
       """
+    Then the integrity is validated

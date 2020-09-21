@@ -18,7 +18,6 @@
 package(default_visibility = ["//visibility:public"])
 
 files = [
-    "compute.feature",
     "define.feature",
     "delete.feature",
     "get.feature",

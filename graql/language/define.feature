@@ -1175,6 +1175,16 @@ Feature: Graql Define Query
       | x   |
       | NOL |
 
+  # TODO
+  Scenario Outline: a type can own a '<value_type>' attribute type as a key
+
+  Examples:
+
+  # TODO
+  Scenario Outline: a '<value_type>' attribute type is not allowed to be a key
+
+  Examples:
+
 
   ##################
   # ABSTRACT TYPES #
@@ -1248,6 +1258,28 @@ Feature: Graql Define Query
       | FSH |
 
 
+  Scenario: an abstract entity type can be defined as a subtype of a concrete entity type
+    When graql define
+      """
+      define
+      exception sub entity;
+      grakn-exception sub exception, abstract;
+      """
+    Then transaction commits
+    Then the integrity is validated
+    Given session opens transaction of type: read
+    When get answers of graql query
+      """
+      match $x sub exception, abstract;
+      """
+    When concept identifiers are
+      |     | check | value           |
+      | GRA | label | grakn-exception |
+    Then uniquely identify answer concepts
+      | x   |
+      | GRA |
+
+
   Scenario: an abstract relation type can be defined
     When graql define
       """
@@ -1316,6 +1348,28 @@ Feature: Graql Define Query
       | TLR |
 
 
+  Scenario: an abstract relation type can be defined as a subtype of a concrete relation type
+    When graql define
+      """
+      define
+      requirement sub relation, relates prerequisite, relates outcome;
+      tech-requirement sub requirement, abstract, relates required-tech as prerequisite;
+      """
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
+    When get answers of graql query
+      """
+      match $x sub requirement; $x abstract;
+      """
+    When concept identifiers are
+      |     | check | value            |
+      | TCR | label | tech-requirement |
+    Then uniquely identify answer concepts
+      | x   |
+      | TCR |
+
+
   Scenario: an abstract attribute type can be defined
     When graql define
       """
@@ -1382,16 +1436,6 @@ Feature: Graql Define Query
       | x   |
       | NOL |
       | NAL |
-
-
-  Scenario: an abstract type cannot be the subtype of a concrete entity
-    Then graql define; throws exception
-      """
-      define
-      exception sub entity;
-      grakn-exception sub exception, abstract;
-      """
-    Then the integrity is validated
 
 
   Scenario: repeating the term 'abstract' when defining a type causes an error to be thrown
@@ -1524,6 +1568,7 @@ Feature: Graql Define Query
       """
     Then transaction commits
     Then the integrity is validated
+    When session opens transaction of type: read
     When get answers of graql query
       """
       match $x owns barcode @key;
@@ -1536,7 +1581,7 @@ Feature: Graql Define Query
       | PRD |
 
 
-  Scenario: defining a key on a type throws if existing instances don't have that key
+  Scenario: defining a key on a type throws on commit if existing instances don't have that key
     Given graql define
       """
       define
@@ -1559,11 +1604,12 @@ Feature: Graql Define Query
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
-    Then graql define; throws exception
+    When graql define
       """
       define
       product owns barcode @key;
       """
+    Then transaction commits; throws exception
     Then the integrity is validated
 
 
@@ -1713,12 +1759,24 @@ Feature: Graql Define Query
     Then the integrity is validated
 
 
-  Scenario: an attribute ownership can not be converted to a key ownership
-    Then graql define; throws exception
+  Scenario: an attribute ownership can be converted to a key ownership
+    When graql define
       """
       define person owns name @key;
       """
+    Then transaction commits
     Then the integrity is validated
+    When session opens transaction of type: read
+    When get answers of graql query
+      """
+      match $x owns name @key; get;
+      """
+    When concept identifiers are
+      |     | check | value  |
+      | PER | label | person |
+    Then uniquely identify answer concepts
+      | x   |
+      | PER |
 
 
   Scenario: the definition of a rule is not modifiable
@@ -1727,10 +1785,10 @@ Feature: Graql Define Query
       define
       nickname sub attribute, value string;
       person owns nickname;
-      robert-has-nickname-bob sub rule,
+      rule robert-has-nickname-bob:
       when {
         $p isa person, has name "Robert";
-      }, then {
+      } then {
         $p has nickname "Bob";
       };
       """
@@ -1738,10 +1796,10 @@ Feature: Graql Define Query
     Then graql define; throws exception
       """
       define
-      robert-has-nickname-bob sub rule,
+      rule robert-has-nickname-bob:
       when {
         $p isa person, has name "robert";
-      }, then {
+      } then {
         $p has nickname "bob";
       };
       """
