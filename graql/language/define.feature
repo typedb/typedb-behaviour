@@ -587,6 +587,15 @@ Feature: Graql Define Query
     Then uniquely identify answer concepts
       | x   |
       | EMP |
+
+
+  Scenario: when overriding a role that doesn't exist on the parent relation, an error is thrown
+    Then graql define; throws exception
+      """
+      define
+      close-friendship sub relation, relates close-friend as friend;
+      """
+    Then the integrity is validated
     
 
   Scenario: a newly defined relation subtype inherits playable roles from its parent type

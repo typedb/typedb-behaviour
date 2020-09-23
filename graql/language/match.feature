@@ -14,14 +14,16 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-Feature: Graql Match Clause
+Feature: Graql Match Query
 
-  Background: Open connection
+  Background: Open connection and create a simple extensible schema
     Given connection has been opened
     Given connection delete all databases
-    Given connection open sessions for databases:
-      | test_match |
-    Given transaction is initialised
+    Given connection does not have any database
+    Given connection create database: grakn
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
+    Given the integrity is validated
     Given graql define
       """
       define
@@ -46,7 +48,9 @@ Feature: Graql Match Clause
       age sub attribute, value long;
       ref sub attribute, value long;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: write
 
 
   ##################
@@ -60,7 +64,9 @@ Feature: Graql Match Clause
       writer sub person;
       scifi-writer sub writer;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x type person;
@@ -80,7 +86,9 @@ Feature: Graql Match Clause
       writer sub person;
       scifi-writer sub writer;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x sub person;
@@ -104,7 +112,9 @@ Feature: Graql Match Clause
       writer sub person;
       scifi-writer sub writer;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match writer sub $x;
@@ -139,7 +149,11 @@ Feature: Graql Match Clause
       smartphone-designer sub telecoms-worker;
       telecoms-business-strategist sub telecoms-worker;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
@@ -151,7 +165,9 @@ Feature: Graql Match Clause
       $f isa telecoms-business-strategist, has name "Felicia", has ref 5;
       $g isa worker, has name "Gary", has ref 6;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match
@@ -199,7 +215,9 @@ Feature: Graql Match Clause
       musician sub person;
       flutist sub musician;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x sub! person;
@@ -223,7 +241,9 @@ Feature: Graql Match Clause
       writer sub person;
       scifi-writer sub writer;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match writer sub! $x;
@@ -249,7 +269,9 @@ Feature: Graql Match Clause
       sub5 sub sub4;
       sub6 sub sub5;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match
@@ -263,7 +285,7 @@ Feature: Graql Match Clause
       """
 
 
-  Scenario: 'has' matches types that have the specified attribute type
+  Scenario: 'owns' matches types that own the specified attribute type
     When get answers of graql query
       """
       match $x owns age;
@@ -276,14 +298,17 @@ Feature: Graql Match Clause
       | PER |
 
 
-  Scenario: 'has' does not match types that have only a subtype of the specified attribute type
+  Scenario: 'owns' does not match types that own only a subtype of the specified attribute type
     Given graql define
       """
       define
+      name abstract;
       club-name sub name;
       club sub entity, owns club-name;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x owns name;
@@ -298,14 +323,17 @@ Feature: Graql Match Clause
       | COM |
 
 
-  Scenario: 'has' does not match types that have only a supertype of the specified attribute type
+  Scenario: 'owns' does not match types that own only a supertype of the specified attribute type
     Given graql define
       """
       define
+      name abstract;
       club-name sub name;
       club sub entity, owns club-name;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x owns club-name;
@@ -318,12 +346,10 @@ Feature: Graql Match Clause
       | CLU |
 
 
-  @ignore
-  # TODO: re-enable when we can retrieve attribute types that a specified type has (issue #4664)
-  Scenario: 'has' can be used to match attribute types that a particular type has
+  Scenario: 'owns' can be used to match attribute types that a given type owns
     When get answers of graql query
       """
-      match person has $x;
+      match person owns $x;
       """
     And concept identifiers are
       |     | check | value |
@@ -337,13 +363,17 @@ Feature: Graql Match Clause
       | REF |
 
 
-  Scenario: 'has' can be used to retrieve all instances of types that can own a given attribute type
+  Scenario: 'owns' can be used to retrieve all instances of types that can own a given attribute type
     Given graql define
       """
       define
       employment owns name;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
@@ -352,7 +382,9 @@ Feature: Graql Match Clause
       $z (friend: $x) isa friendship, has ref 2;
       $w (employee: $x, employer: $y) isa employment, has ref 3;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match
@@ -392,10 +424,12 @@ Feature: Graql Match Clause
     Given graql define
       """
       define
-      close-friendship sub relation, relates close-friend as friend;
+      close-friendship sub friendship, relates close-friend as friend;
       friendly-person sub entity, plays close-friendship:close-friend;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x plays friendship:friend;
@@ -412,10 +446,12 @@ Feature: Graql Match Clause
     Given graql define
       """
       define
-      close-friendship sub relation, relates close-friend as friend;
+      close-friendship sub friendship, relates close-friend as friend;
       friendly-person sub entity, plays close-friendship:close-friend;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x plays close-friendship:close-friend;
@@ -451,7 +487,11 @@ Feature: Graql Match Clause
         plays friendship:friend,
         owns ref @key;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
@@ -459,7 +499,9 @@ Feature: Graql Match Clause
       $y isa company, has ref 1;
       $z isa dog, has ref 2;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match
@@ -478,14 +520,16 @@ Feature: Graql Match Clause
       | DOG | tDOG |
 
 
-  Scenario: 'key' matches types that have the specified attribute type as a key
+  Scenario: 'owns @key' matches types that own the specified attribute type as a key
     Given graql define
       """
       define
       breed sub attribute, value string;
       dog sub entity, owns breed @key;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x owns breed @key;
@@ -498,12 +542,10 @@ Feature: Graql Match Clause
       | DOG |
 
 
-  @ignore
-  # TODO: re-enable when we can retrieve attribute types that a specified type has (issue #4664)
-  Scenario: 'key' can be used to find all attribute types that the specified type uses as key
+  Scenario: 'key' can be used to find all attribute types that a given type owns as a key
     When get answers of graql query
       """
-      match person key $x;
+      match person owns $x @key;
       """
     And concept identifiers are
       |     | check | value |
@@ -513,7 +555,7 @@ Feature: Graql Match Clause
       | REF |
 
 
-  Scenario: 'has' matches types that have the specified attribute type, even if they use it as a key
+  Scenario: 'owns' without '@key' matches all types that own the specified attribute type, even if they use it as a key
     Given graql define
       """
       define
@@ -521,7 +563,9 @@ Feature: Graql Match Clause
       dog sub entity, owns breed @key;
       cat sub entity, owns breed;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x owns breed;
@@ -549,14 +593,16 @@ Feature: Graql Match Clause
       | EMP |
 
 
-  Scenario: 'relates' with 'as' matches relation types where the specified role is played as a subrole of the specified super-role
+  Scenario: 'relates' with 'as' matches relation types that override the specified roleplayer
     Given graql define
       """
       define
-      close-friendship sub relation, relates close-friend as friend;
+      close-friendship sub friendship, relates close-friend as friend;
       friendly-person sub entity, plays close-friendship:close-friend;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x relates close-friend as friend;
@@ -569,14 +615,16 @@ Feature: Graql Match Clause
       | CLF |
 
 
-  Scenario: 'relates' does not match relation types that block the specified roleplayer with 'as'
+  Scenario: 'relates' without 'as' does not match relation types that override the specified roleplayer
     Given graql define
       """
       define
-      close-friendship sub relation, relates close-friend as friend;
+      close-friendship sub friendship, relates close-friend as friend;
       friendly-person sub entity, plays close-friendship:close-friend;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x relates friend;
@@ -626,7 +674,11 @@ Feature: Graql Match Clause
       scifi-writer sub writer;
       good-scifi-writer sub scifi-writer;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
@@ -635,7 +687,9 @@ Feature: Graql Match Clause
       $z isa scifi-writer, has ref 2;
       $w isa good-scifi-writer, has ref 3;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa writer;
@@ -660,7 +714,11 @@ Feature: Graql Match Clause
       scifi-writer sub writer;
       good-scifi-writer sub scifi-writer;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
@@ -669,7 +727,9 @@ Feature: Graql Match Clause
       $z isa scifi-writer, has ref 2;
       $w isa good-scifi-writer, has ref 3;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa! writer;
@@ -683,12 +743,17 @@ Feature: Graql Match Clause
 
 
   Scenario: 'iid' matches the instance with the specified internal iid
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
       $x isa person, has ref 0;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa person;
@@ -699,8 +764,16 @@ Feature: Graql Match Clause
       """
 
 
+  Scenario: match returns an empty answer if there are no matches
+    When get answers of graql query
+      """
+      match $x isa person, has name "Anonymous Coward";
+      """
+    Then answer size is: 0
+
+
   Scenario: when matching by a type whose label doesn't exist, an error is thrown
-    Then graql get throws
+    Then graql match; throws exception
       """
       match $x isa ganesh;
       """
@@ -716,7 +789,7 @@ Feature: Graql Match Clause
 
 
   Scenario: when matching by a relation type whose label doesn't exist, an error is thrown
-    Then graql get throws
+    Then graql match; throws exception
       """
       match ($x, $y) isa $type; $type type jakas-relacja;
       """
@@ -724,7 +797,7 @@ Feature: Graql Match Clause
 
 
   Scenario: when matching a non-existent type label to a variable from a generic 'isa' query, an error is thrown
-    Then graql get throws
+    Then graql match; throws exception
       """
       match $x isa $type; $type type polok;
       """
@@ -742,11 +815,16 @@ Feature: Graql Match Clause
 
 
   Scenario: when one entity exists, and we match two variables both of that entity type, the entity is returned
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert $x isa person, has ref 0;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match
@@ -761,10 +839,10 @@ Feature: Graql Match Clause
       | PER | PER |
 
 
-  Scenario: an error is thrown when matching that a variable has a specific type, when that type is in fact a role
-    Then graql get throws
+  Scenario: an error is thrown when matching that a variable has a specific type, when that type is in fact a role type
+    Then graql match; throws exception
       """
-      match $x isa friend;
+      match $x isa friendship:friend;
       """
     Then the integrity is validated
 
@@ -773,14 +851,17 @@ Feature: Graql Match Clause
     Given graql define
       """
       define
-      metre-rule sub rule, when {
+      rule metre-rule:
+      when {
         $x isa person;
-      }, then {
+      } then {
         $x has name "metre";
       };
       """
+    Given transaction commits
     Given the integrity is validated
-    Then graql get throws
+    Given session opens transaction of type: read
+    Then graql match; throws exception
       """
       match $x isa metre-rule;
       """
@@ -792,7 +873,10 @@ Feature: Graql Match Clause
   #############
 
   Scenario: a relation is matchable from role players without specifying relation type
-    When graql insert
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
+    Given graql insert
       """
       insert
       $x isa person, has ref 0;
@@ -800,7 +884,9 @@ Feature: Graql Match Clause
       $r (employee: $x, employer: $y) isa employment,
          has ref 2;
       """
-    When the integrity is validated
+    Given transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then get answers of graql query
       """
       match $x isa person; $r (employee: $x) isa relation;
@@ -823,6 +909,9 @@ Feature: Graql Match Clause
 
 
   Scenario: relations are matchable from roleplayers without specifying any roles
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
@@ -831,7 +920,9 @@ Feature: Graql Match Clause
       $r (employee: $x, employer: $y) isa employment,
          has ref 2;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa person; $r ($x) isa relation;
@@ -845,7 +936,10 @@ Feature: Graql Match Clause
       | REF0 | REF2 |
 
 
-  Scenario: retrieve all combinations of players in a relation
+  Scenario: all combinations of players in a relation can be retrieved
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     When graql insert
       """
       insert $p isa person, has ref 0;
@@ -853,7 +947,9 @@ Feature: Graql Match Clause
       $c2 isa company, has ref 2;
       $r (employee: $p, employer: $c, employer: $c2) isa employment, has ref 3;
       """
-    When the integrity is validated
+    Given transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then get answers of graql query
       """
       match $r ($x, $y) isa employment;
@@ -881,12 +977,18 @@ Feature: Graql Match Clause
       some-entity sub entity, plays symmetric:player, owns ref @key;
       symmetric sub relation, relates player, owns ref @key;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert $x isa some-entity, has ref 0; (player: $x, player: $x) isa symmetric, has ref 1;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $r (player: $x, player: $x) isa relation;
@@ -907,12 +1009,18 @@ Feature: Graql Match Clause
       some-entity sub entity, plays symmetric:player, owns ref @key;
       symmetric sub relation, relates player, owns ref @key;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert $x isa some-entity, has ref 0; (player: $x, player: $x) isa symmetric, has ref 1;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $r (player: $x) isa relation;
@@ -927,6 +1035,9 @@ Feature: Graql Match Clause
 
 
   Scenario: relations between distinct concepts are not retrieved when matching concepts that relate to themselves
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
@@ -934,7 +1045,9 @@ Feature: Graql Match Clause
       $y isa person, has ref 2;
       (friend: $x, friend: $y) isa friendship, has ref 0;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match (friend: $x, friend: $x) isa friendship;
@@ -954,7 +1067,11 @@ Feature: Graql Match Clause
       person plays gift-delivery:sender,
         plays gift-delivery:recipient;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
@@ -968,7 +1085,9 @@ Feature: Graql Match Clause
       (sender: $x1, recipient: $x2c) isa gift-delivery;
       (sender: $x2a, recipient: $x2b) isa gift-delivery;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match
@@ -1002,7 +1121,11 @@ Feature: Graql Match Clause
         owns ref @key;
       person plays residency:resident;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
@@ -1011,7 +1134,9 @@ Feature: Graql Match Clause
       $f (friend: $x) isa friendship, has ref 2;
       $r (resident: $x) isa residency, has ref 3;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     Given concept identifiers are
       |     | check | value |
       | PER | key   | ref:0 |
@@ -1043,8 +1168,8 @@ Feature: Graql Match Clause
       | PER |
 
 
-  Scenario: an error is thrown when matching an entity type as if it were a role
-    Then graql get throws
+  Scenario: an error is thrown when matching an entity type as if it were a role type
+    Then graql match; throws exception
       """
       match (person: $x) isa relation;
       """
@@ -1052,7 +1177,7 @@ Feature: Graql Match Clause
 
 
   Scenario: an error is thrown when matching an entity as if it were a relation
-    Then graql get throws
+    Then graql match; throws exception
       """
       match ($x) isa person;
       """
@@ -1060,15 +1185,15 @@ Feature: Graql Match Clause
 
 
   Scenario: an error is thrown when matching a non-existent type label as if it were a relation type
-    Then graql get throws
+    Then graql match; throws exception
       """
       match ($x) isa bottle-of-rum;
       """
     Then the integrity is validated
 
 
-  Scenario: when matching a role that doesn't exist, an error is thrown
-    Then graql get throws
+  Scenario: when matching a role type that doesn't exist, an error is thrown
+    Then graql match; throws exception
       """
       match (rolein-rolein-rolein: $rolein) isa relation;
       """
@@ -1115,12 +1240,18 @@ Feature: Graql Match Clause
       """
       define <attr> sub attribute, value <type>, owns ref @key;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert $n <value> isa <attr>, has ref 0;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $a <value>;
@@ -1146,7 +1277,9 @@ Feature: Graql Match Clause
       """
       define <attr> sub attribute, value <type>, owns ref @key;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $a <value>;
@@ -1163,6 +1296,9 @@ Feature: Graql Match Clause
 
 
   Scenario: 'contains' matches strings that contain the specified substring
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
@@ -1170,7 +1306,9 @@ Feature: Graql Match Clause
       $y "Four Weddings and a Funeral" isa name;
       $z "Fun Facts about Space" isa name;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x contains "Fun";
@@ -1186,6 +1324,9 @@ Feature: Graql Match Clause
 
 
   Scenario: 'contains' performs a case-insensitive match
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
@@ -1193,7 +1334,9 @@ Feature: Graql Match Clause
       $y "Pirates of the Caribbean" isa name;
       $z "Mr. Bean" isa name;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x contains "Bean";
@@ -1209,6 +1352,9 @@ Feature: Graql Match Clause
 
 
   Scenario: 'like' matches strings that match the specified regex
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
@@ -1216,7 +1362,9 @@ Feature: Graql Match Clause
       $y "123456" isa name;
       $z "9" isa name;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x like "^[0-9]+$";
@@ -1249,6 +1397,9 @@ Feature: Graql Match Clause
   #######################
 
   Scenario: 'has' can be used to match things that own any instance of the specified attribute
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
@@ -1257,7 +1408,9 @@ Feature: Graql Match Clause
       $c isa company, has name "Grakn", has ref 2;
       $d isa company, has ref 3;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x has name $y; get $x;
@@ -1279,7 +1432,11 @@ Feature: Graql Match Clause
       shoe-size sub attribute, value long;
       person owns shoe-size;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
@@ -1287,7 +1444,9 @@ Feature: Graql Match Clause
       $y isa person, has shoe-size 9, has ref 1;
       $z isa person, has age 12, has shoe-size 12, has ref 2;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x has attribute 9;
@@ -1310,7 +1469,11 @@ Feature: Graql Match Clause
       graduation-date sub attribute, value datetime, owns age, owns ref @key;
       person owns graduation-date;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
@@ -1321,7 +1484,9 @@ Feature: Graql Match Clause
       $v (friend: $x, friend: $w) isa friendship, has age 7, has ref 4;
       $u 2019-06-03 isa graduation-date, has age 22, has ref 5;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x has age 21;
@@ -1345,13 +1510,19 @@ Feature: Graql Match Clause
       lucky-number sub attribute, value long;
       person owns lucky-number;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
       $x isa person, has lucky-number 10, has lucky-number 20, has lucky-number 30, has ref 0;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x has lucky-number 20;
@@ -1365,7 +1536,7 @@ Feature: Graql Match Clause
 
 
   Scenario: an error is thrown when matching by attribute ownership, when the owned thing is actually an entity
-    Then graql get throws
+    Then graql match; throws exception
       """
       match $x has person "Luke";
       """
@@ -1381,7 +1552,7 @@ Feature: Graql Match Clause
 
 
   Scenario: an error is thrown when matching by attribute ownership, when the owned type label doesn't exist
-    Then graql get throws
+    Then graql match; throws exception
       """
       match $x has bananananananana "rama";
       """
@@ -1401,14 +1572,20 @@ Feature: Graql Match Clause
       person owns graduation-date;
       employment owns start-date;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
       $x isa person, has name "James", has ref 0, has graduation-date 2009-07-16;
       $r (employee: $x) isa employment, has start-date 2009-07-16, has ref 1;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match
@@ -1426,6 +1603,9 @@ Feature: Graql Match Clause
 
 
   Scenario: 'has $attr == $x' matches owners of any instance '$y' of '$attr' where '$y' and '$x' are equal by value
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
@@ -1433,7 +1613,9 @@ Feature: Graql Match Clause
       $y isa person, has name "Donald", has age 25, has ref 1;
       $z isa person, has name "Ralph", has age 18, has ref 2;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x has age == 16;
@@ -1447,6 +1629,9 @@ Feature: Graql Match Clause
 
 
   Scenario: 'has $attr > $x' matches owners of any instance '$y' of '$attr' where '$y > $x'
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
@@ -1454,7 +1639,9 @@ Feature: Graql Match Clause
       $y isa person, has name "Donald", has age 25, has ref 1;
       $z isa person, has name "Ralph", has age 18, has ref 2;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x has age > 18;
@@ -1468,6 +1655,9 @@ Feature: Graql Match Clause
 
 
   Scenario: 'has $attr < $x' matches owners of any instance '$y' of '$attr' where '$y < $x'
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
@@ -1475,7 +1665,9 @@ Feature: Graql Match Clause
       $y isa person, has name "Donald", has age 25, has ref 1;
       $z isa person, has name "Ralph", has age 18, has ref 2;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x has age < 18;
@@ -1489,6 +1681,9 @@ Feature: Graql Match Clause
 
 
   Scenario: 'has $attr !== $x' matches owners of any instance '$y' of '$attr' where '$y !== $x'
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
@@ -1496,7 +1691,9 @@ Feature: Graql Match Clause
       $y isa person, has name "Donald", has age 25, has ref 1;
       $z isa person, has name "Ralph", has age 18, has ref 2;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x has age !== 18;
@@ -1518,14 +1715,20 @@ Feature: Graql Match Clause
       house-number sub attribute, value long;
       length sub attribute, value double;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
       $x 1 isa house-number;
       $y 2.0 isa length;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match
@@ -1577,13 +1780,19 @@ Feature: Graql Match Clause
       lucky-number sub attribute, value long;
       person owns lucky-number;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
       $x isa person, has lucky-number 10, has lucky-number 20, has lucky-number 30, has ref 0;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x has lucky-number > 25;
@@ -1596,9 +1805,10 @@ Feature: Graql Match Clause
       | PER |
 
 
-  @ignore
-  # TODO: re-enable when variables used in multiple value predicates are resolvable (grakn#5845)
   Scenario: an attribute variable used in both '==' and '>=' predicates is correctly resolved
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
@@ -1606,7 +1816,9 @@ Feature: Graql Match Clause
       $y isa person, has name "Donald", has age 25, has ref 1;
       $z isa person, has name "Ralph", has age 18, has ref 2;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match
@@ -1631,7 +1843,11 @@ Feature: Graql Match Clause
       define
       length sub attribute, value double;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
@@ -1640,7 +1856,9 @@ Feature: Graql Match Clause
       $c 20.9 isa length;
       $d 19.9 isa length;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match
@@ -1660,11 +1878,16 @@ Feature: Graql Match Clause
 
 
   Scenario: when one entity exists, and we match two variables with concept inequality, an empty answer is returned
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert $x isa person, has ref 0;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match
@@ -1676,14 +1899,14 @@ Feature: Graql Match Clause
 
 
   Scenario: concept comparison of unbound variables throws an error
-    Then graql get throws
+    Then graql match; throws exception
       """
       match $x != $y;
       """
 
 
   Scenario: value comparison of unbound variables throws an error
-    Then graql get throws
+    Then graql match; throws exception
       """
       match $x !== $y;
       """
@@ -1694,13 +1917,18 @@ Feature: Graql Match Clause
   ############
 
   Scenario: disjunctions return the union of composing query statements
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
       $x isa person, has name "Jeff", has ref 0;
       $y isa company, has name "Amazon", has ref 1;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match {$x isa person;} or {$x isa company;};
@@ -1720,6 +1948,9 @@ Feature: Graql Match Clause
   ##################
 
   Scenario: all instances and their types can be retrieved
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
@@ -1727,7 +1958,9 @@ Feature: Graql Match Clause
       $y isa person, has name "Angelina", has ref 1;
       $r (friend: $x, friend: $y) isa friendship, has ref 2;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     Given get answers of graql query
       """
       match $x isa entity;
@@ -1754,6 +1987,9 @@ Feature: Graql Match Clause
 
 
   Scenario: all relations and their types can be retrieved
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
@@ -1761,7 +1997,9 @@ Feature: Graql Match Clause
       $y isa person, has name "Angelina", has ref 1;
       $r (friend: $x, friend: $y) isa friendship, has ref 2;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     Given get answers of graql query
       """
       match $r isa relation;
@@ -1791,15 +2029,14 @@ Feature: Graql Match Clause
 
   At least one negated pattern variable must be bound outside the negation block, so this query is invalid.
 
-    Then graql get throws
+    Then graql match; throws exception
       """
       match not { $x has attribute "value"; };
       """
-    Then the integrity is validated
 
 
   Scenario: when matching a negation whose pattern variables are all unbound outside it, an error is thrown
-    Then graql get throws
+    Then graql match; throws exception
       """
       match
         $r isa entity;
@@ -1808,7 +2045,6 @@ Feature: Graql Match Clause
           $i isa entity;
         };
       """
-    Then the integrity is validated
 
 
   Scenario: the first variable in a negation can be unbound, as long as it is connected to a bound variable
@@ -1820,11 +2056,10 @@ Feature: Graql Match Clause
           $x isa entity, has attribute $r;
         };
       """
-    Then the integrity is validated
 
 
   Scenario: negations cannot contain disjunctions
-    Then graql get throws
+    Then graql match; throws exception
       """
       match
         $x isa entity;
@@ -1832,4 +2067,3 @@ Feature: Graql Match Clause
           { $x has attribute 1; } or { $x has attribute 2; };
         };
       """
-    Then the integrity is validated
