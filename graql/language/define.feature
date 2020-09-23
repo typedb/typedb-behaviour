@@ -2320,7 +2320,8 @@ Feature: Graql Define Query
       define dog sub entity;
       """
     When session opens transaction of type: read
-    Then graql match throws
+    Then graql match; throws exception
       """
       match $x type dog;
       """
+    Then the integrity is validated
