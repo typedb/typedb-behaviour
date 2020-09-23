@@ -27,3 +27,7 @@ graknlabs_dependencies()
 # Load //tool/checkstyle
 load("@graknlabs_dependencies//tool/checkstyle:deps.bzl", checkstyle_deps = "deps")
 checkstyle_deps()
+
+# Load //builder/bazel for RBE
+load("@graknlabs_dependencies//builder/bazel:deps.bzl", "bazel_toolchain")
+bazel_toolchain()
