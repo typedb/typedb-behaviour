@@ -17,6 +17,8 @@
 
 package(default_visibility = ["//visibility:public"])
 
+load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
+
 files = [
     "define.feature",
     "delete.feature",
@@ -31,4 +33,11 @@ filegroup(
     name = "features",
     srcs = files,
 )
+
 exports_files(files)
+
+checkstyle_test(
+    name = "checkstyle",
+    include = glob(["*"]),
+    license_type = "agpl",
+)

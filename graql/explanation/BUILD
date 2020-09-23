@@ -17,6 +17,8 @@
 
 package(default_visibility = ["//visibility:public"])
 
+load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
+
 files = [
     "reasoner.feature",
     "language.feature",
@@ -28,3 +30,9 @@ filegroup(
 )
 
 exports_files(files)
+
+checkstyle_test(
+    name = "checkstyle",
+    include = glob(["*"]),
+    license_type = "agpl",
+)

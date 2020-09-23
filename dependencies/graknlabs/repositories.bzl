@@ -15,18 +15,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-package(default_visibility = ["//visibility:public"])
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
-load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
-
-exports_files([
-    "attribute.feature",
-    "entity.feature",
-    "relation.feature"
-])
-
-checkstyle_test(
-    name = "checkstyle",
-    include = glob(["*"]),
-    license_type = "agpl",
-)
+def graknlabs_dependencies():
+    git_repository(
+        name = "graknlabs_dependencies",
+        remote = "https://github.com/graknlabs/dependencies",
+        commit = "34f55e21fcfd942e5919f11c6255512b3590af73", # sync-marker: do not remove this comment, this is used for sync-dependencies by @graknlabs_dependencies
+    )

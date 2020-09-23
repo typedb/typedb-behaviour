@@ -15,15 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-package(default_visibility = ["//visibility:public"])
-
 load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
-
-exports_files([
-    "attribute.feature",
-    "entity.feature",
-    "relation.feature"
-])
 
 checkstyle_test(
     name = "checkstyle",
