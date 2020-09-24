@@ -15,3 +15,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 Feature: Graql Compute Query
+
+  # This file is retained as a placeholder for future functionality
+  

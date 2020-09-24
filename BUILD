@@ -15,19 +15,21 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-# CI targets that are not declared in any BUILD file, but are called externally
-
 load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 checkstyle_test(
     name = "checkstyle",
-    include = glob(["*", ".grabl/automation.yml"]),
+    include = glob([
+        "*",
+        ".grabl/*",
+    ]),
     license_type = "agpl",
 )
 
+# CI targets that are not declared in any BUILD file, but are called externally
 filegroup(
     name = "ci",
     data = [
         "@graknlabs_dependencies//tool/checkstyle:test-coverage",
-    ]
+    ],
 )

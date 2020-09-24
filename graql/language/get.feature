@@ -14,14 +14,16 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-Feature: Graql Get Query
+Feature: Graql Get Clause
 
   Background: Open connection and create a simple extensible schema
     Given connection has been opened
     Given connection delete all databases
-    Given connection open sessions for databases:
-      | test_get |
-    Given transaction is initialised
+    Given connection does not have any database
+    Given connection create database: grakn
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
+    Given the integrity is validated
     Given graql define
       """
       define
@@ -46,22 +48,18 @@ Feature: Graql Get Query
       age sub attribute, value long;
       ref sub attribute, value long;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
 
 
-  ########################
-  # ANSWERS OF GET QUERY #
-  ########################
+  #############
+  # VARIABLES #
+  #############
 
-  Scenario: match-get returns an empty answer if there are no matches
-    When get answers of graql query
-      """
-      match $x isa person, has name "Anonymous Coward";
-      """
-    Then answer size is: 0
-
-
-  Scenario: when restricting the variables in a get, the answer includes only the variables that are specified
+  Scenario: 'get' can be used to restrict the set of variables that appear in an answer set
     Given graql insert
       """
       insert
@@ -69,7 +67,9 @@ Feature: Graql Get Query
       $y 16 isa age;
       $z isa person, has name $x, has age $y, has ref 0;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     And concept identifiers are
       |     | check | value     |
       | PER | key   | ref:0     |
@@ -86,8 +86,8 @@ Feature: Graql Get Query
       | PER | LIS |
 
 
-  Scenario: match-get throws an error when there are unbound variables in the 'get'
-    Then graql get throws
+  Scenario: when a 'get' has unbound variables, an error is thrown
+    Then graql match; throws exception
       """
       match $x isa person; get $y;
       """
@@ -98,13 +98,20 @@ Feature: Graql Get Query
   # SORT #
   ########
 
-  Scenario Outline: the answers of a get can be sorted by an attribute of type '<type>'
+  Scenario Outline: the answers of a match can be sorted by an attribute of type '<type>'
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
       <attr> sub attribute, value <type>, owns ref @key;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
@@ -113,7 +120,9 @@ Feature: Graql Get Query
       $c <val3> isa <attr>, has ref 2;
       $d <val4> isa <attr>, has ref 3;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa <attr>;
@@ -149,7 +158,9 @@ Feature: Graql Get Query
       $c isa person, has name "Frederick", has ref 2;
       $d isa person, has name "Brenda", has ref 3;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa person, has name $y;
@@ -193,7 +204,9 @@ Feature: Graql Get Query
       $c isa person, has name "Frederick", has ref 2;
       $d isa person, has name "Brenda", has ref 3;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa person, has name $y;
@@ -226,7 +239,9 @@ Feature: Graql Get Query
       $c isa person, has name "Frederick", has ref 2;
       $d isa person, has name "Brenda", has ref 3;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa person, has name $y;
@@ -257,7 +272,9 @@ Feature: Graql Get Query
       $c isa person, has name "Frederick", has ref 2;
       $d isa person, has name "Brenda", has ref 3;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa person, has name $y;
@@ -285,7 +302,9 @@ Feature: Graql Get Query
       $c isa person, has name "Frederick", has ref 2;
       $d isa person, has name "Brenda", has ref 3;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa person, has name $y;
@@ -305,7 +324,7 @@ Feature: Graql Get Query
       | GAR | nGAR |
 
 
-  Scenario: when the answer size limit is 0, an empty answer set is returned
+  Scenario: when the answer size is limited to 0, an empty answer set is returned
     Given graql insert
       """
       insert
@@ -314,7 +333,9 @@ Feature: Graql Get Query
       $c isa person, has name "Frederick", has ref 2;
       $d isa person, has name "Brenda", has ref 3;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa person, has name $y;
@@ -333,7 +354,9 @@ Feature: Graql Get Query
       $c isa person, has name "Frederick", has ref 2;
       $d isa person, has name "Brenda", has ref 3;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa person, has name $y;
@@ -344,7 +367,7 @@ Feature: Graql Get Query
 
 
   Scenario: string sorting is case-insensitive
-    When get answers of graql insert
+    Given graql insert
       """
       insert
       $a "Bond" isa name;
@@ -353,8 +376,10 @@ Feature: Graql Get Query
       $d "agent" isa name;
       $e "secret agent" isa name;
       """
-    When the integrity is validated
-    And concept identifiers are
+    Given transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
+    When concept identifiers are
       |     | check | value             |
       | BON | value | name:Bond         |
       | JAM | value | name:James Bond   |
@@ -385,7 +410,9 @@ Feature: Graql Get Query
       $d isa person, has age 6, has ref 3;
       $e isa person, has age 2, has ref 4;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa person, has age $y;
@@ -426,8 +453,10 @@ Feature: Graql Get Query
       $a isa person, has age 2, has ref 0;
       $b isa person, has age 6, has ref 1;
       """
+    Given transaction commits
     Given the integrity is validated
-    Then graql get throws
+    Given session opens transaction of type: read
+    Then graql match; throws exception
       """
       match
         $x isa person, has age $y;
@@ -435,7 +464,6 @@ Feature: Graql Get Query
       sort $y asc;
       limit 2;
       """
-    Then the integrity is validated
 
 
   #############
@@ -451,7 +479,9 @@ Feature: Graql Get Query
       $p3 isa person, has name "Karen", has ref 2;
       $f (friend: $p1, friend: $p2) isa friendship, has ref 3;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match
@@ -498,13 +528,20 @@ Feature: Graql Get Query
 
 
   Scenario Outline: the <agg_type> of an answer set of '<type>' values can be retrieved
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
       <attr> sub attribute, value <type>;
       person owns <attr>;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
@@ -512,7 +549,9 @@ Feature: Graql Get Query
       $p2 isa person, has <attr> <val2>, has ref 1;
       $p3 isa person, has <attr> <val3>, has ref 2;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa person, has <attr> $y;
@@ -535,13 +574,20 @@ Feature: Graql Get Query
 
 
   Scenario: the sample standard deviation can be retrieved for an answer set of 'double' values
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
       weight sub attribute, value double;
       person owns weight;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
@@ -549,7 +595,9 @@ Feature: Graql Get Query
       $p2 isa person, has weight 86.5, has ref 1;
       $p3 isa person, has weight 24.8, has ref 2;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa person, has weight $y;
@@ -559,7 +607,7 @@ Feature: Graql Get Query
     Then aggregate value is: 31.0537
 
 
-  Scenario: restricting the variables in the 'get' does not affect the result of the 'sum'
+  Scenario: restricting variables with 'get' does not affect the result of a 'sum'
     Given graql insert
       """
       insert
@@ -567,7 +615,9 @@ Feature: Graql Get Query
       $p2 isa person, has name "Yoko", has age 20, has ref 1;
       $p3 isa person, has name "Miles", has age 15, has ref 2;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa person, has name $y, has age $z;
@@ -592,7 +642,9 @@ Feature: Graql Get Query
       $p2 isa person, has age <val1and2>, has ref 1;
       $p3 isa person, has age <val3>, has ref 2;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa person, has age $y;
@@ -616,7 +668,9 @@ Feature: Graql Get Query
       $p3 isa person, has age 19, has ref 2;
       $p4 isa person, has age 35, has ref 3;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa person, has age $y;
@@ -626,13 +680,18 @@ Feature: Graql Get Query
 
 
   Scenario Outline: when an answer set is empty, calling '<agg_type>' on it returns an empty answer
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
       income sub attribute, value double;
       person owns income;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa person, has income $y;
@@ -651,7 +710,7 @@ Feature: Graql Get Query
 
 
   Scenario Outline: an error is thrown when getting the '<agg_type>' of an undefined variable in an aggregate query
-    Then graql get throws
+    Then graql match; throws exception
       """
       match $x isa person;
       <agg_type> $y;
@@ -668,12 +727,14 @@ Feature: Graql Get Query
 
 
   Scenario: aggregates can only be performed over sets of attributes
-    When graql insert
+    Given graql insert
       """
       insert $x isa person, has ref 0;
       """
-    When the integrity is validated
-    Then graql get throws
+    Given transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
+    Then graql match; throws exception
       """
       match $x isa person;
       min $x;
@@ -682,20 +743,29 @@ Feature: Graql Get Query
 
 
   Scenario Outline: an error is thrown when getting the '<agg_type>' of attributes that have the inapplicable type, '<type>'
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
       <attr> sub attribute, value <type>;
       person owns <attr>;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert
       $x isa person, has ref 0, has <attr> <value>;
       """
+    Given transaction commits
     Given the integrity is validated
-    Then graql get throws
+    Given session opens transaction of type: read
+    Then graql match; throws exception
       """
       match $x isa person, has <attr> $y;
       <agg_type> $y;
@@ -725,14 +795,16 @@ Feature: Graql Get Query
 
 
   Scenario: when taking the sum of a set of attributes, where some are numeric and others are strings, an error is thrown
-    When graql insert
+    Given graql insert
       """
       insert
       $x isa person, has name "Barry", has age 39, has ref 0;
       $y isa person, has name "Gloria", has age 28, has ref 1;
       """
-    When the integrity is validated
-    Then graql get throws
+    Given transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
+    Then graql match; throws exception
       """
       match $x isa person, has attribute $y;
       sum $y;
@@ -763,7 +835,9 @@ Feature: Graql Get Query
       $p4 isa person, has name "Colin", has ref 3;
       $f (friend: $p1, friend: $p2, friend: $p3, friend: $p4) isa friendship, has ref 4;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match ($x, $y) isa friendship;
@@ -823,8 +897,10 @@ Feature: Graql Get Query
       $p2 isa person, has name "Rupert", has ref 1;
       $f (friend: $p1, friend: $p2) isa friendship, has ref 2;
       """
+    Given transaction commits
     Given the integrity is validated
-    Then graql get throws
+    Given session opens transaction of type: read
+    Then graql match; throws exception
       """
       match ($x, $y) isa friendship;
       get $x;
@@ -847,7 +923,9 @@ Feature: Graql Get Query
       $p4 isa person, has name "Colin", has ref 3;
       $f (friend: $p1, friend: $p2, friend: $p3, friend: $p4) isa friendship, has ref 4;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $x isa person;
@@ -878,7 +956,7 @@ Feature: Graql Get Query
       | gCOL  | 3     |
 
 
-  Scenario: the size of answer groups is still computed correctly when restricting variables in the 'get'
+  Scenario: the size of answer groups is still computed correctly when restricting variables with 'get'
     Given graql insert
       """
       insert
@@ -890,7 +968,9 @@ Feature: Graql Get Query
       $e1 (employer: $c1, employee: $p1, employee: $p2) isa employment, has ref 5;
       $e2 (employer: $c2, employee: $p3) isa employment, has ref 6;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     And concept identifiers are
       |     | check | value |
       | APP | key   | ref:0 |
@@ -951,7 +1031,9 @@ Feature: Graql Get Query
       $e1 (employer: $c1, employee: $p1, employee: $p2, employee: $p3) isa employment, has ref 6;
       $e2 (employer: $c2, employee: $p4) isa employment, has ref 7;
       """
+    Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     And concept identifiers are
       |     | check | value |
       | LLO | key   | ref:0 |
