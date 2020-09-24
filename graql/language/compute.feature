@@ -14,31 +14,4 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
-package(default_visibility = ["//visibility:public"])
-
-load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
-
-files = [
-    "compute.feature",
-    "define.feature",
-    "delete.feature",
-    "get.feature",
-    "insert.feature",
-    "match.feature",
-    "rule-validation.feature",
-    "undefine.feature",
-]
-
-filegroup(
-    name = "features",
-    srcs = files,
-)
-
-exports_files(files)
-
-checkstyle_test(
-    name = "checkstyle",
-    include = glob(["*"]),
-    license_type = "agpl",
-)
+Feature: Graql Compute Query
