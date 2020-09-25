@@ -599,14 +599,12 @@ Feature: Type Hierarchy Resolution
     When materialised database is completed
     Then for graql query
       """
-      match $x isa person, has hair "orange";
+      match $x has hair "orange";
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
-    Then for graql query
+    Then answer set is equivalent for graql query
       """
-      match %x isa person;
+      match $x isa person;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
     Then materialised and reasoned databases are the same size
