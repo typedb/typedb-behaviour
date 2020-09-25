@@ -563,3 +563,50 @@ Feature: Type Hierarchy Resolution
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
 #    Then materialised and reasoned databases are the same size
+
+
+  Scenario: a rule can correctly use a super-relations's role in the sub-relation.
+    Given for each session, graql define
+      """
+        define
+
+        person
+        plays president,
+        has hair;
+
+        hair sub attribute,
+        value string;
+
+        citizenship sub relation,
+        relates citizen;
+
+        presidency sub citizenship,
+        relates president as citizen;
+
+        orange-man sub rule,
+        when {
+            (citizen: $a) isa presidency;
+        }, then {
+            $a has hair "orange";
+        };
+      """
+    Given for each session, graql insert
+      """
+      insert
+      $x isa person;
+      (president: $x) isa presidency;
+      """
+    When materialised database is completed
+    Then for graql query
+      """
+      match $x isa person, has hair "orange";
+      """
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
+    Then for graql query
+      """
+      match %x isa person;
+      """
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
+    Then materialised and reasoned databases are the same size
