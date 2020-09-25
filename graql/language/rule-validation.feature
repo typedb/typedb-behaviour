@@ -671,3 +671,32 @@ Feature: Graql Rule Validation
       | x   |
       | ORA |
       | RUL |
+
+  Scenario: When defining a rule with a variable atom type, an error is thrown.
+    Given graql define
+      """
+      define
+
+      element sub entity,
+      plays first,
+      plays second;
+
+      symmetric sub relation,
+      relates first,
+      relates second;
+      """
+
+    Given the integrity is validated
+    Then graql define throws
+
+      """
+      define
+      symmetry sub rule,
+      when {
+          $s sub symmetric;
+          (first: $a, second: $b) isa $s;
+      }, then {
+          (first: $b, second: $a) isa $s;
+      };
+      """
+    Then the integrity is validated
