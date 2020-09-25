@@ -631,3 +631,43 @@ Feature: Graql Rule Validation
       };
       """
     Then the integrity is validated
+
+
+  Scenario: a rule can infer both an attribute and its ownership
+    Given graql define
+      """
+      define
+
+      person
+      plays president,
+      has hair;
+
+      hair sub attribute,
+      value string;
+
+      citizenship sub relation,
+      relates citizen;
+
+      presidency sub citizenship,
+      relates president as citizen;
+
+      orange-man sub rule,
+      when {
+          (citizen: $a) isa presidency;
+      }, then {
+          $a has hair "orange";
+      };
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x sub rule; get;
+      """
+    When concept identifiers are
+      |     | check | value                   |
+      | ORA | label | orange-man              |
+      | RUL | label | rule                    |
+    Then uniquely identify answer concepts
+      | x   |
+      | ORA |
+      | RUL |
