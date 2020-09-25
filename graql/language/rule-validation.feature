@@ -633,7 +633,7 @@ Feature: Graql Rule Validation
     Then the integrity is validated
 
 
-  Scenario: a rule can infer both an attribute and its ownership
+  Scenario: a rule can use a super-relations's role in the sub-relation.
     Given graql define
       """
       define
