@@ -272,6 +272,9 @@ Feature: Graql Rule Validation
     Then the integrity is validated
 
 
+#    what about if there are two statements in a negation?
+
+
   Scenario: when a rule has two conclusions, an error is thrown
     Given graql define
       """
@@ -700,3 +703,74 @@ Feature: Graql Rule Validation
       };
       """
     Then the integrity is validated
+
+
+  Scenario: when defining a rule that uses a role from a sub-relation, an error is thrown
+    Given graql define
+      """
+      define
+
+      person
+      plays president,
+      has hair;
+
+      hair sub attribute,
+      value string;
+
+      citizenship sub relation,
+      relates citizen;
+
+      presidency sub citizenship,
+      relates president as citizen;
+     """
+    Given the integrity is validated
+    Then graql define throws
+     """
+      orange-man sub rule,
+      when {
+          (president: $a) isa citizenship;
+      }, then {
+          $a has hair "orange";
+      };
+      """
+    Given the integrity is validated
+
+  Scenario: when a rule infers variable of wrong type in attribute, an error is thrown
+    Given graql define throws
+      """
+      define
+      age sub attribute, value long;
+      boudicca-is-1960-years-old sub rule,
+      when {
+        $person isa person, has name $n;
+      }, then {
+        $person has age $n;
+      };
+      """
+    Then the integrity is validated
+
+  Scenario: a rule can infer attributes of a subtype of its attribute
+    Given graql define
+      """
+      define
+      nickname sub name;
+      robert-has-nickname-bob sub rule,
+      when {
+        $p isa person, has nickname "Bob";
+      }, then {
+        $p has name "Robert";
+      };
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x sub rule;
+      """
+    Then concept identifiers are
+      |     | check | value                   |
+      | BOB | label | robert-has-nickname-bob |
+      | RUL | label | rule                    |
+    Then uniquely identify answer concepts
+      | x   |
+      | BOB |
+      | RUL |
