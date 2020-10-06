@@ -75,61 +75,49 @@ Feature: Variable Role Resolution
 
       name sub attribute, value string;
 
-      binary-base-transitive sub rule,
-      when {
+      rule binary-base-transitive: when {
           (role1:$x, role2:$z) isa binary-base;
           (role1:$z, role2:$y) isa binary-base;
-      },
-      then {
+       } then {
           (role1:$x, role2:$y) isa binary-base;
-      };
+       };
 
-      binary-base-to-ternary-base sub rule,
-      when {
+      rule binary-base-to-ternary-base: when {
           (role1:$x, role2:$z) isa binary-base;
           (role1:$z, role2:$y) isa binary-base;
-      },
-      then {
+       } then {
           (ternary-role1:$x, ternary-role2:$y, ternary-role3: $z) isa ternary-base;
-      };
+       };
 
-      binary-base-to-quaternary-base sub rule,
-      when {
+      rule binary-base-to-quaternary-base: when {
           (role1:$x, role2:$z1) isa binary-base;
           (role1:$z1, role2:$z2) isa binary-base;
           (role1:$z2, role2:$y) isa binary-base;
-      },
-      then {
+       } then {
           (quat-role1:$x, quat-role2:$z1, quat-role3: $z2, quat-role4: $y) isa quaternary-base;
-      };
+       };
 
-      binary-transitive sub rule,
-      when {
+      rule binary-transitive: when {
           (role1:$x, role2:$z) isa binary;
           (role1:$z, role2:$y) isa binary;
-      },
-      then {
+       } then {
           (role1:$x, role2:$y) isa binary;
-      };
+       };
 
-      binary-to-ternary sub rule,
-      when {
+      rule binary-to-ternary: when {
           (role1:$x, role2:$z) isa binary;
           (role1:$z, role2:$y) isa binary;
-      },
-      then {
+       } then {
           (ternary-role1:$x, ternary-role2:$y, ternary-role3: $z) isa ternary;
-      };
+       };
 
-      binary-to-quaternary sub rule,
-      when {
+      rule binary-to-quaternary: when {
           (role1:$x, role2:$z1) isa binary;
           (role1:$z1, role2:$z2) isa binary;
           (role1:$z2, role2:$y) isa binary;
-      },
-      then {
+       } then {
           (quat-role1:$x, quat-role2:$z1, quat-role3: $z2, quat-role4: $y) isa quaternary;
-      };
+       };
       """
     Given for each session, graql insert
       """

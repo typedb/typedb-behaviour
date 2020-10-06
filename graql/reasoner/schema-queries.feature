@@ -65,20 +65,18 @@ Feature: Schema Query Resolution (Variable Types)
       """
       define
 
-      maryland sub rule,
-      when {
+      rule maryland: when {
         $x isa person;
-      }, then {
+       } then {
         $x has name "Mary";
-      };
+       };
 
-      friendship-everlasting sub rule,
-      when {
+      rule friendship-everlasting: when {
         $x isa person;
         $y isa person;
-      }, then {
+       } then {
         (friend: $x, friend: $y) isa friendship;
-      };
+       };
       """
     Given for each session, graql insert
       """
@@ -125,13 +123,12 @@ Feature: Schema Query Resolution (Variable Types)
       """
       define
 
-      friendship-eternal sub rule,
-      when {
+      rule friendship-eternal: when {
         $x isa person;
         $y isa person;
-      }, then {
+       } then {
         (friend: $x, friend: $y) isa friendship;
-      };
+       };
       """
     Given for each session, graql insert
       """
@@ -175,26 +172,23 @@ Feature: Schema Query Resolution (Variable Types)
 
       employment owns contract;
 
-      everyone-has-friends sub rule,
-      when {
+      rule everyone-has-friends: when {
         $x isa person;
-      }, then {
+       } then {
         (friend: $x) isa friendship;
-      };
+       };
 
-      there-is-no-unemployment sub rule,
-      when {
+      rule there-is-no-unemployment: when {
         $x isa person;
-      }, then {
+       } then {
         (employee: $x) isa employment;
-      };
+       };
 
-      there-are-no-homeless sub rule,
-      when {
+      rule there-are-no-homeless: when {
         $x isa person;
-      }, then {
+       } then {
         (resident: $x) isa residency;
-      };
+       };
       """
     Given for each session, graql insert
       """
@@ -228,19 +222,17 @@ Feature: Schema Query Resolution (Variable Types)
       """
       define
 
-      everyone-has-friends sub rule,
-      when {
+      rule everyone-has-friends: when {
         $x isa person;
-      }, then {
+       } then {
         (friend: $x) isa friendship;
-      };
+       };
 
-      there-is-no-unemployment sub rule,
-      when {
+      rule there-is-no-unemployment: when {
         $x isa person;
-      }, then {
+       } then {
         (employee: $x) isa employment;
-      };
+       };
       """
     Given for each session, graql insert
       """
@@ -286,26 +278,23 @@ Feature: Schema Query Resolution (Variable Types)
       person plays legal-documentation:party, plays residency:resident;
       employment plays legal-documentation:subject;
 
-      everyone-has-friends sub rule,
-      when {
+      rule everyone-has-friends: when {
         $x isa person;
-      }, then {
+       } then {
         (friend: $x) isa friendship;
-      };
+       };
 
-      there-is-no-unemployment sub rule,
-      when {
+      rule there-is-no-unemployment: when {
         $x isa person;
-      }, then {
+       } then {
         (employee: $x) isa employment;
-      };
+       };
 
-      there-are-no-homeless sub rule,
-      when {
+      rule there-are-no-homeless: when {
         $x isa person;
-      }, then {
+       } then {
         (resident: $x) isa residency;
-      };
+       };
       """
     Given for each session, graql insert
       """
@@ -347,13 +336,12 @@ Feature: Schema Query Resolution (Variable Types)
       colonel sub military-person,
         plays employment:employee;
 
-      armed-forces-employ-the-military sub rule,
-      when {
+      rule armed-forces-employ-the-military: when {
         $x isa company, has name "Armed Forces";
         $y isa military-person;
-      }, then {
+       } then {
         (employee: $y, employer: $x) isa employment;
-      };
+       };
       """
     Given for each session, graql insert
       """
@@ -401,21 +389,17 @@ Feature: Schema Query Resolution (Variable Types)
       retail-company sub company;
       finance-company sub company;
 
-      captain-obvious-1 sub rule,
-      when {
+      rule captain-obvious-1: when {
          $x isa retail-company;
-      },
-      then {
+       } then {
          $x isa company;
-      };
+       };
 
-      captain-obvious-2 sub rule,
-      when {
+      rule captain-obvious-2: when {
          $x isa finance-company;
-      },
-      then {
+       } then {
          $x isa company;
-      };
+       };
       """
     Given for each session, graql insert
       """
@@ -484,19 +468,17 @@ Feature: Schema Query Resolution (Variable Types)
       duelist sub person;
       poet sub person;
 
-      romeo-is-a-duelist sub rule,
-      when {
+      rule romeo-is-a-duelist: when {
         $x isa person, has name "Romeo";
-      }, then {
+       } then {
         $x isa duelist;
-      };
+       };
 
-      romeo-is-a-poet sub rule,
-      when {
+      rule romeo-is-a-poet: when {
         $x isa person, has name "Romeo";
-      }, then {
+       } then {
         $x isa poet;
-      };
+       };
       """
     Given for each session, graql insert
       """
@@ -538,19 +520,17 @@ Feature: Schema Query Resolution (Variable Types)
       duelist sub person;
       poet sub person;
 
-      romeo-is-a-duelist sub rule,
-      when {
+      rule romeo-is-a-duelist: when {
         $x isa person, has name "Romeo";
-      }, then {
+       } then {
         $x isa duelist;
-      };
+       };
 
-      a-duelist-is-a-poet sub rule,
-      when {
+      rule a-duelist-is-a-poet: when {
         $x isa duelist;
-      }, then {
+       } then {
         $x isa poet;
-      };
+       };
       """
     Given for each session, graql insert
       """

@@ -39,12 +39,11 @@ Feature: Graql Reasoning Explanation
         owns name,
         owns company-id @key;
 
-      company-has-name sub rule,
-      when {
+      rule company-has-name: when {
          $c isa company;
-      }, then {
+       } then {
          $c has name "the-company";
-      };
+       };
       """
 
     When graql insert
@@ -96,19 +95,17 @@ Feature: Graql Reasoning Explanation
           owns name,
           owns is-liable;
 
-      company-has-name sub rule,
-      when {
+      rule company-has-name: when {
           $c1 isa company;
-      }, then {
+       } then {
           $c1 has name "the-company";
-      };
+       };
 
-      company-is-liable sub rule,
-      when {
+      rule company-is-liable: when {
           $c2 isa company, has name $name; $name "the-company";
-      }, then {
+       } then {
           $c2 has is-liable true;
-      };
+       };
       """
 
     When graql insert
@@ -165,13 +162,12 @@ Feature: Graql Reasoning Explanation
           relates superior,
           relates subordinate;
 
-      location-hierarchy-transitivity sub rule,
-      when {
+      rule location-hierarchy-transitivity: when {
           (superior: $a, subordinate: $b) isa location-hierarchy;
           (superior: $b, subordinate: $c) isa location-hierarchy;
-      }, then {
+       } then {
           (superior: $a, subordinate: $c) isa location-hierarchy;
-      };
+       };
       """
 
     When graql insert
@@ -246,20 +242,18 @@ Feature: Graql Reasoning Explanation
       siblingship sub family-relation,
           relates sibling;
 
-      a-man-is-called-bob sub rule,
-      when {
+      rule a-man-is-called-bob: when {
           $man isa man;
-      }, then {
+       } then {
           $man has name "Bob";
-      };
+       };
 
-      bobs-sister-is-alice sub rule,
-      when {
+      rule bobs-sister-is-alice: when {
           $p isa man, has name $nb; $nb "Bob";
           $p1 isa woman, has name $na; $na "Alice";
-      }, then {
+       } then {
           (sibling: $p, sibling: $p1) isa siblingship;
-      };
+       };
       """
 
     When graql insert
@@ -338,12 +332,11 @@ Feature: Graql Reasoning Explanation
           owns name,
           owns is-liable;
 
-      company-is-liable sub rule,
-      when {
+      rule company-is-liable: when {
           $c2 isa company, has name $n2; $n2 "the-company";
-      }, then {
-          $c2 has is-liable $l; $l true;
-      };
+       } then {
+          $c2 has is-liable true;
+       };
       """
 
     When graql insert
@@ -401,15 +394,14 @@ Feature: Graql Reasoning Explanation
           owns name,
           owns is-liable;
 
-      company-is-liable sub rule,
-      when {
+      rule company-is-liable: when {
           $c2 isa company;
           not {
             $c2 has name $n2; $n2 "the-company";
           };
-      }, then {
-          $c2 has is-liable $l; $l true;
-      };
+       } then {
+          $c2 has is-liable true;
+       };
       """
 
     When graql insert
@@ -468,13 +460,12 @@ Feature: Graql Reasoning Explanation
           owns name,
           owns is-liable;
 
-      company-is-liable sub rule,
-      when {
+      rule company-is-liable: when {
           $c2 isa company;
           $c2 has name $n2; $n2 "the-company";
-      }, then {
-          $c2 has is-liable $l; $l true;
-      };
+       } then {
+          $c2 has is-liable true;
+       };
       """
 
     When graql insert
