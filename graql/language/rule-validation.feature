@@ -123,7 +123,7 @@ Feature: Graql Rule Validation
       define
       nickname sub name;
       person owns nickname;
-      has-nickname-bob sub rule,
+      rule has-nickname-bob:
       when {
       } then {
         $p has nickname "Bob";
