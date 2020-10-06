@@ -72,9 +72,9 @@ Feature: Value Predicate Resolution
       rule tortoises-become-old-at-age-1-year: when {
         $x isa tortoise, has age $a;
         $a > 0;
-       } then {
+      } then {
         $x has is-old true;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -98,9 +98,9 @@ Feature: Value Predicate Resolution
       define
       lucky-number sub attribute, value long;
       person owns lucky-number;
-      rule rule-1337: when {  $x isa person;  } then {  $x has lucky-number 1337;  };
-      rule rule-1667: when {  $x isa person;  } then {  $x has lucky-number 1667;  };
-      rule rule-1997: when {  $x isa person;  } then {  $x has lucky-number 1997;  };
+      rule rule-1337: when { $x isa person; } then { $x has lucky-number 1337; };
+      rule rule-1667: when { $x isa person; } then { $x has lucky-number 1667; };
+      rule rule-1997: when { $x isa person; } then { $x has lucky-number 1997; };
       """
     Given for each session, graql insert
       """
@@ -136,8 +136,8 @@ Feature: Value Predicate Resolution
       define
       lucky-number sub attribute, value long;
       person owns lucky-number;
-      rule rule-1337: when {  $x isa person;  } then {  $x has lucky-number 1337;  };
-      rule rule-1667: when {  $x isa person;  } then {  $x has lucky-number 1667;  };
+      rule rule-1337: when { $x isa person; } then { $x has lucky-number 1337; };
+      rule rule-1667: when { $x isa person; } then { $x has lucky-number 1667; };
       """
     Given for each session, graql insert
       """
@@ -174,9 +174,9 @@ Feature: Value Predicate Resolution
       define
       lucky-number sub attribute, value long;
       person owns lucky-number;
-      rule rule-1337: when {  $x isa person;  } then {  $x has lucky-number 1337;  };
-      rule rule-1667: when {  $x isa person;  } then {  $x has lucky-number 1667;  };
-      rule rule-1997: when {  $x isa person;  } then {  $x has lucky-number 1997;  };
+      rule rule-1337: when { $x isa person; } then { $x has lucky-number 1337; };
+      rule rule-1667: when { $x isa person; } then { $x has lucky-number 1667; };
+      rule rule-1997: when { $x isa person; } then { $x has lucky-number 1997; };
       """
     Given for each session, graql insert
       """
@@ -213,17 +213,17 @@ Feature: Value Predicate Resolution
       define
       rule tesco-sells-all-soft-drinks: when {
         $x isa soft-drink;
-       } then {
+      } then {
         $x has retailer 'Tesco';
-       };
+      };
 
       rule if-ocado-exists-it-sells-all-soft-drinks: when {
         $x isa retailer;
         $x == 'Ocado';
         $y isa soft-drink;
-       } then {
+      } then {
         $y has retailer 'Ocado';
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -254,17 +254,17 @@ Feature: Value Predicate Resolution
       define
       rule tesco-sells-all-soft-drinks: when {
         $x isa soft-drink;
-       } then {
+      } then {
         $x has retailer 'Tesco';
-       };
+      };
 
       rule if-ocado-exists-it-sells-all-soft-drinks: when {
         $x isa retailer;
         $x == 'Ocado';
         $y isa soft-drink;
-       } then {
+      } then {
         $y has retailer 'Ocado';
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -297,21 +297,21 @@ Feature: Value Predicate Resolution
 
       rule iceland-sells-drinks: when {
         $x isa soft-drink;
-       } then {
+      } then {
         $x has retailer 'Iceland';
-       };
+      };
 
       rule poundland-sells-drinks: when {
         $x isa soft-drink;
-       } then {
+      } then {
         $x has retailer 'Poundland';
-       };
+      };
 
       rule londis-sells-drinks: when {
         $x isa soft-drink;
-       } then {
+      } then {
         $x has retailer 'Londis';
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -337,21 +337,21 @@ Feature: Value Predicate Resolution
 
       rule iceland-sells-drinks: when {
         $x isa soft-drink;
-       } then {
+      } then {
         $x has retailer 'Iceland';
-       };
+      };
 
       rule poundland-sells-drinks: when {
         $x isa soft-drink;
-       } then {
+      } then {
         $x has retailer 'Poundland';
-       };
+      };
 
       rule londis-sells-drinks: when {
         $x isa soft-drink;
-       } then {
+      } then {
         $x has retailer 'Londis';
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -390,21 +390,21 @@ Feature: Value Predicate Resolution
 
       rule iceland-sells-drinks: when {
         $x isa soft-drink;
-       } then {
+      } then {
         $x has retailer 'Iceland';
-       };
+      };
 
       rule poundland-sells-drinks: when {
         $x isa soft-drink;
-       } then {
+      } then {
         $x has retailer 'Poundland';
-       };
+      };
 
       rule londis-sells-drinks: when {
         $x isa soft-drink;
-       } then {
+      } then {
         $x has retailer 'Londis';
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -449,17 +449,17 @@ Feature: Value Predicate Resolution
       define
       rule tesco-sells-all-soft-drinks: when {
         $x isa soft-drink;
-       } then {
+      } then {
         $x has retailer 'Tesco';
-       };
+      };
 
       rule if-ocado-exists-it-sells-all-soft-drinks: when {
         $x isa retailer;
         $x == 'Ocado';
         $y isa soft-drink;
-       } then {
+      } then {
         $y has retailer 'Ocado';
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -497,17 +497,17 @@ Feature: Value Predicate Resolution
       define
       rule tesco-sells-all-soft-drinks: when {
         $x isa soft-drink;
-       } then {
+      } then {
         $x has retailer 'Tesco';
-       };
+      };
 
       rule if-ocado-exists-it-sells-all-soft-drinks: when {
         $x isa retailer;
         $x == 'Ocado';
         $y isa soft-drink;
-       } then {
+      } then {
         $y has retailer 'Ocado';
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -546,17 +546,17 @@ Feature: Value Predicate Resolution
       define
       rule tesco-sells-all-soft-drinks: when {
         $x isa soft-drink;
-       } then {
+      } then {
         $x has retailer 'Tesco';
-       };
+      };
 
       rule if-ocado-exists-it-sells-all-soft-drinks: when {
         $x isa retailer;
         $x == 'Ocado';
         $y isa soft-drink;
-       } then {
+      } then {
         $y has retailer 'Ocado';
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -591,15 +591,15 @@ Feature: Value Predicate Resolution
       rule transfer-string-attribute-to-other-people: when {
         $x isa person, has string-attribute $r1;
         $y isa person;
-       } then {
+      } then {
         $y has string-attribute $r1;
-       };
+      };
 
       rule tesco-sells-all-soft-drinks: when {
         $x isa soft-drink;
-       } then {
+      } then {
         $x has retailer 'Tesco';
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -634,15 +634,15 @@ Feature: Value Predicate Resolution
       rule transfer-string-attribute-to-other-people: when {
         $x isa person, has string-attribute $r1;
         $y isa person;
-       } then {
+      } then {
         $y has string-attribute $r1;
-       };
+      };
 
       rule tesco-sells-all-soft-drinks: when {
         $x isa soft-drink;
-       } then {
+      } then {
         $x has retailer 'Tesco';
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -681,9 +681,9 @@ Feature: Value Predicate Resolution
 
       rule tesco-sells-all-soft-drinks: when {
         $x isa soft-drink;
-       } then {
+      } then {
         $x has retailer 'Tesco';
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -729,23 +729,23 @@ Feature: Value Predicate Resolution
       rule expensive-drinks: when {
         $x has price >= 3.50;
         $y "expensive" isa price-range;
-       } then {
+      } then {
         (priced-item: $x, price-category: $y) isa price-classification;
-       };
+      };
 
       rule not-expensive-drinks: when {
         $x has price < 3.50;
         $y "not expensive" isa price-range;
-       } then {
+      } then {
         (priced-item: $x, price-category: $y) isa price-classification;
-       };
+      };
 
       rule low-price-drinks: when {
         $x has price < 1.75;
         $y "low price" isa price-range;
-       } then {
+      } then {
         (priced-item: $x, price-category: $y) isa price-classification;
-       };
+      };
 
       rule cheap-drinks: when {
         (priced-item: $x, price-category: $y) isa price-classification;
@@ -753,9 +753,9 @@ Feature: Value Predicate Resolution
         (priced-item: $x, price-category: $y2) isa price-classification;
         $y2 "low price" isa price-range;
         $y3 "cheap" isa price-range;
-       } then {
+      } then {
         (priced-item: $x, price-category: $y3) isa price-classification;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -844,9 +844,9 @@ Feature: Value Predicate Resolution
           $d1 < $d2;
           (original:$p, reply:$r) isa reply-of;
           $r has creation-date $d2;
-       } then {
+      } then {
           (predecessor:$s, successor:$r) isa message-succession;
-       };
+      };
       """
     Given for each session, graql insert
       """

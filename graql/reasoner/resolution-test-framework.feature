@@ -40,9 +40,9 @@ Feature: Resolution Test Framework
 
       rule company-has-name: when {
          $c isa company;
-       } then {
+      } then {
          $c has name "the-company";
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -75,15 +75,15 @@ Feature: Resolution Test Framework
 
       rule company-has-name: when {
           $c1 isa company;
-       } then {
+      } then {
           $c1 has name "the-company";
-       };
+      };
 
       rule company-is-liable: when {
           $c2 isa company, has name $name; $name "the-company";
-       } then {
+      } then {
           $c2 has is-liable true;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -125,9 +125,9 @@ Feature: Resolution Test Framework
       rule location-hierarchy-transitivity: when {
           (superior: $a, subordinate: $b) isa location-hierarchy;
           (superior: $b, subordinate: $c) isa location-hierarchy;
-       } then {
+      } then {
           (superior: $a, subordinate: $c) isa location-hierarchy;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -180,9 +180,9 @@ Feature: Resolution Test Framework
       rule location-hierarchy-transitivity: when {
           (location-hierarchy_superior: $a, location-hierarchy_subordinate: $b) isa location-hierarchy;
           (location-hierarchy_superior: $b, location-hierarchy_subordinate: $c) isa location-hierarchy;
-       } then {
+      } then {
           (location-hierarchy_superior: $a, location-hierarchy_subordinate: $c) isa location-hierarchy;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -228,16 +228,16 @@ Feature: Resolution Test Framework
 
       rule a-man-is-called-bob: when {
           $man isa man;
-       } then {
+      } then {
           $man has name "Bob";
-       };
+      };
 
       rule bobs-sister-is-alice: when {
           $p isa man, has name $nb; $nb "Bob";
           $p1 isa woman, has name $na; $na "Alice";
-       } then {
+      } then {
           (sibling: $p, sibling: $p1) isa siblingship;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -273,9 +273,9 @@ Feature: Resolution Test Framework
 
       rule company-is-liable: when {
           $c2 isa company, has name $n2; $n2 "the-company";
-       } then {
+      } then {
           $c2 has is-liable true;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -317,9 +317,9 @@ Feature: Resolution Test Framework
           not {
             $c2 has name $n2; $n2 "the-company";
           };
-       } then {
+      } then {
           $c2 has is-liable true;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -357,9 +357,9 @@ Feature: Resolution Test Framework
       rule company-is-liable: when {
           $c2 isa company;
           $c2 has name $n2; $n2 "the-company";
-       } then {
+      } then {
           $c2 has is-liable true;
-       };
+      };
       """
     Given for each session, graql insert
       """

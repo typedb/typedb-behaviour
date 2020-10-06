@@ -79,17 +79,17 @@ Feature: Recursion Resolution
       rule transitive-location: when {
         (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
         (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
-       } then {
+      } then {
         (location-subordinate: $x, location-superior: $z) isa location-hierarchy;
-       };
+      };
 
       rule if-a-big-thing-is-in-a-big-place-then-its-a-big-location: when {
         $x isa big-place;
         $y isa big-place;
         (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
-       } then {
+      } then {
         (big-location-subordinate: $x, big-location-superior: $y) isa big-location-hierarchy;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -141,16 +141,16 @@ Feature: Recursion Resolution
           (role11:$x, role12:$y) isa relation1;
           (role21:$y, role22:$z) isa relation2;
           (role11:$z, role12:$u) isa relation1;
-       } then {
+      } then {
           (role31:$x, role32:$u) isa relation3;
-       };
+      };
 
       rule relation2-transitivity: when {
           (role21:$x, role22:$y) isa relation2;
           (role21:$y, role22:$z) isa relation2;
-       } then {
+      } then {
           (role21:$x, role22:$z) isa relation2;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -208,21 +208,21 @@ Feature: Recursion Resolution
 
       rule relation-1-to-2: when {
           (role11:$x, role12:$y) isa relation1;
-       } then {
+      } then {
           (role21:$x, role22:$y) isa relation2;
-       };
+      };
 
       rule relation-3-to-2: when {
           (role31:$x, role32:$y) isa relation3;
-       } then {
+      } then {
           (role21:$x, role22:$y) isa relation2;
-       };
+      };
 
       rule relation-2-to-3: when {
           (role21:$x, role22:$y) isa relation2;
-       } then {
+      } then {
           (role31:$x, role32:$y) isa relation3;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -268,9 +268,9 @@ Feature: Recursion Resolution
       rule inception: when {
         $x isa person;
         $z (dreamer: $x, dream-subject: $y) isa dream;
-       } then {
+      } then {
         (dreamer: $x, dream-subject: $z) isa dream;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -328,18 +328,18 @@ Feature: Recursion Resolution
           $y isa word;
           $x has name !== 'f';
           $y has name !== 'o';
-       } then {
+      } then {
           (prep: $x, pobj: $y) isa pair;
-       };
+      };
 
       rule inference-pairs-ff: when {
           $f isa f;
           (subtype: $prep, supertype: $f) isa inheritance;
           (subtype: $pobj, supertype: $f) isa inheritance;
           $p (prep: $prep, pobj: $pobj) isa pair;
-       } then {
+      } then {
           $p has name 'ff';
-       };
+      };
 
       rule inference-pairs-fo: when {
           $f isa f;
@@ -347,9 +347,9 @@ Feature: Recursion Resolution
           (subtype: $prep, supertype: $f) isa inheritance;
           (subtype: $pobj, supertype: $o) isa inheritance;
           $p (prep: $prep, pobj: $pobj) isa pair;
-       } then {
+      } then {
           $p has name 'fo';
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -423,9 +423,9 @@ Feature: Recursion Resolution
 
       rule rule-1: when {
         (role-A: $x, role-B: $y) isa E;
-       } then {
+      } then {
         (role-A: $x, role-B: $y) isa R;
-       };
+      };
 
       rule rule-2: when {
         (role-A: $x, role-B: $t) isa F;
@@ -433,9 +433,9 @@ Feature: Recursion Resolution
         (role-A: $u, role-B: $v) isa G;
         (role-A: $v, role-B: $w) isa R;
         (role-A: $w, role-B: $y) isa H;
-       } then {
+      } then {
         (role-A: $x, role-B: $y) isa R;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -518,15 +518,15 @@ Feature: Recursion Resolution
       rule rule-1: when {
         (parent: $x, child: $z) isa Parent;
         (ancestor: $z, descendant: $y) isa Ancestor;
-       } then {
+      } then {
         (ancestor: $x, descendant: $y) isa Ancestor;
-       };
+      };
 
       rule rule-2: when {
         (parent: $x, child: $y) isa Parent;
-       } then {
+      } then {
         (ancestor: $x, descendant: $y) isa Ancestor;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -658,16 +658,16 @@ Feature: Recursion Resolution
 
       rule rule-1: when {
         (friend: $x, friend: $y) isa Friend;
-       } then {
+      } then {
         (ancestor: $x, ancestor-friend: $y) isa Ancestor-friend;
-       };
+      };
 
       rule rule-2: when {
         (parent: $x, child: $z) isa Parent;
         (ancestor: $z, ancestor-friend: $y) isa Ancestor-friend;
-       } then {
+      } then {
         (ancestor: $x, ancestor-friend: $y) isa Ancestor-friend;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -758,17 +758,17 @@ Feature: Recursion Resolution
 
       rule rule-1: when {
         $x isa Human;
-       } then {
+      } then {
         (SG-role: $x, SG-role: $x) isa SameGen;
-       };
+      };
 
       rule rule-2: when {
         (parent: $x, child: $u) isa Parent;
         (parent: $y, child: $v) isa Parent;
         (SG-role: $u, SG-role: $v) isa SameGen;
-       } then {
+      } then {
         (SG-role: $x, SG-role: $y) isa SameGen;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -844,22 +844,22 @@ Feature: Recursion Resolution
       rule rule-1: when {
         $x isa q;
         (TC-roleA: $x, TC-roleB: $y) isa TC;
-       } then {
+      } then {
         (roleA: $x, roleB: $y) isa N-TC;
-       };
+      };
 
       rule rule-2: when {
         (P-roleA: $x, P-roleB: $y) isa P;
-       } then {
+      } then {
         (TC-roleA: $x, TC-roleB: $y) isa TC;
-       };
+      };
 
       rule rule-3: when {
         (P-roleA: $x, P-roleB: $z) isa P;
         (TC-roleA:$z, TC-roleB: $y) isa TC;
-       } then {
+      } then {
         (TC-roleA: $x, TC-roleB: $y) isa TC;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -925,31 +925,31 @@ Feature: Recursion Resolution
 
       rule reachability-transitivityA: when {
           (from: $x, to: $y) isa link;
-       } then {
+      } then {
           (from: $x, to: $y) isa reachable;
-       };
+      };
 
       rule reachability-transitivityB: when {
           (from: $x, to: $z) isa link;
           (from: $z, to: $y) isa reachable;
-       } then {
+      } then {
           (from: $x, to: $y) isa reachable;
-       };
+      };
 
       rule indirect-link-rule: when {
           (from: $x, to: $y) isa reachable;
           not {(from: $x, to: $y) isa link;};
-       } then {
+      } then {
           (from: $x, to: $y) isa indirect-link;
-       };
+      };
 
       rule unreachability-rule: when {
           $x isa vertex;
           $y isa vertex;
           not {(from: $x, to: $y) isa reachable;};
-       } then {
+      } then {
           (from: $x, to: $y) isa unreachable;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -1015,16 +1015,16 @@ Feature: Recursion Resolution
 
       rule a-linked-point-is-reachable: when {
         ($x, $y) isa link;
-       } then {
+      } then {
         (coordinate: $x, coordinate: $y) isa reachable;
-       };
+      };
 
       rule a-point-reachable-from-a-linked-point-is-reachable: when {
         ($x, $z) isa link;
         ($z, $y) isa reachable;
-       } then {
+      } then {
         (coordinate: $x, coordinate: $y) isa reachable;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -1085,24 +1085,24 @@ Feature: Recursion Resolution
 
       rule rule-1: when {
         (A: $x, B: $y) isa Sibling;
-       } then {
+      } then {
         (A: $x, B: $y) isa SameGen;
-       };
+      };
 
       rule rule-2: when {
         (parent: $x, child: $u) isa Parent;
         ($u, $v) isa SameGen;
         (parent: $y, child: $v) isa Parent;
-       } then {
+      } then {
         (A: $x, B: $y) isa SameGen;
-       };
+      };
 
       rule rule-3: when {
         (parent: $z, child: $x) isa Parent;
         (parent: $z, child: $y) isa Parent;
-       } then {
+      } then {
         (A: $x, B: $y) isa Sibling;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -1168,17 +1168,17 @@ Feature: Recursion Resolution
 
       rule rule-1: when {
         (from: $x, to: $y) isa flat;
-       } then {
+      } then {
         (from: $x, to: $y) isa RevSG;
-       };
+      };
 
       rule rule-2: when {
         (from: $x, to: $x1) isa up;
         (from: $y1, to: $x1) isa RevSG;
         (from: $y1, to: $y) isa down;
-       } then {
+      } then {
         (from: $x, to: $y) isa RevSG;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -1294,35 +1294,35 @@ Feature: Recursion Resolution
 
       rule rule-1: when {
         (from: $x, to: $y) isa R1;
-       } then {
+      } then {
         (from: $x, to: $y) isa Q1;
-       };
+      };
 
       rule rule-2: when {
         (from: $x, to: $z) isa R1;
         (from: $z, to: $y) isa Q1;
-       } then {
+      } then {
         (from: $x, to: $y) isa Q1;
-       };
+      };
 
       rule rule-3: when {
         (from: $x, to: $y) isa R2;
-       } then {
+      } then {
         (from: $x, to: $y) isa Q2;
-       };
+      };
 
       rule rule-4: when {
         (from: $x, to: $z) isa R2;
         (from: $z, to: $y) isa Q2;
-       } then {
+      } then {
         (from: $x, to: $y) isa Q2;
-       };
+      };
 
       rule rule-5: when {
         (from: $x, to: $y) isa Q1;
-       } then {
+      } then {
         (from: $x, to: $y) isa P;
-       };
+      };
       """
     # These insert statements can be procedurally generated based on 'm' and 'n', the width and height of the matrix
     Given for each session, graql insert
@@ -1454,16 +1454,16 @@ Feature: Recursion Resolution
 
       rule rule-1: when {
         (from: $x, to: $y) isa Q;
-       } then {
+      } then {
         (from: $x, to: $y) isa P;
-       };
+      };
 
       rule rule-2: when {
         (from: $x, to: $z) isa Q;
         (from: $z, to: $y) isa P;
-       } then {
+      } then {
         (from: $x, to: $y) isa P;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -1682,24 +1682,24 @@ Feature: Recursion Resolution
 
       rule rule-1: when {
         (rA: $x, rB: $y) isa R;
-       } then {
+      } then {
         (rA: $x, rB: $y) isa N;
-       };
+      };
 
       rule rule-2: when {
         (rA: $x, rB: $z) isa P;
         (rA: $z, rB: $w) isa N;
         (rA: $w, rB: $y) isa Q;
-       } then {
+      } then {
         (rA: $x, rB: $y) isa N;
-       };
+      };
 
       rule rule-3: when {
         (rA: $x, rB: $y) isa N;
         $x has index 'c';
-       } then {
+      } then {
         $y isa S;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -1841,22 +1841,22 @@ Feature: Recursion Resolution
 
       rule rule-1: when {
         (from: $x, to: $y) isa Q;
-       } then {
+      } then {
         (from: $x, to: $y) isa P;
-       };
+      };
 
       rule rule-2: when {
         (from: $x, to: $z) isa Q;
         (from: $z, to: $y) isa P;
-       } then {
+      } then {
         (from: $x, to: $y) isa P;
-       };
+      };
 
       rule rule-3: when {
         (from: $x, to: $y) isa P;
-       } then {
+      } then {
         (from: $x, to: $y) isa S;
-       };
+      };
       """
     Given for each session, graql insert
       """

@@ -49,9 +49,9 @@ Feature: Concept Inequality Resolution
       rule transitivity: when {
           (ball1:$x, ball2:$y) isa selection;
           (ball1:$y, ball2:$z) isa selection;
-       } then {
+      } then {
           (ball1:$x, ball2:$z) isa selection;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -96,9 +96,9 @@ Feature: Concept Inequality Resolution
           (related-state: $st) isa achieved;
           (related-state: $st2) isa prior;
           $st != $st2;
-       } then {
+      } then {
           (related-state: $st) isa holds;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -407,9 +407,9 @@ Feature: Concept Inequality Resolution
 
       rule tesco-sells-all-soft-drinks: when {
         $x isa soft-drink;
-       } then {
+      } then {
         $x has retailer 'Tesco';
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -457,23 +457,23 @@ Feature: Concept Inequality Resolution
       rule transfer-string-attribute-to-other-people: when {
         $x isa person, has string-attribute $r1;
         $y isa person;
-       } then {
+      } then {
         $y has string-attribute $r1;
-       };
+      };
 
       rule tesco-sells-all-soft-drinks: when {
         $x isa soft-drink;
-       } then {
+      } then {
         $x has retailer 'Tesco';
-       };
+      };
 
       rule if-ocado-exists-it-sells-all-soft-drinks: when {
         $x isa retailer;
         $x == 'Ocado';
         $y isa soft-drink;
-       } then {
+      } then {
         $y has retailer $x;
-       };
+      };
       """
     Given for each session, graql insert
       """

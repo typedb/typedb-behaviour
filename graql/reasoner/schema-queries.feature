@@ -67,16 +67,16 @@ Feature: Schema Query Resolution (Variable Types)
 
       rule maryland: when {
         $x isa person;
-       } then {
+      } then {
         $x has name "Mary";
-       };
+      };
 
       rule friendship-everlasting: when {
         $x isa person;
         $y isa person;
-       } then {
+      } then {
         (friend: $x, friend: $y) isa friendship;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -126,9 +126,9 @@ Feature: Schema Query Resolution (Variable Types)
       rule friendship-eternal: when {
         $x isa person;
         $y isa person;
-       } then {
+      } then {
         (friend: $x, friend: $y) isa friendship;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -174,21 +174,21 @@ Feature: Schema Query Resolution (Variable Types)
 
       rule everyone-has-friends: when {
         $x isa person;
-       } then {
+      } then {
         (friend: $x) isa friendship;
-       };
+      };
 
       rule there-is-no-unemployment: when {
         $x isa person;
-       } then {
+      } then {
         (employee: $x) isa employment;
-       };
+      };
 
       rule there-are-no-homeless: when {
         $x isa person;
-       } then {
+      } then {
         (resident: $x) isa residency;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -224,15 +224,15 @@ Feature: Schema Query Resolution (Variable Types)
 
       rule everyone-has-friends: when {
         $x isa person;
-       } then {
+      } then {
         (friend: $x) isa friendship;
-       };
+      };
 
       rule there-is-no-unemployment: when {
         $x isa person;
-       } then {
+      } then {
         (employee: $x) isa employment;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -280,21 +280,21 @@ Feature: Schema Query Resolution (Variable Types)
 
       rule everyone-has-friends: when {
         $x isa person;
-       } then {
+      } then {
         (friend: $x) isa friendship;
-       };
+      };
 
       rule there-is-no-unemployment: when {
         $x isa person;
-       } then {
+      } then {
         (employee: $x) isa employment;
-       };
+      };
 
       rule there-are-no-homeless: when {
         $x isa person;
-       } then {
+      } then {
         (resident: $x) isa residency;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -339,9 +339,9 @@ Feature: Schema Query Resolution (Variable Types)
       rule armed-forces-employ-the-military: when {
         $x isa company, has name "Armed Forces";
         $y isa military-person;
-       } then {
+      } then {
         (employee: $y, employer: $x) isa employment;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -391,15 +391,15 @@ Feature: Schema Query Resolution (Variable Types)
 
       rule captain-obvious-1: when {
          $x isa retail-company;
-       } then {
+      } then {
          $x isa company;
-       };
+      };
 
       rule captain-obvious-2: when {
          $x isa finance-company;
-       } then {
+      } then {
          $x isa company;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -470,15 +470,15 @@ Feature: Schema Query Resolution (Variable Types)
 
       rule romeo-is-a-duelist: when {
         $x isa person, has name "Romeo";
-       } then {
+      } then {
         $x isa duelist;
-       };
+      };
 
       rule romeo-is-a-poet: when {
         $x isa person, has name "Romeo";
-       } then {
+      } then {
         $x isa poet;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -522,15 +522,15 @@ Feature: Schema Query Resolution (Variable Types)
 
       rule romeo-is-a-duelist: when {
         $x isa person, has name "Romeo";
-       } then {
+      } then {
         $x isa duelist;
-       };
+      };
 
       rule a-duelist-is-a-poet: when {
         $x isa duelist;
-       } then {
+      } then {
         $x isa poet;
-       };
+      };
       """
     Given for each session, graql insert
       """

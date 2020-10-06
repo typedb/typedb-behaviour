@@ -551,17 +551,17 @@ Feature: Negation Resolution
       rule apple-employs-everyone: when {
         $p isa person;
         $c isa company, has name "Apple";
-       } then {
+      } then {
         (employee: $p, employer: $c) isa employment;
-       };
+      };
 
       rule anna-manages-carol: when {
         $r (employee: $x) isa employment;
         $x has name "Carol";
         $y isa person, has name "Anna";
-       } then {
+      } then {
         $r (manager: $y) isa employment;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -594,17 +594,17 @@ Feature: Negation Resolution
       rule apple-employs-everyone: when {
         $p isa person;
         $c isa company, has name "Apple";
-       } then {
+      } then {
         (employee: $p, employer: $c) isa employment;
-       };
+      };
 
       rule anna-manages-carol: when {
         $r (employee: $x) isa employment;
         $x has name "Carol";
         $y isa person, has name "Anna";
-       } then {
+      } then {
         $r (manager: $y) isa employment;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -637,17 +637,17 @@ Feature: Negation Resolution
       rule apple-employs-everyone: when {
         $p isa person;
         $c isa company, has name "Apple";
-       } then {
+      } then {
         (employee: $p, employer: $c) isa employment;
-       };
+      };
 
       rule anna-manages-carol: when {
         $r (employee: $x) isa employment;
         $x has name "Carol";
         $y isa person, has name "Anna";
-       } then {
+      } then {
         $r (manager: $y) isa employment;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -693,9 +693,9 @@ Feature: Negation Resolution
       rule location-hierarchy-transitivity: when {
           (superior: $a, subordinate: $b) isa location-hierarchy;
           (superior: $b, subordinate: $c) isa location-hierarchy;
-       } then {
+      } then {
           (superior: $a, subordinate: $c) isa location-hierarchy;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -754,23 +754,23 @@ Feature: Negation Resolution
 
       rule reachability-transitivityA: when {
           (link-from: $x, link-to: $y) isa link;
-       } then {
+      } then {
           (reachable-from: $x, reachable-to: $y) isa reachable;
-       };
+      };
 
       rule reachability-transitivityB: when {
           (link-from: $x, link-to: $z) isa link;
           (reachable-from: $z, reachable-to: $y) isa reachable;
-       } then {
+      } then {
           (reachable-from: $x, reachable-to: $y) isa reachable;
-       };
+      };
 
       rule indirect-link-rule: when {
           (reachable-from: $x, reachable-to: $y) isa reachable;
           not {(link-from: $x, link-to: $y) isa link;};
-       } then {
+      } then {
           (indirect-from: $x, indirect-to: $y) isa indirect-link;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -816,9 +816,9 @@ Feature: Negation Resolution
       rule not-ten: when {
         $x isa person;
         not { $x has age 10; };
-       } then {
+      } then {
         $x has name "Not Ten";
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -850,9 +850,9 @@ Feature: Negation Resolution
       rule not-ten: when {
         $x isa person;
         not { $x has age $val; };
-       } then {
+      } then {
         $x has name "No Age";
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -893,9 +893,9 @@ Feature: Negation Resolution
           (company-with-country: $x, country-for-company: $y) isa company-country;
           $y has name 'UK';
         };
-       } then {
+      } then {
         (not-in-uk: $x) isa non-uk;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -960,9 +960,9 @@ Feature: Negation Resolution
           (company-with-country: $x, country-for-company: $y) isa company-country;
           $y has name 'UK';
         };
-       } then {
+      } then {
         (not-in-uk: $x) isa non-uk;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -1057,9 +1057,9 @@ Feature: Negation Resolution
           not {
               $ques has response $r;
           };
-       } then {
+      } then {
           (question-not-answered: $ques, parent-session: $ts) isa unanswered-question;
-       };
+      };
 
       rule determined-fault: when {
           (relevant-fault: $flt, parent-session: $ts) isa reported-fault;
@@ -1067,9 +1067,9 @@ Feature: Negation Resolution
               (question-not-answered: $ques, parent-session: $ts) isa unanswered-question;
               ($flt, $ques) isa fault-identification;
           };
-       } then {
+      } then {
           (diagnosed-fault: $flt, parent-session: $ts) isa diagnosis;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -1124,7 +1124,7 @@ Feature: Negation Resolution
 
       rule rule-2: when {
           (role-1: $x, role-2: $y) isa relation-2;
-          not { (role-3: $x, role-4: $z) isa relation-5; };
+          not { (role-3: $x, role-4: $z) isa relation-5;};
       } then {
           (role-3: $x, role-4: $y) isa relation-4;
       };
@@ -1201,24 +1201,24 @@ Feature: Negation Resolution
 
       rule reachability-transitivityA: when {
           (link-from: $x, link-to: $y) isa link;
-       } then {
+      } then {
           (reachable-from: $x, reachable-to: $y) isa reachable;
-       };
+      };
 
       rule reachability-transitivityB: when {
           (link-from: $x, link-to: $z) isa link;
           (reachable-from: $z, reachable-to: $y) isa reachable;
-       } then {
+      } then {
           (reachable-from: $x, reachable-to: $y) isa reachable;
-       };
+      };
 
       rule unreachability-rule: when {
           $x isa node;
           $y isa node;
           not {(reachable-from: $x, reachable-to: $y) isa reachable;};
-       } then {
+      } then {
           (unreachable-from: $x, unreachable-to: $y) isa unreachable;
-       };
+      };
       """
     Given for each session, graql insert
       """

@@ -56,9 +56,9 @@ Feature: Type Hierarchy Resolution
           $x isa child;
           $y isa person;
           (performer:$x, writer:$y) isa performance;
-       } then {
+      } then {
           (actor:$x, writer:$y) isa film-production;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -160,9 +160,9 @@ Feature: Type Hierarchy Resolution
 
       rule parents-are-mothers: when {
           (child: $x, parent: $y) isa family;
-       } then {
+      } then {
           (child: $x, mother: $y) isa large-family;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -214,9 +214,9 @@ Feature: Type Hierarchy Resolution
 
       rule performance-to-scifi: when {
           (writer:$x, performer:$y) isa performance;
-       } then {
+      } then {
           (scifi-writer:$x, scifi-actor:$y) isa scifi-production;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -263,9 +263,9 @@ Feature: Type Hierarchy Resolution
 
       rule performance-to-scifi: when {
           (writer:$x, performer:$y) isa performance;
-       } then {
+      } then {
           (scifi-writer:$x, scifi-actor:$y) isa scifi-production;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -312,9 +312,9 @@ Feature: Type Hierarchy Resolution
 
       rule performance-to-scifi: when {
           (writer:$x, performer:$y) isa performance;
-       } then {
+      } then {
           (scifi-writer:$x, scifi-actor:$y) isa scifi-production;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -362,17 +362,17 @@ Feature: Type Hierarchy Resolution
           $x isa child;
           $y isa person;
           (performer:$x, writer:$y) isa performance;
-       } then {
+      } then {
           (actor:$x, writer:$y) isa film-production;
-       };
+      };
 
       rule performance-to-performance: when {
           $x isa person;
           $y isa child;
           (performer:$x, writer:$y) isa performance;
-       } then {
+      } then {
           (performer:$x, writer:$y) isa performance;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -479,9 +479,9 @@ Feature: Type Hierarchy Resolution
 
       rule families-live-together: when {
           (parent:$x, child:$y) isa family;
-       } then {
+      } then {
           (parent-home-owner:$x, child-resident:$y) isa family-residence;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -520,9 +520,9 @@ Feature: Type Hierarchy Resolution
 
       rule pandas-are-actually-drunk-people: when {
           $x isa panda;
-       } then {
+      } then {
           $x isa drunk-person;
-       };
+      };
       """
     Given for each session, graql insert
       """

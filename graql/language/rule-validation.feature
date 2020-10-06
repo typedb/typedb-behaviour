@@ -45,9 +45,9 @@ Feature: Graql Rule Validation
       person owns nickname;
       rule robert-has-nickname-bob: when {
         $p isa person, has name "Robert";
-       } then {
+      } then {
         $p has nickname "Bob";
-       };
+      };
       """
     Given the integrity is validated
     When get answers of graql query
@@ -71,9 +71,9 @@ Feature: Graql Rule Validation
       define
       rule john-smiths-email: when {
         $p has name "John Smith";
-       } then {
+      } then {
         $p has email "john.smith@gmail.com";
-       };
+      };
       """
     Given the integrity is validated
     When get answers of graql query
@@ -96,7 +96,7 @@ Feature: Graql Rule Validation
       define
       nickname sub name;
       person owns nickname;
-      rule has-nickname-bob:
+      has-nickname-bob sub rule,
       then {
         $p has nickname "Bob";
       };
@@ -123,8 +123,9 @@ Feature: Graql Rule Validation
       define
       nickname sub name;
       person owns nickname;
-      rule has-nickname-bob: when {
-      }, then {
+      has-nickname-bob sub rule,
+      when {
+      } then {
         $p has nickname "Bob";
       };
       """
@@ -139,8 +140,8 @@ Feature: Graql Rule Validation
       person owns nickname;
       rule robert: when {
         $p has name "Robert";
-       } then {
-       };
+      } then {
+      };
       """
     Then the integrity is validated
 
@@ -157,9 +158,9 @@ Feature: Graql Rule Validation
         not {
           (sibling: $p, sibling: $p2) isa siblings;
         };
-       } then {
+      } then {
         $p has only-child true;
-       };
+      };
       """
     Given the integrity is validated
     When get answers of graql query
@@ -187,9 +188,9 @@ Feature: Graql Rule Validation
         not {
           $p isa person, has name "Robert";
         };
-       } then {
+      } then {
         $register has has-robert false;
-       };
+      };
       """
     Then the integrity is validated
 
@@ -208,9 +209,9 @@ Feature: Graql Rule Validation
             $p has name "Robert";
           };
         };
-       } then {
+      } then {
         $p has nickname "Bob";
-       };
+      };
       """
     Then the integrity is validated
 
@@ -230,9 +231,9 @@ Feature: Graql Rule Validation
         not {
           (resident: $p) isa residence;
         };
-       } then {
+      } then {
         $p has nickname "Bob";
-       };
+      };
       """
     Then the integrity is validated
 
@@ -250,10 +251,10 @@ Feature: Graql Rule Validation
       define
       rule robert-has-nicknames-bob-and-bobby: when {
         $p has name "Robert";
-       } then {
+      } then {
         $p has nickname "Bob";
         $p has nickname "Bobby";
-       };
+      };
       """
     Then the integrity is validated
 
@@ -267,9 +268,9 @@ Feature: Graql Rule Validation
       rule two-roberts-are-both-named-robert: when {
         $p isa person, has name "Robert";
         $p2 isa person, has name "Robert";
-       } then {
+      } then {
         (named-robert: $p, named-robert: $p2) isa both-named-robert;
-       };
+      };
       """
     Given the integrity is validated
     When get answers of graql query
@@ -300,9 +301,9 @@ Feature: Graql Rule Validation
       rule sophie-and-fiona-have-nickname-fi: when {
         $p isa person;
         {$p has name "Sophie";} or {$p has name "Fiona";};
-       } then {
+      } then {
         $p has nickname "Fi";
-       };
+      };
       """
     Then the integrity is validated
 
@@ -320,9 +321,9 @@ Feature: Graql Rule Validation
       define
       rule i-did-a-bad-typo: when {
         $p has name "I am a person";
-       } then {
+      } then {
         $q has nickname "Who am I?";
-       };
+      };
       """
     Then the integrity is validated
 
@@ -333,9 +334,9 @@ Feature: Graql Rule Validation
       define
       rule boudicca-is-1960-years-old: when {
         $person isa person, has name "Boudicca";
-       } then {
+      } then {
         $person has age 1960;
-       };
+      };
       """
     Then the integrity is validated
 
@@ -347,9 +348,9 @@ Feature: Graql Rule Validation
       age sub attribute, value long;
       rule boudicca-is-1960-years-old: when {
         $person isa person, has name "Boudicca";
-       } then {
+      } then {
         $person has age 1960;
-       };
+      };
       """
     Then the integrity is validated
 
@@ -369,9 +370,9 @@ Feature: Graql Rule Validation
       define
       rule may-has-nickname-5: when {
         $p has name "May";
-       } then {
+      } then {
         $p has nickname 5;
-       };
+      };
       """
     Then the integrity is validated
 
@@ -383,9 +384,9 @@ Feature: Graql Rule Validation
       rule bonnie-and-clyde-are-partners-in-crime: when {
         $bonnie isa person, has name "Bonnie";
         $clyde isa person, has name "Clyde";
-       } then {
+      } then {
         (criminal: $bonnie, sidekick: $clyde) isa partners-in-crime;
-       };
+      };
       """
     Then the integrity is validated
 
@@ -399,9 +400,9 @@ Feature: Graql Rule Validation
       rule bonnie-and-clyde-are-partners-in-crime: when {
         $bonnie isa person, has name "Bonnie";
         $clyde isa person, has name "Clyde";
-       } then {
+      } then {
         (criminal: $bonnie, sidekick: $clyde) isa partners-in-crime;
-       };
+      };
       """
     Then the integrity is validated
 
@@ -417,9 +418,9 @@ Feature: Graql Rule Validation
       rule bonnie-and-clyde-are-partners-in-crime: when {
         $bonnie isa person, has name "Bonnie";
         $clyde isa person, has name "Clyde";
-       } then {
+      } then {
         (criminal: $bonnie, sidekick: $clyde) isa partners-in-crime;
-       };
+      };
       """
     Then the integrity is validated
 
@@ -434,9 +435,9 @@ Feature: Graql Rule Validation
       person owns number-of-devices;
       rule karl-is-allergic-to-technology: when {
         $karl isa person, has name "Karl";
-       } then {
+      } then {
         $karl has number-of-devices 0;
-       };
+      };
       """
     Then the integrity is validated
 
@@ -450,9 +451,9 @@ Feature: Graql Rule Validation
         not {
           (employee: $person) isa employment;
         };
-       } then {
+      } then {
         (employee: $person) isa employment;
-       };
+      };
       """
     Then the integrity is validated
 
@@ -467,9 +468,9 @@ Feature: Graql Rule Validation
     person owns nickname;
     rule robert-has-nickname-bob: when {
       $p isa person, has name "Robert";
-     } then {
+    } then {
       $p has nickname "Bob";
-     };
+    };
     robert-has-nickname-bobby sub robert-has-nickname-bob,
     when {
       $p isa person, has name "Robert";
@@ -494,9 +495,9 @@ Feature: Graql Rule Validation
       define
       rule rule-1: when {
           $x isa baseEntity;
-       } then {
+      } then {
           $y isa derivedEntity;
-       };
+      };
       """
     Then the integrity is validated
 
@@ -525,9 +526,9 @@ Feature: Graql Rule Validation
       rule rule-1: when {
           (role1:$x, role2:$y) isa baseRelation;
           (role1:$y, role2:$z) isa baseRelation;
-       } then {
+      } then {
           $u isa derivedEntity;
-       };
+      };
       """
     Then the integrity is validated
 
@@ -552,9 +553,9 @@ Feature: Graql Rule Validation
       rule rule-1: when {
           (role1:$x, role2:$y) isa baseRelation;
           (role1:$y, role2:$z) isa baseRelation;
-       } then {
+      } then {
           $u (role1:$x, role2:$z) isa baseRelation;
-       };
+      };
       """
     Then the integrity is validated
 
@@ -571,8 +572,8 @@ Feature: Graql Rule Validation
       define
       rule romeo-is-a-dog: when {
         $x isa person, has name "Romeo";
-       } then {
+      } then {
         $x isa dog;
-       };
+      };
       """
     Then the integrity is validated

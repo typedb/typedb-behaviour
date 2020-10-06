@@ -68,9 +68,9 @@ Feature: Attribute Attachment Resolution
       rule transfer-string-attribute-to-other-people: when {
         $x isa person, has string-attribute $r1;
         $y isa person;
-       } then {
+      } then {
         $y has string-attribute $r1;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -102,21 +102,21 @@ Feature: Attribute Attachment Resolution
       rule transfer-string-attribute-to-other-people: when {
         $x isa person, has string-attribute $r1;
         $y isa person;
-       } then {
+      } then {
         $y has string-attribute $r1;
-       };
+      };
 
       rule transfer-attribute-value-to-sub-attribute: when {
         $x isa person, has string-attribute $r1;
-       } then {
+      } then {
         $x has sub-string-attribute $r1;
-       };
+      };
 
       rule transfer-attribute-value-to-unrelated-attribute: when {
         $x isa person, has string-attribute $r1;
-       } then {
+      } then {
         $x has unrelated-attribute $r1;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -148,9 +148,9 @@ Feature: Attribute Attachment Resolution
       define
       rule transfer-attribute-value-to-sub-attribute: when {
         $x isa person, has string-attribute $r1;
-       } then {
+      } then {
         $x has sub-string-attribute $r1;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -187,9 +187,9 @@ Feature: Attribute Attachment Resolution
       define
       rule transfer-attribute-value-to-unrelated-attribute: when {
         $x isa person, has string-attribute $r1;
-       } then {
+      } then {
         $x has unrelated-attribute $r1;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -221,16 +221,16 @@ Feature: Attribute Attachment Resolution
       rule transfer-string-attribute-to-other-people: when {
         $x isa person, has string-attribute $r1;
         $y isa person;
-       } then {
+      } then {
         $y has string-attribute $r1;
-       };
+      };
 
       rule transfer-string-attribute-from-people-to-teams: when {
         $x isa person, has string-attribute $y;
         $z isa team;
-       } then {
+      } then {
         $z has string-attribute $y;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -255,17 +255,17 @@ Feature: Attribute Attachment Resolution
       define
       rule tesco-sells-all-soft-drinks: when {
         $x isa soft-drink;
-       } then {
+      } then {
         $x has retailer 'Tesco';
-       };
+      };
 
       rule if-ocado-exists-it-sells-all-soft-drinks: when {
         $x isa retailer;
         $x == 'Ocado';
         $y isa soft-drink;
-       } then {
+      } then {
         $y has retailer 'Ocado';
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -304,9 +304,9 @@ Feature: Attribute Attachment Resolution
         $x isa retailer;
         $x == 'Ocado';
         $y isa soft-drink;
-       } then {
+      } then {
         $y has retailer $x;
-       };
+      };
       """
     Given for each session, graql insert
       """

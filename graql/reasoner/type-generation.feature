@@ -37,9 +37,9 @@ Feature: Type Generation Resolution
       derivedEntity sub entity;
       rule rule-1: when {
         $x isa baseEntity;
-       } then {
+      } then {
         $x isa derivedEntity;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -77,15 +77,15 @@ Feature: Type Generation Resolution
 
       rule isaRule: when {
         $x isa subEntity;
-       } then {
+      } then {
         $x isa derivedEntity;
-       };
+      };
 
       rule directIsaRule: when {
         $x isa! subEntity;
-       } then {
+      } then {
         $x isa directDerivedEntity;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -137,9 +137,9 @@ Feature: Type Generation Resolution
       rule rule-1: when {
           (role1:$x, role2:$y) isa baseRelation;
           (role1:$y, role2:$x) isa baseRelation;
-       } then {
+      } then {
           $x isa derivedEntity;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -241,15 +241,15 @@ Feature: Type Generation Resolution
 
       rule relationRule: when {
           ($x) isa subRelation;
-       } then {
+      } then {
           (derivedRelationRole: $x) isa derivedRelation;
-       };
+      };
 
       rule directRelationRule: when {
           ($x) isa! subRelation;
-       } then {
+      } then {
           (derivedRelationRole: $x) isa directDerivedRelation;
-       };
+      };
       """
     Given for each session, graql insert
       """

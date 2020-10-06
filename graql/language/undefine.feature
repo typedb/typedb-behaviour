@@ -1410,7 +1410,7 @@ Feature: Graql Undefine Query
       | A_RULE |
     When graql undefine
       """
-      undefine a-rule sub rule;
+      undefine rule a-rule;
       """
     Then transaction commits
     Then the integrity is validated
@@ -1455,7 +1455,7 @@ Feature: Graql Undefine Query
       | SAM |
     When graql undefine
       """
-      undefine samuel-email-rule sub rule;
+      undefine rule samuel-email-rule;
       """
     Then transaction commits
     Then the integrity is validated
@@ -1508,7 +1508,7 @@ Feature: Graql Undefine Query
       | SAM |
     When graql undefine
       """
-      undefine samuel-email-rule sub rule;
+      undefine rule samuel-email-rule;
       """
     Then the integrity is validated
     When get answers of graql query

@@ -70,9 +70,9 @@ Feature: Roleplayer Attachment Resolution
       rule giant-turtles-rule-the-world: when {
         $r (ruled-person: $p) isa dominion;
         $gt isa giant-turtle;
-       } then {
+      } then {
         $r (ruler: $gt) isa dominion;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -106,9 +106,9 @@ Feature: Roleplayer Attachment Resolution
       rule giant-turtles-rule-the-world: when {
         $r (ruled-person: $p) isa dominion;
         $gt isa giant-turtle;
-       } then {
+      } then {
         $r (ruler: $gt) isa dominion;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -140,9 +140,9 @@ Feature: Roleplayer Attachment Resolution
 
       rule i-am-the-cook-therefore-i-am-the-captain: when {
         $r (chef: $p) isa ship-crew;
-       } then {
+      } then {
         $r (captain: $p) isa ship-crew;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -176,9 +176,9 @@ Feature: Roleplayer Attachment Resolution
 
       rule i-really-am-the-captain: when {
         $r (captain: $p) isa ship-crew;
-       } then {
+      } then {
         $r (captain: $p, captain: $p) isa ship-crew;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -221,9 +221,9 @@ Feature: Roleplayer Attachment Resolution
 
       rule the-captain-is-required-to-assist-the-navigator: when {
         $r (captain: $y, navigator: $z) isa ship-crew;
-       } then {
+      } then {
         $r (navigator: $y) isa ship-crew;
-       };
+      };
       """
     Given for each session, graql insert
       """

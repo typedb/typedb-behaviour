@@ -70,9 +70,9 @@ Feature: Relation Inference Resolution
       dog sub entity;
       rule people-are-employed: when {
         $p isa person;
-       } then {
+      } then {
         (employee: $p) isa employment;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -106,9 +106,9 @@ Feature: Relation Inference Resolution
       define
       rule haikal-is-employed: when {
         $p has name "Haikal";
-       } then {
+      } then {
         (employee: $p) isa employment;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -145,9 +145,9 @@ Feature: Relation Inference Resolution
       rule nutella-price: when {
         $x isa item, has name "3kg jar of Nutella";
         $y 14.99 isa price;
-       } then {
+      } then {
         (item: $x, price: $y) isa item-listing;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -179,9 +179,9 @@ Feature: Relation Inference Resolution
         $x isa company, has name "Kronenbourg";
         $p isa person, has name $n;
         $y 1664 isa year;
-       } then {
+      } then {
         (employee: $p, employer: $x, favourite-year: $y) isa employment;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -215,9 +215,9 @@ Feature: Relation Inference Resolution
       rule everyone-is-my-friend-including-myself: when {
         $x isa person;
         $y isa person;
-       } then {
+      } then {
         (friend: $x, friend: $y) isa friendship;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -249,9 +249,9 @@ Feature: Relation Inference Resolution
       rule everyone-is-my-friend-including-myself: when {
         $x isa person;
         $y isa person;
-       } then {
+      } then {
         (friend: $x, friend: $y) isa friendship;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -280,9 +280,9 @@ Feature: Relation Inference Resolution
       person plays employment:employer;
       rule self-employment: when {
         $x isa person;
-       } then {
+      } then {
         (employee: $x, employer: $x) isa employment;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -308,9 +308,9 @@ Feature: Relation Inference Resolution
       person plays employment:employer;
       rule self-employment: when {
         $x isa person;
-       } then {
+      } then {
         (employee: $x, employer: $x) isa employment;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -335,9 +335,9 @@ Feature: Relation Inference Resolution
       rule robert-employs-jane: when {
         $x has name "Robert";
         $y has name "Jane";
-       } then {
+      } then {
         (employee: $y, employer: $x) isa employment;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -384,16 +384,16 @@ Feature: Relation Inference Resolution
 
       rule people-work-with-themselves: when {
           $x isa person;
-       } then {
+      } then {
           (coworker: $x, coworker: $x) isa coworkers;
-       };
+      };
 
       rule robots-work-with-their-owners-coworkers: when {
           (pet: $c, owner: $m) isa robot-pet-ownership;
           (coworker: $m, coworker: $op) isa coworkers;
-       } then {
+      } then {
           (coworker: $c, coworker: $op) isa coworkers;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -446,9 +446,9 @@ Feature: Relation Inference Resolution
       rule transitive-location: when {
         (subordinate: $x, superior: $y) isa location-hierarchy;
         (subordinate: $y, superior: $z) isa location-hierarchy;
-       } then {
+      } then {
         (subordinate: $x, superior: $z) isa location-hierarchy;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -477,9 +477,9 @@ Feature: Relation Inference Resolution
       rule transitive-location: when {
         (subordinate: $x, superior: $y) isa location-hierarchy;
         (subordinate: $y, superior: $z) isa location-hierarchy;
-       } then {
+      } then {
         (subordinate: $x, superior: $z) isa location-hierarchy;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -530,9 +530,9 @@ Feature: Relation Inference Resolution
       rule transitive-location: when {
         (subordinate: $x, superior: $y) isa location-hierarchy;
         (subordinate: $y, superior: $z) isa location-hierarchy;
-       } then {
+      } then {
         (subordinate: $x, superior: $z) isa location-hierarchy;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -575,9 +575,9 @@ Feature: Relation Inference Resolution
       rule employment-rule: when {
         $c isa company;
         $p isa person;
-       } then {
+      } then {
         (employee: $p, employer: $c) isa employment;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -601,9 +601,9 @@ Feature: Relation Inference Resolution
       rule employment-rule: when {
         $c isa company;
         $p isa person;
-       } then {
+      } then {
         (employee: $p, employer: $c) isa employment;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -629,9 +629,9 @@ Feature: Relation Inference Resolution
         $a has name "Alice";
         $b has name "Bob";
         $c has name "Charlie";
-       } then {
+      } then {
         (friend: $a, friend: $b, friend: $c) isa friendship;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -665,15 +665,15 @@ Feature: Relation Inference Resolution
       person plays selection:choice1, plays selection:choice2;
       rule symmetric-selection: when {
         (choice1: $x, choice2: $y) isa selection;
-       } then {
+      } then {
         (choice1: $y, choice2: $x) isa selection;
-       };
+      };
       rule transitive-selection: when {
         (choice1: $x, choice2: $y) isa selection;
         (choice1: $y, choice2: $z) isa selection;
-       } then {
+      } then {
         (choice1: $x, choice2: $z) isa selection;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -729,9 +729,9 @@ Feature: Relation Inference Resolution
       rule transitive-location: when {
         (subordinate: $x, superior: $y) isa location-hierarchy;
         (subordinate: $y, superior: $z) isa location-hierarchy;
-       } then {
+      } then {
         (subordinate: $x, superior: $z) isa location-hierarchy;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -766,9 +766,9 @@ Feature: Relation Inference Resolution
       rule transitive-location: when {
         (subordinate: $x, superior: $y) isa location-hierarchy;
         (subordinate: $y, superior: $z) isa location-hierarchy;
-       } then {
+      } then {
         (subordinate: $x, superior: $z) isa location-hierarchy;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -817,15 +817,15 @@ Feature: Relation Inference Resolution
       rule transitive-location: when {
         (subordinate: $x, superior: $y) isa location-hierarchy;
         (subordinate: $y, superior: $z) isa location-hierarchy;
-       } then {
+      } then {
         (subordinate: $x, superior: $z) isa location-hierarchy;
-       };
+      };
 
       rule long-role-names-suck: when {
         (subordinate: $x, superior: $y) isa location-hierarchy;
-       } then {
+      } then {
         (loc-sub: $x, loc-sup: $y) isa loc-hie;
-       };
+      };
       """
     Given for each session, graql insert
       """
@@ -861,9 +861,9 @@ Feature: Relation Inference Resolution
       rule transitive-location: when {
         (subordinate: $x, superior: $y) isa location-hierarchy;
         (subordinate: $y, superior: $z) isa location-hierarchy;
-       } then {
+      } then {
         (subordinate: $x, superior: $z) isa location-hierarchy;
-       };
+      };
       """
     Given for each session, graql insert
       """
