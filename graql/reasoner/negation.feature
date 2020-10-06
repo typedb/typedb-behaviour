@@ -434,41 +434,6 @@ Feature: Negation Resolution
     Then answer size in reasoned database is: 2
 
 
-  Scenario: when negating a negation, the statement becomes positive again
-    Given for each session, graql insert
-      """
-      insert
-
-      $x isa person, has name "Tim", has age 45;
-      $y isa person, has name "Tim", has age 55;
-      $z isa person, has name "Jim", has age 55;
-      $w isa person, has name "Winnie";
-      $c isa company, has name "Pizza Express";
-      """
-    Given for graql query
-      """
-      match $x isa person, has name "Tim";
-      """
-    Given answer size in reasoned database is: 2
-    Then for graql query
-      """
-      match
-        $x isa person, has name "Tim";
-        not {
-          not {
-            $x has age 55;
-          };
-        };
-      """
-    Then answer size in reasoned database is: 1
-    Then answer set is equivalent for graql query
-      """
-      match
-        $x isa person, has name "Tim";
-        $x has age 55;
-      """
-
-
   Scenario: negation can exclude entities of specific types that play roles in a specific relation
     Given for each session, graql define
       """

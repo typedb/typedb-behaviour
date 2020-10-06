@@ -1222,7 +1222,7 @@ Feature: Graql Undefine Query
     When session opens transaction of type: read
     When get answers of graql query
       """
-      match $x owns name; get;
+      match $x owns name;
       """
     When concept identifiers are
       |     | check | value  |
@@ -1282,7 +1282,7 @@ Feature: Graql Undefine Query
     When session opens transaction of type: read
     When get answers of graql query
       """
-      match $x owns email; get;
+      match $x owns email;
       """
     Then answer size is: 0
 
