@@ -67,11 +67,10 @@ Feature: Roleplayer Attachment Resolution
       giant-turtle sub entity, plays dominion:ruler;
       person plays dominion:ruled-person;
 
-      giant-turtles-rule-the-world sub rule,
-      when {
+      rule giant-turtles-rule-the-world: when {
         $r (ruled-person: $p) isa dominion;
         $gt isa giant-turtle;
-      }, then {
+      } then {
         $r (ruler: $gt) isa dominion;
       };
       """
@@ -104,11 +103,10 @@ Feature: Roleplayer Attachment Resolution
       giant-turtle sub entity, plays dominion:ruler;
       person plays dominion:ruled-person;
 
-      giant-turtles-rule-the-world sub rule,
-      when {
+      rule giant-turtles-rule-the-world: when {
         $r (ruled-person: $p) isa dominion;
         $gt isa giant-turtle;
-      }, then {
+      } then {
         $r (ruler: $gt) isa dominion;
       };
       """
@@ -140,10 +138,9 @@ Feature: Roleplayer Attachment Resolution
       ship-crew sub relation, relates captain, relates navigator, relates chef;
       person plays ship-crew:captain, plays ship-crew:navigator, plays ship-crew:chef;
 
-      i-am-the-cook-therefore-i-am-the-captain sub rule,
-      when {
+      rule i-am-the-cook-therefore-i-am-the-captain: when {
         $r (chef: $p) isa ship-crew;
-      }, then {
+      } then {
         $r (captain: $p) isa ship-crew;
       };
       """
@@ -177,10 +174,9 @@ Feature: Roleplayer Attachment Resolution
       ship-crew sub relation, relates captain, relates navigator, relates chef;
       person plays ship-crew:captain, plays ship-crew:navigator, plays ship-crew:chef;
 
-      i-really-am-the-captain sub rule,
-      when {
+      rule i-really-am-the-captain: when {
         $r (captain: $p) isa ship-crew;
-      }, then {
+      } then {
         $r (captain: $p, captain: $p) isa ship-crew;
       };
       """
@@ -223,10 +219,9 @@ Feature: Roleplayer Attachment Resolution
       ship-crew sub relation, relates captain, relates navigator, relates chef;
       person plays ship-crew:captain, plays ship-crew:navigator, plays ship-crew:chef;
 
-      the-captain-is-required-to-assist-the-navigator sub rule,
-      when {
+      rule the-captain-is-required-to-assist-the-navigator: when {
         $r (captain: $y, navigator: $z) isa ship-crew;
-      }, then {
+      } then {
         $r (navigator: $y) isa ship-crew;
       };
       """

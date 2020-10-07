@@ -35,11 +35,9 @@ Feature: Type Generation Resolution
       define
       baseEntity sub entity;
       derivedEntity sub entity;
-      rule-1 sub rule,
-      when {
+      rule rule-1: when {
         $x isa baseEntity;
-      },
-      then {
+      } then {
         $x isa derivedEntity;
       };
       """
@@ -77,19 +75,15 @@ Feature: Type Generation Resolution
       derivedEntity sub entity;
       directDerivedEntity sub derivedEntity;
 
-      isaRule sub rule,
-      when {
+      rule isaRule: when {
         $x isa subEntity;
-      },
-      then {
+      } then {
         $x isa derivedEntity;
       };
 
-      directIsaRule sub rule,
-      when {
+      rule directIsaRule: when {
         $x isa! subEntity;
-      },
-      then {
+      } then {
         $x isa directDerivedEntity;
       };
       """
@@ -140,12 +134,10 @@ Feature: Type Generation Resolution
           relates role1,
           relates role2;
 
-      rule-1 sub rule,
-      when {
+      rule rule-1: when {
           (role1:$x, role2:$y) isa baseRelation;
           (role1:$y, role2:$x) isa baseRelation;
-      },
-      then {
+      } then {
           $x isa derivedEntity;
       };
       """
@@ -247,19 +239,15 @@ Feature: Type Generation Resolution
       directDerivedRelation sub derivedRelation,
           relates derivedRelationRole;
 
-      relationRule sub rule,
-      when {
+      rule relationRule: when {
           ($x) isa subRelation;
-      },
-      then {
+      } then {
           (derivedRelationRole: $x) isa derivedRelation;
       };
 
-      directRelationRule sub rule,
-      when {
+      rule directRelationRule: when {
           ($x) isa! subRelation;
-      },
-      then {
+      } then {
           (derivedRelationRole: $x) isa directDerivedRelation;
       };
       """

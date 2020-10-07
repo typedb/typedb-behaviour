@@ -38,11 +38,10 @@ Feature: Resolution Test Framework
       company sub entity,
         owns name;
 
-      company-has-name sub rule,
-      when {
+      rule company-has-name: when {
          $c isa company;
-      }, then {
-         $c has name  $n; $n "the-company";
+      } then {
+         $c has name "the-company";
       };
       """
     Given for each session, graql insert
@@ -74,18 +73,16 @@ Feature: Resolution Test Framework
           owns name,
           owns is-liable;
 
-      company-has-name sub rule,
-      when {
+      rule company-has-name: when {
           $c1 isa company;
-      }, then {
-          $c1 has name $n; $n "the-company";
+      } then {
+          $c1 has name "the-company";
       };
 
-      company-is-liable sub rule,
-      when {
+      rule company-is-liable: when {
           $c2 isa company, has name $name; $name "the-company";
-      }, then {
-          $c2 has is-liable $lia; $lia true;
+      } then {
+          $c2 has is-liable true;
       };
       """
     Given for each session, graql insert
@@ -125,11 +122,10 @@ Feature: Resolution Test Framework
           relates superior,
           relates subordinate;
 
-      location-hierarchy-transitivity sub rule,
-      when {
+      rule location-hierarchy-transitivity: when {
           (superior: $a, subordinate: $b) isa location-hierarchy;
           (superior: $b, subordinate: $c) isa location-hierarchy;
-      }, then {
+      } then {
           (superior: $a, subordinate: $c) isa location-hierarchy;
       };
       """
@@ -181,11 +177,10 @@ Feature: Resolution Test Framework
           relates location-hierarchy_superior,
           relates location-hierarchy_subordinate;
 
-      location-hierarchy-transitivity sub rule,
-      when {
+      rule location-hierarchy-transitivity: when {
           (location-hierarchy_superior: $a, location-hierarchy_subordinate: $b) isa location-hierarchy;
           (location-hierarchy_superior: $b, location-hierarchy_subordinate: $c) isa location-hierarchy;
-      }, then {
+      } then {
           (location-hierarchy_superior: $a, location-hierarchy_subordinate: $c) isa location-hierarchy;
       };
       """
@@ -231,18 +226,16 @@ Feature: Resolution Test Framework
       siblingship sub family-relation,
           relates sibling;
 
-      a-man-is-called-bob sub rule,
-      when {
+      rule a-man-is-called-bob: when {
           $man isa man;
-      }, then {
-          $man has name $n; $n "Bob";
+      } then {
+          $man has name "Bob";
       };
 
-      bobs-sister-is-alice sub rule,
-      when {
+      rule bobs-sister-is-alice: when {
           $p isa man, has name $nb; $nb "Bob";
           $p1 isa woman, has name $na; $na "Alice";
-      }, then {
+      } then {
           (sibling: $p, sibling: $p1) isa siblingship;
       };
       """
@@ -278,11 +271,10 @@ Feature: Resolution Test Framework
           owns name,
           owns is-liable;
 
-      company-is-liable sub rule,
-      when {
+      rule company-is-liable: when {
           $c2 isa company, has name $n2; $n2 "the-company";
-      }, then {
-          $c2 has is-liable $l; $l true;
+      } then {
+          $c2 has is-liable true;
       };
       """
     Given for each session, graql insert
@@ -320,14 +312,13 @@ Feature: Resolution Test Framework
           owns name,
           owns is-liable;
 
-      company-is-liable sub rule,
-      when {
+      rule company-is-liable: when {
           $c2 isa company;
           not {
             $c2 has name $n2; $n2 "the-company";
           };
-      }, then {
-          $c2 has is-liable $l; $l true;
+      } then {
+          $c2 has is-liable true;
       };
       """
     Given for each session, graql insert
@@ -363,12 +354,11 @@ Feature: Resolution Test Framework
           owns name,
           owns is-liable;
 
-      company-is-liable sub rule,
-      when {
+      rule company-is-liable: when {
           $c2 isa company;
           $c2 has name $n2; $n2 "the-company";
-      }, then {
-          $c2 has is-liable $l; $l true;
+      } then {
+          $c2 has is-liable true;
       };
       """
     Given for each session, graql insert

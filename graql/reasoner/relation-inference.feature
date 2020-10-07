@@ -68,10 +68,9 @@ Feature: Relation Inference Resolution
       """
       define
       dog sub entity;
-      people-are-employed sub rule,
-      when {
+      rule people-are-employed: when {
         $p isa person;
-      }, then {
+      } then {
         (employee: $p) isa employment;
       };
       """
@@ -105,10 +104,9 @@ Feature: Relation Inference Resolution
     Given for each session, graql define
       """
       define
-      haikal-is-employed sub rule,
-      when {
+      rule haikal-is-employed: when {
         $p has name "Haikal";
-      }, then {
+      } then {
         (employee: $p) isa employment;
       };
       """
@@ -144,11 +142,10 @@ Feature: Relation Inference Resolution
       item sub entity, owns name, plays item-listing:item;
       price sub attribute, value double, plays item-listing:price;
       item-listing sub relation, relates item, relates price;
-      nutella-price sub rule,
-      when {
+      rule nutella-price: when {
         $x isa item, has name "3kg jar of Nutella";
         $y 14.99 isa price;
-      }, then {
+      } then {
         (item: $x, price: $y) isa item-listing;
       };
       """
@@ -178,12 +175,11 @@ Feature: Relation Inference Resolution
       define
       year sub attribute, value long, plays employment:favourite-year;
       employment relates favourite-year;
-      kronenbourg-employs-anyone-with-a-name sub rule,
-      when {
+      rule kronenbourg-employs-anyone-with-a-name: when {
         $x isa company, has name "Kronenbourg";
         $p isa person, has name $n;
         $y 1664 isa year;
-      }, then {
+      } then {
         (employee: $p, employer: $x, favourite-year: $y) isa employment;
       };
       """
@@ -216,11 +212,10 @@ Feature: Relation Inference Resolution
     Given for each session, graql define
       """
       define
-      everyone-is-my-friend-including-myself sub rule,
-      when {
+      rule everyone-is-my-friend-including-myself: when {
         $x isa person;
         $y isa person;
-      }, then {
+      } then {
         (friend: $x, friend: $y) isa friendship;
       };
       """
@@ -251,11 +246,10 @@ Feature: Relation Inference Resolution
     Given for each session, graql define
       """
       define
-      everyone-is-my-friend-including-myself sub rule,
-      when {
+      rule everyone-is-my-friend-including-myself: when {
         $x isa person;
         $y isa person;
-      }, then {
+      } then {
         (friend: $x, friend: $y) isa friendship;
       };
       """
@@ -284,10 +278,9 @@ Feature: Relation Inference Resolution
       """
       define
       person plays employment:employer;
-      self-employment sub rule,
-      when {
+      rule self-employment: when {
         $x isa person;
-      }, then {
+      } then {
         (employee: $x, employer: $x) isa employment;
       };
       """
@@ -313,10 +306,9 @@ Feature: Relation Inference Resolution
       """
       define
       person plays employment:employer;
-      self-employment sub rule,
-      when {
+      rule self-employment: when {
         $x isa person;
-      }, then {
+      } then {
         (employee: $x, employer: $x) isa employment;
       };
       """
@@ -340,11 +332,10 @@ Feature: Relation Inference Resolution
       """
       define
       person plays employment:employer;
-      robert-employs-jane sub rule,
-      when {
+      rule robert-employs-jane: when {
         $x has name "Robert";
         $y has name "Jane";
-      }, then {
+      } then {
         (employee: $y, employer: $x) isa employment;
       };
       """
@@ -391,20 +382,16 @@ Feature: Relation Inference Resolution
           relates pet,
           relates owner;
 
-      people-work-with-themselves sub rule,
-      when {
+      rule people-work-with-themselves: when {
           $x isa person;
-      },
-      then {
+      } then {
           (coworker: $x, coworker: $x) isa coworkers;
       };
 
-      robots-work-with-their-owners-coworkers sub rule,
-      when {
+      rule robots-work-with-their-owners-coworkers: when {
           (pet: $c, owner: $m) isa robot-pet-ownership;
           (coworker: $m, coworker: $op) isa coworkers;
-      },
-      then {
+      } then {
           (coworker: $c, coworker: $op) isa coworkers;
       };
       """
@@ -456,11 +443,10 @@ Feature: Relation Inference Resolution
     Given for each session, graql define
       """
       define
-      transitive-location sub rule,
-      when {
+      rule transitive-location: when {
         (subordinate: $x, superior: $y) isa location-hierarchy;
         (subordinate: $y, superior: $z) isa location-hierarchy;
-      }, then {
+      } then {
         (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
@@ -488,11 +474,10 @@ Feature: Relation Inference Resolution
     Given for each session, graql define
       """
       define
-      transitive-location sub rule,
-      when {
+      rule transitive-location: when {
         (subordinate: $x, superior: $y) isa location-hierarchy;
         (subordinate: $y, superior: $z) isa location-hierarchy;
-      }, then {
+      } then {
         (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
@@ -542,11 +527,10 @@ Feature: Relation Inference Resolution
         plays cycle-route:start,
         plays cycle-route:end;
 
-      transitive-location sub rule,
-      when {
+      rule transitive-location: when {
         (subordinate: $x, superior: $y) isa location-hierarchy;
         (subordinate: $y, superior: $z) isa location-hierarchy;
-      }, then {
+      } then {
         (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
@@ -588,11 +572,10 @@ Feature: Relation Inference Resolution
     Given for each session, graql define
       """
       define
-      employment-rule sub rule,
-      when {
+      rule employment-rule: when {
         $c isa company;
         $p isa person;
-      }, then {
+      } then {
         (employee: $p, employer: $c) isa employment;
       };
       """
@@ -615,11 +598,10 @@ Feature: Relation Inference Resolution
     Given for each session, graql define
       """
       define
-      employment-rule sub rule,
-      when {
+      rule employment-rule: when {
         $c isa company;
         $p isa person;
-      }, then {
+      } then {
         (employee: $p, employer: $c) isa employment;
       };
       """
@@ -643,12 +625,11 @@ Feature: Relation Inference Resolution
     Given for each session, graql define
       """
       define
-      alice-bob-and-charlie-are-friends sub rule,
-      when {
+      rule alice-bob-and-charlie-are-friends: when {
         $a has name "Alice";
         $b has name "Bob";
         $c has name "Charlie";
-      }, then {
+      } then {
         (friend: $a, friend: $b, friend: $c) isa friendship;
       };
       """
@@ -682,17 +663,15 @@ Feature: Relation Inference Resolution
       define
       selection sub relation, relates choice1, relates choice2;
       person plays selection:choice1, plays selection:choice2;
-      symmetric-selection sub rule,
-      when {
+      rule symmetric-selection: when {
         (choice1: $x, choice2: $y) isa selection;
-      }, then {
+      } then {
         (choice1: $y, choice2: $x) isa selection;
       };
-      transitive-selection sub rule,
-      when {
+      rule transitive-selection: when {
         (choice1: $x, choice2: $y) isa selection;
         (choice1: $y, choice2: $z) isa selection;
-      }, then {
+      } then {
         (choice1: $x, choice2: $z) isa selection;
       };
       """
@@ -747,11 +726,10 @@ Feature: Relation Inference Resolution
     Given for each session, graql define
       """
       define
-      transitive-location sub rule,
-      when {
+      rule transitive-location: when {
         (subordinate: $x, superior: $y) isa location-hierarchy;
         (subordinate: $y, superior: $z) isa location-hierarchy;
-      }, then {
+      } then {
         (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
@@ -785,11 +763,10 @@ Feature: Relation Inference Resolution
     Given for each session, graql define
       """
       define
-      transitive-location sub rule,
-      when {
+      rule transitive-location: when {
         (subordinate: $x, superior: $y) isa location-hierarchy;
         (subordinate: $y, superior: $z) isa location-hierarchy;
-      }, then {
+      } then {
         (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
@@ -837,18 +814,16 @@ Feature: Relation Inference Resolution
 
       place plays loc-hie:loc-sub, plays loc-hie:loc-sup;
 
-      transitive-location sub rule,
-      when {
+      rule transitive-location: when {
         (subordinate: $x, superior: $y) isa location-hierarchy;
         (subordinate: $y, superior: $z) isa location-hierarchy;
-      }, then {
+      } then {
         (subordinate: $x, superior: $z) isa location-hierarchy;
       };
 
-      long-role-names-suck sub rule,
-      when {
+      rule long-role-names-suck: when {
         (subordinate: $x, superior: $y) isa location-hierarchy;
-      }, then {
+      } then {
         (loc-sub: $x, loc-sup: $y) isa loc-hie;
       };
       """
@@ -883,11 +858,10 @@ Feature: Relation Inference Resolution
     Given for each session, graql define
       """
       define
-      transitive-location sub rule,
-      when {
+      rule transitive-location: when {
         (subordinate: $x, superior: $y) isa location-hierarchy;
         (subordinate: $y, superior: $z) isa location-hierarchy;
-      }, then {
+      } then {
         (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
