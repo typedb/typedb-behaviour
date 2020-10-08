@@ -203,8 +203,6 @@ Feature: Graql Insert Query
     Then answer size is: 3
 
 
-  @ignore-client-java
-  # TODO: fix (currently causes a segfault later in the test suite!!)
   Scenario: an insert can be performed using a direct type specifier, and it functions equivalently to 'isa'
     When get answers of graql insert
       """
@@ -219,8 +217,6 @@ Feature: Graql Insert Query
       | HAR |
 
 
-  @ignore-client-java
-  # TODO: fix (currently causes a segfault later in the test file)
   Scenario: attempting to insert an instance of an abstract type throws an error
     Given connection close all sessions
     Given connection open schema session for database: grakn
@@ -243,8 +239,6 @@ Feature: Graql Insert Query
     Then the integrity is validated
 
 
-  @ignore-client-java
-  # TODO: fix (currently causes a segfault later in the test file)
   Scenario: attempting to insert an instance of type 'thing' throws an error
     Then graql insert; throws exception
       """
@@ -455,8 +449,6 @@ Feature: Graql Insert Query
       | work-start-date   | datetime | 2018-01-01 | 2020-01-01 |
 
 
-  @ignore-client-java
-  # TODO: fix (currently causes a segfault later in the test file!)
   Scenario: inserting an attribute onto a thing that can't have that attribute throws an error
     Then graql insert; throws exception
       """
@@ -971,8 +963,6 @@ Feature: Graql Insert Query
       | REF0 | REF1 |
 
 
-  @ignore-client-java
-  # TODO: fix (currently causes a segfault later in the test file)
   Scenario: when inserting a roleplayer that can't play the role, an error is thrown
     Then graql insert; throws exception
       """
@@ -983,8 +973,6 @@ Feature: Graql Insert Query
     Then the integrity is validated
 
 
-  @ignore-client-java
-  # TODO: fix (currently causes a segfault later in the test file)
   Scenario: parent types are not necessarily allowed to play the roles that their children play
     Given connection close all sessions
     Given connection open schema session for database: grakn
@@ -1012,8 +1000,6 @@ Feature: Graql Insert Query
     Then the integrity is validated
 
 
-  @ignore-client-java
-  # TODO: fix (currently causes a segfault later in the test file)
   Scenario: when inserting a relation with no role players, an error is thrown
     Then graql insert; throws exception
       """
@@ -1023,8 +1009,6 @@ Feature: Graql Insert Query
     Then the integrity is validated
 
 
-  @ignore-client-java
-  # TODO: fix (currently causes a segfault later in the test file)
   Scenario: when inserting a relation with an unbound variable as a roleplayer, an error is thrown
     Then graql insert; throws exception
       """
@@ -1143,8 +1127,6 @@ Feature: Graql Insert Query
       | published-date | datetime | 2020-01-01 |
 
 
-  @ignore-client-java
-  # TODO: fix (currently causes a segfault later in the test file)
   Scenario: insert a regex attribute throws error if not conforming to regex
     Given connection close all sessions
     Given connection open schema session for database: grakn
@@ -1351,8 +1333,6 @@ Feature: Graql Insert Query
       | datetime | start-date | 2019-12-26T00:00 | 2019-12-26T00:00 |
 
 
-  @ignore-client-java
-  # TODO: fix (currently causes a segfault later in the test file)
   Scenario Outline: inserting [<value>] as a '<type>' throws an error
     Given connection close all sessions
     Given connection open schema session for database: grakn
@@ -1399,8 +1379,6 @@ Feature: Graql Insert Query
       | datetime | start-date | "2019-12-26" |
 
 
-  @ignore-client-java
-  # TODO: fix (currently causes a segfault later in the test file)
   Scenario: inserting an attribute with no value throws an error
     Then graql insert; throws exception
       """
@@ -1409,8 +1387,6 @@ Feature: Graql Insert Query
     Then the integrity is validated
 
 
-  @ignore-client-java
-  # TODO: fix (currently causes a segfault later in the test file)
   Scenario: inserting an attribute value with no type throws an error
     Then graql insert; throws exception
       """
@@ -1419,8 +1395,6 @@ Feature: Graql Insert Query
     Then the integrity is validated
 
 
-  @ignore-client-java
-  # TODO: fix (currently causes a segfault later in the test file)
   Scenario: inserting an attribute with a predicate throws an error
     Then graql insert; throws exception
       """
@@ -1453,8 +1427,6 @@ Feature: Graql Insert Query
       | PER |
 
 
-  @ignore-client-java
-  # TODO: fix (currently causes a segfault later in the test file)
   Scenario: when a type has a key, attempting to insert it without that key throws on commit
     Then graql insert; throws exception
       """
@@ -1463,8 +1435,6 @@ Feature: Graql Insert Query
     Then the integrity is validated
 
 
-  @ignore-client-java
-  # TODO: fix (currently causes a segfault later in the test file)
   Scenario: inserting two distinct values of the same key on a thing throws on commit
     Then graql insert; throws exception
       """
@@ -1473,8 +1443,6 @@ Feature: Graql Insert Query
     Then the integrity is validated
 
 
-  @ignore-client-java
-  # TODO: fix (currently causes a segfault later in the test file)
   Scenario: instances of a key must be unique among all instances of a type
     Then graql insert; throws exception
       """
@@ -1485,8 +1453,6 @@ Feature: Graql Insert Query
     Then the integrity is validated
 
 
-  @ignore-client-java
-  # TODO: fix (currently causes a segfault later in the test file)
   Scenario: an error is thrown when inserting a second key on an attribute that already has one
     Given connection close all sessions
     Given connection open schema session for database: grakn
@@ -1519,9 +1485,6 @@ Feature: Graql Insert Query
   # ANSWERS OF INSERT QUERY #
   ###########################
 
-
-  @ignore-client-java
-  # TODO: fix (currently causes a segfault later in the test file)
   Scenario: an insert with multiple thing variables returns a single answer that contains them all
     When get answers of graql insert
       """
@@ -1539,8 +1502,6 @@ Feature: Graql Insert Query
       | BRU | WAY |
 
 
-  @ignore-client-java
-  # TODO: fix (currently causes a segfault later in the test file)
   Scenario: when inserting a thing variable with a type variable, the answer contains both variables
     When get answers of graql insert
       """
@@ -1905,8 +1866,6 @@ Feature: Graql Insert Query
     Then answer size is: 1
 
 
-  @ignore-client-java
-  # TODO: fix (currently causes a segfault later in the test file)
   Scenario: re-inserting a matched instance as an unrelated type throws an error
     Given graql insert
       """
@@ -2593,8 +2552,6 @@ Feature: Graql Insert Query
   # TRANSACTIONALITY #
   ####################
 
-  @ignore-client-java
-  # TODO: fix (currently causes a segfault later in the test file)
   Scenario: if any insert in a transaction fails with a syntax error, none of the inserts are performed
     Given graql insert
       """
@@ -2615,8 +2572,6 @@ Feature: Graql Insert Query
     Then answer size is: 0
 
 
-  @ignore-client-java
-  # TODO: fix (currently causes a segfault later in the test file)
   Scenario: if any insert in a transaction fails with a semantic error, none of the inserts are performed
     Given connection close all sessions
     Given connection open schema session for database: grakn
@@ -2649,8 +2604,6 @@ Feature: Graql Insert Query
     Then answer size is: 0
 
 
-  @ignore-client-java
-  # TODO: fix (currently causes a segfault later in the test file)
   Scenario: if any insert in a transaction fails with a 'key' violation, none of the inserts are performed
     Given graql insert
       """
@@ -2675,8 +2628,6 @@ Feature: Graql Insert Query
   # EDGE CASES #
   ##############
 
-  @ignore-client-java
-  # TODO: fix (currently causes a segfault later in the test file)
   Scenario: the 'iid' property is used internally by Grakn and cannot be manually assigned
     Given connection close all sessions
     Given connection open schema session for database: grakn
