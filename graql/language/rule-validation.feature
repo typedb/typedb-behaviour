@@ -416,6 +416,21 @@ Feature: Graql Rule Validation
     Then the integrity is validated
 
 
+  Scenario: when a rule infers a relation with an incorrect roleplayer, an error is thrown
+    Then graql define throws
+      """
+      define
+      partners-in-crime sub relation, relates criminal, relates sidekick;
+      person plays partners-in-crime:criminal;
+      rule bonnie-and-clyde-are-partners-in-crime: when {
+        $bonnie isa person, has name "Bonnie";
+        $clyde isa person, has name "Clyde";
+      } then {
+        (criminal: $bonnie, sidekick: $clyde) isa partners-in-crime;
+      };
+      """
+    Then the integrity is validated
+
   @ignore
   # TODO: re-enable when rules cannot infer abstract relations
   Scenario: when a rule infers an abstract relation, an error is thrown
