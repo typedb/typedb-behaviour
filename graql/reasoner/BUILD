@@ -32,6 +32,7 @@ files = [
     "type-hierarchy.feature",
     "value-predicate.feature",
     "variable-roles.feature",
+    "rule-interaction.feature",
 ]
 
 filegroup(
