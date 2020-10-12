@@ -647,7 +647,7 @@ Feature: Graql Rule Validation
       """
       Then the integrity is validated
 
-    Scenario: We can implement rules with a cycle as long as there is no negation.
+    Scenario: rules with cyclic inferences are allowed as long as there is no negation
       When graql define
       """
       define
