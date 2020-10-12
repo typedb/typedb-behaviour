@@ -31,10 +31,79 @@ Feature: Rule Interaction Resolution
       define
 
       person sub entity,
-      owns name,
-      plays employment:employee;
+      plays team:leader,
+      plays team:member,
+      plays employment:employee,
+      owns name;
+
+      employment sub relation,
+      relates employee;
+
+      team sub relation,
+      relates leader,
+      relates member;
 
       name sub attribute, value string;
       """
 
+
+  ###########################
+  # RULE INTERACTIONS BELOW #
+  ###########################
+
+
+  #  NOTE: There is a currently known bug in core 1.8.3 that makes this test fail (issue #5891)
+  #  We will hope this is fixed by 2.0 as a result of mor robust alpha equivalence definition
+Scenario: when rules are similar but different the reasoner knows to distinguish the rules
+  Given for each session, graql define
+    """
+    define
+
+    person
+    plays lesson:teacher,
+    plays lesson:student,
+    owns tag;
+
+    lesson sub relation,
+    relates teacher,
+    relates student;
+
+    tag sub attribute, value string;
+
+    rule tag-teacher-leaders:
+    when {
+      $x isa person;
+      $y isa person;
+      (student: $x, teacher: $y) isa lesson;
+      (member: $x, member: $y, leader: $y) isa teams;
+    } then {
+      $y has tag "P";
+    }
+
+    rule tag-teacher-members:
+    when {
+      $x isa person;
+      $y isa person;
+      (student: $x, teacher: $y) isa lesson;
+      (member: $x, member: $y, leader: $x) isa teams;
+    } then {
+      $y has tag "P";
+    }
+    """
+  Given for each session, graql insert
+    """
+    insert
+
+    $bob isa person, has name "bob";
+    $alice isa person, has name "alice";
+    $charlie isa person, has name "charlie";
+    $dennis isa person, has name "dennis";
+
+    (attendee: $bob, speaker: $alice) isa conference;
+    (member: $alice, member: $bob, host: $alice) isa party;
+
+    (attendee: $charlie, speaker: $dennis) isa conference;
+    (member: $charlie, member: $dennis, host: $charlie) isa party;
+    """
+  When materialised database is completed
 
