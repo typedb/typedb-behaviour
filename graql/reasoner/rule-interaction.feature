@@ -106,4 +106,10 @@ Scenario: when rules are similar but different the reasoner knows to distinguish
     (member: $charlie, member: $dennis, host: $charlie) isa party;
     """
   When materialised database is completed
+      """
+      match $x isa person, has name $n, has tag "P"; get;
+      """
+  Then all answers are correct in reasoned database
+  Then answer size in reasoned database is: 2
+  Then materialised and reasoned databases are the same size
 
