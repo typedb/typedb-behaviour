@@ -32,7 +32,7 @@ Feature: Graql Rule Validation
       employment sub relation, relates employee, owns start-date;
       scholarship sub relation, relates scholar;
       name sub attribute, value string;
-      nickname sub name;
+      nickname sub attribute, value string;
       email sub attribute, value string;
       start-date sub attribute, value datetime;
       """
@@ -687,4 +687,3 @@ Feature: Graql Rule Validation
 
     """
     Then the integrity is validated
-
