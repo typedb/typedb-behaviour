@@ -55,63 +55,64 @@ Feature: Rule Interaction Resolution
 
   #  NOTE: There is a currently known bug in core 1.8.3 that makes this test fail (issue #5891)
   #  We will hope this is fixed by 2.0 as a result of mor robust alpha equivalence definition
-Scenario: when rules are similar but different the reasoner knows to distinguish the rules
-  Given for each session, graql define
-    """
-    define
+  Scenario: when rules are similar but different the reasoner knows to distinguish the rules
+    Given for each session, graql define
+      """
+      define
 
-    person
-    plays lesson:teacher,
-    plays lesson:student,
-    owns tag;
+      person
+      plays lesson:teacher,
+      plays lesson:student,
+      owns tag;
 
-    lesson sub relation,
-    relates teacher,
-    relates student;
+      lesson sub relation,
+      relates teacher,
+      relates student;
 
-    tag sub attribute, value string;
+      tag sub attribute, value string;
 
-    rule tag-teacher-leaders:
-    when {
-      $x isa person;
-      $y isa person;
-      (student: $x, teacher: $y) isa lesson;
-      (member: $x, member: $y, leader: $y) isa teams;
-    } then {
-      $y has tag "P";
-    };
+      rule tag-teacher-leaders:
+      when {
+        $x isa person;
+        $y isa person;
+        (student: $x, teacher: $y) isa lesson;
+        (member: $x, member: $y, leader: $y) isa teams;
+      } then {
+        $y has tag "P";
+      }
 
-    rule tag-teacher-members:
-    when {
-      $x isa person;
-      $y isa person;
-      (student: $x, teacher: $y) isa lesson;
-      (member: $x, member: $y, leader: $x) isa teams;
-    } then {
-      $y has tag "P";
-    };
-    """
-  Given for each session, graql insert
-    """
-    insert
+      rule tag-teacher-members:
+      when {
+        $x isa person;
+        $y isa person;
+        (student: $x, teacher: $y) isa lesson;
+        (member: $x, member: $y, leader: $x) isa teams;
+      } then {
+        $y has tag "P";
+      }
+      """
+    Given for each session, graql insert
+      """
+      insert
 
-    $bob isa person, has name "bob";
-    $alice isa person, has name "alice";
-    $charlie isa person, has name "charlie";
-    $dennis isa person, has name "dennis";
+      $bob isa person, has name "bob";
+      $alice isa person, has name "alice";
+      $charlie isa person, has name "charlie";
+      $dennis isa person, has name "dennis";
 
-    (attendee: $bob, speaker: $alice) isa conference;
-    (member: $alice, member: $bob, host: $alice) isa party;
+      (attendee: $bob, speaker: $alice) isa conference;
+      (member: $alice, member: $bob, host: $alice) isa party;
 
-    (attendee: $charlie, speaker: $dennis) isa conference;
-    (member: $charlie, member: $dennis, host: $charlie) isa party;
-    """
-  When materialised database is completed
-  Given for graql query
+      (attendee: $charlie, speaker: $dennis) isa conference;
+      (member: $charlie, member: $dennis, host: $charlie) isa party;
+      """
+    When materialised database is completed
       """
       match $x isa person, has name $n, has tag "P";
       """
-  Then all answers are correct in reasoned database
-  Then answer size in reasoned database is: 2
-  Then materialised and reasoned databases are the same size
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
+    Then materialised and reasoned databases are the same size
+
+
 
