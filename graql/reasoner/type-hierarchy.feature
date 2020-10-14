@@ -565,7 +565,7 @@ Feature: Type Hierarchy Resolution
 #    Then materialised and reasoned databases are the same size
 
 
-  Scenario: a rule can correctly use a super-relations's role in the sub-relation.
+  Scenario: a rule can correctly use a super-relation's role in the sub-relation.
     Given for each session, graql define
       """
         define

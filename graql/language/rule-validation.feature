@@ -636,7 +636,7 @@ Feature: Graql Rule Validation
     Then the integrity is validated
 
 
-  Scenario: a rule can use a super-relations's role in the sub-relation.
+  Scenario: a rule can use a super-relation's role in the sub-relation.
     Given graql define
       """
       define
@@ -675,7 +675,7 @@ Feature: Graql Rule Validation
       | ORA |
       | RUL |
 
-  Scenario: When defining a rule with a variable atom type, an error is thrown.
+  Scenario: when defining a rule with a variable atom type, an error is throwns
     Given graql define
       """
       define
