@@ -26,9 +26,13 @@ Feature: Graql Rule Validation
     Given graql define
       """
       define
-      person sub entity, plays employment:employee, owns name, owns email @key;
+      person sub entity,
+        plays employment:employee, plays scholarship:scholar,
+        owns name, owns nickname, owns email @key;
       employment sub relation, relates employee, owns start-date;
+      scholarship sub relation, relates scholar;
       name sub attribute, value string;
+      nickname sub attribute, value string;
       email sub attribute, value string;
       start-date sub attribute, value datetime;
       """
@@ -37,12 +41,12 @@ Feature: Graql Rule Validation
 
   # Note: These tests verify only the ability to create rules, and are not concerned with their application.
 
+
   Scenario: a rule can infer both an attribute and its ownership
     Given graql define
       """
       define
-      nickname sub name;
-      person owns nickname;
+      
       rule robert-has-nickname-bob: when {
         $p isa person, has name "Robert";
       } then {
@@ -94,8 +98,8 @@ Feature: Graql Rule Validation
     Then graql define throws
       """
       define
-      nickname sub name;
-      person owns nickname;
+      
+      
       has-nickname-bob sub rule,
       then {
         $p has nickname "Bob";
@@ -108,8 +112,8 @@ Feature: Graql Rule Validation
     Then graql define throws
       """
       define
-      nickname sub name;
-      person owns nickname;
+      
+      
       rule robert: when {
         $p has name "Robert";
       };
@@ -121,8 +125,8 @@ Feature: Graql Rule Validation
     Then graql define throws
       """
       define
-      nickname sub name;
-      person owns nickname;
+      
+      
       rule has-nickname-bob:
       when {
       } then {
@@ -136,8 +140,8 @@ Feature: Graql Rule Validation
     Then graql define throws
       """
       define
-      nickname sub name;
-      person owns nickname;
+      
+      
       rule robert: when {
         $p has name "Robert";
       } then {
@@ -199,8 +203,8 @@ Feature: Graql Rule Validation
     Then graql define throws
       """
       define
-      nickname sub attribute, value string;
-      person owns nickname;
+
+      
       rule unemployed-robert-maybe-doesnt-not-have-nickname-bob: when {
         $p isa person;
         not {
@@ -216,11 +220,11 @@ Feature: Graql Rule Validation
     Then the integrity is validated
 
 
-  Scenario: when a rule has two negations, an error is thrown
+  Scenario: when a rule has multiple negations, an error is thrown
     Then graql define throws
       """
       define
-      nickname sub attribute, value string;
+
       residence sub relation, relates resident;
       person owns nickname, plays residence:resident;
       rule unemployed-homeless-robert-has-nickname-bob: when {
@@ -237,13 +241,34 @@ Feature: Graql Rule Validation
       """
     Then the integrity is validated
 
+  Scenario: a rule can have a conjunction in a negation
+    Then graql define throws
+      """
+      define
+
+
+      residence sub relation, relates resident;
+      person owns nickname, plays residence:resident;
+
+      rule unemployed-homeless-robert-has-nickname-bob: when {
+        $p isa person, has name "Robert";
+        not {
+          (employee: $p) isa employment;
+          (resident: $p) isa residence;
+        };
+      } then {
+        $p has nickname "Bob";
+      };
+      """
+    Then the integrity is validated
+
 
   Scenario: when a rule has two conclusions, an error is thrown
     Given graql define
       """
       define
-      nickname sub name;
-      person owns nickname;
+      
+      
       """
     Given the integrity is validated
     Then graql define throws
@@ -291,8 +316,8 @@ Feature: Graql Rule Validation
     Given graql define
       """
       define
-      nickname sub name;
-      person owns nickname;
+      
+      
       """
     Given the integrity is validated
     Then graql define throws
@@ -312,8 +337,8 @@ Feature: Graql Rule Validation
     Given graql define
       """
       define
-      nickname sub name;
-      person owns nickname;
+      
+      
       """
     Given the integrity is validated
     Then graql define throws
@@ -361,8 +386,8 @@ Feature: Graql Rule Validation
     Given graql define
       """
       define
-      nickname sub name;
-      person owns nickname;
+      
+      
       """
     Given the integrity is validated
     Then graql define throws
@@ -406,7 +431,6 @@ Feature: Graql Rule Validation
       """
     Then the integrity is validated
 
-
   @ignore
   # TODO: re-enable when rules cannot infer abstract relations
   Scenario: when a rule infers an abstract relation, an error is thrown
@@ -442,30 +466,13 @@ Feature: Graql Rule Validation
     Then the integrity is validated
 
 
-  Scenario: when a rule negates its conclusion in the 'when', causing a loop, an error is thrown
-    Then graql define throws
-      """
-      define
-      rule there-are-no-unemployed: when {
-        $person isa person;
-        not {
-          (employee: $person) isa employment;
-        };
-      } then {
-        (employee: $person) isa employment;
-      };
-      """
-    Then the integrity is validated
 
-
-  @ignore
-  # TODO: re-enable when subrules are not allowed
   Scenario: attempting to 'sub' another rule label throws an error
     Then graql define throws
     """
     define
-    nickname sub name;
-    person owns nickname;
+    
+    
     rule robert-has-nickname-bob: when {
       $p isa person, has name "Robert";
     } then {
@@ -576,4 +583,122 @@ Feature: Graql Rule Validation
         $x isa dog;
       };
       """
+    Then the integrity is validated
+
+
+#    CHECK RULE STRATIFICATION
+#  This makes sure no cycle exists which contains a negation
+
+  Scenario: when a rule negates its conclusion in the 'when', causing a loop, an error is thrown
+    Then graql define throws
+      """
+      define
+      rule there-are-no-unemployed: when {
+        $person isa person;
+        not {
+          (employee: $person) isa employment;
+        };
+      } then {
+        (employee: $person) isa employment;
+      };
+      """
+    Then the integrity is validated
+
+  Scenario: when a rule negates itself, but only in the rule body, the rule commits
+    Given graql define
+      """
+      define
+      rule crazy-rule: when {
+        $p isa person;
+        not { $p isa person;};
+      } then {
+        (employee: $p) isa employment;
+      };
+      """
+    Then the integrity is validated
+
+    Scenario: when a rule negates itself in the rule body, the rule commits even if that cycle involves a then clause in another rule
+      Given graql define
+      """
+      define
+
+      rule crazy-rule: when {
+        $p isa person;
+        (employee: $p) isa employment;
+        not { (employee: $p) isa employment;};
+      } then {
+        (scholar: $p) isa scholarship;
+      };
+
+      rule another-rule: when {
+        $p isa person;
+      } then {
+        (employee: $p) isa employment;
+      };
+      """
+      Then the integrity is validated
+
+    Scenario: When multiple rules cause a loop with a negation, an error is thrown
+      Then graql define throws
+
+      """
+      define
+
+      rule unemployment-is-scholar: when {
+        $person isa person;
+        not {
+          (employee: $person) isa employment;
+        };
+      } then {
+        (scholar: $person) isa scholarship;
+      };
+
+      rule scholarship-means-employment: when {
+        $person isa person;
+        (scholar: $person) isa scholarship;
+      } then {
+        (employee: $person) isa employment;
+      };
+      """
+      Then the integrity is validated
+
+    Scenario: rules with cyclic inferences are allowed as long as there is no negation
+      When graql define
+      """
+      define
+
+      rule employed-are-scholars: when {
+        $p isa person;
+        (employee: $p) isa employment;
+      } then {
+        (scholar: $p) isa scholarship;
+      };
+
+      rule scholars-are-employed:
+      when {
+        $p isa person;
+        (scholar: $p) isa scholarship;
+      } d  d then {
+        (employee: $p) isa employment;
+      };
+      """
+      Then the integrity is validated
+
+
+
+#CHECK CLAUSE VALIDATION
+  Scenario: when a rule has a conjunction as the conclusion, an error is thrown.
+    When graql define
+    """
+    define
+
+    rule people-are-employed-scholars:
+    when {
+      $p isa person;
+    } then {
+        (scholar: $p) isa scholarship;
+        (employee: $p) isa employment;
+    };
+
+    """
     Then the integrity is validated
