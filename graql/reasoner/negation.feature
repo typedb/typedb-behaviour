@@ -542,6 +542,8 @@ Feature: Negation Resolution
   # MATCHING INFERRED CONCEPTS #
   ##############################
 
+  #  TODO: disabled because added new roles to existing relations no longer allowed in rule heads
+  @ignore
   Scenario: a negation with a roleplayer but no relation variable checks that no relations have that roleplayer
     Given for each session, graql define
       """
@@ -585,6 +587,8 @@ Feature: Negation Resolution
     Then materialised and reasoned databases are the same size
 
 
+#  TODO: disabled because added new roles to existing relations no longer allowed in rule heads
+  @ignore
   Scenario: a negation with a roleplayer and inferred relation checks that the relation doesn't have that roleplayer
     Given for each session, graql define
       """
@@ -628,6 +632,8 @@ Feature: Negation Resolution
     Then materialised and reasoned databases are the same size
 
 
+    #  TODO: disabled because added new roles to existing relations no longer allowed in rule heads
+  @ignore
   Scenario: negation with an unbound roleplayer variable checks that an inferred relation doesn't have that role played
     Given for each session, graql define
       """

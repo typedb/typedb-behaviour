@@ -1634,6 +1634,8 @@ Feature: Recursion Resolution
 
 
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
+  #  TODO: disabled because down and side casting no longer allowed
+  @ignore
   Scenario: Nguyen's test
 
   test3 from Madalinska-Bugaj, Nguyen - A Generalized QSQR Evaluation Method for Horn Knowledge Bases

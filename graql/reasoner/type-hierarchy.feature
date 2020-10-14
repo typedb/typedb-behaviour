@@ -510,6 +510,8 @@ Feature: Type Hierarchy Resolution
 
 
   # TODO: re-enable all steps once attribute re-attachment is resolvable
+  #  TODO: disabled because down and side casting no longer allowed
+  @ignore
   Scenario: querying for a super-entity gives the same answer as querying for its inferred sub-entity
     Given for each session, graql define
       """

@@ -30,6 +30,8 @@ Feature: Type Generation Resolution
 
 
   # TODO: re-enable all steps once attribute re-attachment is resolvable
+  #  TODO: disabled because down and side casting no longer allowed
+  @ignore
   Scenario: additional types for entities can be derived using 'isa'
     Given for each session, graql define
       """
@@ -64,6 +66,8 @@ Feature: Type Generation Resolution
 
 
   # TODO: re-enable all steps once attribute re-attachment is resolvable
+  #  TODO: disabled because down and side casting no longer allowed
+  @ignore
   Scenario: additional types for entities can be derived using direct 'isa!'
     Given for each session, graql define
       """
@@ -118,6 +122,8 @@ Feature: Type Generation Resolution
 
 
   # TODO: re-enable all steps once attribute re-attachment is resolvable
+  #  TODO: disabled because down and side casting no longer allowed
+  @ignore
   Scenario: additional types for entities can be derived via relations that they play roles in
     Given for each session, graql define
       """
@@ -168,6 +174,7 @@ Feature: Type Generation Resolution
 
   @ignore
   # TODO: re-enable when grakn#5824 is fixed (matching a variable with two types)
+    #  TODO: disabled because down and side casting no longer allowed
   Scenario: additional types for entities can be derived via attributes that they own
     Given for each session, graql define
       """

@@ -60,6 +60,8 @@ Feature: Roleplayer Attachment Resolution
       """
 
   # TODO: re-enable all steps when fixed (#75)
+  #  TODO: disabled because added new roles to existing relations no longer allowed in rule heads
+  @ignore
   Scenario: a rule can attach an additional roleplayer to an existing relation
     Given for each session, graql define
       """
@@ -96,6 +98,8 @@ Feature: Roleplayer Attachment Resolution
 
 
   # TODO: re-enable all steps when fixed (#75)
+  #  TODO: disabled because added new roles to existing relations no longer allowed in rule heads
+  @ignore
   Scenario: additional roleplayers attached to relations can be retrieved without specifying the relation type
     Given for each session, graql define
       """
@@ -132,6 +136,8 @@ Feature: Roleplayer Attachment Resolution
 
 
   # TODO: re-enable all steps when fixed (#75)
+  #  TODO: disabled because added new roles to existing relations no longer allowed in rule heads
+  @ignore
   Scenario: a rule can make an existing relation roleplayer play an additional role in that relation
     Given for each session, graql define
       """
@@ -168,6 +174,8 @@ Feature: Roleplayer Attachment Resolution
 
 
   # TODO: re-enable all steps when fixed (#75)
+  #  TODO: disabled because added new roles to existing relations no longer allowed in rule heads
+  @ignore
   Scenario: a rule can make an existing relation roleplayer play that role an additional time
     Given for each session, graql define
       """
@@ -213,6 +221,8 @@ Feature: Roleplayer Attachment Resolution
 
 
   # TODO: re-enable all steps when fixed (#75)
+  #  TODO: disabled because added new roles to existing relations no longer allowed in rule heads
+  @ignore
   Scenario: when copying a roleplayer to another role, making it a duplicate role, the players are retrieved correctly
     Given for each session, graql define
       """

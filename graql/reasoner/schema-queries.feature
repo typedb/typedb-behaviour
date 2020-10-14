@@ -389,18 +389,6 @@ Feature: Schema Query Resolution (Variable Types)
 
       retail-company sub company;
       finance-company sub company;
-
-      rule captain-obvious-1: when {
-         $x isa retail-company;
-      } then {
-         $x isa company;
-      };
-
-      rule captain-obvious-2: when {
-         $x isa finance-company;
-      } then {
-         $x isa company;
-      };
       """
     Given for each session, graql insert
       """
@@ -461,6 +449,8 @@ Feature: Schema Query Resolution (Variable Types)
 
 
   # TODO: re-enable all steps when type generation is supported in resolution test framework (#75)
+#  TODO: disabled because down and side casting no longer allowed
+  @ignore
   Scenario: when two additional types are inferred in parallel, one can be excluded from the results
     Given for each session, graql define
       """
@@ -513,6 +503,8 @@ Feature: Schema Query Resolution (Variable Types)
 
 
   # TODO: re-enable all steps when type generation is supported in resolution test framework (#75)
+  #  TODO: disabled because down and side casting no longer allowed
+  @ignore
   Scenario: when two additional types are inferred in series, one can be excluded from the results
     Given for each session, graql define
       """
