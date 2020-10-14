@@ -434,41 +434,6 @@ Feature: Negation Resolution
     Then answer size in reasoned database is: 2
 
 
-  Scenario: when negating a negation, the statement becomes positive again
-    Given for each session, graql insert
-      """
-      insert
-
-      $x isa person, has name "Tim", has age 45;
-      $y isa person, has name "Tim", has age 55;
-      $z isa person, has name "Jim", has age 55;
-      $w isa person, has name "Winnie";
-      $c isa company, has name "Pizza Express";
-      """
-    Given for graql query
-      """
-      match $x isa person, has name "Tim";
-      """
-    Given answer size in reasoned database is: 2
-    Then for graql query
-      """
-      match
-        $x isa person, has name "Tim";
-        not {
-          not {
-            $x has age 55;
-          };
-        };
-      """
-    Then answer size in reasoned database is: 1
-    Then answer set is equivalent for graql query
-      """
-      match
-        $x isa person, has name "Tim";
-        $x has age 55;
-      """
-
-
   Scenario: negation can exclude entities of specific types that play roles in a specific relation
     Given for each session, graql define
       """
@@ -583,20 +548,18 @@ Feature: Negation Resolution
       employment relates manager;
       person plays employment:manager;
 
-      apple-employs-everyone sub rule,
-      when {
+      rule apple-employs-everyone: when {
         $p isa person;
         $c isa company, has name "Apple";
-      }, then {
+      } then {
         (employee: $p, employer: $c) isa employment;
       };
 
-      anna-manages-carol sub rule,
-      when {
+      rule anna-manages-carol: when {
         $r (employee: $x) isa employment;
         $x has name "Carol";
         $y isa person, has name "Anna";
-      }, then {
+      } then {
         $r (manager: $y) isa employment;
       };
       """
@@ -628,20 +591,18 @@ Feature: Negation Resolution
       employment relates manager;
       person plays employment:manager;
 
-      apple-employs-everyone sub rule,
-      when {
+      rule apple-employs-everyone: when {
         $p isa person;
         $c isa company, has name "Apple";
-      }, then {
+      } then {
         (employee: $p, employer: $c) isa employment;
       };
 
-      anna-manages-carol sub rule,
-      when {
+      rule anna-manages-carol: when {
         $r (employee: $x) isa employment;
         $x has name "Carol";
         $y isa person, has name "Anna";
-      }, then {
+      } then {
         $r (manager: $y) isa employment;
       };
       """
@@ -673,20 +634,18 @@ Feature: Negation Resolution
       employment relates manager;
       person plays employment:manager;
 
-      apple-employs-everyone sub rule,
-      when {
+      rule apple-employs-everyone: when {
         $p isa person;
         $c isa company, has name "Apple";
-      }, then {
+      } then {
         (employee: $p, employer: $c) isa employment;
       };
 
-      anna-manages-carol sub rule,
-      when {
+      rule anna-manages-carol: when {
         $r (employee: $x) isa employment;
         $x has name "Carol";
         $y isa person, has name "Anna";
-      }, then {
+      } then {
         $r (manager: $y) isa employment;
       };
       """
@@ -731,11 +690,10 @@ Feature: Negation Resolution
       country sub place;
       continent sub place;
 
-      location-hierarchy-transitivity sub rule,
-      when {
+      rule location-hierarchy-transitivity: when {
           (superior: $a, subordinate: $b) isa location-hierarchy;
           (superior: $b, subordinate: $c) isa location-hierarchy;
-      }, then {
+      } then {
           (superior: $a, subordinate: $c) isa location-hierarchy;
       };
       """
@@ -794,26 +752,23 @@ Feature: Negation Resolution
 
       index sub attribute, value string;
 
-      reachability-transitivityA sub rule,
-      when {
+      rule reachability-transitivityA: when {
           (link-from: $x, link-to: $y) isa link;
-      }, then {
+      } then {
           (reachable-from: $x, reachable-to: $y) isa reachable;
       };
 
-      reachability-transitivityB sub rule,
-      when {
+      rule reachability-transitivityB: when {
           (link-from: $x, link-to: $z) isa link;
           (reachable-from: $z, reachable-to: $y) isa reachable;
-      }, then {
+      } then {
           (reachable-from: $x, reachable-to: $y) isa reachable;
       };
 
-      indirect-link-rule sub rule,
-      when {
+      rule indirect-link-rule: when {
           (reachable-from: $x, reachable-to: $y) isa reachable;
           not {(link-from: $x, link-to: $y) isa link;};
-      }, then {
+      } then {
           (indirect-from: $x, indirect-to: $y) isa indirect-link;
       };
       """
@@ -858,11 +813,10 @@ Feature: Negation Resolution
       define
       person owns age;
       age sub attribute, value long;
-      not-ten sub rule,
-      when {
+      rule not-ten: when {
         $x isa person;
         not { $x has age 10; };
-      }, then {
+      } then {
         $x has name "Not Ten";
       };
       """
@@ -893,11 +847,10 @@ Feature: Negation Resolution
       define
       person owns age;
       age sub attribute, value long;
-      not-ten sub rule,
-      when {
+      rule not-ten: when {
         $x isa person;
         not { $x has age $val; };
-      }, then {
+      } then {
         $x has name "No Age";
       };
       """
@@ -934,14 +887,13 @@ Feature: Negation Resolution
         relates country;
       non-uk sub relation,
         relates not-in-uk;
-      non-uk-rule sub rule,
-      when {
+      rule non-uk-rule: when {
         $x isa company;
         not {
           (company-with-country: $x, country-for-company: $y) isa company-country;
           $y has name 'UK';
         };
-      }, then {
+      } then {
         (not-in-uk: $x) isa non-uk;
       };
       """
@@ -1002,14 +954,13 @@ Feature: Negation Resolution
         relates country;
       non-uk sub relation,
         relates not-in-uk;
-      non-uk-rule sub rule,
-      when {
+      rule non-uk-rule: when {
         $x isa company;
         not {
           (company-with-country: $x, country-for-company: $y) isa company-country;
           $y has name 'UK';
         };
-      }, then {
+      } then {
         (not-in-uk: $x) isa non-uk;
       };
       """
@@ -1100,25 +1051,23 @@ Feature: Negation Resolution
           relates parent-session;
 
 
-      no-response-means-unanswered-question sub rule,
-      when {
+      rule no-response-means-unanswered-question: when {
           $ques isa question;
           (question-logged: $ques, parent-session: $ts) isa logged-question;
           not {
               $ques has response $r;
           };
-      }, then {
+      } then {
           (question-not-answered: $ques, parent-session: $ts) isa unanswered-question;
       };
 
-      determined-fault sub rule,
-      when {
+      rule determined-fault: when {
           (relevant-fault: $flt, parent-session: $ts) isa reported-fault;
           not {
               (question-not-answered: $ques, parent-session: $ts) isa unanswered-question;
               ($flt, $ques) isa fault-identification;
           };
-      }, then {
+      } then {
           (diagnosed-fault: $flt, parent-session: $ts) isa diagnosis;
       };
       """
@@ -1167,28 +1116,31 @@ Feature: Negation Resolution
       symmetric-relation sub relation, relates symmetric-role;
 
 
-      rule-1 sub rule , when {
-          (role-3: $x, role-4: $y) isa relation-5;},
-      then {
-          (role-3: $x, role-4: $y) isa relation-4;};
+      rule rule-1: when {
+          (role-3: $x, role-4: $y) isa relation-5;
+      } then {
+          (role-3: $x, role-4: $y) isa relation-4;
+      };
 
-      rule-2 sub rule , when {
+      rule rule-2: when {
           (role-1: $x, role-2: $y) isa relation-2;
-          not {
-          (role-3: $x, role-4: $z) isa relation-5;};},
-      then {
-          (role-3: $x, role-4: $y) isa relation-4;};
+          not { (role-3: $x, role-4: $z) isa relation-5;};
+      } then {
+          (role-3: $x, role-4: $y) isa relation-4;
+      };
 
-      trans-rule sub rule , when {
+      rule trans-rule: when {
           (role-3: $y, role-4: $z) isa relation-4;
-          (role-3: $x, role-4: $y) isa relation-4;},
-      then {
-          (role-3: $x, role-4: $z) isa relation-4;};
+          (role-3: $x, role-4: $y) isa relation-4;
+      } then {
+          (role-3: $x, role-4: $z) isa relation-4;
+      };
 
-      rule-3 sub rule , when {
-          (symmetric-role: $x, symmetric-role: $y) isa symmetric-relation;},
-      then {
-          (role-3: $y, role-4: $x) isa relation-5;};
+      rule rule-3: when {
+          (symmetric-role: $x, symmetric-role: $y) isa symmetric-relation;
+      } then {
+          (role-3: $y, role-4: $x) isa relation-5;
+      };
       """
     Given for each session, graql insert
       """
@@ -1247,27 +1199,24 @@ Feature: Negation Resolution
 
       index sub attribute, value string;
 
-      reachability-transitivityA sub rule,
-      when {
+      rule reachability-transitivityA: when {
           (link-from: $x, link-to: $y) isa link;
-      }, then {
+      } then {
           (reachable-from: $x, reachable-to: $y) isa reachable;
       };
 
-      reachability-transitivityB sub rule,
-      when {
+      rule reachability-transitivityB: when {
           (link-from: $x, link-to: $z) isa link;
           (reachable-from: $z, reachable-to: $y) isa reachable;
-      }, then {
+      } then {
           (reachable-from: $x, reachable-to: $y) isa reachable;
       };
 
-      unreachability-rule sub rule,
-      when {
+      rule unreachability-rule: when {
           $x isa node;
           $y isa node;
           not {(reachable-from: $x, reachable-to: $y) isa reachable;};
-      }, then {
+      } then {
           (unreachable-from: $x, unreachable-to: $y) isa unreachable;
       };
       """

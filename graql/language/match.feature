@@ -2067,3 +2067,15 @@ Feature: Graql Match Query
           { $x has attribute 1; } or { $x has attribute 2; };
         };
       """
+
+  Scenario: when negating a negation redundantly, an error is thrown
+    Then graql match; throws exception
+      """
+      match
+        $x isa person, has name "Tim";
+        not {
+          not {
+            $x has age 55;
+          };
+        };
+      """

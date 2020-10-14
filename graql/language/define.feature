@@ -517,8 +517,8 @@ Feature: Graql Define Query
     When get answers of graql query
       """
       match
-        $x relates parenthood:parent;
-        $x relates parenthood:child;
+        $x relates parent;
+        $x relates child;
       """
     When concept identifiers are
       |     | check | value      |
@@ -529,8 +529,8 @@ Feature: Graql Define Query
     When get answers of graql query
       """
       match
-        $x relates father-sonhood:father;
-        $x relates father-sonhood:son;
+        $x relates father;
+        $x relates son;
       """
     When concept identifiers are
       |     | check | value          |
@@ -579,7 +579,7 @@ Feature: Graql Define Query
     Given session opens transaction of type: read
     When get answers of graql query
       """
-      match $x relates employment:employee;
+      match $x relates employee;
       """
     When concept identifiers are
       |     | check | value      |
@@ -1778,7 +1778,7 @@ Feature: Graql Define Query
     When session opens transaction of type: read
     When get answers of graql query
       """
-      match $x owns name @key; get;
+      match $x owns name @key;
       """
     When concept identifiers are
       |     | check | value  |
@@ -2247,7 +2247,7 @@ Feature: Graql Define Query
     Given session opens transaction of type: read
     When get answers of graql query
       """
-      match $x type child, has $y;
+      match $x type child, owns $y;
       """
     When concept identifiers are
       |       | check | value        |
@@ -2273,7 +2273,7 @@ Feature: Graql Define Query
     Given session opens transaction of type: read
     When get answers of graql query
       """
-      match $x type child, key $y;
+      match $x type child, owns $y @key;
       """
     When concept identifiers are
       |       | check | value |

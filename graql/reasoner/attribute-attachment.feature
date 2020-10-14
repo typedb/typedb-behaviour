@@ -65,12 +65,10 @@ Feature: Attribute Attachment Resolution
     Given for each session, graql define
       """
       define
-      transfer-string-attribute-to-other-people sub rule,
-      when {
+      rule transfer-string-attribute-to-other-people: when {
         $x isa person, has string-attribute $r1;
         $y isa person;
-      },
-      then {
+      } then {
         $y has string-attribute $r1;
       };
       """
@@ -101,28 +99,22 @@ Feature: Attribute Attachment Resolution
     Given for each session, graql define
       """
       define
-      transfer-string-attribute-to-other-people sub rule,
-      when {
+      rule transfer-string-attribute-to-other-people: when {
         $x isa person, has string-attribute $r1;
         $y isa person;
-      },
-      then {
+      } then {
         $y has string-attribute $r1;
       };
 
-      transfer-attribute-value-to-sub-attribute sub rule,
-      when {
+      rule transfer-attribute-value-to-sub-attribute: when {
         $x isa person, has string-attribute $r1;
-      },
-      then {
+      } then {
         $x has sub-string-attribute $r1;
       };
 
-      transfer-attribute-value-to-unrelated-attribute sub rule,
-      when {
+      rule transfer-attribute-value-to-unrelated-attribute: when {
         $x isa person, has string-attribute $r1;
-      },
-      then {
+      } then {
         $x has unrelated-attribute $r1;
       };
       """
@@ -154,11 +146,9 @@ Feature: Attribute Attachment Resolution
     Given for each session, graql define
       """
       define
-      transfer-attribute-value-to-sub-attribute sub rule,
-      when {
+      rule transfer-attribute-value-to-sub-attribute: when {
         $x isa person, has string-attribute $r1;
-      },
-      then {
+      } then {
         $x has sub-string-attribute $r1;
       };
       """
@@ -195,11 +185,9 @@ Feature: Attribute Attachment Resolution
     Given for each session, graql define
       """
       define
-      transfer-attribute-value-to-unrelated-attribute sub rule,
-      when {
+      rule transfer-attribute-value-to-unrelated-attribute: when {
         $x isa person, has string-attribute $r1;
-      },
-      then {
+      } then {
         $x has unrelated-attribute $r1;
       };
       """
@@ -230,21 +218,17 @@ Feature: Attribute Attachment Resolution
     Given for each session, graql define
       """
       define
-      transfer-string-attribute-to-other-people sub rule,
-      when {
+      rule transfer-string-attribute-to-other-people: when {
         $x isa person, has string-attribute $r1;
         $y isa person;
-      },
-      then {
+      } then {
         $y has string-attribute $r1;
       };
 
-      transfer-string-attribute-from-people-to-teams sub rule,
-      when {
+      rule transfer-string-attribute-from-people-to-teams: when {
         $x isa person, has string-attribute $y;
         $z isa team;
-      },
-      then {
+      } then {
         $z has string-attribute $y;
       };
       """
@@ -269,21 +253,17 @@ Feature: Attribute Attachment Resolution
     Given for each session, graql define
       """
       define
-      tesco-sells-all-soft-drinks sub rule,
-      when {
+      rule tesco-sells-all-soft-drinks: when {
         $x isa soft-drink;
-      },
-      then {
+      } then {
         $x has retailer 'Tesco';
       };
 
-      if-ocado-exists-it-sells-all-soft-drinks sub rule,
-      when {
+      rule if-ocado-exists-it-sells-all-soft-drinks: when {
         $x isa retailer;
         $x == 'Ocado';
         $y isa soft-drink;
-      },
-      then {
+      } then {
         $y has retailer 'Ocado';
       };
       """
@@ -320,13 +300,11 @@ Feature: Attribute Attachment Resolution
     Given for each session, graql define
       """
       define
-      if-ocado-exists-it-sells-all-soft-drinks sub rule,
-      when {
+      rule if-ocado-exists-it-sells-all-soft-drinks: when {
         $x isa retailer;
         $x == 'Ocado';
         $y isa soft-drink;
-      },
-      then {
+      } then {
         $y has retailer $x;
       };
       """

@@ -52,13 +52,11 @@ Feature: Type Hierarchy Resolution
 
       name sub attribute, value string;
 
-      performance-to-film-production sub rule,
-      when {
+      rule performance-to-film-production: when {
           $x isa child;
           $y isa person;
           (performer:$x, writer:$y) isa performance;
-      },
-      then {
+      } then {
           (actor:$x, writer:$y) isa film-production;
       };
       """
@@ -160,11 +158,9 @@ Feature: Type Hierarchy Resolution
           relates mother as parent,
           relates father as parent;
 
-      parents-are-mothers sub rule,
-      when {
+      rule parents-are-mothers: when {
           (child: $x, parent: $y) isa family;
-      },
-      then {
+      } then {
           (child: $x, mother: $y) isa large-family;
       };
       """
@@ -216,11 +212,9 @@ Feature: Type Hierarchy Resolution
           relates scifi-writer as writer,
           relates scifi-actor as actor;
 
-      performance-to-scifi sub rule,
-      when {
+      rule performance-to-scifi: when {
           (writer:$x, performer:$y) isa performance;
-      },
-      then {
+      } then {
           (scifi-writer:$x, scifi-actor:$y) isa scifi-production;
       };
       """
@@ -267,11 +261,9 @@ Feature: Type Hierarchy Resolution
           relates scifi-writer as film-writer,
           relates scifi-actor as actor;
 
-      performance-to-scifi sub rule,
-      when {
+      rule performance-to-scifi: when {
           (writer:$x, performer:$y) isa performance;
-      },
-      then {
+      } then {
           (scifi-writer:$x, scifi-actor:$y) isa scifi-production;
       };
       """
@@ -318,11 +310,9 @@ Feature: Type Hierarchy Resolution
           relates scifi-writer as film-writer,
           relates scifi-actor as actor;
 
-      performance-to-scifi sub rule,
-      when {
+      rule performance-to-scifi: when {
           (writer:$x, performer:$y) isa performance;
-      },
-      then {
+      } then {
           (scifi-writer:$x, scifi-actor:$y) isa scifi-production;
       };
       """
@@ -368,23 +358,19 @@ Feature: Type Hierarchy Resolution
 
       name sub attribute, value string;
 
-      performance-to-film-production sub rule,
-      when {
+      rule performance-to-film-production: when {
           $x isa child;
           $y isa person;
           (performer:$x, writer:$y) isa performance;
-      },
-      then {
+      } then {
           (actor:$x, writer:$y) isa film-production;
       };
 
-      performance-to-performance sub rule,
-      when {
+      rule performance-to-performance: when {
           $x isa person;
           $y isa child;
           (performer:$x, writer:$y) isa performance;
-      },
-      then {
+      } then {
           (performer:$x, writer:$y) isa performance;
       };
       """
@@ -491,11 +477,9 @@ Feature: Type Hierarchy Resolution
           relates parent,
           relates child;
 
-      families-live-together sub rule,
-      when {
+      rule families-live-together: when {
           (parent:$x, child:$y) isa family;
-      },
-      then {
+      } then {
           (parent-home-owner:$x, child-resident:$y) isa family-residence;
       };
       """
@@ -534,11 +518,9 @@ Feature: Type Hierarchy Resolution
       drunk-person sub person;
       panda sub entity;
 
-      pandas-are-actually-drunk-people sub rule,
-      when {
+      rule pandas-are-actually-drunk-people: when {
           $x isa panda;
-      },
-      then {
+      } then {
           $x isa drunk-person;
       };
       """

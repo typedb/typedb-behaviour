@@ -46,12 +46,10 @@ Feature: Concept Inequality Resolution
 
       name sub attribute, value string;
 
-      transitivity sub rule,
-      when {
+      rule transitivity: when {
           (ball1:$x, ball2:$y) isa selection;
           (ball1:$y, ball2:$z) isa selection;
-      },
-      then {
+      } then {
           (ball1:$x, ball2:$z) isa selection;
       };
       """
@@ -93,14 +91,12 @@ Feature: Concept Inequality Resolution
       holds sub transition,
           relates state;
 
-      state-rule sub rule,
-      when {
+      rule state-rule: when {
           $st isa state;
           (related-state: $st) isa achieved;
           (related-state: $st2) isa prior;
           $st != $st2;
-      },
-      then {
+      } then {
           (related-state: $st) isa holds;
       };
       """
@@ -409,11 +405,9 @@ Feature: Concept Inequality Resolution
       retailer sub base-attribute;
       person owns string-attribute;
 
-      tesco-sells-all-soft-drinks sub rule,
-      when {
+      rule tesco-sells-all-soft-drinks: when {
         $x isa soft-drink;
-      },
-      then {
+      } then {
         $x has retailer 'Tesco';
       };
       """
@@ -460,30 +454,24 @@ Feature: Concept Inequality Resolution
       retailer sub base-attribute;
       person owns string-attribute;
 
-      transfer-string-attribute-to-other-people sub rule,
-      when {
+      rule transfer-string-attribute-to-other-people: when {
         $x isa person, has string-attribute $r1;
         $y isa person;
-      },
-      then {
+      } then {
         $y has string-attribute $r1;
       };
 
-      tesco-sells-all-soft-drinks sub rule,
-      when {
+      rule tesco-sells-all-soft-drinks: when {
         $x isa soft-drink;
-      },
-      then {
+      } then {
         $x has retailer 'Tesco';
       };
 
-      if-ocado-exists-it-sells-all-soft-drinks sub rule,
-      when {
+      rule if-ocado-exists-it-sells-all-soft-drinks: when {
         $x isa retailer;
         $x == 'Ocado';
         $y isa soft-drink;
-      },
-      then {
+      } then {
         $y has retailer $x;
       };
       """
