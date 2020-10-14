@@ -114,5 +114,52 @@ Feature: Rule Interaction Resolution
     Then answer size in reasoned database is: 2
     Then materialised and reasoned databases are the same size
 
+  Scenario: when two distinct rules have alpha-equivalent bodies and heads, the reasoner still sees them as distinct.
+    Given for each session, graql define
+      """
+      define
 
+      person
+      plays husband,
+      plays wife;
+
+      marriage sub relation,
+      relates husband,
+      relates wife;
+
+      rule husbands-called-tracey:
+      when {
+          $x isa person;
+          $y isa person;
+          (husband: $x, wife: $y) isa marriage;
+      } then {
+          $x has name 'tracey';
+      };
+
+      rule: wives-called-tracey:
+      when {
+          $x isa person;
+          $y isa person;
+          (husband: $x, wife: $y) isa marriage;
+      } then {
+          $y has name 'tracey';
+      };
+      """
+
+    Given for each sesion, graql insert
+      """
+      insert
+
+      $a isa person;
+      $b isa person;
+      (husband: $a, wife: $b) isa marriage;
+      """
+
+    When materialised database is completed
+      """
+      match $x isa person, has name 'tracey'; get;
+      """
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
+    Then materialised and reasoned databases are the same size
 
