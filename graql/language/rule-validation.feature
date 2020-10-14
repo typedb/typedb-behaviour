@@ -704,7 +704,7 @@ Feature: Graql Rule Validation
     Then the integrity is validated
 
 
-#BAR DOWN-CASTING AND SIDE-CASTING IN RULE INFERENCES
+#CHECK NO DOWN-CASTING AND SIDE-CASTING IS NOT ALLOWED
   Scenario: when a rule has a down-cast in a rule conclusion, an error is thrown
     When graql define throws
       """
@@ -741,3 +741,21 @@ Feature: Graql Rule Validation
       };
       """
       Then the integrity is validated
+
+
+#CEHCK ADDING NEW ROLES TO EXISTING RELATIONSHIPS I NOT ALLOWED
+
+  Scenario: when a rule adds a role to an existing relation, an error is thrown
+    When graql define throws
+      """
+      define
+
+      rule add-bob-to-all-employment:
+      when {
+        $r isa employment;
+        $p isa person, has name bob;
+      } then {
+        $r (employee: $p) isa employment;
+      };
+      """
+    Then the integrity is validated
