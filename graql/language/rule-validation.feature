@@ -702,3 +702,42 @@ Feature: Graql Rule Validation
 
     """
     Then the integrity is validated
+
+
+#BAR DOWN-CASTING AND SIDE-CASTING IN RULE INFERENCES
+  Scenario: when a rule has a down-cast in a rule conclusion, an error is thrown
+    When graql define throws
+      """
+      define
+
+      man sub person;
+
+      rule all-bobs-are-men:
+      when {
+        $p isa person;
+        $p has name 'bob';
+      } then {
+        $p isa man;
+      };
+      """
+    Then the integrity is validated
+
+
+    Scenario: when a rule has a side-cast in a rule, an error is thrown
+      When graql define throws
+      """
+      define
+
+      man sub person;
+      boy sub person;
+
+      rule male-children-are-boys:
+      when {
+        $p isa person;
+        $p has age $a;
+        $a < 18;
+      } then {
+        $p isa boy;
+      };
+      """
+      Then the integrity is validated
