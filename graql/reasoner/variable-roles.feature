@@ -16,6 +16,7 @@
 #
 
 # TODO: re-enable all steps in file when Grakn is faster
+#noinspection CucumberUndefinedStep
 Feature: Variable Role Resolution
 
   Background: Set up databases for resolution testing

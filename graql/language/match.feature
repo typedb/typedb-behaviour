@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+
+#noinspection CucumberUndefinedStep
 Feature: Graql Match Query
 
   Background: Open connection and create a simple extensible schema

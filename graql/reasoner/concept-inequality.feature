@@ -16,6 +16,7 @@
 #
 
 # TODO: re-enable all steps in file when 3-hop transitivity is resolvable
+#noinspection CucumberUndefinedStep
 Feature: Concept Inequality Resolution
 
   Background: Set up databases for resolution testing

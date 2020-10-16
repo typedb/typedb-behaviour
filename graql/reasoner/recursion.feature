@@ -15,6 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+#noinspection CucumberUndefinedStep
 Feature: Recursion Resolution
 
   In some cases, the inferences made by a rule are used to trigger further inferences by the same rule.
