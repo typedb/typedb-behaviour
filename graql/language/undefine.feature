@@ -885,6 +885,28 @@ Feature: Graql Undefine Query
       | EMP |
 
 
+  Scenario: removing a playable role throws an error if it is played by existing instances
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
+    Given graql insert
+      """
+      insert
+      $p isa person, has email "ganesh@grakn.ai";
+      $r (employee: $p) isa employment;
+      """
+    Given transaction commits
+    Given the integrity is validated
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
+    Then graql undefine; throws exception
+      """
+      undefine person plays employment:employee;
+      """
+    Then the integrity is validated
+
+
   ###################
   # ATTRIBUTE TYPES #
   ###################
@@ -1317,7 +1339,7 @@ Feature: Graql Undefine Query
     Then answer size is: 0
 
 
-  Scenario: undefining an attribute ownership throws on commit if any instance of the owner has that attribute
+  Scenario: removing an attribute ownership throws an error if it is owned by existing instances
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -1330,15 +1352,14 @@ Feature: Graql Undefine Query
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
-    Then graql undefine
+    Then graql undefine; throws exception
       """
       undefine person owns name;
       """
-    Then transaction commits; throws exception
     Then the integrity is validated
 
 
-  Scenario: undefining a key ownership throws an error if there are existing instances of the owner
+  Scenario: undefining a key ownership throws an error if it is owned by existing instances
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write

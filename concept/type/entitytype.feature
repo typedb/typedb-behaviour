@@ -334,7 +334,7 @@ Feature: Concept Entity Type
       | name |
       | age  |
 
-  Scenario: Entity types can unset attributes
+  Scenario: Entity types can unset owning attributes
     When put attribute type: name, with value type: string
     When put attribute type: age, with value type: long
     When put entity type: person
@@ -349,6 +349,23 @@ Feature: Concept Entity Type
     Then entity(person) get owns attribute types do not contain:
       | name |
       | age  |
+
+  Scenario: Entity types cannot unset owning attributes that are owned by existing instances
+    When put attribute type: name, with value type: string
+    When put entity type: person
+    When entity(person) set owns attribute type: name
+    Then transaction commits
+    When connection close all sessions
+    When connection open data session for database: grakn
+    When session opens transaction of type: write
+    When $a = entity(person) create new instance
+    When $alice = attribute(name) as(string) put: alice
+    When entity $a set has: $alice
+    Then transaction commits
+    When connection close all sessions
+    When connection open schema session for database: grakn
+    When session opens transaction of type: write
+    Then entity(person) unset owns attribute type: name; throws exception
 
   Scenario: Entity types can have keys and attributes
     When put attribute type: email, with value type: string
@@ -942,6 +959,25 @@ Feature: Concept Entity Type
     Then entity(person) get playing roles do not contain:
       | marriage:husband |
     Then transaction commits
+
+  Scenario: Entity types cannot unset playing role types that are currently played by existing instances
+    When put relation type: marriage
+    When relation(marriage) set relates role: husband
+    When relation(marriage) set relates role: wife
+    When put entity type: person
+    When entity(person) set plays role: marriage:wife
+    Then transaction commits
+    When connection close all sessions
+    When connection open data session for database: grakn
+    When session opens transaction of type: write
+    When $m = relation(marriage) create new instance
+    When $a = entity(person) create new instance
+    When relation $m add player for role(wife): $a
+    Then transaction commits
+    When connection close all sessions
+    When connection open schema session for database: grakn
+    When session opens transaction of type: write
+    Then entity(person) unset plays role: marriage:wife; throws exception
 
   Scenario: Entity types can inherit playing role types
     When put relation type: parentship
