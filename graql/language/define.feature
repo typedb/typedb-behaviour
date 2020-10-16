@@ -296,6 +296,17 @@ Feature: Graql Define Query
     Then the integrity is validated
 
 
+  Scenario: a cyclic type hierarchy is not allowed
+    Then graql define; throws exception
+      """
+      define
+      giant sub person;
+      green-giant sub giant;
+      person sub green-giant;
+      """
+    Then the integrity is validated
+
+
   Scenario: defining a playable role is idempotent
     Given graql define
       """
@@ -1590,7 +1601,7 @@ Feature: Graql Define Query
       | PRD |
 
 
-  Scenario: defining a key on a type throws on commit if existing instances don't have that key
+  Scenario: defining a key on a type throws if existing instances don't have that key
     Given graql define
       """
       define
@@ -1613,12 +1624,11 @@ Feature: Graql Define Query
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
-    When graql define
+    Then graql define; throws exception
       """
       define
       product owns barcode @key;
       """
-    Then transaction commits; throws exception
     Then the integrity is validated
 
 
