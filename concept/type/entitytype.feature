@@ -930,6 +930,19 @@ Feature: Concept Entity Type
     Then relation(marriage) get role(wife) get players do not contain:
       | person |
 
+  Scenario: Entity types can unset playing role types that they don't actually play, which is a no-op
+    When put relation type: marriage
+    When relation(marriage) set relates role: husband
+    When relation(marriage) set relates role: wife
+    When put entity type: person
+    When entity(person) set plays role: marriage:wife
+    Then entity(person) get playing roles do not contain:
+      | marriage:husband |
+    Then entity(person) unset plays role: marriage:husband
+    Then entity(person) get playing roles do not contain:
+      | marriage:husband |
+    Then transaction commits
+
   Scenario: Entity types can inherit playing role types
     When put relation type: parentship
     When relation(parentship) set relates role: parent
