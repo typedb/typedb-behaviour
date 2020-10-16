@@ -707,7 +707,6 @@ Feature: Graql Undefine Query
     Then answer size is: 0
 
 
-  # TODO: should this not throw (on undefine)? Currently it doesn't throw on undefine OR commit
   Scenario: removing a role throws an error if it is played by existing roleplayers in relations
     Given graql define
       """
