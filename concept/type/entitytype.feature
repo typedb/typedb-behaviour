@@ -243,6 +243,48 @@ Feature: Concept Entity Type
       | email    |
       | username |
 
+  Scenario: Entity types can only commit keys if every instance owns a distinct key
+    When put attribute type: email, with value type: string
+    When put attribute type: username, with value type: string
+    When put entity type: person
+    When entity(person) set owns key type: username
+    Then transaction commits
+    When connection close all sessions
+    When connection open data session for database: grakn
+    When session opens transaction of type: write
+    When $a = entity(person) create new instance with key(username): alice
+    When $b = entity(person) create new instance with key(username): bob
+    Then transaction commits
+    When connection close all sessions
+    When connection open schema session for database: grakn
+    When session opens transaction of type: write
+    When entity(person) set owns key type: email; throws exception
+    When session opens transaction of type: write
+    When entity(person) set owns attribute type: email
+    Then transaction commits
+    When connection close all sessions
+    When connection open data session for database: grakn
+    When session opens transaction of type: write
+    When $a = entity(person) get instance with key(username): alice
+    When $alice = attribute(email) as(string) put: alice@grakn.ai
+    When entity $a set has: $alice
+    When $b = entity(person) get instance with key(username): bob
+    When $bob = attribute(email) as(string) put: bob@grakn.ai
+    When entity $b set has: $bob
+    Then transaction commits
+    When connection close all sessions
+    When connection open schema session for database: grakn
+    When session opens transaction of type: write
+    When entity(person) set owns key type: email
+    Then entity(person) get owns key types contain:
+      | email    |
+      | username |
+    Then transaction commits
+    When session opens transaction of type: read
+    Then entity(person) get owns key types contain:
+      | email    |
+      | username |
+
   Scenario: Entity types can unset keys
     When put attribute type: email, with value type: string
     When put attribute type: username, with value type: string
