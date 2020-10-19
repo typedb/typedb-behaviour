@@ -1599,12 +1599,12 @@ Feature: Graql Match Query
       """
       match
         $x isa person, has graduation-date $date;
-        $r (employee: $x) isa employment, has start-date == $date;
+        $r (employee: $x) isa employment, has start-date = $date;
       """
     Then answer size is: 1
 
 
-  Scenario: 'has $attr == $x' matches owners of any instance '$y' of '$attr' where '$y' and '$x' are equal by value
+  Scenario: 'has $attr = $x' matches owners of any instance '$y' of '$attr' where '$y' and '$x' are equal by value
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -1620,7 +1620,7 @@ Feature: Graql Match Query
     Given session opens transaction of type: read
     When get answers of graql query
       """
-      match $x has age == 16;
+      match $x has age = 16;
       """
     And concept identifiers are
       |     | check | value |
@@ -1682,7 +1682,7 @@ Feature: Graql Match Query
       | SUS |
 
 
-  Scenario: 'has $attr !== $x' matches owners of any instance '$y' of '$attr' where '$y !== $x'
+  Scenario: 'has $attr != $x' matches owners of any instance '$y' of '$attr' where '$y != $x'
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -1698,7 +1698,7 @@ Feature: Graql Match Query
     Given session opens transaction of type: read
     When get answers of graql query
       """
-      match $x has age !== 18;
+      match $x has age != 18;
       """
     And concept identifiers are
       |     | check | value |
@@ -1735,14 +1735,14 @@ Feature: Graql Match Query
       """
       match
         $x isa house-number;
-        $x == 1.0;
+        $x = 1.0;
       """
     Then answer size is: 1
     When get answers of graql query
       """
       match
         $x isa length;
-        $x == 2;
+        $x = 2;
       """
     Then answer size is: 1
     When get answers of graql query
@@ -1807,7 +1807,7 @@ Feature: Graql Match Query
       | PER |
 
 
-  Scenario: an attribute variable used in both '==' and '>=' predicates is correctly resolved
+  Scenario: an attribute variable used in both '=' and '>=' predicates is correctly resolved
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -1824,7 +1824,7 @@ Feature: Graql Match Query
     When get answers of graql query
       """
       match
-        $x has age == $z;
+        $x has age = $z;
         $z >= 17;
         $z isa age;
       get $x;
@@ -1895,7 +1895,7 @@ Feature: Graql Match Query
       match
         $x isa person;
         $y isa person;
-        $x != $y;
+        not { $x is $y; };
       """
     Then answer size is: 0
 
@@ -1903,14 +1903,14 @@ Feature: Graql Match Query
   Scenario: concept comparison of unbound variables throws an error
     Then graql match; throws exception
       """
-      match $x != $y;
+      match not { $x is $y; };
       """
 
 
   Scenario: value comparison of unbound variables throws an error
     Then graql match; throws exception
       """
-      match $x !== $y;
+      match $x != $y;
       """
 
 

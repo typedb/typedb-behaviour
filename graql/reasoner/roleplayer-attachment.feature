@@ -248,6 +248,6 @@ Feature: Roleplayer Attachment Resolution
       """
       match
         (navigator: $x, navigator: $y) isa ship-crew;
-        $x != $y;
+        not { $x is $y; };
       """
     Then materialised and reasoned databases are the same size

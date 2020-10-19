@@ -126,8 +126,8 @@ Feature: Value Predicate Resolution
       | >=  | 4           |
       | <   | 2           |
       | <=  | 4           |
-      | ==  | 2           |
-      | !== | 4           |
+      | =   | 2           |
+      | !=  | 4           |
 
 
   # TODO: re-enable all steps when fixed (#75)
@@ -164,8 +164,8 @@ Feature: Value Predicate Resolution
       | >=  | 3           |
       | <   | 1           |
       | <=  | 3           |
-      | ==  | 2           |
-      | !== | 2           |
+      | =   | 2           |
+      | !=  | 2           |
 
 
   # TODO: re-enable all steps when fixed (#75)
@@ -204,8 +204,8 @@ Feature: Value Predicate Resolution
       | >=  | 3           |
       | <   | 0           |
       | <=  | 3           |
-      | ==  | 1           |
-      | !== | 4           |
+      | =   | 1           |
+      | !=  | 4           |
 
 
   Scenario: inferred attributes can be matched by inequality to a variable that is equal to a specified value
@@ -220,7 +220,7 @@ Feature: Value Predicate Resolution
 
       rule if-ocado-exists-it-sells-all-soft-drinks: when {
         $x isa retailer;
-        $x == 'Ocado';
+        $x = 'Ocado';
         $y isa soft-drink;
       } then {
         $y has retailer 'Ocado';
@@ -238,8 +238,8 @@ Feature: Value Predicate Resolution
       """
       match
         $x has retailer $r;
-        $r !== $unwanted;
-        $unwanted == "Ocado";
+        $r != $unwanted;
+        $unwanted = "Ocado";
       """
     Given all answers are correct in reasoned database
     # x     | r     |
@@ -261,7 +261,7 @@ Feature: Value Predicate Resolution
 
       rule if-ocado-exists-it-sells-all-soft-drinks: when {
         $x isa retailer;
-        $x == 'Ocado';
+        $x = 'Ocado';
         $y isa soft-drink;
       } then {
         $y has retailer 'Ocado';
@@ -279,8 +279,8 @@ Feature: Value Predicate Resolution
       """
       match
         $x has retailer $r;
-        $wanted == "Ocado";
-        $r == $wanted;
+        $wanted = "Ocado";
+        $r = $wanted;
       """
     Given all answers are correct in reasoned database
     # x     | r     |
@@ -366,7 +366,7 @@ Feature: Value Predicate Resolution
       match
         $x has retailer $rx;
         $y has retailer $ry;
-        $rx == $ry;
+        $rx = $ry;
         $ry contains 'land';
       """
 #    Then all answers are correct in reasoned database
@@ -419,7 +419,7 @@ Feature: Value Predicate Resolution
       match
         $x has retailer $rx;
         $y has retailer $ry;
-        $rx !== $ry;
+        $rx != $ry;
         $ry contains 'land';
       """
 #    Then all answers are correct in reasoned database
@@ -444,7 +444,7 @@ Feature: Value Predicate Resolution
 #    Then materialised and reasoned databases are the same size
 
 
-  Scenario: in a rule, 'not { $x == $y; }' is the same as saying '$x !== $y'
+  Scenario: in a rule, 'not { $x = $y; }' is the same as saying '$x != $y'
     Given for each session, graql define
       """
       define
@@ -456,7 +456,7 @@ Feature: Value Predicate Resolution
 
       rule if-ocado-exists-it-sells-all-soft-drinks: when {
         $x isa retailer;
-        $x == 'Ocado';
+        $x = 'Ocado';
         $y isa soft-drink;
       } then {
         $y has retailer 'Ocado';
@@ -474,7 +474,7 @@ Feature: Value Predicate Resolution
       """
       match
         $x has retailer $r;
-        $r !== "Ocado";
+        $r != "Ocado";
       """
     Given all answers are correct in reasoned database
     # x     | r     |
@@ -485,14 +485,14 @@ Feature: Value Predicate Resolution
       """
       match
         $x has retailer $r;
-        not { $r == "Ocado"; };
+        not { $r = "Ocado"; };
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
     Then materialised and reasoned databases are the same size
 
 
-  Scenario: in a rule, 'not { $x !== $y; }' is the same as saying '$x == $y'
+  Scenario: in a rule, 'not { $x != $y; }' is the same as saying '$x = $y'
     Given for each session, graql define
       """
       define
@@ -504,7 +504,7 @@ Feature: Value Predicate Resolution
 
       rule if-ocado-exists-it-sells-all-soft-drinks: when {
         $x isa retailer;
-        $x == 'Ocado';
+        $x = 'Ocado';
         $y isa soft-drink;
       } then {
         $y has retailer 'Ocado';
@@ -522,7 +522,7 @@ Feature: Value Predicate Resolution
       """
       match
         $x has retailer $r;
-        $r == "Ocado";
+        $r = "Ocado";
       """
     Given all answers are correct in reasoned database
     # x     | r     |
@@ -533,7 +533,7 @@ Feature: Value Predicate Resolution
       """
       match
         $x has retailer $r;
-        not { $r !== "Ocado"; };
+        not { $r != "Ocado"; };
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
@@ -553,7 +553,7 @@ Feature: Value Predicate Resolution
 
       rule if-ocado-exists-it-sells-all-soft-drinks: when {
         $x isa retailer;
-        $x == 'Ocado';
+        $x = 'Ocado';
         $y isa soft-drink;
       } then {
         $y has retailer 'Ocado';
@@ -572,8 +572,8 @@ Feature: Value Predicate Resolution
       match
         $x has retailer $r;
         not {
-          $r == $unwanted;
-          $unwanted == "Ocado";
+          $r = $unwanted;
+          $unwanted = "Ocado";
         };
       """
     Then all answers are correct in reasoned database
@@ -585,7 +585,7 @@ Feature: Value Predicate Resolution
 
 
   # TODO: re-enable all steps once attribute re-attachment is resolvable
-  Scenario: when matching a pair of unrelated inferred attributes with '!==', the answers are unequal
+  Scenario: when matching a pair of unrelated inferred attributes with '!=', the answers are unequal
     Given for each session, graql define
       """
       define
@@ -615,7 +615,7 @@ Feature: Value Predicate Resolution
       match
         $x has retailer $re;
         $y has string-attribute $sa;
-        $re !== $sa;
+        $re != $sa;
       """
 #    Then all answers are correct in reasoned database
     # The string-attributes are transferred to each other, so in fact both people have both Tesco and Safeway
@@ -628,7 +628,7 @@ Feature: Value Predicate Resolution
 
   # TODO: re-enable all steps once attribute re-attachment is resolvable
   # TODO: move to negation.feature
-  Scenario: when matching a pair of unrelated inferred attributes with negation and ==, the answers are unequal
+  Scenario: when matching a pair of unrelated inferred attributes with negation and =, the answers are unequal
     Given for each session, graql define
       """
       define
@@ -658,7 +658,7 @@ Feature: Value Predicate Resolution
       match
         $x has retailer $re;
         $y has string-attribute $sa;
-        not { $re == $sa; };
+        not { $re = $sa; };
       """
 #    Then all answers are correct in reasoned database
     # The string-attributes are transferred to each other, so in fact both people have both Tesco and Safeway
@@ -698,7 +698,7 @@ Feature: Value Predicate Resolution
       match
         $x has base-attribute $ax;
         $y has base-attribute $ay;
-        $ax != $ay;
+        not { $ax is $ay; };
       """
     Then all answers are correct in reasoned database
     # x   | ax  | y   | ay  |

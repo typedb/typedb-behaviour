@@ -96,7 +96,7 @@ Feature: Concept Inequality Resolution
           $st isa state;
           (related-state: $st) isa achieved;
           (related-state: $st2) isa prior;
-          $st != $st2;
+          not { $st is $st2; };
       } then {
           (related-state: $st) isa holds;
       };
@@ -140,7 +140,7 @@ Feature: Concept Inequality Resolution
       """
       match
         (ball1: $x, ball2: $y) isa selection;
-        $x != $y;
+        not { $x is $y; };
       """
 #    Then all answers are correct in reasoned database
     # materialised: [ab, ba, bc, cb]
@@ -151,10 +151,10 @@ Feature: Concept Inequality Resolution
       """
       match
         (ball1: $x, ball2: $y) isa selection;
-        $x != $y;
+        not { $x is $y; };
         $x has name $nx;
         $y has name $ny;
-        $nx !== $ny;
+        not { $nx is $ny; };
       get $x, $y;
       """
 #    Then all answers are correct in reasoned database
@@ -168,7 +168,7 @@ Feature: Concept Inequality Resolution
       """
       match
         (ball1: $x, ball2: $y) isa selection;
-        $x != $y;
+        not { $x is $y; };
         $y has name 'c';
       """
 #    Then all answers are correct in reasoned database
@@ -178,7 +178,7 @@ Feature: Concept Inequality Resolution
       """
       match
         (ball1: $x, ball2: $y) isa selection;
-        $x != $y;
+        not { $x is $y; };
         $y has name 'c';
         {$x has name 'a';} or {$x has name 'b';};
       """
@@ -196,7 +196,7 @@ Feature: Concept Inequality Resolution
   / \
   /   \
   v     v
-  y  !=   z
+  y is not z
 
 #    When materialised database is completed
     Then for graql query
@@ -204,7 +204,7 @@ Feature: Concept Inequality Resolution
       match
         (ball1: $x, ball2: $y) isa selection;
         (ball1: $x, ball2: $z) isa selection;
-        $y != $z;
+        not { $y is $z; };
       """
 #    Then all answers are correct in reasoned database
     # [aab, aac, aba, abc, aca, acb,
@@ -217,10 +217,10 @@ Feature: Concept Inequality Resolution
       match
         (ball1: $x, ball2: $y) isa selection;
         (ball1: $x, ball2: $z) isa selection;
-        $y != $z;
+        not { $y is $z; };
         $y has name $ny;
         $z has name $nz;
-        $ny !== $nz;
+        not { $ny is $nz; };
       get $x, $y, $z;
       """
 #    Then all answers are correct in reasoned database
@@ -239,7 +239,7 @@ Feature: Concept Inequality Resolution
   ^ \
   /   \
   /     v
-  x  !=   z
+  x is not z
 
 #    When materialised database is completed
     Then for graql query
@@ -247,7 +247,7 @@ Feature: Concept Inequality Resolution
       match
         (ball1: $x, ball2: $y) isa selection;
         (ball1: $y, ball2: $z) isa selection;
-        $x != $z;
+        not { $x is $z; };
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 18
@@ -257,10 +257,10 @@ Feature: Concept Inequality Resolution
       match
         (ball1: $x, ball2: $y) isa selection;
         (ball1: $x, ball2: $z) isa selection;
-        $x != $z;
+        not { $x is $z; };
         $x has name $nx;
         $z has name $nz;
-        $nx !== $nz;
+        not { $nx is $nz; };
       get $x, $y, $z;
       """
 #    Then all answers are correct in reasoned database
@@ -273,15 +273,15 @@ Feature: Concept Inequality Resolution
   Tests a scenario in which multiple neq predicates are present but bind at most a single var in a relation.
   Corresponds to the following pattern:
 
-  y    !=    z1
-  ^        ^
-  \      /
-  \    /
+  y  is not  z1
+  ^         ^
+  \       /
+  \     /
   x[a]
-  /    \
-  /      \
-  v        v
-  y2    !=    z2
+  /     \
+  /       \
+  v         v
+  y2 is not  z2
 
 #    When materialised database is completed
     Given for graql query
@@ -303,8 +303,8 @@ Feature: Concept Inequality Resolution
         (ball1: $x, ball2: $y2) isa selection;
         (ball1: $x, ball2: $z2) isa selection;
 
-        $y1 != $z1;
-        $y2 != $z2;
+        not { $y1 is $z1; };
+        not { $y2 is $z2; };
       """
 #    Then all answers are correct in reasoned database
     # Each neq predicate reduces the answer size by 1/3, cutting it to 162, then 108
@@ -317,14 +317,14 @@ Feature: Concept Inequality Resolution
         (ball1: $x, ball2: $z1) isa selection;
         (ball1: $x, ball2: $y2) isa selection;
         (ball1: $x, ball2: $z2) isa selection;
-        $y1 != $z1;
-        $y2 != $z2;
+        not { $y1 is $z1; };
+        not { $y2 is $z2; };
         $y1 has name $ny1;
         $z1 has name $nz1;
         $y2 has name $ny2;
         $z2 has name $nz2;
-        $ny1 !== $nz1;
-        $ny2 !== $nz2;
+        not { $ny1 is $nz1; };
+        not { $ny2 is $nz2; };
       get $x, $y1, $z1, $y2, $z2;
       """
 #    Then all answers are correct in reasoned database
@@ -337,11 +337,11 @@ Feature: Concept Inequality Resolution
   Tests a scenario in which a single relation has both variables bound with two different neq predicates.
   Corresponds to the following pattern:
 
-  x[a]  - != - >  z1
+  x[a]  - is not - >  z1
   |
   |
   v
-  y     - != - >  z2
+  y     - is not - >  z2
 
 #    When materialised database is completed
     Given for graql query
@@ -361,8 +361,8 @@ Feature: Concept Inequality Resolution
         (ball1: $x, ball2: $z1) isa selection;
         (ball1: $x, ball2: $z2) isa selection;
 
-        $x != $z1;
-        $y != $z2;
+        not { $x is $z1; };
+        not { $y is $z2; };
       """
 #    Then all answers are correct in reasoned database
     # Each neq predicate reduces the answer size by 1/3, cutting it to 54, then 36
@@ -374,14 +374,14 @@ Feature: Concept Inequality Resolution
         (ball1: $x, ball2: $y) isa selection;
         (ball1: $x, ball2: $z1) isa selection;
         (ball1: $x, ball2: $z2) isa selection;
-        $x != $z1;
-        $y != $z2;
+        not { $x is $z1; };
+        not { $y is $z2; };
         $x has name $nx;
         $z1 has name $nz1;
         $y has name $ny;
         $z2 has name $nz2;
-        $nx !== $nz1;
-        $ny !== $nz2;
+        not { $nx is $nz1; };
+        not { $ny is $nz2; };
       get $x, $y, $z1, $z2;
       """
 #    Then all answers are correct in reasoned database
@@ -426,7 +426,7 @@ Feature: Concept Inequality Resolution
         $y has base-attribute $ay;
         $ax isa! $typeof_ax;
         $ay isa! $typeof_ay;
-        $typeof_ax != $typeof_ay;
+        not { $typeof_ax is $typeof_ay; };
       """
     Then all answers are correct in reasoned database
     # x   | ax  | y   | ay  |
@@ -470,7 +470,7 @@ Feature: Concept Inequality Resolution
 
       rule if-ocado-exists-it-sells-all-soft-drinks: when {
         $x isa retailer;
-        $x == 'Ocado';
+        $x = 'Ocado';
         $y isa soft-drink;
       } then {
         $y has retailer $x;
@@ -490,11 +490,11 @@ Feature: Concept Inequality Resolution
       match
         $x has base-attribute $value;
         $y has base-attribute $unwantedValue;
-        $value !== $unwantedValue;
+        not { $value is $unwantedValue; };
         $unwantedValue "Ocado";
         $value isa! $type;
         $unwantedValue isa! $type;
-        $type != $unwantedType;
+        not { $type is $unwantedType; };
         $unwantedType type string-attribute;
       get $x, $value, $type;
       """

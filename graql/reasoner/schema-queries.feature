@@ -431,7 +431,7 @@ Feature: Schema Query Resolution (Variable Types)
         $xx isa $type;
         (employee: $y, employer: $yy) isa employment;
         $yy isa $type;
-        $y != $x;
+        not { $y is $x; };
       get $x, $y;
       """
 #    Then all answers are correct in reasoned database
@@ -447,10 +447,10 @@ Feature: Schema Query Resolution (Variable Types)
         $xx isa $type;
         (employee: $y, employer: $yy) isa employment;
         $yy isa $type;
-        $y != $x;
-        $meta type entity; $type != $meta;
-        $meta2 type thing; $type != $meta2;
-        $meta3 type company; $type != $meta3;
+        not { $y is $x; };
+        $meta type entity; not { $type is $meta; };
+        $meta2 type thing; not { $type is $meta2; };
+        $meta3 type company; not { $type is $meta3; };
       get $x, $y;
       """
     # $type is forced to be either finance-company or retail-company, restricting the answer space
@@ -503,7 +503,7 @@ Feature: Schema Query Resolution (Variable Types)
         $x isa $type;
         $type sub entity;
         $type2 type duelist;
-        $type2 != $type;
+        not { $type2 is $type; };
       get $x, $type;
       """
 #    Then all answers are correct in reasoned database
@@ -555,7 +555,7 @@ Feature: Schema Query Resolution (Variable Types)
         $x isa $type;
         $type sub entity;
         $type2 type duelist;
-        $type2 != $type;
+        not { $type2 is $type; };
       get $x, $type;
       """
 #    Then all answers are correct in reasoned database

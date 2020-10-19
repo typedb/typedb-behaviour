@@ -327,8 +327,8 @@ Feature: Recursion Resolution
       rule inference-all-pairs: when {
           $x isa word;
           $y isa word;
-          $x has name !== 'f';
-          $y has name !== 'o';
+          $x has name != 'f';
+          $y has name != 'o';
       } then {
           (prep: $x, pobj: $y) isa pair;
       };
@@ -489,7 +489,7 @@ Feature: Recursion Resolution
       """
       match
         $y has index $ind;
-        {$ind == 'j';} or {$ind == 's';} or {$ind == 'v';};
+        {$ind = 'j';} or {$ind = 's';} or {$ind = 'v';};
       get $y;
       """
 #    Then materialised and reasoned databases are the same size
@@ -564,7 +564,7 @@ Feature: Recursion Resolution
       """
       match
         $Y isa person, has name $name;
-        {$name == 'aaa';} or {$name == 'aab';} or {$name == 'aaaa';};
+        {$name = 'aaa';} or {$name = 'aab';} or {$name = 'aaaa';};
       get $Y, $name;
       """
     Then for graql query
@@ -580,7 +580,7 @@ Feature: Recursion Resolution
       """
       match
         $Y isa person, has name $name;
-        {$name == 'a';} or {$name == 'aaa';} or {$name == 'aab';} or {$name == 'aaaa';};
+        {$name = 'a';} or {$name = 'aaa';} or {$name = 'aab';} or {$name = 'aaaa';};
       get $Y;
       """
     Then for graql query
@@ -594,11 +594,11 @@ Feature: Recursion Resolution
       match
         $Y isa person, has name $nameY;
         $X isa person, has name $nameX;
-        {$nameX == 'a';$nameY == 'aa';} or {$nameX == 'a';$nameY == 'ab';} or
-        {$nameX == 'a';$nameY == 'aaa';} or {$nameX == 'a';$nameY == 'aab';} or
-        {$nameX == 'a';$nameY == 'aaaa';} or {$nameX == 'aa';$nameY == 'aaa';} or
-        {$nameX == 'aa';$nameY == 'aab';} or {$nameX == 'aa';$nameY == 'aaaa';} or
-        {$nameX == 'aaa';$nameY == 'aaaa';} or {$nameX == 'c';$nameY == 'ca';};
+        {$nameX = 'a';$nameY = 'aa';} or {$nameX = 'a';$nameY = 'ab';} or
+        {$nameX = 'a';$nameY = 'aaa';} or {$nameX = 'a';$nameY = 'aab';} or
+        {$nameX = 'a';$nameY = 'aaaa';} or {$nameX = 'aa';$nameY = 'aaa';} or
+        {$nameX = 'aa';$nameY = 'aab';} or {$nameX = 'aa';$nameY = 'aaaa';} or
+        {$nameX = 'aaa';$nameY = 'aaaa';} or {$nameX = 'c';$nameY = 'ca';};
       get $X, $Y;
       """
     Then for graql query
@@ -612,23 +612,23 @@ Feature: Recursion Resolution
       match
         $X isa person, has name $nameX;
         $Y isa person, has name $nameY;
-        {$nameX == 'a';$nameY == 'aa';} or
-        {$nameX == 'a';$nameY == 'ab';} or {$nameX == 'a';$nameY == 'aaa';} or
-        {$nameX == 'a';$nameY == 'aab';} or {$nameX == 'a';$nameY == 'aaaa';} or
-        {$nameY == 'a';$nameX == 'aa';} or
-        {$nameY == 'a';$nameX == 'ab';} or {$nameY == 'a';$nameX == 'aaa';} or
-        {$nameY == 'a';$nameX == 'aab';} or {$nameY == 'a';$nameX == 'aaaa';} or
+        {$nameX = 'a';$nameY = 'aa';} or
+        {$nameX = 'a';$nameY = 'ab';} or {$nameX = 'a';$nameY = 'aaa';} or
+        {$nameX = 'a';$nameY = 'aab';} or {$nameX = 'a';$nameY = 'aaaa';} or
+        {$nameY = 'a';$nameX = 'aa';} or
+        {$nameY = 'a';$nameX = 'ab';} or {$nameY = 'a';$nameX = 'aaa';} or
+        {$nameY = 'a';$nameX = 'aab';} or {$nameY = 'a';$nameX = 'aaaa';} or
 
-        {$nameX == 'aa';$nameY == 'aaa';} or {$nameX == 'aa';$nameY == 'aab';} or
-        {$nameX == 'aa';$nameY == 'aaaa';} or
-        {$nameY == 'aa';$nameX == 'aaa';} or {$nameY == 'aa';$nameX == 'aab';} or
-        {$nameY == 'aa';$nameX == 'aaaa';} or
+        {$nameX = 'aa';$nameY = 'aaa';} or {$nameX = 'aa';$nameY = 'aab';} or
+        {$nameX = 'aa';$nameY = 'aaaa';} or
+        {$nameY = 'aa';$nameX = 'aaa';} or {$nameY = 'aa';$nameX = 'aab';} or
+        {$nameY = 'aa';$nameX = 'aaaa';} or
 
-        {$nameX == 'aaa';$nameY == 'aaaa';} or
-        {$nameY == 'aaa';$nameX == 'aaaa';} or
+        {$nameX = 'aaa';$nameY = 'aaaa';} or
+        {$nameY = 'aaa';$nameX = 'aaaa';} or
 
-        {$nameX == 'c';$nameY == 'ca';} or
-        {$nameY == 'c';$nameX == 'ca';};
+        {$nameX = 'c';$nameY = 'ca';} or
+        {$nameY = 'c';$nameX = 'ca';};
       get $X, $Y;
       """
     Then materialised and reasoned databases are the same size
@@ -700,7 +700,7 @@ Feature: Recursion Resolution
       """
       match
         $Y has name $name;
-        {$name == 'd';} or {$name == 'g';};
+        {$name = 'd';} or {$name = 'g';};
       get $Y;
       """
     And answer set is equivalent for graql query
@@ -723,7 +723,7 @@ Feature: Recursion Resolution
       """
       match
         $X has name $name;
-        {$name == 'a';} or {$name == 'b';} or {$name == 'c';};
+        {$name = 'a';} or {$name = 'b';} or {$name = 'c';};
       get $X;
       """
     And answer set is equivalent for graql query
@@ -812,7 +812,7 @@ Feature: Recursion Resolution
       """
       match
         $y has name $name;
-        {$name == 'f';} or {$name == 'a';};
+        {$name = 'f';} or {$name = 'a';};
       get $y;
       """
 #    Then materialised and reasoned databases are the same size
@@ -978,13 +978,13 @@ Feature: Recursion Resolution
       match
         $x has index $indX;
         $y has index $indY;
-        {$indX == 'aa';$indY == 'bb';} or
-        {$indX == 'bb';$indY == 'cc';} or
-        {$indX == 'cc';$indY == 'cc';} or
-        {$indX == 'cc';$indY == 'dd';} or
-        {$indX == 'aa';$indY == 'cc';} or
-        {$indX == 'bb';$indY == 'dd';} or
-        {$indX == 'aa';$indY == 'dd';};
+        {$indX = 'aa';$indY = 'bb';} or
+        {$indX = 'bb';$indY = 'cc';} or
+        {$indX = 'cc';$indY = 'cc';} or
+        {$indX = 'cc';$indY = 'dd';} or
+        {$indX = 'aa';$indY = 'cc';} or
+        {$indX = 'bb';$indY = 'dd';} or
+        {$indX = 'aa';$indY = 'dd';};
       get $x, $y;
       """
     Then materialised and reasoned databases are the same size
@@ -1055,7 +1055,7 @@ Feature: Recursion Resolution
       """
       match
         $y has index $indY;
-        {$indY == 'a';} or {$indY == 'b';} or {$indY == 'c';} or {$indY == 'd';};
+        {$indY = 'a';} or {$indY = 'b';} or {$indY = 'c';} or {$indY = 'd';};
       get $y;
       """
 #    Then materialised and reasoned databases are the same size
@@ -1132,7 +1132,7 @@ Feature: Recursion Resolution
       """
       match
         $y has name $name;
-        {$name == 'ann';} or {$name == 'bill';} or {$name == 'peter';};
+        {$name = 'ann';} or {$name = 'bill';} or {$name = 'peter';};
       get $y;
       """
 #    Then materialised and reasoned databases are the same size
@@ -1236,7 +1236,7 @@ Feature: Recursion Resolution
       """
       match
         $y isa person, has name $name;
-        {$name == 'b';} or {$name == 'c';} or {$name == 'd';};
+        {$name = 'b';} or {$name = 'c';} or {$name = 'd';};
       get $y;
       """
     Then for graql query
@@ -1250,12 +1250,12 @@ Feature: Recursion Resolution
       match
         $x has name $nameX;
         $y has name $nameY;
-        {$nameX == 'a';$nameY == 'b';} or {$nameX == 'a';$nameY == 'c';} or
-        {$nameX == 'a';$nameY == 'd';} or {$nameX == 'm';$nameY == 'n';} or
-        {$nameX == 'm';$nameY == 'o';} or {$nameX == 'p';$nameY == 'm';} or
-        {$nameX == 'g';$nameY == 'f';} or {$nameX == 'h';$nameY == 'f';} or
-        {$nameX == 'i';$nameY == 'f';} or {$nameX == 'j';$nameY == 'f';} or
-        {$nameX == 'f';$nameY == 'k';};
+        {$nameX = 'a';$nameY = 'b';} or {$nameX = 'a';$nameY = 'c';} or
+        {$nameX = 'a';$nameY = 'd';} or {$nameX = 'm';$nameY = 'n';} or
+        {$nameX = 'm';$nameY = 'o';} or {$nameX = 'p';$nameY = 'm';} or
+        {$nameX = 'g';$nameY = 'f';} or {$nameX = 'h';$nameY = 'f';} or
+        {$nameX = 'i';$nameY = 'f';} or {$nameX = 'j';$nameY = 'f';} or
+        {$nameX = 'f';$nameY = 'k';};
       get $x, $y;
       """
 #    Then materialised and reasoned databases are the same size

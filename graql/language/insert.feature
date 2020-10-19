@@ -341,7 +341,7 @@ Feature: Graql Insert Query
       match
       $p1 isa person, has age $a;
       $p2 isa person, has age $a;
-      $p1 != $p2;
+      not { $p1 is $p2; };
       get $p1, $p2;
       """
     When concept identifiers are
@@ -2024,7 +2024,7 @@ Feature: Graql Insert Query
       when {
         $x isa person, has score $s;
         $y isa person;
-        $x != $y;
+        not { $x is $y; };
       } then {
         $y has score $s;
       };

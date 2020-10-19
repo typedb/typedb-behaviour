@@ -986,7 +986,7 @@ Feature: Graql Get Clause
         $x isa company;
         $y isa person;
         $z isa person;
-        $y != $z;
+        not { $y is $z; };
         ($x, $y) isa relation;
       get $x, $y, $z;
       """
@@ -1004,7 +1004,7 @@ Feature: Graql Get Clause
         $x isa company;
         $y isa person;
         $z isa person;
-        $y != $z;
+        not { $y is $z; };
         ($x, $y) isa relation;
       get $x, $y, $z;
       group $x;

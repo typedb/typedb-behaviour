@@ -262,7 +262,7 @@ Feature: Attribute Attachment Resolution
 
       rule if-ocado-exists-it-sells-all-soft-drinks: when {
         $x isa retailer;
-        $x == 'Ocado';
+        $x = 'Ocado';
         $y isa soft-drink;
       } then {
         $y has retailer 'Ocado';
@@ -303,7 +303,7 @@ Feature: Attribute Attachment Resolution
       define
       rule if-ocado-exists-it-sells-all-soft-drinks: when {
         $x isa retailer;
-        $x == 'Ocado';
+        $x = 'Ocado';
         $y isa soft-drink;
       } then {
         $y has retailer $x;
