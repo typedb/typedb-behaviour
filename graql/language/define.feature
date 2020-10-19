@@ -1800,6 +1800,33 @@ Feature: Graql Define Query
       | PER |
 
 
+  Scenario: defining a rule is idempotent
+    Given graql define
+      """
+      define
+      nickname sub attribute, value string;
+      person owns nickname;
+      rule robert-has-nickname-bob:
+      when {
+        $p isa person, has name "Robert";
+      } then {
+        $p has nickname "Bob";
+      };
+      """
+    Given the integrity is validated
+    Then graql define
+      """
+      define
+      rule robert-has-nickname-bob:
+      when {
+        $p isa person, has name "Robert";
+      } then {
+        $p has nickname "Bob";
+      };
+      """
+    Then the integrity is validated
+
+
   Scenario: the definition of a rule is not modifiable
     Given graql define
       """
