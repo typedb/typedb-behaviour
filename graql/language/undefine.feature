@@ -1437,11 +1437,14 @@ Feature: Graql Undefine Query
       """
     Given transaction commits
     Given the integrity is validated
-    When session opens transaction of type: write
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert $x isa person, has email "samuel@grakn.ai";
       """
+    Given transaction commits
     Given the integrity is validated
     Given get answers of graql query
       """
@@ -1455,6 +1458,9 @@ Feature: Graql Undefine Query
     Given uniquely identify answer concepts
       | n   |
       | SAM |
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     When graql undefine
       """
       undefine rule samuel-email-rule;
