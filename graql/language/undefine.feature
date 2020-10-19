@@ -948,7 +948,7 @@ Feature: Graql Undefine Query
   Scenario: undefining a regex on an attribute type removes the regex constraints on the attribute
     When graql undefine
       """
-      undefine email regex ".+@\w+\..+";
+      undefine email regex;
       """
     Then transaction commits
     Then the integrity is validated
@@ -969,24 +969,12 @@ Feature: Graql Undefine Query
     Then answer size is: 1
 
 
-  Scenario: undefining the wrong regex from an attribute type does nothing
-    When graql undefine
+  Scenario: regex pattern should not be specified during an undefine; if it is, then an error is thrown
+    Then graql undefine; throws exception
       """
       undefine email regex ".+@\w.com";
       """
-    Then transaction commits
     Then the integrity is validated
-    When session opens transaction of type: read
-    When get answers of graql query
-      """
-      match $x regex ".+@\w+\..+";
-      """
-    When concept identifiers are
-      |     | check | value |
-      | EMA | label | email |
-    Then uniquely identify answer concepts
-      | x   |
-      | EMA |
 
 
   Scenario: removing playable roles from a super attribute type also removes them from its subtypes
