@@ -2279,10 +2279,11 @@ Feature: Graql Insert Query
       define
 
       vertex sub entity,
-        owns index @key;
+        owns index @key,
+        plays link:coordinate,
+        plays reachable:coordinate;
 
       link sub relation, relates coordinate;
-      vertex plays reachable:coordinate;
 
       reachable sub relation,
         relates coordinate,
