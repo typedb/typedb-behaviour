@@ -1827,31 +1827,7 @@ Feature: Graql Define Query
     Then the integrity is validated
 
 
-  Scenario: the definition of a rule is not modifiable
-    Given graql define
-      """
-      define
-      nickname sub attribute, value string;
-      person owns nickname;
-      rule robert-has-nickname-bob:
-      when {
-        $p isa person, has name "Robert";
-      } then {
-        $p has nickname "Bob";
-      };
-      """
-    Given the integrity is validated
-    Then graql define; throws exception
-      """
-      define
-      rule robert-has-nickname-bob:
-      when {
-        $p isa person, has name "robert";
-      } then {
-        $p has nickname "bob";
-      };
-      """
-    Then the integrity is validated
+  Scenario: redefining an existing rule updates its definition
 
 
   #############################
