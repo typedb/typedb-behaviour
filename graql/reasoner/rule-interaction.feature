@@ -79,7 +79,7 @@ Scenario: when rules are similar but different the reasoner knows to distinguish
       (member: $x, member: $y, leader: $y) isa teams;
     } then {
       $y has tag "P";
-    }
+    };
 
     rule tag-teacher-members:
     when {
@@ -89,7 +89,7 @@ Scenario: when rules are similar but different the reasoner knows to distinguish
       (member: $x, member: $y, leader: $x) isa teams;
     } then {
       $y has tag "P";
-    }
+    };
     """
   Given for each session, graql insert
     """
@@ -107,8 +107,9 @@ Scenario: when rules are similar but different the reasoner knows to distinguish
     (member: $charlie, member: $dennis, host: $charlie) isa party;
     """
   When materialised database is completed
+  Given for graql query
       """
-      match $x isa person, has name $n, has tag "P"; get;
+      match $x isa person, has name $n, has tag "P";
       """
   Then all answers are correct in reasoned database
   Then answer size in reasoned database is: 2

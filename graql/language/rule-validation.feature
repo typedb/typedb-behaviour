@@ -15,7 +15,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-#noinspection CucumberUndefinedStep
 Feature: Graql Rule Validation
 
   Background: Initialise a session and transaction for each scenario
@@ -99,7 +98,7 @@ Feature: Graql Rule Validation
     Then graql define throws
       """
       define
-      
+
       
       has-nickname-bob sub rule,
       then {
@@ -268,8 +267,8 @@ Feature: Graql Rule Validation
     Given graql define
       """
       define
-      
-      
+      nickname sub name;
+      person owns nickname;
       """
     Given the integrity is validated
     Then graql define throws
@@ -317,8 +316,8 @@ Feature: Graql Rule Validation
     Given graql define
       """
       define
-      
-      
+      nickname sub name;
+      person owns nickname;
       """
     Given the integrity is validated
     Then graql define throws
@@ -338,8 +337,8 @@ Feature: Graql Rule Validation
     Given graql define
       """
       define
-      
-      
+      nickname sub name;
+      person owns nickname;
       """
     Given the integrity is validated
     Then graql define throws
@@ -387,8 +386,8 @@ Feature: Graql Rule Validation
     Given graql define
       """
       define
-      
-      
+      nickname sub name;
+      person owns nickname;
       """
     Given the integrity is validated
     Then graql define throws
@@ -679,7 +678,7 @@ Feature: Graql Rule Validation
       when {
         $p isa person;
         (scholar: $p) isa scholarship;
-      } d  d then {
+      } then {
         (employee: $p) isa employment;
       };
       """
@@ -689,7 +688,7 @@ Feature: Graql Rule Validation
 
 #CHECK CLAUSE VALIDATION
   Scenario: when a rule has a conjunction as the conclusion, an error is thrown.
-    When graql define
+    When graql define throws
     """
     define
 
