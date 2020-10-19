@@ -15,6 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+#noinspection CucumberUndefinedStep
 Feature: Concept Relation Type and Role Type
 
   Background:
@@ -110,6 +111,28 @@ Feature: Concept Relation Type and Role Type
     When session opens transaction of type: write
     Then delete relation type: marriage; throws exception
 
+  Scenario: Role types that have instances cannot be deleted
+    When put relation type: marriage
+    When relation(marriage) set relates role: wife
+    When relation(marriage) set relates role: husband
+    When put entity type: person
+    When entity(person) set plays role: marriage:wife
+    When transaction commits
+    When connection close all sessions
+    When connection open data session for database: grakn
+    When session opens transaction of type: write
+    When $m = relation(marriage) create new instance
+    When $a = entity(person) create new instance
+    When relation $m add player for role(wife): $a
+    When transaction commits
+    When connection close all sessions
+    When connection open schema session for database: grakn
+    When session opens transaction of type: write
+    Then relation(marriage) unset related role: wife; throws exception
+    When session opens transaction of type: write
+    Then relation(marriage) unset related role: husband
+    Then transaction commits
+
   Scenario: Relation and role types can change labels
     When put relation type: parentship
     When relation(parentship) set relates role: parent
@@ -191,6 +214,14 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(parent) is abstract: true
     Then relation(parentship) get role(child) is abstract: true
     Then relation(parentship) create new instance; throws exception
+
+  Scenario: Relation types must have at least one role in order to commit, unless they are abstract
+    When put relation type: connection
+    Then transaction commits; throws exception
+    When session opens transaction of type: write
+    When put relation type: connection
+    When relation(connection) set abstract: true
+    Then transaction commits
 
   Scenario: Relation and role types can be subtypes of other relation and role types
     When put relation type: parentship

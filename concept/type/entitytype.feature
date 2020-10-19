@@ -15,6 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+#noinspection CucumberUndefinedStep
 Feature: Concept Entity Type
 
   Background:
@@ -243,6 +244,48 @@ Feature: Concept Entity Type
       | email    |
       | username |
 
+  Scenario: Entity types can only commit keys if every instance owns a distinct key
+    When put attribute type: email, with value type: string
+    When put attribute type: username, with value type: string
+    When put entity type: person
+    When entity(person) set owns key type: username
+    Then transaction commits
+    When connection close all sessions
+    When connection open data session for database: grakn
+    When session opens transaction of type: write
+    When $a = entity(person) create new instance with key(username): alice
+    When $b = entity(person) create new instance with key(username): bob
+    Then transaction commits
+    When connection close all sessions
+    When connection open schema session for database: grakn
+    When session opens transaction of type: write
+    When entity(person) set owns key type: email; throws exception
+    When session opens transaction of type: write
+    When entity(person) set owns attribute type: email
+    Then transaction commits
+    When connection close all sessions
+    When connection open data session for database: grakn
+    When session opens transaction of type: write
+    When $a = entity(person) get instance with key(username): alice
+    When $alice = attribute(email) as(string) put: alice@grakn.ai
+    When entity $a set has: $alice
+    When $b = entity(person) get instance with key(username): bob
+    When $bob = attribute(email) as(string) put: bob@grakn.ai
+    When entity $b set has: $bob
+    Then transaction commits
+    When connection close all sessions
+    When connection open schema session for database: grakn
+    When session opens transaction of type: write
+    When entity(person) set owns key type: email
+    Then entity(person) get owns key types contain:
+      | email    |
+      | username |
+    Then transaction commits
+    When session opens transaction of type: read
+    Then entity(person) get owns key types contain:
+      | email    |
+      | username |
+
   Scenario: Entity types can unset keys
     When put attribute type: email, with value type: string
     When put attribute type: username, with value type: string
@@ -291,7 +334,7 @@ Feature: Concept Entity Type
       | name |
       | age  |
 
-  Scenario: Entity types can unset attributes
+  Scenario: Entity types can unset owning attributes
     When put attribute type: name, with value type: string
     When put attribute type: age, with value type: long
     When put entity type: person
@@ -306,6 +349,23 @@ Feature: Concept Entity Type
     Then entity(person) get owns attribute types do not contain:
       | name |
       | age  |
+
+  Scenario: Entity types cannot unset owning attributes that are owned by existing instances
+    When put attribute type: name, with value type: string
+    When put entity type: person
+    When entity(person) set owns attribute type: name
+    Then transaction commits
+    When connection close all sessions
+    When connection open data session for database: grakn
+    When session opens transaction of type: write
+    When $a = entity(person) create new instance
+    When $alice = attribute(name) as(string) put: alice
+    When entity $a set has: $alice
+    Then transaction commits
+    When connection close all sessions
+    When connection open schema session for database: grakn
+    When session opens transaction of type: write
+    Then entity(person) unset owns attribute type: name; throws exception
 
   Scenario: Entity types can have keys and attributes
     When put attribute type: email, with value type: string
@@ -886,6 +946,38 @@ Feature: Concept Entity Type
       | person |
     Then relation(marriage) get role(wife) get players do not contain:
       | person |
+
+  Scenario: Entity types can unset playing role types that they don't actually play, which is a no-op
+    When put relation type: marriage
+    When relation(marriage) set relates role: husband
+    When relation(marriage) set relates role: wife
+    When put entity type: person
+    When entity(person) set plays role: marriage:wife
+    Then entity(person) get playing roles do not contain:
+      | marriage:husband |
+    Then entity(person) unset plays role: marriage:husband
+    Then entity(person) get playing roles do not contain:
+      | marriage:husband |
+    Then transaction commits
+
+  Scenario: Entity types cannot unset playing role types that are currently played by existing instances
+    When put relation type: marriage
+    When relation(marriage) set relates role: husband
+    When relation(marriage) set relates role: wife
+    When put entity type: person
+    When entity(person) set plays role: marriage:wife
+    Then transaction commits
+    When connection close all sessions
+    When connection open data session for database: grakn
+    When session opens transaction of type: write
+    When $m = relation(marriage) create new instance
+    When $a = entity(person) create new instance
+    When relation $m add player for role(wife): $a
+    Then transaction commits
+    When connection close all sessions
+    When connection open schema session for database: grakn
+    When session opens transaction of type: write
+    Then entity(person) unset plays role: marriage:wife; throws exception
 
   Scenario: Entity types can inherit playing role types
     When put relation type: parentship

@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+
+#noinspection CucumberUndefinedStep
 Feature: Graql Undefine Query
 
   Background: Open connection and create a simple extensible schema
@@ -216,7 +218,7 @@ Feature: Graql Undefine Query
     Then answer size is: 0
 
 
-  Scenario: removing a has ownership @key from a super entity type also removes it from its subtypes
+  Scenario: removing a key ownership from a super entity type also removes it from its subtypes
     Given graql define
       """
       define child sub person; 
@@ -226,7 +228,7 @@ Feature: Graql Undefine Query
     When session opens transaction of type: write
     When graql undefine
       """
-      undefine person owns email @key;
+      undefine person owns email;
       """
     Then transaction commits
     Then the integrity is validated
@@ -308,8 +310,7 @@ Feature: Graql Undefine Query
   # RELATION TYPES #
   ##################
 
-  # TODO: do the roles and roleplayers get cleaned up automatically now?
-  Scenario: a relation type is removed by disassociating its roles and their roleplayers, then undefining 'sub relation'
+  Scenario: undefining a relation type removes it
     Given get answers of graql query
       """
       match $x sub relation;
@@ -324,11 +325,7 @@ Feature: Graql Undefine Query
       | REL |
     When graql undefine
       """
-      undefine
-      employment relates employee;
-      employment relates employer;
-      person plays employment:employee;
-      employment sub relation;
+      undefine employment sub relation;
       """
     Then transaction commits
     Then the integrity is validated
@@ -340,27 +337,6 @@ Feature: Graql Undefine Query
     Then uniquely identify answer concepts
       | x   |
       | REL |
-
-
-  # TODO: this does not throw - either on undefine or on commit - does it autoclean its roles + players now?
-  Scenario: undefining a relation type without also undefining its roles throws an error
-    Then graql undefine; throws exception
-      """
-      undefine employment sub relation;
-      """
-    Then the integrity is validated
-
-
-  # TODO: this does not throw - either on undefine or on commit - does it autoclean its roles + players now?
-  Scenario: undefining a relation type and its roles without disassociating them from their roleplayers throws an error
-    Then graql undefine; throws exception
-      """
-      undefine
-      employment relates employee;
-      employment relates employer;
-      employment sub relation;
-      """
-    Then the integrity is validated
 
 
   Scenario: removing playable roles from a super relation type also removes them from its subtypes
@@ -435,7 +411,7 @@ Feature: Graql Undefine Query
     Then answer size is: 0
 
 
-  Scenario: removing has ownerships @key from a super relation type also removes them from its subtypes
+  Scenario: removing key ownerships from a super relation type also removes them from its subtypes
     Given graql define
       """
       define
@@ -460,7 +436,7 @@ Feature: Graql Undefine Query
       | CEM |
     When graql undefine
       """
-      undefine employment owns employment-reference @key;
+      undefine employment owns employment-reference;
       """
     Then transaction commits
     Then the integrity is validated
@@ -498,8 +474,6 @@ Feature: Graql Undefine Query
     Then the integrity is validated
 
 
-  @ignore
-  # TODO: re-enable when removing a role from a relation cleans up the role
   Scenario: all existing instances of a relation type must be deleted in order to undefine it
     Given get answers of graql query
       """
@@ -529,11 +503,7 @@ Feature: Graql Undefine Query
     Given session opens transaction of type: write
     Then graql undefine; throws exception
       """
-      undefine
-      employment relates employee;
-      employment relates employer;
-      person plays employment:employee;
-      employment sub relation;
+      undefine employment sub relation;
       """
     Then the integrity is validated
     When connection close all sessions
@@ -553,11 +523,7 @@ Feature: Graql Undefine Query
     When session opens transaction of type: write
     When graql undefine
       """
-      undefine
-      employment relates employee;
-      employment relates employer;
-      person plays employment:employee;
-      employment sub relation;
+      undefine employment sub relation;
       """
     Then transaction commits
     Then the integrity is validated
@@ -571,11 +537,41 @@ Feature: Graql Undefine Query
       | REL |
 
 
+  Scenario: undefining a relation type automatically detaches any possible roleplayers
+    Given get answers of graql query
+      """
+      match
+        $x type person;
+        $x plays $y;
+      """
+    Given concept identifiers are
+      |     | check | value               |
+      | PER | label | person              |
+      | EME | label | employment:employee |
+    Given uniquely identify answer concepts
+      | x   | y   |
+      | PER | EME |
+    When graql undefine
+      """
+      undefine employment sub relation;
+      """
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
+    When get answers of graql query
+      """
+      match
+        $x type person;
+        $x plays $y;
+      """
+    Then answer size is: 0
+
+
   #############################
   # RELATED ROLES ('RELATES') #
   #############################
 
-  Scenario: a role is removed by removing it from its relation type and disassociating its roleplayers
+  Scenario: a role type can be removed from its relation type
     Given get answers of graql query
       """
       match employment relates $x;
@@ -590,9 +586,7 @@ Feature: Graql Undefine Query
       | EMR |
     When graql undefine
       """
-      undefine
-      person plays employment:employee;
-      employment relates employee;
+      undefine employment relates employee;
       """
     Then transaction commits
     Then the integrity is validated
@@ -604,16 +598,6 @@ Feature: Graql Undefine Query
     Then uniquely identify answer concepts
       | x   |
       | EMR |
-
-
-  # TODO: are roleplayers disassociated automatically now?
-  Scenario: removing a role without disassociating its roleplayers throws an error
-    Then graql undefine; throws exception
-      """
-      undefine
-      employment relates employee;
-      """
-    Then the integrity is validated
 
 
   Scenario: undefining all players of a role produces a valid schema
@@ -682,7 +666,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
 
 
-  Scenario: removing all roles from a relation type, without removing the type, throws on commit
+  Scenario: removing all roles from a relation type without undefining the relation type throws on commit
     When graql undefine
       """
       undefine
@@ -693,7 +677,36 @@ Feature: Graql Undefine Query
     Then the integrity is validated
 
 
-  # TODO: should this not throw (on undefine)? Currently it doesn't throw on undefine OR commit
+  Scenario: undefining a role type automatically detaches any possible roleplayers
+    Given get answers of graql query
+      """
+      match
+        $x type person;
+        $x plays $y;
+      """
+    Given concept identifiers are
+      |     | check | value               |
+      | PER | label | person              |
+      | EME | label | employment:employee |
+    Given uniquely identify answer concepts
+      | x   | y   |
+      | PER | EME |
+    When graql undefine
+      """
+      undefine employment relates employee;
+      """
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
+    When get answers of graql query
+      """
+      match
+        $x type person;
+        $x plays $y;
+      """
+    Then answer size is: 0
+
+
   Scenario: removing a role throws an error if it is played by existing roleplayers in relations
     Given graql define
       """
@@ -872,6 +885,28 @@ Feature: Graql Undefine Query
       | EMP |
 
 
+  Scenario: removing a playable role throws an error if it is played by existing instances
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
+    Given graql insert
+      """
+      insert
+      $p isa person, has email "ganesh@grakn.ai";
+      $r (employee: $p) isa employment;
+      """
+    Given transaction commits
+    Given the integrity is validated
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
+    Then graql undefine; throws exception
+      """
+      undefine person plays employment:employee;
+      """
+    Then the integrity is validated
+
+
   ###################
   # ATTRIBUTE TYPES #
   ###################
@@ -913,7 +948,7 @@ Feature: Graql Undefine Query
   Scenario: undefining a regex on an attribute type removes the regex constraints on the attribute
     When graql undefine
       """
-      undefine email regex ".+@\w+\..+";
+      undefine email regex;
       """
     Then transaction commits
     Then the integrity is validated
@@ -934,24 +969,12 @@ Feature: Graql Undefine Query
     Then answer size is: 1
 
 
-  Scenario: undefining the wrong regex from an attribute type does nothing
-    When graql undefine
+  Scenario: regex pattern should not be specified during an undefine; if it is, then an error is thrown
+    Then graql undefine; throws exception
       """
       undefine email regex ".+@\w.com";
       """
-    Then transaction commits
     Then the integrity is validated
-    When session opens transaction of type: read
-    When get answers of graql query
-      """
-      match $x regex ".+@\w+\..+";
-      """
-    When concept identifiers are
-      |     | check | value |
-      | EMA | label | email |
-    Then uniquely identify answer concepts
-      | x   |
-      | EMA |
 
 
   Scenario: removing playable roles from a super attribute type also removes them from its subtypes
@@ -1028,11 +1051,11 @@ Feature: Graql Undefine Query
     Then answer size is: 0
 
 
-  # TODO: this doesn't look fully tested - is it still a regular attribute ownership? or not owned at all
-  Scenario: removing @key from an attribute ownership of a super attribute type also removes it from its subtypes
+  Scenario: removing a key ownership from a super attribute type also removes it from its subtypes
     Given graql define
       """
       define
+      name abstract;
       first-name sub name;
       name-id sub attribute, value long;
       name owns name-id @key;
@@ -1054,7 +1077,7 @@ Feature: Graql Undefine Query
       | FNA |
     When graql undefine
       """
-      undefine name owns name-id @key;
+      undefine name owns name-id;
       """
     Then transaction commits
     Then the integrity is validated
@@ -1234,45 +1257,7 @@ Feature: Graql Undefine Query
       | CHI |
 
 
-  # TODO: this doesn't look fully tested - is it still a regular attribute ownership? or not owned at all
-  Scenario: undefining a @key removes it
-    Given get answers of graql query
-      """
-      match
-        $x owns email @key;
-        $x type person;
-      """
-    Given concept identifiers are
-      |     | check | value  |
-      | PER | label | person |
-    Given uniquely identify answer concepts
-      | x   |
-      | PER |
-    When graql undefine
-      """
-      undefine person owns email @key;
-      """
-    Then transaction commits
-    Then the integrity is validated
-    When session opens transaction of type: read
-    When get answers of graql query
-      """
-      match
-        $x owns email @key;
-        $x type person;
-      """
-    Then answer size is: 0
-
-
-  Scenario: attempting to undefine a has ownership @key that doesn't exist throws an error
-    Then graql undefine; throws exception
-      """
-      undefine employment owns email @key;
-      """
-    Then the integrity is validated
-
-
-  Scenario: undefining an attribute owned as a key by using 'owns' without @key successfully removes the ownership
+  Scenario: undefining a key ownership removes it
     When graql undefine
       """
       undefine person owns email;
@@ -1287,8 +1272,15 @@ Feature: Graql Undefine Query
     Then answer size is: 0
 
 
-  # TODO: need to decide how this should behave
-  Scenario: attempting to undefine an attribute owned with 'has' by using 'key' throws an error
+  Scenario: writing '@key' when undefining a key ownership is not allowed
+    Then graql undefine; throws exception
+      """
+      undefine person owns email @key;
+      """
+    Then the integrity is validated
+
+
+  Scenario: writing '@key' when undefining an attribute ownership is not allowed
     Then graql undefine; throws exception
       """
       undefine person owns name @key;
@@ -1296,7 +1288,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
 
 
-  Scenario: when an attribute owner owns instances, but none of them own that attribute, the ownership can be removed
+  Scenario: when a type can own an attribute, but none of its instances actually do, the ownership can be undefined
     Given get answers of graql query
       """
       match $x owns name;
@@ -1335,8 +1327,7 @@ Feature: Graql Undefine Query
     Then answer size is: 0
 
 
-  # TODO: should this not throw - on undefine, or on commit?
-  Scenario: undefining an attribute ownership throws on commit if any instance of the owner has that attribute
+  Scenario: removing an attribute ownership throws an error if it is owned by existing instances
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -1349,15 +1340,14 @@ Feature: Graql Undefine Query
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
-    Then graql undefine
+    Then graql undefine; throws exception
       """
       undefine person owns name;
       """
-    Then transaction commits; throws exception
     Then the integrity is validated
 
 
-  Scenario: undefining a type's key ownership throws an error if it has existing instances
+  Scenario: undefining a key ownership throws an error if it is owned by existing instances
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -1372,7 +1362,7 @@ Feature: Graql Undefine Query
     Given session opens transaction of type: write
     Then graql undefine; throws exception
       """
-      undefine person owns email @key;
+      undefine person owns email;
       """
     Then the integrity is validated
 
@@ -1435,11 +1425,14 @@ Feature: Graql Undefine Query
       """
     Given transaction commits
     Given the integrity is validated
-    When session opens transaction of type: write
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
     Given graql insert
       """
       insert $x isa person, has email "samuel@grakn.ai";
       """
+    Given transaction commits
     Given the integrity is validated
     Given get answers of graql query
       """
@@ -1453,6 +1446,9 @@ Feature: Graql Undefine Query
     Given uniquely identify answer concepts
       | n   |
       | SAM |
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     When graql undefine
       """
       undefine rule samuel-email-rule;
@@ -1770,7 +1766,7 @@ Feature: Graql Undefine Query
     When graql undefine
       """
       undefine
-      person sub entity, owns name, owns email @key, plays employment:employee;
+      person sub entity, owns name, owns email, plays employment:employee;
       employment sub relation, relates employee, relates employer;
       name sub attribute;
       """

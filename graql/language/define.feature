@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+
+#noinspection CucumberUndefinedStep
 Feature: Graql Define Query
 
   Background: Open connection and create a simple extensible schema
@@ -292,6 +294,17 @@ Feature: Graql Define Query
     Then graql define; throws exception
       """
       define dog sub dog;
+      """
+    Then the integrity is validated
+
+
+  Scenario: a cyclic type hierarchy is not allowed
+    Then graql define; throws exception
+      """
+      define
+      giant sub person;
+      green-giant sub giant;
+      person sub green-giant;
       """
     Then the integrity is validated
 
@@ -1590,7 +1603,7 @@ Feature: Graql Define Query
       | PRD |
 
 
-  Scenario: defining a key on a type throws on commit if existing instances don't have that key
+  Scenario: defining a key on a type throws if existing instances don't have that key
     Given graql define
       """
       define
@@ -1613,12 +1626,11 @@ Feature: Graql Define Query
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
-    When graql define
+    Then graql define; throws exception
       """
       define
       product owns barcode @key;
       """
-    Then transaction commits; throws exception
     Then the integrity is validated
 
 
@@ -1788,7 +1800,7 @@ Feature: Graql Define Query
       | PER |
 
 
-  Scenario: the definition of a rule is not modifiable
+  Scenario: defining a rule is idempotent
     Given graql define
       """
       define
@@ -1802,17 +1814,20 @@ Feature: Graql Define Query
       };
       """
     Given the integrity is validated
-    Then graql define; throws exception
+    Then graql define
       """
       define
       rule robert-has-nickname-bob:
       when {
-        $p isa person, has name "robert";
+        $p isa person, has name "Robert";
       } then {
-        $p has nickname "bob";
+        $p has nickname "Bob";
       };
       """
     Then the integrity is validated
+
+
+  Scenario: redefining an existing rule updates its definition
 
 
   #############################

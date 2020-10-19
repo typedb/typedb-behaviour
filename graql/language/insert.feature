@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+
+#noinspection CucumberUndefinedStep
 Feature: Graql Insert Query
 
   Background: Open connection and create a simple extensible schema
@@ -1379,6 +1381,23 @@ Feature: Graql Insert Query
       | datetime | start-date | "2019-12-26" |
 
 
+  Scenario: when inserting an attribute, the type and value can be specified in two individual statements
+    When get answers of graql insert
+      """
+      insert
+      $x isa age;
+      $x 10;
+      """
+    Then transaction commits
+    When concept identifiers are
+      |     | check | value  |
+      | A10 | value | age:10 |
+    Then uniquely identify answer concepts
+      | x   |
+      | A10 |
+    Then the integrity is validated
+
+
   Scenario: inserting an attribute with no value throws an error
     Then graql insert; throws exception
       """
@@ -1428,14 +1447,15 @@ Feature: Graql Insert Query
 
 
   Scenario: when a type has a key, attempting to insert it without that key throws on commit
-    Then graql insert; throws exception
+    When graql insert
       """
       insert $x isa person;
       """
+    Then transaction commits; throws exception
     Then the integrity is validated
 
 
-  Scenario: inserting two distinct values of the same key on a thing throws on commit
+  Scenario: inserting two distinct values of the same key on a thing throws an error
     Then graql insert; throws exception
       """
       insert $x isa person, has ref 0, has ref 1;
@@ -2170,7 +2190,7 @@ Feature: Graql Insert Query
     Given graql undefine
       """
       undefine
-      employment owns ref @key;
+      employment owns ref;
       """
     Then transaction commits
     Then the integrity is validated
@@ -2259,10 +2279,11 @@ Feature: Graql Insert Query
       define
 
       vertex sub entity,
-        owns index @key;
+        owns index @key,
+        plays link:coordinate,
+        plays reachable:coordinate;
 
       link sub relation, relates coordinate;
-      vertex plays reachable:coordinate;
 
       reachable sub relation,
         relates coordinate,
@@ -2375,9 +2396,9 @@ Feature: Graql Insert Query
     Given graql undefine
       """
       undefine
-      person owns ref @key;
-      company owns ref @key;
-      employment owns ref @key;
+      person owns ref;
+      company owns ref;
+      employment owns ref;
       """
     Given transaction commits
     Given the integrity is validated
@@ -2484,7 +2505,7 @@ Feature: Graql Insert Query
     Given session opens transaction of type: write
     Given graql undefine
       """
-      undefine person owns ref @key;
+      undefine person owns ref;
       """
     Given transaction commits
     Given the integrity is validated

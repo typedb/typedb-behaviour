@@ -15,6 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+#noinspection CucumberUndefinedStep
 Feature: Graql Rule Validation
 
   Background: Initialise a session and transaction for each scenario

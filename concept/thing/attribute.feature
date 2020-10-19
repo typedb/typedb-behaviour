@@ -15,6 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+#noinspection CucumberUndefinedStep
 Feature: Concept Attribute
 
   Background:
@@ -285,6 +286,20 @@ Feature: Concept Attribute
     When session opens transaction of type: read
     When $x = attribute(birth-date) as(datetime) get: 1990-01-01 11:22:33
     Then attribute $x is null: true
+
+  Scenario: Attribute with value type double is assignable and retrievable from a 'long' value
+    When $x = attribute(score) as(double) put: 123
+    Then attribute $x is null: false
+    Then attribute $x has type: score
+    Then attribute $x has value type: double
+    Then attribute $x has double value: 123
+    When transaction commits
+    When session opens transaction of type: read
+    When $x = attribute(score) as(double) get: 123
+    Then attribute $x is null: false
+    Then attribute $x has type: score
+    Then attribute $x has value type: double
+    Then attribute $x has double value: 123
 
   Scenario: Attribute with value type boolean can be owned
 

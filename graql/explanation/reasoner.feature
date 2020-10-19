@@ -15,6 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+#noinspection CucumberUndefinedStep
 Feature: Graql Reasoning Explanation
 
   Only scenarios where there is only one possible resolution path can be tested in this way

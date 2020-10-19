@@ -15,6 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+#noinspection CucumberUndefinedStep
 Feature: Concept Attribute Type
 
   Background:
@@ -659,3 +660,15 @@ Feature: Concept Attribute Type
       | person |
     Then attribute(email) get key owners do not contain:
       | company |
+
+  Scenario: Attribute types with value type string can unset their regular expression
+    When put attribute type: email, with value type: string
+    When attribute(email) as(string) set regex: \S+@\S+\.\S+
+    Then attribute(email) as(string) get regex: \S+@\S+\.\S+
+    When transaction commits
+    When session opens transaction of type: write
+    Then attribute(email) as(string) unset regex
+    Then attribute(email) as(string) does not have any regex
+    Then transaction commits
+    When session opens transaction of type: read
+    Then attribute(email) as(string) does not have any regex
