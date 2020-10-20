@@ -948,7 +948,7 @@ Feature: Graql Undefine Query
   Scenario: undefining a regex on an attribute type removes the regex constraints on the attribute
     When graql undefine
       """
-      undefine email regex;
+      undefine email regex ".+@\w+\..+";
       """
     Then transaction commits
     Then the integrity is validated
