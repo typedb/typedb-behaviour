@@ -629,7 +629,7 @@ Feature: Graql Rule Validation
       | ORA |
       | RUL |
 
-  Scenario: when defining a rule with a variable atom type, an error is throwns
+  Scenario: when defining a rule with a variable atom type, an error is thrown
     Given graql define
       """
       define
@@ -845,4 +845,3 @@ Feature: Graql Rule Validation
 
     """
     Then the integrity is validated
-
