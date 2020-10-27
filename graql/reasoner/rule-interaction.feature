@@ -79,7 +79,7 @@ Feature: Rule Interaction Resolution
         (member: $x, member: $y, leader: $y) isa teams;
       } then {
         $y has tag "P";
-      }
+      };
 
       rule tag-teacher-members:
       when {
@@ -89,7 +89,7 @@ Feature: Rule Interaction Resolution
         (member: $x, member: $y, leader: $x) isa teams;
       } then {
         $y has tag "P";
-      }
+      };
       """
     Given for each session, graql insert
       """
@@ -107,6 +107,7 @@ Feature: Rule Interaction Resolution
       (member: $charlie, member: $dennis, host: $charlie) isa party;
       """
     When materialised database is completed
+    Then for graql query
       """
       match $x isa person, has name $n, has tag "P";
       """
@@ -123,8 +124,8 @@ Feature: Rule Interaction Resolution
       define
 
       person
-      plays husband,
-      plays wife;
+      plays marriage:husband,
+      plays marriage:wife;
 
       marriage sub relation,
       relates husband,
@@ -159,8 +160,9 @@ Feature: Rule Interaction Resolution
       """
 
     When materialised database is completed
+    Then for graql query
       """
-      match $x isa person, has name 'tracey'; get;
+      match $x isa person, has name 'tracey';
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
