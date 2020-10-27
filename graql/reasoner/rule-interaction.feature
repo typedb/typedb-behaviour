@@ -136,7 +136,7 @@ Feature: Rule Interaction Resolution
           $x has name 'tracey';
       };
 
-      rule: wives-called-tracey:
+      rule wives-called-tracey:
       when {
           $x isa person;
           $y isa person;

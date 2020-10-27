@@ -586,10 +586,8 @@ Feature: Graql Rule Validation
     Then the integrity is validated
 
 
-#    CHECK RULE STRATIFICATION
-#  This makes sure no cycle exists which contains a negation
-
   Scenario: when a rule negates its conclusion in the 'when', causing a loop, an error is thrown
+    Ensure rule stratification is possible
     Then graql define throws
       """
       define
@@ -686,8 +684,8 @@ Feature: Graql Rule Validation
 
 
 
-#CHECK CLAUSE VALIDATION
-  Scenario: when a rule has a conjunction as the conclusion, an error is thrown.
+  Scenario: when a rule has a conjunction as the conclusion, an error is thrown
+  Checks clause validation
     When graql define throws
     """
     define
@@ -704,8 +702,8 @@ Feature: Graql Rule Validation
     Then the integrity is validated
 
 
-#CHECK NO DOWN-CASTING AND SIDE-CASTING IS NOT ALLOWED
   Scenario: when a rule has a down-cast in a rule conclusion, an error is thrown
+  Ensures no down casting and side casting are allowed.
     When graql define throws
       """
       define
@@ -728,6 +726,10 @@ Feature: Graql Rule Validation
       """
       define
 
+      person owns age;
+
+      age sub attribute, value long;
+
       man sub person;
       boy sub person;
 
@@ -743,9 +745,8 @@ Feature: Graql Rule Validation
       Then the integrity is validated
 
 
-#CEHCK ADDING NEW ROLES TO EXISTING RELATIONSHIPS I NOT ALLOWED
-
   Scenario: when a rule adds a role to an existing relation, an error is thrown
+    Checks adding new roles to existing relationships is not allowed
     When graql define throws
       """
       define

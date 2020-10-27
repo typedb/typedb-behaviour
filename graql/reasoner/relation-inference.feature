@@ -899,3 +899,70 @@ Feature: Relation Inference Resolution
     # FIN | TUR | FIN |
     Then answer size in reasoned database is: 12
     Then materialised and reasoned databases are the same size
+
+
+# TODO: re-enable all steps once attribute re-attachment is resolvable
+  Scenario: a relation can be inferred based on a direct type
+    Given for each session, graql define
+      """
+      define
+
+      baseEntity sub entity,
+          plays baseRelation:baseRole,
+          plays derivedRelation:derivedRelationRole;
+
+      baseRelation sub relation,
+          relates baseRole;
+      subRelation sub baseRelation,
+          relates baseRole;
+      subSubRelation sub subRelation,
+          relates baseRole;
+
+      derivedRelation sub relation,
+          relates derivedRelationRole;
+      directDerivedRelation sub derivedRelation,
+          relates derivedRelationRole;
+
+      rule relationRule: when {
+          ($x) isa subRelation;
+      } then {
+          (derivedRelationRole: $x) isa derivedRelation;
+      };
+
+      rule directRelationRule: when {
+          ($x) isa! subRelation;
+      } then {
+          (derivedRelationRole: $x) isa directDerivedRelation;
+      };
+      """
+    Given for each session, graql insert
+      """
+      insert
+      $x isa baseEntity;
+      $y isa baseEntity;
+      $z isa baseEntity;
+
+      (baseRole: $x) isa baseRelation;
+      (baseRole: $y) isa subRelation;
+      (baseRole: $z) isa subSubRelation;
+      """
+#    When materialised database is completed
+    Then for graql query
+      """
+      match ($x) isa derivedRelation;
+      """
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
+    Then for graql query
+      """
+      match ($x) isa! derivedRelation;
+      """
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 2
+    Then for graql query
+      """
+      match ($x) isa directDerivedRelation;
+      """
+#    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
+#    Then materialised and reasoned databases are the same size
