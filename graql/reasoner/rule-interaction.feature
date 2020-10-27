@@ -115,6 +115,9 @@ Feature: Rule Interaction Resolution
     Then materialised and reasoned databases are the same size
 
   Scenario: when two distinct rules have alpha-equivalent bodies and heads, the reasoner still sees them as distinct.
+    More explicitly, suppose we have rule A and rule B. Suppose up to alpha equivalence A.when == B.when and
+    A.then == B.then. But the {rule A} != {rule B} because the bindings of the variables makes the meaning of A.then
+    distinct from B.then. In such a situation, the reasoner does not mistake the rules as equivalent.
     Given for each session, graql define
       """
       define
@@ -146,7 +149,7 @@ Feature: Rule Interaction Resolution
       };
       """
 
-    Given for each sesion, graql insert
+    Given for each session, graql insert
       """
       insert
 
