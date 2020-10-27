@@ -586,10 +586,8 @@ Feature: Graql Rule Validation
     Then the integrity is validated
 
 
-#    CHECK RULE STRATIFICATION
-#  This makes sure no cycle exists which contains a negation
-
   Scenario: when a rule negates its conclusion in the 'when', causing a loop, an error is thrown
+    Ensure rule stratification is possible
     Then graql define throws
       """
       define
@@ -686,8 +684,8 @@ Feature: Graql Rule Validation
 
 
 
-#CHECK CLAUSE VALIDATION
-  Scenario: when a rule has a conjunction as the conclusion, an error is thrown.
+  Scenario: when a rule has a conjunction as the conclusion, an error is thrown
+  Checks clause validation
     When graql define throws
     """
     define
@@ -701,4 +699,64 @@ Feature: Graql Rule Validation
     };
 
     """
+    Then the integrity is validated
+
+
+  Scenario: when a rule has a down-cast in a rule conclusion, an error is thrown
+  Ensures no down casting and side casting are allowed.
+    When graql define throws
+      """
+      define
+
+      man sub person;
+
+      rule all-bobs-are-men:
+      when {
+        $p isa person;
+        $p has name 'bob';
+      } then {
+        $p isa man;
+      };
+      """
+    Then the integrity is validated
+
+
+    Scenario: when a rule has a side-cast in a rule, an error is thrown
+      When graql define throws
+      """
+      define
+
+      person owns age;
+
+      age sub attribute, value long;
+
+      man sub person;
+      boy sub person;
+
+      rule male-children-are-boys:
+      when {
+        $p isa person;
+        $p has age $a;
+        $a < 18;
+      } then {
+        $p isa boy;
+      };
+      """
+      Then the integrity is validated
+
+
+  Scenario: when a rule adds a role to an existing relation, an error is thrown
+    Checks adding new roles to existing relationships is not allowed
+    When graql define throws
+      """
+      define
+
+      rule add-bob-to-all-employment:
+      when {
+        $r isa employment;
+        $p isa person, has name bob;
+      } then {
+        $r (employee: $p) isa employment;
+      };
+      """
     Then the integrity is validated
