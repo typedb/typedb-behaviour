@@ -17,7 +17,8 @@
 
 
 #  NOTE
-#  The following are tests that can no longer be run due to restrictions on HAS constraints in then clauses.
+#  This file is retained as a placeholder for future functionality
+#  The following tests can no longer be run due to restrictions on HAS constraints in then clauses.
 #  The ability to take the value of one attribute and give it to another will, however, be useful
 #  Therefore every test here will be ignored until further change.
 

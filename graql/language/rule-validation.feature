@@ -760,3 +760,103 @@ Feature: Graql Rule Validation
       };
       """
     Then the integrity is validated
+
+  Scenario: if a rule's body uses a type that doesn't exist, an error is thrown
+    When graql define throws
+      """
+      define
+
+      rule all-men-are-employed:
+      when {
+        $m isa man;
+      } then {
+        (employee: $m) isa employment;
+      };
+      """
+    Then the integrity is validated
+
+  Scenario: if a rule that uses a missing type within a negation, an error is thrown
+    When graql define throws
+      """
+      define
+
+      rule all-men-are-employed:
+      when {
+        $p isa person;
+        not {$p isa woman};
+      } then {
+        (employee: $p) isa employment;
+      };
+      """
+    Then the integrity is validated
+
+  Scenario: a rule may infer a named variable for an attribute if the attribute type is left out
+    When graql define
+      """
+      define
+
+      rule robert-has-nickname-bob:
+      when {
+        $p isa person, has name 'robert';
+        (employee: $p) isa employment;
+        $bob 'bob' isa nickname;
+      } then {
+        $p has $bob;
+      };
+      """
+    Then the integrity is validated
+
+  Scenario: a rule may infer an attribute type when the value is concrete
+    When graql define
+    """
+    define
+
+    rule robert-has-nickname-bob:
+      when {
+        $p isa person, has name 'robert';
+        (employee: $p) isa employment;
+      } then {
+        $p has nickname 'bob';
+      };
+    """
+    Then the integrity is validated
+
+  Scenario: if a rule infers both an attribute type and a named variable, an error is thrown
+    When graql define throws
+    """
+    define
+
+    rule robert-has-nickname-bob:
+      when {
+        $p isa person, has name 'robert';
+        (employee: $p) isa employment;
+        $b 'bob' isa nickname;
+      } then {
+        $p has nickname $b;
+      };
+    """
+    Then the integrity is validated
+
+  Scenario: a rule may have a clause asserting both an attribute type and a named variable within its when clause
+    When graql define
+    """
+    define
+
+    surname sub attribute, value string;
+
+    person owns surname,
+    plays family-relation:relative;
+
+    family-relation sub relation,
+    relates relative;
+
+    rule surnames-are-family-names:
+    when {
+      $p isa person, has surname $name;
+      $q isa person, has surname $name;
+    } then {
+      (relative: $p, relative: $q) isa family-relation;
+    };
+    """
+    Then the integrity is validated
+
