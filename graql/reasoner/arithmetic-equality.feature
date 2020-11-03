@@ -22,7 +22,6 @@
 #  The ability to take the value of one attribute and give it to another will, however, be useful
 #  Therefore every test here will be ignored until further change.
 
-Feature: A description
 
 #noinspection CucumberUndefinedStep
 Feature: Attribute Attachment Resolution
