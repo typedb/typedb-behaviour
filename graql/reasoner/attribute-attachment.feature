@@ -70,7 +70,7 @@ Feature: Attribute Attachment Resolution
         $x isa person, has string-attribute $r1;
         $y isa person;
       } then {
-        $y has string-attribute $r1;
+        $y has $r1;
       };
       """
     Given for each session, graql insert
@@ -95,125 +95,6 @@ Feature: Attribute Attachment Resolution
 #    Then materialised and reasoned databases are the same size
 
 
-  # TODO: re-enable all steps once re-attachment of unrelated attributes is resolvable
-  Scenario: when multiple rules copy attributes from an entity, they all get resolved
-    Given for each session, graql define
-      """
-      define
-      rule transfer-string-attribute-to-other-people: when {
-        $x isa person, has string-attribute $r1;
-        $y isa person;
-      } then {
-        $y has string-attribute $r1;
-      };
-
-      rule transfer-attribute-value-to-sub-attribute: when {
-        $x isa person, has string-attribute $r1;
-      } then {
-        $x has sub-string-attribute $r1;
-      };
-
-      rule transfer-attribute-value-to-unrelated-attribute: when {
-        $x isa person, has string-attribute $r1;
-      } then {
-        $x has unrelated-attribute $r1;
-      };
-      """
-    Given for each session, graql insert
-      """
-      insert
-      $geX isa person, has string-attribute "banana";
-      $geY isa person;
-      """
-#    When materialised database is completed
-    Then for graql query
-      """
-      match $x isa person;
-      """
-#    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 2
-    Then for graql query
-      """
-      match $x isa person, has attribute $y;
-      """
-    # four attributes for each entity
-#    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 6
-#    Then materialised and reasoned databases are the same size
-
-
-  # TODO: re-enable all steps once re-attachment of unrelated attributes is resolvable
-  Scenario: when a rule copies an attribute value to its sub-attribute, a new attribute concept is inferred
-    Given for each session, graql define
-      """
-      define
-      rule transfer-attribute-value-to-sub-attribute: when {
-        $x isa person, has string-attribute $r1;
-      } then {
-        $x has sub-string-attribute $r1;
-      };
-      """
-    Given for each session, graql insert
-      """
-      insert
-      $geX isa person, has string-attribute "banana";
-      """
-#    When materialised database is completed
-    Then for graql query
-      """
-      match $x isa person, has sub-string-attribute $y;
-      """
-#    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then for graql query
-      """
-      match $x isa sub-string-attribute;
-      """
-#    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then for graql query
-      """
-      match $x isa string-attribute; $y isa sub-string-attribute;
-      """
-    # 2 SA instances - one base, one sub hence two answers
-#    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 2
-#    Then materialised and reasoned databases are the same size
-
-
-  # TODO: re-enable all steps once re-attachment of unrelated attributes is resolvable
-  Scenario: when a rule copies an attribute value to an unrelated attribute, a new attribute concept is inferred
-    Given for each session, graql define
-      """
-      define
-      rule transfer-attribute-value-to-unrelated-attribute: when {
-        $x isa person, has string-attribute $r1;
-      } then {
-        $x has unrelated-attribute $r1;
-      };
-      """
-    Given for each session, graql insert
-      """
-      insert
-      $geX isa person, has string-attribute "banana";
-      $geY isa person;
-      """
-#    When materialised database is completed
-    Then for graql query
-      """
-      match $x isa person, has unrelated-attribute $y;
-      """
-#    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then for graql query
-      """
-      match $x isa unrelated-attribute;
-      """
-#    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-#    Then materialised and reasoned databases are the same size
-
-
   # TODO: re-enable all steps once attribute re-attachment is resolvable
   Scenario: when the same attribute is inferred on an entity and relation, both owners are correctly retrieved
     Given for each session, graql define
@@ -223,14 +104,14 @@ Feature: Attribute Attachment Resolution
         $x isa person, has string-attribute $r1;
         $y isa person;
       } then {
-        $y has string-attribute $r1;
+        $y has $r1;
       };
 
       rule transfer-string-attribute-from-people-to-teams: when {
         $x isa person, has string-attribute $y;
         $z isa team;
       } then {
-        $z has string-attribute $y;
+        $z has $y;
       };
       """
     Given for each session, graql insert
@@ -306,7 +187,7 @@ Feature: Attribute Attachment Resolution
         $x = 'Ocado';
         $y isa soft-drink;
       } then {
-        $y has retailer $x;
+        $y has $x;
       };
       """
     Given for each session, graql insert

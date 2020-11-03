@@ -2026,7 +2026,7 @@ Feature: Graql Insert Query
         $y isa person;
         not { $x is $y; };
       } then {
-        $y has score $s;
+        $y has $s;
       };
       """
     Given transaction commits
