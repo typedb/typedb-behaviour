@@ -31,3 +31,31 @@ checkstyle_deps()
 # Load //builder/bazel for RBE
 load("@graknlabs_dependencies//builder/bazel:deps.bzl", "bazel_toolchain")
 bazel_toolchain()
+
+# Load //builder/java
+load("@graknlabs_dependencies//builder/java:deps.bzl", java_deps = "deps")
+java_deps()
+load("@graknlabs_dependencies//library/maven:rules.bzl", "maven")
+
+# Load //builder/python
+load("@graknlabs_dependencies//builder/python:deps.bzl", python_deps = "deps")
+python_deps()
+load("@rules_python//python:pip.bzl", "pip_repositories", "pip3_import")
+pip_repositories()
+
+# Load //builder/kotlin
+load("@graknlabs_dependencies//builder/kotlin:deps.bzl", kotlin_deps = "deps")
+kotlin_deps()
+load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kotlin_repositories", "kt_register_toolchains")
+kotlin_repositories()
+kt_register_toolchains()
+
+load("@graknlabs_dependencies//tool/common:deps.bzl", graknlabs_dependencies_tool_maven_artifacts = "maven_artifacts")
+
+############################
+# Load @maven dependencies #
+############################
+load("@graknlabs_dependencies//library/maven:rules.bzl", "maven")
+maven(
+    graknlabs_dependencies_tool_maven_artifacts
+)
