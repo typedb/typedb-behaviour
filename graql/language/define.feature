@@ -70,7 +70,7 @@ Feature: Graql Define Query
   Scenario: a new entity type can be defined as a subtype, creating a new child of its parent type
     When graql define
       """
-      define child sub person; 
+      define child sub person;
       """
     Then transaction commits
     Then the integrity is validated
@@ -288,25 +288,6 @@ Feature: Graql Define Query
       | ATH |
       | RUN |
       | SPR |
-
-
-  Scenario: a type cannot be a subtype of itself
-    Then graql define; throws exception
-      """
-      define dog sub dog;
-      """
-    Then the integrity is validated
-
-
-  Scenario: a cyclic type hierarchy is not allowed
-    Then graql define; throws exception
-      """
-      define
-      giant sub person;
-      green-giant sub giant;
-      person sub green-giant;
-      """
-    Then the integrity is validated
 
 
   Scenario: defining a playable role is idempotent
@@ -806,27 +787,6 @@ Feature: Graql Define Query
       | PAR |
 
 
-  Scenario: a relation type can relate to a role that it plays itself
-    When graql define
-      """
-      define
-      recursive-function sub relation, relates function, plays recursive-function:function;
-      """
-    Then transaction commits
-    Then the integrity is validated
-    Given session opens transaction of type: read
-    When get answers of graql query
-      """
-      match $x relates function; $x plays recursive-function:function;
-      """
-    When concept identifiers are
-      |     | check | value              |
-      | REC | label | recursive-function |
-    Then uniquely identify answer concepts
-      | x   |
-      | REC |
-
-
   Scenario: unrelated relations are allowed to have roles with the same name
     When graql define
       """
@@ -1177,25 +1137,6 @@ Feature: Graql Define Query
     | string     | first-word        |
     | datetime   | graduation-date   |
 
-
-  Scenario: an attribute type can own itself
-    When graql define
-      """
-      define number-of-letters sub attribute, value long, owns number-of-letters;
-      """
-    Then transaction commits
-    Then the integrity is validated
-    When session opens transaction of type: read
-    When get answers of graql query
-      """
-      match $x owns number-of-letters;
-      """
-    When concept identifiers are
-      |     | check | value             |
-      | NOL | label | number-of-letters |
-    Then uniquely identify answer concepts
-      | x   |
-      | NOL |
 
   # TODO
   Scenario Outline: a type can own a '<value_type>' attribute type as a key
@@ -2339,4 +2280,132 @@ Feature: Graql Define Query
       """
       match $x type dog;
       """
+    Then the integrity is validated
+
+
+  ########################
+  # CYCLIC SCHEMA GRAPHS #
+  ########################
+
+  Scenario: a type cannot be a subtype of itself
+    Then graql define; throws exception
+      """
+      define dog sub dog;
+      """
+    Then the integrity is validated
+
+
+  Scenario: a cyclic type hierarchy is not allowed
+    Then graql define; throws exception
+      """
+      define
+      giant sub person;
+      green-giant sub giant;
+      person sub green-giant;
+      """
+    Then the integrity is validated
+
+
+  Scenario: a relation type can relate to a role that it plays itself
+    When graql define
+      """
+      define
+      recursive-function sub relation, relates function, plays recursive-function:function;
+      """
+    Then transaction commits
+    Then the integrity is validated
+    Given session opens transaction of type: read
+    When get answers of graql query
+      """
+      match $x relates function; $x plays recursive-function:function;
+      """
+    When concept identifiers are
+      |     | check | value              |
+      | REC | label | recursive-function |
+    Then uniquely identify answer concepts
+      | x   |
+      | REC |
+
+
+  Scenario: an attribute type can own itself
+    When graql define
+      """
+      define number-of-letters sub attribute, value long, owns number-of-letters;
+      """
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
+    When get answers of graql query
+      """
+      match $x owns number-of-letters;
+      """
+    When concept identifiers are
+      |     | check | value             |
+      | NOL | label | number-of-letters |
+    Then uniquely identify answer concepts
+      | x   |
+      | NOL |
+
+
+  Scenario: two relation types in a type hierarchy can play each other's roles
+    When graql define
+      """
+      define
+      apple sub relation, abstract, relates role1, plays big-apple:role2;
+      big-apple sub apple, plays apple:role1, relates role2;
+      """
+    Then the integrity is validated
+
+
+  Scenario: relation types that play roles in their transitive subtypes can be reliably defined
+
+    Variables from a 'define' query are selected for defining in an arbitrary order. When these variables
+    depend on each other, creating a dependency graph, they should all define successfully regardless of
+    which variable was picked as the start vertex (#131)
+
+    When graql define
+      """
+      define
+
+      apple sub relation, abstract, plays huge-apple:grows-from;
+      big-apple sub apple, abstract;
+      huge-apple sub big-apple, relates tree, relates grows-from;
+
+      banana sub relation, abstract, plays huge-banana:grows-from;
+      big-banana sub banana, abstract;
+      huge-banana sub big-banana, relates tree, relates grows-from;
+
+      orange sub relation, abstract, plays huge-orange:grows-from;
+      big-orange sub orange, abstract;
+      huge-orange sub big-orange, relates tree, relates grows-from;
+
+      pear sub relation, abstract, plays huge-pear:grows-from;
+      big-pear sub pear, abstract;
+      huge-pear sub big-pear, relates tree, relates grows-from;
+
+      tomato sub relation, abstract, plays huge-tomato:grows-from;
+      big-tomato sub tomato, abstract;
+      huge-tomato sub big-tomato, relates tree, relates grows-from;
+
+      watermelon sub relation, abstract, plays huge-watermelon:grows-from;
+      big-watermelon sub watermelon, abstract;
+      huge-watermelon sub big-watermelon, relates tree, relates grows-from;
+
+      lemon sub relation, abstract, plays huge-lemon:grows-from;
+      big-lemon sub lemon, abstract;
+      huge-lemon sub big-lemon, relates tree, relates grows-from;
+
+      lime sub relation, abstract, plays huge-lime:grows-from;
+      big-lime sub lime, abstract;
+      huge-lime sub big-lime, relates tree, relates grows-from;
+
+      mango sub relation, abstract, plays huge-mango:grows-from;
+      big-mango sub mango, abstract;
+      huge-mango sub big-mango, relates tree, relates grows-from;
+
+      pineapple sub relation, abstract, plays huge-pineapple:grows-from;
+      big-pineapple sub pineapple, abstract;
+      huge-pineapple sub big-pineapple, relates tree, relates grows-from;
+      """
+    Then transaction commits
     Then the integrity is validated
