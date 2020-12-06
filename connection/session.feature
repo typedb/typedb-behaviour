@@ -105,12 +105,7 @@ Feature: Connection Session
       | dylan   |
       | eve     |
       | frank   |
-      | george  |
-      | heidi   |
-      | ivan    |
-      | judy    |
-      | mike    |
-      | neil    |
+
     When connection open sessions for databases:
       | alice   |
       | bob     |
@@ -118,12 +113,7 @@ Feature: Connection Session
       | dylan   |
       | eve     |
       | frank   |
-      | george  |
-      | heidi   |
-      | ivan    |
-      | judy    |
-      | mike    |
-      | neil    |
+
     Then sessions are null: false
     Then sessions are open: true
     Then sessions have databases:
@@ -133,12 +123,7 @@ Feature: Connection Session
       | dylan   |
       | eve     |
       | frank   |
-      | george  |
-      | heidi   |
-      | ivan    |
-      | judy    |
-      | mike    |
-      | neil    |
+
 
   Scenario: for many databases, open many sessions in parallel
     When connection create databases:
@@ -148,12 +133,7 @@ Feature: Connection Session
       | dylan   |
       | eve     |
       | frank   |
-      | george  |
-      | heidi   |
-      | ivan    |
-      | judy    |
-      | mike    |
-      | neil    |
+
     When connection open sessions in parallel for databases:
       | alice   |
       | bob     |
@@ -161,12 +141,7 @@ Feature: Connection Session
       | dylan   |
       | eve     |
       | frank   |
-      | george  |
-      | heidi   |
-      | ivan    |
-      | judy    |
-      | mike    |
-      | neil    |
+
     Then sessions in parallel are null: false
     Then sessions in parallel are open: true
     Then sessions in parallel have databases:
@@ -176,9 +151,4 @@ Feature: Connection Session
       | dylan   |
       | eve     |
       | frank   |
-      | george  |
-      | heidi   |
-      | ivan    |
-      | judy    |
-      | mike    |
-      | neil    |
+
