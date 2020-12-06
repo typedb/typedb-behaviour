@@ -37,12 +37,7 @@ Feature: Connection Database
       | dylan   |
       | eve     |
       | frank   |
-      | george  |
-      | heidi   |
-      | ivan    |
-      | judy    |
-      | mike    |
-      | neil    |
+
     Then  connection has databases:
       | alice   |
       | bob     |
@@ -50,12 +45,7 @@ Feature: Connection Database
       | dylan   |
       | eve     |
       | frank   |
-      | george  |
-      | heidi   |
-      | ivan    |
-      | judy    |
-      | mike    |
-      | neil    |
+
 
   Scenario: create many databases in parallel
     When  connection create databases in parallel:
@@ -65,12 +55,7 @@ Feature: Connection Database
       | dylan   |
       | eve     |
       | frank   |
-      | george  |
-      | heidi   |
-      | ivan    |
-      | judy    |
-      | mike    |
-      | neil    |
+
     Then  connection has databases:
       | alice   |
       | bob     |
@@ -78,12 +63,7 @@ Feature: Connection Database
       | dylan   |
       | eve     |
       | frank   |
-      | george  |
-      | heidi   |
-      | ivan    |
-      | judy    |
-      | mike    |
-      | neil    |
+
 
   Scenario: delete one database
       # This step should be rewritten once we can create keypsaces without opening sessions
@@ -104,12 +84,7 @@ Feature: Connection Database
       | dylan   |
       | eve     |
       | frank   |
-      | george  |
-      | heidi   |
-      | ivan    |
-      | judy    |
-      | mike    |
-      | neil    |
+
     When  connection delete databases:
       | alice   |
       | bob     |
@@ -117,12 +92,7 @@ Feature: Connection Database
       | dylan   |
       | eve     |
       | frank   |
-      | george  |
-      | heidi   |
-      | ivan    |
-      | judy    |
-      | mike    |
-      | neil    |
+
     Then  connection does not have databases:
       | alice   |
       | bob     |
@@ -130,12 +100,7 @@ Feature: Connection Database
       | dylan   |
       | eve     |
       | frank   |
-      | george  |
-      | heidi   |
-      | ivan    |
-      | judy    |
-      | mike    |
-      | neil    |
+
     Then  connection does not have any database
 
   Scenario: delete many databases in parallel
@@ -147,12 +112,7 @@ Feature: Connection Database
       | dylan   |
       | eve     |
       | frank   |
-      | george  |
-      | heidi   |
-      | ivan    |
-      | judy    |
-      | mike    |
-      | neil    |
+
     When  connection delete databases in parallel:
       | alice   |
       | bob     |
@@ -160,12 +120,7 @@ Feature: Connection Database
       | dylan   |
       | eve     |
       | frank   |
-      | george  |
-      | heidi   |
-      | ivan    |
-      | judy    |
-      | mike    |
-      | neil    |
+
     Then  connection does not have databases:
       | alice   |
       | bob     |
@@ -173,12 +128,7 @@ Feature: Connection Database
       | dylan   |
       | eve     |
       | frank   |
-      | george  |
-      | heidi   |
-      | ivan    |
-      | judy    |
-      | mike    |
-      | neil    |
+
     Then  connection does not have any database
 
 
