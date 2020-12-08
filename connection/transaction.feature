@@ -20,7 +20,6 @@ Feature: Connection Transaction
 
   Background:
     Given connection has been opened
-    Given connection delete all databases
     Given connection does not have any database
 
   Scenario: one database, one session, one transaction to read
