@@ -28,7 +28,6 @@ Feature: Attribute Attachment Resolution
   Background: Set up databases for resolution testing
 
     Given connection has been opened
-    Given connection delete all databases
     Given connection open sessions for databases:
       | materialised |
       | reasoned     |

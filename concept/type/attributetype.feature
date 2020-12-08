@@ -20,7 +20,6 @@ Feature: Concept Attribute Type
 
   Background:
     Given connection has been opened
-    Given connection delete all databases
     Given connection does not have any database
     Given connection create database: grakn
     Given connection open schema session for database: grakn

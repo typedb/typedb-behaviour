@@ -20,7 +20,6 @@ Feature: Connection Session
 
   Background:
     Given connection has been opened
-    Given connection delete all databases
     Given connection does not have any database
 
   Scenario: for one database, open one session

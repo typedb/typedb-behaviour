@@ -20,7 +20,6 @@ Feature: Graql Reasoning Explanation
 
   Background: Initialise a session and transaction for each scenario
     Given connection has been opened
-    Given connection delete all databases
     Given connection open sessions for databases:
       | test_explanation |
     Given transaction is initialised
