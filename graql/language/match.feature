@@ -1220,19 +1220,6 @@ Feature: Graql Match Query
     Then answer size is: 0
 
 
-  Scenario: when querying for a non-existent relation type iid, an empty result is returned
-    When get answers of graql query
-      """
-      match ($x, $y) isa $type; $type iid 0x83cb2;
-      """
-    Then answer size is: 0
-    When get answers of graql query
-      """
-      match $r ($x, $y) isa $type; $r iid 0x4ba92;
-      """
-    Then answer size is: 0
-
-
   ##############
   # ATTRIBUTES #
   ##############
@@ -1596,7 +1583,7 @@ Feature: Graql Match Query
   # ATTRIBUTE VALUE COMPARISON #
   ##############################
 
-  Scenario: when things own attributes of different types but the same value, they match by equality, but not ownership
+  Scenario: when things own attributes of different types but the same value, they match by equality
     Given graql define
       """
       define
@@ -1619,13 +1606,6 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
-      """
-      match
-        $x isa person, has graduation-date $date;
-        $r (employee: $x) isa employment, has start-date $date;
-      """
-    Then answer size is: 0
     Then get answers of graql query
       """
       match
@@ -1936,14 +1916,6 @@ Feature: Graql Match Query
       """
       match not { $x is $y; };
       """
-
-
-  Scenario: value comparison of unbound variables throws an error
-    Then graql match; throws exception
-      """
-      match $x != $y;
-      """
-
 
   ############
   # PATTERNS #
