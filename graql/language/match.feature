@@ -294,6 +294,26 @@ Feature: Graql Match Query
       | PER |
 
 
+  Scenario: 'owns' can match types that can own themselves
+    Given graql define
+      """
+      define
+      unit sub string, owns unit;
+      """
+    Given transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
+    When get answers of graql query
+      """
+      match $x owns $x;
+      """
+    And concept identifiers are
+      |      | check | value  |
+      | UNIT | label | unit   |
+    Then uniquely identify answer concepts
+      | x    |
+      | UNIT |
+
   Scenario: 'owns' does not match types that own only a subtype of the specified attribute type
     Given graql define
       """
@@ -1529,6 +1549,37 @@ Feature: Graql Match Query
     Then uniquely identify answer concepts
       | x   |
       | PER |
+
+
+  Scenario: 'has' can match instances that have themselves
+    Given graql define
+      """
+      define
+      unit sub string, owns unit, owns ref;
+      """
+    Given transaction commits
+    Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
+    Given graql insert
+      """
+      insert
+      $x "meter" isa unit, has $x, has ref 0;
+      """
+    Given transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
+    When get answers of graql query
+      """
+      match $x has $x;
+      """
+    And concept identifiers are
+      |       | check | value  |
+      | METER | key   | ref:0  |
+    Then uniquely identify answer concepts
+      | x     |
+      | METER |
 
 
   Scenario: an error is thrown when matching by attribute ownership, when the owned thing is actually an entity
