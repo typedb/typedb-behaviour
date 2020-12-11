@@ -125,13 +125,11 @@ Feature: Graql Match Query
       | WRI | label | writer |
       | PER | label | person |
       | ENT | label | entity |
-      | THI | label | thing  |
     Then uniquely identify answer concepts
       | x   |
       | WRI |
       | PER |
       | ENT |
-      | THI |
 
 
   Scenario: 'sub' can be used to retrieve all instances of types that are subtypes of a given type
@@ -225,12 +223,10 @@ Feature: Graql Match Query
       """
     And concept identifiers are
       |     | check | value    |
-      | PER | label | person   |
       | WRI | label | writer   |
       | MUS | label | musician |
     Then uniquely identify answer concepts
       | x   |
-      | PER |
       | WRI |
       | MUS |
 
@@ -251,39 +247,38 @@ Feature: Graql Match Query
       """
     And concept identifiers are
       |     | check | value  |
-      | WRI | label | writer |
       | PER | label | person |
     Then uniquely identify answer concepts
       | x   |
-      | WRI |
       | PER |
 
 
-  Scenario: subtype hierarchy satisfies transitive sub assertions
-    Given graql define
-      """
-      define
-      sub1 sub entity;
-      sub2 sub sub1;
-      sub3 sub sub1;
-      sub4 sub sub2;
-      sub5 sub sub4;
-      sub6 sub sub5;
-      """
-    Given transaction commits
-    Given the integrity is validated
-    Given session opens transaction of type: read
-    When get answers of graql query
-      """
-      match
-        $x sub $y;
-        $y sub $z;
-        $z sub sub1;
-      """
-    Then each answer satisfies
-      """
-      match $x sub $z; $x iid <answer.x.iid>; $z iid <answer.z.iid>;
-      """
+    # TODO this does not work on types anymore - types cannot be specified by IID
+#  Scenario: subtype hierarchy satisfies transitive sub assertions
+#    Given graql define
+#      """
+#      define
+#      sub1 sub entity;
+#      sub2 sub sub1;
+#      sub3 sub sub1;
+#      sub4 sub sub2;
+#      sub5 sub sub4;
+#      sub6 sub sub5;
+#      """
+#    Given transaction commits
+#    Given the integrity is validated
+#    Given session opens transaction of type: read
+#    When get answers of graql query
+#      """
+#      match
+#        $x sub $y;
+#        $y sub $z;
+#        $z sub sub1;
+#      """
+#    Then each answer satisfies
+#      """
+#      match $x sub $z; $x iid <answer.x.iid>; $z iid <answer.z.iid>;
+#      """
 
 
   Scenario: 'owns' matches types that own the specified attribute type
@@ -471,9 +466,9 @@ Feature: Graql Match Query
       match person plays $x;
       """
     And concept identifiers are
-      |     | check | value    |
-      | FRI | label | friend   |
-      | EMP | label | employee |
+      |     | check | value               |
+      | FRI | label | friendship:friend   |
+      | EMP | label | employment:employee |
     Then uniquely identify answer concepts
       | x   |
       | FRI |
