@@ -253,32 +253,33 @@ Feature: Graql Match Query
       | PER |
 
 
+    @ignore
     # TODO this does not work on types anymore - types cannot be specified by IID
-#  Scenario: subtype hierarchy satisfies transitive sub assertions
-#    Given graql define
-#      """
-#      define
-#      sub1 sub entity;
-#      sub2 sub sub1;
-#      sub3 sub sub1;
-#      sub4 sub sub2;
-#      sub5 sub sub4;
-#      sub6 sub sub5;
-#      """
-#    Given transaction commits
-#    Given the integrity is validated
-#    Given session opens transaction of type: read
-#    When get answers of graql query
-#      """
-#      match
-#        $x sub $y;
-#        $y sub $z;
-#        $z sub sub1;
-#      """
-#    Then each answer satisfies
-#      """
-#      match $x sub $z; $x iid <answer.x.iid>; $z iid <answer.z.iid>;
-#      """
+  Scenario: subtype hierarchy satisfies transitive sub assertions
+    Given graql define
+      """
+      define
+      sub1 sub entity;
+      sub2 sub sub1;
+      sub3 sub sub1;
+      sub4 sub sub2;
+      sub5 sub sub4;
+      sub6 sub sub5;
+      """
+    Given transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
+    When get answers of graql query
+      """
+      match
+        $x sub $y;
+        $y sub $z;
+        $z sub sub1;
+      """
+    Then each answer satisfies
+      """
+      match $x sub $z; $x iid <answer.x.iid>; $z iid <answer.z.iid>;
+      """
 
 
   Scenario: 'owns' matches types that own the specified attribute type
@@ -298,7 +299,7 @@ Feature: Graql Match Query
     Given graql define
       """
       define
-      unit sub string, owns unit;
+      unit sub attribute, value string, owns unit;
       """
     Given transaction commits
     Given the integrity is validated
@@ -313,6 +314,7 @@ Feature: Graql Match Query
     Then uniquely identify answer concepts
       | x    |
       | UNIT |
+
 
   Scenario: 'owns' does not match types that own only a subtype of the specified attribute type
     Given graql define
@@ -609,6 +611,7 @@ Feature: Graql Match Query
       | EMP |
 
 
+  @ignore  # TODO query for 'as' via traversal is unimplemented
   Scenario: 'relates' with 'as' matches relation types that override the specified roleplayer
     Given graql define
       """
@@ -659,9 +662,9 @@ Feature: Graql Match Query
       match employment relates $x;
       """
     And concept identifiers are
-      |     | check | value    |
-      | EME | label | employee |
-      | EMR | label | employer |
+      |     | check | value               |
+      | EME | label | employment:employee |
+      | EMR | label | employment:employer |
     Then uniquely identify answer concepts
       | x   |
       | EME |
@@ -796,14 +799,6 @@ Feature: Graql Match Query
     Then the integrity is validated
 
 
-  Scenario: when matching by a type iid that doesn't exist, an empty result is returned
-    When get answers of graql query
-      """
-      match $x isa $type; $type iid 0x83cb2;
-      """
-    Then answer size is: 0
-
-
   Scenario: when matching by a relation type whose label doesn't exist, an error is thrown
     Then graql match; throws exception
       """
@@ -818,16 +813,6 @@ Feature: Graql Match Query
       match $x isa $type; $type type polok;
       """
     Then the integrity is validated
-
-
-  Scenario: when matching that the same variable is of two types, an empty result is returned
-    Then get answers of graql query
-      """
-      match
-        $x isa person;
-        $x isa company;
-      """
-    Then answer size is: 0
 
 
   Scenario: when one entity exists, and we match two variables both of that entity type, the entity is returned
@@ -863,6 +848,7 @@ Feature: Graql Match Query
     Then the integrity is validated
 
 
+    @ignore # TODO we can't query for rule anymore
   Scenario: an error is thrown when matching that a variable has a specific type, when that type is in fact a rule
     Given graql define
       """
@@ -1555,7 +1541,7 @@ Feature: Graql Match Query
     Given graql define
       """
       define
-      unit sub string, owns unit, owns ref;
+     unit sub attribute, value string, owns unit, owns ref;
       """
     Given transaction commits
     Given the integrity is validated
