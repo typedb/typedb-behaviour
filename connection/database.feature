@@ -143,7 +143,7 @@ Feature: Connection Database
     Then for each session, open transaction of type; throws exception
       | write |
 
-
+  @ignore-grakn-core
   Scenario: delete a database causes open transactions to fail
     When connection create database:
       | grakn |
