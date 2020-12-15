@@ -48,16 +48,11 @@ Feature: Graql Undefine Query
       """
       match $x sub entity;
       """
-    Given concept identifiers are
-      |     | check | value         |
-      | ABS | label | abstract-type |
-      | PER | label | person        |
-      | ENT | label | entity        |
     Given uniquely identify answer concepts
-      | x   |
-      | ABS |
-      | PER |
-      | ENT |
+      | x                   |
+      | label:abstract-type |
+      | label:person        |
+      | label:entity        |
     When graql undefine
       """
       undefine person sub entity;
@@ -70,9 +65,9 @@ Feature: Graql Undefine Query
       match $x sub entity;
       """
     Then uniquely identify answer concepts
-      | x   |
-      | ABS |
-      | ENT |
+      | x                   |
+      | label:abstract-type |
+      | label:entity        |
 
 
   Scenario: when undefining 'sub' on an entity type, specifying a type that isn't really its supertype, nothing happens
@@ -87,12 +82,9 @@ Feature: Graql Undefine Query
       """
       match $x type person;
       """
-    When concept identifiers are
-      |     | check | value  |
-      | PER | label | person |
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
+      | x            |
+      | label:person |
 
 
   Scenario: a sub-entity type can be removed using 'sub' with its direct supertype, and its parent is preserved
@@ -107,14 +99,10 @@ Feature: Graql Undefine Query
       """
       match $x sub person;
       """
-    Given concept identifiers are
-      |     | check | value  |
-      | PER | label | person |
-      | CHI | label | child  |
     Given uniquely identify answer concepts
-      | x   |
-      | PER |
-      | CHI |
+      | x            |
+      | label:person |
+      | label:child  |
     When graql undefine
       """
       undefine child sub person;
@@ -127,8 +115,8 @@ Feature: Graql Undefine Query
       match $x sub person;
       """
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
+      | x            |
+      | label:person |
 
 
   Scenario: if 'entity' is not the direct supertype of an entity, undefining 'sub entity' on it does nothing
@@ -150,12 +138,9 @@ Feature: Graql Undefine Query
       """
       match $x type child;
       """
-    When concept identifiers are
-      |     | check | value |
-      | CHI | label | child |
     Then uniquely identify answer concepts
-      | x   |
-      | CHI |
+      | x           |
+      | label:child |
 
 
   Scenario: undefining a supertype throws an error if subtypes exist
@@ -244,16 +229,11 @@ Feature: Graql Undefine Query
       """
       match $x sub entity;
       """
-    Given concept identifiers are
-      |     | check | value         |
-      | ABS | label | abstract-type |
-      | PER | label | person        |
-      | ENT | label | entity        |
     Given uniquely identify answer concepts
-      | x   |
-      | ABS |
-      | PER |
-      | ENT |
+      | x                   |
+      | label:abstract-type |
+      | label:person        |
+      | label:entity        |
     Given transaction commits
     Given the integrity is validated
     Given connection close all sessions
@@ -300,9 +280,9 @@ Feature: Graql Undefine Query
       match $x sub entity;
       """
     Then uniquely identify answer concepts
-      | x   |
-      | ABS |
-      | ENT |
+      | x                   |
+      | label:abstract-type |
+      | label:entity        |
 
 
   ##################
@@ -314,14 +294,10 @@ Feature: Graql Undefine Query
       """
       match $x sub relation;
       """
-    Given concept identifiers are
-      |     | check | value      |
-      | EMP | label | employment |
-      | REL | label | relation   |
     Given uniquely identify answer concepts
-      | x   |
-      | EMP |
-      | REL |
+      | x                |
+      | label:employment |
+      | label:relation   |
     When graql undefine
       """
       undefine employment sub relation;
@@ -334,8 +310,8 @@ Feature: Graql Undefine Query
       match $x sub relation;
       """
     Then uniquely identify answer concepts
-      | x   |
-      | REL |
+      | x              |
+      | label:relation |
 
 
   Scenario: removing playable roles from a super relation type also removes them from its subtypes
@@ -353,12 +329,9 @@ Feature: Graql Undefine Query
       """
       match contract-employment plays $x;
       """
-    Given concept identifiers are
-      |     | check | value      |
-      | EWT | label | employment |
     Given uniquely identify answer concepts
-      | x   |
-      | EWT |
+      | x                |
+      | label:employment |
     When graql undefine
       """
       undefine employment plays employment-terms:employment;
@@ -388,14 +361,10 @@ Feature: Graql Undefine Query
       """
       match $x owns start-date;
       """
-    Given concept identifiers are
-      |     | check | value               |
-      | EMP | label | employment          |
-      | CEM | label | contract-employment |
     Given uniquely identify answer concepts
-      | x   |
-      | EMP |
-      | CEM |
+      | x                         |
+      | label:employment          |
+      | label:contract-employment |
     When graql undefine
       """
       undefine employment owns start-date;
@@ -425,14 +394,10 @@ Feature: Graql Undefine Query
       """
       match $x owns employment-reference @key;
       """
-    Given concept identifiers are
-      |     | check | value               |
-      | EMP | label | employment          |
-      | CEM | label | contract-employment |
     Given uniquely identify answer concepts
-      | x   |
-      | EMP |
-      | CEM |
+      | x                         |
+      | label:employment          |
+      | label:contract-employment |
     When graql undefine
       """
       undefine employment owns employment-reference;
@@ -478,14 +443,10 @@ Feature: Graql Undefine Query
       """
       match $x sub relation;
       """
-    Given concept identifiers are
-      |     | check | value      |
-      | EMP | label | employment |
-      | REL | label | relation   |
     Given uniquely identify answer concepts
-      | x   |
-      | EMP |
-      | REL |
+      | x                |
+      | label:employment |
+      | label:relation   |
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -532,8 +493,8 @@ Feature: Graql Undefine Query
       match $x sub relation;
       """
     Then uniquely identify answer concepts
-      | x   |
-      | REL |
+      | x              |
+      | label:relation |
 
 
   Scenario: undefining a relation type automatically detaches any possible roleplayers
@@ -543,13 +504,9 @@ Feature: Graql Undefine Query
         $x type person;
         $x plays $y;
       """
-    Given concept identifiers are
-      |     | check | value               |
-      | PER | label | person              |
-      | EME | label | employment:employee |
     Given uniquely identify answer concepts
-      | x   | y   |
-      | PER | EME |
+      | x            | y                         |
+      | label:person | label:employment:employee |
     When graql undefine
       """
       undefine employment sub relation;
@@ -575,14 +532,10 @@ Feature: Graql Undefine Query
       """
       match employment relates $x;
       """
-    Given concept identifiers are
-      |     | check | value    |
-      | EME | label | employee |
-      | EMR | label | employer |
     Given uniquely identify answer concepts
-      | x   |
-      | EME |
-      | EMR |
+      | x              |
+      | label:employee |
+      | label:employer |
     When graql undefine
       """
       undefine employment relates employee;
@@ -595,8 +548,8 @@ Feature: Graql Undefine Query
       match employment relates $x;
       """
     Then uniquely identify answer concepts
-      | x   |
-      | EMR |
+      | x              |
+      | label:employer |
 
 
   Scenario: undefining all players of a role produces a valid schema
@@ -683,13 +636,9 @@ Feature: Graql Undefine Query
         $x type person;
         $x plays $y;
       """
-    Given concept identifiers are
-      |     | check | value               |
-      | PER | label | person              |
-      | EME | label | employment:employee |
     Given uniquely identify answer concepts
-      | x   | y   |
-      | PER | EME |
+      | x            | y                         |
+      | label:person | label:employment:employee |
     When graql undefine
       """
       undefine employment relates employee;
@@ -762,12 +711,9 @@ Feature: Graql Undefine Query
       """
       match employment relates $x;
       """
-    When concept identifiers are
-      |     | check | value    |
-      | EME | label | employee |
     Then uniquely identify answer concepts
-      | x   |
-      | EME |
+      | x              |
+      | label:employee |
 
 
   Scenario: removing a role from a super relation type also removes it from its subtypes
@@ -789,13 +735,9 @@ Feature: Graql Undefine Query
       """
       match $x type part-time; $x relates $role;
       """
-    Then concept identifiers are
-      |           | check | value     |
-      | EMPLOYEE  | label | employee  |
-      | PART_TIME | label | part-time |
     Then uniquely identify answer concepts
-      | x         | role     |
-      | PART_TIME | EMPLOYEE |
+      | x               | role           |
+      | label:part-time | label:employee |
 
   # TODO
   Scenario: removing a role from a super relation type also removes roles that override it in its subtypes (?)
@@ -862,12 +804,9 @@ Feature: Graql Undefine Query
       """
       match person plays $x;
       """
-    Given concept identifiers are
-      |     | check | value    |
-      | EMP | label | employee |
     Given uniquely identify answer concepts
-      | x   |
-      | EMP |
+      | x              |
+      | label:employee |
     When graql undefine
       """
       undefine person plays employment:employer;
@@ -880,8 +819,8 @@ Feature: Graql Undefine Query
       match person plays $x;
       """
     Then uniquely identify answer concepts
-      | x   |
-      | EMP |
+      | x              |
+      | label:employee |
 
 
   Scenario: removing a playable role throws an error if it is played by existing instances
@@ -992,12 +931,9 @@ Feature: Graql Undefine Query
       """
       match first-name plays $x;
       """
-    Given concept identifiers are
-      |     | check | value        |
-      | MNA | label | manager-name |
     Given uniquely identify answer concepts
-      | x   |
-      | MNA |
+      | x                  |
+      | label:manager-name |
     When graql undefine
       """
       undefine name plays employment:manager-name;
@@ -1028,14 +964,10 @@ Feature: Graql Undefine Query
       """
       match $x owns locale;
       """
-    Given concept identifiers are
-      |     | check | value      |
-      | NAM | label | name       |
-      | FNA | label | first-name |
     Given uniquely identify answer concepts
-      | x   |
-      | NAM |
-      | FNA |
+      | x                |
+      | label:name       |
+      | label:first-name |
     When graql undefine
       """
       undefine name owns locale;
@@ -1066,14 +998,10 @@ Feature: Graql Undefine Query
       """
       match $x owns name-id @key;
       """
-    Given concept identifiers are
-      |     | check | value      |
-      | NAM | label | name       |
-      | FNA | label | first-name |
     Given uniquely identify answer concepts
-      | x   |
-      | NAM |
-      | FNA |
+      | x                |
+      | label:name       |
+      | label:first-name |
     When graql undefine
       """
       undefine name owns name-id;
@@ -1125,16 +1053,11 @@ Feature: Graql Undefine Query
       """
       match $x sub attribute;
       """
-    Given concept identifiers are
-      |     | check | value     |
-      | NAM | label | name      |
-      | EMA | label | email     |
-      | ATT | label | attribute |
     Given uniquely identify answer concepts
-      | x   |
-      | NAM |
-      | EMA |
-      | ATT |
+      | x               |
+      | label:name      |
+      | label:email     |
+      | label:attribute |
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -1179,9 +1102,9 @@ Feature: Graql Undefine Query
       match $x sub attribute;
       """
     Then uniquely identify answer concepts
-      | x   |
-      | EMA |
-      | ATT |
+      | x               |
+      | label:email     |
+      | label:attribute |
 
 
   ########################
@@ -1195,12 +1118,9 @@ Feature: Graql Undefine Query
         $x owns name;
         $x type person;
       """
-    Given concept identifiers are
-      |     | check | value  |
-      | PER | label | person |
     Given uniquely identify answer concepts
-      | x   |
-      | PER |
+      | x            |
+      | label:person |
     When graql undefine
       """
       undefine person owns name;
@@ -1246,14 +1166,10 @@ Feature: Graql Undefine Query
       """
       match $x owns name;
       """
-    When concept identifiers are
-      |     | check | value  |
-      | PER | label | person |
-      | CHI | label | child  |
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
-      | CHI |
+      | x            |
+      | label:person |
+      | label:child  |
 
 
   Scenario: undefining a key ownership removes it
@@ -1292,12 +1208,9 @@ Feature: Graql Undefine Query
       """
       match $x owns name;
       """
-    Given concept identifiers are
-      |     | check | value  |
-      | PER | label | person |
     Given uniquely identify answer concepts
-      | x   |
-      | PER |
+      | x            |
+      | label:person |
     Given transaction commits
     Given the integrity is validated
     Given connection close all sessions
@@ -1389,14 +1302,10 @@ Feature: Graql Undefine Query
       """
       match $x sub rule;
       """
-    Then concept identifiers are
-      |        | check | value  |
-      | RULE   | label | rule   |
-      | A_RULE | label | a-rule |
     When uniquely identify answer concepts
-      | x      |
-      | RULE   |
-      | A_RULE |
+      | x            |
+      | label:rule   |
+      | label:a-rule |
     When graql undefine
       """
       undefine rule a-rule;
@@ -1439,12 +1348,9 @@ Feature: Graql Undefine Query
         $x has name $n;
       get $n;
       """
-    Given concept identifiers are
-      |     | check | value       |
-      | SAM | value | name:Samuel |
     Given uniquely identify answer concepts
-      | n   |
-      | SAM |
+      | n                 |
+      | value:name:Samuel |
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -1495,12 +1401,9 @@ Feature: Graql Undefine Query
         $x has name $n;
       get $n;
       """
-    Given concept identifiers are
-      |     | check | value       |
-      | SAM | value | name:Samuel |
     Given uniquely identify answer concepts
-      | n   |
-      | SAM |
+      | n                 |
+      | value:name:Samuel |
     When graql undefine
       """
       undefine rule samuel-email-rule;
@@ -1513,8 +1416,8 @@ Feature: Graql Undefine Query
       get $n;
       """
     Then uniquely identify answer concepts
-      | n   |
-      | SAM |
+      | n                 |
+      | value:name:Samuel |
 
 
   ############
@@ -1555,12 +1458,9 @@ Feature: Graql Undefine Query
         $x type abstract-type;
         not { $x abstract; };
       """
-    Then concept identifiers are
-      |     | check | value         |
-      | ABS | label | abstract-type |
     Then uniquely identify answer concepts
-      | x   |
-      | ABS |
+      | x                   |
+      | label:abstract-type |
     When graql insert
       """
       insert $x isa abstract-type;
@@ -1589,12 +1489,9 @@ Feature: Graql Undefine Query
         $x type person;
         not { $x abstract; };
       """
-    When concept identifiers are
-      |     | check | value  |
-      | PER | label | person |
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
+      | x            |
+      | label:person |
 
 
   Scenario: an abstract type can be changed into a concrete type even if has an abstract child type
@@ -1618,12 +1515,9 @@ Feature: Graql Undefine Query
         $x type abstract-type;
         not { $x abstract; };
       """
-    When concept identifiers are
-      |     | check | value         |
-      | ABS | label | abstract-type |
     Then uniquely identify answer concepts
-      | x   |
-      | ABS |
+      | x                   |
+      | label:abstract-type |
 
 
   Scenario: undefining abstract on an attribute type is allowed, even if that attribute type has an owner
@@ -1660,32 +1554,24 @@ Feature: Graql Undefine Query
   ###################
 
   Scenario: a type and an attribute type that it owns can be removed simultaneously
-    Given concept identifiers are
-      |     | check | value         |
-      | PER | label | person        |
-      | ABS | label | abstract-type |
-      | ENT | label | entity        |
-      | NAM | label | name          |
-      | EMA | label | email         |
-      | ATT | label | attribute     |
     Given get answers of graql query
       """
       match $x sub entity;
       """
     Given uniquely identify answer concepts
-      | x   |
-      | PER |
-      | ABS |
-      | ENT |
+      | x                   |
+      | label:person        |
+      | label:abstract-type |
+      | label:entity        |
     Given get answers of graql query
       """
       match $x sub attribute;
       """
     Given uniquely identify answer concepts
-      | x   |
-      | NAM |
-      | EMA |
-      | ATT |
+      | x               |
+      | label:name      |
+      | label:email     |
+      | label:attribute |
     When graql undefine
       """
       undefine
@@ -1700,68 +1586,55 @@ Feature: Graql Undefine Query
       match $x sub entity;
       """
     Then uniquely identify answer concepts
-      | x   |
-      | ABS |
-      | ENT |
+      | x                   |
+      | label:abstract-type |
+      | label:entity        |
     When get answers of graql query
       """
       match $x sub attribute;
       """
     Then uniquely identify answer concepts
-      | x   |
-      | EMA |
-      | ATT |
+      | x               |
+      | label:email     |
+      | label:attribute |
 
 
   Scenario: a type, a relation type that it plays in and an attribute type that it owns can be removed simultaneously
-    Given concept identifiers are
-      |     | check | value         |
-      | PER | label | person        |
-      | ABS | label | abstract-type |
-      | ENT | label | entity        |
-      | EMP | label | employment    |
-      | REL | label | relation      |
-      | EME | label | employee      |
-      | EMR | label | employer      |
-      | ROL | label | role          |
-      | NAM | label | name          |
-      | EMA | label | email         |
-      | ATT | label | attribute     |
     Given get answers of graql query
       """
       match $x sub entity;
       """
     Given uniquely identify answer concepts
-      | x   |
-      | PER |
-      | ABS |
-      | ENT |
+      | x                   |
+      | label:person        |
+      | label:abstract-type |
+      | label:entity        |
     Given get answers of graql query
       """
       match $x sub relation;
       """
     Given uniquely identify answer concepts
-      | x   |
-      | EMP |
-      | REL |
+      | x                |
+      | label:employment |
+      | label:relation   |
     Given get answers of graql query
       """
       match $x sub attribute;
       """
     Given uniquely identify answer concepts
-      | x   |
-      | NAM |
-      | EMA |
-      | ATT |
+      | x               |
+      | label:name      |
+      | label:email     |
+      | label:attribute |
     Given get answers of graql query
       """
       match $x sub role;
       """
     Given uniquely identify answer concepts
-      | x   |
-      | EME |
-      | EMR |
-      | ROL |
+      | x              |
+      | label:employee |
+      | label:employer |
+      | label:role     |
     When graql undefine
       """
       undefine
@@ -1777,28 +1650,28 @@ Feature: Graql Undefine Query
       match $x sub entity;
       """
     Then uniquely identify answer concepts
-      | x   |
-      | ABS |
-      | ENT |
+      | x                   |
+      | label:abstract-type |
+      | label:entity        |
     When get answers of graql query
       """
       match $x sub relation;
       """
     Then uniquely identify answer concepts
-      | x   |
-      | REL |
+      | x              |
+      | label:relation |
     When get answers of graql query
       """
       match $x sub attribute;
       """
     Then uniquely identify answer concepts
-      | x   |
-      | EMA |
-      | ATT |
+      | x               |
+      | label:email     |
+      | label:attribute |
     When get answers of graql query
       """
       match $x sub role;
       """
     Then uniquely identify answer concepts
-      | x   |
-      | ROL |
+      | x          |
+      | label:role |
