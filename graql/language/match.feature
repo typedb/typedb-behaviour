@@ -125,13 +125,11 @@ Feature: Graql Match Query
       | WRI | label | writer |
       | PER | label | person |
       | ENT | label | entity |
-      | THI | label | thing  |
     Then uniquely identify answer concepts
       | x   |
       | WRI |
       | PER |
       | ENT |
-      | THI |
 
 
   Scenario: 'sub' can be used to retrieve all instances of types that are subtypes of a given type
@@ -207,7 +205,7 @@ Feature: Graql Match Query
       | GAR | WOR  |
 
 
-  Scenario: 'sub!' matches the specified type and its direct subtypes
+  Scenario: 'sub!' matches the type's direct subtypes
     Given graql define
       """
       define
@@ -225,17 +223,15 @@ Feature: Graql Match Query
       """
     And concept identifiers are
       |     | check | value    |
-      | PER | label | person   |
       | WRI | label | writer   |
       | MUS | label | musician |
     Then uniquely identify answer concepts
       | x   |
-      | PER |
       | WRI |
       | MUS |
 
 
-  Scenario: 'sub!' can be used to match the specified type and its direct supertype
+  Scenario: 'sub!' can be used to match a type's direct supertype
     Given graql define
       """
       define
@@ -251,14 +247,14 @@ Feature: Graql Match Query
       """
     And concept identifiers are
       |     | check | value  |
-      | WRI | label | writer |
       | PER | label | person |
     Then uniquely identify answer concepts
       | x   |
-      | WRI |
       | PER |
 
 
+    @ignore
+    # TODO this does not work on types anymore - types cannot be specified by IID
   Scenario: subtype hierarchy satisfies transitive sub assertions
     Given graql define
       """
@@ -297,6 +293,27 @@ Feature: Graql Match Query
     Then uniquely identify answer concepts
       | x   |
       | PER |
+
+
+  Scenario: 'owns' can match types that can own themselves
+    Given graql define
+      """
+      define
+      unit sub attribute, value string, owns unit;
+      """
+    Given transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
+    When get answers of graql query
+      """
+      match $x owns $x;
+      """
+    And concept identifiers are
+      |      | check | value  |
+      | UNIT | label | unit   |
+    Then uniquely identify answer concepts
+      | x    |
+      | UNIT |
 
 
   Scenario: 'owns' does not match types that own only a subtype of the specified attribute type
@@ -471,9 +488,9 @@ Feature: Graql Match Query
       match person plays $x;
       """
     And concept identifiers are
-      |     | check | value    |
-      | FRI | label | friend   |
-      | EMP | label | employee |
+      |     | check | value               |
+      | FRI | label | friendship:friend   |
+      | EMP | label | employment:employee |
     Then uniquely identify answer concepts
       | x   |
       | FRI |
@@ -594,6 +611,7 @@ Feature: Graql Match Query
       | EMP |
 
 
+  @ignore # TODO cannot currently query for schema with 'as'
   Scenario: 'relates' with 'as' matches relation types that override the specified roleplayer
     Given graql define
       """
@@ -644,15 +662,17 @@ Feature: Graql Match Query
       match employment relates $x;
       """
     And concept identifiers are
-      |     | check | value    |
-      | EME | label | employee |
-      | EMR | label | employer |
+      |     | check | value               |
+      | EME | label | employment:employee |
+      | EMR | label | employment:employer |
     Then uniquely identify answer concepts
       | x   |
       | EME |
       | EMR |
 
 
+  # TODO we can't test like this because the IID is not a valid encoded IID -- need to rethink this test
+  @ignore
   Scenario: when matching by a concept iid that doesn't exist, an empty result is returned
     When get answers of graql query
       """
@@ -781,14 +801,6 @@ Feature: Graql Match Query
     Then the integrity is validated
 
 
-  Scenario: when matching by a type iid that doesn't exist, an empty result is returned
-    When get answers of graql query
-      """
-      match $x isa $type; $type iid 0x83cb2;
-      """
-    Then answer size is: 0
-
-
   Scenario: when matching by a relation type whose label doesn't exist, an error is thrown
     Then graql match; throws exception
       """
@@ -803,16 +815,6 @@ Feature: Graql Match Query
       match $x isa $type; $type type polok;
       """
     Then the integrity is validated
-
-
-  Scenario: when matching that the same variable is of two types, an empty result is returned
-    Then get answers of graql query
-      """
-      match
-        $x isa person;
-        $x isa company;
-      """
-    Then answer size is: 0
 
 
   Scenario: when one entity exists, and we match two variables both of that entity type, the entity is returned
@@ -848,6 +850,7 @@ Feature: Graql Match Query
     Then the integrity is validated
 
 
+    @ignore # TODO we can't query for rule anymore
   Scenario: an error is thrown when matching that a variable has a specific type, when that type is in fact a rule
     Given graql define
       """
@@ -1219,19 +1222,6 @@ Feature: Graql Match Query
     Then answer size is: 0
 
 
-  Scenario: when querying for a non-existent relation type iid, an empty result is returned
-    When get answers of graql query
-      """
-      match ($x, $y) isa $type; $type iid 0x83cb2;
-      """
-    Then answer size is: 0
-    When get answers of graql query
-      """
-      match $r ($x, $y) isa $type; $r iid 0x4ba92;
-      """
-    Then answer size is: 0
-
-
   ##############
   # ATTRIBUTES #
   ##############
@@ -1380,6 +1370,8 @@ Feature: Graql Match Query
       | NIN |
 
 
+  # TODO we can't test like this because the IID is not a valid encoded IID -- need to rethink this test
+  @ignore
   Scenario: when querying for a non-existent attribute type iid, an empty result is returned
     When get answers of graql query
       """
@@ -1536,6 +1528,37 @@ Feature: Graql Match Query
       | PER |
 
 
+  Scenario: 'has' can match instances that have themselves
+    Given graql define
+      """
+      define
+     unit sub attribute, value string, owns unit, owns ref;
+      """
+    Given transaction commits
+    Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
+    Given graql insert
+      """
+      insert
+      $x "meter" isa unit, has $x, has ref 0;
+      """
+    Given transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
+    When get answers of graql query
+      """
+      match $x has $x;
+      """
+    And concept identifiers are
+      |       | check | value  |
+      | METER | key   | ref:0  |
+    Then uniquely identify answer concepts
+      | x     |
+      | METER |
+
+
   Scenario: an error is thrown when matching by attribute ownership, when the owned thing is actually an entity
     Then graql match; throws exception
       """
@@ -1564,7 +1587,7 @@ Feature: Graql Match Query
   # ATTRIBUTE VALUE COMPARISON #
   ##############################
 
-  Scenario: when things own attributes of different types but the same value, they match by equality, but not ownership
+  Scenario: when things own attributes of different types but the same value, they match by equality
     Given graql define
       """
       define
@@ -1587,13 +1610,6 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
-      """
-      match
-        $x isa person, has graduation-date $date;
-        $r (employee: $x) isa employment, has start-date $date;
-      """
-    Then answer size is: 0
     Then get answers of graql query
       """
       match
@@ -1899,19 +1915,12 @@ Feature: Graql Match Query
     Then answer size is: 0
 
 
+  @ignore # TODO renable with negation
   Scenario: concept comparison of unbound variables throws an error
     Then graql match; throws exception
       """
       match not { $x is $y; };
       """
-
-
-  Scenario: value comparison of unbound variables throws an error
-    Then graql match; throws exception
-      """
-      match $x != $y;
-      """
-
 
   ############
   # PATTERNS #
@@ -1981,10 +1990,10 @@ Feature: Graql Match Query
       """
       match $x isa $type;
       """
-    # 2 entities x 3 types {person,entity,thing}
-    # 1 relation x 3 types {friendship,relation,thing}
-    # 5 attributes x 3 types {ref/name,attribute,thing}
-    Then answer size is: 24
+    # 2 entities x 2 types {person,entity}
+    # 1 relation x 2 types {friendship,relation}
+    # 5 attributes x 2 types {ref/name,attribute}
+    Then answer size is: 16
 
 
   Scenario: all relations and their types can be retrieved
@@ -2016,8 +2025,8 @@ Feature: Graql Match Query
       """
       match ($x, $y) isa $type;
       """
-    # 2 permutations x 3 types {friendship,relation,thing}
-    Then answer size is: 6
+    # 2 permutations x 2 types {friendship,relation}
+    Then answer size is: 4
 
 
   #######################
@@ -2025,11 +2034,8 @@ Feature: Graql Match Query
   #######################
 
   # Negation resolution is handled by Reasoner, but query validation is handled by the language.
-
   Scenario: when the entire match clause is a negation, an error is thrown
-
   At least one negated pattern variable must be bound outside the negation block, so this query is invalid.
-
     Then graql match; throws exception
       """
       match not { $x has attribute "value"; };
