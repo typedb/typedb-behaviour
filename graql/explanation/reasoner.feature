@@ -63,8 +63,8 @@ Feature: Graql Reasoning Explanation
       | CON | value | name:the-company |
 
     Then uniquely identify answer concepts
-      | co | n   |
-      | CO | CON |
+      | co               | n                      |
+      | key:company-id:0 | value:name:the-company |
 
     Then rules are
       |                  | when                 | then                            |
@@ -126,8 +126,8 @@ Feature: Graql Reasoning Explanation
       | LIA | value | is-liable:true   |
 
     Then uniquely identify answer concepts
-      | co | l   |
-      | CO | LIA |
+      | co               | l                    |
+      | key:company-id:0 | value:is-liable:true |
 
     Then rules are
       |                   | when                                                       | then                             |
@@ -195,9 +195,9 @@ Feature: Graql Reasoning Explanation
       | KCN | value | name:King's Cross |
 
     Then uniquely identify answer concepts
-      | k  | l   | n   |
-      | KC | UK  | KCN |
-      | KC | LDN | KCN |
+      | k                     | l               | n                       |
+      | key:name:King's Cross | key:name:UK     | value:name:King's Cross |
+      | key:name:King's Cross | key:name:London | value:name:King's Cross |
 
     Then rules are
       |                                 | when                                                                                                                 | then                                                         |
@@ -281,8 +281,8 @@ Feature: Graql Reasoning Explanation
       """
 
     Then uniquely identify answer concepts
-      | w   | m   |
-      | ALI | BOB |
+      | w               | m               |
+      | key:person-id:0 | key:person-id:1 |
 
     Then answers contain explanation tree
       |   | children | vars          | identifiers          | explanation          | pattern                                                                                                                                                                                            |
@@ -298,8 +298,8 @@ Feature: Graql Reasoning Explanation
       """
 
     Then uniquely identify answer concepts
-      | w   | m   |
-      | ALI | BOB |
+      | w               | m               |
+      | key:person-id:0 | key:person-id:1 |
 
     Then answers contain explanation tree
       |   | children | vars          | identifiers          | explanation          | pattern                                                                                                                                                                                            |
@@ -361,8 +361,8 @@ Feature: Graql Reasoning Explanation
       | N2  | value | name:another-company |
 
     Then uniquely identify answer concepts
-      | com |
-      | ACO |
+      | com              |
+      | key:company-id:1 |
 
     Then rules are
       |                   | when                                                   | then                                |
@@ -424,8 +424,8 @@ Feature: Graql Reasoning Explanation
       | LIA | value | is-liable:true |
 
     Then uniquely identify answer concepts
-      | com | lia |
-      | ACO | LIA |
+      | com              | lia                  |
+      | key:company-id:1 | value:is-liable:true |
 
     Then rules are
       |                   | when                                                                | then                                |
@@ -487,8 +487,8 @@ Feature: Graql Reasoning Explanation
       | ACO | key   | company-id:1 |
 
     Then uniquely identify answer concepts
-      | com |
-      | ACO |
+      | com              |
+      | key:company-id:1 |
 
     Then rules are
       |                   | when                                                      | then                                |

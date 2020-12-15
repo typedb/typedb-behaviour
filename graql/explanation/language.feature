@@ -162,8 +162,8 @@ Feature: Graql Reasoning Explanation
       | KCn | value | name:King's Cross |
 
     Then uniquely identify answer concepts
-      | k  | l   | u  | n   |
-      | KC | LDN | UK | KCn |
+      | k                     | l               | u           | n                       |
+      | key:name:King's Cross | key:name:London | key:name:UK | value:name:King's Cross |
 
     Then answers contain explanation tree
       |   | children | vars       | identifiers      | explanation | pattern                                                                                                                                                                                                                                       |
@@ -210,8 +210,8 @@ Feature: Graql Reasoning Explanation
       | N   | value | name:another-company |
 
     Then uniquely identify answer concepts
-      | com | n |
-      | ACO | N |
+      | com              | n                          |
+      | key:company-id:1 | value:name:another-company |
 
     Then answers contain explanation tree
       |   | children | vars   | identifiers | explanation | pattern                                                                                                                       |
@@ -258,8 +258,8 @@ Feature: Graql Reasoning Explanation
       | N2  | value | name:another-company |
 
     Then uniquely identify answer concepts
-      | com |
-      | ACO |
+      | com              |
+      | key:company-id:1 |
 
     Then answers contain explanation tree
       |   | children | vars    | identifiers | explanation | pattern                                                                                                                                                            |
@@ -306,8 +306,8 @@ Feature: Graql Reasoning Explanation
       | N2  | value | name:another-company |
 
     Then uniquely identify answer concepts
-      | com |
-      | ACO |
+      | com              |
+      | key:company-id:1 |
 
     Then answers contain explanation tree
       |   | children | vars    | identifiers | explanation | pattern                                                                                                                                                                                                                              |
