@@ -110,7 +110,6 @@ Feature: Graql Delete Query
       """
     Given transaction commits
     Given the integrity is validated
-    When concept identifiers are
     Then uniquely identify answer concepts
       | x             | y            | r         | n               |
       | key:name:Alex | key:name:Bob | key:ref:0 | value:name:John |
@@ -595,11 +594,6 @@ Feature: Graql Delete Query
       """
     Given transaction commits
     Given the integrity is validated
-    When concept identifiers are
-      |      | check | value     |
-      | ALEX | key   | name:Alex |
-      | BOB  | key   | name:Bob  |
-      | FR   | key   | ref:0     |
     Then uniquely identify answer concepts
       | x             | y            | r         |
       | key:name:Alex | key:name:Bob | key:ref:0 |
@@ -1110,7 +1104,6 @@ Feature: Graql Delete Query
       """
     Given transaction commits
     Given the integrity is validated
-    Given concept identifiers are
     Then uniquely identify answer concepts
       | x                 |
       | key:name:Sherlock |
