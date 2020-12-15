@@ -72,12 +72,9 @@ Feature: Graql Match Query
       """
       match $x type person;
       """
-    And concept identifiers are
-      |     | check | value  |
-      | PER | label | person |
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
+      | x            |
+      | label:person |
 
 
   Scenario: 'sub' can be used to match the specified type and all its subtypes, including indirect subtypes
@@ -94,16 +91,11 @@ Feature: Graql Match Query
       """
       match $x sub person;
       """
-    And concept identifiers are
-      |     | check | value        |
-      | PER | label | person       |
-      | WRI | label | writer       |
-      | SCW | label | scifi-writer |
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
-      | WRI |
-      | SCW |
+      | x                  |
+      | label:person       |
+      | label:writer       |
+      | label:scifi-writer |
 
 
   Scenario: 'sub' can be used to match the specified type and all its supertypes, including indirect supertypes
@@ -120,16 +112,11 @@ Feature: Graql Match Query
       """
       match writer sub $x;
       """
-    And concept identifiers are
-      |     | check | value  |
-      | WRI | label | writer |
-      | PER | label | person |
-      | ENT | label | entity |
     Then uniquely identify answer concepts
-      | x   |
-      | WRI |
-      | PER |
-      | ENT |
+      | x            |
+      | label:writer |
+      | label:person |
+      | label:entity |
 
 
   Scenario: 'sub' can be used to retrieve all instances of types that are subtypes of a given type
@@ -173,36 +160,22 @@ Feature: Graql Match Query
         $x isa $type;
         $type sub worker;
       """
-    When concept identifiers are
-      |     | check | value                        |
-      | CHA | key   | ref:2                        |
-      | DEB | key   | ref:3                        |
-      | EDM | key   | ref:4                        |
-      | FEL | key   | ref:5                        |
-      | GAR | key   | ref:6                        |
-      | CON | label | construction-worker          |
-      | BRI | label | bricklayer                   |
-      | CRA | label | crane-driver                 |
-      | TEL | label | telecoms-worker              |
-      | MNR | label | mobile-network-researcher    |
-      | TBS | label | telecoms-business-strategist |
-      | WOR | label | worker                       |
     # Alfred and Barbara are not retrieved, as they aren't subtypes of worker
     Then uniquely identify answer concepts
-      | x   | type |
-      | CHA | BRI  |
-      | CHA | CON  |
-      | CHA | WOR  |
-      | DEB | CRA  |
-      | DEB | CON  |
-      | DEB | WOR  |
-      | EDM | MNR  |
-      | EDM | TEL  |
-      | EDM | WOR  |
-      | FEL | TBS  |
-      | FEL | TEL  |
-      | FEL | WOR  |
-      | GAR | WOR  |
+      | x         | type                                |
+      | key:ref:2 | label:bricklayer                    |
+      | key:ref:2 | label:construction-worker           |
+      | key:ref:2 | label:worker                        |
+      | key:ref:3 | label:crane-driver                  |
+      | key:ref:3 | label:construction-worker           |
+      | key:ref:3 | label:worker                        |
+      | key:ref:4 | label:mobile-network-researcher     |
+      | key:ref:4 | label:telecoms-worker               |
+      | key:ref:4 | label:worker                        |
+      | key:ref:5 | label:telecoms-business-strategist  |
+      | key:ref:5 | label:telecoms-worker               |
+      | key:ref:5 | label:worker                        |
+      | key:ref:6 | label:worker                        |
 
 
   Scenario: 'sub!' matches the type's direct subtypes
@@ -221,14 +194,10 @@ Feature: Graql Match Query
       """
       match $x sub! person;
       """
-    And concept identifiers are
-      |     | check | value    |
-      | WRI | label | writer   |
-      | MUS | label | musician |
     Then uniquely identify answer concepts
-      | x   |
-      | WRI |
-      | MUS |
+      | x              |
+      | label:writer   |
+      | label:musician |
 
 
   Scenario: 'sub!' can be used to match a type's direct supertype
@@ -245,12 +214,9 @@ Feature: Graql Match Query
       """
       match writer sub! $x;
       """
-    And concept identifiers are
-      |     | check | value  |
-      | PER | label | person |
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
+      | x            |
+      | label:person |
 
 
     @ignore
@@ -287,12 +253,9 @@ Feature: Graql Match Query
       """
       match $x owns age;
       """
-    And concept identifiers are
-      |     | check | value  |
-      | PER | label | person |
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
+      | x            |
+      | label:person |
 
 
   Scenario: 'owns' can match types that can own themselves
@@ -331,14 +294,10 @@ Feature: Graql Match Query
       """
       match $x owns name;
       """
-    And concept identifiers are
-      |     | check | value   |
-      | PER | label | person  |
-      | COM | label | company |
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
-      | COM |
+      | x             |
+      | label:person  |
+      | label:company |
 
 
   Scenario: 'owns' does not match types that own only a supertype of the specified attribute type
@@ -356,12 +315,9 @@ Feature: Graql Match Query
       """
       match $x owns club-name;
       """
-    And concept identifiers are
-      |     | check | value |
-      | CLU | label | club  |
     Then uniquely identify answer concepts
-      | x   |
-      | CLU |
+      | x          |
+      | label:club |
 
 
   Scenario: 'owns' can be used to match attribute types that a given type owns
@@ -369,16 +325,11 @@ Feature: Graql Match Query
       """
       match person owns $x;
       """
-    And concept identifiers are
-      |     | check | value |
-      | NAM | label | name  |
-      | AGE | label | age   |
-      | REF | label | ref   |
     Then uniquely identify answer concepts
-      | x   |
-      | NAM |
-      | AGE |
-      | REF |
+      | x          |
+      | label:name |
+      | label:age  |
+      | label:ref  |
 
 
   Scenario: 'owns' can be used to retrieve all instances of types that can own a given attribute type
@@ -409,20 +360,12 @@ Feature: Graql Match Query
         $x isa $type;
         $type owns name;
       """
-    When concept identifiers are
-      |      | check | value      |
-      | PER  | key   | ref:0      |
-      | COM  | key   | ref:1      |
-      | EMP  | key   | ref:3      |
-      | tPER | label | person     |
-      | tCOM | label | company    |
-      | tEMP | label | employment |
     # friendship and ref should not be retrieved, as they can't have a name
     Then uniquely identify answer concepts
-      | x   | type |
-      | PER | tPER |
-      | COM | tCOM |
-      | EMP | tEMP |
+      | x         | type             |
+      | key:ref:0 | label:person     |
+      | key:ref:1 | label:company    |
+      | key:ref:2 | label:employment |
 
 
   Scenario: 'plays' matches types that can play the specified role
@@ -430,12 +373,9 @@ Feature: Graql Match Query
       """
       match $x plays friendship:friend;
       """
-    And concept identifiers are
-      |     | check | value  |
-      | PER | label | person |
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
+      | x            |
+      | label:person |
 
 
   Scenario: 'plays' does not match types that only play a subrole of the specified role
@@ -452,12 +392,9 @@ Feature: Graql Match Query
       """
       match $x plays friendship:friend;
       """
-    And concept identifiers are
-      |     | check | value  |
-      | PER | label | person |
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
+      | x            |
+      | label:person |
 
 
   Scenario: 'plays' does not match types that only play a super-role of the specified role
@@ -474,12 +411,9 @@ Feature: Graql Match Query
       """
       match $x plays close-friendship:close-friend;
       """
-    And concept identifiers are
-      |     | check | value           |
-      | FRP | label | friendly-person |
     Then uniquely identify answer concepts
-      | x   |
-      | FRP |
+      | x                     |
+      | label:friendly-person |
 
 
   Scenario: 'plays' can be used to match roles that a particular type can play
@@ -487,14 +421,10 @@ Feature: Graql Match Query
       """
       match person plays $x;
       """
-    And concept identifiers are
-      |     | check | value               |
-      | FRI | label | friendship:friend   |
-      | EMP | label | employment:employee |
     Then uniquely identify answer concepts
-      | x   |
-      | FRI |
-      | EMP |
+      | x                         |
+      | label:friendship:friend   |
+      | label:employment:employee |
 
 
   Scenario: 'plays' can be used to retrieve all instances of types that can play a specific role
@@ -526,16 +456,10 @@ Feature: Graql Match Query
         $x isa $type;
         $type plays friendship:friend;
       """
-    When concept identifiers are
-      |      | check | value  |
-      | PER  | key   | ref:0  |
-      | DOG  | key   | ref:2  |
-      | tPER | label | person |
-      | tDOG | label | dog    |
     Then uniquely identify answer concepts
-      | x   | type |
-      | PER | tPER |
-      | DOG | tDOG |
+      | x         | type         |
+      | key:ref:0 | label:person |
+      | key:ref:2 | label:dog    |
 
 
   Scenario: 'owns @key' matches types that own the specified attribute type as a key
@@ -552,12 +476,9 @@ Feature: Graql Match Query
       """
       match $x owns breed @key;
       """
-    And concept identifiers are
-      |     | check | value |
-      | DOG | label | dog   |
     Then uniquely identify answer concepts
-      | x   |
-      | DOG |
+      | x         |
+      | label:dog |
 
 
   Scenario: 'key' can be used to find all attribute types that a given type owns as a key
@@ -565,12 +486,9 @@ Feature: Graql Match Query
       """
       match person owns $x @key;
       """
-    And concept identifiers are
-      |     | check | value |
-      | REF | label | ref   |
     Then uniquely identify answer concepts
-      | x   |
-      | REF |
+      | x         |
+      | label:ref |
 
 
   Scenario: 'owns' without '@key' matches all types that own the specified attribute type, even if they use it as a key
@@ -588,14 +506,10 @@ Feature: Graql Match Query
       """
       match $x owns breed;
       """
-    And concept identifiers are
-      |     | check | value |
-      | DOG | label | dog   |
-      | CAT | label | cat   |
     Then uniquely identify answer concepts
-      | x   |
-      | DOG |
-      | CAT |
+      | x         |
+      | label:dog |
+      | label:cat |
 
 
   Scenario: 'relates' matches relation types where the specified role can be played
@@ -603,12 +517,9 @@ Feature: Graql Match Query
       """
       match $x relates employee;
       """
-    And concept identifiers are
-      |     | check | value      |
-      | EMP | label | employment |
     Then uniquely identify answer concepts
-      | x   |
-      | EMP |
+      | x                |
+      | label:employment |
 
 
   @ignore # TODO cannot currently query for schema with 'as'
@@ -626,12 +537,9 @@ Feature: Graql Match Query
       """
       match $x relates close-friend as friend;
       """
-    And concept identifiers are
-      |     | check | value            |
-      | CLF | label | close-friendship |
     Then uniquely identify answer concepts
-      | x   |
-      | CLF |
+      | x                      |
+      | label:close-friendship |
 
 
   Scenario: 'relates' without 'as' does not match relation types that override the specified roleplayer
@@ -648,12 +556,9 @@ Feature: Graql Match Query
       """
       match $x relates friend;
       """
-    And concept identifiers are
-      |     | check | value      |
-      | FRE | label | friendship |
     Then uniquely identify answer concepts
-      | x   |
-      | FRE |
+      | x                |
+      | label:friendship |
 
 
   Scenario: 'relates' can be used to retrieve all the roles of a relation type
@@ -661,14 +566,10 @@ Feature: Graql Match Query
       """
       match employment relates $x;
       """
-    And concept identifiers are
-      |     | check | value               |
-      | EME | label | employment:employee |
-      | EMR | label | employment:employer |
     Then uniquely identify answer concepts
-      | x   |
-      | EME |
-      | EMR |
+      | x              |
+      | label:employment:employee |
+      | label:employment:employer |
 
 
   # TODO we can't test like this because the IID is not a valid encoded IID -- need to rethink this test
@@ -715,16 +616,11 @@ Feature: Graql Match Query
       """
       match $x isa writer;
       """
-    And concept identifiers are
-      |     | check | value |
-      | WRI | key   | ref:1 |
-      | SCI | key   | ref:2 |
-      | GOO | key   | ref:3 |
     Then uniquely identify answer concepts
-      | x   |
-      | WRI |
-      | SCI |
-      | GOO |
+      | x         |
+      | key:ref:1 |
+      | key:ref:2 |
+      | key:ref:3 |
 
 
   Scenario: 'isa!' only matches things of the specified type, and does not match subtypes
@@ -755,12 +651,9 @@ Feature: Graql Match Query
       """
       match $x isa! writer;
       """
-    And concept identifiers are
-      |     | check | value |
-      | WRI | key   | ref:1 |
     Then uniquely identify answer concepts
-      | x   |
-      | WRI |
+      | x         |
+      | key:ref:1 |
 
 
   Scenario: 'iid' matches the instance with the specified internal iid
@@ -834,12 +727,9 @@ Feature: Graql Match Query
         $x isa person;
         $y isa person;
       """
-    When concept identifiers are
-      |     | check | value |
-      | PER | key   | ref:0 |
     Then uniquely identify answer concepts
-      | x   | y   |
-      | PER | PER |
+      | x         | y         |
+      | key:ref:0 | key:ref:0 |
 
 
   Scenario: an error is thrown when matching that a variable has a specific type, when that type is in fact a role type
@@ -895,21 +785,16 @@ Feature: Graql Match Query
       """
       match $x isa person; $r (employee: $x) isa relation;
       """
-    And concept identifiers are
-      |      | check | value |
-      | REF0 | key   | ref:0 |
-      | REF1 | key   | ref:1 |
-      | REF2 | key   | ref:2 |
     Then uniquely identify answer concepts
-      | x    | r    |
-      | REF0 | REF2 |
+      | x         | r         |
+      | key:ref:0 | key:ref:2 |
     When get answers of graql query
       """
       match $y isa company; $r (employer: $y) isa relation;
       """
     Then uniquely identify answer concepts
-      | y    | r    |
-      | REF1 | REF2 |
+      | y         | r         |
+      | key:ref:1 | key:ref:2 |
 
 
   Scenario: relations are matchable from roleplayers without specifying any roles
@@ -931,13 +816,9 @@ Feature: Graql Match Query
       """
       match $x isa person; $r ($x) isa relation;
       """
-    When concept identifiers are
-      |      | check | value |
-      | REF0 | key   | ref:0 |
-      | REF2 | key   | ref:2 |
     Then uniquely identify answer concepts
-      | x    | r    |
-      | REF0 | REF2 |
+      | x         | r         |
+      | key:ref:0 | key:ref:2 |
 
 
   Scenario: all combinations of players in a relation can be retrieved
@@ -958,20 +839,14 @@ Feature: Graql Match Query
       """
       match $r ($x, $y) isa employment;
       """
-    And concept identifiers are
-      |      | check | value |
-      | REF0 | key   | ref:0 |
-      | REF1 | key   | ref:1 |
-      | REF2 | key   | ref:2 |
-      | REF3 | key   | ref:3 |
     Then uniquely identify answer concepts
-      | x    | y    | r    |
-      | REF0 | REF1 | REF3 |
-      | REF1 | REF0 | REF3 |
-      | REF0 | REF2 | REF3 |
-      | REF2 | REF0 | REF3 |
-      | REF1 | REF2 | REF3 |
-      | REF2 | REF1 | REF3 |
+      | x         | y         | r         |
+      | key:ref:0 | key:ref:1 | key:ref:3 |
+      | key:ref:1 | key:ref:0 | key:ref:3 |
+      | key:ref:0 | key:ref:2 | key:ref:3 |
+      | key:ref:2 | key:ref:0 | key:ref:3 |
+      | key:ref:1 | key:ref:2 | key:ref:3 |
+      | key:ref:2 | key:ref:1 | key:ref:3 |
 
 
   Scenario: duplicate role players are retrieved singly when queried doubly
@@ -997,13 +872,9 @@ Feature: Graql Match Query
       """
       match $r (player: $x, player: $x) isa relation;
       """
-    And concept identifiers are
-      |      | check | value |
-      | REF0 | key   | ref:0 |
-      | REF1 | key   | ref:1 |
     Then uniquely identify answer concepts
-      | x    | r    |
-      | REF0 | REF1 |
+      | x         | r         |
+      | key:ref:0 | key:ref:1 |
 
 
   Scenario: duplicate role players are retrieved singly when queried singly
@@ -1029,13 +900,9 @@ Feature: Graql Match Query
       """
       match $r (player: $x) isa relation;
       """
-    And concept identifiers are
-      |      | check | value |
-      | REF0 | key   | ref:0 |
-      | REF1 | key   | ref:1 |
     Then uniquely identify answer concepts
-      | x    | r    |
-      | REF0 | REF1 |
+      | x         | r         |
+      | key:ref:0 | key:ref:1 |
 
 
   Scenario: relations between distinct concepts are not retrieved when matching concepts that relate to themselves
@@ -1098,14 +965,9 @@ Feature: Graql Match Query
         (sender: $a, recipient: $b) isa gift-delivery;
         (sender: $b, recipient: $c) isa gift-delivery;
       """
-    When concept identifiers are
-      |     | check | value |
-      | SOR | key   | ref:0 |
-      | MAR | key   | ref:1 |
-      | PAT | key   | ref:2 |
     Then uniquely identify answer concepts
-      | a   | b   | c   |
-      | SOR | MAR | PAT |
+      | a         | b         | c         |
+      | key:ref:0 | key:ref:1 | key:ref:2 |
     When get answers of graql query
       """
       match
@@ -1141,35 +1003,29 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    Given concept identifiers are
-      |     | check | value |
-      | PER | key   | ref:0 |
-      | EMP | key   | ref:1 |
-      | FRI | key   | ref:2 |
-      | RES | key   | ref:3 |
     Given get answers of graql query
       """
       match $r isa relation;
       """
     Given uniquely identify answer concepts
-      | r   |
-      | EMP |
-      | FRI |
-      | RES |
+      | r         |
+      | key:ref:1 |
+      | key:ref:2 |
+      | key:ref:3 |
     When get answers of graql query
       """
       match ($x) isa relation;
       """
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
+      | x         |
+      | key:ref:0 |
     When get answers of graql query
       """
       match ($x);
       """
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
+      | x         |
+      | key:ref:0 |
 
 
   Scenario: an error is thrown when matching an entity type as if it were a role type
@@ -1247,12 +1103,9 @@ Feature: Graql Match Query
       """
       match $a <value>;
       """
-    And concept identifiers are
-      |     | check | value |
-      | ATT | key   | ref:0 |
     Then uniquely identify answer concepts
-      | a   |
-      | ATT |
+      | a         |
+      | key:ref:0 |
 
     Examples:
       | attr        | type     | value      |
@@ -1304,14 +1157,10 @@ Feature: Graql Match Query
       """
       match $x contains "Fun";
       """
-    And concept identifiers are
-      |     | check | value                            |
-      | FOU | value | name:Four Weddings and a Funeral |
-      | FUN | value | name:Fun Facts about Space       |
     Then uniquely identify answer concepts
-      | x   |
-      | FOU |
-      | FUN |
+      | x                                      |
+      | value:name:Four Weddings and a Funeral |
+      | value:name:Fun Facts about Space       |
 
 
   Scenario: 'contains' performs a case-insensitive match
@@ -1332,14 +1181,10 @@ Feature: Graql Match Query
       """
       match $x contains "Bean";
       """
-    And concept identifiers are
-      |     | check | value                         |
-      | PIR | value | name:Pirates of the Caribbean |
-      | MRB | value | name:Mr. Bean                 |
     Then uniquely identify answer concepts
-      | x   |
-      | PIR |
-      | MRB |
+      | x                                   |
+      | value:name:Pirates of the Caribbean |
+      | value:name:Mr. Bean                 |
 
 
   Scenario: 'like' matches strings that match the specified regex
@@ -1360,14 +1205,10 @@ Feature: Graql Match Query
       """
       match $x like "^[0-9]+$";
       """
-    And concept identifiers are
-      |     | check | value       |
-      | ONE | value | name:123456 |
-      | NIN | value | name:9      |
     Then uniquely identify answer concepts
-      | x   |
-      | ONE |
-      | NIN |
+      | x                 |
+      | value:name:123456 |
+      | value:name:9      |
 
 
   # TODO we can't test like this because the IID is not a valid encoded IID -- need to rethink this test
@@ -1408,14 +1249,10 @@ Feature: Graql Match Query
       """
       match $x has name $y; get $x;
       """
-    And concept identifiers are
-      |     | check | value |
-      | LEI | key   | ref:0 |
-      | GRA | key   | ref:2 |
     Then uniquely identify answer concepts
-      | x   |
-      | LEI |
-      | GRA |
+      | x         |
+      | key:ref:0 |
+      | key:ref:2 |
 
 
   Scenario: using the 'attribute' meta label, 'has' can match things that own any attribute with a specified value
@@ -1444,14 +1281,10 @@ Feature: Graql Match Query
       """
       match $x has attribute 9;
       """
-    And concept identifiers are
-      |     | check | value |
-      | AG9 | key   | ref:0 |
-      | SS9 | key   | ref:1 |
     Then uniquely identify answer concepts
-      | x   |
-      | AG9 |
-      | SS9 |
+      | x         |
+      | key:ref:0 |
+      | key:ref:1 |
 
 
   Scenario: when an attribute instance is fully specified, 'has' matches its owners
@@ -1484,16 +1317,11 @@ Feature: Graql Match Query
       """
       match $x has age 21;
       """
-    And concept identifiers are
-      |     | check | value |
-      | PER | key   | ref:0 |
-      | FRI | key   | ref:1 |
-      | GRA | key   | ref:2 |
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
-      | FRI |
-      | GRA |
+      | x         |
+      | key:ref:0 |
+      | key:ref:1 |
+      | key:ref:2 |
 
 
   Scenario: 'has' matches an attribute's owner even if it owns more attributes of the same type
@@ -1520,12 +1348,9 @@ Feature: Graql Match Query
       """
       match $x has lucky-number 20;
       """
-    And concept identifiers are
-      |     | check | value |
-      | PER | key   | ref:0 |
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
+      | x         |
+      | key:ref:0 |
 
 
   Scenario: 'has' can match instances that have themselves
@@ -1637,12 +1462,9 @@ Feature: Graql Match Query
       """
       match $x has age = 16;
       """
-    And concept identifiers are
-      |     | check | value |
-      | SUS | key   | ref:0 |
     Then uniquely identify answer concepts
-      | x   |
-      | SUS |
+      | x         |
+      | key:ref:0 |
 
 
   Scenario: 'has $attr > $x' matches owners of any instance '$y' of '$attr' where '$y > $x'
@@ -1663,12 +1485,9 @@ Feature: Graql Match Query
       """
       match $x has age > 18;
       """
-    And concept identifiers are
-      |     | check | value |
-      | DON | key   | ref:1 |
     Then uniquely identify answer concepts
-      | x   |
-      | DON |
+      | x         |
+      | key:ref:1 |
 
 
   Scenario: 'has $attr < $x' matches owners of any instance '$y' of '$attr' where '$y < $x'
@@ -1689,12 +1508,9 @@ Feature: Graql Match Query
       """
       match $x has age < 18;
       """
-    And concept identifiers are
-      |     | check | value |
-      | SUS | key   | ref:0 |
     Then uniquely identify answer concepts
-      | x   |
-      | SUS |
+      | x         |
+      | key:ref:0 |
 
 
   Scenario: 'has $attr != $x' matches owners of any instance '$y' of '$attr' where '$y != $x'
@@ -1715,14 +1531,10 @@ Feature: Graql Match Query
       """
       match $x has age != 18;
       """
-    And concept identifiers are
-      |     | check | value |
-      | DON | key   | ref:1 |
-      | SUS | key   | ref:0 |
     Then uniquely identify answer concepts
-      | x   |
-      | DON |
-      | SUS |
+      | x         |
+      | key:ref:0 |
+      | key:ref:1 |
 
 
   Scenario: value comparisons can be performed between a 'double' and a 'long'
@@ -1814,12 +1626,9 @@ Feature: Graql Match Query
       """
       match $x has lucky-number > 25;
       """
-    And concept identifiers are
-      |     | check | value |
-      | PER | key   | ref:0 |
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
+      | x         |
+      | key:ref:0 |
 
 
   Scenario: an attribute variable used in both '=' and '>=' predicates is correctly resolved
@@ -1844,14 +1653,10 @@ Feature: Graql Match Query
         $z isa age;
       get $x;
       """
-    And concept identifiers are
-      |     | check | value |
-      | DON | key   | ref:1 |
-      | RAL | key   | ref:2 |
     Then uniquely identify answer concepts
-      | x   |
-      | DON |
-      | RAL |
+      | x         |
+      | key:ref:1 |
+      | key:ref:2 |
 
 
   Scenario: when the answers of a value comparison include both a 'double' and a 'long', both answers are returned
@@ -1882,16 +1687,10 @@ Feature: Graql Match Query
         $x isa attribute;
         $x > 20;
       """
-    And concept identifiers are
-      |      | check | value       |
-      | A24  | value | age:24      |
-      | A19  | value | age:19      |
-      | L209 | value | length:20.9 |
-      | L199 | value | length:19.9 |
     Then uniquely identify answer concepts
-      | x    |
-      | A24  |
-      | L209 |
+      | x                 |
+      | value:age:24      |
+      | value:length:20.9 |
 
 
   Scenario: when one entity exists, and we match two variables with concept inequality, an empty answer is returned
@@ -1943,14 +1742,10 @@ Feature: Graql Match Query
       """
       match {$x isa person;} or {$x isa company;};
       """
-    And concept identifiers are
-      |     | check | value |
-      | JEF | key   | ref:0 |
-      | AMA | key   | ref:1 |
     Then uniquely identify answer concepts
-      | x   |
-      | JEF |
-      | AMA |
+      | x         |
+      | key:ref:0 |
+      | key:ref:1 |
 
 
   ##################
