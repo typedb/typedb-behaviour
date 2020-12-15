@@ -205,7 +205,7 @@ Feature: Graql Match Query
       | GAR | WOR  |
 
 
-  Scenario: 'sub!' matches the specified type and its direct subtypes
+  Scenario: 'sub!' matches the type's direct subtypes
     Given graql define
       """
       define
@@ -231,7 +231,7 @@ Feature: Graql Match Query
       | MUS |
 
 
-  Scenario: 'sub!' can be used to match the specified type and its direct supertype
+  Scenario: 'sub!' can be used to match a type's direct supertype
     Given graql define
       """
       define
@@ -611,7 +611,7 @@ Feature: Graql Match Query
       | EMP |
 
 
-  @ignore  # TODO query for 'as' via traversal is unimplemented
+  @ignore # TODO cannot currently query for schema with 'as'
   Scenario: 'relates' with 'as' matches relation types that override the specified roleplayer
     Given graql define
       """
@@ -671,6 +671,8 @@ Feature: Graql Match Query
       | EMR |
 
 
+  # TODO we can't test like this because the IID is not a valid encoded IID -- need to rethink this test
+  @ignore
   Scenario: when matching by a concept iid that doesn't exist, an empty result is returned
     When get answers of graql query
       """
@@ -1368,6 +1370,8 @@ Feature: Graql Match Query
       | NIN |
 
 
+  # TODO we can't test like this because the IID is not a valid encoded IID -- need to rethink this test
+  @ignore
   Scenario: when querying for a non-existent attribute type iid, an empty result is returned
     When get answers of graql query
       """
@@ -1911,6 +1915,7 @@ Feature: Graql Match Query
     Then answer size is: 0
 
 
+  @ignore # TODO renable with negation
   Scenario: concept comparison of unbound variables throws an error
     Then graql match; throws exception
       """
@@ -1985,10 +1990,10 @@ Feature: Graql Match Query
       """
       match $x isa $type;
       """
-    # 2 entities x 3 types {person,entity,thing}
-    # 1 relation x 3 types {friendship,relation,thing}
-    # 5 attributes x 3 types {ref/name,attribute,thing}
-    Then answer size is: 24
+    # 2 entities x 2 types {person,entity}
+    # 1 relation x 2 types {friendship,relation}
+    # 5 attributes x 2 types {ref/name,attribute}
+    Then answer size is: 16
 
 
   Scenario: all relations and their types can be retrieved
@@ -2020,8 +2025,8 @@ Feature: Graql Match Query
       """
       match ($x, $y) isa $type;
       """
-    # 2 permutations x 3 types {friendship,relation,thing}
-    Then answer size is: 6
+    # 2 permutations x 2 types {friendship,relation}
+    Then answer size is: 4
 
 
   #######################
@@ -2029,11 +2034,8 @@ Feature: Graql Match Query
   #######################
 
   # Negation resolution is handled by Reasoner, but query validation is handled by the language.
-
   Scenario: when the entire match clause is a negation, an error is thrown
-
   At least one negated pattern variable must be bound outside the negation block, so this query is invalid.
-
     Then graql match; throws exception
       """
       match not { $x has attribute "value"; };
