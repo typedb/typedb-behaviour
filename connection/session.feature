@@ -23,18 +23,14 @@ Feature: Connection Session
     Given connection does not have any database
 
   Scenario: for one database, open one session
-    When connection create database:
-      | grakn |
-    When connection open session for database:
-      | grakn |
+    When connection create database: grakn
+    When connection open session for database: grakn
     Then session is null: false
     Then session is open: true
-    Then session has database:
-      | grakn |
+    Then session has database: grakn
 
   Scenario: for one database, open many sessions
-    When connection create database:
-      | grakn |
+    When connection create database: grakn
     When connection open sessions for databases:
       | grakn |
       | grakn |
@@ -65,8 +61,7 @@ Feature: Connection Session
       | grakn |
 
   Scenario: for one database, open many sessions in parallel
-    When connection create database:
-      | grakn |
+    When connection create database: grakn
     When connection open sessions in parallel for databases:
       | grakn |
       | grakn |
@@ -151,3 +146,24 @@ Feature: Connection Session
       | eve     |
       | frank   |
 
+  Scenario: write schema in a data session throws
+    When connection create database: grakn
+    Given connection open data session for database: grakn
+    When session opens transaction of type: write
+    Then graql define; throws exception containing "session type does not allow"
+      """
+      define person sub entity;
+      """
+
+  Scenario: write data in a schema session throws
+    When connection create database: grakn
+    Given connection open schema session for database: grakn
+    When session opens transaction of type: write
+    Then graql define
+      """
+      define person sub entity;
+      """
+    Then graql put; throws exception containing "session type does not allow"
+      """
+      put $x isa person;
+      """

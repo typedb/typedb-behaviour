@@ -50,13 +50,9 @@ Feature: Graql Reasoning Explanation
       match $p isa person;
       """
 
-    Then concept identifiers are
-      |    | check | value      |
-      | AL | key   | name:Alice |
-
     Then uniquely identify answer concepts
-      | p  |
-      | AL |
+      | p              |
+      | key:name:Alice |
 
     Then answers contain explanation tree
       |   | children | vars | identifiers | explanation | pattern                                    |
@@ -107,8 +103,8 @@ Feature: Graql Reasoning Explanation
       | KCn | value | name:King's Cross |
 
     Then uniquely identify answer concepts
-      | k  | l   | n   |
-      | KC | LDN | KCn |
+      |          k            |       l         |           n             |
+      | key:name:King's Cross | key:name:London | value:name:King's Cross |
 
     Then answers contain explanation tree
       |   | children | vars    | identifiers  | explanation | pattern                                                                                                                                                        |

@@ -71,11 +71,6 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    And concept identifiers are
-      |     | check | value     |
-      | PER | key   | ref:0     |
-      | LIS | value | name:Lisa |
-      | SIX | value | age:16    |
     When get answers of graql query
       """
       match
@@ -83,8 +78,8 @@ Feature: Graql Get Clause
       get $z, $x;
       """
     Then uniquely identify answer concepts
-      | z   | x   |
-      | PER | LIS |
+      | z         | x               |
+      | key:ref:0 | value:name:Lisa |
 
 
   Scenario: when a 'get' has unbound variables, an error is thrown
@@ -420,15 +415,10 @@ Feature: Graql Get Clause
       sort $y asc;
       limit 2;
       """
-    And concept identifiers are
-      |      | check | value |
-      | A2P1 | key   | ref:0 |
-      | A2P2 | key   | ref:4 |
-      | AGE2 | value | age:2 |
     Then uniquely identify answer concepts
-      | x    | y    |
-      | A2P1 | AGE2 |
-      | A2P2 | AGE2 |
+      | x         | y           |
+      | key:ref:0 | value:age:2 |
+      | key:ref:4 | value:age:2 |
     When get answers of graql query
       """
       match $x isa person, has age $y;
@@ -442,9 +432,9 @@ Feature: Graql Get Clause
       | A6P2 | key   | ref:3 |
       | AGE6 | value | age:6 |
     Then uniquely identify answer concepts
-      | x    | y    |
-      | A6P1 | AGE6 |
-      | A6P2 | AGE6 |
+      | x         | y           |
+      | key:ref:1 | value:age:6 |
+      | key:ref:3 | value:age:6 |
 
 
   Scenario: when sorting by a variable not contained in the answer set, an error is thrown
@@ -850,19 +840,19 @@ Feature: Graql Get Clause
       | BER | key   | ref:2 |
       | COL | key   | ref:3 |
     Then uniquely identify answer concepts
-      | x   | y   |
-      | VIO | RUP |
-      | VIO | BER |
-      | VIO | COL |
-      | RUP | VIO |
-      | RUP | BER |
-      | RUP | COL |
-      | BER | VIO |
-      | BER | RUP |
-      | BER | COL |
-      | COL | VIO |
-      | COL | RUP |
-      | COL | BER |
+      | x         | y         |
+      | key:ref:0 | key:ref:1 |
+      | key:ref:0 | key:ref:2 |
+      | key:ref:0 | key:ref:3 |
+      | key:ref:1 | key:ref:0 |
+      | key:ref:1 | key:ref:2 |
+      | key:ref:1 | key:ref:3 |
+      | key:ref:2 | key:ref:0 |
+      | key:ref:2 | key:ref:1 |
+      | key:ref:2 | key:ref:3 |
+      | key:ref:3 | key:ref:0 |
+      | key:ref:3 | key:ref:1 |
+      | key:ref:3 | key:ref:2 |
     When get answers of graql query
       """
       match ($x, $y) isa friendship;
@@ -990,13 +980,13 @@ Feature: Graql Get Clause
       get $x, $y, $z;
       """
     Then uniquely identify answer concepts
-      | x   | y   | z   |
-      | APP | ELE | FLY |
-      | APP | ELE | LYU |
-      | APP | FLY | ELE |
-      | APP | FLY | LYU |
-      | GOO | LYU | ELE |
-      | GOO | LYU | FLY |
+      | x         | y         | z         |
+      | key:ref:0 | key:ref:2 | key:ref:3 |
+      | key:ref:0 | key:ref:2 | key:ref:4 |
+      | key:ref:0 | key:ref:3 | key:ref:2 |
+      | key:ref:0 | key:ref:3 | key:ref:4 |
+      | key:ref:1 | key:ref:4 | key:ref:2 |
+      | key:ref:1 | key:ref:4 | key:ref:3 |
     Then get answers of graql query
       """
       match

@@ -58,12 +58,9 @@ Feature: Graql Define Query
       """
       match $x type dog;
       """
-    When concept identifiers are
-      |     | check | value |
-      | DOG | label | dog   |
     Then uniquely identify answer concepts
-      | x   |
-      | DOG |
+      | x         |
+      | label:dog |
 
 
   Scenario: a new entity type can be defined as a subtype, creating a new child of its parent type
@@ -78,14 +75,10 @@ Feature: Graql Define Query
       """
       match $x sub person;
       """
-    When concept identifiers are
-      |     | check | value  |
-      | PER | label | person |
-      | CHD | label | child  |
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
-      | CHD |
+      | x            |
+      | label:person |
+      | label:child  |
 
 
   Scenario: when defining that a type owns a non-existent thing, an error is thrown
@@ -148,14 +141,10 @@ Feature: Graql Define Query
       """
       match $x plays employment:employee;
       """
-    When concept identifiers are
-      |     | check | value  |
-      | PER | label | person |
-      | CHD | label | child  |
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
-      | CHD |
+      | x            |
+      | label:person |
+      | label:child  |
 
 
   Scenario: a newly defined entity subtype inherits playable roles from all of its supertypes
@@ -173,18 +162,12 @@ Feature: Graql Define Query
       """
       match $x plays employment:employee;
       """
-    When concept identifiers are
-      |     | check | value    |
-      | PER | label | person   |
-      | ATH | label | athlete  |
-      | RUN | label | runner   |
-      | SPR | label | sprinter |
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
-      | ATH |
-      | RUN |
-      | SPR |
+      | x              |
+      | label:person   |
+      | label:athlete  |
+      | label:runner   |
+      | label:sprinter |
 
 
   Scenario: a newly defined entity subtype inherits attribute ownerships from its parent type
@@ -199,14 +182,10 @@ Feature: Graql Define Query
       """
       match $x owns name;
       """
-    When concept identifiers are
-      |     | check | value  |
-      | PER | label | person |
-      | CHD | label | child  |
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
-      | CHD |
+      | x            |
+      | label:person |
+      | label:child  |
 
 
   Scenario: a newly defined entity subtype inherits attribute ownerships from all of its supertypes
@@ -224,18 +203,12 @@ Feature: Graql Define Query
       """
       match $x owns name;
       """
-    When concept identifiers are
-      |     | check | value    |
-      | PER | label | person   |
-      | ATH | label | athlete  |
-      | RUN | label | runner   |
-      | SPR | label | sprinter |
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
-      | ATH |
-      | RUN |
-      | SPR |
+      | x              |
+      | label:person   |
+      | label:athlete  |
+      | label:runner   |
+      | label:sprinter |
 
 
   Scenario: a newly defined entity subtype inherits keys from its parent type
@@ -250,14 +223,10 @@ Feature: Graql Define Query
       """
       match $x owns email @key;
       """
-    When concept identifiers are
-      |     | check | value  |
-      | PER | label | person |
-      | CHD | label | child  |
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
-      | CHD |
+      | x            |
+      | label:person |
+      | label:child  |
 
 
   Scenario: a newly defined entity subtype inherits keys from all of its supertypes
@@ -275,18 +244,12 @@ Feature: Graql Define Query
       """
       match $x owns email @key;
       """
-    When concept identifiers are
-      |     | check | value    |
-      | PER | label | person   |
-      | ATH | label | athlete  |
-      | RUN | label | runner   |
-      | SPR | label | sprinter |
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
-      | ATH |
-      | RUN |
-      | SPR |
+      | x              |
+      | label:person   |
+      | label:athlete  |
+      | label:runner   |
+      | label:sprinter |
 
 
   Scenario: defining a playable role is idempotent
@@ -304,12 +267,9 @@ Feature: Graql Define Query
       """
       match $x plays home-ownership:home;
       """
-    When concept identifiers are
-      |     | check | value |
-      | HOU | label | house |
     Then uniquely identify answer concepts
-      | x   |
-      | HOU |
+      | x           |
+      | label:house |
 
 
   Scenario: defining an attribute ownership is idempotent
@@ -326,12 +286,9 @@ Feature: Graql Define Query
       """
       match $x owns price;
       """
-    When concept identifiers are
-      |     | check | value |
-      | HOU | label | house |
     Then uniquely identify answer concepts
-      | x   |
-      | HOU |
+      | x           |
+      | label:house |
 
 
   Scenario: defining a key ownership is idempotent
@@ -348,12 +305,9 @@ Feature: Graql Define Query
       """
       match $x owns address @key;
       """
-    When concept identifiers are
-      |     | check | value |
-      | HOU | label | house |
     Then uniquely identify answer concepts
-      | x   |
-      | HOU |
+      | x           |
+      | label:house |
 
 
   Scenario: defining a type without a 'sub' clause throws
@@ -433,12 +387,9 @@ Feature: Graql Define Query
       """
       match $x type pet-ownership;
       """
-    When concept identifiers are
-      |     | check | value         |
-      | POW | label | pet-ownership |
     Then uniquely identify answer concepts
-      | x   |
-      | POW |
+      | x                   |
+      | label:pet-ownership |
 
 
   Scenario: a new relation type can be defined as a subtype, creating a new child of its parent type
@@ -453,14 +404,10 @@ Feature: Graql Define Query
       """
       match $x sub employment;
       """
-    When concept identifiers are
-      |     | check | value          |
-      | EMP | label | employment     |
-      | FUN | label | fun-employment |
     Then uniquely identify answer concepts
-      | x   |
-      | EMP |
-      | FUN |
+      | x                    |
+      | label:employment     |
+      | label:fun_employment |
 
 
   Scenario: defining a relation type throws on commit if it has no roleplayers and is not abstract
@@ -484,14 +431,10 @@ Feature: Graql Define Query
       """
       match $x relates employee;
       """
-    When concept identifiers are
-      |     | check | value                |
-      | EMP | label | employment           |
-      | PTT | label | part-time-employment |
     Then uniquely identify answer concepts
-      | x   |
-      | EMP |
-      | PTT |
+      | x                          |
+      | label:employment           |
+      | label:part-time-employment |
 
 
   Scenario: a newly defined relation subtype inherits roles from all of its supertypes
@@ -513,24 +456,18 @@ Feature: Graql Define Query
         $x relates parent;
         $x relates child;
       """
-    When concept identifiers are
-      |     | check | value      |
-      | PAR | label | parenthood |
     Then uniquely identify answer concepts
-      | x   |
-      | PAR |
+      | x                 |
+      | label:parenthood |
     When get answers of graql query
       """
       match
         $x relates father;
         $x relates son;
       """
-    When concept identifiers are
-      |     | check | value          |
-      | FSH | label | father-sonhood |
     Then uniquely identify answer concepts
-      | x   |
-      | FSH |
+      | x                    |
+      | label:father-sonhood |
 
 
   Scenario: when a relation type's role is overridden, it creates a sub-role of the parent role type
@@ -548,18 +485,12 @@ Feature: Graql Define Query
       match
       $x sub parenthood:parent; $y sub parenthood:child; get $x, $y;
       """
-    When concept identifiers are
-      |     | check | value  |
-      | PAR | label | parent |
-      | FAT | label | father |
-      | CHI | label | child  |
-      | SON | label | son    |
     Then uniquely identify answer concepts
-      | x   | y   |
-      | PAR | CHI |
-      | FAT | CHI |
-      | PAR | SON |
-      | FAT | SON |
+      | x            | y           |
+      | label:parent | label:child |
+      | label:father | label:child |
+      | label:parent | label:son   |
+      | label:father | label:son   |
 
 
   Scenario: an overridden role is no longer associated with the relation type that overrides it
@@ -574,12 +505,9 @@ Feature: Graql Define Query
       """
       match $x relates employee;
       """
-    When concept identifiers are
-      |     | check | value      |
-      | EMP | label | employment |
     Then uniquely identify answer concepts
-      | x   |
-      | EMP |
+      | x                |
+      | label:employment |
 
 
   Scenario: when overriding a role that doesn't exist on the parent relation, an error is thrown
@@ -603,14 +531,10 @@ Feature: Graql Define Query
       """
       match $x plays income:source;
       """
-    When concept identifiers are
-      |     | check | value               |
-      | EMP | label | employment          |
-      | CEM | label | contract-employment |
     Then uniquely identify answer concepts
-      | x   |
-      | EMP |
-      | CEM |
+      | x                         |
+      | label:employment          |
+      | label:contract-employment |
 
 
   Scenario: a newly defined relation subtype inherits playable roles from all of its supertypes
@@ -628,18 +552,12 @@ Feature: Graql Define Query
       """
       match $x plays income:source;
       """
-    When concept identifiers are
-      |     | check | value                       |
-      | EMP | label | employment                  |
-      | TRN | label | transport-employment        |
-      | AVI | label | aviation-employment         |
-      | FAA | label | flight-attendant-employment |
     Then uniquely identify answer concepts
-      | x   |
-      | EMP |
-      | TRN |
-      | AVI |
-      | FAA |
+      | x                                 |
+      | label:employment                  |
+      | label:transport-employment        |
+      | label:aviation-employment         |
+      | label:flight-attendant-employment |
 
 
   Scenario: a newly defined relation subtype inherits attribute ownerships from its parent type
@@ -654,14 +572,10 @@ Feature: Graql Define Query
       """
       match $x owns start-date;
       """
-    When concept identifiers are
-      |     | check | value               |
-      | EMP | label | employment          |
-      | CEM | label | contract-employment |
     Then uniquely identify answer concepts
-      | x   |
-      | EMP |
-      | CEM |
+      | x                         |
+      | label:employment          |
+      | label:contract-employment |
 
 
   Scenario: a newly defined relation subtype inherits attribute ownerships from all of its supertypes
@@ -679,18 +593,12 @@ Feature: Graql Define Query
       """
       match $x owns start-date;
       """
-    When concept identifiers are
-      |     | check | value                       |
-      | EMP | label | employment                  |
-      | TRN | label | transport-employment        |
-      | AVI | label | aviation-employment         |
-      | FAA | label | flight-attendant-employment |
     Then uniquely identify answer concepts
-      | x   |
-      | EMP |
-      | TRN |
-      | AVI |
-      | FAA |
+      | x                                 |
+      | label:employment                  |
+      | label:transport-employment        |
+      | label:aviation-employment         |
+      | label:flight-attendant-employment |
 
 
   Scenario: a newly defined relation subtype inherits keys from its parent type
@@ -705,14 +613,10 @@ Feature: Graql Define Query
       """
       match $x owns employment-reference-code @key;
       """
-    When concept identifiers are
-      |     | check | value               |
-      | EMP | label | employment          |
-      | CEM | label | contract-employment |
     Then uniquely identify answer concepts
-      | x   |
-      | EMP |
-      | CEM |
+      | x                         |
+      | label:employment          |
+      | label:contract-employment |
 
 
   Scenario: a newly defined relation subtype inherits keys from all of its supertypes
@@ -730,18 +634,12 @@ Feature: Graql Define Query
       """
       match $x owns employment-reference-code @key;
       """
-    When concept identifiers are
-      |     | check | value                       |
-      | EMP | label | employment                  |
-      | TRN | label | transport-employment        |
-      | AVI | label | aviation-employment         |
-      | FAA | label | flight-attendant-employment |
     Then uniquely identify answer concepts
-      | x   |
-      | EMP |
-      | TRN |
-      | AVI |
-      | FAA |
+      | x                                 |
+      | label:employment                  |
+      | label:transport-employment        |
+      | label:aviation-employment         |
+      | label:flight-attendant-employment |
 
 
   Scenario: a relation type can be defined with no roleplayers when it is marked as abstract
@@ -756,12 +654,9 @@ Feature: Graql Define Query
       """
       match $x type connection;
       """
-    When concept identifiers are
-      |     | check | value      |
-      | CON | label | connection |
     Then uniquely identify answer concepts
-      | x   |
-      | CON |
+      | x                |
+      | label:connection |
 
 
   Scenario: when defining a relation type, duplicate 'relates' are idempotent
@@ -778,12 +673,9 @@ Feature: Graql Define Query
       """
       match $x relates parent; $x relates child;
       """
-    When concept identifiers are
-      |     | check | value      |
-      | PAR | label | parenthood |
     Then uniquely identify answer concepts
-      | x   |
-      | PAR |
+      | x                |
+      | label:parenthood |
 
 
   Scenario: unrelated relations are allowed to have roles with the same name
@@ -800,14 +692,10 @@ Feature: Graql Define Query
       """
       match $x relates owner;
       """
-    When concept identifiers are
-      |     | check | value     |
-      | OWN | label | ownership |
-      | LOA | label | loan      |
     Then uniquely identify answer concepts
-      | x   |
-      | OWN |
-      | LOA |
+      | x               |
+      | label:ownership |
+      | label:loan      |
 
 
   ###################
@@ -869,14 +757,10 @@ Feature: Graql Define Query
       """
       match $x sub code;
       """
-    When concept identifiers are
-      |     | check | value     |
-      | COD | label | code      |
-      | DOC | label | door-code |
     Then uniquely identify answer concepts
-      | x   |
-      | COD |
-      | DOC |
+      | x               |
+      | label:code      |
+      | label:door-code |
 
 
   Scenario: a newly defined attribute subtype inherits the value type of its parent
@@ -893,12 +777,9 @@ Feature: Graql Define Query
       """
       match $x type door-code, value string;
       """
-    When concept identifiers are
-      |     | check | value     |
-      | DOC | label | door-code |
     Then uniquely identify answer concepts
-      | x   |
-      | DOC |
+      | x               |
+      | label:door-code |
 
 
   Scenario: defining an attribute subtype throws if it is given a different value type to what its parent has
@@ -921,12 +802,9 @@ Feature: Graql Define Query
       """
       match $x regex "^(yes|no|maybe)$";
       """
-    When concept identifiers are
-      |     | check | value    |
-      | RES | label | response |
     Then uniquely identify answer concepts
-      | x   |
-      | RES |
+      | x              |
+      | label:resource |
 
 
   Scenario: a regex constraint cannot be defined on an attribute type whose value type is anything other than 'string'
@@ -953,14 +831,10 @@ Feature: Graql Define Query
       """
       match $x plays car-sales-listing:available-colour;
       """
-    When concept identifiers are
-      |     | check | value            |
-      | COL | label | colour           |
-      | GRC | label | grayscale-colour |
     Then uniquely identify answer concepts
-      | x   |
-      | COL |
-      | GRC |
+      | x                      |
+      | label:colour           |
+      | label:grayscale-colour |
 
 
   Scenario: a newly defined attribute subtype inherits playable roles from all of its supertypes
@@ -981,18 +855,12 @@ Feature: Graql Define Query
       """
       match $x plays phone-contact:number;
       """
-    When concept identifiers are
-      |     | check | value                      |
-      | PHN | label | phone-number               |
-      | UKP | label | uk-phone-number            |
-      | UKL | label | uk-landline-number         |
-      | UPM | label | uk-premium-landline-number |
     Then uniquely identify answer concepts
-      | x   |
-      | PHN |
-      | UKP |
-      | UKL |
-      | UPM |
+      | x                                |
+      | label:phone-number               |
+      | label:uk-phone-number            |
+      | label:uk-landline-number         |
+      | label:uk-premium-landline-number |
 
 
   Scenario: a newly defined attribute subtype inherits attribute ownerships from its parent type
@@ -1010,14 +878,10 @@ Feature: Graql Define Query
       """
       match $x owns brightness;
       """
-    When concept identifiers are
-      |     | check | value            |
-      | COL | label | colour           |
-      | GRC | label | grayscale-colour |
     Then uniquely identify answer concepts
-      | x   |
-      | COL |
-      | GRC |
+      | x                      |
+      | label:colour           |
+      | label:grayscale-colour |
 
 
   Scenario: a newly defined attribute subtype inherits attribute ownerships from all of its supertypes
@@ -1037,18 +901,12 @@ Feature: Graql Define Query
       """
       match $x owns country-calling-code;
       """
-    When concept identifiers are
-      |     | check | value                      |
-      | PHN | label | phone-number               |
-      | UKP | label | uk-phone-number            |
-      | UKL | label | uk-landline-number         |
-      | UPM | label | uk-premium-landline-number |
     Then uniquely identify answer concepts
-      | x   |
-      | PHN |
-      | UKP |
-      | UKL |
-      | UPM |
+      | x                                |
+      | label:phone-number               |
+      | label:uk-phone-number            |
+      | label:uk-landline-number         |
+      | label:uk-premium-landline-number |
 
 
   Scenario: a newly defined attribute subtype inherits keys from its parent type
@@ -1066,14 +924,10 @@ Feature: Graql Define Query
       """
       match $x owns hex-value @key;
       """
-    When concept identifiers are
-      |     | check | value            |
-      | COL | label | colour           |
-      | GRC | label | grayscale-colour |
     Then uniquely identify answer concepts
-      | x   |
-      | COL |
-      | GRC |
+      | x                      |
+      | label:colour           |
+      | label:grayscale-colour |
 
 
   Scenario: a newly defined attribute subtype inherits keys from all of its supertypes
@@ -1093,18 +947,12 @@ Feature: Graql Define Query
       """
       match $x owns hex-value @key;
       """
-    When concept identifiers are
-      |     | check | value                |
-      | COL | label | colour               |
-      | DRK | label | dark-colour          |
-      | DKR | label | dark-red-colour      |
-      | VDR | label | very-dark-red-colour |
     Then uniquely identify answer concepts
-      | x   |
-      | COL |
-      | DRK |
-      | DKR |
-      | VDR |
+      | x                          |
+      | label:colour               |
+      | label:dark-colour          |
+      | label:dark-red-colour      |
+      | label:very-dark-red-colour |
 
 
   Scenario Outline: a type can own a '<value_type>' attribute type
@@ -1121,12 +969,9 @@ Feature: Graql Define Query
       """
       match $x owns <label>;
       """
-    When concept identifiers are
-      |     | check | value  |
-      | PER | label | person |
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
+      | x            |
+      | label:person |
 
   Examples:
     | value_type | label             |
@@ -1164,12 +1009,9 @@ Feature: Graql Define Query
       """
       match $x type animal; $x abstract;
       """
-    When concept identifiers are
-      |     | check | value  |
-      | ANI | label | animal |
     Then uniquely identify answer concepts
-      | x   |
-      | ANI |
+      | x            |
+      | label:animal |
 
 
   Scenario: a concrete entity type can be defined as a subtype of an abstract entity type
@@ -1186,14 +1028,10 @@ Feature: Graql Define Query
       """
       match $x sub animal;
       """
-    When concept identifiers are
-      |     | check | value  |
-      | ANI | label | animal |
-      | HOR | label | horse  |
     Then uniquely identify answer concepts
-      | x   |
-      | ANI |
-      | HOR |
+      | x            |
+      | label:animal |
+      | label:horse  |
 
 
   Scenario: an abstract entity type can be defined as a subtype of another abstract entity type
@@ -1210,14 +1048,10 @@ Feature: Graql Define Query
       """
       match $x sub animal; $x abstract;
       """
-    When concept identifiers are
-      |     | check | value  |
-      | ANI | label | animal |
-      | FSH | label | fish   |
     Then uniquely identify answer concepts
-      | x   |
-      | ANI |
-      | FSH |
+      | x            |
+      | label:animal |
+      | label:fish   |
 
 
   Scenario: an abstract entity type can be defined as a subtype of a concrete entity type
@@ -1234,12 +1068,9 @@ Feature: Graql Define Query
       """
       match $x sub exception, abstract;
       """
-    When concept identifiers are
-      |     | check | value           |
-      | GRA | label | grakn-exception |
     Then uniquely identify answer concepts
-      | x   |
-      | GRA |
+      | x                     |
+      | label:grakn-exception |
 
 
   Scenario: an abstract relation type can be defined
@@ -1254,12 +1085,9 @@ Feature: Graql Define Query
       """
       match $x type membership; $x abstract;
       """
-    When concept identifiers are
-      |     | check | value      |
-      | MEM | label | membership |
     Then uniquely identify answer concepts
-      | x   |
-      | MEM |
+      | x                |
+      | label:membership |
 
 
   Scenario: a concrete relation type can be defined as a subtype of an abstract relation type
@@ -1276,14 +1104,10 @@ Feature: Graql Define Query
       """
       match $x sub membership;
       """
-    When concept identifiers are
-      |     | check | value          |
-      | MEM | label | membership     |
-      | GYM | label | gym-membership |
     Then uniquely identify answer concepts
-      | x   |
-      | MEM |
-      | GYM |
+      | x                    |
+      | label:membership     |
+      | label:gym-membership |
 
 
   Scenario: an abstract relation type can be defined as a subtype of another abstract relation type
@@ -1300,14 +1124,10 @@ Feature: Graql Define Query
       """
       match $x sub requirement; $x abstract;
       """
-    When concept identifiers are
-      |     | check | value            |
-      | REQ | label | requirement      |
-      | TLR | label | tool-requirement |
     Then uniquely identify answer concepts
-      | x   |
-      | REQ |
-      | TLR |
+      | x                      |
+      | label:requirement      |
+      | label:tool-requirement |
 
 
   Scenario: an abstract relation type can be defined as a subtype of a concrete relation type
@@ -1324,12 +1144,9 @@ Feature: Graql Define Query
       """
       match $x sub requirement; $x abstract;
       """
-    When concept identifiers are
-      |     | check | value            |
-      | TCR | label | tech-requirement |
     Then uniquely identify answer concepts
-      | x   |
-      | TCR |
+      | x                      |
+      | label:tech-requirement |
 
 
   Scenario: an abstract attribute type can be defined
@@ -1344,12 +1161,9 @@ Feature: Graql Define Query
       """
       match $x type number-of-limbs; $x abstract;
       """
-    When concept identifiers are
-      |     | check | value           |
-      | NOL | label | number-of-limbs |
     Then uniquely identify answer concepts
-      | x   |
-      | NOL |
+      | x                     |
+      | label:number-of-limbs |
 
 
   Scenario: a concrete attribute type can be defined as a subtype of an abstract attribute type
@@ -1366,14 +1180,10 @@ Feature: Graql Define Query
       """
       match $x sub number-of-limbs;
       """
-    When concept identifiers are
-      |     | check | value           |
-      | NOL | label | number-of-limbs |
-      | NLE | label | number-of-legs  |
     Then uniquely identify answer concepts
-      | x   |
-      | NOL |
-      | NLE |
+      | x                     |
+      | label:number-of-limbs |
+      | label:number-of-legs  |
 
 
   Scenario: an abstract attribute type can be defined as a subtype of another abstract attribute type
@@ -1390,14 +1200,10 @@ Feature: Graql Define Query
       """
       match $x sub number-of-limbs; $x abstract;
       """
-    When concept identifiers are
-      |     | check | value                      |
-      | NOL | label | number-of-limbs            |
-      | NAL | label | number-of-artificial-limbs |
     Then uniquely identify answer concepts
-      | x   |
-      | NOL |
-      | NAL |
+      | x                     |
+      | label:number-of-limbs |
+      | label:number-of-legs  |
 
 
   Scenario: defining attribute type hierarchies is idempotent
@@ -1497,14 +1303,10 @@ Feature: Graql Define Query
       """
       match $x owns name;
       """
-    When concept identifiers are
-      |     | check | value      |
-      | PER | label | person     |
-      | EMP | label | employment |
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
-      | EMP |
+      | x                |
+      | label:person     |
+      | label:employment |
 
 
   Scenario: a new playable role can be defined on an existing type
@@ -1519,14 +1321,10 @@ Feature: Graql Define Query
       """
       match $x plays employment:employee;
       """
-    When concept identifiers are
-      |     | check | value      |
-      | PER | label | person     |
-      | EMP | label | employment |
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
-      | EMP |
+      | x                |
+      | label:person     |
+      | label:employment |
 
 
   Scenario: defining a key on an existing type is possible if existing instances have it and there are no collisions
@@ -1564,12 +1362,9 @@ Feature: Graql Define Query
       """
       match $x owns barcode @key;
       """
-    When concept identifiers are
-      |     | check | value   |
-      | PRD | label | product |
     Then uniquely identify answer concepts
-      | x   |
-      | PRD |
+      | x             |
+      | label:product |
 
 
   Scenario: defining a key on a type throws if existing instances don't have that key
@@ -1648,12 +1443,9 @@ Feature: Graql Define Query
       """
       match $x relates employer;
       """
-    When concept identifiers are
-      |     | check | value      |
-      | EMP | label | employment |
     Then uniquely identify answer concepts
-      | x   |
-      | EMP |
+      | x                |
+      | label:employment |
 
 
   Scenario: a regex constraint can be added to an existing attribute type if all its instances satisfy it
@@ -1681,12 +1473,9 @@ Feature: Graql Define Query
       """
       match $x regex "^A.*$";
       """
-    When concept identifiers are
-      |     | check | value |
-      | NAM | label | name  |
     Then uniquely identify answer concepts
-      | x   |
-      | NAM |
+      | x          |
+      | label:name |
 
 
   Scenario: a regex cannot be added to an existing attribute type if there is an instance that doesn't satisfy it
@@ -1761,12 +1550,9 @@ Feature: Graql Define Query
       """
       match $x owns name @key;
       """
-    When concept identifiers are
-      |     | check | value  |
-      | PER | label | person |
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
+      | x            |
+      | label:person |
 
 
   Scenario: defining a rule is idempotent
@@ -1815,12 +1601,9 @@ Feature: Graql Define Query
       """
       match $x sub person; $x abstract;
       """
-    When concept identifiers are
-      |     | check | value  |
-      | PER | label | person |
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
+      | x            |
+      | label:person |
 
 
   Scenario: a concrete relation type can be converted to an abstract relation type
@@ -1835,12 +1618,9 @@ Feature: Graql Define Query
       """
       match $x sub employment; $x abstract;
       """
-    When concept identifiers are
-      |     | check | value      |
-      | EMP | label | employment |
     Then uniquely identify answer concepts
-      | x   |
-      | EMP |
+      | x                |
+      | label:employment |
 
 
   Scenario: a concrete attribute type can be converted to an abstract attribute type
@@ -1855,12 +1635,9 @@ Feature: Graql Define Query
       """
       match $x sub name; $x abstract;
       """
-    When concept identifiers are
-      |     | check | value |
-      | NAM | label | name  |
     Then uniquely identify answer concepts
-      | x   |
-      | NAM |
+      | x          |
+      | label:name |
 
 
   Scenario: an existing entity type cannot be converted to abstract if it has existing instances
@@ -1944,14 +1721,10 @@ Feature: Graql Define Query
       """
       match $x sub apple-product;
       """
-    When concept identifiers are
-      |     | check | value         |
-      | APL | label | apple-product |
-      | GEN | label | genius        |
     Then uniquely identify answer concepts
-      | x   |
-      | APL |
-      | GEN |
+      | x                   |
+      | label:apple-product |
+      | label:genius        |
 
 
   Scenario: an existing relation type can be switched to a new supertype
@@ -1992,12 +1765,9 @@ Feature: Graql Define Query
       """
       match $x sub shoe-size;
       """
-    When concept identifiers are
-      |     | check | value     |
-      | SHS | label | shoe-size |
     Then uniquely identify answer concepts
-      | x   |
-      | SHS |
+      | x               |
+      | label:shoe-size |
 
 
   Scenario: assigning a new supertype succeeds even if they have different attributes + roles, if there are no instances
@@ -2025,16 +1795,11 @@ Feature: Graql Define Query
       """
       match $x sub organism;
       """
-    When concept identifiers are
-      |     | check | value    |
-      | ORG | label | organism |
-      | PER | label | person   |
-      | CHI | label | child    |
     Then uniquely identify answer concepts
-      | x   |
-      | ORG |
-      | PER |
-      | CHI |
+      | x              |
+      | label:organism |
+      | label:person   |
+      | label:child    |
 
 
   Scenario: assigning a new supertype succeeds even with existing data if the supertypes have no properties
@@ -2071,12 +1836,9 @@ Feature: Graql Define Query
       """
       match $x sub pigeon;
       """
-    When concept identifiers are
-      |     | check | value  |
-      | PIG | label | pigeon |
     Then uniquely identify answer concepts
-      | x   |
-      | PIG |
+      | x            |
+      | label:pigeon |
 
 
   Scenario: assigning a new supertype succeeds with existing data if the supertypes play the same roles
@@ -2114,12 +1876,9 @@ Feature: Graql Define Query
       """
       match $x sub pigeon;
       """
-    When concept identifiers are
-      |     | check | value  |
-      | PIG | label | pigeon |
     Then uniquely identify answer concepts
-      | x   |
-      | PIG |
+      | x            |
+      | label:pigeon |
 
 
   Scenario: assigning a new supertype succeeds with existing data if the supertypes have the same attributes
@@ -2157,12 +1916,9 @@ Feature: Graql Define Query
       """
       match $x sub pigeon;
       """
-    When concept identifiers are
-      |     | check | value  |
-      | PIG | label | pigeon |
     Then uniquely identify answer concepts
-      | x   |
-      | PIG |
+      | x            |
+      | label:pigeon |
 
 
   # TODO: write this once 'assign new supertype .. with existing data' succeeds if the supertypes have the same attributes
@@ -2205,17 +1961,11 @@ Feature: Graql Define Query
       """
       match $x type child, plays $r;
       """
-    When concept identifiers are
-      |          | check | value    |
-      | EMPLOYEE | label | employee |
-      | EMPLOYER | label | employer |
-      | EARNER   | label | earner   |
-      | CHILD    | label | child    |
     Then uniquely identify answer concepts
-      | x     | r        |
-      | CHILD | EMPLOYEE |
-      | CHILD | EMPLOYER |
-      | CHILD | EARNER   |
+      | x           | r              |
+      | label:child | label:employee |
+      | label:child | label:employer |
+      | label:child | label:earner   |
 
 
   Scenario: when adding an attribute ownership to an existing type, the change is propagated to its subtypes
@@ -2233,15 +1983,10 @@ Feature: Graql Define Query
       """
       match $x type child, owns $y;
       """
-    When concept identifiers are
-      |       | check | value        |
-      | CHILD | label | child        |
-      | NAME  | label | name         |
-      | PHONE | label | phone-number |
     Then uniquely identify answer concepts
-      | x     | y     |
-      | CHILD | NAME  |
-      | CHILD | PHONE |
+      | x           | y                  |
+      | label:child | label:name         |
+      | label:child | label:phone-number |
 
 
   Scenario: when adding a key ownership to an existing type, the change is propagated to its subtypes
@@ -2259,14 +2004,10 @@ Feature: Graql Define Query
       """
       match $x type child, owns $y @key;
       """
-    When concept identifiers are
-      |       | check | value |
-      | CHILD | label | child |
-      | EMAIL | label | email |
     Then uniquely identify answer concepts
-      | x     | y     |
-      | CHILD | EMAIL |
-      | CHILD | EMAIL |
+      | x           | y           |
+      | label:child | label:email |
+      | label:child | label:email |
 
 
   Scenario: when adding a related role to an existing relation type, the change is propagated to all its subtypes
@@ -2283,15 +2024,10 @@ Feature: Graql Define Query
       """
       match $x type part-time-employment, relates $r;
       """
-    When concept identifiers are
-      |           | check | value                |
-      | EMPLOYEE  | label | employee             |
-      | EMPLOYER  | label | employer             |
-      | PART_TIME | label | part-time-employment |
     Then uniquely identify answer concepts
-      | x         | r        |
-      | PART_TIME | EMPLOYEE |
-      | PART_TIME | EMPLOYER |
+      | x                          | r              |
+      | label:part-time-employment | label:employee |
+      | label:part-time-employment | label:employer |
 
 
   ####################
@@ -2347,12 +2083,9 @@ Feature: Graql Define Query
       """
       match $x relates function; $x plays recursive-function:function;
       """
-    When concept identifiers are
-      |     | check | value              |
-      | REC | label | recursive-function |
     Then uniquely identify answer concepts
-      | x   |
-      | REC |
+      | x                        |
+      | label:recursive-function |
 
 
   Scenario: an attribute type can own itself
@@ -2367,12 +2100,9 @@ Feature: Graql Define Query
       """
       match $x owns number-of-letters;
       """
-    When concept identifiers are
-      |     | check | value             |
-      | NOL | label | number-of-letters |
     Then uniquely identify answer concepts
-      | x   |
-      | NOL |
+      | x                       |
+      | label:number-of-letters |
 
 
   Scenario: two relation types in a type hierarchy can play each other's roles
