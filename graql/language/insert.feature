@@ -77,12 +77,9 @@ Feature: Graql Insert Query
       """
       match $x isa person;
       """
-    When concept identifiers are
-      |     | check | value |
-      | PER | key   | ref:0 |
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
+      | x         |
+      | key:ref:0 |
 
 
   Scenario: one query can insert multiple things
@@ -99,14 +96,10 @@ Feature: Graql Insert Query
       """
       match $x isa person;
       """
-    When concept identifiers are
-      |      | check | value |
-      | REF0 | key   | ref:0 |
-      | REF1 | key   | ref:1 |
     Then uniquely identify answer concepts
-      | x    |
-      | REF0 |
-      | REF1 |
+      | x         |
+      | key:ref:0 |
+      | key:ref:1 |
 
 
   Scenario: when an insert has multiple statements with the same variable name, they refer to the same thing
@@ -124,26 +117,23 @@ Feature: Graql Insert Query
       """
       match $x has name "Bond";
       """
-    When concept identifiers are
-      |      | check | value |
-      | BOND | key   | ref:0 |
     Then uniquely identify answer concepts
-      | x    |
-      | BOND |
+      | x         |
+      | key:ref:0 |
     When get answers of graql query
       """
       match $x has name "James Bond";
       """
     Then uniquely identify answer concepts
-      | x    |
-      | BOND |
+      | x         |
+      | key:ref:0 |
     When get answers of graql query
       """
       match $x has name "Bond", has name "James Bond";
       """
     Then uniquely identify answer concepts
-      | x    |
-      | BOND |
+      | x         |
+      | key:ref:0 |
 
 
   Scenario: when running multiple identical insert queries in series, new things get created each time
@@ -210,12 +200,9 @@ Feature: Graql Insert Query
       insert $x isa! person, has name "Harry", has ref 0;
       """
     Then the integrity is validated
-    When concept identifiers are
-      |     | check | value |
-      | HAR | key   | ref:0 |
     Then uniquely identify answer concepts
-      | x   |
-      | HAR |
+      | x         |
+      | key:ref:0 |
 
 
   Scenario: attempting to insert an instance of an abstract type throws an error
@@ -269,18 +256,12 @@ Feature: Graql Insert Query
       """
       match $x isa thing;
       """
-    When concept identifiers are
-      |      | check | value           |
-      | WIL  | key   | ref:0           |
-      | nWIL | value | name:Wilhelmina |
-      | a25  | value | age:25          |
-      | REF0 | value | ref:0           |
     Then uniquely identify answer concepts
-      | x    |
-      | WIL  |
-      | nWIL |
-      | a25  |
-      | REF0 |
+      | x                     |
+      | key:ref:0             |
+      | value:name:Wilhelmina |
+      | value:age:25          |
+      | value:ref:0           |
 
 
   Scenario: a freshly inserted attribute has no owners
@@ -317,12 +298,9 @@ Feature: Graql Insert Query
       """
       match $x has name "Kyle";
       """
-    When concept identifiers are
-      |      | check | value |
-      | KYLE | key   | ref:0 |
     Then uniquely identify answer concepts
-      | x    |
-      | KYLE |
+      | x         |
+      | key:ref:0 |
 
 
   Scenario: after inserting two things that own the same attribute, the attribute has two owners
@@ -343,14 +321,10 @@ Feature: Graql Insert Query
       not { $p1 is $p2; };
       get $p1, $p2;
       """
-    When concept identifiers are
-      |      | check | value |
-      | JACK | key   | ref:0 |
-      | JILL | key   | ref:1 |
     Then uniquely identify answer concepts
-      | p1   | p2   |
-      | JACK | JILL |
-      | JILL | JACK |
+      | p1        | p2        |
+      | key:ref:0 | key:ref:1 |
+      | key:ref:1 | key:ref:0 |
 
 
   Scenario: after inserting a new owner for every existing ownership of an attribute, its number of owners doubles
@@ -432,14 +406,10 @@ Feature: Graql Insert Query
       """
       match $p isa person, has <attr> $x; get $x;
       """
-    When concept identifiers are
-      |      | check | value |
-      | VAL1 | key   | ref:0 |
-      | VAL2 | key   | ref:1 |
     Then uniquely identify answer concepts
-      | x    |
-      | VAL1 |
-      | VAL2 |
+      | x         |
+      | key:ref:0 |
+      | key:ref:1 |
 
     Examples:
       | attr              | type     | val1       | val2       |
@@ -491,12 +461,9 @@ Feature: Graql Insert Query
       """
       match $p has name "Spiderman";
       """
-    When concept identifiers are
-      |     | check | value |
-      | PET | key   | ref:0 |
     Then uniquely identify answer concepts
-      | p   |
-      | PET |
+      | p         |
+      | key:ref:0 |
 
 
   Scenario: when inserting an additional attribute ownership on an entity, the entity type can be optionally specified
@@ -527,12 +494,9 @@ Feature: Graql Insert Query
       """
       match $p has name "Spiderman";
       """
-    When concept identifiers are
-      |     | check | value |
-      | PET | key   | ref:0 |
     Then uniquely identify answer concepts
-      | p   |
-      | PET |
+      | p         |
+      | key:ref:0 |
 
 
   Scenario: when an attribute owns an attribute, an instance of that attribute can be inserted onto it
@@ -577,12 +541,9 @@ Feature: Graql Insert Query
       """
       match $c has hex-value "#FF0000";
       """
-    When concept identifiers are
-      |     | check | value      |
-      | COL | value | colour:red |
     Then uniquely identify answer concepts
-      | c   |
-      | COL |
+      | c                |
+      | value:colour:red |
 
 
   Scenario: when inserting an additional attribute ownership on an attribute, the owner type can be optionally specified
@@ -627,12 +588,9 @@ Feature: Graql Insert Query
       """
       match $c has hex-value "#FF0000";
       """
-    When concept identifiers are
-      |     | check | value      |
-      | COL | value | colour:red |
     Then uniquely identify answer concepts
-      | c   |
-      | COL |
+      | c                |
+      | value:colour:red |
 
 
   Scenario: when linking an attribute that doesn't exist yet to a relation, the attribute gets created
@@ -685,13 +643,9 @@ Feature: Graql Insert Query
       """
       match $r isa residence, has tenure-days $a; get $a;
       """
-    When concept identifiers are
-      |     | check | value           |
-      | RES | key   | ref:0           |
-      | TEN | value | tenure-days:365 |
     Then uniquely identify answer concepts
-      | a   |
-      | TEN |
+      | a                     |
+      | value:tenure-days:365 |
 
 
   Scenario: an attribute ownership currently inferred by a rule can be explicitly inserted
@@ -724,12 +678,9 @@ Feature: Graql Insert Query
       """
       match $p has age 32;
       """
-    Given concept identifiers are
-      |      | check | value |
-      | LUCY | key   | ref:0 |
     Given uniquely identify answer concepts
-      | p    |
-      | LUCY |
+      | p         |
+      | key:ref:0 |
     Given graql insert
       """
       match
@@ -745,8 +696,8 @@ Feature: Graql Insert Query
       match $p has age 32;
       """
     Then uniquely identify answer concepts
-      | p    |
-      | LUCY |
+      | p         |
+      | key:ref:0 |
 
 
   #############
@@ -767,13 +718,9 @@ Feature: Graql Insert Query
       """
       match $r (employee: $p) isa employment;
       """
-    When concept identifiers are
-      |     | check | value |
-      | PER | key   | ref:0 |
-      | EMP | key   | ref:1 |
     Then uniquely identify answer concepts
-      | p   | r   |
-      | PER | EMP |
+      | p         | r         |
+      | key:ref:0 | key:ref:1 |
 
 
   Scenario: when inserting a relation that owns an attribute and has an attribute roleplayer, both attributes are created
@@ -812,14 +759,9 @@ Feature: Graql Insert Query
       """
       match $r (place-of-residence: $addr) isa residence, has is-permanent $perm;
       """
-    When concept identifiers are
-      |     | check | value                         |
-      | RES | key   | ref:0                         |
-      | ADD | value | address:742 Evergreen Terrace |
-      | PER | value | is-permanent:true             |
     Then uniquely identify answer concepts
-      | r   | addr | perm |
-      | RES | ADD  | PER  |
+      | r         | addr                                 | perm                     |
+      | key:ref:0 | value:address:742 Evergreen Terrace  | value:is-permanent:true  |
 
 
   Scenario: relations can be inserted with multiple role players
@@ -841,12 +783,9 @@ Feature: Graql Insert Query
         $c has name $cname;
       get $cname;
       """
-    When concept identifiers are
-      |     | check | value          |
-      | MOR | value | name:Morrisons |
     Then uniquely identify answer concepts
-      | cname |
-      | MOR   |
+      | cname                  |
+      | value:name:Morrisons   |
     When get answers of graql query
       """
       match
@@ -854,10 +793,7 @@ Feature: Graql Insert Query
         $p has name $pname;
       get $pname;
       """
-    When concept identifiers are
-      |     | check | value       |
-      | GOR | value | name:Gordon |
-      | HEL | value | name:Helen  |
+    #TODO: Appears unfinished?
 
 
   Scenario: an additional role player can be inserted onto an existing relation
@@ -883,14 +819,9 @@ Feature: Graql Insert Query
       """
       match $r (employer: $c, employee: $p) isa employment;
       """
-    When concept identifiers are
-      |      | check | value |
-      | REF0 | key   | ref:0 |
-      | REF1 | key   | ref:1 |
-      | REF2 | key   | ref:2 |
     Then uniquely identify answer concepts
-      | p    | c    | r    |
-      | REF0 | REF2 | REF1 |
+      | p         | c         | r         |
+      | key:ref:0 | key:ref:2 | key:ref:1 |
 
 
   Scenario: an additional role player can be inserted into every relation matching a pattern
@@ -920,16 +851,10 @@ Feature: Graql Insert Query
       """
       match $r (employer: $c, employee: $p) isa employment;
       """
-    When concept identifiers are
-      |      | check | value |
-      | RUTH | key   | ref:0 |
-      | EMP1 | key   | ref:1 |
-      | EMP2 | key   | ref:2 |
-      | COMP | key   | ref:3 |
     Then uniquely identify answer concepts
-      | p    | c    | r    |
-      | RUTH | COMP | EMP1 |
-      | RUTH | COMP | EMP2 |
+      | p         | c         | r         |
+      | key:ref:0 | key:ref:3 | key:ref:1 |
+      | key:ref:0 | key:ref:3 | key:ref:2 |
 
 
   Scenario: an additional duplicate role player can be inserted into an existing relation
@@ -955,13 +880,9 @@ Feature: Graql Insert Query
       """
       match $r (employee: $p, employee: $p) isa employment;
       """
-    When concept identifiers are
-      |      | check | value |
-      | REF0 | key   | ref:0 |
-      | REF1 | key   | ref:1 |
     Then uniquely identify answer concepts
-      | p    | r    |
-      | REF0 | REF1 |
+      | p         | r         |
+      | key:ref:0 | key:ref:1 |
 
 
   Scenario: when inserting a roleplayer that can't play the role, an error is thrown
@@ -1052,9 +973,6 @@ Feature: Graql Insert Query
       """
       match (member: $p) isa gym-membership; get $p;
       """
-    When concept identifiers are
-      |     | check | value |
-      | JEN | key   | ref:0 |
     Then graql insert
       """
       match
@@ -1070,8 +988,8 @@ Feature: Graql Insert Query
       match (member: $p) isa gym-membership; get $p;
       """
     Then uniquely identify answer concepts
-      | p   |
-      | JEN |
+      | p         |
+      | key:ref:0 |
     When get answers of graql query
       """
       match $r isa gym-membership; get $r;
@@ -1112,12 +1030,9 @@ Feature: Graql Insert Query
       """
       match $x <value> isa <attr>;
       """
-    When concept identifiers are
-      |     | check | value |
-      | ATT | key   | ref:0 |
     Then uniquely identify answer concepts
-      | x   |
-      | ATT |
+      | x         |
+      | key:ref:0 |
 
     Examples:
       | attr           | type     | value      |
@@ -1165,16 +1080,13 @@ Feature: Graql Insert Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When concept identifiers are
-      |      | check | value |
-      | AGE2 | value | age:2 |
     When get answers of graql query
       """
       match $x isa age;
       """
     Then uniquely identify answer concepts
-      | x    |
-      | AGE2 |
+      | x           |
+      | value:age:2 |
 
 
   Scenario: inserting two 'double' attribute values with the same integer value creates a single concept
@@ -1200,17 +1112,14 @@ Feature: Graql Insert Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When concept identifiers are
-      |    | check | value      |
-      | L2 | value | length:2.0 |
     When get answers of graql query
       """
       match $x isa length;
       """
     Then answer size is: 1
     Then uniquely identify answer concepts
-      | x  |
-      | L2 |
+      | x                |
+      | value:length:2.0 |
 
 
   Scenario: inserting the same integer twice as a 'double' in separate transactions creates a single concept
@@ -1243,17 +1152,14 @@ Feature: Graql Insert Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When concept identifiers are
-      |    | check | value      |
-      | L2 | value | length:2.0 |
     When get answers of graql query
       """
       match $x isa length;
       """
     Then answer size is: 1
     Then uniquely identify answer concepts
-      | x  |
-      | L2 |
+      | x                |
+      | value:length:2.0 |
 
 
   Scenario: inserting attribute values [2] and [2.0] with the same attribute type creates a single concept
@@ -1306,19 +1212,16 @@ Feature: Graql Insert Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When concept identifiers are
-      |     | check | value |
-      | RF0 | key   | ref:0 |
     Then uniquely identify answer concepts
-      | x   |
-      | RF0 |
+      | x         |
+      | key:ref:0 |
     When get answers of graql query
       """
       match $x <match> isa <attr>;
       """
     Then uniquely identify answer concepts
-      | x   |
-      | RF0 |
+      | x         |
+      | key:ref:0 |
 
     Examples:
       | type     | attr       | insert           | match            |
@@ -1388,12 +1291,9 @@ Feature: Graql Insert Query
       $x 10;
       """
     Then transaction commits
-    When concept identifiers are
-      |     | check | value  |
-      | A10 | value | age:10 |
     Then uniquely identify answer concepts
-      | x   |
-      | A10 |
+      | x            |
+      | value:age:10 |
     Then the integrity is validated
 
 
@@ -1437,12 +1337,9 @@ Feature: Graql Insert Query
       """
       match $x isa person;
       """
-    When concept identifiers are
-      |     | check | value |
-      | PER | key   | ref:0 |
     Then uniquely identify answer concepts
-      | x   |
-      | PER |
+      | x         |
+      | key:ref:0 |
 
 
   Scenario: when a type has a key, attempting to insert it without that key throws on commit
@@ -1512,13 +1409,9 @@ Feature: Graql Insert Query
       $z isa company, has name "Wayne Enterprises", has ref 0;
       """
     Then the integrity is validated
-    When concept identifiers are
-      |     | check | value |
-      | BRU | key   | ref:0 |
-      | WAY | key   | ref:0 |
     Then uniquely identify answer concepts
-      | x   | z   |
-      | BRU | WAY |
+      | x         | z         |
+      | key:ref:0 | key:ref:0 |
 
 
   Scenario: when inserting a thing variable with a type variable, the answer contains both variables
@@ -1530,13 +1423,9 @@ Feature: Graql Insert Query
         $x isa $type, has name "Microsoft", has ref 0;
       """
     Then the integrity is validated
-    When concept identifiers are
-      |     | check | value   |
-      | MIC | key   | ref:0   |
-      | COM | label | company |
     Then uniquely identify answer concepts
-      | x   | type |
-      | MIC | COM  |
+      | x         | type           |
+      | key:ref:0 | label:company  |
 
 
   ################
@@ -1581,10 +1470,7 @@ Feature: Graql Insert Query
       """
       match $x has is-cool true;
       """
-    When concept identifiers are
-      |     | check | value |
-      | NOR | key   | ref:0 |
-      | DAN | key   | ref:1 |
+    #TODO: Appears unfinished
 
 
   Scenario: the answers of a match-insert only include the variables referenced in the 'insert' block
@@ -1608,14 +1494,10 @@ Feature: Graql Insert Query
         (employer: $x, employee: $y) isa employment, has ref 10;
       """
     Then the integrity is validated
-    When concept identifiers are
-      |     | check | value |
-      | MIC | key   | ref:1 |
-      | TAR | key   | ref:3 |
     # Should only contain variables mentioned in the insert (so excludes '$z')
     Then uniquely identify answer concepts
-      | x   | y   |
-      | MIC | TAR |
+      | x         | y         |
+      | key:ref:1 | key:ref:3 |
 
 
   Scenario: match-insert can take an attribute's value and copy it to an attribute of a different type
@@ -1659,12 +1541,9 @@ Feature: Graql Insert Query
         $x has height $z;
       get $x;
       """
-    When concept identifiers are
-      |     | check | value |
-      | SUS | key   | ref:0 |
     Then uniquely identify answer concepts
-      | x   |
-      | SUS |
+      | x         |
+      | key:ref:0 |
 
 
   Scenario: if match-insert matches nothing, then nothing is inserted
@@ -1712,14 +1591,9 @@ Feature: Graql Insert Query
       $y isa person, has name "Steven", has ref 1;
       $z isa person, has name "Theresa", has ref 2;
       """
-    Given concept identifiers are
-      |     | check | value |
-      | BEC | key   | ref:0 |
-      | STE | key   | ref:1 |
-      | THE | key   | ref:2 |
     Given uniquely identify answer concepts
-      | x   | y   | z   |
-      | BEC | STE | THE |
+      | x         | y         | z         |
+      | key:ref:0 | key:ref:1 | key:ref:2 |
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: write
@@ -1728,10 +1602,10 @@ Feature: Graql Insert Query
       match $x isa person;
       """
     Given uniquely identify answer concepts
-      | x   |
-      | BEC |
-      | STE |
-      | THE |
+      | x         |
+      | key:ref:0 |
+      | key:ref:1 |
+      | key:ref:2 |
     When graql insert
       """
       match
@@ -1747,10 +1621,10 @@ Feature: Graql Insert Query
       match $x isa person;
       """
     Then uniquely identify answer concepts
-      | x   |
-      | BEC |
-      | STE |
-      | THE |
+      | x         |
+      | key:ref:0 |
+      | key:ref:1 |
+      | key:ref:2 |
 
 
   Scenario: match-inserting only existing relations is a no-op
@@ -1765,18 +1639,9 @@ Feature: Graql Insert Query
       $yr (employee: $y, employer: $c) isa employment, has ref 5;
       $zr (employee: $z, employer: $c) isa employment, has ref 6;
       """
-    Given concept identifiers are
-      |      | check | value |
-      | HOM  | key   | ref:0 |
-      | BUR  | key   | ref:1 |
-      | SMI  | key   | ref:2 |
-      | NPP  | key   | ref:3 |
-      | eHOM | key   | ref:4 |
-      | eBUR | key   | ref:5 |
-      | eSMI | key   | ref:6 |
     Given uniquely identify answer concepts
-      | x   | y   | z   | c   | xr   | yr   | zr   |
-      | HOM | BUR | SMI | NPP | eHOM | eBUR | eSMI |
+      | x         | y         | z         | c         | xr        | yr        | zr        |
+      | key:ref:0 | key:ref:1 | key:ref:2 | key:ref:3 | key:ref:4 | key:ref:5 | key:ref:6 |
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: write
@@ -1785,10 +1650,10 @@ Feature: Graql Insert Query
       match $r (employee: $x, employer: $c) isa employment;
       """
     Given uniquely identify answer concepts
-      | r    | x   | c   |
-      | eHOM | HOM | NPP |
-      | eBUR | BUR | NPP |
-      | eSMI | SMI | NPP |
+      | r         | x         | c         |
+      | key:ref:4 | key:ref:0 | key:ref:3 |
+      | key:ref:5 | key:ref:1 | key:ref:3 |
+      | key:ref:6 | key:ref:2 | key:ref:3 |
     When graql insert
       """
       match
@@ -1804,10 +1669,10 @@ Feature: Graql Insert Query
       match $r (employee: $x, employer: $c) isa employment;
       """
     Then uniquely identify answer concepts
-      | r    | x   | c   |
-      | eHOM | HOM | NPP |
-      | eBUR | BUR | NPP |
-      | eSMI | SMI | NPP |
+      | r         | x         | c         |
+      | key:ref:4 | key:ref:0 | key:ref:3 |
+      | key:ref:5 | key:ref:1 | key:ref:3 |
+      | key:ref:6 | key:ref:2 | key:ref:3 |
 
 
   Scenario: match-inserting only existing attributes is a no-op
@@ -1818,14 +1683,9 @@ Feature: Graql Insert Query
       $y "Misty" isa name;
       $z "Brock" isa name;
       """
-    Given concept identifiers are
-      |     | check | value      |
-      | ASH | value | name:Ash   |
-      | MIS | value | name:Misty |
-      | BRO | value | name:Brock |
     Given uniquely identify answer concepts
-      | x   | y   | z   |
-      | ASH | MIS | BRO |
+      | x              | y                | z                |
+      | value:name:Ash | value:name:Misty | value:name:Brock |
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: write
@@ -1834,10 +1694,10 @@ Feature: Graql Insert Query
       match $x isa name;
       """
     Given uniquely identify answer concepts
-      | x   |
-      | ASH |
-      | MIS |
-      | BRO |
+      | x                |
+      | value:name:Ash   |
+      | value:name:Misty |
+      | value:name:Brock |
     When graql insert
       """
       match
@@ -1853,10 +1713,10 @@ Feature: Graql Insert Query
       match $x isa name;
       """
     Then uniquely identify answer concepts
-      | x   |
-      | ASH |
-      | MIS |
-      | BRO |
+      | x                |
+      | value:name:Ash   |
+      | value:name:Misty |
+      | value:name:Brock |
 
 
   Scenario: re-inserting a matched instance does nothing
@@ -1982,16 +1842,13 @@ Feature: Graql Insert Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: write
-    When concept identifiers are
-      |     | check | value       |
-      | GAN | value | name:Ganesh |
     When get answers of graql query
       """
       match $x isa name;
       """
     Then uniquely identify answer concepts
-      | x   |
-      | GAN |
+      | x                 |
+      | value:name:Ganesh |
     When graql delete
       """
       match
@@ -2042,19 +1899,14 @@ Feature: Graql Insert Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: write
-    When concept identifiers are
-      |     | check | value      |
-      | CHR | key   | ref:0      |
-      | FRE | key   | ref:1      |
-      | TEN | value | score:10.0 |
     When get answers of graql query
       """
       match $x isa person, has score $score;
       """
     Then uniquely identify answer concepts
-      | x   | score |
-      | CHR | TEN   |
-      | FRE | TEN   |
+      | x         | score            |
+      | key:ref:0 | value:score:10.0 |
+      | key:ref:1 | value:score:10.0 |
     When graql delete
       """
       match
@@ -2071,8 +1923,8 @@ Feature: Graql Insert Query
       """
     # The score '10.0' still exists, we never deleted it
     Then uniquely identify answer concepts
-      | x   |
-      | TEN |
+      | x                |
+      | value:score:10.0 |
     When get answers of graql query
       """
       match $x isa person, has score $score;
@@ -2125,17 +1977,13 @@ Feature: Graql Insert Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: write
-    When concept identifiers are
-      |     | check | value       |
-      | GAN | value | name:Ganesh |
-      | G   | value | letter:G    |
     When get answers of graql query
       """
       match $x isa name;
       """
     Then uniquely identify answer concepts
-      | x   |
-      | GAN |
+      | x                 |
+      | value:name:Ganesh |
     # At this step we materialise the inferred name 'Ganesh' because the material name-initial relation depends on it.
     When graql insert
       """
@@ -2170,16 +2018,16 @@ Feature: Graql Insert Query
       """
     # We deleted the person called 'Ganesh', but the name still exists because it was materialised on match-insert
     Then uniquely identify answer concepts
-      | x   |
-      | GAN |
+      | x                 |
+      | value:name:Ganesh |
     When get answers of graql query
       """
       match (lettered-name: $x, initial: $y) isa name-initial;
       """
     # And the inserted relation still exists too
     Then uniquely identify answer concepts
-      | x   | y |
-      | GAN | G |
+      | x                 | y              |
+      | value:name:Ganesh | value:letter:G |
 
 
   Scenario: when inserting things connected to an inferred relation, the inferred relation gets materialised
