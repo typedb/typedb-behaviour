@@ -19,8 +19,7 @@ Feature: Graql Rule Validation
 
   Background: Initialise a session and transaction for each scenario
     Given connection has been opened
-    Given connection open sessions for databases:
-      | test_rule_validation |
+    Given connection open session for databases: test_rule_validation
     Given transaction is initialised
     Given graql define
       """
@@ -57,14 +56,10 @@ Feature: Graql Rule Validation
       """
       match $x sub rule;
       """
-    Then concept identifiers are
-      |     | check | value                   |
-      | BOB | label | robert-has-nickname-bob |
-      | RUL | label | rule                    |
     Then uniquely identify answer concepts
-      | x   |
-      | BOB |
-      | RUL |
+      | x                             |
+      | label:robert-has-nickname-bob |
+      | label:rule                    |
 
 
   # Keys are validated at commit time, so integrity will not be harmed by writing one in a rule.
@@ -83,14 +78,10 @@ Feature: Graql Rule Validation
       """
       match $x sub rule;
       """
-    Then concept identifiers are
-      |     | check | value             |
-      | JSE | label | john-smiths-email |
-      | RUL | label | rule              |
     Then uniquely identify answer concepts
-      | x   |
-      | JSE |
-      | RUL |
+      | x                       |
+      | label:john-smiths-email |
+      | label:rule              |
 
 
   Scenario: when a rule has no 'when' clause, an error is thrown
@@ -170,14 +161,10 @@ Feature: Graql Rule Validation
       """
       match $x sub rule;
       """
-    Then concept identifiers are
-      |     | check | value           |
-      | ONL | label | only-child-rule |
-      | RUL | label | rule            |
     Then uniquely identify answer concepts
-      | x   |
-      | ONL |
-      | RUL |
+      | x                     |
+      | label:only-child-rule |
+      | label:rule            |
 
 
   Scenario: when a rule has a negation block whose pattern variables are all unbound outside it, an error is thrown
@@ -301,14 +288,10 @@ Feature: Graql Rule Validation
       """
       match $x sub rule;
       """
-    Then concept identifiers are
-      |     | check | value                             |
-      | BOB | label | two-roberts-are-both-named-robert |
-      | RUL | label | rule                              |
     Then uniquely identify answer concepts
-      | x   |
-      | BOB |
-      | RUL |
+      | x                                       |
+      | label:two-roberts-are-both-named-robert |
+      | label:rule                              |
 
 
   Scenario: when a rule contains a disjunction, an error is thrown
