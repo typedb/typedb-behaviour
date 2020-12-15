@@ -271,12 +271,9 @@ Feature: Graql Match Query
       """
       match $x owns $x;
       """
-    And concept identifiers are
-      |      | check | value  |
-      | UNIT | label | unit   |
     Then uniquely identify answer concepts
-      | x    |
-      | UNIT |
+      | x          |
+      | label:unit |
 
 
   Scenario: 'owns' does not match types that own only a subtype of the specified attribute type
@@ -1376,12 +1373,9 @@ Feature: Graql Match Query
       """
       match $x has $x;
       """
-    And concept identifiers are
-      |       | check | value  |
-      | METER | key   | ref:0  |
     Then uniquely identify answer concepts
-      | x     |
-      | METER |
+      | x         |
+      | key:ref:0 |
 
 
   Scenario: an error is thrown when matching by attribute ownership, when the owned thing is actually an entity
