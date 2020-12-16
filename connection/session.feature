@@ -165,5 +165,5 @@ Feature: Connection Session
       """
     Then graql insert; throws exception containing "session type does not allow"
       """
-      put $x isa person;
+      insert $x isa person;
       """
