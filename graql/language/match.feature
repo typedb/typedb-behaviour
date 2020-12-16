@@ -362,7 +362,7 @@ Feature: Graql Match Query
       | x         | type             |
       | key:ref:0 | label:person     |
       | key:ref:1 | label:company    |
-      | key:ref:2 | label:employment |
+      | key:ref:3 | label:employment |
 
 
   Scenario: 'plays' matches types that can play the specified role
