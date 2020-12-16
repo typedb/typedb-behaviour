@@ -1400,6 +1400,35 @@ Feature: Graql Define Query
       | NAL |
 
 
+  Scenario: defining attribute type hierarchies is idempotent
+    When graql define
+      """
+      define name sub attribute, abstract, value string; location-name sub name;
+      """
+    Then transaction commits
+    Then session opens transaction of type: write
+    Then graql define
+      """
+      define name sub attribute, abstract, value string; location-name sub name;
+      """
+    Then transaction commits
+    Then session opens transaction of type: read
+    When get answers of graql query
+      """
+      match
+      $name type name; $name abstract;
+      $location type location-name, sub name;
+      """
+    When concept identifiers are
+      |     | check | value         |
+      | NAM | label | name          |
+      | LOC | label | location-name |
+    Then uniquely identify answer concepts
+      | name | location |
+      | NAM  | LOC      |
+    Then the integrity is validated
+
+
   Scenario: repeating the term 'abstract' when defining a type causes an error to be thrown
     Given graql define; throws exception
       """
