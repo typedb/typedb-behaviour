@@ -71,11 +71,6 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    And concept identifiers are
-      |     | check | value     |
-      | PER | key   | ref:0     |
-      | LIS | value | name:Lisa |
-      | SIX | value | age:16    |
     When get answers of graql query
       """
       match
@@ -83,8 +78,8 @@ Feature: Graql Get Clause
       get $z, $x;
       """
     Then uniquely identify answer concepts
-      | z   | x   |
-      | PER | LIS |
+      | z         | x               |
+      | key:ref:0 | value:name:Lisa |
 
 
   Scenario: when a 'get' has unbound variables, an error is thrown
@@ -129,18 +124,12 @@ Feature: Graql Get Clause
       match $x isa <attr>;
       sort $x asc;
       """
-    And concept identifiers are
-      |      | check | value |
-      | VAL1 | key   | ref:0 |
-      | VAL2 | key   | ref:1 |
-      | VAL3 | key   | ref:2 |
-      | VAL4 | key   | ref:3 |
     Then order of answer concepts is
-      | x    |
-      | VAL4 |
-      | VAL2 |
-      | VAL3 |
-      | VAL1 |
+      | x         |
+      | key:ref:3 |
+      | key:ref:1 |
+      | key:ref:2 |
+      | key:ref:0 |
 
     Examples:
       | attr          | type     | val4       | val2             | val3             | val1       |
@@ -167,33 +156,23 @@ Feature: Graql Get Clause
       match $x isa person, has name $y;
       sort $y asc;
       """
-    And concept identifiers are
-      |      | check | value          |
-      | GAR  | key   | ref:0          |
-      | JEM  | key   | ref:1          |
-      | FRE  | key   | ref:2          |
-      | BRE  | key   | ref:3          |
-      | nGAR | value | name:Gary      |
-      | nJEM | value | name:Jemima    |
-      | nFRE | value | name:Frederick |
-      | nBRE | value | name:Brenda    |
     Then order of answer concepts is
-      | x   | y    |
-      | BRE | nBRE |
-      | FRE | nFRE |
-      | GAR | nGAR |
-      | JEM | nJEM |
+      | x         | y                    |
+      | key:ref:3 | value:name:Brenda    |
+      | key:ref:2 | value:name:Frederick |
+      | key:ref:0 | value:name:Gary      |
+      | key:ref:1 | value:name:Jemima    |
     When get answers of graql query
       """
       match $x isa person, has name $y;
       sort $y desc;
       """
     Then order of answer concepts is
-      | x   | y    |
-      | JEM | nJEM |
-      | GAR | nGAR |
-      | FRE | nFRE |
-      | BRE | nBRE |
+      | x         | y                    |
+      | key:ref:1 | value:name:Jemima    |
+      | key:ref:0 | value:name:Gary      |
+      | key:ref:2 | value:name:Frederick |
+      | key:ref:3 | value:name:Brenda    |
 
 
   Scenario: the default sort order is ascending
@@ -213,22 +192,12 @@ Feature: Graql Get Clause
       match $x isa person, has name $y;
       sort $y;
       """
-    And concept identifiers are
-      |      | check | value          |
-      | GAR  | key   | ref:0          |
-      | JEM  | key   | ref:1          |
-      | FRE  | key   | ref:2          |
-      | BRE  | key   | ref:3          |
-      | nGAR | value | name:Gary      |
-      | nJEM | value | name:Jemima    |
-      | nFRE | value | name:Frederick |
-      | nBRE | value | name:Brenda    |
     Then order of answer concepts is
-      | x   | y    |
-      | BRE | nBRE |
-      | FRE | nFRE |
-      | GAR | nGAR |
-      | JEM | nJEM |
+      | x         | y                    |
+      | key:ref:3 | value:name:Brenda    |
+      | key:ref:2 | value:name:Frederick |
+      | key:ref:0 | value:name:Gary      |
+      | key:ref:1 | value:name:Jemima    |
 
 
   Scenario: a sorted result set can be limited to a specific size
@@ -249,19 +218,11 @@ Feature: Graql Get Clause
       sort $y asc;
       limit 3;
       """
-    And concept identifiers are
-      |      | check | value          |
-      | GAR  | key   | ref:0          |
-      | FRE  | key   | ref:2          |
-      | BRE  | key   | ref:3          |
-      | nGAR | value | name:Gary      |
-      | nFRE | value | name:Frederick |
-      | nBRE | value | name:Brenda    |
     Then order of answer concepts is
-      | x   | y    |
-      | BRE | nBRE |
-      | FRE | nFRE |
-      | GAR | nGAR |
+      | x         | y                    |
+      | key:ref:3 | value:name:Brenda    |
+      | key:ref:2 | value:name:Frederick |
+      | key:ref:0 | value:name:Gary      |
 
 
   Scenario: sorted results can be retrieved starting from a specific offset
@@ -282,16 +243,10 @@ Feature: Graql Get Clause
       sort $y asc;
       offset 2;
       """
-    And concept identifiers are
-      |      | check | value       |
-      | GAR  | key   | ref:0       |
-      | JEM  | key   | ref:1       |
-      | nGAR | value | name:Gary   |
-      | nJEM | value | name:Jemima |
     Then order of answer concepts is
-      | x   | y    |
-      | GAR | nGAR |
-      | JEM | nJEM |
+      | x         | y                    |
+      | key:ref:0 | value:name:Gary      |
+      | key:ref:1 | value:name:Jemima    |
 
 
   Scenario: 'offset' and 'limit' can be used together to restrict the answer set
@@ -313,16 +268,10 @@ Feature: Graql Get Clause
       offset 1;
       limit 2;
       """
-    And concept identifiers are
-      |      | check | value          |
-      | GAR  | key   | ref:0          |
-      | FRE  | key   | ref:2          |
-      | nGAR | value | name:Gary      |
-      | nFRE | value | name:Frederick |
     Then order of answer concepts is
-      | x   | y    |
-      | FRE | nFRE |
-      | GAR | nGAR |
+      | x         | y                    |
+      | key:ref:2 | value:name:Frederick |
+      | key:ref:0 | value:name:Gary      |
 
 
   Scenario: when the answer size is limited to 0, an empty answer set is returned
@@ -380,25 +329,18 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When concept identifiers are
-      |     | check | value             |
-      | BON | value | name:Bond         |
-      | JAM | value | name:James Bond   |
-      | 007 | value | name:007          |
-      | AGE | value | name:agent        |
-      | SEC | value | name:secret agent |
     Then get answers of graql query
       """
       match $x isa name;
       sort $x asc;
       """
     Then order of answer concepts is
-      | x   |
-      | 007 |
-      | AGE |
-      | BON |
-      | JAM |
-      | SEC |
+      | x                       |
+      | value:name:007          |
+      | value:name:agent        |
+      | value:name:Bond         |
+      | value:name:James Bond   |
+      | value:name:secret agent |
 
 
   Scenario: sort is able to correctly handle duplicates in the value set
@@ -420,15 +362,10 @@ Feature: Graql Get Clause
       sort $y asc;
       limit 2;
       """
-    And concept identifiers are
-      |      | check | value |
-      | A2P1 | key   | ref:0 |
-      | A2P2 | key   | ref:4 |
-      | AGE2 | value | age:2 |
     Then uniquely identify answer concepts
-      | x    | y    |
-      | A2P1 | AGE2 |
-      | A2P2 | AGE2 |
+      | x         | y           |
+      | key:ref:0 | value:age:2 |
+      | key:ref:4 | value:age:2 |
     When get answers of graql query
       """
       match $x isa person, has age $y;
@@ -436,15 +373,10 @@ Feature: Graql Get Clause
       offset 2;
       limit 2;
       """
-    And concept identifiers are
-      |      | check | value |
-      | A6P1 | key   | ref:1 |
-      | A6P2 | key   | ref:3 |
-      | AGE6 | value | age:6 |
     Then uniquely identify answer concepts
-      | x    | y    |
-      | A6P1 | AGE6 |
-      | A6P2 | AGE6 |
+      | x         | y           |
+      | key:ref:1 | value:age:6 |
+      | key:ref:3 | value:age:6 |
 
 
   Scenario: when sorting by a variable not contained in the answer set, an error is thrown
@@ -843,51 +775,39 @@ Feature: Graql Get Clause
       """
       match ($x, $y) isa friendship;
       """
-    And concept identifiers are
-      |     | check | value |
-      | VIO | key   | ref:0 |
-      | RUP | key   | ref:1 |
-      | BER | key   | ref:2 |
-      | COL | key   | ref:3 |
     Then uniquely identify answer concepts
-      | x   | y   |
-      | VIO | RUP |
-      | VIO | BER |
-      | VIO | COL |
-      | RUP | VIO |
-      | RUP | BER |
-      | RUP | COL |
-      | BER | VIO |
-      | BER | RUP |
-      | BER | COL |
-      | COL | VIO |
-      | COL | RUP |
-      | COL | BER |
+      | x         | y         |
+      | key:ref:0 | key:ref:1 |
+      | key:ref:0 | key:ref:2 |
+      | key:ref:0 | key:ref:3 |
+      | key:ref:1 | key:ref:0 |
+      | key:ref:1 | key:ref:2 |
+      | key:ref:1 | key:ref:3 |
+      | key:ref:2 | key:ref:0 |
+      | key:ref:2 | key:ref:1 |
+      | key:ref:2 | key:ref:3 |
+      | key:ref:3 | key:ref:0 |
+      | key:ref:3 | key:ref:1 |
+      | key:ref:3 | key:ref:2 |
     When get answers of graql query
       """
       match ($x, $y) isa friendship;
       group $x;
       """
-    And group identifiers are
-      |      | owner |
-      | gVIO | VIO   |
-      | gRUP | RUP   |
-      | gBER | BER   |
-      | gCOL | COL   |
     Then answer groups are
-      | group | x   | y   |
-      | gVIO  | VIO | RUP |
-      | gVIO  | VIO | BER |
-      | gVIO  | VIO | COL |
-      | gRUP  | RUP | VIO |
-      | gRUP  | RUP | BER |
-      | gRUP  | RUP | COL |
-      | gBER  | BER | VIO |
-      | gBER  | BER | RUP |
-      | gBER  | BER | COL |
-      | gCOL  | COL | VIO |
-      | gCOL  | COL | RUP |
-      | gCOL  | COL | BER |
+      | owner      | x         | y         |
+      | key:ref:0  | key:ref:0 | key:ref:1 |
+      | key:ref:0  | key:ref:0 | key:ref:2 |
+      | key:ref:0  | key:ref:0 | key:ref:3 |
+      | key:ref:1  | key:ref:1 | key:ref:0 |
+      | key:ref:1  | key:ref:1 | key:ref:2 |
+      | key:ref:1  | key:ref:1 | key:ref:3 |
+      | key:ref:2  | key:ref:2 | key:ref:0 |
+      | key:ref:2  | key:ref:2 | key:ref:1 |
+      | key:ref:2  | key:ref:2 | key:ref:3 |
+      | key:ref:3  | key:ref:3 | key:ref:0 |
+      | key:ref:3  | key:ref:3 | key:ref:1 |
+      | key:ref:3  | key:ref:3 | key:ref:2 |
 
 
   Scenario: when grouping answers by a variable that is not contained in the answer set, an error is thrown
@@ -931,30 +851,18 @@ Feature: Graql Get Clause
       """
       match $x isa person;
       """
-    And concept identifiers are
-      |     | check | value |
-      | VIO | key   | ref:0 |
-      | RUP | key   | ref:1 |
-      | BER | key   | ref:2 |
-      | COL | key   | ref:3 |
     When get answers of graql query
       """
       match ($x, $y) isa friendship;
       group $x;
       count;
       """
-    And group identifiers are
-      |      | owner |
-      | gVIO | VIO   |
-      | gRUP | RUP   |
-      | gBER | BER   |
-      | gCOL | COL   |
     Then group aggregate values are
-      | group | value |
-      | gVIO  | 3     |
-      | gRUP  | 3     |
-      | gBER  | 3     |
-      | gCOL  | 3     |
+      | owner      | value |
+      | key:ref:0  | 3     |
+      | key:ref:1  | 3     |
+      | key:ref:2  | 3     |
+      | key:ref:3  | 3     |
 
 
   Scenario: the size of answer groups is still computed correctly when restricting variables with 'get'
@@ -972,13 +880,6 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    And concept identifiers are
-      |     | check | value |
-      | APP | key   | ref:0 |
-      | GOO | key   | ref:1 |
-      | ELE | key   | ref:2 |
-      | FLY | key   | ref:3 |
-      | LYU | key   | ref:4 |
     When get answers of graql query
       """
       match
@@ -990,13 +891,13 @@ Feature: Graql Get Clause
       get $x, $y, $z;
       """
     Then uniquely identify answer concepts
-      | x   | y   | z   |
-      | APP | ELE | FLY |
-      | APP | ELE | LYU |
-      | APP | FLY | ELE |
-      | APP | FLY | LYU |
-      | GOO | LYU | ELE |
-      | GOO | LYU | FLY |
+      | x         | y         | z         |
+      | key:ref:0 | key:ref:2 | key:ref:3 |
+      | key:ref:0 | key:ref:2 | key:ref:4 |
+      | key:ref:0 | key:ref:3 | key:ref:2 |
+      | key:ref:0 | key:ref:3 | key:ref:4 |
+      | key:ref:1 | key:ref:4 | key:ref:2 |
+      | key:ref:1 | key:ref:4 | key:ref:3 |
     Then get answers of graql query
       """
       match
@@ -1009,14 +910,10 @@ Feature: Graql Get Clause
       group $x;
       count;
       """
-    And group identifiers are
-      |      | owner |
-      | gAPP | APP   |
-      | gGOO | GOO   |
     Then group aggregate values are
-      | group | value |
-      | gAPP  | 4     |
-      | gGOO  | 2     |
+      | owner      | value |
+      | key:ref:0  | 4     |
+      | key:ref:1  | 2     |
 
 
   Scenario: the maximum value for a particular variable within each answer group can be retrieved using a group 'max'
@@ -1035,10 +932,6 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    And concept identifiers are
-      |     | check | value |
-      | LLO | key   | ref:0 |
-      | BAR | key   | ref:1 |
     When get answers of graql query
       """
       match
@@ -1048,11 +941,7 @@ Feature: Graql Get Clause
       group $x;
       max $z;
       """
-    And group identifiers are
-      |      | owner |
-      | gLLO | LLO   |
-      | gBAR | BAR   |
     Then group aggregate values are
-      | group | value |
-      | gLLO  | 57    |
-      | gBAR  | 45    |
+      | owner      | value |
+      | key:ref:0  | 57    |
+      | key:ref:1  | 45    |

@@ -60,17 +60,9 @@ Feature: Graql Delete Query
       """
     Given transaction commits
     Given the integrity is validated
-    Given concept identifiers are
-      |      | check | value     |
-      | ALEX | key   | name:Alex |
-      | BOB  | key   | name:Bob  |
-      | FR   | key   | ref:0     |
-      | JOHN | value | name:John |
-      | nALX | value | name:Alex |
-      | nBOB | value | name:Bob  |
     Given uniquely identify answer concepts
-      | x    | y   | r  | n    |
-      | ALEX | BOB | FR | JOHN |
+      | x             | y            | r         | n               |
+      | key:name:Alex | key:name:Bob | key:ref:0 | value:name:John |
     Given session opens transaction of type: write
     When graql delete
       """
@@ -89,8 +81,8 @@ Feature: Graql Delete Query
       match $x isa person;
       """
     Then uniquely identify answer concepts
-      | x   |
-      | BOB |
+      | x            |
+      | key:name:Bob |
     When get answers of graql query
       """
       match $x isa friendship;
@@ -101,9 +93,9 @@ Feature: Graql Delete Query
       match $x isa name;
       """
     Then uniquely identify answer concepts
-      | x    |
-      | nALX |
-      | nBOB |
+      | x               |
+      | value:name:Alex |
+      | value:name:Bob  |
 
 
   Scenario: an instance can be deleted using the 'thing' meta label
@@ -118,15 +110,9 @@ Feature: Graql Delete Query
       """
     Given transaction commits
     Given the integrity is validated
-    When concept identifiers are
-      |      | check | value     |
-      | ALEX | key   | name:Alex |
-      | BOB  | key   | name:Bob  |
-      | FR   | key   | ref:0     |
-      | JOHN | value | name:John |
     Then uniquely identify answer concepts
-      | x    | y   | r  | n    |
-      | ALEX | BOB | FR | JOHN |
+      | x             | y            | r         | n               |
+      | key:name:Alex | key:name:Bob | key:ref:0 | value:name:John |
     Given session opens transaction of type: write
     When graql delete
       """
@@ -143,8 +129,8 @@ Feature: Graql Delete Query
       match $x isa person;
       """
     Then uniquely identify answer concepts
-      | x   |
-      | BOB |
+      | x            |
+      | key:name:Bob |
 
 
   Scenario: an entity can be deleted using the 'entity' meta label
@@ -159,15 +145,9 @@ Feature: Graql Delete Query
       """
     Given transaction commits
     Given the integrity is validated
-    When concept identifiers are
-      |      | check | value     |
-      | ALEX | key   | name:Alex |
-      | BOB  | key   | name:Bob  |
-      | FR   | key   | ref:0     |
-      | JOHN | value | name:John |
     Then uniquely identify answer concepts
-      | x    | y   | r  | n    |
-      | ALEX | BOB | FR | JOHN |
+      | x             | y            | r         | n               |
+      | key:name:Alex | key:name:Bob | key:ref:0 | value:name:John |
     Given session opens transaction of type: write
     When graql delete
       """
@@ -184,8 +164,8 @@ Feature: Graql Delete Query
       match $x isa person;
       """
     Then uniquely identify answer concepts
-      | x   |
-      | BOB |
+      | x            |
+      | key:name:Bob |
 
 
   Scenario: a relation can be deleted using the 'relation' meta label
@@ -200,15 +180,9 @@ Feature: Graql Delete Query
       """
     Given transaction commits
     Given the integrity is validated
-    When concept identifiers are
-      |      | check | value     |
-      | ALEX | key   | name:Alex |
-      | BOB  | key   | name:Bob  |
-      | FR   | key   | ref:0     |
-      | JOHN | value | name:John |
     Then uniquely identify answer concepts
-      | x    | y   | r  | n    |
-      | ALEX | BOB | FR | JOHN |
+      | x             | y            | r         | n               |
+      | key:name:Alex | key:name:Bob | ket:ref:0 | value:name:John |
     Given session opens transaction of type: write
     When graql delete
       """
@@ -235,12 +209,9 @@ Feature: Graql Delete Query
       """
     Given transaction commits
     Given the integrity is validated
-    When concept identifiers are
-      |      | check | value     |
-      | JOHN | value | name:John |
     Then uniquely identify answer concepts
-      | n    |
-      | JOHN |
+      | n               |
+      | value:name:John |
     Given session opens transaction of type: write
     When graql delete
       """
@@ -271,15 +242,9 @@ Feature: Graql Delete Query
       """
     Given transaction commits
     Given the integrity is validated
-    When concept identifiers are
-      |      | check | value     |
-      | ALEX | key   | name:Alex |
-      | BOB  | key   | name:Bob  |
-      | FR   | key   | ref:0     |
-      | JOHN | value | name:John |
     Then uniquely identify answer concepts
-      | x    | y   | r  | n    |
-      | ALEX | BOB | FR | JOHN |
+      | x             | y            | r         | n               |
+      | key:name:Alex | key:name:Bob | key:ref:0 | value:name:John |
     Given session opens transaction of type: write
     When graql delete
       """
@@ -296,8 +261,8 @@ Feature: Graql Delete Query
       match $x isa person;
       """
     Then uniquely identify answer concepts
-      | x   |
-      | BOB |
+      | x              |
+      | value:name:Bob |
 
 
   Scenario: one delete statement can delete multiple things
@@ -309,13 +274,9 @@ Feature: Graql Delete Query
       """
     Given transaction commits
     Given the integrity is validated
-    When concept identifiers are
-      |     | check | value        |
-      | ALC | key   | name:Alice   |
-      | BAR | key   | name:Barbara |
     Then uniquely identify answer concepts
-      | a   | b   |
-      | ALC | BAR |
+      | a              | b                |
+      | key:name:Alice | key:name:Barbara |
     Given session opens transaction of type: write
     When graql delete
       """
@@ -424,15 +385,9 @@ Feature: Graql Delete Query
       """
     Given transaction commits
     Given the integrity is validated
-    When concept identifiers are
-      |      | check | value       |
-      | ALEX | key   | name:Alex   |
-      | BOB  | key   | name:Bob    |
-      | CAR  | key   | name:Carrie |
-      | FR   | key   | ref:0       |
     Then uniquely identify answer concepts
-      | x    | y   | z   | r  |
-      | ALEX | BOB | CAR | FR |
+      | x             | y            | z               | r         |
+      | key:name:Alex | key:name:Bob | key:name:Carrie | key:ref:0 |
     Given session opens transaction of type: write
     When graql delete
       """
@@ -452,9 +407,9 @@ Feature: Graql Delete Query
       match (friend: $x, friend: $y) isa friendship;
       """
     Then uniquely identify answer concepts
-      | x   | y   |
-      | BOB | CAR |
-      | CAR | BOB |
+      | x               | y               |
+      | key:name:Bob    | key:name:Carrie |
+      | key:name:Carrie | key:name:Bob    |
 
 
   Scenario: deleting a role player from a relation using meta 'role' removes the player from the relation
@@ -469,15 +424,9 @@ Feature: Graql Delete Query
       """
     Given transaction commits
     Given the integrity is validated
-    When concept identifiers are
-      |      | check | value       |
-      | ALEX | key   | name:Alex   |
-      | BOB  | key   | name:Bob    |
-      | CAR  | key   | name:Carrie |
-      | FR   | key   | ref:0       |
     Then uniquely identify answer concepts
-      | x    | y   | z   | r  |
-      | ALEX | BOB | CAR | FR |
+      | x             | y            | z               | r         |
+      | key:name:Alex | key:name:Bob | key:name:Carrie | key:ref:0 |
     Given session opens transaction of type: write
     When graql delete
       """
@@ -497,9 +446,9 @@ Feature: Graql Delete Query
       match (friend: $x, friend: $y) isa friendship;
       """
     Then uniquely identify answer concepts
-      | x   | y   |
-      | BOB | CAR |
-      | CAR | BOB |
+      | x               | y               |
+      | key:name:Bob    | key:name:Carrie |
+      | key:name:Carrie | key:name:Bob    |
 
 
   Scenario: deleting a role player from a relation using a super-role removes the player from the relation
@@ -529,15 +478,9 @@ Feature: Graql Delete Query
       """
     Given transaction commits
     Given the integrity is validated
-    When concept identifiers are
-      |      | check | value       |
-      | ALEX | key   | name:Alex   |
-      | BOB  | key   | name:Bob    |
-      | CAR  | key   | name:Carrie |
-      | FR   | key   | ref:0       |
     Then uniquely identify answer concepts
-      | x    | y   | z   | r  |
-      | ALEX | BOB | CAR | FR |
+      | x             | y            | z               | r         |
+      | key:name:Alex | key:name:Bob | key:name:Carrie | key:ref:0 |
     When session opens transaction of type: write
     When graql delete
       """
@@ -557,9 +500,9 @@ Feature: Graql Delete Query
       match (special-friend: $x, special-friend: $y) isa friendship;
       """
     Then uniquely identify answer concepts
-      | x   | y   |
-      | BOB | CAR |
-      | CAR | BOB |
+      | x               | y               |
+      | key:name:Bob    | key:name:Carrie |
+      | key:name:Carrie | key:name:Bob    |
 
 
   Scenario: deleting an instance removes it from all relations
@@ -574,16 +517,9 @@ Feature: Graql Delete Query
       """
     Given transaction commits
     Given the integrity is validated
-    When concept identifiers are
-      |      | check | value       |
-      | ALEX | key   | name:Alex   |
-      | BOB  | key   | name:Bob    |
-      | CAR  | key   | name:Carrie |
-      | FR1  | key   | ref:1       |
-      | FR2  | key   | ref:2       |
     Then uniquely identify answer concepts
-      | x    | y   | z   | r   | r2  |
-      | ALEX | BOB | CAR | FR1 | FR2 |
+      | x             | y            | z               | r         | r2        |
+      | key:name:Alex | key:name:Bob | key:name:Carrie | key:ref:1 | key:ref:2 |
     Then the integrity is validated
     When session opens transaction of type: write
     When graql delete
@@ -602,17 +538,17 @@ Feature: Graql Delete Query
       match $x isa person;
       """
     Then uniquely identify answer concepts
-      | x   |
-      | BOB |
-      | CAR |
+      | x               |
+      | key:name:Bob    |
+      | key:name:Carrie |
     When get answers of graql query
       """
       match $r (friend: $x) isa friendship;
       """
     Then uniquely identify answer concepts
-      | r   | x   |
-      | FR1 | BOB |
-      | FR2 | CAR |
+      | r         | x               |
+      | key:ref:1 | key:name:Bob    |
+      | key:ref:2 | key:name:Carrie |
 
 
   Scenario: duplicate role players can be deleted from a relation
@@ -625,14 +561,9 @@ Feature: Graql Delete Query
       """
     Given transaction commits
     Given the integrity is validated
-    When concept identifiers are
-      |      | check | value     |
-      | ALEX | key   | name:Alex |
-      | BOB  | key   | name:Bob  |
-      | FR   | key   | ref:0     |
     Then uniquely identify answer concepts
-      | x    | y   | r  |
-      | ALEX | BOB | FR |
+      | x             | y            | r         |
+      | key:name:Alex | key:name:Bob | key:ref:0 |
     When session opens transaction of type: write
     When graql delete
       """
@@ -649,8 +580,8 @@ Feature: Graql Delete Query
       match $r (friend: $x) isa friendship;
       """
     Then uniquely identify answer concepts
-      | r  | x   |
-      | FR | BOB |
+      | r         | x            |
+      | key:ref:0 | key:name:Bob |
 
 
   Scenario: when deleting multiple duplicate role players from a relation, it removes the number you asked to delete
@@ -663,14 +594,9 @@ Feature: Graql Delete Query
       """
     Given transaction commits
     Given the integrity is validated
-    When concept identifiers are
-      |      | check | value     |
-      | ALEX | key   | name:Alex |
-      | BOB  | key   | name:Bob  |
-      | FR   | key   | ref:0     |
     Then uniquely identify answer concepts
-      | x    | y   | r  |
-      | ALEX | BOB | FR |
+      | x             | y            | r         |
+      | key:name:Alex | key:name:Bob | key:ref:0 |
     When session opens transaction of type: write
     When graql delete
       """
@@ -687,9 +613,9 @@ Feature: Graql Delete Query
       match $r (friend: $x, friend: $y) isa friendship;
       """
     Then uniquely identify answer concepts
-      | r  | x    | y    |
-      | FR | BOB  | ALEX |
-      | FR | ALEX | BOB  |
+      | r         | x             | y             |
+      | key:ref:0 | key:name:Bob  | key:name:Alex |
+      | key:ref:0 | key:name:Alex | key:name:Bob  |
 
 
   Scenario: when deleting duplicate role players in multiple statements, it removes the total number you asked to delete
@@ -702,14 +628,9 @@ Feature: Graql Delete Query
       """
     Given transaction commits
     Given the integrity is validated
-    When concept identifiers are
-      |      | check | value     |
-      | ALEX | key   | name:Alex |
-      | BOB  | key   | name:Bob  |
-      | FR   | key   | ref:0     |
     Then uniquely identify answer concepts
-      | x    | y   | r  |
-      | ALEX | BOB | FR |
+      | x             | y            | r         |
+      | key:name:Alex | key:name:Bob | key:ref:0 |
     When session opens transaction of type: write
     When graql delete
       """
@@ -728,9 +649,9 @@ Feature: Graql Delete Query
       match $r (friend: $x, friend: $y) isa friendship;
       """
     Then uniquely identify answer concepts
-      | r  | x    | y    |
-      | FR | BOB  | ALEX |
-      | FR | ALEX | BOB  |
+      | r         | x             | y             |
+      | key:ref:0 | key:name:Bob  | key:name:Alex |
+      | key:ref:0 | key:name:Alex | key:name:Bob  |
 
 
   Scenario: when deleting one of the duplicate role players from a relation, only one duplicate is removed
@@ -743,14 +664,9 @@ Feature: Graql Delete Query
       """
     Given transaction commits
     Given the integrity is validated
-    When concept identifiers are
-      |      | check | value     |
-      | ALEX | key   | name:Alex |
-      | BOB  | key   | name:Bob  |
-      | FR   | key   | ref:0     |
     Then uniquely identify answer concepts
-      | x    | y   | r  |
-      | ALEX | BOB | FR |
+      | x             | y            | r         |
+      | key:name:Alex | key:name:Bob | key:ref:0 |
     When session opens transaction of type: write
     When graql delete
       """
@@ -768,9 +684,9 @@ Feature: Graql Delete Query
       match $r (friend: $x, friend: $y) isa friendship;
       """
     Then uniquely identify answer concepts
-      | r  | x    | y    |
-      | FR | BOB  | ALEX |
-      | FR | ALEX | BOB  |
+      | r         | x             | y             |
+      | key:ref:0 | key:name:Bob  | key:name:Alex |
+      | key:ref:0 | key:name:Alex | key:name:Bob  |
 
 
   Scenario: when deleting role players in multiple statements, they are all deleted
@@ -784,15 +700,9 @@ Feature: Graql Delete Query
       """
     Given transaction commits
     Given the integrity is validated
-    When concept identifiers are
-      |      | check | value       |
-      | ALEX | key   | name:Alex   |
-      | BOB  | key   | name:Bob    |
-      | CAR  | key   | name:Carrie |
-      | FR   | key   | ref:0       |
     Then uniquely identify answer concepts
-      | x    | y   | z   | r  |
-      | ALEX | BOB | CAR | FR |
+      | x             | y            | z               | r         |
+      | key:name:Alex | key:name:Bob | key:name:Carrie | key:ref:0 |
     When session opens transaction of type: write
     When graql delete
       """
@@ -813,8 +723,8 @@ Feature: Graql Delete Query
       match $r (friend: $x) isa friendship;
       """
     Then uniquely identify answer concepts
-      | r  | x   |
-      | FR | CAR |
+      | r         | x               |
+      | key:ref:0 | key:name:Carrie |
 
 
   Scenario: when deleting more role players than actually exist, an error is thrown
@@ -850,14 +760,9 @@ Feature: Graql Delete Query
       """
     Given transaction commits
     Given the integrity is validated
-    When concept identifiers are
-      |      | check | value     |
-      | ALEX | key   | name:Alex |
-      | BOB  | key   | name:Bob  |
-      | FR   | key   | ref:0     |
     Then uniquely identify answer concepts
-      | x    | y   | r  |
-      | ALEX | BOB | FR |
+      | x             | y            | r         |
+      | key:name:Alex | key:name:Bob | key:ref:0 |
     When session opens transaction of type: write
     When graql delete
       """
@@ -888,14 +793,9 @@ Feature: Graql Delete Query
       """
     Given transaction commits
     Given the integrity is validated
-    When concept identifiers are
-      |      | check | value     |
-      | ALEX | key   | name:Alex |
-      | BOB  | key   | name:Bob  |
-      | FR   | key   | ref:0     |
     Then uniquely identify answer concepts
-      | x    | y   | r  |
-      | ALEX | BOB | FR |
+      | x             | y            | r         |
+      | key:name:Alex | key:name:Bob | key:ref:0 |
     When session opens transaction of type: write
     When graql delete
       """
@@ -1044,13 +944,9 @@ Feature: Graql Delete Query
       """
       match $rel (chef: $p) isa ship-crew;
       """
-    When concept identifiers are
-      |      | check | value       |
-      | CREW | key   | ref:0       |
-      | JOSH | key   | name:Joshua |
     Then uniquely identify answer concepts
-      | rel  | p    |
-      | CREW | JOSH |
+      | rel       | p               |
+      | key:ref:0 | key:name:Joshua |
     When graql delete
       """
       match
@@ -1099,12 +995,9 @@ Feature: Graql Delete Query
       """
       match $x has age 18;
       """
-    When concept identifiers are
-      |     | check | value     |
-      | ANA | key   | name:Anna |
     Then uniquely identify answer concepts
-      | x   |
-      | ANA |
+      | x             |
+      | key:name:Anna |
     When graql delete
       """
       match
@@ -1149,16 +1042,9 @@ Feature: Graql Delete Query
       """
     Given transaction commits
     Given the integrity is validated
-    When concept identifiers are
-      |      | check | value          |
-      | ALEX | key   | name:Alex      |
-      | JOHN | key   | name:John      |
-      | lnST | value | lastname:Smith |
-      | nALX | value | name:Alex      |
-      | nJHN | value | name:John      |
     Then uniquely identify answer concepts
-      | x    | y    |
-      | ALEX | JOHN |
+      | x             | y             |
+      | key:name:Alex | key:name:John |
     When session opens transaction of type: write
     When graql delete
       """
@@ -1176,23 +1062,23 @@ Feature: Graql Delete Query
       match $x isa person;
       """
     Then uniquely identify answer concepts
-      | x    |
-      | ALEX |
-      | JOHN |
+      | x             |
+      | key:name:Alex |
+      | key:name:John |
     When get answers of graql query
       """
       match $n isa lastname;
       """
     Then uniquely identify answer concepts
-      | n    |
-      | lnST |
+      | n                    |
+      | value:lastname:Smith |
     When get answers of graql query
       """
       match $x isa person, has lastname $n;
       """
     Then uniquely identify answer concepts
-      | x    | n    |
-      | JOHN | lnST |
+      | x             | n                    |
+      | key:name:John | value:lastname:Smith |
 
 
   Scenario: an attribute ownership can be deleted using the 'attribute' meta label
@@ -1218,23 +1104,18 @@ Feature: Graql Delete Query
       """
     Given transaction commits
     Given the integrity is validated
-    Given concept identifiers are
-      |      | check | value           |
-      | SHER | key   | name:Sherlock   |
-      | nSLK | value | name:Sherlock   |
-      | pcW1 | value | postcode:W1U8ED |
     Then uniquely identify answer concepts
-      | x    |
-      | SHER |
+      | x                 |
+      | key:name:Sherlock |
     When session opens transaction of type: write
     When get answers of graql query
       """
       match $x has attribute $a;
       """
     Then uniquely identify answer concepts
-      | x    | a    |
-      | SHER | nSLK |
-      | SHER | pcW1 |
+      | x                 | a                     |
+      | key:name:Sherlock | value:name:Sherlock   |
+      | key:name:Sherlock | value:postcode:W1U8ED |
     When graql delete
       """
       match
@@ -1251,8 +1132,8 @@ Feature: Graql Delete Query
       match $x has attribute $a;
       """
     Then uniquely identify answer concepts
-      | x    | a    |
-      | SHER | nSLK |
+      | x                 | a                   |
+      | key:name:Sherlock | value:name:Sherlock |
 
 
   Scenario: an attribute ownership can be deleted using its supertype as a label
@@ -1278,19 +1159,14 @@ Feature: Graql Delete Query
       """
     Given transaction commits
     Given the integrity is validated
-    Given concept identifiers are
-      |      | check | value           |
-      | SHER | key   | name:Sherlock   |
-      | nSLK | value | name:Sherlock   |
-      | pcW1 | value | postcode:W1U8ED |
     When session opens transaction of type: write
     When get answers of graql query
       """
       match $x has address $a;
       """
     Then uniquely identify answer concepts
-      | x    | a    |
-      | SHER | pcW1 |
+      | x                 | a                     |
+      | key:name:Sherlock | value:postcode:W1U8ED |
     When graql delete
       """
       match
@@ -1350,13 +1226,9 @@ Feature: Graql Delete Query
       """
     Given transaction commits
     Given the integrity is validated
-    Given concept identifiers are
-      |     | check | value       |
-      | WAT | key   | name:Watson |
-      | nWA | value | name:Watson |
     Then uniquely identify answer concepts
-      | x   |
-      | WAT |
+      | x               |
+      | key:name:Watson |
     When session opens transaction of type: write
     When graql delete
       """
@@ -1423,13 +1295,9 @@ Feature: Graql Delete Query
       """
       match $x has duration $d;
       """
-    When concept identifiers are
-      |      | check | value         |
-      | REF0 | key   | ref:0         |
-      | DURA | value | duration:1000 |
     Then uniquely identify answer concepts
-      | x    | d    |
-      | REF0 | DURA |
+      | x         | d                   |
+      | key:ref:0 | value:duration:1000 |
     When graql delete
       """
       match
@@ -1475,13 +1343,9 @@ Feature: Graql Delete Query
       """
       match $x has duration $d;
       """
-    When concept identifiers are
-      |      | check | value         |
-      | REF0 | key   | ref:0         |
-      | DURA | value | duration:1000 |
     Then uniquely identify answer concepts
-      | x    | d    |
-      | REF0 | DURA |
+      | x         | d                   |
+      | key:ref:0 | value:duration:1000 |
     When graql delete
       """
       match
@@ -1549,16 +1413,6 @@ Feature: Graql Delete Query
       """
     Given transaction commits
     Given the integrity is validated
-    Given concept identifiers are
-      |      | check | value          |
-      | ALEX | key   | name:Alex      |
-      | JOHN | key   | name:John      |
-      | SMTH | value | lastname:Smith |
-      | nALX | value | name:Alex      |
-      | nJHN | value | name:John      |
-      | F1   | key   | ref:1          |
-      | F2   | key   | ref:2          |
-      | REFL | key   | ref:3          |
     When session opens transaction of type: write
     When graql delete
       """
@@ -1580,25 +1434,25 @@ Feature: Graql Delete Query
       match $f (friend: $x) isa friendship;
       """
     Then uniquely identify answer concepts
-      | f    | x    |
-      | F2   | ALEX |
-      | F2   | JOHN |
-      | REFL | ALEX |
+      | f           | x             |
+      | key:ref:1   | key:name:Alex |
+      | key:ref:2   | key:name:John |
+      | key:ref:3   | key:name:Alex |
     When get answers of graql query
       """
       match $n isa name;
       """
     Then uniquely identify answer concepts
-      | n    |
-      | nJHN |
-      | nALX |
+      | n               |
+      | value:name:John |
+      | value:name:Alex |
     When get answers of graql query
       """
       match $x isa person, has lastname $n;
       """
     Then uniquely identify answer concepts
-      | x    | n    |
-      | JOHN | SMTH |
+      | x             | n                    |
+      | key:name:John | value:lastname:Smith |
 
 
   Scenario: deleting everything in a complex pattern
@@ -1631,16 +1485,6 @@ Feature: Graql Delete Query
       """
     Given transaction commits
     Given the integrity is validated
-    Given concept identifiers are
-      |      | check | value          |
-      | ALEX | key   | name:Alex      |
-      | JOHN | key   | name:John      |
-      | SMTH | value | lastname:Smith |
-      | nALX | value | name:Alex      |
-      | nJHN | value | name:John      |
-      | F1   | key   | ref:1          |
-      | F2   | key   | ref:2          |
-      | REFL | key   | ref:3          |
     When session opens transaction of type: write
     When graql delete
       """
@@ -1712,12 +1556,9 @@ Feature: Graql Delete Query
       """
       match $x isa name;
       """
-    When concept identifiers are
-      |     | check | value        |
-      | TAT | value | name:Tatyana |
     Then uniquely identify answer concepts
-      | x   |
-      | TAT |
+      | x                  |
+      | value:name:Tatyana |
     Then graql delete; throws exception
       """
       match

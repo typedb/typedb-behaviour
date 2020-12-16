@@ -23,13 +23,11 @@ Feature: Connection Database
     Given connection does not have any database
 
   Scenario: create one database
-    When  connection create database:
-      | alice |
-    Then  connection has database:
-      | alice |
+    When connection create database: alice
+    Then connection has database: alice
 
   Scenario: create many databases
-    When  connection create databases:
+    When connection create databases:
       | alice   |
       | bob     |
       | charlie |
@@ -66,13 +64,10 @@ Feature: Connection Database
 
   Scenario: delete one database
       # This step should be rewritten once we can create keypsaces without opening sessions
-    Given connection create database:
-      | alice |
-    When  connection delete database:
-      | alice |
-    Then  connection does not have database:
-      | alice |
-    Then  connection does not have any database
+    Given connection create database: alice
+    When connection delete database: alice
+    Then connection does not have database: alice
+    Then connection does not have any database
 
   Scenario: connection can delete many databases
       # This step should be rewritten once we can create keypsaces without opening sessions
@@ -100,7 +95,7 @@ Feature: Connection Database
       | eve     |
       | frank   |
 
-    Then  connection does not have any database
+    Then connection does not have any database
 
   Scenario: delete many databases in parallel
       # This step should be rewritten once we can create keypsaces without opening sessions
@@ -120,7 +115,7 @@ Feature: Connection Database
       | eve     |
       | frank   |
 
-    Then  connection does not have databases:
+    Then connection does not have databases:
       | alice   |
       | bob     |
       | charlie |
@@ -128,38 +123,29 @@ Feature: Connection Database
       | eve     |
       | frank   |
 
-    Then  connection does not have any database
+    Then connection does not have any database
 
 
   Scenario: delete a database causes open sessions to fail
-    When connection create database:
-      | grakn |
-    When connection open session for database:
-      | grakn |
-    When  connection delete database:
-      | grakn |
-    Then  connection does not have database:
-      | grakn |
-    Then for each session, open transaction of type; throws exception
-      | write |
+    When connection create database: grakn
+    When connection open session for database: grakn
+    When connection delete database: grakn
+    Then connection does not have database: grakn
+    Then session, open transaction of type; throws exception: write
 
   @ignore-grakn-core
   Scenario: delete a database causes open transactions to fail
-    When connection create database:
-      | grakn |
-    When connection open session for database:
-      | grakn |
-    When for each session, open transaction of type:
-      | write |
-    When connection delete database:
-      | grakn |
-    Then connection does not have database:
-      | grakn |
+    When connection create database: grakn
+    When connection opens session for database: grakn
+    When session opens transaction of type: write
+    When connection delete database: grakn
+    Then connection does not have database: grakn
     Then for each transaction, define query; throws exception containing "transaction has been closed"
       """
       define person sub entity;
       """
 
   Scenario: delete a nonexistent database throws an error
-    When connection delete database; throws exception
-      | grakn |
+    When connection delete database; throws exception: grakn
+
+    #TODO: CONTINUE REMOVING SINGLETONS
