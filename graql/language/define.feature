@@ -1225,13 +1225,9 @@ Feature: Graql Define Query
       $name type name; $name abstract;
       $location type location-name, sub name;
       """
-    When concept identifiers are
-      |     | check | value         |
-      | NAM | label | name          |
-      | LOC | label | location-name |
     Then uniquely identify answer concepts
-      | name | location |
-      | NAM  | LOC      |
+      | name        | location            |
+      | label:name  | label:location-name |
     Then the integrity is validated
 
 
