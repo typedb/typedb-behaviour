@@ -584,4 +584,4 @@ Feature: Connection Transaction
       """
       define person sub entity;
       """
-    Then transaction commit; throws exception containing "write transactions can be committed"
+    Then transaction commits; throws exception containing "write transactions can be committed"
