@@ -2408,3 +2408,22 @@ Feature: Graql Define Query
       """
     Then transaction commits
     Then the integrity is validated
+
+
+  Scenario: attribute type hierarchies can be redefined
+
+    Redefining existing schema follows different logic to creating a fresh schema. There was a bug where Grakn would
+    falsely claim that an attribute type couldn't be set to abstract as its subtypes were not abstract, which was
+    only triggered when redefining existing schema. (#5955)
+
+    When graql define
+      """
+      define name sub attribute, abstract, value string; location-name sub name;
+      """
+    Then transaction commits
+    Then session opens transaction of type: write
+    Then graql define
+      """
+      define name sub attribute, abstract, value string; location-name sub name;
+      """
+    Then the integrity is validated
