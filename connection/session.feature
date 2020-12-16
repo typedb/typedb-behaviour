@@ -163,7 +163,7 @@ Feature: Connection Session
       """
       define person sub entity;
       """
-    Then graql put; throws exception containing "session type does not allow"
+    Then graql insert; throws exception containing "session type does not allow"
       """
       put $x isa person;
       """
