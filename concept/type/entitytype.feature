@@ -132,20 +132,24 @@ Feature: Concept Entity Type
     Then entity(person) get supertype: animal
     Then entity(cat) get supertype: animal
     Then entity(man) get supertypes contain:
+      | thing  |
       | entity |
       | man    |
       | person |
       | animal |
     Then entity(woman) get supertypes contain:
+      | thing  |
       | entity |
       | woman  |
       | person |
       | animal |
     Then entity(person) get supertypes contain:
+      | thing  |
       | entity |
       | person |
       | animal |
     Then entity(cat) get supertypes contain:
+      | thing  |
       | entity |
       | cat    |
       | animal |
@@ -179,20 +183,24 @@ Feature: Concept Entity Type
     Then entity(person) get supertype: animal
     Then entity(cat) get supertype: animal
     Then entity(man) get supertypes contain:
+      | thing  |
       | entity |
       | man    |
       | person |
       | animal |
     Then entity(woman) get supertypes contain:
+      | thing  |
       | entity |
       | woman  |
       | person |
       | animal |
     Then entity(person) get supertypes contain:
+      | thing  |
       | entity |
       | person |
       | animal |
     Then entity(cat) get supertypes contain:
+      | thing  |
       | entity |
       | cat    |
       | animal |

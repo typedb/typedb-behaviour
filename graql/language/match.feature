@@ -117,6 +117,7 @@ Feature: Graql Match Query
       | label:writer |
       | label:person |
       | label:entity |
+      | label:thing  |
 
 
   Scenario: 'sub' can be used to retrieve all instances of types that are subtypes of a given type
@@ -219,8 +220,8 @@ Feature: Graql Match Query
       | label:person |
 
 
-    @ignore
-    # TODO this does not work on types anymore - types cannot be specified by IID
+  @ignore
+  # TODO this does not work on types anymore - types cannot be specified by IID
   Scenario: subtype hierarchy satisfies transitive sub assertions
     Given graql define
       """
@@ -737,7 +738,7 @@ Feature: Graql Match Query
     Then the integrity is validated
 
 
-    @ignore # TODO we can't query for rule anymore
+  @ignore # TODO we can't query for rule anymore
   Scenario: an error is thrown when matching that a variable has a specific type, when that type is in fact a rule
     Given graql define
       """
@@ -1779,10 +1780,10 @@ Feature: Graql Match Query
       """
       match $x isa $type;
       """
-    # 2 entities x 2 types {person,entity}
-    # 1 relation x 2 types {friendship,relation}
-    # 5 attributes x 2 types {ref/name,attribute}
-    Then answer size is: 16
+    # 2 entities x 3 types {person,entity,thing}
+    # 1 relation x 3 types {friendship,relation,thing}
+    # 5 attributes x 3 types {ref/name,attribute,thing}
+    Then answer size is: 24
 
 
   Scenario: all relations and their types can be retrieved
@@ -1814,8 +1815,8 @@ Feature: Graql Match Query
       """
       match ($x, $y) isa $type;
       """
-    # 2 permutations x 2 types {friendship,relation}
-    Then answer size is: 4
+    # 2 permutations x 3 types {friendship,relation,thing}
+    Then answer size is: 6
 
 
   #######################

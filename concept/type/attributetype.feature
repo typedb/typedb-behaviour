@@ -179,20 +179,24 @@ Feature: Concept Attribute Type
     Then attribute(real-name) get supertype: name
     Then attribute(username) get supertype: name
     Then attribute(first-name) get supertypes contain:
+      | thing      |
       | attribute  |
       | first-name |
       | real-name  |
       | name       |
     Then attribute(last-name) get supertypes contain:
+      | thing     |
       | attribute |
       | last-name |
       | real-name |
       | name      |
     Then attribute(real-name) get supertypes contain:
+      | thing     |
       | attribute |
       | real-name |
       | name      |
     Then attribute(username) get supertypes contain:
+      | thing     |
       | attribute |
       | username  |
       | name      |
@@ -226,20 +230,24 @@ Feature: Concept Attribute Type
     Then attribute(real-name) get supertype: name
     Then attribute(username) get supertype: name
     Then attribute(first-name) get supertypes contain:
+      | thing      |
       | attribute  |
       | first-name |
       | real-name  |
       | name       |
     Then attribute(last-name) get supertypes contain:
+      | thing     |
       | attribute |
       | last-name |
       | real-name |
       | name      |
     Then attribute(real-name) get supertypes contain:
+      | thing     |
       | attribute |
       | real-name |
       | name      |
     Then attribute(username) get supertypes contain:
+      | thing     |
       | attribute |
       | username  |
       | name      |
