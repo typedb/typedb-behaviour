@@ -351,34 +351,24 @@ Feature: Concept Attribute Type
     When session opens transaction of type: write
     Then attribute(timestamp) set supertype: name; throws exception
 
-  Scenario: Attribute types can get the root type as the same value class
+  Scenario: Attribute types can get the root type
     When put attribute type: is-open, with value type: boolean
     When put attribute type: age, with value type: long
     When put attribute type: rating, with value type: double
     When put attribute type: name, with value type: string
     When put attribute type: timestamp, with value type: datetime
     Then attribute(is-open) get supertype: attribute
-    Then attribute(is-open) get supertype value type: boolean
     Then attribute(age) get supertype: attribute
-    Then attribute(age) get supertype value type: long
     Then attribute(rating) get supertype: attribute
-    Then attribute(rating) get supertype value type: double
     Then attribute(name) get supertype: attribute
-    Then attribute(name) get supertype value type: string
     Then attribute(timestamp) get supertype: attribute
-    Then attribute(timestamp) get supertype value type: datetime
     When transaction commits
     When session opens transaction of type: read
     Then attribute(is-open) get supertype: attribute
-    Then attribute(is-open) get supertype value type: boolean
     Then attribute(age) get supertype: attribute
-    Then attribute(age) get supertype value type: long
     Then attribute(rating) get supertype: attribute
-    Then attribute(rating) get supertype value type: double
     Then attribute(name) get supertype: attribute
-    Then attribute(name) get supertype value type: string
     Then attribute(timestamp) get supertype: attribute
-    Then attribute(timestamp) get supertype value type: datetime
 
   Scenario: Attribute type root can get attribute types of a specific value class
     When put attribute type: is-open, with value type: boolean
