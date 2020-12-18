@@ -140,12 +140,11 @@ Feature: Connection Database
     When session opens transaction of type: write
     When connection delete database: grakn
     Then connection does not have database: grakn
-    Then for each transaction, define query; throws exception containing "transaction has been closed"
+    Then graql define; throws exception containing "transaction has been closed"
       """
       define person sub entity;
       """
 
   Scenario: delete a nonexistent database throws an error
     When connection delete database; throws exception: grakn
-
-    #TODO: CONTINUE REMOVING SINGLETONS
+    
