@@ -1292,6 +1292,28 @@ Feature: Graql Match Query
       """
     Then answer size is: 0
 
+  # TODO: this test uses attributes, but is ultimately testing the traversal structure,
+  #       such that match query does not throw. Perhaps we should introduce a new feature file
+  #       containing a new set of scenarios that test: traversal structure, plan and procedure
+  Scenario: Traversal planner can handle "loops" in the traversal structure
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
+    Given graql insert
+      """
+      insert
+      $x isa person, has name 'alice', has ref 0;
+      $y isa person, has name 'alice', has ref 1;
+      """
+    Given transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
+    When get answers of graql query
+      """
+      match
+      $x isa person, has $n;
+      $y isa person, has $n;
+      """
 
   #######################
   # ATTRIBUTE OWNERSHIP #
