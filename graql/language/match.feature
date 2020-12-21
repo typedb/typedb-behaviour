@@ -1058,12 +1058,12 @@ Feature: Graql Match Query
     Then the integrity is validated
 
 
-  Scenario: when matching a role in a relation type that doesn't have that role, an empty result is returned
-    When get answers of graql query
+  Scenario: when matching a role in a relation type that doesn't have that role, an error is thrown
+    Then graql match; throws exception
       """
       match (friend: $x) isa employment;
       """
-    Then answer size is: 0
+    Then the integrity is validated
 
 
   Scenario: when matching a roleplayer in a relation that can't actually play that role, an empty result is returned
