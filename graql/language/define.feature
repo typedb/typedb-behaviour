@@ -718,13 +718,13 @@ Feature: Graql Define Query
       """
     Then answer size is: 1
 
-  Examples:
-    | value_type | label          |
-    | boolean    | can-fly        |
-    | long       | number-of-cows |
-    | double     | density        |
-    | string     | favourite-food |
-    | datetime   | flight-date    |
+    Examples:
+      | value_type | label          |
+      | boolean    | can-fly        |
+      | long       | number-of-cows |
+      | double     | density        |
+      | string     | favourite-food |
+      | datetime   | flight-date    |
 
 
   Scenario: defining an attribute type throws if you don't specify a value type
@@ -973,24 +973,24 @@ Feature: Graql Define Query
       | x            |
       | label:person |
 
-  Examples:
-    | value_type | label             |
-    | boolean    | is-sleeping       |
-    | long       | number-of-fingers |
-    | double     | height            |
-    | string     | first-word        |
-    | datetime   | graduation-date   |
+    Examples:
+      | value_type | label             |
+      | boolean    | is-sleeping       |
+      | long       | number-of-fingers |
+      | double     | height            |
+      | string     | first-word        |
+      | datetime   | graduation-date   |
 
 
   # TODO
   Scenario Outline: a type can own a '<value_type>' attribute type as a key
 
-  Examples:
+    Examples:
 
   # TODO
   Scenario Outline: a '<value_type>' attribute type is not allowed to be a key
 
-  Examples:
+    Examples:
 
 
   ##################
@@ -2065,6 +2065,57 @@ Feature: Graql Define Query
       """
     Then the integrity is validated
 
+  Scenario: two attribute types can own each other in a cycle
+    Given graql define
+      """
+      define
+      nickname sub attribute, value string, owns surname, owns middlename;
+      surname sub attribute, value string, owns nickname;
+      middlename sub attribute, value string, owns firstname;
+      firstname sub attribute, value string, owns surname;
+      """
+    Then get answers of graql query
+      """
+      match $a sub attribute, owns $b; $b sub attribute, owns $a;
+      """
+    Then uniquely identify answer concepts
+      | a              | b              |
+      | label:nickname | label:surname  |
+      | label:surname  | label:nickname |
+    Then get answers of graql query
+      """
+      match $a owns $b; $b owns $a;
+      """
+    Then uniquely identify answer concepts
+      | a              | b              |
+      | label:nickname | label:surname  |
+      | label:surname  | label:nickname |
+
+  Scenario: many attribute types can own each other in a big cycle
+    Given graql define
+      """
+      define
+      nickname sub attribute, value string, owns surname, owns middlename;
+      surname sub attribute, value string, owns nickname;
+      middlename sub attribute, value string, owns firstname;
+      firstname sub attribute, value string, owns surname;
+      """
+    Then get answers of graql query
+      """
+      match
+      $a sub attribute, owns $b;
+      $b sub attribute, owns $c;
+      $c sub attribute, owns $d;
+      $d sub attribute, owns $a;
+      """
+    Then uniquely identify answer concepts
+      | a                | b                | c                | d                |
+      | label:middlename | label:firstname  | label:surname    | label:nickname   |
+      | label:firstname  | label:surname    | label:nickname   | label:middlename |
+      | label:surname    | label:nickname   | label:middlename | label:firstname  |
+      | label:surname    | label:nickname   | label:surname    | label:nickname   |
+      | label:nickname   | label:middlename | label:firstname  | label:surname    |
+      | label:nickname   | label:surname    | label:nickname   | label:surname    |
 
   Scenario: a relation type can relate to a role that it plays itself
     When graql define
