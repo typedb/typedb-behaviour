@@ -25,12 +25,12 @@ build:
       owner: graknlabs
       branch: master
     dependency-analysis:
-      machine: graknlabs-ubuntu-20.04
+      image: graknlabs-ubuntu-20.04
       script: |
         bazel run @graknlabs_dependencies//grabl/analysis:dependency-analysis
   correctness:
     build:
-      machine: graknlabs-ubuntu-20.04
+      image: graknlabs-ubuntu-20.04
       script: |
         bazel build --config=rbe //... --test_output=errors
         bazel run @graknlabs_dependencies//tool/checkstyle:test-coverage
