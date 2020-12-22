@@ -1954,7 +1954,6 @@ Feature: Graql Match Query
       match not { $x has attribute "value"; };
       """
 
-
   Scenario: when matching a negation whose pattern variables are all unbound outside it, an error is thrown
     Then graql match; throws exception
       """
@@ -1966,7 +1965,6 @@ Feature: Graql Match Query
         };
       """
 
-
   Scenario: the first variable in a negation can be unbound, as long as it is connected to a bound variable
     Then get answers of graql query
       """
@@ -1977,9 +1975,9 @@ Feature: Graql Match Query
         };
       """
 
-
-  Scenario: negations cannot contain disjunctions
-    Then graql match; throws exception
+  # TODO: We should verify the answers
+  Scenario: negations can contain disjunctions
+    Then get answers of graql query
       """
       match
         $x isa entity;
