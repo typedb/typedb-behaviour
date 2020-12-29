@@ -19,7 +19,7 @@ Feature: Graql Rule Validation
 
   Background: Initialise a session and transaction for each scenario
     Given connection has been opened
-    Given connection open session for databases: test_rule_validation
+    Given connection open schema session for database: test_rule_validation
     Given transaction is initialised
     Given graql define
       """
