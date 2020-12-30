@@ -1114,6 +1114,7 @@ Feature: Graql Match Query
       person plays hetero-marriage:husband, plays hetero-marriage:wife;
       marriage sub relation, relates spouse;
       hetero-marriage sub marriage, relates husband as spouse, relates wife as spouse;
+      civil-marriage sub marriage;
       """
     Given transaction commits
     Given the integrity is validated
@@ -1126,6 +1127,7 @@ Feature: Graql Match Query
       $a isa person, has ref 1;
       $b isa person, has ref 2;
       (wife: $a, husband: $b) isa hetero-marriage;
+      (spouse: $a, spouse: $b) isa civil-marriage;
       """
     Given transaction commits
     Given the integrity is validated
@@ -1152,14 +1154,19 @@ Feature: Graql Match Query
     Then answer size is: 2
     When get answers of graql query
       """
-      match (spouse: $x, spouse: $y) isa marriage;
+      match (spouse: $x, spouse: $y) isa civil-marriage;
       """
     Then answer size is: 2
     When get answers of graql query
       """
+      match (spouse: $x, spouse: $y) isa marriage;
+      """
+    Then answer size is: 4
+    When get answers of graql query
+      """
       match (spouse: $x, spouse: $y) isa relation;
       """
-    Then answer size is: 2
+    Then answer size is: 4
     When get answers of graql query
       """
       match (role: $x, role: $y) isa hetero-marriage;
@@ -1169,12 +1176,12 @@ Feature: Graql Match Query
       """
       match (role: $x, role: $y) isa marriage;
       """
-    Then answer size is: 2
+    Then answer size is: 4
     When get answers of graql query
       """
       match (role: $x, role: $y) isa relation;
       """
-    Then answer size is: 2
+    Then answer size is: 4
 
 
   ##############
