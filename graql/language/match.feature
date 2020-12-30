@@ -163,20 +163,20 @@ Feature: Graql Match Query
       """
     # Alfred and Barbara are not retrieved, as they aren't subtypes of worker
     Then uniquely identify answer concepts
-      | x         | type                                |
-      | key:ref:2 | label:bricklayer                    |
-      | key:ref:2 | label:construction-worker           |
-      | key:ref:2 | label:worker                        |
-      | key:ref:3 | label:crane-driver                  |
-      | key:ref:3 | label:construction-worker           |
-      | key:ref:3 | label:worker                        |
-      | key:ref:4 | label:mobile-network-researcher     |
-      | key:ref:4 | label:telecoms-worker               |
-      | key:ref:4 | label:worker                        |
-      | key:ref:5 | label:telecoms-business-strategist  |
-      | key:ref:5 | label:telecoms-worker               |
-      | key:ref:5 | label:worker                        |
-      | key:ref:6 | label:worker                        |
+      | x         | type                               |
+      | key:ref:2 | label:bricklayer                   |
+      | key:ref:2 | label:construction-worker          |
+      | key:ref:2 | label:worker                       |
+      | key:ref:3 | label:crane-driver                 |
+      | key:ref:3 | label:construction-worker          |
+      | key:ref:3 | label:worker                       |
+      | key:ref:4 | label:mobile-network-researcher    |
+      | key:ref:4 | label:telecoms-worker              |
+      | key:ref:4 | label:worker                       |
+      | key:ref:5 | label:telecoms-business-strategist |
+      | key:ref:5 | label:telecoms-worker              |
+      | key:ref:5 | label:worker                       |
+      | key:ref:6 | label:worker                       |
 
 
   Scenario: 'sub!' matches the type's direct subtypes
@@ -565,7 +565,7 @@ Feature: Graql Match Query
       match employment relates $x;
       """
     Then uniquely identify answer concepts
-      | x              |
+      | x                         |
       | label:employment:employee |
       | label:employment:employer |
 
@@ -1111,7 +1111,7 @@ Feature: Graql Match Query
     Given graql define
       """
       define
-      person plays hetero-marriage:husband, plays hetero-marriage:wife;
+      person plays marriage:spouse, plays hetero-marriage:husband, plays hetero-marriage:wife;
       marriage sub relation, relates spouse;
       hetero-marriage sub marriage, relates husband as spouse, relates wife as spouse;
       civil-marriage sub marriage;
@@ -1134,52 +1134,61 @@ Feature: Graql Match Query
     Given session opens transaction of type: read
     When get answers of graql query
       """
-      match (wife: $x, husband: $y) isa relation;
+      match $m (wife: $x, husband: $y) isa hetero-marriage;
+      """
+    Then answer size is: 1
+    Then graql match; throws exception
+      """
+      match $m (wife: $x, husband: $y) isa civil-marriage;
+      """
+    When get answers of graql query
+      """
+      match $m (wife: $x, husband: $y) isa marriage;
       """
     Then answer size is: 1
     When get answers of graql query
       """
-      match (wife: $x, husband: $y) isa marriage;
+      match $m (wife: $x, husband: $y) isa relation;
       """
     Then answer size is: 1
     When get answers of graql query
       """
-      match (wife: $x, husband: $y) isa hetero-marriage;
-      """
-    Then answer size is: 1
-    When get answers of graql query
-      """
-      match (spouse: $x, spouse: $y) isa hetero-marriage;
+      match $m (spouse: $x, spouse: $y) isa hetero-marriage;
       """
     Then answer size is: 2
     When get answers of graql query
       """
-      match (spouse: $x, spouse: $y) isa civil-marriage;
+      match $m (spouse: $x, spouse: $y) isa civil-marriage;
       """
     Then answer size is: 2
     When get answers of graql query
       """
-      match (spouse: $x, spouse: $y) isa marriage;
+      match $m (spouse: $x, spouse: $y) isa marriage;
       """
     Then answer size is: 4
     When get answers of graql query
       """
-      match (spouse: $x, spouse: $y) isa relation;
+      match $m (spouse: $x, spouse: $y) isa relation;
       """
     Then answer size is: 4
     When get answers of graql query
       """
-      match (role: $x, role: $y) isa hetero-marriage;
+      match $m (role: $x, role: $y) isa hetero-marriage;
       """
     Then answer size is: 2
     When get answers of graql query
       """
-      match (role: $x, role: $y) isa marriage;
+      match $m (role: $x, role: $y) isa civil-marriage;
+      """
+    Then answer size is: 2
+    When get answers of graql query
+      """
+      match $m (role: $x, role: $y) isa marriage;
       """
     Then answer size is: 4
     When get answers of graql query
       """
-      match (role: $x, role: $y) isa relation;
+      match $m (role: $x, role: $y) isa relation;
       """
     Then answer size is: 4
 
