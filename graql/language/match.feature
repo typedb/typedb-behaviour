@@ -1576,6 +1576,9 @@ Feature: Graql Match Query
         $r (employee: $x) isa employment, has start-date = $date;
       """
     Then answer size is: 1
+    Then uniquely identify answer concepts
+      | x         | r         | date                             |
+      | key:ref:0 | key:ref:1 | value:graduation-date:2009-07-16 |
 
 
   Scenario: 'has $attr = $x' matches owners of any instance '$y' of '$attr' where '$y' and '$x' are equal by value
