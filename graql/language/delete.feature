@@ -551,7 +551,7 @@ Feature: Graql Delete Query
       | key:ref:2 | key:name:Carrie |
 
 
-  Scenario: duplicate role players can be deleted from a relation
+  Scenario: repeated role players can be deleted from a relation
     Given get answers of graql insert
       """
       insert
@@ -584,7 +584,7 @@ Feature: Graql Delete Query
       | key:ref:0 | key:name:Bob |
 
 
-  Scenario: when deleting multiple duplicate role players from a relation, it removes the number you asked to delete
+  Scenario: when deleting multiple repeated role players from a relation, it removes the number you asked to delete
     Given get answers of graql insert
       """
       insert
@@ -618,7 +618,7 @@ Feature: Graql Delete Query
       | key:ref:0 | key:name:Alex | key:name:Bob  |
 
 
-  Scenario: when deleting duplicate role players in multiple statements, it removes the total number you asked to delete
+  Scenario: when deleting repeated role players in multiple statements, it removes the total number you asked to delete
     Given get answers of graql insert
       """
       insert
@@ -654,7 +654,7 @@ Feature: Graql Delete Query
       | key:ref:0 | key:name:Alex | key:name:Bob  |
 
 
-  Scenario: when deleting one of the duplicate role players from a relation, only one duplicate is removed
+  Scenario: when deleting one of the repeated role players from a relation, only one duplicate is removed
     Given get answers of graql insert
       """
       insert
@@ -905,7 +905,7 @@ Feature: Graql Delete Query
 #  Even when a $role variable matches multiple roles (will always match 'role' unless constrained)
 #  We only delete role player edges until the 'match' is no longer satisfied.
 #
-#  **Sometimes this means multiple duplicate role players will be unassigned **
+#  **Sometimes this means multiple repeated role players will be unassigned **
 #
 #  For example
 #
@@ -915,7 +915,7 @@ Feature: Graql Delete Query
 #
 #  First, we will match '$role1' = ROLE meta role. Using this answer we will remove a single $x from $r via the 'production'.
 #  Next, we will match '$role1' = WORK role, and we delete another 'production' player. This repeats again for $role='production'.
-  Scenario: when deleting duplicate role players with a single variable role, both duplicates are removed
+  Scenario: when deleting repeated role players with a single variable role, both repetitions are removed
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write

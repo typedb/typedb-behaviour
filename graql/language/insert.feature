@@ -857,7 +857,7 @@ Feature: Graql Insert Query
       | key:ref:0 | key:ref:3 | key:ref:2 |
 
 
-  Scenario: an additional duplicate role player can be inserted into an existing relation
+  Scenario: an additional repeated role player can be inserted into an existing relation
     Given graql insert
       """
       insert $p isa person, has ref 0; $r (employee: $p) isa employment, has ref 1;

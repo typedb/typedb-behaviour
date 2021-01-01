@@ -879,7 +879,7 @@ Feature: Graql Match Query
       | key:ref:2 | key:ref:1 | key:ref:3 |
 
 
-  Scenario: duplicate role players are retrieved singly when queried doubly
+  Scenario: repeated role players are retrieved singly when queried doubly
     Given graql define
       """
       define
@@ -907,7 +907,7 @@ Feature: Graql Match Query
       | key:ref:0 | key:ref:1 |
 
 
-  Scenario: duplicate role players are retrieved singly when queried singly
+  Scenario: repeated role players are retrieved singly when queried singly
     Given graql define
       """
       define
