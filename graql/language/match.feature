@@ -1140,6 +1140,7 @@ Feature: Graql Match Query
       """
       match $m (wife: $x, husband: $y) isa civil-marriage;
       """
+    Given session opens transaction of type: read
     When get answers of graql query
       """
       match $m (wife: $x, husband: $y) isa marriage;
