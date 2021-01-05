@@ -721,6 +721,7 @@ Feature: Graql Match Query
       """
       match $x isa ganesh;
       """
+    Then session transaction is open: false
     Then the integrity is validated
 
 
@@ -729,6 +730,7 @@ Feature: Graql Match Query
       """
       match ($x, $y) isa $type; $type type jakas-relacja;
       """
+    Then session transaction is open: false
     Then the integrity is validated
 
 
@@ -737,6 +739,7 @@ Feature: Graql Match Query
       """
       match $x isa $type; $type type polok;
       """
+    Then session transaction is open: false
     Then the integrity is validated
 
 
@@ -789,6 +792,7 @@ Feature: Graql Match Query
       """
       match $x isa metre-rule;
       """
+    Then session transaction is open: false
     Then the integrity is validated
 
 
@@ -1062,6 +1066,7 @@ Feature: Graql Match Query
       """
       match (person: $x) isa relation;
       """
+    Then session transaction is open: false
     Then the integrity is validated
 
   @ignore # TODO: enable when type resolver is fixed
@@ -1070,6 +1075,7 @@ Feature: Graql Match Query
       """
       match ($x) isa person;
       """
+    Then session transaction is open: false
     Then the integrity is validated
 
 
@@ -1078,6 +1084,7 @@ Feature: Graql Match Query
       """
       match ($x) isa bottle-of-rum;
       """
+    Then session transaction is open: false
     Then the integrity is validated
 
 
@@ -1086,6 +1093,7 @@ Feature: Graql Match Query
       """
       match (rolein-rolein-rolein: $rolein) isa relation;
       """
+    Then session transaction is open: false
     Then the integrity is validated
 
 
@@ -1094,6 +1102,7 @@ Feature: Graql Match Query
       """
       match (friend: $x) isa employment;
       """
+    Then session transaction is open: false
     Then the integrity is validated
 
 
@@ -1140,6 +1149,7 @@ Feature: Graql Match Query
       """
       match $m (wife: $x, husband: $y) isa civil-marriage;
       """
+    Then session transaction is open: false
     Given session opens transaction of type: read
     When get answers of graql query
       """
@@ -1523,6 +1533,7 @@ Feature: Graql Match Query
       """
       match $x has person "Luke";
       """
+    Then session transaction is open: false
     Then the integrity is validated
 
 
@@ -1539,6 +1550,7 @@ Feature: Graql Match Query
       """
       match $x has bananananananana "rama";
       """
+    Then session transaction is open: false
     Then the integrity is validated
 
 
@@ -1857,6 +1869,7 @@ Feature: Graql Match Query
       """
       match not { $x is $y; };
       """
+    Then session transaction is open: false
 
   ############
   # PATTERNS #
@@ -1972,6 +1985,7 @@ Feature: Graql Match Query
       """
       match not { $x has attribute "value"; };
       """
+    Then session transaction is open: false
 
   Scenario: when matching a negation whose pattern variables are all unbound outside it, an error is thrown
     Then graql match; throws exception
@@ -1983,6 +1997,7 @@ Feature: Graql Match Query
           $i isa entity;
         };
       """
+    Then session transaction is open: false
 
   Scenario: the first variable in a negation can be unbound, as long as it is connected to a bound variable
     Then get answers of graql query
