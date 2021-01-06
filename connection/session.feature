@@ -146,6 +146,7 @@ Feature: Connection Session
       | eve     |
       | frank   |
 
+  @ignore-client-java
   Scenario: write schema in a data session throws
     When connection create database: grakn
     Given connection open data session for database: grakn
@@ -155,6 +156,7 @@ Feature: Connection Session
       define person sub entity;
       """
 
+  @ignore-client-java
   Scenario: write data in a schema session throws
     When connection create database: grakn
     Given connection open schema session for database: grakn
