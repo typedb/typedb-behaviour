@@ -133,10 +133,10 @@ Feature: Connection Database
     Then connection does not have database: grakn
     Then session, open transaction of type; throws exception: write
 
-  @ignore-grakn-core
+  @ignore
   Scenario: delete a database causes open transactions to fail
     When connection create database: grakn
-    When connection opens session for database: grakn
+    When connection open session for database: grakn
     When session opens transaction of type: write
     When connection delete database: grakn
     Then connection does not have database: grakn
