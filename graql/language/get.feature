@@ -559,13 +559,11 @@ Feature: Graql Get Clause
     Then aggregate value is: 65
     Then get answers of graql query
       """
-      match
-        $x isa person, has name $y, has age $z;
+      match $x isa person, has name $y, has age $z;
       get $y, $z;
       sum $z;
       """
     Then aggregate value is: 65
-
 
   Scenario Outline: duplicate attribute values are included in a '<agg_type>'
     Given graql insert
@@ -590,7 +588,6 @@ Feature: Graql Get Clause
       | 30       | 75   | sum      | 135     |
       | 30       | 60   | mean     | 40      |
       | 17       | 14   | median   | 17      |
-
 
   Scenario: the median of an even number of values is the number halfway between the two most central values
     Given graql insert
@@ -630,7 +627,7 @@ Feature: Graql Get Clause
       match $x isa person, has income $y;
       <agg_type> $y;
       """
-    Then aggregate answer is empty
+    Then aggregate answer is not a number
 
     Examples:
       | agg_type |
@@ -751,7 +748,7 @@ Feature: Graql Get Clause
       match $x isa person, has name $y;
       sum $y;
       """
-    Then aggregate answer is empty
+    Then aggregate answer is not a number
 
 
   #########
