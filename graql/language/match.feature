@@ -1862,8 +1862,6 @@ Feature: Graql Match Query
       """
     Then answer size is: 0
 
-
-  @ignore # TODO renable with negation
   Scenario: concept comparison of unbound variables throws an error
     Then graql match; throws exception
       """
