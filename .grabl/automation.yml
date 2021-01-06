@@ -26,12 +26,12 @@ build:
       branch: master
     dependency-analysis:
       image: graknlabs-ubuntu-20.04
-      script: |
+      command: |
         bazel run @graknlabs_dependencies//grabl/analysis:dependency-analysis
   correctness:
     build:
       image: graknlabs-ubuntu-20.04
-      script: |
+      command: |
         bazel build --config=rbe //... --test_output=errors
         bazel run @graknlabs_dependencies//tool/checkstyle:test-coverage
         bazel test --config=rbe $(bazel query 'kind(checkstyle_test, //...)') --test_output=errors
