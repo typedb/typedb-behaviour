@@ -1551,6 +1551,28 @@ Feature: Graql Define Query
       | label:person |
 
 
+  Scenario: an attribute key ownership can be converted to a regular ownership
+    When graql define
+      """
+      define person owns email;
+      """
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
+    When get answers of graql query
+      """
+      match $x owns email;
+      """
+    Then uniquely identify answer concepts
+      | x            |
+      | label:person |
+    When get answers of graql query
+      """
+      match $x owns email @key;
+      """
+    Then answer size is: 0
+    
+
   Scenario: defining a rule is idempotent
     Given graql define
       """
