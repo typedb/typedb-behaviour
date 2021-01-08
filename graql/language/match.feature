@@ -1069,8 +1069,6 @@ Feature: Graql Match Query
     Then session transaction is open: false
     Then the integrity is validated
 
-  @ignore # TODO: enable when type resolver is fixed
-  Scenario: an error is thrown when matching an entity as if it were a relation
     Then graql match; throws exception
       """
       match ($x) isa person;
@@ -1106,14 +1104,15 @@ Feature: Graql Match Query
     Then the integrity is validated
 
 
-  Scenario: when matching a roleplayer in a relation that can't actually play that role, an empty result is returned
-    When get answers of graql query
+  Scenario: when matching a roleplayer in a relation that can't actually play that role, an error is thrown
+    When graql match; throws exception
       """
       match
       $x isa company;
       ($x) isa friendship;
       """
-    Then answer size is: 0
+    Then session transaction is open: false
+    Then the integrity is validated
 
   Scenario: Relations can be queried with pairings of relation and role types that are not directly related to each other
     Given graql define
@@ -1527,7 +1526,6 @@ Feature: Graql Match Query
       | x         |
       | key:ref:0 |
 
-  @ignore # TODO: enable when type resolver is fixed
   Scenario: an error is thrown when matching by attribute ownership, when the owned thing is actually an entity
     Then graql match; throws exception
       """
@@ -1538,11 +1536,12 @@ Feature: Graql Match Query
 
 
   Scenario: when matching by an attribute ownership, if the owner can't actually own it, an empty result is returned
-    When get answers of graql query
+    Then graql match; throws exception
       """
       match $x isa company, has age $n;
       """
-    Then answer size is: 0
+    Then session transaction is open: false
+    Then the integrity is validated
 
 
   Scenario: an error is thrown when matching by attribute ownership, when the owned type label doesn't exist
