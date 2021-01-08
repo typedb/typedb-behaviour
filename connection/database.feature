@@ -126,13 +126,17 @@ Feature: Connection Database
     Then connection does not have any database
 
 
+  # TODO: currently throws in @After; re-enable when we are able to check if sessions are alive (see client-java#225)
+  @ignore
   Scenario: delete a database causes open sessions to fail
     When connection create database: grakn
     When connection open session for database: grakn
     When connection delete database: grakn
     Then connection does not have database: grakn
-    Then session, open transaction of type; throws exception: write
+    Then session open transaction of type; throws exception: write
 
+
+  # TODO: currently throws in @After; re-enable when we are able to check if sessions are alive (see client-java#225)
   @ignore
   Scenario: delete a database causes open transactions to fail
     When connection create database: grakn
@@ -147,4 +151,3 @@ Feature: Connection Database
 
   Scenario: delete a nonexistent database throws an error
     When connection delete database; throws exception: grakn
-    
