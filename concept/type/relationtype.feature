@@ -36,8 +36,8 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) get role(husband) get supertype: relation:role
     Then relation(marriage) get role(wife) get supertype: relation:role
     Then relation(marriage) get related roles contain:
-      | husband |
-      | wife    |
+      | marriage:husband |
+      | marriage:wife    |
     When transaction commits
     When session opens transaction of type: read
     Then relation(marriage) is null: false
@@ -47,8 +47,8 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) get role(husband) get supertype: relation:role
     Then relation(marriage) get role(wife) get supertype: relation:role
     Then relation(marriage) get related roles contain:
-      | husband |
-      | wife    |
+      | marriage:husband |
+      | marriage:wife    |
 
   Scenario: Relation and role types can be deleted
     When put relation type: marriage
