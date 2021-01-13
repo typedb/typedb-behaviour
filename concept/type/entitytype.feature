@@ -1099,7 +1099,7 @@ Feature: Concept Entity Type
     When entity(person) set plays role: parentship:child
     When put entity type: man
     When entity(man) set supertype: person
-    When entity(man) set plays role: fathership:father as parent
+    When entity(man) set plays role: fathership:father as parentship:parent
     Then entity(man) get playing roles contain:
       | fathership:father |
       | parentship:child  |
@@ -1117,7 +1117,7 @@ Feature: Concept Entity Type
     When relation(mothership) set relates role: mother as parent
     When put entity type: woman
     When entity(woman) set supertype: person
-    When entity(woman) set plays role: mothership:mother as parent
+    When entity(woman) set plays role: mothership:mother as parentship:parent
     Then entity(woman) get playing roles contain:
       | mothership:mother |
       | parentship:child  |
@@ -1158,10 +1158,10 @@ Feature: Concept Entity Type
     When entity(person) set plays role: parentship:parent
     When put entity type: man
     When entity(man) set supertype: person
-    When entity(man) set plays role: fathership:father as parent
+    When entity(man) set plays role: fathership:father as parentship:parent
     When transaction commits
     When session opens transaction of type: write
-    When entity(man) set plays role: fathership:father as parent
+    When entity(man) set plays role: fathership:father as parentship:parent
 
   Scenario: Entity types cannot redeclare inherited/overridden playing role types
     When put relation type: parentship
@@ -1173,7 +1173,7 @@ Feature: Concept Entity Type
     When entity(person) set plays role: parentship:parent
     When put entity type: man
     When entity(man) set supertype: person
-    When entity(man) set plays role: fathership:father as parent
+    When entity(man) set plays role: fathership:father as parentship:parent
     When put entity type: boy
     When entity(boy) set supertype: man
     When transaction commits
@@ -1190,7 +1190,7 @@ Feature: Concept Entity Type
     When relation(fathership) set relates role: father as parent
     When put entity type: person
     When entity(person) set plays role: parentship:parent
-    Then entity(person) set plays role: fathership:father as parent; throws exception
+    Then entity(person) set plays role: fathership:father as parentship:parent; throws exception
 
   Scenario: Entity types cannot override inherited playing role types other than with their subtypes
     When put relation type: parentship
@@ -1203,4 +1203,4 @@ Feature: Concept Entity Type
     When entity(person) set plays role: parentship:child
     When put entity type: man
     When entity(man) set supertype: person
-    Then entity(man) set plays role: fathership:father as parent; throws exception
+    Then entity(man) set plays role: fathership:father as parentship:parent; throws exception
