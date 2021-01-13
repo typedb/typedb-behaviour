@@ -76,19 +76,19 @@ Feature: Graql Delete Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa person;
       """
     Then uniquely identify answer concepts
       | x            |
       | key:name:Bob |
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa friendship;
       """
     Then answer size is: 0
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa name;
       """
@@ -124,7 +124,7 @@ Feature: Graql Delete Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa person;
       """
@@ -159,7 +159,7 @@ Feature: Graql Delete Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa person;
       """
@@ -194,7 +194,7 @@ Feature: Graql Delete Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa friendship;
       """
@@ -223,7 +223,7 @@ Feature: Graql Delete Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa name;
       """
@@ -256,7 +256,7 @@ Feature: Graql Delete Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa person;
       """
@@ -288,7 +288,7 @@ Feature: Graql Delete Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa person;
       """
@@ -402,7 +402,7 @@ Feature: Graql Delete Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: write
-    When get answers of graql query
+    When get answers of graql match
       """
       match (friend: $x, friend: $y) isa friendship;
       """
@@ -441,7 +441,7 @@ Feature: Graql Delete Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match (friend: $x, friend: $y) isa friendship;
       """
@@ -495,7 +495,7 @@ Feature: Graql Delete Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match (special-friend: $x, special-friend: $y) isa friendship;
       """
@@ -533,7 +533,7 @@ Feature: Graql Delete Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa person;
       """
@@ -541,7 +541,7 @@ Feature: Graql Delete Query
       | x               |
       | key:name:Bob    |
       | key:name:Carrie |
-    When get answers of graql query
+    When get answers of graql match
       """
       match $r (friend: $x) isa friendship;
       """
@@ -575,7 +575,7 @@ Feature: Graql Delete Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $r (friend: $x) isa friendship;
       """
@@ -608,7 +608,7 @@ Feature: Graql Delete Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $r (friend: $x, friend: $y) isa friendship;
       """
@@ -644,7 +644,7 @@ Feature: Graql Delete Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $r (friend: $x, friend: $y) isa friendship;
       """
@@ -679,7 +679,7 @@ Feature: Graql Delete Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $r (friend: $x, friend: $y) isa friendship;
       """
@@ -718,7 +718,7 @@ Feature: Graql Delete Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $r (friend: $x) isa friendship;
       """
@@ -776,7 +776,7 @@ Feature: Graql Delete Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $r isa friendship;
       """
@@ -810,7 +810,7 @@ Feature: Graql Delete Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $r isa friendship;
       """
@@ -940,7 +940,7 @@ Feature: Graql Delete Query
     Given transaction commits
     Given the integrity is validated
     When session opens transaction of type: write
-    When get answers of graql query
+    When get answers of graql match
       """
       match $rel (chef: $p) isa ship-crew;
       """
@@ -957,7 +957,7 @@ Feature: Graql Delete Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $rel (chef: $p) isa ship-crew;
       """
@@ -991,7 +991,7 @@ Feature: Graql Delete Query
     Given transaction commits
     Given the integrity is validated
     When session opens transaction of type: write
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x has age 18;
       """
@@ -1008,7 +1008,7 @@ Feature: Graql Delete Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x has age 18;
       """
@@ -1057,7 +1057,7 @@ Feature: Graql Delete Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa person;
       """
@@ -1065,14 +1065,14 @@ Feature: Graql Delete Query
       | x             |
       | key:name:Alex |
       | key:name:John |
-    When get answers of graql query
+    When get answers of graql match
       """
       match $n isa lastname;
       """
     Then uniquely identify answer concepts
       | n                    |
       | value:lastname:Smith |
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa person, has lastname $n;
       """
@@ -1108,7 +1108,7 @@ Feature: Graql Delete Query
       | x                 |
       | key:name:Sherlock |
     When session opens transaction of type: write
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x has attribute $a;
       """
@@ -1127,7 +1127,7 @@ Feature: Graql Delete Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x has attribute $a;
       """
@@ -1160,7 +1160,7 @@ Feature: Graql Delete Query
     Given transaction commits
     Given the integrity is validated
     When session opens transaction of type: write
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x has address $a;
       """
@@ -1177,7 +1177,7 @@ Feature: Graql Delete Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x has address $a;
       """
@@ -1240,7 +1240,7 @@ Feature: Graql Delete Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa person;
       """
@@ -1291,7 +1291,7 @@ Feature: Graql Delete Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: write
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x has duration $d;
       """
@@ -1308,7 +1308,7 @@ Feature: Graql Delete Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x has duration $d;
       """
@@ -1339,7 +1339,7 @@ Feature: Graql Delete Query
     Given transaction commits
     Given the integrity is validated
     When session opens transaction of type: write
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x has duration $d;
       """
@@ -1356,12 +1356,12 @@ Feature: Graql Delete Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x has duration $d;
       """
     Then answer size is: 0
-    When get answers of graql query
+    When get answers of graql match
       """
       match $r isa friendship;
       """
@@ -1429,7 +1429,7 @@ Feature: Graql Delete Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $f (friend: $x) isa friendship;
       """
@@ -1438,7 +1438,7 @@ Feature: Graql Delete Query
       | key:ref:1   | key:name:Alex |
       | key:ref:2   | key:name:John |
       | key:ref:3   | key:name:Alex |
-    When get answers of graql query
+    When get answers of graql match
       """
       match $n isa name;
       """
@@ -1446,7 +1446,7 @@ Feature: Graql Delete Query
       | n               |
       | value:name:John |
       | value:name:Alex |
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa person, has lastname $n;
       """
@@ -1502,7 +1502,7 @@ Feature: Graql Delete Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa person, has lastname $n;
       """
@@ -1552,7 +1552,7 @@ Feature: Graql Delete Query
     Given transaction commits
     Given the integrity is validated
     When session opens transaction of type: write
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa name;
       """

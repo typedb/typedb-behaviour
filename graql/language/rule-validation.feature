@@ -52,7 +52,7 @@ Feature: Graql Rule Validation
       };
       """
     Given the integrity is validated
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x sub rule;
       """
@@ -74,7 +74,7 @@ Feature: Graql Rule Validation
       };
       """
     Given the integrity is validated
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x sub rule;
       """
@@ -157,7 +157,7 @@ Feature: Graql Rule Validation
       };
       """
     Given the integrity is validated
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x sub rule;
       """
@@ -284,7 +284,7 @@ Feature: Graql Rule Validation
       };
       """
     Given the integrity is validated
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x sub rule;
       """
