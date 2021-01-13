@@ -423,7 +423,7 @@ Feature: Graql Get Clause
         $f isa friendship;
       """
     Then answer size is: 9
-    When get answer of graql aggregate
+    When get answer of graql match aggregate
       """
       match
         $x isa person;
@@ -440,7 +440,7 @@ Feature: Graql Get Clause
         $f (friend: $x) isa friendship;
       """
     Then answer size is: 6
-    When get answer of graql aggregate
+    When get answer of graql match aggregate
       """
       match
         $x isa person;
@@ -452,7 +452,7 @@ Feature: Graql Get Clause
 
 
   Scenario: the 'count' of an empty answer set is zero
-    When get answer of graql aggregate
+    When get answer of graql match aggregate
       """
       match $x isa person, has name "Voldemort";
       count;
@@ -485,7 +485,7 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answer of graql aggregate
+    When get answer of graql match aggregate
       """
       match $x isa person, has <attr> $y;
       <agg_type> $y;
@@ -531,7 +531,7 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answer of graql aggregate
+    When get answer of graql match aggregate
       """
       match $x isa person, has weight $y;
       std $y;
@@ -551,13 +551,13 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answer of graql aggregate
+    When get answer of graql match aggregate
       """
       match $x isa person, has name $y, has age $z;
       sum $z;
       """
     Then aggregate value is: 65
-    Then get answer of graql aggregate
+    Then get answer of graql match aggregate
       """
       match $x isa person, has name $y, has age $z;
       get $y, $z;
@@ -576,7 +576,7 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answer of graql aggregate
+    When get answer of graql match aggregate
       """
       match $x isa person, has age $y;
       <agg_type> $y;
@@ -601,7 +601,7 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answer of graql aggregate
+    When get answer of graql match aggregate
       """
       match $x isa person, has age $y;
       median $y;
@@ -622,7 +622,7 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answer of graql aggregate
+    When get answer of graql match aggregate
       """
       match $x isa person, has income $y;
       <agg_type> $y;
@@ -743,7 +743,7 @@ Feature: Graql Get Clause
 
 
   Scenario: when taking the sum of an empty set, even if any matches would definitely be strings, no error is thrown and an empty answer is returned
-    When get answer of graql aggregate
+    When get answer of graql match aggregate
       """
       match $x isa person, has name $y;
       sum $y;
