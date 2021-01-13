@@ -36,8 +36,8 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) get role(husband) get supertype: relation:role
     Then relation(marriage) get role(wife) get supertype: relation:role
     Then relation(marriage) get related roles contain:
-      | husband |
-      | wife    |
+      | marriage:husband |
+      | marriage:wife    |
     When transaction commits
     When session opens transaction of type: read
     Then relation(marriage) is null: false
@@ -47,8 +47,8 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) get role(husband) get supertype: relation:role
     Then relation(marriage) get role(wife) get supertype: relation:role
     Then relation(marriage) get related roles contain:
-      | husband |
-      | wife    |
+      | marriage:husband |
+      | marriage:wife    |
 
   Scenario: Relation and role types can be deleted
     When put relation type: marriage
@@ -1151,7 +1151,7 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set plays role: locates:located
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    When relation(contractor-employment) set plays role: contractor-locates:contractor-located as located
+    When relation(contractor-employment) set plays role: contractor-locates:contractor-located as locates:located
     Then relation(contractor-employment) get playing roles do not contain:
       | locates:located |
     When transaction commits
@@ -1164,7 +1164,7 @@ Feature: Concept Relation Type and Role Type
     When relation(parttime-employment) set supertype: contractor-employment
     When relation(parttime-employment) set relates role: parttime-employer
     When relation(parttime-employment) set relates role: parttime-employee
-    When relation(parttime-employment) set plays role: parttime-locates:parttime-located as contractor-located
+    When relation(parttime-employment) set plays role: parttime-locates:parttime-located as contractor-locates:contractor-located
     Then relation(parttime-employment) get playing roles do not contain:
       | locates:located                       |
       | contractor-locates:contractor-located |
@@ -1187,7 +1187,7 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set plays role: locates:located
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    When relation(contractor-employment) set plays role: contractor-locates:contractor-located as located
+    When relation(contractor-employment) set plays role: contractor-locates:contractor-located as locates:located
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
     When transaction commits
