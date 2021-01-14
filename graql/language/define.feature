@@ -54,7 +54,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x type dog;
       """
@@ -71,7 +71,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x sub person;
       """
@@ -137,7 +137,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x plays employment:employee;
       """
@@ -158,7 +158,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x plays employment:employee;
       """
@@ -178,7 +178,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x owns name;
       """
@@ -199,7 +199,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x owns name;
       """
@@ -219,7 +219,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x owns email @key;
       """
@@ -240,7 +240,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x owns email @key;
       """
@@ -263,7 +263,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x plays home-ownership:home;
       """
@@ -282,7 +282,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x owns price;
       """
@@ -301,7 +301,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x owns address @key;
       """
@@ -383,7 +383,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x type pet-ownership;
       """
@@ -400,7 +400,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x sub employment;
       """
@@ -427,7 +427,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x relates employee;
       """
@@ -450,7 +450,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match
         $x relates parent;
@@ -459,7 +459,7 @@ Feature: Graql Define Query
     Then uniquely identify answer concepts
       | x                 |
       | label:parenthood |
-    When get answers of graql query
+    When get answers of graql match
       """
       match
         $x relates father;
@@ -480,7 +480,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match
       $x sub parenthood:parent; $y sub parenthood:child; get $x, $y;
@@ -501,7 +501,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x relates employee;
       """
@@ -527,7 +527,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x plays income:source;
       """
@@ -548,7 +548,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x plays income:source;
       """
@@ -568,7 +568,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x owns start-date;
       """
@@ -589,7 +589,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x owns start-date;
       """
@@ -609,7 +609,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x owns employment-reference-code @key;
       """
@@ -630,7 +630,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x owns employment-reference-code @key;
       """
@@ -650,7 +650,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x type connection;
       """
@@ -669,7 +669,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x relates parent; $x relates child;
       """
@@ -688,7 +688,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x relates owner;
       """
@@ -710,7 +710,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match
         $x type <label>;
@@ -753,7 +753,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x sub code;
       """
@@ -773,7 +773,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x type door-code, value string;
       """
@@ -798,7 +798,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x regex "^(yes|no|maybe)$";
       """
@@ -827,7 +827,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x plays car-sales-listing:available-colour;
       """
@@ -851,7 +851,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x plays phone-contact:number;
       """
@@ -874,7 +874,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x owns brightness;
       """
@@ -897,7 +897,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x owns country-calling-code;
       """
@@ -920,7 +920,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x owns hex-value @key;
       """
@@ -943,7 +943,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x owns hex-value @key;
       """
@@ -965,7 +965,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x owns <label>;
       """
@@ -1005,7 +1005,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x type animal; $x abstract;
       """
@@ -1024,7 +1024,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x sub animal;
       """
@@ -1044,7 +1044,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x sub animal; $x abstract;
       """
@@ -1064,7 +1064,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x sub exception, abstract;
       """
@@ -1081,7 +1081,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x type membership; $x abstract;
       """
@@ -1100,7 +1100,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x sub membership;
       """
@@ -1120,7 +1120,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x sub requirement; $x abstract;
       """
@@ -1140,7 +1140,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x sub requirement; $x abstract;
       """
@@ -1157,7 +1157,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x type number-of-limbs; $x abstract;
       """
@@ -1176,7 +1176,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x sub number-of-limbs;
       """
@@ -1196,7 +1196,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x sub number-of-limbs; $x abstract;
       """
@@ -1219,7 +1219,7 @@ Feature: Graql Define Query
       """
     Then transaction commits
     Then session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match
       $name type name; $name abstract;
@@ -1254,7 +1254,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x type person, owns name;
       """
@@ -1295,7 +1295,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x owns name;
       """
@@ -1313,7 +1313,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x plays employment:employee;
       """
@@ -1354,7 +1354,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x owns barcode @key;
       """
@@ -1435,7 +1435,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x relates employer;
       """
@@ -1465,7 +1465,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     Then session opens transaction of type: read
-    Then get answers of graql query
+    Then get answers of graql match
       """
       match $x regex "^A.*$";
       """
@@ -1542,7 +1542,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x owns name @key;
       """
@@ -1559,14 +1559,14 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x owns email;
       """
     Then uniquely identify answer concepts
       | x            |
       | label:person |
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x owns email @key;
       """
@@ -1615,7 +1615,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x sub person; $x abstract;
       """
@@ -1632,7 +1632,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x sub employment; $x abstract;
       """
@@ -1649,7 +1649,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x sub name; $x abstract;
       """
@@ -1735,7 +1735,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x sub apple-product;
       """
@@ -1779,7 +1779,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x sub shoe-size;
       """
@@ -1809,7 +1809,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x sub organism;
       """
@@ -1850,7 +1850,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x sub pigeon;
       """
@@ -1890,7 +1890,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x sub pigeon;
       """
@@ -1930,7 +1930,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x sub pigeon;
       """
@@ -1975,7 +1975,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x type child, plays $r;
       """
@@ -1997,7 +1997,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x type child, owns $y;
       """
@@ -2018,7 +2018,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x type child, owns $y @key;
       """
@@ -2038,7 +2038,7 @@ Feature: Graql Define Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x type part-time-employment, relates $r;
       """
@@ -2096,7 +2096,7 @@ Feature: Graql Define Query
       middlename sub attribute, value string, owns firstname;
       firstname sub attribute, value string, owns surname;
       """
-    Then get answers of graql query
+    Then get answers of graql match
       """
       match $a sub attribute, owns $b; $b sub attribute, owns $a;
       """
@@ -2104,7 +2104,7 @@ Feature: Graql Define Query
       | a              | b              |
       | label:nickname | label:surname  |
       | label:surname  | label:nickname |
-    Then get answers of graql query
+    Then get answers of graql match
       """
       match $a owns $b; $b owns $a;
       """
@@ -2122,7 +2122,7 @@ Feature: Graql Define Query
       middlename sub attribute, value string, owns firstname;
       firstname sub attribute, value string, owns surname;
       """
-    Then get answers of graql query
+    Then get answers of graql match
       """
       match
       $a sub attribute, owns $b;
@@ -2148,7 +2148,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x relates function; $x plays recursive-function:function;
       """
@@ -2165,7 +2165,7 @@ Feature: Graql Define Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x owns number-of-letters;
       """

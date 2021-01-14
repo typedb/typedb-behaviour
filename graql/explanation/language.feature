@@ -45,7 +45,7 @@ Feature: Graql Reasoning Explanation
       $p isa person, has name "Alice";
       """
 
-    Then get answers of graql query
+    Then get answers of graql match
       """
       match $p isa person;
       """
@@ -89,7 +89,7 @@ Feature: Graql Reasoning Explanation
       (superior: $cit, subordinate: $ar) isa location-hierarchy;
       """
 
-    Then get answers of graql query
+    Then get answers of graql match
       """
       match
       $k isa area, has name $n;
@@ -146,7 +146,7 @@ Feature: Graql Reasoning Explanation
       (superior: $cou, subordinate: $cit) isa location-hierarchy;
       """
 
-    Then get answers of graql query
+    Then get answers of graql match
       """
       match
       $k isa area, has name $n;
@@ -199,7 +199,7 @@ Feature: Graql Reasoning Explanation
       $c2 has name $n2; $n2 "another-company";
       """
 
-    Then get answers of graql query
+    Then get answers of graql match
       """
       match $com isa company, has name $n; not { $n "the-company"; };
       """
@@ -246,7 +246,7 @@ Feature: Graql Reasoning Explanation
       $c2 has name $n2; $n2 "another-company";
       """
 
-    Then get answers of graql query
+    Then get answers of graql match
       """
       match $com isa company;
       {$com has name $n1; $n1 "the-company";} or {$com has name $n2; $n2 "another-company";};
@@ -294,7 +294,7 @@ Feature: Graql Reasoning Explanation
       $c2 has name $n2; $n2 "another-company";
       """
 
-    Then get answers of graql query
+    Then get answers of graql match
       """
       match $com isa company;
       {$com has name $n1; $n1 "the-company";} or {$com has name $n2; {$n2 "another-company";} or {$n2 "third-company";};};

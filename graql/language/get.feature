@@ -71,7 +71,7 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match
         $z isa person, has name $x, has age $y;
@@ -119,7 +119,7 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa <attr>;
       sort $x asc;
@@ -151,7 +151,7 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa person, has name $y;
       sort $y asc;
@@ -162,7 +162,7 @@ Feature: Graql Get Clause
       | key:ref:2 | value:name:Frederick |
       | key:ref:0 | value:name:Gary      |
       | key:ref:1 | value:name:Jemima    |
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa person, has name $y;
       sort $y desc;
@@ -187,7 +187,7 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa person, has name $y;
       sort $y;
@@ -212,7 +212,7 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa person, has name $y;
       sort $y asc;
@@ -237,7 +237,7 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa person, has name $y;
       sort $y asc;
@@ -261,7 +261,7 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa person, has name $y;
       sort $y asc;
@@ -286,7 +286,7 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa person, has name $y;
       sort $y asc;
@@ -307,7 +307,7 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa person, has name $y;
       sort $y asc;
@@ -329,7 +329,7 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    Then get answers of graql query
+    Then get answers of graql match
       """
       match $x isa name;
       sort $x asc;
@@ -356,7 +356,7 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa person, has age $y;
       sort $y asc;
@@ -366,7 +366,7 @@ Feature: Graql Get Clause
       | x         | y           |
       | key:ref:0 | value:age:2 |
       | key:ref:4 | value:age:2 |
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa person, has age $y;
       sort $y asc;
@@ -415,7 +415,7 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match
         $x isa person;
@@ -423,7 +423,7 @@ Feature: Graql Get Clause
         $f isa friendship;
       """
     Then answer size is: 9
-    When get answers of graql query
+    When get answer of graql match aggregate
       """
       match
         $x isa person;
@@ -432,7 +432,7 @@ Feature: Graql Get Clause
       count;
       """
     Then aggregate value is: 9
-    When get answers of graql query
+    When get answers of graql match
       """
       match
         $x isa person;
@@ -440,7 +440,7 @@ Feature: Graql Get Clause
         $f (friend: $x) isa friendship;
       """
     Then answer size is: 6
-    When get answers of graql query
+    When get answer of graql match aggregate
       """
       match
         $x isa person;
@@ -452,7 +452,7 @@ Feature: Graql Get Clause
 
 
   Scenario: the 'count' of an empty answer set is zero
-    When get answers of graql query
+    When get answer of graql match aggregate
       """
       match $x isa person, has name "Voldemort";
       count;
@@ -485,7 +485,7 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answer of graql match aggregate
       """
       match $x isa person, has <attr> $y;
       <agg_type> $y;
@@ -531,7 +531,7 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answer of graql match aggregate
       """
       match $x isa person, has weight $y;
       std $y;
@@ -551,13 +551,13 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answer of graql match aggregate
       """
       match $x isa person, has name $y, has age $z;
       sum $z;
       """
     Then aggregate value is: 65
-    Then get answers of graql query
+    Then get answer of graql match aggregate
       """
       match $x isa person, has name $y, has age $z;
       get $y, $z;
@@ -576,7 +576,7 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answer of graql match aggregate
       """
       match $x isa person, has age $y;
       <agg_type> $y;
@@ -601,7 +601,7 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answer of graql match aggregate
       """
       match $x isa person, has age $y;
       median $y;
@@ -622,7 +622,7 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answer of graql match aggregate
       """
       match $x isa person, has income $y;
       <agg_type> $y;
@@ -743,7 +743,7 @@ Feature: Graql Get Clause
 
 
   Scenario: when taking the sum of an empty set, even if any matches would definitely be strings, no error is thrown and an empty answer is returned
-    When get answers of graql query
+    When get answer of graql match aggregate
       """
       match $x isa person, has name $y;
       sum $y;
@@ -768,7 +768,7 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match ($x, $y) isa friendship;
       """
@@ -786,7 +786,7 @@ Feature: Graql Get Clause
       | key:ref:3 | key:ref:0 |
       | key:ref:3 | key:ref:1 |
       | key:ref:3 | key:ref:2 |
-    When get answers of graql query
+    When get answers of graql match group
       """
       match ($x, $y) isa friendship;
       group $x;
@@ -844,11 +844,11 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa person;
       """
-    When get answers of graql query
+    When get answers of graql match group aggregate
       """
       match ($x, $y) isa friendship;
       group $x;
@@ -876,7 +876,7 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match
       $x isa company;
@@ -894,7 +894,7 @@ Feature: Graql Get Clause
       | key:ref:0 | key:ref:3 | key:ref:4 |
       | key:ref:1 | key:ref:4 | key:ref:2 |
       | key:ref:1 | key:ref:4 | key:ref:3 |
-    Then get answers of graql query
+    Then get answers of graql match group aggregate
       """
       match
         $x isa company;
@@ -928,7 +928,7 @@ Feature: Graql Get Clause
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match group aggregate
       """
       match
         $x isa company;

@@ -68,7 +68,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x type person;
       """
@@ -87,7 +87,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x sub person;
       """
@@ -108,7 +108,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match writer sub $x;
       """
@@ -155,7 +155,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match
         $x isa $type;
@@ -191,7 +191,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x sub! person;
       """
@@ -211,7 +211,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match writer sub! $x;
       """
@@ -236,7 +236,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match
         $x sub $y;
@@ -250,7 +250,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'owns' matches types that own the specified attribute type
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x owns age;
       """
@@ -268,7 +268,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x owns $x;
       """
@@ -288,7 +288,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x owns name;
       """
@@ -309,7 +309,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x owns club-name;
       """
@@ -319,7 +319,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'owns' can be used to match attribute types that a given type owns
-    When get answers of graql query
+    When get answers of graql match
       """
       match person owns $x;
       """
@@ -352,7 +352,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match
         $x isa $type;
@@ -367,7 +367,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'plays' matches types that can play the specified role
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x plays friendship:friend;
       """
@@ -386,7 +386,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x plays friendship:friend;
       """
@@ -405,7 +405,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x plays close-friendship:close-friend;
       """
@@ -415,7 +415,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'plays' can be used to match roles that a particular type can play
-    When get answers of graql query
+    When get answers of graql match
       """
       match person plays $x;
       """
@@ -448,7 +448,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match
         $x isa $type;
@@ -470,7 +470,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x owns breed @key;
       """
@@ -480,7 +480,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'key' can be used to find all attribute types that a given type owns as a key
-    When get answers of graql query
+    When get answers of graql match
       """
       match person owns $x @key;
       """
@@ -500,7 +500,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x owns breed;
       """
@@ -511,7 +511,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'relates' matches relation types where the specified role can be played
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x relates employee;
       """
@@ -531,7 +531,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x relates close-friend as friend;
       """
@@ -550,7 +550,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x relates friend;
       """
@@ -560,7 +560,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'relates' can be used to retrieve all the roles of a relation type
-    When get answers of graql query
+    When get answers of graql match
       """
       match employment relates $x;
       """
@@ -573,7 +573,7 @@ Feature: Graql Match Query
   # TODO we can't test like this because the IID is not a valid encoded IID -- need to rethink this test
   @ignore
   Scenario: when matching by a concept iid that doesn't exist, an empty result is returned
-    When get answers of graql query
+    When get answers of graql match
       """
       match
         $x iid 0x83cb2;
@@ -599,7 +599,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa $y;
       """
@@ -642,7 +642,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa writer;
       """
@@ -677,7 +677,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa! writer;
       """
@@ -698,7 +698,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa person;
       """
@@ -709,7 +709,7 @@ Feature: Graql Match Query
 
 
   Scenario: match returns an empty answer if there are no matches
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa person, has name "Anonymous Coward";
       """
@@ -754,7 +754,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match
         $x isa person;
@@ -815,14 +815,14 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    Then get answers of graql query
+    Then get answers of graql match
       """
       match $x isa person; $r (employee: $x) isa relation;
       """
     Then uniquely identify answer concepts
       | x         | r         |
       | key:ref:0 | key:ref:2 |
-    When get answers of graql query
+    When get answers of graql match
       """
       match $y isa company; $r (employer: $y) isa relation;
       """
@@ -846,7 +846,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa person; $r ($x) isa relation;
       """
@@ -869,7 +869,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    Then get answers of graql query
+    Then get answers of graql match
       """
       match $r ($x, $y) isa employment;
       """
@@ -902,7 +902,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $r (player: $x, player: $x) isa relation;
       """
@@ -930,7 +930,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $r (player: $x) isa relation;
       """
@@ -953,7 +953,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match (friend: $x, friend: $x) isa friendship;
       """
@@ -993,7 +993,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match
         (sender: $a, recipient: $b) isa gift-delivery;
@@ -1002,7 +1002,7 @@ Feature: Graql Match Query
     Then uniquely identify answer concepts
       | a         | b         | c         |
       | key:ref:0 | key:ref:1 | key:ref:2 |
-    When get answers of graql query
+    When get answers of graql match
       """
       match
         (sender: $a, recipient: $b) isa gift-delivery;
@@ -1037,7 +1037,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    Given get answers of graql query
+    Given get answers of graql match
       """
       match $r isa relation;
       """
@@ -1046,14 +1046,14 @@ Feature: Graql Match Query
       | key:ref:1 |
       | key:ref:2 |
       | key:ref:3 |
-    When get answers of graql query
+    When get answers of graql match
       """
       match ($x) isa relation;
       """
     Then uniquely identify answer concepts
       | x         |
       | key:ref:0 |
-    When get answers of graql query
+    When get answers of graql match
       """
       match ($x);
       """
@@ -1141,7 +1141,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $m (wife: $x, husband: $y) isa hetero-marriage;
       """
@@ -1152,52 +1152,52 @@ Feature: Graql Match Query
       """
     Then session transaction is open: false
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $m (wife: $x, husband: $y) isa marriage;
       """
     Then answer size is: 1
-    When get answers of graql query
+    When get answers of graql match
       """
       match $m (wife: $x, husband: $y) isa relation;
       """
     Then answer size is: 1
-    When get answers of graql query
+    When get answers of graql match
       """
       match $m (spouse: $x, spouse: $y) isa hetero-marriage;
       """
     Then answer size is: 2
-    When get answers of graql query
+    When get answers of graql match
       """
       match $m (spouse: $x, spouse: $y) isa civil-marriage;
       """
     Then answer size is: 2
-    When get answers of graql query
+    When get answers of graql match
       """
       match $m (spouse: $x, spouse: $y) isa marriage;
       """
     Then answer size is: 4
-    When get answers of graql query
+    When get answers of graql match
       """
       match $m (spouse: $x, spouse: $y) isa relation;
       """
     Then answer size is: 4
-    When get answers of graql query
+    When get answers of graql match
       """
       match $m (role: $x, role: $y) isa hetero-marriage;
       """
     Then answer size is: 2
-    When get answers of graql query
+    When get answers of graql match
       """
       match $m (role: $x, role: $y) isa civil-marriage;
       """
     Then answer size is: 2
-    When get answers of graql query
+    When get answers of graql match
       """
       match $m (role: $x, role: $y) isa marriage;
       """
     Then answer size is: 4
-    When get answers of graql query
+    When get answers of graql match
       """
       match $m (role: $x, role: $y) isa relation;
       """
@@ -1225,7 +1225,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $a <value>;
       """
@@ -1250,7 +1250,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $a <value>;
       """
@@ -1279,7 +1279,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x contains "Fun";
       """
@@ -1303,7 +1303,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x contains "Bean";
       """
@@ -1327,7 +1327,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x like "^[0-9]+$";
       """
@@ -1340,12 +1340,12 @@ Feature: Graql Match Query
   # TODO we can't test like this because the IID is not a valid encoded IID -- need to rethink this test
   @ignore
   Scenario: when querying for a non-existent attribute type iid, an empty result is returned
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x has name $y; $x iid 0x83cb2;
       """
     Then answer size is: 0
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x has name $y; $y iid 0x83cb2;
       """
@@ -1367,7 +1367,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match
       $x isa person, has $n;
@@ -1393,7 +1393,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x has name $y; get $x;
       """
@@ -1425,7 +1425,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x has attribute 9;
       """
@@ -1461,7 +1461,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x has age 21;
       """
@@ -1492,7 +1492,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x has lucky-number 20;
       """
@@ -1520,7 +1520,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x has $x;
       """
@@ -1587,7 +1587,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    Then get answers of graql query
+    Then get answers of graql match
       """
       match
         $x isa person, has graduation-date $date;
@@ -1613,7 +1613,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x has age = 16;
       """
@@ -1636,7 +1636,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x has age > 18;
       """
@@ -1659,7 +1659,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x has age < 18;
       """
@@ -1682,7 +1682,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x has age != 18;
       """
@@ -1713,42 +1713,42 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match
         $x isa house-number;
         $x = 1.0;
       """
     Then answer size is: 1
-    When get answers of graql query
+    When get answers of graql match
       """
       match
         $x isa length;
         $x = 2;
       """
     Then answer size is: 1
-    When get answers of graql query
+    When get answers of graql match
       """
       match
         $x isa house-number;
         $x 1.0;
       """
     Then answer size is: 1
-    When get answers of graql query
+    When get answers of graql match
       """
       match
         $x isa length;
         $x 2;
       """
     Then answer size is: 1
-    When get answers of graql query
+    When get answers of graql match
       """
       match
         $x isa attribute;
         $x >= 1;
       """
     Then answer size is: 2
-    When get answers of graql query
+    When get answers of graql match
       """
       match
         $x isa attribute;
@@ -1777,7 +1777,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x has lucky-number > 25;
       """
@@ -1800,7 +1800,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match
         $x has age = $z;
@@ -1836,7 +1836,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match
         $x isa attribute;
@@ -1859,7 +1859,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match
         $x isa person;
@@ -1892,7 +1892,7 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    When get answers of graql query
+    When get answers of graql match
       """
       match {$x isa person;} or {$x isa company;};
       """
@@ -1920,22 +1920,22 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    Given get answers of graql query
+    Given get answers of graql match
       """
       match $x isa entity;
       """
     Given answer size is: 2
-    Given get answers of graql query
+    Given get answers of graql match
       """
       match $r isa relation;
       """
     Given answer size is: 1
-    Given get answers of graql query
+    Given get answers of graql match
       """
       match $x isa attribute;
       """
     Given answer size is: 5
-    When get answers of graql query
+    When get answers of graql match
       """
       match $x isa $type;
       """
@@ -1959,18 +1959,18 @@ Feature: Graql Match Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: read
-    Given get answers of graql query
+    Given get answers of graql match
       """
       match $r isa relation;
       """
     Given answer size is: 1
-    Given get answers of graql query
+    Given get answers of graql match
       """
       match ($x, $y) isa relation;
       """
     # 2 permutations of the roleplayers
     Given answer size is: 2
-    When get answers of graql query
+    When get answers of graql match
       """
       match ($x, $y) isa $type;
       """
@@ -2004,7 +2004,7 @@ Feature: Graql Match Query
     Then session transaction is open: false
 
   Scenario: the first variable in a negation can be unbound, as long as it is connected to a bound variable
-    Then get answers of graql query
+    Then get answers of graql match
       """
       match
         $r isa attribute;
@@ -2015,7 +2015,7 @@ Feature: Graql Match Query
 
   # TODO: We should verify the answers
   Scenario: negations can contain disjunctions
-    Then get answers of graql query
+    Then get answers of graql match
       """
       match
         $x isa entity;
