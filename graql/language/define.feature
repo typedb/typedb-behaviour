@@ -1554,8 +1554,6 @@ Feature: Graql Define Query
       | label:person |
 
 
-  # TODO: re-enable when fixed - currently the 2nd match throws saying the query is unsatisfiable
-  @ignore
   Scenario: an attribute key ownership can be converted to a regular ownership
     When graql define
       """
