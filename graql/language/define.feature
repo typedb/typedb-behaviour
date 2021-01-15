@@ -983,14 +983,9 @@ Feature: Graql Define Query
 
 
   # TODO
-  Scenario Outline: a type can own a '<value_type>' attribute type as a key
-
-    Examples:
-
-  # TODO
-  Scenario Outline: a '<value_type>' attribute type is not allowed to be a key
-
-    Examples:
+#  Scenario Outline: a type can own a '<value_type>' attribute type as a key
+#
+#  Scenario Outline: a '<value_type>' attribute type is not allowed to be a key
 
 
   ##################
