@@ -1680,6 +1680,24 @@ Feature: Graql Define Query
 
 
   Scenario: an existing relation type cannot be converted to abstract if it has existing instances
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
+    Given graql insert
+      """
+      insert
+      $x isa person, has name "Jeremy", has email "jeremy@grakn.ai";
+      $r (employee: $x) isa employment, has employment-reference-code "J123123";
+      """
+    Given transaction commits
+    Given the integrity is validated
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
+    Then graql define; throws exception
+      """
+      define employment abstract;
+      """
 
 
   Scenario: an existing attribute type cannot be converted to abstract if it has existing instances
