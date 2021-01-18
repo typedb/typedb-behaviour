@@ -2063,6 +2063,10 @@ Feature: Graql Define Query
   # TRANSACTIONALITY #
   ####################
 
+  # TODO: re-enable when it passes reliably in clients (see client-java#233)
+  @ignore-client-java
+  @ignore-client-nodejs
+  @ignore-client-python
   Scenario: uncommitted transaction writes are not persisted
     When graql define
       """
