@@ -366,9 +366,12 @@ Feature: Graql Define Query
     Then the integrity is validated
 
 
-  @ignore
-  # TODO: re-enable when writing a variable in a 'define' is forbidden
   Scenario: writing a variable in a 'define' is not allowed
+    Then graql define; throws exception
+      """
+      define $x sub entity;
+      """
+    Then the integrity is validated
 
 
   ##################
@@ -392,8 +395,6 @@ Feature: Graql Define Query
       | label:pet-ownership |
 
 
-  # TODO: re-enable when fixed (currently gives wrong answer)
-  @ignore
   Scenario: a new relation type can be defined as a subtype, creating a new child of its parent type
     When graql define
       """
@@ -409,7 +410,7 @@ Feature: Graql Define Query
     Then uniquely identify answer concepts
       | x                    |
       | label:employment     |
-      | label:fun_employment |
+      | label:fun-employment |
 
 
   Scenario: defining a relation type throws on commit if it has no roleplayers and is not abstract
@@ -472,8 +473,6 @@ Feature: Graql Define Query
       | label:father-sonhood |
 
 
-  # TODO: re-enable when fixed (currently gives wrong answer)
-  @ignore
   Scenario: when a relation type's role is overridden, it creates a sub-role of the parent role type
     When graql define
       """
@@ -490,11 +489,11 @@ Feature: Graql Define Query
       $x sub parenthood:parent; $y sub parenthood:child; get $x, $y;
       """
     Then uniquely identify answer concepts
-      | x            | y           |
-      | label:parent | label:child |
-      | label:father | label:child |
-      | label:parent | label:son   |
-      | label:father | label:son   |
+      | x                           | y                        |
+      | label:parenthood:parent     | label:parenthood:child   |
+      | label:father-sonhood:father | label:parenthood:child   |
+      | label:parenthood:parent     | label:father-sonhood:son |
+      | label:father-sonhood:father | label:father-sonhood:son |
 
 
   Scenario: an overridden role is no longer associated with the relation type that overrides it
@@ -1187,8 +1186,6 @@ Feature: Graql Define Query
       | label:number-of-legs  |
 
 
-  # TODO: re-enable when fixed (currently gives wrong answer)
-  @ignore
   Scenario: an abstract attribute type can be defined as a subtype of another abstract attribute type
     When graql define
       """
@@ -1204,9 +1201,9 @@ Feature: Graql Define Query
       match $x sub number-of-limbs; $x abstract;
       """
     Then uniquely identify answer concepts
-      | x                     |
-      | label:number-of-limbs |
-      | label:number-of-legs  |
+      | x                                 |
+      | label:number-of-limbs             |
+      | label:number-of-artificial-limbs  |
 
 
   Scenario: defining attribute type hierarchies is idempotent
@@ -1967,8 +1964,7 @@ Feature: Graql Define Query
   # SCHEMA MUTATION INHERITANCE #
   ###############################
 
-  # TODO: re-enable when fixed (currently gives wrong answer)
-  @ignore
+
   Scenario: when adding a playable role to an existing type, the change is propagated to its subtypes
     Given graql define
       """
@@ -1985,14 +1981,12 @@ Feature: Graql Define Query
       match $x type child, plays $r;
       """
     Then uniquely identify answer concepts
-      | x           | r              |
-      | label:child | label:employee |
-      | label:child | label:employer |
-      | label:child | label:earner   |
+      | x           | r                         |
+      | label:child | label:employment:employee |
+      | label:child | label:employment:employer |
+      | label:child | label:income:earner       |
 
 
-  # TODO: re-enable when fixed (currently gives wrong answer)
-  @ignore
   Scenario: when adding an attribute ownership to an existing type, the change is propagated to its subtypes
     Given graql define
     """
@@ -2012,10 +2006,9 @@ Feature: Graql Define Query
       | x           | y                  |
       | label:child | label:name         |
       | label:child | label:phone-number |
+      | label:child | label:email        |
 
 
-  # TODO: re-enable when fixed (currently gives wrong answer)
-  @ignore
   Scenario: when adding a key ownership to an existing type, the change is propagated to its subtypes
     Given graql define
       """
@@ -2032,13 +2025,11 @@ Feature: Graql Define Query
       match $x type child, owns $y @key;
       """
     Then uniquely identify answer concepts
-      | x           | y           |
-      | label:child | label:email |
-      | label:child | label:email |
+      | x           | y                  |
+      | label:child | label:email        |
+      | label:child | label:phone-number |
 
 
-  # TODO: re-enable when fixed (currently gives wrong answer)
-  @ignore
   Scenario: when adding a related role to an existing relation type, the change is propagated to all its subtypes
     Given graql define
       """
@@ -2054,9 +2045,9 @@ Feature: Graql Define Query
       match $x type part-time-employment, relates $r;
       """
     Then uniquely identify answer concepts
-      | x                          | r              |
-      | label:part-time-employment | label:employee |
-      | label:part-time-employment | label:employer |
+      | x                          | r                         |
+      | label:part-time-employment | label:employment:employee |
+      | label:part-time-employment | label:employment:employer |
 
 
   ####################
