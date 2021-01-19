@@ -1584,7 +1584,7 @@ Feature: Graql Define Query
       match $x owns email @key;
       """
     Then answer size is: 0
-    
+
 
   Scenario: defining a rule is idempotent
     Given graql define
