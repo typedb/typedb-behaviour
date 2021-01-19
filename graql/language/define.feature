@@ -522,6 +522,19 @@ Feature: Graql Define Query
     Then the integrity is validated
 
 
+  Scenario: types should be able to define roles they play with an override
+    Then graql define
+      """
+        define
+        locates sub relation, relates located;
+        contractor-locates sub locates, relates contractor-located as located;
+
+        employment sub relation, relates employee, plays locates:located;
+        contractor-employment sub employment, plays contractor-locates:contractor-located as located;
+      """
+    Then the integrity is validated
+
+
   Scenario: a newly defined relation subtype inherits playable roles from its parent type
     Given graql define
       """
