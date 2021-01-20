@@ -535,6 +535,21 @@ Feature: Graql Define Query
     Then the integrity is validated
 
 
+  Scenario: already shadowed types should not be overrideable
+    Then graql define; throws exception
+      """
+        define
+        locates sub relation, relates located;
+        contractor-locates sub locates, relates contractor-located as located;
+        software-contractor-locates sub contractor-locates, relates software-contractor-located as contractor-located;
+
+        employment sub relation, relates employee, plays locates:located;
+        contractor-employment sub employment, plays contractor-locates:contractor-located as located;
+        software-contractor-employment sub contractor-employment, plays software-contractor-locates:software-contractor-located as located;
+      """
+    Then the integrity is validated
+
+
   Scenario: a newly defined relation subtype inherits playable roles from its parent type
     Given graql define
       """
