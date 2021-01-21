@@ -110,7 +110,7 @@ Feature: Graql Undefine Query
       | label:person |
 
 
-  Scenario: undefining sub a supertype that is not a type's direct supertype should still undefine that type
+  Scenario: undefining a type 'sub' an indirect supertype should still remove that type
     Given graql define
       """
       define child sub person;
