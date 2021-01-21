@@ -70,21 +70,12 @@ Feature: Graql Undefine Query
       | label:entity        |
 
 
-  Scenario: when undefining 'sub' on an entity type, specifying a type that isn't really its supertype, nothing happens
-    When graql undefine
+  Scenario: when undefining 'sub' on an entity type, specifying a type that isn't really its supertype throws
+    When graql undefine; throws exception
       """
-      undefine person sub thing;
+      undefine person sub relation;
       """
-    Then transaction commits
     Then the integrity is validated
-    When session opens transaction of type: read
-    When get answers of graql match
-      """
-      match $x type person;
-      """
-    Then uniquely identify answer concepts
-      | x            |
-      | label:person |
 
 
   Scenario: a sub-entity type can be removed using 'sub' with its direct supertype, and its parent is preserved
@@ -119,13 +110,22 @@ Feature: Graql Undefine Query
       | label:person |
 
 
-  Scenario: if 'entity' is not the direct supertype of an entity, undefining 'sub entity' on it does nothing
+  Scenario: undefining sub a supertype that is not a type's direct supertype should still undefine that type
     Given graql define
       """
       define child sub person;
       """
     Given transaction commits
     Given the integrity is validated
+    When session opens transaction of type: read
+    When get answers of graql match
+      """
+      match $x sub person;
+      """
+    Then uniquely identify answer concepts
+      | x            |
+      | label:person |
+      | label:child  |
     When session opens transaction of type: write
     When graql undefine
       """
@@ -136,11 +136,11 @@ Feature: Graql Undefine Query
     When session opens transaction of type: read
     When get answers of graql match
       """
-      match $x type child;
+      match $x sub person;
       """
     Then uniquely identify answer concepts
-      | x           |
-      | label:child |
+      | x            |
+      | label:person |
 
 
   Scenario: undefining a supertype throws an error if subtypes exist
@@ -161,7 +161,7 @@ Feature: Graql Undefine Query
   Scenario: removing a playable role from a super entity type also removes it from its subtypes
     Given graql define
       """
-      define child sub person; 
+      define child sub person;
       """
     Given transaction commits
     Given the integrity is validated
@@ -183,7 +183,7 @@ Feature: Graql Undefine Query
   Scenario: removing an attribute ownership from a super entity type also removes it from its subtypes
     Given graql define
       """
-      define child sub person; 
+      define child sub person;
       """
     Given transaction commits
     Given the integrity is validated
@@ -205,7 +205,7 @@ Feature: Graql Undefine Query
   Scenario: removing a key ownership from a super entity type also removes it from its subtypes
     Given graql define
       """
-      define child sub person; 
+      define child sub person;
       """
     Given transaction commits
     Given the integrity is validated
@@ -223,7 +223,8 @@ Feature: Graql Undefine Query
       """
     Then answer size is: 0
 
-
+  #TODO: Reenable when deletion works
+  @ignore
   Scenario: all existing instances of an entity type must be deleted in order to undefine it
     Given get answers of graql match
       """
@@ -330,8 +331,8 @@ Feature: Graql Undefine Query
       match contract-employment plays $x;
       """
     Given uniquely identify answer concepts
-      | x                |
-      | label:employment |
+      | x                                 |
+      | label:employment-terms:employment |
     When graql undefine
       """
       undefine employment plays employment-terms:employment;
@@ -437,7 +438,8 @@ Feature: Graql Undefine Query
       """
     Then the integrity is validated
 
-
+  #TODO: Reenable when deletion works
+  @ignore
   Scenario: all existing instances of a relation type must be deleted in order to undefine it
     Given get answers of graql match
       """
@@ -533,9 +535,9 @@ Feature: Graql Undefine Query
       match employment relates $x;
       """
     Given uniquely identify answer concepts
-      | x              |
-      | label:employee |
-      | label:employer |
+      | x                         |
+      | label:employment:employee |
+      | label:employment:employer |
     When graql undefine
       """
       undefine employment relates employee;
@@ -548,8 +550,8 @@ Feature: Graql Undefine Query
       match employment relates $x;
       """
     Then uniquely identify answer concepts
-      | x              |
-      | label:employer |
+      | x                         |
+      | label:employment:employer |
 
 
   Scenario: undefining all players of a role produces a valid schema
@@ -566,7 +568,8 @@ Feature: Graql Undefine Query
       """
     Then answer size is: 0
 
-
+  #TODO: Reenable when deletion works
+  @ignore
   Scenario: after removing a role from a relation type, relation instances can no longer be created with that role
     Given connection close all sessions
     Given connection open data session for database: grakn
@@ -712,8 +715,8 @@ Feature: Graql Undefine Query
       match employment relates $x;
       """
     Then uniquely identify answer concepts
-      | x              |
-      | label:employee |
+      | x                         |
+      | label:employment:employee |
 
 
   Scenario: removing a role from a super relation type also removes it from its subtypes
@@ -736,8 +739,8 @@ Feature: Graql Undefine Query
       match $x type part-time; $x relates $role;
       """
     Then uniquely identify answer concepts
-      | x               | role           |
-      | label:part-time | label:employee |
+      | x               | role                      |
+      | label:part-time | label:employment:employee |
 
   # TODO
   Scenario: removing a role from a super relation type also removes roles that override it in its subtypes (?)
@@ -750,6 +753,8 @@ Feature: Graql Undefine Query
   # PLAYABLE ROLES ('PLAYS') #
   ############################
 
+  #TODO: Reenable when deletion works
+  @ignore
   Scenario: after undefining a playable role from a type, the type can no longer play the role
     Given connection close all sessions
     Given connection open data session for database: grakn
@@ -799,28 +804,19 @@ Feature: Graql Undefine Query
     Then the integrity is validated
 
 
-  Scenario: undefining a playable role that was not actually playable to begin with is a no-op
+  Scenario: undefining a playable role that was not actually playable to begin with throws
     Given get answers of graql match
       """
       match person plays $x;
       """
     Given uniquely identify answer concepts
-      | x              |
-      | label:employee |
-    When graql undefine
+      | x                         |
+      | label:employment:employee |
+    When graql undefine; throws exception
       """
       undefine person plays employment:employer;
       """
-    Then transaction commits
     Then the integrity is validated
-    When session opens transaction of type: read
-    When get answers of graql match
-      """
-      match person plays $x;
-      """
-    Then uniquely identify answer concepts
-      | x              |
-      | label:employee |
 
 
   Scenario: removing a playable role throws an error if it is played by existing instances
@@ -906,7 +902,8 @@ Feature: Graql Undefine Query
       """
     Then answer size is: 1
 
-
+  #TODO: Appears to directly contradict the above? Ask why it's different
+  @ignore
   Scenario: regex pattern should not be specified during an undefine; if it is, then an error is thrown
     Then graql undefine; throws exception
       """
@@ -932,8 +929,8 @@ Feature: Graql Undefine Query
       match first-name plays $x;
       """
     Given uniquely identify answer concepts
-      | x                  |
-      | label:manager-name |
+      | x                             |
+      | label:employment:manager-name |
     When graql undefine
       """
       undefine name plays employment:manager-name;
@@ -1047,7 +1044,8 @@ Feature: Graql Undefine Query
       """
     Then the integrity is validated
 
-
+  #TODO: Reenable when deletion works
+  @ignore
   Scenario: all existing instances of an attribute type must be deleted in order to undefine it
     Given get answers of graql match
       """
@@ -1137,17 +1135,15 @@ Feature: Graql Undefine Query
     Then answer size is: 0
 
 
-  Scenario: attempting to undefine an attribute ownership that was not actually owned to begin with is a no-op
-    When graql undefine
+  Scenario: attempting to undefine an attribute ownership that was not actually owned to begin throws
+    When graql undefine; throws exception
       """
       undefine employment owns name;
       """
-    Then transaction commits
     Then the integrity is validated
 
 
-  # TODO: this is stealthy - the user might expect that this undefine actually does something!
-  Scenario: attempting to undefine an attribute ownership inherited from a parent is a no-op
+  Scenario: attempting to undefine an attribute ownership inherited from a parent throws
     Given graql define
       """
       define child sub person;
@@ -1155,21 +1151,11 @@ Feature: Graql Undefine Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: write
-    Then graql undefine
+    Then graql undefine; throws exception
       """
       undefine child owns name;
       """
-    Then transaction commits
     Then the integrity is validated
-    When session opens transaction of type: read
-    When get answers of graql match
-      """
-      match $x owns name;
-      """
-    Then uniquely identify answer concepts
-      | x            |
-      | label:person |
-      | label:child  |
 
 
   Scenario: undefining a key ownership removes it
@@ -1298,14 +1284,7 @@ Feature: Graql Undefine Query
     Given transaction commits
     Given the integrity is validated
     When session opens transaction of type: write
-    When get answers of graql match
-      """
-      match $x sub rule;
-      """
-    When uniquely identify answer concepts
-      | x            |
-      | label:rule   |
-      | label:a-rule |
+    Then rules contain: a-rule
     When graql undefine
       """
       undefine rule a-rule;
@@ -1313,13 +1292,10 @@ Feature: Graql Undefine Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    Then get answers of graql match
-      """
-      match $x sub rule;
-      """
-    Then answer size is: 1
+    Then rules do not contain: a-rule
 
-
+  #TODO: Reenable when rules actually do something
+  @ignore
   Scenario: after undefining a rule, concepts previously inferred by that rule are no longer inferred
     Given graql define
       """
@@ -1342,6 +1318,7 @@ Feature: Graql Undefine Query
       """
     Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     Given get answers of graql match
       """
       match
@@ -1369,7 +1346,8 @@ Feature: Graql Undefine Query
       """
     Then answer size is: 0
 
-
+  #TODO: Reenable when rules actually do something
+  @ignore
   Scenario: when undefining a rule, concepts inferred by that rule can still be retrieved until the next commit
     Given graql define
       """
@@ -1526,7 +1504,6 @@ Feature: Graql Undefine Query
       define
       person abstract;
       vehicle-registration sub attribute, value string, abstract;
-      car-registration sub vehicle-registration;
       person owns vehicle-registration;
       """
     Given transaction commits
@@ -1598,7 +1575,6 @@ Feature: Graql Undefine Query
       | label:email     |
       | label:attribute |
 
-
   Scenario: a type, a relation type that it plays in and an attribute type that it owns can be removed simultaneously
     Given get answers of graql match
       """
@@ -1628,13 +1604,13 @@ Feature: Graql Undefine Query
       | label:attribute |
     Given get answers of graql match
       """
-      match $x sub role;
+      match $x sub relation:role;
       """
     Given uniquely identify answer concepts
-      | x              |
-      | label:employee |
-      | label:employer |
-      | label:role     |
+      | x                         |
+      | label:employment:employee |
+      | label:employment:employer |
+      | label:relation:role       |
     When graql undefine
       """
       undefine
@@ -1670,8 +1646,8 @@ Feature: Graql Undefine Query
       | label:attribute |
     When get answers of graql match
       """
-      match $x sub role;
+      match $x sub relation:role;
       """
     Then uniquely identify answer concepts
-      | x          |
-      | label:role |
+      | x                   |
+      | label:relation:role |
