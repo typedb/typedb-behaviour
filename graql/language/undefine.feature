@@ -804,7 +804,7 @@ Feature: Graql Undefine Query
     Then the integrity is validated
 
 
-  Scenario: undefining a playable role that was not actually playable to begin with is a no-op
+  Scenario: undefining a playable role that was not actually playable to begin with throws
     Given get answers of graql match
       """
       match person plays $x;
@@ -812,20 +812,11 @@ Feature: Graql Undefine Query
     Given uniquely identify answer concepts
       | x                         |
       | label:employment:employee |
-    When graql undefine
+    When graql undefine; throws exception
       """
       undefine person plays employment:employer;
       """
-    Then transaction commits
     Then the integrity is validated
-    When session opens transaction of type: read
-    When get answers of graql match
-      """
-      match person plays $x;
-      """
-    Then uniquely identify answer concepts
-      | x                         |
-      | label:employment:employee |
 
 
   Scenario: removing a playable role throws an error if it is played by existing instances
@@ -1144,15 +1135,14 @@ Feature: Graql Undefine Query
     Then answer size is: 0
 
 
-  Scenario: attempting to undefine an attribute ownership that was not actually owned to begin with is a no-op
-    When graql undefine
+  Scenario: attempting to undefine an attribute ownership that was not actually owned to begin throws
+    When graql undefine; throws exception
       """
       undefine employment owns name;
       """
-    Then transaction commits
     Then the integrity is validated
 
-  #TODO: MAKE AN EXCEPTION SPECIFIC TO THIS
+
   Scenario: attempting to undefine an attribute ownership inherited from a parent throws
     Given graql define
       """
@@ -1279,8 +1269,6 @@ Feature: Graql Undefine Query
   # RULES #
   #########
 
-  #TODO: Talk to josh to understand how rule syntax works
-  @ignore
   Scenario: undefining a rule removes it
     Given graql define
       """
@@ -1296,14 +1284,7 @@ Feature: Graql Undefine Query
     Given transaction commits
     Given the integrity is validated
     When session opens transaction of type: write
-    When get answers of graql match
-      """
-      match $x sub rule;
-      """
-    When uniquely identify answer concepts
-      | x            |
-      | label:rule   |
-      | label:a-rule |
+    Then rules contain: a-rule
     When graql undefine
       """
       undefine rule a-rule;
@@ -1311,12 +1292,9 @@ Feature: Graql Undefine Query
     Then transaction commits
     Then the integrity is validated
     When session opens transaction of type: read
-    Then get answers of graql match
-      """
-      match $x sub rule;
-      """
-    Then answer size is: 1
+    Then rules do not contain: a-rule
 
+  #TODO: Reenable when rules actually do something
   @ignore
   Scenario: after undefining a rule, concepts previously inferred by that rule are no longer inferred
     Given graql define
@@ -1340,6 +1318,7 @@ Feature: Graql Undefine Query
       """
     Given transaction commits
     Given the integrity is validated
+    Given session opens transaction of type: read
     Given get answers of graql match
       """
       match
@@ -1367,6 +1346,7 @@ Feature: Graql Undefine Query
       """
     Then answer size is: 0
 
+  #TODO: Reenable when rules actually do something
   @ignore
   Scenario: when undefining a rule, concepts inferred by that rule can still be retrieved until the next commit
     Given graql define
@@ -1595,8 +1575,6 @@ Feature: Graql Undefine Query
       | label:email     |
       | label:attribute |
 
-  #TODO: Ask how to specify role as well as rule
-  @ignore
   Scenario: a type, a relation type that it plays in and an attribute type that it owns can be removed simultaneously
     Given get answers of graql match
       """
@@ -1626,13 +1604,13 @@ Feature: Graql Undefine Query
       | label:attribute |
     Given get answers of graql match
       """
-      match $x sub role;
+      match $x sub relation:role;
       """
     Given uniquely identify answer concepts
-      | x              |
-      | label:employee |
-      | label:employer |
-      | label:role     |
+      | x                         |
+      | label:employment:employee |
+      | label:employment:employer |
+      | label:relation:role       |
     When graql undefine
       """
       undefine
@@ -1668,8 +1646,8 @@ Feature: Graql Undefine Query
       | label:attribute |
     When get answers of graql match
       """
-      match $x sub role;
+      match $x sub relation:role;
       """
     Then uniquely identify answer concepts
-      | x          |
-      | label:role |
+      | x                   |
+      | label:relation:role |
