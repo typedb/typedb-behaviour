@@ -647,7 +647,8 @@ Feature: Graql Insert Query
       | a                     |
       | value:tenure-days:365 |
 
-
+  #TODO: Reenable when rules actually do something
+  @ignore
   Scenario: an attribute ownership currently inferred by a rule can be explicitly inserted
     Given connection close all sessions
     Given connection open schema session for database: grakn
@@ -757,7 +758,7 @@ Feature: Graql Insert Query
     When session opens transaction of type: read
     When get answers of graql match
       """
-      match $r (place-of-residence: $addr) isa residence, has is-permanent $perm;
+      match $r (place: $addr) isa residence, has is-permanent $perm;
       """
     Then uniquely identify answer concepts
       | r         | addr                                 | perm                     |
@@ -809,7 +810,7 @@ Feature: Graql Insert Query
       match
         $r isa employment;
       insert
-        $r (employer: $c) isa employment;
+        $r (employer: $c);
         $c isa company, has ref 2;
       """
     Then transaction commits
@@ -940,7 +941,8 @@ Feature: Graql Insert Query
       """
     Then the integrity is validated
 
-
+  #TODO: Reenable when rules actually do something
+  @ignore
   Scenario: a relation currently inferred by a rule can be explicitly inserted
     Given connection close all sessions
     Given connection open schema session for database: grakn
@@ -1209,12 +1211,12 @@ Feature: Graql Insert Query
       """
       insert $x <insert> isa <attr>, has ref 0;
       """
-    Then transaction commits
-    Then the integrity is validated
-    When session opens transaction of type: read
     Then uniquely identify answer concepts
       | x         |
       | key:ref:0 |
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
     When get answers of graql match
       """
       match $x <match> isa <attr>;
@@ -1414,8 +1416,8 @@ Feature: Graql Insert Query
       | key:ref:0 | key:ref:0 |
 
 
-  Scenario: when inserting a thing variable with a type variable, the answer contains both variables
-    When get answers of graql insert
+  Scenario: referring to a type by variable rather than by label in an insert throws
+    When get answers of graql insert; throws exception
       """
       match
         $type type company;
@@ -1423,10 +1425,6 @@ Feature: Graql Insert Query
         $x isa $type, has name "Microsoft", has ref 0;
       """
     Then the integrity is validated
-    Then uniquely identify answer concepts
-      | x         | type           |
-      | key:ref:0 | label:company  |
-
 
   ################
   # MATCH-INSERT #
@@ -1764,7 +1762,35 @@ Feature: Graql Insert Query
     Then the integrity is validated
 
 
-  Scenario: inserting a new type on an existing instance has no effect, if the old type is a subtype of the new one
+  Scenario: inserting a new type on an existing instance that is a subtype of its existing type throws
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
+    Given graql define
+      """
+      define child sub person;
+      """
+    Given transaction commits
+    Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
+    Given graql insert
+      """
+      insert $x isa person, has ref 0;
+      """
+    Given transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: write
+    When graql insert; throws exception
+      """
+      match
+        $x isa person;
+      insert
+        $x isa child;
+      """
+
+  Scenario: inserting a new type on an existing instance that is a supertype of its existing type throws
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -1784,34 +1810,50 @@ Feature: Graql Insert Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: write
-    When graql insert
+    When graql insert; throws exception
       """
       match
         $x isa child;
       insert
         $x isa person;
       """
-    Then transaction commits
-    Then the integrity is validated
-    When session opens transaction of type: read
-    When get answers of graql match
-      """
-      match $x isa! child;
-      """
-    Then answer size is: 1
-    When get answers of graql match
-      """
-      match $x isa! person;
-      """
-    Then answer size is: 0
 
+  Scenario: inserting a new type on an existing instance that is unrelated to its existing type throws
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
+    Given graql define
+      """
+      define
+        car sub entity;
+      """
+    Given transaction commits
+    Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
+    Given graql insert
+      """
+      insert $x isa person, has ref 0;
+      """
+    Given transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: write
+    When graql insert; throws exception
+      """
+      match
+        $x isa person;
+      insert
+        $x isa car;
+      """
 
   #####################################
   # MATERIALISATION OF INFERRED FACTS #
   #####################################
 
   # Note: These tests have been placed here because Resolution Testing was not built to handle these kinds of cases
-
+  #TODO: Reenable when rules actually do something
+  @ignore
   Scenario: when inserting a thing that has inferred concepts, those concepts are not automatically materialised
     Given connection close all sessions
     Given connection open schema session for database: grakn
@@ -1866,7 +1908,8 @@ Feature: Graql Insert Query
     # If the name 'Ganesh' had been materialised, then it would still exist in the knowledge graph.
     Then answer size is: 0
 
-
+  #TODO: Reenable when rules actually do something
+  @ignore
   Scenario: when inserting a thing with an inferred attribute ownership, the ownership is not automatically persisted
     Given connection close all sessions
     Given connection open schema session for database: grakn
@@ -1932,7 +1975,8 @@ Feature: Graql Insert Query
     # But Freya's ownership of score 10.0 was never materialised and is now gone
     Then answer size is: 0
 
-
+  #TODO: Reenable when rules actually do something
+  @ignore
   Scenario: when inserting things connected to an inferred attribute, the inferred attribute gets materialised
 
   By explicitly inserting (x,y) is a relation, we are making explicit the fact that x and y both exist.
@@ -2029,7 +2073,8 @@ Feature: Graql Insert Query
       | x                 | y              |
       | value:name:Ganesh | value:letter:G |
 
-
+  #TODO: Reenable when rules actually do something
+  @ignore
   Scenario: when inserting things connected to an inferred relation, the inferred relation gets materialised
     Given connection close all sessions
     Given connection open schema session for database: grakn
@@ -2116,7 +2161,8 @@ Feature: Graql Insert Query
     # And the inserted relation still exists too
     Then answer size is: 1
 
-
+  #TODO: Reenable when rules actually do something
+  @ignore
   Scenario: when inserting things connected to a chain of inferred concepts, the whole chain is materialised
     Given connection close all sessions
     Given connection open schema session for database: grakn
@@ -2236,7 +2282,7 @@ Feature: Graql Insert Query
     Then answer size is: 0
 
 
-  Scenario: when matching two types and inserting one of them, the number of entities of that type doubles each time
+  Scenario: when matching two disjoint instances of distinct types but only selecting one to insert a pattern, inserts will only happen for the selected instance
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -2337,13 +2383,13 @@ Feature: Graql Insert Query
       """
       match $x isa person;
       """
-    Then answer size is: 64
+    Then answer size is: 7
     When get answers of graql match
       """
       match $x isa employment;
       """
     # The original person is still unemployed.
-    Then answer size is: 63
+    Then answer size is: 6
 
   ####################
   # TRANSACTIONALITY #
@@ -2394,6 +2440,7 @@ Feature: Graql Insert Query
       $y isa person, has name "Emily", has capacity 1000;
       """
     Then the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql match
       """
       match $x isa person, has name "Derek";

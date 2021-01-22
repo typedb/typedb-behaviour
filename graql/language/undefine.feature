@@ -902,15 +902,6 @@ Feature: Graql Undefine Query
       """
     Then answer size is: 1
 
-  #TODO: Appears to directly contradict the above? Ask why it's different
-  @ignore
-  Scenario: regex pattern should not be specified during an undefine; if it is, then an error is thrown
-    Then graql undefine; throws exception
-      """
-      undefine email regex ".+@\w.com";
-      """
-    Then the integrity is validated
-
 
   Scenario: removing playable roles from a super attribute type also removes them from its subtypes
     Given graql define
