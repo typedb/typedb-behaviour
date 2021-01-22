@@ -758,7 +758,7 @@ Feature: Graql Insert Query
     When session opens transaction of type: read
     When get answers of graql match
       """
-      match $r (residence:place-of-residence: $addr) isa residence, has is-permanent $perm;
+      match $r (place: $addr) isa residence, has is-permanent $perm;
       """
     Then uniquely identify answer concepts
       | r         | addr                                 | perm                     |
@@ -810,7 +810,7 @@ Feature: Graql Insert Query
       match
         $r isa employment;
       insert
-        $r (employer: $c) isa employment;
+        $r (employer: $c);
         $c isa company, has ref 2;
       """
     Then transaction commits
