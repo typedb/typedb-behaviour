@@ -580,8 +580,13 @@ Feature: Connection Transaction
     When connection create database: grakn
     Given connection open schema session for database: grakn
     When session opens transaction of type: read
-    Then graql define
+    Then graql define; throws exception containing "schema writes when session and transaction types do not allow"
       """
       define person sub entity;
       """
+
+  Scenario: commit in a read transaction throws
+    When connection create database: grakn
+    Given connection open schema session for database: grakn
+    When session opens transaction of type: read
     Then transaction commits; throws exception containing "write transactions can be committed"
