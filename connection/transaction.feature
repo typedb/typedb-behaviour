@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2020 Grakn Labs
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -577,6 +577,15 @@ Feature: Connection Transaction
 
 
   Scenario: write in a read transaction throws
+    When connection create database: grakn
+    Given connection open schema session for database: grakn
+    When session opens transaction of type: read
+    Then graql define; throws exception containing "schema writes when session and transaction types do not allow"
+      """
+      define person sub entity;
+      """
+
+  Scenario: commit in a read transaction throws
     When connection create database: grakn
     Given connection open schema session for database: grakn
     When session opens transaction of type: read
