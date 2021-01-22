@@ -1211,12 +1211,12 @@ Feature: Graql Insert Query
       """
       insert $x <insert> isa <attr>, has ref 0;
       """
-    Then transaction commits
-    Then the integrity is validated
-    When session opens transaction of type: read
     Then uniquely identify answer concepts
       | x         |
       | key:ref:0 |
+    Then transaction commits
+    Then the integrity is validated
+    When session opens transaction of type: read
     When get answers of graql match
       """
       match $x <match> isa <attr>;
@@ -1766,7 +1766,35 @@ Feature: Graql Insert Query
     Then the integrity is validated
 
 
-  Scenario: inserting a new type on an existing instance has no effect, if the old type is a subtype of the new one
+  Scenario: inserting a new type on an existing instance that is a subtype of its existing type throws
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
+    Given graql define
+      """
+      define child sub person;
+      """
+    Given transaction commits
+    Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
+    Given graql insert
+      """
+      insert $x isa person, has ref 0;
+      """
+    Given transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: write
+    When graql insert; throws exception
+      """
+      match
+        $x isa person;
+      insert
+        $x isa child;
+      """
+
+  Scenario: inserting a new type on an existing instance that is a supertype of its existing type throws
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -1786,27 +1814,42 @@ Feature: Graql Insert Query
     Given transaction commits
     Given the integrity is validated
     Given session opens transaction of type: write
-    When graql insert
+    When graql insert; throws exception
       """
       match
         $x isa child;
       insert
         $x isa person;
       """
-    Then transaction commits
-    Then the integrity is validated
-    When session opens transaction of type: read
-    When get answers of graql match
-      """
-      match $x isa! child;
-      """
-    Then answer size is: 1
-    When get answers of graql match
-      """
-      match $x isa! person;
-      """
-    Then answer size is: 0
 
+  Scenario: inserting a new type on an existing instance that is unrelated to its existing type throws
+    Given connection close all sessions
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
+    Given graql define
+      """
+      define
+        car sub entity;
+      """
+    Given transaction commits
+    Given the integrity is validated
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
+    Given graql insert
+      """
+      insert $x isa person, has ref 0;
+      """
+    Given transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: write
+    When graql insert; throws exception
+      """
+      match
+        $x isa person;
+      insert
+        $x isa car;
+      """
 
   #####################################
   # MATERIALISATION OF INFERRED FACTS #
@@ -2243,7 +2286,7 @@ Feature: Graql Insert Query
     Then answer size is: 0
 
 
-  Scenario: when matching two types and inserting one of them, the number of entities of that type doubles each time
+  Scenario: when matching two disjoint instances of distinct types but only selecting one to insert a pattern, inserts will only happen for the selected instance
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -2344,13 +2387,13 @@ Feature: Graql Insert Query
       """
       match $x isa person;
       """
-    Then answer size is: 64
+    Then answer size is: 7
     When get answers of graql match
       """
       match $x isa employment;
       """
     # The original person is still unemployed.
-    Then answer size is: 63
+    Then answer size is: 6
 
   ####################
   # TRANSACTIONALITY #
@@ -2401,6 +2444,7 @@ Feature: Graql Insert Query
       $y isa person, has name "Emily", has capacity 1000;
       """
     Then the integrity is validated
+    Given session opens transaction of type: read
     When get answers of graql match
       """
       match $x isa person, has name "Derek";
