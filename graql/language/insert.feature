@@ -1416,8 +1416,8 @@ Feature: Graql Insert Query
       | key:ref:0 | key:ref:0 |
 
 
-  Scenario: when inserting a thing variable with a type variable, the answer contains both variables
-    When get answers of graql insert
+  Scenario: referring to a type by variable rather than by label in an insert throws
+    When get answers of graql insert; throws exception
       """
       match
         $type type company;
@@ -1425,10 +1425,6 @@ Feature: Graql Insert Query
         $x isa $type, has name "Microsoft", has ref 0;
       """
     Then the integrity is validated
-    Then uniquely identify answer concepts
-      | x         | type           |
-      | key:ref:0 | label:company  |
-
 
   ################
   # MATCH-INSERT #
