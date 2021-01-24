@@ -1417,7 +1417,7 @@ Feature: Graql Insert Query
 
 
   Scenario: referring to a type by variable rather than by label in an insert throws
-    When get answers of graql insert; throws exception
+    Then graql insert; throws exception
       """
       match
         $type type company;
