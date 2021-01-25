@@ -638,8 +638,7 @@ Feature: Graql Delete Query
         $x isa person;
         $r (friend: $x, friend: $x, friend: $x) isa friendship;
       delete
-        $r (friend: $x);
-        $r (friend: $x);
+        $r (friend: $x, friend: $x);
       """
     Then transaction commits
 
