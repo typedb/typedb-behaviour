@@ -1119,8 +1119,7 @@ Feature: Graql Delete Query
     When graql delete
       """
       match
-        $x isa person, has attribute $a;
-        $a isa postcode;
+        $x isa person, has postcode $a;
       delete
         $x has attribute $a;
       """
