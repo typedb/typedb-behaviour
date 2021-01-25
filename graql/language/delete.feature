@@ -412,98 +412,6 @@ Feature: Graql Delete Query
       | key:name:Carrie | key:name:Bob    |
 
 
-  Scenario: deleting a role player from a relation using meta 'role' removes the player from the relation
-    Given get answers of graql insert
-      """
-      insert
-      $x isa person, has name "Alex";
-      $y isa person, has name "Bob";
-      $z isa person, has name "Carrie";
-      $r (friend: $x, friend: $y, friend: $z) isa friendship,
-         has ref 0;
-      """
-    Given transaction commits
-
-    Then uniquely identify answer concepts
-      | x             | y            | z               | r         |
-      | key:name:Alex | key:name:Bob | key:name:Carrie | key:ref:0 |
-    Given session opens transaction of type: write
-    When graql delete
-      """
-      match
-        $r (friend: $x, friend: $y, friend: $z) isa friendship;
-        $x isa person, has name "Alex";
-        $y isa person, has name "Bob";
-        $z isa person, has name "Carrie";
-      delete
-        $r (role: $x);
-      """
-    Then transaction commits
-
-    When session opens transaction of type: read
-    When get answers of graql match
-      """
-      match (friend: $x, friend: $y) isa friendship;
-      """
-    Then uniquely identify answer concepts
-      | x               | y               |
-      | key:name:Bob    | key:name:Carrie |
-      | key:name:Carrie | key:name:Bob    |
-
-
-  Scenario: deleting a role player from a relation using a super-role removes the player from the relation
-    Given connection close all sessions
-    Given connection open schema session for database: grakn
-    Given session opens transaction of type: write
-    Given graql define
-      """
-      define
-      special-friendship sub friendship,
-        relates special-friend as friend;
-      person plays special-friendship:special-friend;
-      """
-    Given transaction commits
-
-    Given connection close all sessions
-    Given connection open data session for database: grakn
-    Given session opens transaction of type: write
-    Given get answers of graql insert
-      """
-      insert
-      $x isa person, has name "Alex";
-      $y isa person, has name "Bob";
-      $z isa person, has name "Carrie";
-      $r (special-friend: $x, special-friend: $y, special-friend: $z) isa special-friendship,
-         has ref 0;
-      """
-    Given transaction commits
-
-    Then uniquely identify answer concepts
-      | x             | y            | z               | r         |
-      | key:name:Alex | key:name:Bob | key:name:Carrie | key:ref:0 |
-    When session opens transaction of type: write
-    When graql delete
-      """
-      match
-        $r (friend: $x, friend: $y, friend: $z) isa friendship;
-        $x isa person, has name "Alex";
-        $y isa person, has name "Bob";
-        $z isa person, has name "Carrie";
-      delete
-        $r (friend: $x);
-      """
-    Then transaction commits
-
-    When session opens transaction of type: read
-    When get answers of graql match
-      """
-      match (special-friend: $x, special-friend: $y) isa friendship;
-      """
-    Then uniquely identify answer concepts
-      | x               | y               |
-      | key:name:Bob    | key:name:Carrie |
-      | key:name:Carrie | key:name:Bob    |
-
 
   Scenario: deleting an instance removes it from all relations
     Given get answers of graql insert
@@ -688,7 +596,7 @@ Feature: Graql Delete Query
       | key:ref:0 | key:name:Alex | key:name:Bob  |
 
 
-  Scenario: when deleting role players in multiple statements, they are all deleted
+  Scenario: deleting role players in multiple statements throws
     Given get answers of graql insert
       """
       insert
@@ -703,7 +611,7 @@ Feature: Graql Delete Query
       | x             | y            | z               | r         |
       | key:name:Alex | key:name:Bob | key:name:Carrie | key:ref:0 |
     When session opens transaction of type: write
-    When graql delete
+    When graql delete; throws exception
       """
       match
         $r (friend: $x, friend: $y, friend: $z) isa friendship;
@@ -714,17 +622,6 @@ Feature: Graql Delete Query
         $r (friend: $x);
         $r (friend: $y);
       """
-    Then transaction commits
-
-    When session opens transaction of type: read
-    When get answers of graql match
-      """
-      match $r (friend: $x) isa friendship;
-      """
-    Then uniquely identify answer concepts
-      | r         | x               |
-      | key:ref:0 | key:name:Carrie |
-
 
   Scenario: when deleting more role players than actually exist, an error is thrown
     Given graql insert
@@ -803,8 +700,7 @@ Feature: Graql Delete Query
         $y isa person, has name "Bob";
         $r ($x, $y) isa friendship;
       delete
-        $r (role: $x);
-        $r (role: $y);
+        $r (friend: $x, friend: $y);
       """
     Then transaction commits
 
