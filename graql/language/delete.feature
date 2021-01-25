@@ -915,6 +915,9 @@ Feature: Graql Delete Query
 #
 #  First, we will match '$role1' = ROLE meta role. Using this answer we will remove a single $x from $r via the 'production'.
 #  Next, we will match '$role1' = WORK role, and we delete another 'production' player. This repeats again for $role='production'.
+
+# TODO: This behaviour was possible in 1.8 but is not implemented yet in 2.0, reimplement when type variables are allowed in insert and delete again
+  @ignore
   Scenario: when deleting repeated role players with a single variable role, both repetitions are removed
     Given connection close all sessions
     Given connection open schema session for database: grakn
