@@ -261,8 +261,8 @@ Feature: Graql Delete Query
       match $x isa person;
       """
     Then uniquely identify answer concepts
-      | x              |
-      | value:name:Bob |
+      | x            |
+      | key:name:Bob |
 
 
   Scenario: one delete statement can delete multiple things
@@ -1530,7 +1530,7 @@ Feature: Graql Delete Query
     Given transaction commits
 
     When session opens transaction of type: write
-    Then graql delete; throws exception
+    Then graql delete
       """
       match
         $x isa person, has name $n;
@@ -1538,8 +1538,7 @@ Feature: Graql Delete Query
       delete
         $x has name $n;
       """
-
-
+    Then transaction commits; throws exception
 
   @ignore
   # TODO: re-enable when deleting an attribute instance that is owned as a has throws @key an error
