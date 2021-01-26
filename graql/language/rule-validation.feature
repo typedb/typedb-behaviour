@@ -34,7 +34,7 @@ Feature: Graql Rule Validation
       email sub attribute, value string;
       start-date sub attribute, value datetime;
       """
-    Given the integrity is validated
+
 
 
   # Note: These tests verify only the ability to create rules, and are not concerned with their application.
@@ -51,7 +51,7 @@ Feature: Graql Rule Validation
         $p has nickname "Bob";
       };
       """
-    Given the integrity is validated
+
     When get answers of graql match
       """
       match $x sub rule;
@@ -73,7 +73,7 @@ Feature: Graql Rule Validation
         $p has email "john.smith@gmail.com";
       };
       """
-    Given the integrity is validated
+
     When get answers of graql match
       """
       match $x sub rule;
@@ -95,7 +95,7 @@ Feature: Graql Rule Validation
         $p has nickname "Bob";
       };
       """
-    Then the integrity is validated
+
 
 
   Scenario: when a rule has no 'then' clause, an error is thrown
@@ -108,7 +108,7 @@ Feature: Graql Rule Validation
         $p has name "Robert";
       };
       """
-    Then the integrity is validated
+
 
 
   Scenario: when a rule's 'when' clause is empty, an error is thrown
@@ -123,7 +123,7 @@ Feature: Graql Rule Validation
         $p has nickname "Bob";
       };
       """
-    Then the integrity is validated
+
 
 
   Scenario: when a rule's 'then' clause is empty, an error is thrown
@@ -137,7 +137,7 @@ Feature: Graql Rule Validation
       } then {
       };
       """
-    Then the integrity is validated
+
 
 
   Scenario: a rule can have negation in its 'when' clause
@@ -156,7 +156,7 @@ Feature: Graql Rule Validation
         $p has only-child true;
       };
       """
-    Given the integrity is validated
+
     When get answers of graql match
       """
       match $x sub rule;
@@ -182,7 +182,7 @@ Feature: Graql Rule Validation
         $register has has-robert false;
       };
       """
-    Then the integrity is validated
+
 
 
   Scenario: when a rule has nested negation, an error is thrown
@@ -203,7 +203,7 @@ Feature: Graql Rule Validation
         $p has nickname "Bob";
       };
       """
-    Then the integrity is validated
+
 
 
   Scenario: when a rule has multiple negations, an error is thrown
@@ -225,7 +225,7 @@ Feature: Graql Rule Validation
         $p has nickname "Bob";
       };
       """
-    Then the integrity is validated
+
 
   Scenario: a rule can have a conjunction in a negation
     Then graql define throws
@@ -246,7 +246,7 @@ Feature: Graql Rule Validation
         $p has nickname "Bob";
       };
       """
-    Then the integrity is validated
+
 
 
   Scenario: when a rule has two conclusions, an error is thrown
@@ -256,7 +256,7 @@ Feature: Graql Rule Validation
       nickname sub name;
       person owns nickname;
       """
-    Given the integrity is validated
+
     Then graql define throws
       """
       define
@@ -267,7 +267,7 @@ Feature: Graql Rule Validation
         $p has nickname "Bobby";
       };
       """
-    Then the integrity is validated
+
 
 
   Scenario: a rule can use conjunction in its 'when' clause
@@ -283,7 +283,7 @@ Feature: Graql Rule Validation
         (named-robert: $p, named-robert: $p2) isa both-named-robert;
       };
       """
-    Given the integrity is validated
+
     When get answers of graql match
       """
       match $x sub rule;
@@ -301,7 +301,7 @@ Feature: Graql Rule Validation
       nickname sub name;
       person owns nickname;
       """
-    Given the integrity is validated
+
     Then graql define throws
       """
       define
@@ -312,7 +312,7 @@ Feature: Graql Rule Validation
         $p has nickname "Fi";
       };
       """
-    Then the integrity is validated
+
 
 
   Scenario: when a rule contains an unbound variable in the 'then' clause, an error is thrown
@@ -322,7 +322,7 @@ Feature: Graql Rule Validation
       nickname sub name;
       person owns nickname;
       """
-    Given the integrity is validated
+
     Then graql define throws
       """
       define
@@ -332,7 +332,7 @@ Feature: Graql Rule Validation
         $q has nickname "Who am I?";
       };
       """
-    Then the integrity is validated
+
 
 
   Scenario: when a rule has an undefined attribute set in its 'then' clause, an error is thrown
@@ -345,7 +345,7 @@ Feature: Graql Rule Validation
         $person has age 1960;
       };
       """
-    Then the integrity is validated
+
 
 
   Scenario: when a rule attaches an attribute to a type that can't have that attribute, an error is thrown
@@ -359,7 +359,7 @@ Feature: Graql Rule Validation
         $person has age 1960;
       };
       """
-    Then the integrity is validated
+
 
 
   @ignore
@@ -371,7 +371,7 @@ Feature: Graql Rule Validation
       nickname sub name;
       person owns nickname;
       """
-    Given the integrity is validated
+
     Then graql define throws
       """
       define
@@ -381,7 +381,7 @@ Feature: Graql Rule Validation
         $p has nickname 5;
       };
       """
-    Then the integrity is validated
+
 
 
   Scenario: when a rule infers a relation whose type doesn't exist, an error is thrown
@@ -395,7 +395,7 @@ Feature: Graql Rule Validation
         (criminal: $bonnie, sidekick: $clyde) isa partners-in-crime;
       };
       """
-    Then the integrity is validated
+
 
 
   Scenario: when a rule infers a relation with an incorrect roleplayer, an error is thrown
@@ -411,7 +411,7 @@ Feature: Graql Rule Validation
         (criminal: $bonnie, sidekick: $clyde) isa partners-in-crime;
       };
       """
-    Then the integrity is validated
+
 
   @ignore
   # TODO: re-enable when rules cannot infer abstract relations
@@ -428,7 +428,7 @@ Feature: Graql Rule Validation
         (criminal: $bonnie, sidekick: $clyde) isa partners-in-crime;
       };
       """
-    Then the integrity is validated
+
 
 
   @ignore
@@ -445,7 +445,7 @@ Feature: Graql Rule Validation
         $karl has number-of-devices 0;
       };
       """
-    Then the integrity is validated
+
 
 
 
@@ -467,7 +467,7 @@ Feature: Graql Rule Validation
       $p has nickname "Bobby";
     };
     """
-    Then the integrity is validated
+
 
 
   Scenario: when defining a rule to generate new entities from existing ones, an error is thrown
@@ -478,7 +478,7 @@ Feature: Graql Rule Validation
       baseEntity sub entity;
       derivedEntity sub entity;
       """
-    Given the integrity is validated
+
     Then graql define throws
       """
       define
@@ -488,7 +488,7 @@ Feature: Graql Rule Validation
           $y isa derivedEntity;
       };
       """
-    Then the integrity is validated
+
 
 
   Scenario: when defining a rule to generate new entities from existing relations, an error is thrown
@@ -508,7 +508,7 @@ Feature: Graql Rule Validation
           relates role1,
           relates role2;
       """
-    Given the integrity is validated
+
     Then graql define throws
       """
       define
@@ -519,7 +519,7 @@ Feature: Graql Rule Validation
           $u isa derivedEntity;
       };
       """
-    Then the integrity is validated
+
 
 
   Scenario: when defining a rule to generate new relations from existing ones, an error is thrown
@@ -535,7 +535,7 @@ Feature: Graql Rule Validation
           relates role1,
           relates role2;
       """
-    Given the integrity is validated
+
     Then graql define throws
       """
       define
@@ -546,7 +546,7 @@ Feature: Graql Rule Validation
           $u (role1:$x, role2:$z) isa baseRelation;
       };
       """
-    Then the integrity is validated
+
 
 
   Scenario: when defining a rule to infer an additional type that is missing a necessary attribute, an error is thrown
@@ -555,7 +555,7 @@ Feature: Graql Rule Validation
       define
       dog sub entity;
       """
-    Given the integrity is validated
+
     Then graql define throws
       """
       define
@@ -565,7 +565,7 @@ Feature: Graql Rule Validation
         $x isa dog;
       };
       """
-    Then the integrity is validated
+
 
 
   Scenario: when a rule negates its conclusion in the 'when', causing a loop, an error is thrown
@@ -582,7 +582,7 @@ Feature: Graql Rule Validation
         (employee: $person) isa employment;
       };
       """
-    Then the integrity is validated
+
 
   Scenario: when a rule negates itself, but only in the rule body, the rule commits
     Given graql define
@@ -595,7 +595,7 @@ Feature: Graql Rule Validation
         (employee: $p) isa employment;
       };
       """
-    Then the integrity is validated
+
 
     Scenario: when a rule negates itself in the rule body, the rule commits even if that cycle involves a then clause in another rule
       Given graql define
@@ -616,7 +616,7 @@ Feature: Graql Rule Validation
         (employee: $p) isa employment;
       };
       """
-      Then the integrity is validated
+
 
     Scenario: When multiple rules cause a loop with a negation, an error is thrown
       Then graql define throws
@@ -640,7 +640,7 @@ Feature: Graql Rule Validation
         (employee: $person) isa employment;
       };
       """
-      Then the integrity is validated
+
 
     Scenario: rules with cyclic inferences are allowed as long as there is no negation
       When graql define
@@ -662,7 +662,7 @@ Feature: Graql Rule Validation
         (employee: $p) isa employment;
       };
       """
-      Then the integrity is validated
+
 
 
 
@@ -681,7 +681,7 @@ Feature: Graql Rule Validation
     };
 
     """
-    Then the integrity is validated
+
 
 
   Scenario: when a rule has a down-cast in a rule conclusion, an error is thrown
@@ -700,7 +700,7 @@ Feature: Graql Rule Validation
         $p isa man;
       };
       """
-    Then the integrity is validated
+
 
 
     Scenario: when a rule has a side-cast in a rule, an error is thrown
@@ -724,7 +724,7 @@ Feature: Graql Rule Validation
         $p isa boy;
       };
       """
-      Then the integrity is validated
+
 
 
   Scenario: when a rule adds a role to an existing relation, an error is thrown
@@ -741,7 +741,7 @@ Feature: Graql Rule Validation
         $r (employee: $p) isa employment;
       };
       """
-    Then the integrity is validated
+
 
   Scenario: if a rule's body uses a type that doesn't exist, an error is thrown
     When graql define throws
@@ -755,7 +755,7 @@ Feature: Graql Rule Validation
         (employee: $m) isa employment;
       };
       """
-    Then the integrity is validated
+
 
   Scenario: if a rule that uses a missing type within a negation, an error is thrown
     When graql define throws
@@ -770,7 +770,7 @@ Feature: Graql Rule Validation
         (employee: $p) isa employment;
       };
       """
-    Then the integrity is validated
+
 
   Scenario: a rule may infer a named variable for an attribute if the attribute type is left out
     When graql define
@@ -786,7 +786,7 @@ Feature: Graql Rule Validation
         $p has $bob;
       };
       """
-    Then the integrity is validated
+
 
   Scenario: a rule may infer an attribute type when the value is concrete
     When graql define
@@ -801,7 +801,7 @@ Feature: Graql Rule Validation
         $p has nickname 'bob';
       };
     """
-    Then the integrity is validated
+
 
   Scenario: if a rule infers both an attribute type and a named variable, an error is thrown
     When graql define throws
@@ -817,7 +817,7 @@ Feature: Graql Rule Validation
         $p has nickname $b;
       };
     """
-    Then the integrity is validated
+
 
   Scenario: a rule may have a clause asserting both an attribute type and a named variable within its when clause
     When graql define
@@ -840,5 +840,5 @@ Feature: Graql Rule Validation
       (relative: $p, relative: $q) isa family-relation;
     };
     """
-    Then the integrity is validated
+
 

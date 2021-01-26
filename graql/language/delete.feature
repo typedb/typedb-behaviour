@@ -24,7 +24,7 @@ Feature: Graql Delete Query
     Given connection create database: grakn
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
-    Given the integrity is validated
+
     Given graql define
       """
       define
@@ -38,7 +38,7 @@ Feature: Graql Delete Query
       ref sub attribute, value long;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -59,7 +59,7 @@ Feature: Graql Delete Query
       $n "John" isa name;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given uniquely identify answer concepts
       | x             | y            | r         | n               |
       | key:name:Alex | key:name:Bob | key:ref:0 | value:name:John |
@@ -74,7 +74,7 @@ Feature: Graql Delete Query
         $x isa thing; $r isa thing; $n isa thing;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -109,7 +109,7 @@ Feature: Graql Delete Query
       $n "John" isa name;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Then uniquely identify answer concepts
       | x             | y            | r         | n               |
       | key:name:Alex | key:name:Bob | key:ref:0 | value:name:John |
@@ -122,7 +122,7 @@ Feature: Graql Delete Query
         $r isa thing;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -144,7 +144,7 @@ Feature: Graql Delete Query
       $n "John" isa name;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Then uniquely identify answer concepts
       | x             | y            | r         | n               |
       | key:name:Alex | key:name:Bob | key:ref:0 | value:name:John |
@@ -157,7 +157,7 @@ Feature: Graql Delete Query
         $r isa entity;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -179,7 +179,7 @@ Feature: Graql Delete Query
       $n "John" isa name;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Then uniquely identify answer concepts
       | x             | y            | r         | n               |
       | key:name:Alex | key:name:Bob | ket:ref:0 | value:name:John |
@@ -192,7 +192,7 @@ Feature: Graql Delete Query
         $r isa relation;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -208,7 +208,7 @@ Feature: Graql Delete Query
       $n "John" isa name;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Then uniquely identify answer concepts
       | n               |
       | value:name:John |
@@ -221,7 +221,7 @@ Feature: Graql Delete Query
         $r isa attribute;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -241,7 +241,7 @@ Feature: Graql Delete Query
       $n "John" isa name;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Then uniquely identify answer concepts
       | x             | y            | r         | n               |
       | key:name:Alex | key:name:Bob | key:ref:0 | value:name:John |
@@ -254,7 +254,7 @@ Feature: Graql Delete Query
         $r isa person;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -273,7 +273,7 @@ Feature: Graql Delete Query
       $b isa person, has name "Barbara";
       """
     Given transaction commits
-    Given the integrity is validated
+
     Then uniquely identify answer concepts
       | a              | b                |
       | key:name:Alice | key:name:Barbara |
@@ -286,7 +286,7 @@ Feature: Graql Delete Query
       $p isa person;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -303,7 +303,7 @@ Feature: Graql Delete Query
       $n "John" isa name;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: write
     Then graql delete; throws exception
       """
@@ -313,7 +313,7 @@ Feature: Graql Delete Query
       delete
         $r isa person;
       """
-    Then the integrity is validated
+
 
 
   Scenario: deleting an instance using a non-existing type label throws
@@ -323,7 +323,7 @@ Feature: Graql Delete Query
       $n "John" isa name;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: write
     Then graql delete; throws exception
       """
@@ -332,7 +332,7 @@ Feature: Graql Delete Query
       delete
         $r isa heffalump;
       """
-    Then the integrity is validated
+
 
 
   Scenario: deleting a relation instance using a too-specific (downcasting) type throws
@@ -345,7 +345,7 @@ Feature: Graql Delete Query
       special-friendship sub friendship;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -357,7 +357,7 @@ Feature: Graql Delete Query
       $r (friend: $x, friend: $y) isa friendship, has ref 0;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: write
     Then graql delete; throws exception
       """
@@ -366,7 +366,7 @@ Feature: Graql Delete Query
       delete
         $r isa special-friendship;
       """
-    Then the integrity is validated
+
 
 
   ###############
@@ -384,7 +384,7 @@ Feature: Graql Delete Query
          has ref 0;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Then uniquely identify answer concepts
       | x             | y            | z               | r         |
       | key:name:Alex | key:name:Bob | key:name:Carrie | key:ref:0 |
@@ -400,7 +400,7 @@ Feature: Graql Delete Query
         $r (friend: $x);
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: write
     When get answers of graql match
       """
@@ -423,7 +423,7 @@ Feature: Graql Delete Query
          has ref 0;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Then uniquely identify answer concepts
       | x             | y            | z               | r         |
       | key:name:Alex | key:name:Bob | key:name:Carrie | key:ref:0 |
@@ -439,7 +439,7 @@ Feature: Graql Delete Query
         $r (role: $x);
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -463,7 +463,7 @@ Feature: Graql Delete Query
       person plays special-friendship:special-friend;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -477,7 +477,7 @@ Feature: Graql Delete Query
          has ref 0;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Then uniquely identify answer concepts
       | x             | y            | z               | r         |
       | key:name:Alex | key:name:Bob | key:name:Carrie | key:ref:0 |
@@ -493,7 +493,7 @@ Feature: Graql Delete Query
         $r (friend: $x);
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -516,11 +516,11 @@ Feature: Graql Delete Query
       $r2 (friend: $x, friend: $z) isa friendship, has ref 2;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Then uniquely identify answer concepts
       | x             | y            | z               | r         | r2        |
       | key:name:Alex | key:name:Bob | key:name:Carrie | key:ref:1 | key:ref:2 |
-    Then the integrity is validated
+
     When session opens transaction of type: write
     When graql delete
       """
@@ -529,9 +529,9 @@ Feature: Graql Delete Query
       delete
         $x isa person;
       """
-    Then the integrity is validated
+
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -560,7 +560,7 @@ Feature: Graql Delete Query
       $r (friend: $x, friend: $x, friend: $y) isa friendship, has ref 0;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Then uniquely identify answer concepts
       | x             | y            | r         |
       | key:name:Alex | key:name:Bob | key:ref:0 |
@@ -573,7 +573,7 @@ Feature: Graql Delete Query
         $r (friend: $x, friend: $x);
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -593,7 +593,7 @@ Feature: Graql Delete Query
       $r (friend: $x, friend: $x, friend: $x, friend: $y) isa friendship, has ref 0;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Then uniquely identify answer concepts
       | x             | y            | r         |
       | key:name:Alex | key:name:Bob | key:ref:0 |
@@ -606,7 +606,7 @@ Feature: Graql Delete Query
         $r (friend: $x, friend: $x);
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -627,7 +627,7 @@ Feature: Graql Delete Query
       $r (friend: $x, friend: $x, friend: $x, friend: $y) isa friendship, has ref 0;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Then uniquely identify answer concepts
       | x             | y            | r         |
       | key:name:Alex | key:name:Bob | key:ref:0 |
@@ -642,7 +642,7 @@ Feature: Graql Delete Query
         $r (friend: $x);
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -663,7 +663,7 @@ Feature: Graql Delete Query
       $r (friend: $x, friend: $x, friend: $y) isa friendship, has ref 0;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Then uniquely identify answer concepts
       | x             | y            | r         |
       | key:name:Alex | key:name:Bob | key:ref:0 |
@@ -677,7 +677,7 @@ Feature: Graql Delete Query
         $r (friend: $x);
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -699,7 +699,7 @@ Feature: Graql Delete Query
       $r (friend: $x, friend: $y, friend: $z) isa friendship, has ref 0;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Then uniquely identify answer concepts
       | x             | y            | z               | r         |
       | key:name:Alex | key:name:Bob | key:name:Carrie | key:ref:0 |
@@ -716,7 +716,7 @@ Feature: Graql Delete Query
         $r (friend: $y);
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -736,7 +736,7 @@ Feature: Graql Delete Query
       $r (friend: $x, friend: $y) isa friendship, has ref 0;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     Then graql delete; throws exception
       """
@@ -747,7 +747,7 @@ Feature: Graql Delete Query
       delete
         $r (friend: $x, friend: $x);
       """
-    Then the integrity is validated
+
 
 
   Scenario: when all instances that play roles in a relation are deleted, the relation instance gets cleaned up
@@ -759,7 +759,7 @@ Feature: Graql Delete Query
       $r (friend: $x, friend: $y) isa friendship, has ref 0;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Then uniquely identify answer concepts
       | x             | y            | r         |
       | key:name:Alex | key:name:Bob | key:ref:0 |
@@ -774,7 +774,7 @@ Feature: Graql Delete Query
         $y isa person;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -792,7 +792,7 @@ Feature: Graql Delete Query
       $r (friend: $x, friend: $y) isa friendship, has ref 0;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Then uniquely identify answer concepts
       | x             | y            | r         |
       | key:name:Alex | key:name:Bob | key:ref:0 |
@@ -808,7 +808,7 @@ Feature: Graql Delete Query
         $r (role: $y);
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -828,7 +828,7 @@ Feature: Graql Delete Query
         relates special-friend as friend;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -840,7 +840,7 @@ Feature: Graql Delete Query
       $r (friend: $x, friend: $y) isa friendship, has ref 0;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: write
     Then graql delete; throws exception
       """
@@ -851,7 +851,7 @@ Feature: Graql Delete Query
       delete
         $r (special-friend: $x);
       """
-    Then the integrity is validated
+
 
 
 #  Even when a $role variable matches multiple roles (will always match 'role' unless constrained)
@@ -877,7 +877,7 @@ Feature: Graql Delete Query
       person plays ship-crew:captain, plays ship-crew:navigator, plays ship-crew:chef;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -890,7 +890,7 @@ Feature: Graql Delete Query
       $r (captain: $x, navigator: $y, chef: $z) isa ship-crew;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: write
     Then graql delete; throws exception
       """
@@ -899,7 +899,7 @@ Feature: Graql Delete Query
       delete
         $r ($role1: $x);
       """
-    Then the integrity is validated
+
 
 
 #  Even when a $role variable matches multiple roles (will always match 'role' unless constrained)
@@ -926,7 +926,7 @@ Feature: Graql Delete Query
       person plays ship-crew:captain, plays ship-crew:navigator, plays ship-crew:chef;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -938,7 +938,7 @@ Feature: Graql Delete Query
       $r (captain: $x, chef: $y, chef: $y) isa ship-crew, has ref 0;
       """
     Given transaction commits
-    Given the integrity is validated
+
     When session opens transaction of type: write
     When get answers of graql match
       """
@@ -955,7 +955,7 @@ Feature: Graql Delete Query
         $r ($role1: $x);
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -979,7 +979,7 @@ Feature: Graql Delete Query
       person owns age;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -989,7 +989,7 @@ Feature: Graql Delete Query
       $x isa person, has name "Anna", has age 18;
       """
     Given transaction commits
-    Given the integrity is validated
+
     When session opens transaction of type: write
     When get answers of graql match
       """
@@ -1006,7 +1006,7 @@ Feature: Graql Delete Query
         $x isa attribute;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1026,7 +1026,7 @@ Feature: Graql Delete Query
       person sub entity, owns lastname;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -1041,7 +1041,7 @@ Feature: Graql Delete Query
         has name "John";
       """
     Given transaction commits
-    Given the integrity is validated
+
     Then uniquely identify answer concepts
       | x             | y             |
       | key:name:Alex | key:name:John |
@@ -1055,7 +1055,7 @@ Feature: Graql Delete Query
         $x has lastname $n;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1093,7 +1093,7 @@ Feature: Graql Delete Query
       person owns postcode;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -1103,7 +1103,7 @@ Feature: Graql Delete Query
       $x isa person, has name "Sherlock", has postcode "W1U8ED";
       """
     Given transaction commits
-    Given the integrity is validated
+
     Then uniquely identify answer concepts
       | x                 |
       | key:name:Sherlock |
@@ -1125,7 +1125,7 @@ Feature: Graql Delete Query
         $x has attribute $a;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1148,7 +1148,7 @@ Feature: Graql Delete Query
       person owns postcode;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -1158,7 +1158,7 @@ Feature: Graql Delete Query
       $x isa person, has name "Sherlock", has postcode "W1U8ED";
       """
     Given transaction commits
-    Given the integrity is validated
+
     When session opens transaction of type: write
     When get answers of graql match
       """
@@ -1175,7 +1175,7 @@ Feature: Graql Delete Query
         $x has address $a;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1196,7 +1196,7 @@ Feature: Graql Delete Query
       person owns postcode;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -1206,7 +1206,7 @@ Feature: Graql Delete Query
       $x isa person, has name "Sherlock", has postcode "W1U8ED";
       """
     Given transaction commits
-    Given the integrity is validated
+
     When session opens transaction of type: write
     Then graql delete; throws exception
       """
@@ -1215,7 +1215,7 @@ Feature: Graql Delete Query
       delete
         $x has thing $a;
       """
-    Then the integrity is validated
+
 
 
   Scenario: an attribute can be specified by direct type when deleting an ownership of it
@@ -1225,7 +1225,7 @@ Feature: Graql Delete Query
       $x isa person, has name "Watson";
       """
     Given transaction commits
-    Given the integrity is validated
+
     Then uniquely identify answer concepts
       | x               |
       | key:name:Watson |
@@ -1238,7 +1238,7 @@ Feature: Graql Delete Query
         $x isa! person;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1254,7 +1254,7 @@ Feature: Graql Delete Query
       $x isa person, has name "Watson";
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: write
     Then graql delete; throws exception
       """
@@ -1263,7 +1263,7 @@ Feature: Graql Delete Query
       delete
         $x isa! entity;
       """
-    Then the integrity is validated
+
 
 
   Scenario: deleting the owner of an attribute also deletes the attribute ownership
@@ -1277,7 +1277,7 @@ Feature: Graql Delete Query
       friendship owns duration;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -1289,7 +1289,7 @@ Feature: Graql Delete Query
       $r (friend: $x, friend: $y) isa friendship, has ref 0, has duration 1000;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: write
     When get answers of graql match
       """
@@ -1306,7 +1306,7 @@ Feature: Graql Delete Query
         $r isa relation;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1326,7 +1326,7 @@ Feature: Graql Delete Query
       friendship owns duration;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -1337,7 +1337,7 @@ Feature: Graql Delete Query
       $r (friend: $x) isa friendship, has ref 0, has duration 1000;
       """
     Given transaction commits
-    Given the integrity is validated
+
     When session opens transaction of type: write
     When get answers of graql match
       """
@@ -1354,7 +1354,7 @@ Feature: Graql Delete Query
         $r (friend: $x);
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1376,7 +1376,7 @@ Feature: Graql Delete Query
       delete
         $x has diameter $val;
       """
-    Then the integrity is validated
+
 
 
   ####################
@@ -1394,7 +1394,7 @@ Feature: Graql Delete Query
       person sub entity, owns lastname;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -1412,7 +1412,7 @@ Feature: Graql Delete Query
       $reflexive (friend: $x, friend: $x) isa friendship, has ref 3;
       """
     Given transaction commits
-    Given the integrity is validated
+
     When session opens transaction of type: write
     When graql delete
       """
@@ -1427,7 +1427,7 @@ Feature: Graql Delete Query
         $f1 isa friendship;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1466,7 +1466,7 @@ Feature: Graql Delete Query
       person sub entity, owns lastname;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -1484,7 +1484,7 @@ Feature: Graql Delete Query
       $reflexive (friend: $x, friend: $x) isa friendship, has ref 3;
       """
     Given transaction commits
-    Given the integrity is validated
+
     When session opens transaction of type: write
     When graql delete
       """
@@ -1500,7 +1500,7 @@ Feature: Graql Delete Query
         $f1 (friend: $x, friend: $y) isa friendship, has ref $r2;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1518,7 +1518,7 @@ Feature: Graql Delete Query
       """
       match $x isa person; delete $n isa name;
       """
-    Then the integrity is validated
+
 
 
   Scenario: deleting a has ownership @key throws on commit
@@ -1528,7 +1528,7 @@ Feature: Graql Delete Query
       $x isa person, has name "Alex";
       """
     Given transaction commits
-    Given the integrity is validated
+
     When session opens transaction of type: write
     Then graql delete; throws exception
       """
@@ -1538,7 +1538,7 @@ Feature: Graql Delete Query
       delete
         $x has name $n;
       """
-    Then the integrity is validated
+
 
 
   @ignore
@@ -1550,7 +1550,7 @@ Feature: Graql Delete Query
       $x isa person, has name "Tatyana";
       """
     Given transaction commits
-    Given the integrity is validated
+
     When session opens transaction of type: write
     When get answers of graql match
       """
@@ -1566,7 +1566,7 @@ Feature: Graql Delete Query
       delete
         $x isa attribute;
       """
-    Then the integrity is validated
+
 
 
   Scenario: deleting a type throws an error
@@ -1577,4 +1577,4 @@ Feature: Graql Delete Query
       delete
         $x isa thing;
       """
-    Then the integrity is validated
+
