@@ -1204,7 +1204,7 @@ Feature: Graql Delete Query
       """
     Then uniquely identify answer concepts
       | f           | x             |
-      | key:ref:1   | key:name:Alex |
+      | key:ref:2   | key:name:Alex |
       | key:ref:2   | key:name:John |
       | key:ref:3   | key:name:Alex |
     When get answers of graql match
