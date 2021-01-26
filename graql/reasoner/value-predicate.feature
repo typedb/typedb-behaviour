@@ -24,8 +24,8 @@ Feature: Value Predicate Resolution
     Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised database is named: materialised
-    Given reasoned database is named: reasoned
+    Given materialised session has database name: materialised
+    Given reasoned session has database name: reasoned
     Given for each session, graql define
       """
       define
@@ -83,7 +83,6 @@ Feature: Value Predicate Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -113,7 +112,6 @@ Feature: Value Predicate Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -153,7 +151,6 @@ Feature: Value Predicate Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -195,7 +192,6 @@ Feature: Value Predicate Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -246,7 +242,6 @@ Feature: Value Predicate Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -290,7 +285,6 @@ Feature: Value Predicate Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -337,7 +331,6 @@ Feature: Value Predicate Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -382,7 +375,6 @@ Feature: Value Predicate Resolution
       """
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -438,7 +430,6 @@ Feature: Value Predicate Resolution
       """
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -497,7 +488,6 @@ Feature: Value Predicate Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Given for graql query
       """
@@ -548,7 +538,6 @@ Feature: Value Predicate Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Given for graql query
       """
@@ -600,7 +589,6 @@ Feature: Value Predicate Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -646,7 +634,6 @@ Feature: Value Predicate Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -728,7 +715,6 @@ Feature: Value Predicate Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -826,7 +812,6 @@ Feature: Value Predicate Resolution
       """
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """

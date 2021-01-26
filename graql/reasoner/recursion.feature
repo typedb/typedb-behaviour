@@ -27,8 +27,8 @@ Feature: Recursion Resolution
     Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised database is named: materialised
-    Given reasoned database is named: reasoned
+    Given materialised session has database name: materialised
+    Given reasoned session has database name: reasoned
     Given for each session, graql define
       """
       define
@@ -103,7 +103,6 @@ Feature: Recursion Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -176,7 +175,6 @@ Feature: Recursion Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -242,7 +240,6 @@ Feature: Recursion Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -290,7 +287,6 @@ Feature: Recursion Resolution
       """
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -390,7 +386,6 @@ Feature: Recursion Resolution
       """
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -491,7 +486,6 @@ Feature: Recursion Resolution
       """
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -503,7 +497,6 @@ Feature: Recursion Resolution
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 3
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then answer set is equivalent for graql query
       """
@@ -571,7 +564,6 @@ Feature: Recursion Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -584,7 +576,6 @@ Feature: Recursion Resolution
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 3
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then answer set is equivalent for graql query
       """
@@ -603,7 +594,6 @@ Feature: Recursion Resolution
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 4
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then answer set is equivalent for graql query
       """
@@ -619,7 +609,6 @@ Feature: Recursion Resolution
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 10
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then answer set is equivalent for graql query
       """
@@ -640,7 +629,6 @@ Feature: Recursion Resolution
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 20
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then answer set is equivalent for graql query
       """
@@ -722,7 +710,6 @@ Feature: Recursion Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -735,7 +722,6 @@ Feature: Recursion Resolution
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then answer set is equivalent for graql query
       """
@@ -761,7 +747,6 @@ Feature: Recursion Resolution
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 3
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then answer set is equivalent for graql query
       """
@@ -844,7 +829,6 @@ Feature: Recursion Resolution
       """
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -856,7 +840,6 @@ Feature: Recursion Resolution
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then answer set is equivalent for graql query
       """
@@ -925,7 +908,6 @@ Feature: Recursion Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -937,7 +919,6 @@ Feature: Recursion Resolution
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then answer set is equivalent for graql query
       """
@@ -1024,7 +1005,6 @@ Feature: Recursion Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -1033,7 +1013,6 @@ Feature: Recursion Resolution
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 7
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then answer set is equivalent for graql query
       """
@@ -1105,7 +1084,6 @@ Feature: Recursion Resolution
       """
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -1117,7 +1095,6 @@ Feature: Recursion Resolution
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 4
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then answer set is equivalent for graql query
       """
@@ -1188,7 +1165,6 @@ Feature: Recursion Resolution
       """
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -1200,7 +1176,6 @@ Feature: Recursion Resolution
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 3
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then answer set is equivalent for graql query
       """
@@ -1298,7 +1273,6 @@ Feature: Recursion Resolution
       """
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -1310,7 +1284,6 @@ Feature: Recursion Resolution
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 3
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then answer set is equivalent for graql query
       """
@@ -1326,7 +1299,6 @@ Feature: Recursion Resolution
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 11
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then answer set is equivalent for graql query
       """
@@ -1499,7 +1471,6 @@ Feature: Recursion Resolution
       """
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -1511,7 +1482,6 @@ Feature: Recursion Resolution
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 5
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then answer set is equivalent for graql query
       """
@@ -1707,7 +1677,6 @@ Feature: Recursion Resolution
       """
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -1719,7 +1688,6 @@ Feature: Recursion Resolution
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 60
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then answer set is equivalent for graql query
       """
@@ -1863,7 +1831,6 @@ Feature: Recursion Resolution
       """
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -1875,7 +1842,6 @@ Feature: Recursion Resolution
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 25
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then answer set is equivalent for graql query
       """

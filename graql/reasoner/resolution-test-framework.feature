@@ -24,8 +24,8 @@ Feature: Resolution Test Framework
     Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised database is named: materialised
-    Given reasoned database is named: reasoned
+    Given materialised session has database name: materialised
+    Given reasoned session has database name: reasoned
 
 
   Scenario: basic rule
@@ -51,7 +51,6 @@ Feature: Resolution Test Framework
       """
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -96,7 +95,6 @@ Feature: Resolution Test Framework
 
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -147,7 +145,6 @@ Feature: Resolution Test Framework
 
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -207,7 +204,6 @@ Feature: Resolution Test Framework
 
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -260,7 +256,6 @@ Feature: Resolution Test Framework
 
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -303,7 +298,6 @@ Feature: Resolution Test Framework
 
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -350,7 +344,6 @@ Feature: Resolution Test Framework
 
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -393,7 +386,6 @@ Feature: Resolution Test Framework
 
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """

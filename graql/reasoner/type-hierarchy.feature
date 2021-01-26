@@ -24,8 +24,8 @@ Feature: Type Hierarchy Resolution
     Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised database is named: materialised
-    Given reasoned database is named: reasoned
+    Given materialised session has database name: materialised
+    Given reasoned session has database name: reasoned
 
 
   Scenario: subtypes trigger rules based on their parents; parent types don't trigger rules based on their children
@@ -75,7 +75,6 @@ Feature: Type Hierarchy Resolution
       (performer:$y, writer:$v) isa performance;  # person - child   -> doesn't satisfy rule
       """
         Given transaction commits
-    Given the integrity is validated
     Given session opens transaction of type:read
 
     Then for graql query
@@ -176,7 +175,6 @@ Feature: Type Hierarchy Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     # Matching a sibling of the actual role
     Then for graql query
@@ -233,7 +231,6 @@ Feature: Type Hierarchy Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     # sub-roles, super-relation
     Then for graql query
@@ -285,7 +282,6 @@ Feature: Type Hierarchy Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     # super-roles, sub-relation
     Then for graql query
@@ -337,7 +333,6 @@ Feature: Type Hierarchy Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     # super-roles, super-relation
     Then for graql query
@@ -405,7 +400,6 @@ Feature: Type Hierarchy Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -510,7 +504,6 @@ Feature: Type Hierarchy Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """

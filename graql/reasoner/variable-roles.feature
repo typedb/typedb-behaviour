@@ -25,8 +25,8 @@ Feature: Variable Role Resolution
     Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised database is named: materialised
-    Given reasoned database is named: reasoned
+    Given materialised session has database name: materialised
+    Given reasoned session has database name: reasoned
     Given for each session, graql define
       """
       define
@@ -152,7 +152,6 @@ Feature: Variable Role Resolution
   Scenario: when querying a binary relation, introducing a variable role doubles the answer size
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Given for graql query
       """
@@ -173,7 +172,6 @@ Feature: Variable Role Resolution
   Scenario: converting a fixed role to a variable role bound with 'type' does not modify the answer size
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Given for graql query
       """
@@ -197,7 +195,6 @@ Feature: Variable Role Resolution
   Scenario: when querying a binary relation, introducing a meta 'role' and a variable role triples the answer size
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Given for graql query
       """
@@ -220,7 +217,6 @@ Feature: Variable Role Resolution
   Scenario: converting a fixed role to a variable bound with 'type role' (?)
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Given for graql query
       """
@@ -246,7 +242,6 @@ Feature: Variable Role Resolution
   Scenario: converting a fixed role to a variable bound with 'sub role' (?)
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Given for graql query
       """
@@ -272,7 +267,6 @@ Feature: Variable Role Resolution
   Scenario: when all other role variables are bound, introducing a meta 'role' doesn't affect the answer size
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -299,7 +293,6 @@ Feature: Variable Role Resolution
   Scenario: when querying a binary relation, introducing two variable roles multiplies the answer size by 7
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Given for graql query
       """
@@ -373,7 +366,6 @@ Feature: Variable Role Resolution
   Scenario: variable roles are correctly mapped to answers for a ternary relation with 3 possible roleplayers
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -417,7 +409,6 @@ Feature: Variable Role Resolution
   Scenario: variable roles are correctly mapped to answers for a quaternary relation with 3 possible roleplayers
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -460,7 +451,6 @@ Feature: Variable Role Resolution
   Scenario: variable roles are correctly mapped to answers for a quaternary relation with 2 possible roleplayers
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """

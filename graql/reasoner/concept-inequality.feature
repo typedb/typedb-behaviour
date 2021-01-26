@@ -25,8 +25,8 @@ Feature: Concept Inequality Resolution
     Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised database is named: materialised
-    Given reasoned database is named: reasoned
+    Given materialised session has database name: materialised
+    Given reasoned session has database name: reasoned
     Given for each session, graql define
       """
       define
@@ -113,7 +113,6 @@ Feature: Concept Inequality Resolution
       """
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -122,7 +121,6 @@ Feature: Concept Inequality Resolution
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then answer set is equivalent for graql query
       """
@@ -134,7 +132,6 @@ Feature: Concept Inequality Resolution
   Scenario: inferred binary relations can be filtered by concept inequality of their roleplayers
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Given for graql query
       """
@@ -173,7 +170,6 @@ Feature: Concept Inequality Resolution
   Scenario: inferred binary relations can be filtered by inequality to a specific concept
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -211,7 +207,6 @@ Feature: Concept Inequality Resolution
 
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -257,7 +252,6 @@ Feature: Concept Inequality Resolution
 
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -302,7 +296,6 @@ Feature: Concept Inequality Resolution
 
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Given for graql query
       """
@@ -365,7 +358,6 @@ Feature: Concept Inequality Resolution
 
 #    When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Given for graql query
       """
@@ -443,7 +435,6 @@ Feature: Concept Inequality Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -512,7 +503,6 @@ Feature: Concept Inequality Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given the integrity is validated
     Given session opens transaction of type: read
     Then for graql query
       """

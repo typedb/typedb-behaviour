@@ -23,8 +23,6 @@ Feature: Attribute Attachment Resolution
     Given connection does not have any database
     Given connection create database: reasoned
     Given connection create database: materialised
-    Given reasoned database is named: reasoned
-    Given materialised database is named: materialised
     Given connection open schema sessions for databases:
       | reasoned     |
       | materialised |
@@ -59,8 +57,7 @@ Feature: Attribute Attachment Resolution
       is-old sub attribute, value boolean;
       unrelated-attribute sub attribute, value string;
       """
-    Given transaction commits
-    Given the integrity is validated
+    Given for each session, transaction commits
     Given session opens transaction of type: write
 
 
@@ -76,18 +73,24 @@ Feature: Attribute Attachment Resolution
         $y has $r1;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given reasoned session has database name: reasoned
+    Given materialised session has database name: materialised
+    Given session opens transaction of type: write
     Given for each session, graql insert
       """
       insert
       $geX isa person, has string-attribute "banana";
       $geY isa person;
       """
-    Given transaction commits
-    Given the integrity is validated
+    Given for each session, transaction commits
     Given session opens transaction of type: write
 #    When materialised database is completed
-    Given the transaction commits
-    Given the integrity is validated
+    Given for each session, transaction commits
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -95,8 +98,7 @@ Feature: Attribute Attachment Resolution
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
-    Given the transaction commits
-    Given the integrity is validated
+    Given for each session, transaction commits
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -126,19 +128,25 @@ Feature: Attribute Attachment Resolution
         $z has $y;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given reasoned session has database name: reasoned
+    Given materialised session has database name: materialised
+    Given session opens transaction of type: write
     Given for each session, graql insert
       """
       insert
       $geX isa person, has string-attribute "banana";
       $geY isa person;
-      (leader:$geX, team-member:$geX) isa team;
+      (leader:$geX, member:$geX) isa team;
       """
-    Given transaction commits
-    Given the integrity is validated
+    Given for each session, transaction commits
     Given session opens transaction of type: write
 #    When materialised database is completed
-    Given the transaction commits
-    Given the integrity is validated
+    Given for each session, transaction commits
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -167,6 +175,14 @@ Feature: Attribute Attachment Resolution
         $y has retailer 'Ocado';
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given reasoned session has database name: reasoned
+    Given materialised session has database name: materialised
+    Given session opens transaction of type: write
     Given for each session, graql insert
       """
       insert
@@ -174,12 +190,10 @@ Feature: Attribute Attachment Resolution
       $aeY isa soft-drink;
       $r "Ocado" isa retailer;
       """
-    Given transaction commits
-    Given the integrity is validated
+    Given for each session, transaction commits
     Given session opens transaction of type: write
 #    When materialised database is completed
-    Given the transaction commits
-    Given the integrity is validated
+    Given for each session, transaction commits
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -187,7 +201,7 @@ Feature: Attribute Attachment Resolution
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
-    Given the transaction commits
+    Given for each session, transaction commits
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -195,7 +209,7 @@ Feature: Attribute Attachment Resolution
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 4
-    Given the transaction commits
+    Given for each session, transaction commits
     Given session opens transaction of type: read
     Then for graql query
       """
@@ -218,6 +232,14 @@ Feature: Attribute Attachment Resolution
         $y has $x;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given reasoned session has database name: reasoned
+    Given materialised session has database name: materialised
+    Given session opens transaction of type: write
     Given for each session, graql insert
       """
       insert
@@ -225,12 +247,10 @@ Feature: Attribute Attachment Resolution
       $aeY isa soft-drink;
       $r "Ocado" isa retailer;
       """
-    Given transaction commits
-    Given the integrity is validated
+    Given for each session, transaction commits
     Given session opens transaction of type: write
 #    When materialised database is completed
-    Given the transaction commits
-    Given the integrity is validated
+    Given for each session, transaction commits
     Given session opens transaction of type: read
     Then for graql query
       """
