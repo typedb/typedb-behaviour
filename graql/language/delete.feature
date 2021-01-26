@@ -1191,7 +1191,7 @@ Feature: Graql Delete Query
         $refl (friend: $x, friend: $x) isa friendship, has ref 3;
         $f1 (friend: $x, friend: $y) isa friendship, has ref 1;
       delete
-        $x has lastname $n;
+        $x has $n;
         $refl (friend: $x);
         $f1 isa friendship;
       """
@@ -1263,10 +1263,10 @@ Feature: Graql Delete Query
         $refl (friend: $x, friend: $x) isa friendship, has ref $r1; $r1 3;
         $f1 (friend: $x, friend: $y) isa friendship, has ref $r2; $r2 1;
       delete
-        $x isa person, has lastname $n;
-        $y isa person, has lastname $n;
-        $refl (friend: $x, friend: $x) isa friendship, has ref $r1;
-        $f1 (friend: $x, friend: $y) isa friendship, has ref $r2;
+        $x isa person, has $n;
+        $y isa person, has $n;
+        $refl (friend: $x, friend: $x) isa friendship, has $r1;
+        $f1 (friend: $x, friend: $y) isa friendship, has $r2;
       """
     Then transaction commits
 
