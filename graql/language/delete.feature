@@ -1154,6 +1154,7 @@ Feature: Graql Delete Query
   # COMPLEX PATTERNS #
   ####################
 
+  @ignore # TODO: enable once query planning has been optimised
   Scenario: deletion of a complex pattern
     Given connection close all sessions
     Given connection open schema session for database: grakn
