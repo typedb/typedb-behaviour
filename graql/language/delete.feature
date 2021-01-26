@@ -633,7 +633,7 @@ Feature: Graql Delete Query
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given session opens transaction of type: write
     Then graql delete; throws exception
       """
       match
