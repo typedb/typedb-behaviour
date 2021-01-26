@@ -913,7 +913,7 @@ Feature: Graql Delete Query
     Then answer size is: 0
 
 
-  Scenario: an attribute ownership can be deleted using the attribute's type label
+  Scenario: attempting to delete an attribute ownership with a derived isa throws
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -944,7 +944,7 @@ Feature: Graql Delete Query
       | x             | y             |
       | key:name:Alex | key:name:John |
     When session opens transaction of type: write
-    When graql delete
+    When graql delete; throws exception
       """
       match
         $x isa person, has lastname $n, has name "Alex";
@@ -952,134 +952,6 @@ Feature: Graql Delete Query
       delete
         $x has lastname $n;
       """
-    Then transaction commits
-
-    When session opens transaction of type: read
-    When get answers of graql match
-      """
-      match $x isa person;
-      """
-    Then uniquely identify answer concepts
-      | x             |
-      | key:name:Alex |
-      | key:name:John |
-    When get answers of graql match
-      """
-      match $n isa lastname;
-      """
-    Then uniquely identify answer concepts
-      | n                    |
-      | value:lastname:Smith |
-    When get answers of graql match
-      """
-      match $x isa person, has lastname $n;
-      """
-    Then uniquely identify answer concepts
-      | x             | n                    |
-      | key:name:John | value:lastname:Smith |
-
-
-  Scenario: an attribute ownership can be deleted using the 'attribute' meta label
-    Given connection close all sessions
-    Given connection open schema session for database: grakn
-    Given session opens transaction of type: write
-    Given graql define
-      """
-      define
-      address sub attribute, value string, abstract;
-      postcode sub address;
-      person owns postcode;
-      """
-    Given transaction commits
-
-    Given connection close all sessions
-    Given connection open data session for database: grakn
-    Given session opens transaction of type: write
-    Given get answers of graql insert
-      """
-      insert
-      $x isa person, has name "Sherlock", has postcode "W1U8ED";
-      """
-    Given transaction commits
-
-    Then uniquely identify answer concepts
-      | x                 |
-      | key:name:Sherlock |
-    When session opens transaction of type: write
-    When get answers of graql match
-      """
-      match $x has attribute $a;
-      """
-    Then uniquely identify answer concepts
-      | x                 | a                     |
-      | key:name:Sherlock | value:name:Sherlock   |
-      | key:name:Sherlock | value:postcode:W1U8ED |
-    When graql delete
-      """
-      match
-        $x isa person, has postcode $a;
-      delete
-        $x has attribute $a;
-      """
-    Then transaction commits
-
-    When session opens transaction of type: read
-    When get answers of graql match
-      """
-      match $x has attribute $a;
-      """
-    Then uniquely identify answer concepts
-      | x                 | a                   |
-      | key:name:Sherlock | value:name:Sherlock |
-
-
-  Scenario: an attribute ownership can be deleted using its supertype as a label
-    Given connection close all sessions
-    Given connection open schema session for database: grakn
-    Given session opens transaction of type: write
-    Given graql define
-      """
-      define
-      address sub attribute, value string, abstract;
-      postcode sub address;
-      person owns postcode;
-      """
-    Given transaction commits
-
-    Given connection close all sessions
-    Given connection open data session for database: grakn
-    Given session opens transaction of type: write
-    Given graql insert
-      """
-      insert
-      $x isa person, has name "Sherlock", has postcode "W1U8ED";
-      """
-    Given transaction commits
-
-    When session opens transaction of type: write
-    When get answers of graql match
-      """
-      match $x has address $a;
-      """
-    Then uniquely identify answer concepts
-      | x                 | a                     |
-      | key:name:Sherlock | value:postcode:W1U8ED |
-    When graql delete
-      """
-      match
-        $x isa person, has address $a;
-      delete
-        $x has address $a;
-      """
-    Then transaction commits
-
-    When session opens transaction of type: read
-    When get answers of graql match
-      """
-      match $x has address $a;
-      """
-    Then answer size is: 0
-
 
   Scenario: deleting an attribute ownership using 'thing' as a label throws an error
     Given connection close all sessions
@@ -1433,7 +1305,7 @@ Feature: Graql Delete Query
         $x isa person, has name $n;
         $n "Alex";
       delete
-        $x has name $n;
+        $x has $n;
       """
     Then transaction commits; throws exception
 
