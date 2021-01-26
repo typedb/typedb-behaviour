@@ -112,12 +112,18 @@ Feature: Concept Inequality Resolution
       (related-state: $s2) isa achieved;
       """
 #    When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match (related-state: $s) isa holds;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then answer set is equivalent for graql query
       """
       match $s isa state, has name 's2';
@@ -127,6 +133,9 @@ Feature: Concept Inequality Resolution
 
   Scenario: inferred binary relations can be filtered by concept inequality of their roleplayers
 #    When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Given for graql query
       """
       match (ball1: $x, ball2: $y) isa selection;
@@ -163,6 +172,9 @@ Feature: Concept Inequality Resolution
 
   Scenario: inferred binary relations can be filtered by inequality to a specific concept
 #    When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match
@@ -198,6 +210,9 @@ Feature: Concept Inequality Resolution
   y is not z
 
 #    When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match
@@ -241,6 +256,9 @@ Feature: Concept Inequality Resolution
   x is not z
 
 #    When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match
@@ -283,6 +301,9 @@ Feature: Concept Inequality Resolution
   y2 is not  z2
 
 #    When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Given for graql query
       """
       match
@@ -343,6 +364,9 @@ Feature: Concept Inequality Resolution
   y     - is not - >  z2
 
 #    When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Given for graql query
       """
       match
@@ -418,6 +442,9 @@ Feature: Concept Inequality Resolution
       $y isa soft-drink, has name "Tesco";
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match
@@ -484,6 +511,9 @@ Feature: Concept Inequality Resolution
       $z "Ocado" isa retailer;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match

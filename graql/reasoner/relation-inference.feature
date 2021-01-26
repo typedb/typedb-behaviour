@@ -82,6 +82,9 @@ Feature: Relation Inference Resolution
       $z isa person;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match
@@ -117,6 +120,9 @@ Feature: Relation Inference Resolution
       $y isa person, has name "Michael";
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match
@@ -156,6 +162,9 @@ Feature: Relation Inference Resolution
       $y 14.99 isa price;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match
@@ -192,6 +201,9 @@ Feature: Relation Inference Resolution
       $y 1664 isa year;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match
@@ -229,6 +241,9 @@ Feature: Relation Inference Resolution
       $e isa person, has name "Eustace";
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match $r isa friendship;
@@ -263,6 +278,9 @@ Feature: Relation Inference Resolution
       $e isa person, has name "Eustace";
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match ($x, $y) isa friendship;
@@ -292,6 +310,9 @@ Feature: Relation Inference Resolution
       $h isa person, has name "Hattie";
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match (employee: $x, employer: $x) isa employment;
@@ -318,6 +339,9 @@ Feature: Relation Inference Resolution
       $i isa person, has name "Irma";
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match (employee: $x, employer: $y) isa employment;
@@ -346,6 +370,9 @@ Feature: Relation Inference Resolution
       $j isa person, has name "Jane";
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match (employee: $x, employer: $x) isa employment;
@@ -405,6 +432,9 @@ Feature: Relation Inference Resolution
       (coworker: $b, coworker: $c) isa coworkers;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match (coworker: $x, coworker: $x) isa coworkers;
@@ -460,6 +490,9 @@ Feature: Relation Inference Resolution
       (subordinate: $y, superior: $y) isa location-hierarchy;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match $x isa location-hierarchy;
@@ -494,6 +527,9 @@ Feature: Relation Inference Resolution
       (subordinate: $c, superior: $d) isa location-hierarchy;
       """
 #    When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match (subordinate: $x1, superior: $x2) isa location-hierarchy;
@@ -555,6 +591,9 @@ Feature: Relation Inference Resolution
       (subordinate: $x3, superior: $x4) isa location-hierarchy;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match (subordinate: $x, superior: $y) isa location-hierarchy;
@@ -586,6 +625,9 @@ Feature: Relation Inference Resolution
       $c isa company;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match (employee: $x, employee: $y) isa employment;
@@ -612,6 +654,9 @@ Feature: Relation Inference Resolution
       $c isa company;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match (employee: $x) isa employment;
@@ -641,12 +686,18 @@ Feature: Relation Inference Resolution
       $z isa person, has name "Charlie";
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match (friend: $a, friend: $b, friend: $c) isa friendship;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 6
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then answer set is equivalent for graql query
       """
       match
@@ -686,6 +737,9 @@ Feature: Relation Inference Resolution
       (choice1: $y, choice2: $z) isa selection;
       """
 #    When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match
@@ -707,6 +761,9 @@ Feature: Relation Inference Resolution
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then answer set is equivalent for graql query
       """
       match
@@ -744,6 +801,9 @@ Feature: Relation Inference Resolution
       (subordinate: $y, superior: $z) isa location-hierarchy;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match
@@ -781,6 +841,9 @@ Feature: Relation Inference Resolution
       (subordinate: $y, superior: $z) isa location-hierarchy;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Given for graql query
       """
       match
@@ -838,6 +901,9 @@ Feature: Relation Inference Resolution
       (subordinate: $y, superior: $z) isa location-hierarchy;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Given for graql query
       """
       match ($a, $b) isa relation;
@@ -846,6 +912,9 @@ Feature: Relation Inference Resolution
     # Despite there being more inferred relations, the answer size is still 6 (as in the previous scenario)
     # because the query is only interested in the related concepts, not in the relation instances themselves
     Then answer size in reasoned database is: 6
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then answer set is equivalent for graql query
       """
       match ($a, $b);
@@ -876,6 +945,9 @@ Feature: Relation Inference Resolution
       (subordinate: $y, superior: $z) isa location-hierarchy;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match
@@ -946,6 +1018,9 @@ Feature: Relation Inference Resolution
       (baseRole: $z) isa subSubRelation;
       """
 #    When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match ($x) isa derivedRelation;

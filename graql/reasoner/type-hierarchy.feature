@@ -74,7 +74,10 @@ Feature: Type Hierarchy Resolution
       (performer:$x, writer:$v) isa performance;  # child - child    -> satisfies rule
       (performer:$y, writer:$v) isa performance;  # person - child   -> doesn't satisfy rule
       """
-    When materialised database is completed
+        Given transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type:read
+
     Then for graql query
       """
       match
@@ -172,6 +175,9 @@ Feature: Type Hierarchy Resolution
       (child: $x, parent: $y) isa family;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     # Matching a sibling of the actual role
     Then for graql query
       """
@@ -226,6 +232,9 @@ Feature: Type Hierarchy Resolution
       (writer:$x, performer:$y) isa performance;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     # sub-roles, super-relation
     Then for graql query
       """
@@ -275,6 +284,9 @@ Feature: Type Hierarchy Resolution
       (writer:$x, performer:$y) isa performance;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     # super-roles, sub-relation
     Then for graql query
       """
@@ -324,6 +336,9 @@ Feature: Type Hierarchy Resolution
       (writer:$x, performer:$y) isa performance;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     # super-roles, super-relation
     Then for graql query
       """
@@ -389,6 +404,9 @@ Feature: Type Hierarchy Resolution
       (performer:$y, writer:$v) isa performance;  # person - child   -> doesn't satisfy rule
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match
@@ -491,6 +509,9 @@ Feature: Type Hierarchy Resolution
       (parent:$x, child:$y) isa family;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match (home-owner: $x, resident: $y) isa residence;

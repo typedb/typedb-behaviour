@@ -19,13 +19,16 @@
 Feature: Attribute Attachment Resolution
 
   Background: Set up databases for resolution testing
-
     Given connection has been opened
-    Given connection open sessions for databases:
-      | materialised |
-      | reasoned     |
-    Given materialised database is named: materialised
+    Given connection does not have any database
+    Given connection create database: reasoned
+    Given connection create database: materialised
     Given reasoned database is named: reasoned
+    Given materialised database is named: materialised
+    Given connection open schema sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given session opens transaction of type: write
     Given for each session, graql define
       """
       define
@@ -35,7 +38,6 @@ Feature: Attribute Attachment Resolution
           plays team:member,
           owns string-attribute,
           owns unrelated-attribute,
-          owns sub-string-attribute,
           owns age,
           owns is-old;
 
@@ -55,9 +57,11 @@ Feature: Attribute Attachment Resolution
       retailer sub attribute, value string;
       age sub attribute, value long;
       is-old sub attribute, value boolean;
-      sub-string-attribute sub string-attribute;
       unrelated-attribute sub attribute, value string;
       """
+    Given transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: write
 
 
   # TODO: re-enable all steps once attribute re-attachment is resolvable
@@ -78,13 +82,22 @@ Feature: Attribute Attachment Resolution
       $geX isa person, has string-attribute "banana";
       $geY isa person;
       """
+    Given transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: write
 #    When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match $x isa person, has string-attribute $y;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match $x isa string-attribute;
@@ -120,7 +133,13 @@ Feature: Attribute Attachment Resolution
       $geY isa person;
       (leader:$geX, team-member:$geX) isa team;
       """
+    Given transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: write
 #    When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match $x has string-attribute $y;
@@ -155,19 +174,29 @@ Feature: Attribute Attachment Resolution
       $aeY isa soft-drink;
       $r "Ocado" isa retailer;
       """
-    When materialised database is completed
+    Given transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: write
+#    When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match $x has retailer 'Ocado';
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
+    Given the transaction commits
+    Given session opens transaction of type: read
     Then for graql query
       """
       match $x has retailer $r;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 4
+    Given the transaction commits
+    Given session opens transaction of type: read
     Then for graql query
       """
       match $x has retailer 'Tesco';
@@ -196,7 +225,13 @@ Feature: Attribute Attachment Resolution
       $aeY isa soft-drink;
       $r "Ocado" isa retailer;
       """
-    When materialised database is completed
+    Given transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: write
+#    When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match $x isa soft-drink, has retailer 'Ocado';

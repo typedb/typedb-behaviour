@@ -192,7 +192,10 @@ Feature: Negation Resolution
         not {$y 20;};
       """
     Then answer size in reasoned database is: 1
-    Then answer set is equivalent for graql query
+    Then     answer set is equivalent for graql query
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
       """
       match
         $x has age $y;
@@ -216,7 +219,10 @@ Feature: Negation Resolution
         not {$y isa name;};
       """
     Then answer size in reasoned database is: 2
-    Then answer set is equivalent for graql query
+    Then     answer set is equivalent for graql query
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
       """
       match $x has age $y;
       """
@@ -265,6 +271,9 @@ Feature: Negation Resolution
       """
     # Eliminates (cdzd, zdzd)
     Then answer size in reasoned database is: 22
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then answer set is equivalent for graql query
       """
       match
@@ -317,6 +326,9 @@ Feature: Negation Resolution
       """
     # (d,z) is a friendship so we eliminate results where $b is 'd': these are (cdc, cdz, zdc, zdz)
     Then answer size in reasoned database is: 10
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then answer set is equivalent for graql query
       """
       match
@@ -380,6 +392,9 @@ Feature: Negation Resolution
         };
       """
     Then answer size in reasoned database is: 6
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then answer set is equivalent for graql query
       """
       match
@@ -571,6 +586,9 @@ Feature: Negation Resolution
       (superior: $cit, subordinate: $ar) isa location-hierarchy;
       """
 #    When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Given for graql query
       """
       match
@@ -655,6 +673,9 @@ Feature: Negation Resolution
         $x has index "aa";
       """
     Then answer size in reasoned database is: 2
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then answer set is equivalent for graql query
       """
       match
@@ -689,6 +710,9 @@ Feature: Negation Resolution
       $y isa person, has age 20;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match $x has name "Not Ten", has age 20;
@@ -724,6 +748,9 @@ Feature: Negation Resolution
       $z isa person;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Given for graql query
       """
       match $x isa person;
@@ -775,6 +802,9 @@ Feature: Negation Resolution
       (company-with-country: $c, country-for-company: $f) isa company-country;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Given for graql query
       """
       match $x isa company;
@@ -788,6 +818,9 @@ Feature: Negation Resolution
       """
     # Should exclude both the company in France and the company with no country
     Then answer size in reasoned database is: 2
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then answer set is equivalent for graql query
       """
       match
@@ -853,6 +886,9 @@ Feature: Negation Resolution
         };
       """
     Then answer size in reasoned database is: 3
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then answer set is equivalent for graql query
       """
       match
@@ -951,6 +987,9 @@ Feature: Negation Resolution
       (identified-fault: $f2, identifying-question: $q2) isa fault-identification;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match (diagnosed-fault: $flt, parent-session: $ts) isa diagnosis;
@@ -1026,6 +1065,9 @@ Feature: Negation Resolution
       (symmetric-role: $c, symmetric-role: $b ) isa symmetric-relation;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match (role-3: $x, role-4: $y) isa relation-4;
@@ -1111,6 +1153,9 @@ Feature: Negation Resolution
       """
     # aa is not linked to itself. ee, ff, gg are linked to each other, but not to aa. hh is not linked to anything
     Then answer size in reasoned database is: 5
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then answer set is equivalent for graql query
       """
       match

@@ -106,6 +106,9 @@ Feature: Rule Interaction Resolution
       (member: $charlie, member: $dennis, host: $charlie) isa party;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match $x isa person, has name $n, has tag "P";
@@ -159,6 +162,9 @@ Feature: Rule Interaction Resolution
       """
 
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match $x isa person, has name 'tracey';

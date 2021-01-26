@@ -86,6 +86,9 @@ Feature: Schema Query Resolution (Variable Types)
       $z isa person;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Given for graql query
       """
       match $x isa entity;
@@ -138,6 +141,9 @@ Feature: Schema Query Resolution (Variable Types)
       $z isa person, has name "Rupert";
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Given for graql query
       """
       match ($u, $v) isa relation;
@@ -197,6 +203,9 @@ Feature: Schema Query Resolution (Variable Types)
       $y isa person, has name "Tobias";
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Given for graql query
       """
       match $x isa relation;
@@ -242,6 +251,9 @@ Feature: Schema Query Resolution (Variable Types)
       $z isa person, has name "Rupert";
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Given for graql query
       """
       match $x isa relation;
@@ -303,6 +315,9 @@ Feature: Schema Query Resolution (Variable Types)
       $y isa person, has name "Tobias";
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Given for graql query
       """
       match $x isa relation;
@@ -352,6 +367,9 @@ Feature: Schema Query Resolution (Variable Types)
       $w isa colonel;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Given for graql query
       """
       match (employee: $x, employer: $y) isa employment;
@@ -409,6 +427,9 @@ Feature: Schema Query Resolution (Variable Types)
       (employee: $s4, employer: $c2prime) isa employment;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match

@@ -82,6 +82,9 @@ Feature: Value Predicate Resolution
       $se isa tortoise, has age 1;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match $x has is-old $r;
@@ -109,6 +112,9 @@ Feature: Value Predicate Resolution
       $y isa person;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match
@@ -146,6 +152,9 @@ Feature: Value Predicate Resolution
       $y isa person, has name "Bob";
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match
@@ -185,6 +194,9 @@ Feature: Value Predicate Resolution
       $y isa person, has name "Bob";
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match
@@ -233,6 +245,9 @@ Feature: Value Predicate Resolution
       $r "Ocado" isa retailer;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match
@@ -274,6 +289,9 @@ Feature: Value Predicate Resolution
       $r "Ocado" isa retailer;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match
@@ -318,6 +336,9 @@ Feature: Value Predicate Resolution
       insert $x isa soft-drink, has name "Fanta";
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match
@@ -360,6 +381,9 @@ Feature: Value Predicate Resolution
       $y isa soft-drink, has name "Tango";
       """
 #    When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match
@@ -413,6 +437,9 @@ Feature: Value Predicate Resolution
       $y isa soft-drink, has name "Tango";
       """
 #    When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match
@@ -469,6 +496,9 @@ Feature: Value Predicate Resolution
       $r "Ocado" isa retailer;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Given for graql query
       """
       match
@@ -517,6 +547,9 @@ Feature: Value Predicate Resolution
       $r "Ocado" isa retailer;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Given for graql query
       """
       match
@@ -566,6 +599,9 @@ Feature: Value Predicate Resolution
       $r "Ocado" isa retailer;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match
@@ -609,6 +645,9 @@ Feature: Value Predicate Resolution
       $y isa soft-drink, has name "Tesco";
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match
@@ -688,6 +727,9 @@ Feature: Value Predicate Resolution
       $p4 "cheap" isa price-range;
       """
     When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match
@@ -783,6 +825,9 @@ Feature: Value Predicate Resolution
       (original:$x, reply:$x5) isa reply-of;
       """
 #    When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match (predecessor:$x1, successor:$x2) isa message-succession;

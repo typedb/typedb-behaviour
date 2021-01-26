@@ -25,14 +25,18 @@
 
 #noinspection CucumberUndefinedStep
 Feature: Attribute Attachment Resolution
-  Background: Set up databases for resolution testing
 
+  Background: Set up databases for resolution testing
     Given connection has been opened
+    Given connection does not have any database
+    Given connection create database: reasoned
+    Given connection create database: materialised
     Given connection open sessions for databases:
       | materialised |
       | reasoned     |
     Given materialised database is named: materialised
     Given reasoned database is named: reasoned
+    Given session opens transaction of type: write
     Given for each session, graql define
       """
       define
@@ -65,129 +69,9 @@ Feature: Attribute Attachment Resolution
       sub-string-attribute sub string-attribute;
       unrelated-attribute sub attribute, value string;
       """
-
-      # TODO: re-enable all steps once re-attachment of unrelated attributes is resolvable
-  @Ignore
-  Scenario: when multiple rules copy attributes from an entity, they all get resolved
-    Given for each session, graql define
-      """
-      define
-      rule transfer-string-attribute-to-other-people: when {
-        $x isa person, has string-attribute $r1;
-        $y isa person;
-      } then {
-        $y has string-attribute $r1;
-      };
-
-      rule transfer-attribute-value-to-sub-attribute: when {
-        $x isa person, has string-attribute $r1;
-      } then {
-        $x has sub-string-attribute $r1;
-      };
-
-      rule transfer-attribute-value-to-unrelated-attribute: when {
-        $x isa person, has string-attribute $r1;
-        $r2 isa unrelated-attribute;
-      } then {
-        $x has unrelated-attribute $r1;
-      };
-      """
-    Given for each session, graql insert
-      """
-      insert
-      $geX isa person, has string-attribute "banana";
-      $geY isa person;
-      """
-#    When materialised database is completed
-    Then for graql query
-      """
-      match $x isa person;
-      """
-#    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 2
-    Then for graql query
-      """
-      match $x isa person, has attribute $y;
-      """
-    # four attributes for each entity
-#    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 6
-#    Then materialised and reasoned databases are the same size
-
-
-  @Ignore
-   # TODO: re-enable all steps once re-attachment of unrelated attributes is resolvable
-  Scenario: when a rule copies an attribute value to its sub-attribute, a new attribute concept is inferred
-    Given for each session, graql define
-      """
-      define
-      rule transfer-attribute-value-to-sub-attribute: when {
-        $x isa person, has string-attribute $r1;
-      } then {
-        $x has sub-string-attribute $r1;
-      };
-      """
-    Given for each session, graql insert
-      """
-      insert
-      $geX isa person, has string-attribute "banana";
-      """
-#    When materialised database is completed
-    Then for graql query
-      """
-      match $x isa person, has sub-string-attribute $y;
-      """
-#    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then for graql query
-      """
-      match $x isa sub-string-attribute;
-      """
-#    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then for graql query
-      """
-      match $x isa string-attribute; $y isa sub-string-attribute;
-      """
-    # 2 SA instances - one base, one sub hence two answers
-#    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 2
-#    Then materialised and reasoned databases are the same size
-
-
-  @Ignore
-  # TODO: re-enable all steps once re-attachment of unrelated attributes is resolvable
-  Scenario: when a rule copies an attribute value to an unrelated attribute, a new attribute concept is inferred
-    Given for each session, graql define
-      """
-      define
-      rule transfer-attribute-value-to-unrelated-attribute: when {
-        $x isa person, has string-attribute $r1;
-      } then {
-        $x has unrelated-attribute $r1;
-      };
-      """
-    Given for each session, graql insert
-      """
-      insert
-      $geX isa person, has string-attribute "banana";
-      $geY isa person;
-      """
-#    When materialised database is completed
-    Then for graql query
-      """
-      match $x isa person, has unrelated-attribute $y;
-      """
-#    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then for graql query
-      """
-      match $x isa unrelated-attribute;
-      """
-#    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-#    Then materialised and reasoned databases are the same size
-
+    Given transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: write
 
   @Ignore
   # TODO: re-enable all steps once attribute re-attachment is resolvable
@@ -216,7 +100,13 @@ Feature: Attribute Attachment Resolution
       $y isa person, has name "Bob", has string-attribute "Safeway";
       $z isa soft-drink, has name "Tango";
       """
+    Given transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: write
 #    When materialised database is completed
+    Given transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match
@@ -258,7 +148,13 @@ Feature: Attribute Attachment Resolution
       $y isa person, has name "Bob", has string-attribute "Safeway";
       $z isa soft-drink, has name "Tango";
       """
+    Given transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
 #    When materialised database is completed
+    Given the transaction commits
+    Given the integrity is validated
+    Given session opens transaction of type: read
     Then for graql query
       """
       match
