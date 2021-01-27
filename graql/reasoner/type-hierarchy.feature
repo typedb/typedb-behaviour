@@ -24,8 +24,8 @@ Feature: Type Hierarchy Resolution
     Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised session has database name: materialised
-    Given reasoned session has database name: reasoned
+
+
 
 
   Scenario: subtypes trigger rules based on their parents; parent types don't trigger rules based on their children
@@ -173,7 +173,7 @@ Feature: Type Hierarchy Resolution
       $y isa person;
       (child: $x, parent: $y) isa family;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     # Matching a sibling of the actual role
@@ -229,7 +229,7 @@ Feature: Type Hierarchy Resolution
       $y isa person;
       (writer:$x, performer:$y) isa performance;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     # sub-roles, super-relation
@@ -280,7 +280,7 @@ Feature: Type Hierarchy Resolution
       $y isa person;
       (writer:$x, performer:$y) isa performance;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     # super-roles, sub-relation
@@ -331,7 +331,7 @@ Feature: Type Hierarchy Resolution
       $y isa person;
       (writer:$x, performer:$y) isa performance;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     # super-roles, super-relation
@@ -398,7 +398,7 @@ Feature: Type Hierarchy Resolution
       (performer:$x, writer:$v) isa performance;  # child - child    -> satisfies rule
       (performer:$y, writer:$v) isa performance;  # person - child   -> doesn't satisfy rule
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -502,7 +502,7 @@ Feature: Type Hierarchy Resolution
       $y isa person;
       (parent:$x, child:$y) isa family;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query

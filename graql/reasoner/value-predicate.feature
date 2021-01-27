@@ -24,8 +24,8 @@ Feature: Value Predicate Resolution
     Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised session has database name: materialised
-    Given reasoned session has database name: reasoned
+
+
     Given for each session, graql define
       """
       define
@@ -81,7 +81,7 @@ Feature: Value Predicate Resolution
       insert
       $se isa tortoise, has age 1;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -110,7 +110,7 @@ Feature: Value Predicate Resolution
       $x isa person;
       $y isa person;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -149,7 +149,7 @@ Feature: Value Predicate Resolution
       $x isa person, has name "Alice";
       $y isa person, has name "Bob";
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -190,7 +190,7 @@ Feature: Value Predicate Resolution
       $x isa person, has name "Alice";
       $y isa person, has name "Bob";
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -240,7 +240,7 @@ Feature: Value Predicate Resolution
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -283,7 +283,7 @@ Feature: Value Predicate Resolution
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -329,7 +329,7 @@ Feature: Value Predicate Resolution
       """
       insert $x isa soft-drink, has name "Fanta";
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -373,7 +373,7 @@ Feature: Value Predicate Resolution
       $x isa soft-drink, has name "Fanta";
       $y isa soft-drink, has name "Tango";
       """
-#    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -428,7 +428,7 @@ Feature: Value Predicate Resolution
       $x isa soft-drink, has name "Fanta";
       $y isa soft-drink, has name "Tango";
       """
-#    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -486,7 +486,7 @@ Feature: Value Predicate Resolution
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Given for graql query
@@ -536,7 +536,7 @@ Feature: Value Predicate Resolution
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Given for graql query
@@ -587,7 +587,7 @@ Feature: Value Predicate Resolution
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -632,7 +632,7 @@ Feature: Value Predicate Resolution
       $x isa person, has string-attribute "Tesco";
       $y isa soft-drink, has name "Tesco";
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -713,7 +713,7 @@ Feature: Value Predicate Resolution
       $p3 "low price" isa price-range;
       $p4 "cheap" isa price-range;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -810,7 +810,7 @@ Feature: Value Predicate Resolution
       (original:$x, reply:$x4) isa reply-of;
       (original:$x, reply:$x5) isa reply-of;
       """
-#    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query

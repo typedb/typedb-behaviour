@@ -95,8 +95,6 @@ Feature: Attribute Attachment Resolution
     Given connection open data sessions for databases:
       | reasoned     |
       | materialised |
-    Given reasoned session has database name: reasoned
-    Given materialised session has database name: materialised
     Given sessions open transactions of type: write
     Given for each session, graql insert
       """
@@ -107,7 +105,7 @@ Feature: Attribute Attachment Resolution
       """
     Given for each session, transaction commits
     Given sessions open transactions of type: write
-#    When materialised database is completed
+    Then materialised database is completed
     Given transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -149,8 +147,6 @@ Feature: Attribute Attachment Resolution
     Given connection open data sessions for databases:
       | reasoned     |
       | materialised |
-    Given reasoned session has database name: reasoned
-    Given materialised session has database name: materialised
     Given sessions open transactions of type: write
     Given for each session, graql insert
       """
@@ -161,7 +157,7 @@ Feature: Attribute Attachment Resolution
       """
     Given for each session, transaction commits
     Given sessions open transactions with reasoning of type: read
-#    When materialised database is completed
+    Then materialised database is completed
     Given for each session, transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query

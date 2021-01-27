@@ -24,8 +24,8 @@ Feature: Schema Query Resolution (Variable Types)
     Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised session has database name: materialised
-    Given reasoned session has database name: reasoned
+
+
     Given for each session, graql define
       """
       define
@@ -85,7 +85,7 @@ Feature: Schema Query Resolution (Variable Types)
       $y isa person;
       $z isa person;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Given for graql query
@@ -139,7 +139,7 @@ Feature: Schema Query Resolution (Variable Types)
       $y isa person, has name "Richard";
       $z isa person, has name "Rupert";
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Given for graql query
@@ -200,7 +200,7 @@ Feature: Schema Query Resolution (Variable Types)
       $x isa person, has name "Sharon";
       $y isa person, has name "Tobias";
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Given for graql query
@@ -247,7 +247,7 @@ Feature: Schema Query Resolution (Variable Types)
       $y isa person, has name "Richard";
       $z isa person, has name "Rupert";
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Given for graql query
@@ -310,7 +310,7 @@ Feature: Schema Query Resolution (Variable Types)
       $x isa person, has name "Sharon";
       $y isa person, has name "Tobias";
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Given for graql query
@@ -361,7 +361,7 @@ Feature: Schema Query Resolution (Variable Types)
       $z isa colonel;
       $w isa colonel;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Given for graql query
@@ -420,7 +420,7 @@ Feature: Schema Query Resolution (Variable Types)
       (employee: $s3, employer: $c2) isa employment;
       (employee: $s4, employer: $c2prime) isa employment;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query

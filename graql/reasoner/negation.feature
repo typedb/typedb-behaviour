@@ -24,8 +24,8 @@ Feature: Negation Resolution
     Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised session has database name: materialised
-    Given reasoned session has database name: reasoned
+
+
     Given for each session, graql define
       """
       define
@@ -580,7 +580,7 @@ Feature: Negation Resolution
       (superior: $cntry, subordinate: $cit) isa location-hierarchy;
       (superior: $cit, subordinate: $ar) isa location-hierarchy;
       """
-#    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Given for graql query
@@ -702,7 +702,7 @@ Feature: Negation Resolution
       $x isa person, has age 10;
       $y isa person, has age 20;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -739,7 +739,7 @@ Feature: Negation Resolution
       $y isa person, has age 20;
       $z isa person;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Given for graql query
@@ -792,7 +792,7 @@ Feature: Negation Resolution
       (company-with-country: $b, country-for-company: $e) isa company-country;
       (company-with-country: $c, country-for-company: $f) isa company-country;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Given for graql query
@@ -974,7 +974,7 @@ Feature: Negation Resolution
       (identified-fault: $f1, identifying-question: $q1) isa fault-identification;
       (identified-fault: $f2, identifying-question: $q2) isa fault-identification;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -1051,7 +1051,7 @@ Feature: Negation Resolution
 
       (symmetric-role: $c, symmetric-role: $b ) isa symmetric-relation;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -1130,7 +1130,7 @@ Feature: Negation Resolution
       (link-from: $ee, link-to: $ff) isa link;
       (link-from: $ff, link-to: $gg) isa link;
       """
-    # When materialised database is completed
+    # Then materialised database is completed
     Then for graql query
       """
       match

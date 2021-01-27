@@ -24,8 +24,8 @@ Feature: Resolution Test Framework
     Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised session has database name: materialised
-    Given reasoned session has database name: reasoned
+
+
 
 
   Scenario: basic rule
@@ -49,7 +49,7 @@ Feature: Resolution Test Framework
       insert
       $x isa company;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -93,7 +93,7 @@ Feature: Resolution Test Framework
       $co isa company;
       """
 
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -143,7 +143,7 @@ Feature: Resolution Test Framework
       (superior: $cit, subordinate: $ar) isa location-hierarchy;
       """
 
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -202,7 +202,7 @@ Feature: Resolution Test Framework
       (location-hierarchy_superior: $cit, location-hierarchy_subordinate: $ar) isa location-hierarchy;
       """
 
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -254,7 +254,7 @@ Feature: Resolution Test Framework
       $b isa man;
       """
 
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -296,7 +296,7 @@ Feature: Resolution Test Framework
       $c2 has name $n2; $n2 "another-company";
       """
 
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -342,7 +342,7 @@ Feature: Resolution Test Framework
       $c2 has name $n2; $n2 "another-company";
       """
 
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -384,7 +384,7 @@ Feature: Resolution Test Framework
       $c2 has name $n2; $n2 "another-company";
       """
 
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query

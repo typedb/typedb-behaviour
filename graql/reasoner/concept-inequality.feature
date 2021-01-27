@@ -59,8 +59,6 @@ Feature: Concept Inequality Resolution
     Given connection open data sessions for databases:
       | reasoned     |
       | materialised |
-    Given reasoned session has database name: reasoned
-    Given materialised session has database name: materialised
     Given for each session, graql insert
       """
       insert
@@ -119,8 +117,6 @@ Feature: Concept Inequality Resolution
     Given connection open data sessions for databases:
       | reasoned     |
       | materialised |
-    Given reasoned session has database name: reasoned
-    Given materialised session has database name: materialised
     Given sessions open transactions of type: write
     Given for each session, graql insert
       """
@@ -135,7 +131,7 @@ Feature: Concept Inequality Resolution
       """
     Given for each session, transaction commits
     Given sessions open transactions of type: write
-#    When materialised database is completed
+    Then materialised database is completed
     Given for each session, transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -155,7 +151,7 @@ Feature: Concept Inequality Resolution
 
   Scenario: inferred binary relations can be filtered by concept inequality of their roleplayers
     Given sessions open transactions of type: write
-#    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Given for graql query
@@ -198,7 +194,7 @@ Feature: Concept Inequality Resolution
 
   Scenario: inferred binary relations can be filtered by inequality to a specific concept
     Given sessions open transactions of type: write
-#    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -238,7 +234,7 @@ Feature: Concept Inequality Resolution
   y is not z
 
     Given sessions open transactions of type: write
-#    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -286,7 +282,7 @@ Feature: Concept Inequality Resolution
   x is not z
 
     Given sessions open transactions of type: write
-#    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -333,7 +329,7 @@ Feature: Concept Inequality Resolution
   y2 is not  z2
 
     Given sessions open transactions of type: write
-#    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Given for graql query
@@ -400,7 +396,7 @@ Feature: Concept Inequality Resolution
   y     - is not - >  z2
 
     Given sessions open transactions of type: write
-#    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Given for graql query
@@ -485,8 +481,6 @@ Feature: Concept Inequality Resolution
     Given connection open data sessions for databases:
       | reasoned     |
       | materialised |
-    Given reasoned session has database name: reasoned
-    Given materialised session has database name: materialised
     Given sessions open transactions of type: write
     Given for each session, graql insert
       """
@@ -496,7 +490,7 @@ Feature: Concept Inequality Resolution
       """
     Given for each session, transaction commits
     Given sessions open transactions of type: write
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -566,8 +560,6 @@ Feature: Concept Inequality Resolution
     Given connection open data sessions for databases:
       | reasoned     |
       | materialised |
-    Given reasoned session has database name: reasoned
-    Given materialised session has database name: materialised
     Given sessions open transactions of type: write
     Given for each session, graql insert
     """
@@ -579,7 +571,7 @@ Feature: Concept Inequality Resolution
       """
     Given for each session, transaction commits
     Given sessions open transactions of type: write
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query

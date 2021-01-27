@@ -24,8 +24,8 @@ Feature: Rule Interaction Resolution
     Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised session has database name: materialised
-    Given reasoned session has database name: reasoned
+
+
     Given for each session, graql define
       """
       define
@@ -105,7 +105,7 @@ Feature: Rule Interaction Resolution
       (attendee: $charlie, speaker: $dennis) isa conference;
       (member: $charlie, member: $dennis, host: $charlie) isa party;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -160,7 +160,7 @@ Feature: Rule Interaction Resolution
       (husband: $a, wife: $b) isa marriage;
       """
 
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query

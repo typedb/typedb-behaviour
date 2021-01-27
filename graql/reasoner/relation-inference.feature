@@ -19,13 +19,14 @@
 Feature: Relation Inference Resolution
 
   Background: Set up databases for resolution testing
-
     Given connection has been opened
-    Given connection open sessions for databases:
-      | materialised |
+    Given connection does not have any database
+    Given connection create database: reasoned
+    Given connection create database: materialised
+    Given connection open schema sessions for databases:
       | reasoned     |
-    Given materialised session has database name: materialised
-    Given reasoned session has database name: reasoned
+      | materialised |
+    Given sessions open transactions of type: write
     Given for each session, graql define
       """
       define
@@ -57,7 +58,9 @@ Feature: Relation Inference Resolution
 
       name sub attribute, value string;
       """
-
+    Given for each session, transaction commits
+    # each scenario specialises the schema further
+    Given sessions open transactions of type: write
 
   #######################
   # BASIC FUNCTIONALITY #
@@ -74,6 +77,12 @@ Feature: Relation Inference Resolution
         (employee: $p) isa employment;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given sessions open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -81,7 +90,9 @@ Feature: Relation Inference Resolution
       $y isa dog;
       $z isa person;
       """
-    When materialised database is completed
+    Given for each session, transaction commits
+    Given sessions open transactions of type: write
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -92,6 +103,8 @@ Feature: Relation Inference Resolution
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
+    Then for each session, transaction closes
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -112,13 +125,21 @@ Feature: Relation Inference Resolution
         (employee: $p) isa employment;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given sessions open transactions of type: write
     Given for each session, graql insert
       """
       insert
       $x isa person, has name "Haikal";
       $y isa person, has name "Michael";
       """
-    When materialised database is completed
+    Given for each session, transaction commits
+    Given sessions open transactions of type: write
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -129,6 +150,8 @@ Feature: Relation Inference Resolution
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
+    Then for each session, transaction closes
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -153,13 +176,21 @@ Feature: Relation Inference Resolution
         (item: $x, price: $y) isa item-listing;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given sessions open transactions of type: write
     Given for each session, graql insert
       """
       insert
       $x isa item, has name "3kg jar of Nutella";
       $y 14.99 isa price;
       """
-    When materialised database is completed
+    Given for each session, transaction commits
+    Given sessions open transactions of type: write
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -189,6 +220,12 @@ Feature: Relation Inference Resolution
         (employee: $p, employer: $x, favourite-year: $y) isa employment;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given sessions open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -197,7 +234,9 @@ Feature: Relation Inference Resolution
       $p2 isa person, has name "Prasanth";
       $y 1664 isa year;
       """
-    When materialised database is completed
+    Given for each session, transaction commits
+    Given sessions open transactions of type: write
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -227,6 +266,12 @@ Feature: Relation Inference Resolution
         (friend: $x, friend: $y) isa friendship;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given sessions open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -236,7 +281,9 @@ Feature: Relation Inference Resolution
       $d isa person, has name "Damien";
       $e isa person, has name "Eustace";
       """
-    When materialised database is completed
+    Given for each session, transaction commits
+    Given sessions open transactions of type: write
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -263,6 +310,12 @@ Feature: Relation Inference Resolution
         (friend: $x, friend: $y) isa friendship;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given sessions open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -272,7 +325,9 @@ Feature: Relation Inference Resolution
       $d isa person, has name "Damien";
       $e isa person, has name "Eustace";
       """
-    When materialised database is completed
+    Given for each session, transaction commits
+    Given sessions open transactions of type: write
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -296,6 +351,12 @@ Feature: Relation Inference Resolution
         (employee: $x, employer: $x) isa employment;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given sessions open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -303,7 +364,9 @@ Feature: Relation Inference Resolution
       $g isa person, has name "Gawain";
       $h isa person, has name "Hattie";
       """
-    When materialised database is completed
+    Given for each session, transaction commits
+    Given sessions open transactions of type: write
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -326,12 +389,20 @@ Feature: Relation Inference Resolution
         (employee: $x, employer: $x) isa employment;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given sessions open transactions of type: write
     Given for each session, graql insert
       """
       insert
       $i isa person, has name "Irma";
       """
-    When materialised database is completed
+    Given for each session, transaction commits
+    Given sessions open transactions of type: write
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -355,13 +426,21 @@ Feature: Relation Inference Resolution
         (employee: $y, employer: $x) isa employment;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given sessions open transactions of type: write
     Given for each session, graql insert
       """
       insert
       $r isa person, has name "Robert";
       $j isa person, has name "Jane";
       """
-    When materialised database is completed
+    Given for each session, transaction commits
+    Given sessions open transactions of type: write
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -413,6 +492,12 @@ Feature: Relation Inference Resolution
           (coworker: $c, coworker: $op) isa coworkers;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given sessions open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -422,7 +507,9 @@ Feature: Relation Inference Resolution
       (pet: $a, owner: $b) isa robot-pet-ownership;
       (coworker: $b, coworker: $c) isa coworkers;
       """
-    When materialised database is completed
+    Given for each session, transaction commits
+    Given sessions open transactions of type: write
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -437,6 +524,8 @@ Feature: Relation Inference Resolution
     # Applying the robot work rule a 2nd time, (r1,p) is a pet ownership and (p,r1) are coworkers,
     # therefore (r1,r1) is a reflexive coworker relation. So the answers are [p] and [r1].
     Then answer size in reasoned database is: 2
+    Then for each session, transaction closes
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match (coworker: $x, coworker: $y) isa coworkers;
@@ -470,6 +559,12 @@ Feature: Relation Inference Resolution
         (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given sessions open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -479,7 +574,9 @@ Feature: Relation Inference Resolution
       (subordinate: $x, superior: $y) isa location-hierarchy;
       (subordinate: $y, superior: $y) isa location-hierarchy;
       """
-    When materialised database is completed
+    Given for each session, transaction commits
+    Given sessions open transactions of type: write
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -503,6 +600,12 @@ Feature: Relation Inference Resolution
         (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given sessions open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -515,7 +618,9 @@ Feature: Relation Inference Resolution
       (subordinate: $b, superior: $c) isa location-hierarchy;
       (subordinate: $c, superior: $d) isa location-hierarchy;
       """
-#    When materialised database is completed
+    Given for each session, transaction commits
+    Given sessions open transactions of type: write
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -558,6 +663,12 @@ Feature: Relation Inference Resolution
         (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given sessions open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -578,7 +689,9 @@ Feature: Relation Inference Resolution
 
       (subordinate: $x3, superior: $x4) isa location-hierarchy;
       """
-    When materialised database is completed
+    Given for each session, transaction commits
+    Given sessions open transactions of type: write
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -605,13 +718,21 @@ Feature: Relation Inference Resolution
         (employee: $p, employer: $c) isa employment;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given sessions open transactions of type: write
     Given for each session, graql insert
       """
       insert
       $x isa person;
       $c isa company;
       """
-    When materialised database is completed
+    Given for each session, transaction commits
+    Given sessions open transactions of type: write
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -633,13 +754,21 @@ Feature: Relation Inference Resolution
         (employee: $p, employer: $c) isa employment;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given sessions open transactions of type: write
     Given for each session, graql insert
       """
       insert
       $x isa person;
       $c isa company;
       """
-    When materialised database is completed
+    Given for each session, transaction commits
+    Given sessions open transactions of type: write
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -663,6 +792,12 @@ Feature: Relation Inference Resolution
         (friend: $a, friend: $b, friend: $c) isa friendship;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given sessions open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -670,7 +805,9 @@ Feature: Relation Inference Resolution
       $y isa person, has name "Bob";
       $z isa person, has name "Charlie";
       """
-    When materialised database is completed
+    Given for each session, transaction commits
+    Given sessions open transactions of type: write
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -679,7 +816,7 @@ Feature: Relation Inference Resolution
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 6
-    Given the transaction commits
+    Then for each session, transaction closes
     Given sessions open transactions with reasoning of type: read
     Then answer set is equivalent for graql query
       """
@@ -709,6 +846,12 @@ Feature: Relation Inference Resolution
         (choice1: $x, choice2: $z) isa selection;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given sessions open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -719,7 +862,9 @@ Feature: Relation Inference Resolution
       (choice1: $x, choice2: $y) isa selection;
       (choice1: $y, choice2: $z) isa selection;
       """
-#    When materialised database is completed
+    Given for each session, transaction commits
+    Given sessions open transactions of type: write
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -732,6 +877,8 @@ Feature: Relation Inference Resolution
 #    Then all answers are correct in reasoned database
     # (a,a), (b,b), (c,c)
     Then answer size in reasoned database is: 3
+    Then for each session, transaction closes
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -743,7 +890,7 @@ Feature: Relation Inference Resolution
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
-    Given the transaction commits
+    Then for each session, transaction closes
     Given sessions open transactions with reasoning of type: read
     Then answer set is equivalent for graql query
       """
@@ -771,6 +918,12 @@ Feature: Relation Inference Resolution
         (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given sessions open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -781,7 +934,9 @@ Feature: Relation Inference Resolution
       (subordinate: $x, superior: $y) isa location-hierarchy;
       (subordinate: $y, superior: $z) isa location-hierarchy;
       """
-    When materialised database is completed
+    Given for each session, transaction commits
+    Given sessions open transactions of type: write
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -810,6 +965,12 @@ Feature: Relation Inference Resolution
         (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given sessions open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -820,7 +981,9 @@ Feature: Relation Inference Resolution
       (subordinate: $x, superior: $y) isa location-hierarchy;
       (subordinate: $y, superior: $z) isa location-hierarchy;
       """
-    When materialised database is completed
+    Given for each session, transaction commits
+    Given sessions open transactions of type: write
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Given for graql query
@@ -832,6 +995,8 @@ Feature: Relation Inference Resolution
       """
 #    Given all answers are correct in reasoned database
     Given answer size in reasoned database is: 1
+    Then for each session, transaction closes
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -869,6 +1034,12 @@ Feature: Relation Inference Resolution
         (loc-sub: $x, loc-sup: $y) isa loc-hie;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given sessions open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -879,7 +1050,9 @@ Feature: Relation Inference Resolution
       (subordinate: $x, superior: $y) isa location-hierarchy;
       (subordinate: $y, superior: $z) isa location-hierarchy;
       """
-    When materialised database is completed
+    Given for each session, transaction commits
+    Given sessions open transactions of type: write
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Given for graql query
@@ -890,7 +1063,7 @@ Feature: Relation Inference Resolution
     # Despite there being more inferred relations, the answer size is still 6 (as in the previous scenario)
     # because the query is only interested in the related concepts, not in the relation instances themselves
     Then answer size in reasoned database is: 6
-    Given the transaction commits
+    Then for each session, transaction closes
     Given sessions open transactions with reasoning of type: read
     Then answer set is equivalent for graql query
       """
@@ -911,6 +1084,12 @@ Feature: Relation Inference Resolution
         (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given sessions open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -921,7 +1100,9 @@ Feature: Relation Inference Resolution
       (subordinate: $x, superior: $y) isa location-hierarchy;
       (subordinate: $y, superior: $z) isa location-hierarchy;
       """
-    When materialised database is completed
+    Given for each session, transaction commits
+    Given sessions open transactions of type: write
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -982,6 +1163,12 @@ Feature: Relation Inference Resolution
           (derivedRelationRole: $x) isa directDerivedRelation;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given sessions open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -993,7 +1180,9 @@ Feature: Relation Inference Resolution
       (baseRole: $y) isa subRelation;
       (baseRole: $z) isa subSubRelation;
       """
-#    When materialised database is completed
+    Given for each session, transaction commits
+    Given sessions open transactions of type: write
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -1002,12 +1191,16 @@ Feature: Relation Inference Resolution
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
+    Then for each session, transaction closes
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match ($x) isa! derivedRelation;
       """
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
+    Then for each session, transaction closes
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match ($x) isa directDerivedRelation;

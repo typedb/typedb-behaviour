@@ -27,8 +27,8 @@ Feature: Recursion Resolution
     Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised session has database name: materialised
-    Given reasoned session has database name: reasoned
+
+
     Given for each session, graql define
       """
       define
@@ -101,7 +101,7 @@ Feature: Recursion Resolution
       (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
       (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -173,7 +173,7 @@ Feature: Recursion Resolution
       (role21:$v, role22:$w) isa relation2;
       (role11:$w, role12:$q) isa relation1;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -238,7 +238,7 @@ Feature: Recursion Resolution
       (role11:$x, role12:$x) isa relation1;
       (role11:$x, role12:$y) isa relation1;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -285,7 +285,7 @@ Feature: Recursion Resolution
       # If only Yusuf didn't dream about himself...
       (dreamer: $x, dream-subject: $x) isa dream;
       """
-#    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -384,7 +384,7 @@ Feature: Recursion Resolution
       (supertype: $f, subtype: $rr) isa inheritance;
       (supertype: $f, subtype: $rr2) isa inheritance;
       """
-#    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -484,7 +484,7 @@ Feature: Recursion Resolution
       (role-A: $r, role-B: $s) isa H;
       (role-A: $u, role-B: $v) isa H;
       """
-#    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -562,7 +562,7 @@ Feature: Recursion Resolution
       (parent: $aaa, child: $aaaa) isa Parent;
       (parent: $c, child: $ca) isa Parent;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -708,7 +708,7 @@ Feature: Recursion Resolution
       (friend: $a, friend: $g) isa Friend;
       (friend: $c, friend: $d) isa Friend;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -827,7 +827,7 @@ Feature: Recursion Resolution
 
       (parent: $h, child: $g) isa Parent;
       """
-#    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -906,7 +906,7 @@ Feature: Recursion Resolution
       (P-roleA: $a1, P-roleB: $a) isa P;
       (P-roleA: $a2, P-roleB: $a1) isa P;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -1003,7 +1003,7 @@ Feature: Recursion Resolution
       (from: $cc, to: $cc) isa link;
       (from: $cc, to: $dd) isa link;
       """
-    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -1082,7 +1082,7 @@ Feature: Recursion Resolution
       (coordinate: $c, coordinate: $c) isa link;
       (coordinate: $c, coordinate: $d) isa link;
       """
-#    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -1163,7 +1163,7 @@ Feature: Recursion Resolution
       (parent: $john, child: $peter) isa Parent;
       (parent: $john, child: $bill) isa Parent;
       """
-#    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -1271,7 +1271,7 @@ Feature: Recursion Resolution
       (down-from: $i, down-to: $d) isa down;
       (down-from: $p, down-to: $k) isa down;
       """
-#    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -1469,7 +1469,7 @@ Feature: Recursion Resolution
       (R2-from: $b25, R2-to: $b35) isa R2;
       (R2-from: $b35, R2-to: $b45) isa R2;
       """
-#    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -1675,7 +1675,7 @@ Feature: Recursion Resolution
       (Q-from: $b4_10, Q-to: $b5_10) isa Q;
       (Q-from: $b5_10, Q-to: $b6_10) isa Q;
       """
-#    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
@@ -1829,7 +1829,7 @@ Feature: Recursion Resolution
       (Q-from: $a5_3, Q-to: $a5_4) isa Q;
       (Q-from: $a5_4, Q-to: $a5_5) isa Q;
       """
-#    When materialised database is completed
+    Then materialised database is completed
     Given the transaction commits
     Given sessions open transactions with reasoning of type: read
     Then for graql query
