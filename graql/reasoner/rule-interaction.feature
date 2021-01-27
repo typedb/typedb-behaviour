@@ -107,7 +107,7 @@ Feature: Rule Interaction Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match $x isa person, has name $n, has tag "P";
@@ -162,7 +162,7 @@ Feature: Rule Interaction Resolution
 
     When materialised database is completed
     Given the transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match $x isa person, has name 'tracey';

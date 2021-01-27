@@ -83,7 +83,7 @@ Feature: Value Predicate Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match $x has is-old $r;
@@ -112,7 +112,7 @@ Feature: Value Predicate Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -151,7 +151,7 @@ Feature: Value Predicate Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -192,7 +192,7 @@ Feature: Value Predicate Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -242,7 +242,7 @@ Feature: Value Predicate Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -285,7 +285,7 @@ Feature: Value Predicate Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -331,7 +331,7 @@ Feature: Value Predicate Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -375,7 +375,7 @@ Feature: Value Predicate Resolution
       """
 #    When materialised database is completed
     Given the transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -430,7 +430,7 @@ Feature: Value Predicate Resolution
       """
 #    When materialised database is completed
     Given the transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -488,7 +488,7 @@ Feature: Value Predicate Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Given for graql query
       """
       match
@@ -538,7 +538,7 @@ Feature: Value Predicate Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Given for graql query
       """
       match
@@ -589,7 +589,7 @@ Feature: Value Predicate Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -634,7 +634,7 @@ Feature: Value Predicate Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -715,7 +715,7 @@ Feature: Value Predicate Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -812,7 +812,7 @@ Feature: Value Predicate Resolution
       """
 #    When materialised database is completed
     Given the transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match (predecessor:$x1, successor:$x2) isa message-succession;

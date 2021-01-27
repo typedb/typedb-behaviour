@@ -152,7 +152,7 @@ Feature: Variable Role Resolution
   Scenario: when querying a binary relation, introducing a variable role doubles the answer size
 #    When materialised database is completed
     Given the transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Given for graql query
       """
       match (role1: $a, role2: $b) isa binary-base;
@@ -172,7 +172,7 @@ Feature: Variable Role Resolution
   Scenario: converting a fixed role to a variable role bound with 'type' does not modify the answer size
 #    When materialised database is completed
     Given the transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Given for graql query
       """
       match (role1: $a, $r1: $b) isa binary-base;
@@ -195,7 +195,7 @@ Feature: Variable Role Resolution
   Scenario: when querying a binary relation, introducing a meta 'role' and a variable role triples the answer size
 #    When materialised database is completed
     Given the transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Given for graql query
       """
       match (role1: $a, role2: $b) isa binary-base;
@@ -217,7 +217,7 @@ Feature: Variable Role Resolution
   Scenario: converting a fixed role to a variable bound with 'type role' (?)
 #    When materialised database is completed
     Given the transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Given for graql query
       """
       match (role: $a, $r1: $b) isa binary-base;
@@ -242,7 +242,7 @@ Feature: Variable Role Resolution
   Scenario: converting a fixed role to a variable bound with 'sub role' (?)
 #    When materialised database is completed
     Given the transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Given for graql query
       """
       match (role: $a, $r1: $b) isa binary-base;
@@ -267,7 +267,7 @@ Feature: Variable Role Resolution
   Scenario: when all other role variables are bound, introducing a meta 'role' doesn't affect the answer size
 #    When materialised database is completed
     Given the transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -293,7 +293,7 @@ Feature: Variable Role Resolution
   Scenario: when querying a binary relation, introducing two variable roles multiplies the answer size by 7
 #    When materialised database is completed
     Given the transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Given for graql query
       """
       match (role1: $a, role2: $b) isa binary-base;
@@ -366,7 +366,7 @@ Feature: Variable Role Resolution
   Scenario: variable roles are correctly mapped to answers for a ternary relation with 3 possible roleplayers
 #    When materialised database is completed
     Given the transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -409,7 +409,7 @@ Feature: Variable Role Resolution
   Scenario: variable roles are correctly mapped to answers for a quaternary relation with 3 possible roleplayers
 #    When materialised database is completed
     Given the transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -451,7 +451,7 @@ Feature: Variable Role Resolution
   Scenario: variable roles are correctly mapped to answers for a quaternary relation with 2 possible roleplayers
 #    When materialised database is completed
     Given the transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match

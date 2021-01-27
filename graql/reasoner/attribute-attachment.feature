@@ -26,7 +26,7 @@ Feature: Attribute Attachment Resolution
     Given connection open schema sessions for databases:
       | reasoned     |
       | materialised |
-    Given session opens transactions with reasoning of type: write
+    Given sessions open transactions of type: write
     Given for each session, graql define
       """
       define
@@ -58,10 +58,9 @@ Feature: Attribute Attachment Resolution
       unrelated-attribute sub attribute, value string;
       """
     Given for each session, transaction commits
-    Given session opens transactions with reasoning of type: write
+    Given sessions open transactions of type: write
 
 
-  # TODO: re-enable all steps once attribute re-attachment is resolvable
   Scenario: when a rule copies an attribute from one entity to another, the existing attribute instance is reused
     Given for each session, graql define
       """
@@ -80,7 +79,7 @@ Feature: Attribute Attachment Resolution
       | materialised |
     Given reasoned session has database name: reasoned
     Given materialised session has database name: materialised
-    Given session opens transactions with reasoning of type: write
+    Given sessions open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -88,10 +87,10 @@ Feature: Attribute Attachment Resolution
       $geY isa person;
       """
     Given for each session, transaction commits
-    Given session opens transactions with reasoning of type: write
+    Given sessions open transactions of type: write
 #    When materialised database is completed
     Given for each session, transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match $x isa person, has string-attribute $y;
@@ -99,7 +98,7 @@ Feature: Attribute Attachment Resolution
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
     Then for each session, transaction closes
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match $x isa string-attribute;
@@ -137,7 +136,7 @@ Feature: Attribute Attachment Resolution
       | materialised |
     Given reasoned session has database name: reasoned
     Given materialised session has database name: materialised
-    Given session opens transactions with reasoning of type: write
+    Given sessions open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -146,10 +145,10 @@ Feature: Attribute Attachment Resolution
       (leader:$geX, member:$geX) isa team;
       """
     Given for each session, transaction commits
-    Given session opens transactions with reasoning of type: write
+    Given sessions open transactions of type: write
 #    When materialised database is completed
     Given for each session, transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match $x has string-attribute $y;
@@ -186,7 +185,7 @@ Feature: Attribute Attachment Resolution
       | materialised |
     Given reasoned session has database name: reasoned
     Given materialised session has database name: materialised
-    Given session opens transactions with reasoning of type: write
+    Given sessions open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -195,18 +194,25 @@ Feature: Attribute Attachment Resolution
       $r "Ocado" isa retailer;
       """
     Given for each session, transaction commits
-    Given session opens transactions with reasoning of type: write
+    Given sessions open transactions of type: write
 #    When materialised database is completed
     Given for each session, transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match $x has retailer 'Ocado';
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
+#    Then sleep
     Then for each session, transaction closes
-    Given session opens transactions with reasoning of type: read
+    Then connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given reasoned session has database name: reasoned
+    Given materialised session has database name: materialised
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match $x has retailer $r;
@@ -214,7 +220,7 @@ Feature: Attribute Attachment Resolution
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 4
     Then for each session, transaction closes
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match $x has retailer 'Tesco';
@@ -243,7 +249,7 @@ Feature: Attribute Attachment Resolution
       | materialised |
     Given reasoned session has database name: reasoned
     Given materialised session has database name: materialised
-    Given session opens transactions with reasoning of type: write
+    Given sessions open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -252,10 +258,10 @@ Feature: Attribute Attachment Resolution
       $r "Ocado" isa retailer;
       """
     Given for each session, transaction commits
-    Given session opens transactions with reasoning of type: write
+    Given sessions open transactions of type: write
 #    When materialised database is completed
     Given for each session, transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match $x isa soft-drink, has retailer 'Ocado';

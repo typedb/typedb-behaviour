@@ -34,9 +34,7 @@ Feature: Attribute Attachment Resolution
     Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised session has database name: materialised
-    Given reasoned session has database name: reasoned
-    Given session opens transactions with reasoning of type: write
+    Given sessions open transactions of type: write
     Given for each session, graql define
       """
       define
@@ -70,7 +68,7 @@ Feature: Attribute Attachment Resolution
       unrelated-attribute sub attribute, value string;
       """
     Given transaction commits
-    Given session opens transactions with reasoning of type: write
+    Given sessions open transactions of type: write
 
   @Ignore
   # TODO: re-enable all steps once attribute re-attachment is resolvable
@@ -92,6 +90,14 @@ Feature: Attribute Attachment Resolution
         $x has retailer 'Tesco';
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given reasoned session has database name: reasoned
+    Given materialised session has database name: materialised
+    Given sessions open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -99,11 +105,11 @@ Feature: Attribute Attachment Resolution
       $y isa person, has name "Bob", has string-attribute "Safeway";
       $z isa soft-drink, has name "Tango";
       """
-    Given transaction commits
-    Given session opens transactions with reasoning of type: write
+    Given for each session, transaction commits
+    Given sessions open transactions of type: write
 #    When materialised database is completed
     Given transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -138,6 +144,14 @@ Feature: Attribute Attachment Resolution
         $x has retailer 'Tesco';
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given reasoned session has database name: reasoned
+    Given materialised session has database name: materialised
+    Given sessions open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -145,11 +159,11 @@ Feature: Attribute Attachment Resolution
       $y isa person, has name "Bob", has string-attribute "Safeway";
       $z isa soft-drink, has name "Tango";
       """
-    Given transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given for each session, transaction commits
+    Given sessions open transactions with reasoning of type: read
 #    When materialised database is completed
-    Given the transaction commits
-    Given session opens transactions with reasoning of type: read
+    Given for each session, transaction commits
+    Given sessions open transactions with reasoning of type: read
     Then for graql query
       """
       match
