@@ -36,7 +36,7 @@ Feature: Attribute Attachment Resolution
       | reasoned     |
     Given materialised session has database name: materialised
     Given reasoned session has database name: reasoned
-    Given session opens transaction of type: write
+    Given session opens transactions with reasoning of type: write
     Given for each session, graql define
       """
       define
@@ -70,7 +70,7 @@ Feature: Attribute Attachment Resolution
       unrelated-attribute sub attribute, value string;
       """
     Given transaction commits
-    Given session opens transaction of type: write
+    Given session opens transactions with reasoning of type: write
 
   @Ignore
   # TODO: re-enable all steps once attribute re-attachment is resolvable
@@ -100,10 +100,10 @@ Feature: Attribute Attachment Resolution
       $z isa soft-drink, has name "Tango";
       """
     Given transaction commits
-    Given session opens transaction of type: write
+    Given session opens transactions with reasoning of type: write
 #    When materialised database is completed
     Given transaction commits
-    Given session opens transaction of type: read
+    Given session opens transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -146,10 +146,10 @@ Feature: Attribute Attachment Resolution
       $z isa soft-drink, has name "Tango";
       """
     Given transaction commits
-    Given session opens transaction of type: read
+    Given session opens transactions with reasoning of type: read
 #    When materialised database is completed
     Given the transaction commits
-    Given session opens transaction of type: read
+    Given session opens transactions with reasoning of type: read
     Then for graql query
       """
       match

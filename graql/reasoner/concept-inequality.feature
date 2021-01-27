@@ -113,7 +113,7 @@ Feature: Concept Inequality Resolution
       """
 #    When materialised database is completed
     Given the transaction commits
-    Given session opens transaction of type: read
+    Given session opens transactions with reasoning of type: read
     Then for graql query
       """
       match (related-state: $s) isa holds;
@@ -121,7 +121,7 @@ Feature: Concept Inequality Resolution
 #    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
     Given the transaction commits
-    Given session opens transaction of type: read
+    Given session opens transactions with reasoning of type: read
     Then answer set is equivalent for graql query
       """
       match $s isa state, has name 's2';
@@ -132,7 +132,7 @@ Feature: Concept Inequality Resolution
   Scenario: inferred binary relations can be filtered by concept inequality of their roleplayers
 #    When materialised database is completed
     Given the transaction commits
-    Given session opens transaction of type: read
+    Given session opens transactions with reasoning of type: read
     Given for graql query
       """
       match (ball1: $x, ball2: $y) isa selection;
@@ -170,7 +170,7 @@ Feature: Concept Inequality Resolution
   Scenario: inferred binary relations can be filtered by inequality to a specific concept
 #    When materialised database is completed
     Given the transaction commits
-    Given session opens transaction of type: read
+    Given session opens transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -207,7 +207,7 @@ Feature: Concept Inequality Resolution
 
 #    When materialised database is completed
     Given the transaction commits
-    Given session opens transaction of type: read
+    Given session opens transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -252,7 +252,7 @@ Feature: Concept Inequality Resolution
 
 #    When materialised database is completed
     Given the transaction commits
-    Given session opens transaction of type: read
+    Given session opens transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -296,7 +296,7 @@ Feature: Concept Inequality Resolution
 
 #    When materialised database is completed
     Given the transaction commits
-    Given session opens transaction of type: read
+    Given session opens transactions with reasoning of type: read
     Given for graql query
       """
       match
@@ -358,7 +358,7 @@ Feature: Concept Inequality Resolution
 
 #    When materialised database is completed
     Given the transaction commits
-    Given session opens transaction of type: read
+    Given session opens transactions with reasoning of type: read
     Given for graql query
       """
       match
@@ -435,7 +435,7 @@ Feature: Concept Inequality Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given session opens transaction of type: read
+    Given session opens transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -503,7 +503,7 @@ Feature: Concept Inequality Resolution
       """
     When materialised database is completed
     Given the transaction commits
-    Given session opens transaction of type: read
+    Given session opens transactions with reasoning of type: read
     Then for graql query
       """
       match
