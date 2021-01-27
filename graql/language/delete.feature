@@ -597,7 +597,7 @@ Feature: Graql Delete Query
       | key:ref:0 | key:name:Bob  | key:name:Alex |
       | key:ref:0 | key:name:Alex | key:name:Bob  |
 
-
+  @ignore
   Scenario: deleting role players in multiple statements throws
     Given get answers of graql insert
       """
