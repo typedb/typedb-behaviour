@@ -1227,6 +1227,7 @@ Feature: Graql Delete Query
       | key:name:John | value:lastname:Smith |
 
 
+  @ignore # TODO: enable once query planning has been optimised
   Scenario: deleting everything in a complex pattern
     Given connection close all sessions
     Given connection open schema session for database: grakn
