@@ -34,7 +34,7 @@ Feature: Attribute Attachment Resolution
     Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given sessions open transactions of type: write
+    Given for each session, open transactions of type: write
     Given for each session, graql define
       """
       define
@@ -68,7 +68,7 @@ Feature: Attribute Attachment Resolution
       unrelated-attribute sub attribute, value string;
       """
     Given transaction commits
-    Given sessions open transactions of type: write
+    Given for each session, open transactions of type: write
 
   @Ignore
   # TODO: re-enable all steps once attribute re-attachment is resolvable
@@ -95,7 +95,7 @@ Feature: Attribute Attachment Resolution
     Given connection open data sessions for databases:
       | reasoned     |
       | materialised |
-    Given sessions open transactions of type: write
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -104,10 +104,10 @@ Feature: Attribute Attachment Resolution
       $z isa soft-drink, has name "Tango";
       """
     Given for each session, transaction commits
-    Given sessions open transactions of type: write
+    Given for each session, open transactions of type: write
     Then materialised database is completed
     Given transaction commits
-    Given sessions open transactions with reasoning of type: read
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -147,7 +147,7 @@ Feature: Attribute Attachment Resolution
     Given connection open data sessions for databases:
       | reasoned     |
       | materialised |
-    Given sessions open transactions of type: write
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -156,10 +156,10 @@ Feature: Attribute Attachment Resolution
       $z isa soft-drink, has name "Tango";
       """
     Given for each session, transaction commits
-    Given sessions open transactions with reasoning of type: read
+    Given for each session, open transactions with reasoning of type: read
     Then materialised database is completed
     Given for each session, transaction commits
-    Given sessions open transactions with reasoning of type: read
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match

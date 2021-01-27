@@ -75,7 +75,7 @@ Feature: Type Hierarchy Resolution
       (performer:$y, writer:$v) isa performance;  # person - child   -> doesn't satisfy rule
       """
         Given transaction commits
-    Given sessions open transactions with reasoning of type:read
+    Given for each session, open transactions with reasoning of type:read
 
     Then for graql query
       """
@@ -174,8 +174,8 @@ Feature: Type Hierarchy Resolution
       (child: $x, parent: $y) isa family;
       """
     Then materialised database is completed
-    Given the transaction commits
-    Given sessions open transactions with reasoning of type: read
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     # Matching a sibling of the actual role
     Then for graql query
       """
@@ -230,8 +230,8 @@ Feature: Type Hierarchy Resolution
       (writer:$x, performer:$y) isa performance;
       """
     Then materialised database is completed
-    Given the transaction commits
-    Given sessions open transactions with reasoning of type: read
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     # sub-roles, super-relation
     Then for graql query
       """
@@ -281,8 +281,8 @@ Feature: Type Hierarchy Resolution
       (writer:$x, performer:$y) isa performance;
       """
     Then materialised database is completed
-    Given the transaction commits
-    Given sessions open transactions with reasoning of type: read
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     # super-roles, sub-relation
     Then for graql query
       """
@@ -332,8 +332,8 @@ Feature: Type Hierarchy Resolution
       (writer:$x, performer:$y) isa performance;
       """
     Then materialised database is completed
-    Given the transaction commits
-    Given sessions open transactions with reasoning of type: read
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     # super-roles, super-relation
     Then for graql query
       """
@@ -399,8 +399,8 @@ Feature: Type Hierarchy Resolution
       (performer:$y, writer:$v) isa performance;  # person - child   -> doesn't satisfy rule
       """
     Then materialised database is completed
-    Given the transaction commits
-    Given sessions open transactions with reasoning of type: read
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -503,8 +503,8 @@ Feature: Type Hierarchy Resolution
       (parent:$x, child:$y) isa family;
       """
     Then materialised database is completed
-    Given the transaction commits
-    Given sessions open transactions with reasoning of type: read
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match (home-owner: $x, resident: $y) isa residence;
