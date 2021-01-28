@@ -192,7 +192,7 @@ Feature: Negation Resolution
         not {$y 20;};
       """
     Then answer size in reasoned database is: 1
-    Then     answer set is equivalent for graql query
+    Then answer set is equivalent for graql query
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
       """
@@ -218,7 +218,7 @@ Feature: Negation Resolution
         not {$y isa name;};
       """
     Then answer size in reasoned database is: 2
-    Then     answer set is equivalent for graql query
+    Then answer set is equivalent for graql query
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
       """
