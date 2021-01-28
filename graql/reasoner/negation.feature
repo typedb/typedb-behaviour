@@ -598,7 +598,7 @@ Feature: Negation Resolution
         not {(superior: $continent, subordinate: $area) isa location-hierarchy;};
       """
     Then answer size in reasoned database is: 0
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: negation can exclude a particular entity from a matched transitive relation
@@ -709,7 +709,7 @@ Feature: Negation Resolution
       """
       match $x has name "Not Ten", has age 20;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
     Then for graql query
       """
@@ -983,7 +983,7 @@ Feature: Negation Resolution
       """
     Then answer size in reasoned database is: 0
     Then answers are consistent across 5 executions in reasoned database
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when fixed (currently takes too long) (#75)
@@ -1058,7 +1058,7 @@ Feature: Negation Resolution
       """
       match (role-3: $x, role-4: $y) isa relation-4;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 11
     Then answers are consistent across 5 executions in reasoned database
     Then materialised and reasoned databases are the same size

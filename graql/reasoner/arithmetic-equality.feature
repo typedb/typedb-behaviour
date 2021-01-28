@@ -71,7 +71,6 @@ Feature: Attribute Attachment Resolution
     Given for each session, open transactions of type: write
 
   @Ignore
-  # TODO: re-enable all steps once attribute re-attachment is resolvable
   # TODO: move to negation.feature
   Scenario: when matching a pair of unrelated inferred attributes with negation and =, the answers are unequal
     Given for each session, graql define
@@ -115,16 +114,15 @@ Feature: Attribute Attachment Resolution
         $y has string-attribute $sa;
         not { $re = $sa; };
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     # The string-attributes are transferred to each other, so in fact both people have both Tesco and Safeway
     # x     | re    | y     | sa      |
     # Tango | Tesco | Alice | Safeway |
     # Tango | Tesco | Bob   | Safeway |
     Then answer size in reasoned database is: 2
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
   @Ignore
-   # TODO: re-enable all steps once attribute re-attachment is resolvable
   Scenario: when matching a pair of unrelated inferred attributes with '!=', the answers are unequal
     Given for each session, graql define
       """
@@ -167,10 +165,10 @@ Feature: Attribute Attachment Resolution
         $y has string-attribute $sa;
         $re != $sa;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     # The string-attributes are transferred to each other, so in fact both people have both Tesco and Safeway
     # x     | re    | y     | sa      |
     # Tango | Tesco | Alice | Safeway |
     # Tango | Tesco | Bob   | Safeway |
     Then answer size in reasoned database is: 2
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size

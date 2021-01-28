@@ -93,7 +93,7 @@ Feature: Attribute Attachment Resolution
       """
       match $x isa person, has string-attribute $y;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
     Then for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
@@ -101,14 +101,12 @@ Feature: Attribute Attachment Resolution
       """
       match $x isa string-attribute;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
     Then for each session, transaction closes
 
 
-
-  # TODO: re-enable all steps once attribute re-attachment is resolvable
   Scenario: when the same attribute is inferred on an entity and relation, both owners are correctly retrieved
     Given for each session, graql define
       """
@@ -149,11 +147,10 @@ Feature: Attribute Attachment Resolution
       """
       match $x has string-attribute $y;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 3
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
     Then for each session, transaction closes
-
 
 
   Scenario: a rule can infer an attribute value that did not previously exist in the graph
@@ -198,7 +195,6 @@ Feature: Attribute Attachment Resolution
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
-#    Then sleep
     Then for each session, transaction closes
     Then connection close all sessions
     Given connection open data sessions for databases:

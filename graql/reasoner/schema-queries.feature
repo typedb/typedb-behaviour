@@ -108,7 +108,7 @@ Feature: Schema Query Resolution (Variable Types)
       """
       match $x isa $type;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     # 3 people x 3 types of person {person,entity,thing}
     # 6 friendships x 3 types of friendship {friendship, relation, thing}
     # 1 name x 3 types of name {name,attribute,thing}
@@ -152,7 +152,7 @@ Feature: Schema Query Resolution (Variable Types)
       """
       match ($u, $v) isa $type;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     # 3 possible $u x 3 possible $v x 3 possible $type {friendship,relation,thing}
     Then answer size in reasoned database is: 27
     Then materialised and reasoned databases are the same size
@@ -215,7 +215,7 @@ Feature: Schema Query Resolution (Variable Types)
         $x isa $type;
         $type owns contract;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     # friendship can't have a contract... at least, not in this pristine test world
     # note: enforcing 'has contract' also eliminates 'relation' and 'thing' as possible types
     Then answer size in reasoned database is: 4
@@ -262,7 +262,7 @@ Feature: Schema Query Resolution (Variable Types)
         $x isa $type;
         $type sub relation;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     # 3 friendships, 3 employments, 6 relations
     Then answer size in reasoned database is: 12
     Then materialised and reasoned databases are the same size
@@ -325,7 +325,7 @@ Feature: Schema Query Resolution (Variable Types)
         $x isa $type;
         $type plays legal-documentation:subject;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     # friendship can't be a documented-thing
     # note: enforcing 'plays legal-documentation:subject' also eliminates 'relation' and 'thing' as possible types
     Then answer size in reasoned database is: 4
@@ -376,7 +376,7 @@ Feature: Schema Query Resolution (Variable Types)
         (employee: $x, employer: $y) isa employment;
         $x isa $type;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     # 3 colonels * 5 supertypes of colonel (colonel, military-person, person, entity, thing)
     Then answer size in reasoned database is: 15
     Then for graql query
@@ -385,7 +385,7 @@ Feature: Schema Query Resolution (Variable Types)
         ($x, $y) isa employment;
         $x isa $type;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     # (3 colonels * 5 supertypes of colonel * 1 company)
     # + (1 company * 3 supertypes of company * 3 colonels)
     Then answer size in reasoned database is: 24
@@ -435,7 +435,7 @@ Feature: Schema Query Resolution (Variable Types)
         not { $y is $x; };
       get $x, $y;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     # All companies match when $type is company (or entity)
     # Query returns {ab,ac,ad,bc,bd,cd} and each of them with the variables flipped
     Then answer size in reasoned database is: 12

@@ -508,7 +508,7 @@ Feature: Relation Inference Resolution
       """
       match (coworker: $x, coworker: $x) isa coworkers;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     # (p,p) is a coworkers since people work with themselves.
     # Applying the robot work rule we see that (r1,p) is a pet ownership, and (p,p) and (p,r2) are coworker relations,
     # so (r1,p) and (r1,r2) are both coworker relations.
@@ -522,7 +522,7 @@ Feature: Relation Inference Resolution
       """
       match (coworker: $x, coworker: $y) isa coworkers;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     # $x | $y |
     # p  | p  |
     # p  | r2 |
@@ -619,10 +619,10 @@ Feature: Relation Inference Resolution
       """
       match (subordinate: $x1, superior: $x2) isa location-hierarchy;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 6
     Then answers are consistent across 5 executions in reasoned database
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: when a transitive rule's 'then' matches a query, but its 'when' is unmet, the material answers are returned
@@ -866,7 +866,7 @@ Feature: Relation Inference Resolution
         $x has name $n;
         $y has name $n;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     # (a,a), (b,b), (c,c)
     Then answer size in reasoned database is: 3
     Then for each session, transaction closes
@@ -880,7 +880,7 @@ Feature: Relation Inference Resolution
         $n = 'a';
       get $x, $y;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
     Then for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
@@ -891,7 +891,7 @@ Feature: Relation Inference Resolution
         $x has name 'a';
         $y has name 'a';
       """
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
   #######################
@@ -939,7 +939,7 @@ Feature: Relation Inference Resolution
         $b isa place, has name "Turku";
         ($b, $c);
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     # $c in {'Turku Airport', 'Finland'}
     Then answer size in reasoned database is: 2
     Then materialised and reasoned databases are the same size
@@ -985,7 +985,7 @@ Feature: Relation Inference Resolution
         ($a, $b);
         $b isa place, has name "Turku";
       """
-#    Given all answers are correct in reasoned database
+    Given all answers are correct in reasoned database
     Given answer size in reasoned database is: 1
     Then for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
@@ -997,7 +997,7 @@ Feature: Relation Inference Resolution
         $b isa place, has name "Turku";
         ($c, $d);
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     # (2 db relations + 1 inferred) x 2 for variable swap
     Then answer size in reasoned database is: 6
     Then materialised and reasoned databases are the same size
@@ -1051,7 +1051,7 @@ Feature: Relation Inference Resolution
       """
       match ($a, $b) isa relation;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     # Despite there being more inferred relations, the answer size is still 6 (as in the previous scenario)
     # because the query is only interested in the related concepts, not in the relation instances themselves
     Then answer size in reasoned database is: 6
@@ -1061,7 +1061,7 @@ Feature: Relation Inference Resolution
       """
       match ($a, $b);
       """
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when fixed (#75)
@@ -1103,7 +1103,7 @@ Feature: Relation Inference Resolution
         ($a, $b);
         ($b, $c);
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     # a   | b   | c   |
     # AIR | TUR | FIN |
     # AIR | FIN | TUR |
@@ -1121,7 +1121,6 @@ Feature: Relation Inference Resolution
     Then materialised and reasoned databases are the same size
 
 
-# TODO: re-enable all steps once attribute re-attachment is resolvable
   Scenario: a relation can be inferred based on a direct type
     Given for each session, graql define
       """
@@ -1181,7 +1180,7 @@ Feature: Relation Inference Resolution
       """
       match ($x) isa derivedRelation;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
     Then for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
@@ -1189,7 +1188,7 @@ Feature: Relation Inference Resolution
       """
       match ($x) isa! derivedRelation;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
     Then for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
@@ -1197,6 +1196,6 @@ Feature: Relation Inference Resolution
       """
       match ($x) isa directDerivedRelation;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size

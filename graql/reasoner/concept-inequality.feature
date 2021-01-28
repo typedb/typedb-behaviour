@@ -76,7 +76,6 @@ Feature: Concept Inequality Resolution
     Given for each session, transaction commits
 
 
-  # TODO: re-enable all steps when 3-hop transitivity is resolvable
   Scenario: a rule can be applied based on concept inequality
     Given connection close all sessions
     Given connection open schema sessions for databases:
@@ -138,7 +137,7 @@ Feature: Concept Inequality Resolution
       """
       match (related-state: $s) isa holds;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
     Then for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
@@ -146,7 +145,7 @@ Feature: Concept Inequality Resolution
       """
       match $s isa state, has name 's2';
       """
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: inferred binary relations can be filtered by concept inequality of their roleplayers
@@ -158,7 +157,7 @@ Feature: Concept Inequality Resolution
       """
       match (ball1: $x, ball2: $y) isa selection;
       """
-#    Given all answers are correct in reasoned database
+    Given all answers are correct in reasoned database
     # materialised: [ab, ba, bc, cb]
     # inferred: [aa, ac, bb, ca, cc]
     Given answer size in reasoned database is: 9
@@ -170,7 +169,7 @@ Feature: Concept Inequality Resolution
         (ball1: $x, ball2: $y) isa selection;
         not { $x is $y; };
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     # materialised: [ab, ba, bc, cb]
     # inferred: [ac, ca]
     Then answer size in reasoned database is: 6
@@ -187,9 +186,9 @@ Feature: Concept Inequality Resolution
         not { $nx is $ny; };
       get $x, $y;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 6
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: inferred binary relations can be filtered by inequality to a specific concept
@@ -204,7 +203,7 @@ Feature: Concept Inequality Resolution
         not { $x is $y; };
         $y has name 'c';
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
     Then for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
@@ -217,9 +216,9 @@ Feature: Concept Inequality Resolution
         $y has name 'c';
         {$x has name 'a';} or {$x has name 'b';};
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: pairs of inferred relations can be filtered by inequality of players in the same role
@@ -244,7 +243,7 @@ Feature: Concept Inequality Resolution
         (ball1: $x, ball2: $z) isa selection;
         not { $y is $z; };
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     # [aab, aac, aba, abc, aca, acb,
     #  bab, bac, bba, bbc, bca, bcb,
     #  cab, cac, cba, cbc, cca, ccb]
@@ -263,9 +262,9 @@ Feature: Concept Inequality Resolution
         not { $ny is $nz; };
       get $x, $y, $z;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 18
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
 
@@ -292,7 +291,7 @@ Feature: Concept Inequality Resolution
         (ball1: $y, ball2: $z) isa selection;
         not { $x is $z; };
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 18
     # verify that $y and $z always have distinct names
     Then for each session, transaction closes
@@ -308,9 +307,9 @@ Feature: Concept Inequality Resolution
         not { $nx is $nz; };
       get $x, $y, $z;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 18
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: inequality predicates can operate independently against multiple pairs of relations in the same query
@@ -340,7 +339,7 @@ Feature: Concept Inequality Resolution
         (ball1: $x, ball2: $y2) isa selection;
         (ball1: $x, ball2: $z2) isa selection;
       """
-#    Given all answers are correct in reasoned database
+    Given all answers are correct in reasoned database
     # For each of the [3] values of $x, there are 3^4 = 81 choices for {$y1, $z1, $y2, $z2}, for a total of 243
     Then answer size in reasoned database is: 243
     Then for each session, transaction closes
@@ -356,7 +355,7 @@ Feature: Concept Inequality Resolution
         not { $y1 is $z1; };
         not { $y2 is $z2; };
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     # Each neq predicate reduces the answer size by 1/3, cutting it to 162, then 108
     Then answer size in reasoned database is: 108
     Then for each session, transaction closes
@@ -379,9 +378,9 @@ Feature: Concept Inequality Resolution
         not { $ny2 is $nz2; };
       get $x, $y1, $z1, $y2, $z2;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 108
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: inequality predicates can operate independently against multiple roleplayers in the same relation
@@ -406,7 +405,7 @@ Feature: Concept Inequality Resolution
         (ball1: $x, ball2: $z1) isa selection;
         (ball1: $y, ball2: $z2) isa selection;
       """
-#    Given all answers are correct in reasoned database
+    Given all answers are correct in reasoned database
     # There are 3^4 possible choices for the set {$x, $y, $z1, $z2}, for a total of 81
     Then answer size in reasoned database is: 81
     Then for each session, transaction closes
@@ -421,7 +420,7 @@ Feature: Concept Inequality Resolution
         not { $x is $z1; };
         not { $y is $z2; };
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     # Each neq predicate reduces the answer size by 1/3, cutting it to 54, then 36
     Then answer size in reasoned database is: 36
     Then for each session, transaction closes
@@ -443,9 +442,9 @@ Feature: Concept Inequality Resolution
         not { $ny is $nz2; };
       get $x, $y, $z1, $z2;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 36
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
   @ignore
@@ -591,4 +590,4 @@ Feature: Concept Inequality Resolution
     # x      | value | type     |
     # Sprite | Tesco | retailer |
     Then answer size in reasoned database is: 1
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size

@@ -108,7 +108,7 @@ Feature: Recursion Resolution
       """
       match (big-location-subordinate: $x, big-location-superior: $y) isa big-location-hierarchy;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
     Then materialised and reasoned databases are the same size
 
@@ -180,7 +180,7 @@ Feature: Recursion Resolution
       """
       match (role31: $x, role32: $y) isa relation3;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
     Then materialised and reasoned databases are the same size
 
@@ -292,9 +292,9 @@ Feature: Recursion Resolution
       """
       match $x isa dream; limit 10;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 10
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when materialisation is possible (may be an infinite graph?) (#75)
@@ -391,15 +391,15 @@ Feature: Recursion Resolution
       """
       match $p isa pair, has name 'ff';
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 16
     Then for graql query
       """
       match $p isa pair;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 64
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
@@ -494,7 +494,7 @@ Feature: Recursion Resolution
         $x has index 'i';
       get $y;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 3
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -505,7 +505,7 @@ Feature: Recursion Resolution
         {$ind = 'j';} or {$ind = 's';} or {$ind = 'v';};
       get $y;
       """
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
@@ -573,7 +573,7 @@ Feature: Recursion Resolution
         $Y has name $name;
       get $Y, $name;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 3
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -591,7 +591,7 @@ Feature: Recursion Resolution
         $X has name 'aa';
       get $Y;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 4
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -606,7 +606,7 @@ Feature: Recursion Resolution
       """
       match (ancestor: $X, descendant: $Y) isa Ancestor;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 10
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -626,7 +626,7 @@ Feature: Recursion Resolution
       """
       match ($X, $Y) isa Ancestor;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 20
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -719,7 +719,7 @@ Feature: Recursion Resolution
         $Y has name $name;
       get $Y;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -744,7 +744,7 @@ Feature: Recursion Resolution
         $Y has name 'd';
       get $X;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 3
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -837,7 +837,7 @@ Feature: Recursion Resolution
         $x has name 'a';
       get $y;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -848,7 +848,7 @@ Feature: Recursion Resolution
         {$name = 'f';} or {$name = 'a';};
       get $y;
       """
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when resolvable ('all answers correct' takes too long, 'same size' test fails) (#75)
@@ -916,7 +916,7 @@ Feature: Recursion Resolution
         $y has index 'a';
       get $x;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -924,7 +924,7 @@ Feature: Recursion Resolution
       """
       match $x has index 'a2';
       """
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
@@ -1010,7 +1010,7 @@ Feature: Recursion Resolution
       """
       match (from: $x, to: $y) isa reachable;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 7
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -1092,7 +1092,7 @@ Feature: Recursion Resolution
         $x has index 'a';
       get $y;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 4
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -1103,7 +1103,7 @@ Feature: Recursion Resolution
         {$indY = 'a';} or {$indY = 'b';} or {$indY = 'c';} or {$indY = 'd';};
       get $y;
       """
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
@@ -1173,7 +1173,7 @@ Feature: Recursion Resolution
         $x has name 'ann';
       get $y;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 3
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -1184,7 +1184,7 @@ Feature: Recursion Resolution
         {$name = 'ann';} or {$name = 'bill';} or {$name = 'peter';};
       get $y;
       """
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
@@ -1281,7 +1281,7 @@ Feature: Recursion Resolution
         $x has name 'a';
       get $y;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 3
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -1296,7 +1296,7 @@ Feature: Recursion Resolution
       """
       match (RSG-from: $x, RSG-to: $y) isa RevSG;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 11
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -1313,7 +1313,7 @@ Feature: Recursion Resolution
         {$nameX = 'f';$nameY = 'k';};
       get $x, $y;
       """
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
@@ -1479,7 +1479,7 @@ Feature: Recursion Resolution
         $x has index 'a0';
       get $y;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 5
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -1487,7 +1487,7 @@ Feature: Recursion Resolution
       """
       match { $y isa a-entity; } or { $y isa end; };
       """
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
@@ -1685,7 +1685,7 @@ Feature: Recursion Resolution
         $x has index 'a0';
       get $y;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 60
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -1693,7 +1693,7 @@ Feature: Recursion Resolution
       """
       match $y isa b-entity;
       """
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
   Scenario: linear transitivity matrix test
@@ -1839,7 +1839,7 @@ Feature: Recursion Resolution
         $x has index 'a';
       get $y;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 25
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -1847,4 +1847,4 @@ Feature: Recursion Resolution
       """
       match $y isa a-entity;
       """
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
