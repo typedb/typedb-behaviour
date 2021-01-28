@@ -24,8 +24,8 @@ Feature: Resolution Test Framework
     Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised database is named: materialised
-    Given reasoned database is named: reasoned
+
+
 
 
   Scenario: basic rule
@@ -49,7 +49,9 @@ Feature: Resolution Test Framework
       insert
       $x isa company;
       """
-    When materialised database is completed
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match $co has name $n;
@@ -91,7 +93,9 @@ Feature: Resolution Test Framework
       $co isa company;
       """
 
-    When materialised database is completed
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match $co has is-liable $l;
@@ -139,7 +143,9 @@ Feature: Resolution Test Framework
       (superior: $cit, subordinate: $ar) isa location-hierarchy;
       """
 
-    When materialised database is completed
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -196,7 +202,9 @@ Feature: Resolution Test Framework
       (location-hierarchy_superior: $cit, location-hierarchy_subordinate: $ar) isa location-hierarchy;
       """
 
-    When materialised database is completed
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match $lh (location-hierarchy_superior: $continent, location-hierarchy_subordinate: $area) isa location-hierarchy;
@@ -246,7 +254,9 @@ Feature: Resolution Test Framework
       $b isa man;
       """
 
-    When materialised database is completed
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match ($w, $m) isa family-relation; $w isa woman;
@@ -286,7 +296,9 @@ Feature: Resolution Test Framework
       $c2 has name $n2; $n2 "another-company";
       """
 
-    When materialised database is completed
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match $com isa company;
@@ -330,7 +342,9 @@ Feature: Resolution Test Framework
       $c2 has name $n2; $n2 "another-company";
       """
 
-    When materialised database is completed
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match $com isa company, has is-liable $lia; $lia true;
@@ -370,7 +384,9 @@ Feature: Resolution Test Framework
       $c2 has name $n2; $n2 "another-company";
       """
 
-    When materialised database is completed
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match $com isa company; not { $com has is-liable $lia; $lia true; }; not { $com has name $n; $n "the-company"; };
