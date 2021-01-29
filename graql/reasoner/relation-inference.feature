@@ -819,7 +819,6 @@ Feature: Relation Inference Resolution
     Then materialised and reasoned databases are the same size
 
 
-  # TODO: re-enable all steps when fixed (#75), currently they are very slow
   Scenario: inferred relations can be filtered by shared attribute ownership
     Given for each session, graql define
       """
