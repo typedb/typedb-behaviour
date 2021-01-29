@@ -24,7 +24,7 @@ Feature: Graql Get Clause
     Given connection create database: grakn
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
-    Given the integrity is validated
+
     Given graql define
       """
       define
@@ -50,7 +50,7 @@ Feature: Graql Get Clause
       ref sub attribute, value long;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -69,7 +69,7 @@ Feature: Graql Get Clause
       $z isa person, has name $x, has age $y, has ref 0;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -87,7 +87,7 @@ Feature: Graql Get Clause
       """
       match $x isa person; get $y;
       """
-    Then the integrity is validated
+
 
 
   ########
@@ -104,7 +104,7 @@ Feature: Graql Get Clause
       <attr> sub attribute, value <type>, owns ref @key;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -117,7 +117,7 @@ Feature: Graql Get Clause
       $d <val4> isa <attr>, has ref 3;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -149,7 +149,7 @@ Feature: Graql Get Clause
       $d isa person, has name "Brenda", has ref 3;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -185,7 +185,7 @@ Feature: Graql Get Clause
       $d isa person, has name "Brenda", has ref 3;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -210,7 +210,7 @@ Feature: Graql Get Clause
       $d isa person, has name "Brenda", has ref 3;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -235,7 +235,7 @@ Feature: Graql Get Clause
       $d isa person, has name "Brenda", has ref 3;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -259,7 +259,7 @@ Feature: Graql Get Clause
       $d isa person, has name "Brenda", has ref 3;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -284,7 +284,7 @@ Feature: Graql Get Clause
       $d isa person, has name "Brenda", has ref 3;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -305,7 +305,7 @@ Feature: Graql Get Clause
       $d isa person, has name "Brenda", has ref 3;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -327,7 +327,7 @@ Feature: Graql Get Clause
       $e "secret agent" isa name;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     Then get answers of graql match
       """
@@ -354,7 +354,7 @@ Feature: Graql Get Clause
       $e isa person, has age 2, has ref 4;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -387,7 +387,7 @@ Feature: Graql Get Clause
       $b isa person, has age 6, has ref 1;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     Then graql match; throws exception
       """
@@ -413,7 +413,7 @@ Feature: Graql Get Clause
       $f (friend: $p1, friend: $p2) isa friendship, has ref 3;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -471,7 +471,7 @@ Feature: Graql Get Clause
       person owns <attr>;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -483,7 +483,7 @@ Feature: Graql Get Clause
       $p3 isa person, has <attr> <val3>, has ref 2;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answer of graql match aggregate
       """
@@ -517,7 +517,7 @@ Feature: Graql Get Clause
       person owns weight;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -529,7 +529,7 @@ Feature: Graql Get Clause
       $p3 isa person, has weight 24.8, has ref 2;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answer of graql match aggregate
       """
@@ -549,7 +549,7 @@ Feature: Graql Get Clause
       $p3 isa person, has name "Miles", has age 15, has ref 2;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answer of graql match aggregate
       """
@@ -574,7 +574,7 @@ Feature: Graql Get Clause
       $p3 isa person, has age <val3>, has ref 2;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answer of graql match aggregate
       """
@@ -599,7 +599,7 @@ Feature: Graql Get Clause
       $p4 isa person, has age 35, has ref 3;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answer of graql match aggregate
       """
@@ -620,7 +620,7 @@ Feature: Graql Get Clause
       person owns income;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answer of graql match aggregate
       """
@@ -662,14 +662,14 @@ Feature: Graql Get Clause
       insert $x isa person, has ref 0;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     Then graql match; throws exception
       """
       match $x isa person;
       min $x;
       """
-    Then the integrity is validated
+
 
 
   Scenario Outline: an error is thrown when getting the '<agg_type>' of attributes that have the inapplicable type, '<type>'
@@ -683,7 +683,7 @@ Feature: Graql Get Clause
       person owns <attr>;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -693,14 +693,14 @@ Feature: Graql Get Clause
       $x isa person, has ref 0, has <attr> <value>;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     Then graql match; throws exception
       """
       match $x isa person, has <attr> $y;
       <agg_type> $y;
       """
-    Then the integrity is validated
+
 
     Examples:
       | attr       | type     | value      | agg_type |
@@ -732,14 +732,14 @@ Feature: Graql Get Clause
       $y isa person, has name "Gloria", has age 28, has ref 1;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     Then graql match; throws exception
       """
       match $x isa person, has attribute $y;
       sum $y;
       """
-    Then the integrity is validated
+
 
 
   Scenario: when taking the sum of an empty set, even if any matches would definitely be strings, no error is thrown and an empty answer is returned
@@ -766,7 +766,7 @@ Feature: Graql Get Clause
       $f (friend: $p1, friend: $p2, friend: $p3, friend: $p4) isa friendship, has ref 4;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -816,7 +816,7 @@ Feature: Graql Get Clause
       $f (friend: $p1, friend: $p2) isa friendship, has ref 2;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     Then graql match; throws exception
       """
@@ -824,7 +824,7 @@ Feature: Graql Get Clause
       get $x;
       group $y;
       """
-    Then the integrity is validated
+
 
 
   ###################
@@ -842,7 +842,7 @@ Feature: Graql Get Clause
       $f (friend: $p1, friend: $p2, friend: $p3, friend: $p4) isa friendship, has ref 4;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -874,7 +874,7 @@ Feature: Graql Get Clause
       $e2 (employer: $c2, employee: $p3) isa employment, has ref 6;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -926,7 +926,7 @@ Feature: Graql Get Clause
       $e2 (employer: $c2, employee: $p4) isa employment, has ref 7;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match group aggregate
       """

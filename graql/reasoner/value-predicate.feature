@@ -24,8 +24,8 @@ Feature: Value Predicate Resolution
     Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised database is named: materialised
-    Given reasoned database is named: reasoned
+
+
     Given for each session, graql define
       """
       define
@@ -81,7 +81,9 @@ Feature: Value Predicate Resolution
       insert
       $se isa tortoise, has age 1;
       """
-    When materialised database is completed
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match $x has is-old $r;
@@ -108,7 +110,9 @@ Feature: Value Predicate Resolution
       $x isa person;
       $y isa person;
       """
-    When materialised database is completed
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -117,7 +121,7 @@ Feature: Value Predicate Resolution
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: <answer-size>
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
     Examples:
       | op  | answer-size |
@@ -145,7 +149,9 @@ Feature: Value Predicate Resolution
       $x isa person, has name "Alice";
       $y isa person, has name "Bob";
       """
-    When materialised database is completed
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -153,9 +159,9 @@ Feature: Value Predicate Resolution
         $y isa person, has name "Bob", has lucky-number $n;
         $m <op> $n;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: <answer-size>
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
     Examples:
       | op  | answer-size |
@@ -184,7 +190,9 @@ Feature: Value Predicate Resolution
       $x isa person, has name "Alice";
       $y isa person, has name "Bob";
       """
-    When materialised database is completed
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -193,9 +201,9 @@ Feature: Value Predicate Resolution
         $m <op> $n;
         $n <op> 1667;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: <answer-size>
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
     Examples:
       | op  | answer-size |
@@ -232,7 +240,9 @@ Feature: Value Predicate Resolution
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    When materialised database is completed
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -273,7 +283,9 @@ Feature: Value Predicate Resolution
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    When materialised database is completed
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -317,7 +329,9 @@ Feature: Value Predicate Resolution
       """
       insert $x isa soft-drink, has name "Fanta";
       """
-    When materialised database is completed
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -326,7 +340,7 @@ Feature: Value Predicate Resolution
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when fixed (#75)
@@ -359,7 +373,9 @@ Feature: Value Predicate Resolution
       $x isa soft-drink, has name "Fanta";
       $y isa soft-drink, has name "Tango";
       """
-#    When materialised database is completed
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -368,7 +384,7 @@ Feature: Value Predicate Resolution
         $rx = $ry;
         $ry contains 'land';
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     # x     | rx        | y     | ry        |
     # Fanta | Iceland   | Tango | Iceland   |
     # Tango | Iceland   | Fanta | Iceland   |
@@ -379,7 +395,7 @@ Feature: Value Predicate Resolution
     # Tango | Iceland   | Tango | Iceland   |
     # Tango | Poundland | Tango | Poundland |
     Then answer size in reasoned database is: 8
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when fixed (#75)
@@ -412,7 +428,9 @@ Feature: Value Predicate Resolution
       $x isa soft-drink, has name "Fanta";
       $y isa soft-drink, has name "Tango";
       """
-#    When materialised database is completed
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -421,7 +439,7 @@ Feature: Value Predicate Resolution
         $rx != $ry;
         $ry contains 'land';
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     # x     | rx        | y     | ry        |
     # Fanta | Iceland   | Tango | Poundland |
     # Tango | Iceland   | Fanta | Poundland |
@@ -440,7 +458,7 @@ Feature: Value Predicate Resolution
     # Fanta | Londis    | Fanta | Iceland   |
     # Tango | Londis    | Tango | Iceland   |
     Then answer size in reasoned database is: 16
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: in a rule, 'not { $x = $y; }' is the same as saying '$x != $y'
@@ -468,7 +486,9 @@ Feature: Value Predicate Resolution
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    When materialised database is completed
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Given for graql query
       """
       match
@@ -516,7 +536,9 @@ Feature: Value Predicate Resolution
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    When materialised database is completed
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Given for graql query
       """
       match
@@ -565,7 +587,9 @@ Feature: Value Predicate Resolution
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    When materialised database is completed
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -608,7 +632,9 @@ Feature: Value Predicate Resolution
       $x isa person, has string-attribute "Tesco";
       $y isa soft-drink, has name "Tesco";
       """
-    When materialised database is completed
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -687,7 +713,9 @@ Feature: Value Predicate Resolution
       $p3 "low price" isa price-range;
       $p4 "cheap" isa price-range;
       """
-    When materialised database is completed
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -710,7 +738,7 @@ Feature: Value Predicate Resolution
         $x "cheap" isa price-range;
         ($x, priced-item: $y) isa price-classification;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
     Then for graql query
       """
@@ -726,7 +754,7 @@ Feature: Value Predicate Resolution
         $x isa price-range;
         ($x, priced-item: $y) isa price-classification;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     # sum of all previous answers
     Then answer size in reasoned database is: 5
     Then materialised and reasoned databases are the same size
@@ -782,12 +810,14 @@ Feature: Value Predicate Resolution
       (original:$x, reply:$x4) isa reply-of;
       (original:$x, reply:$x5) isa reply-of;
       """
-#    When materialised database is completed
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match (predecessor:$x1, successor:$x2) isa message-succession;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     # the (n-1)th triangle number, where n is the number of replies to the first post
     Then answer size in reasoned database is: 10
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size

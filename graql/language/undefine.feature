@@ -24,7 +24,7 @@ Feature: Graql Undefine Query
     Given connection create database: grakn
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
-    Given the integrity is validated
+
     Given graql define
       """
       define
@@ -35,7 +35,7 @@ Feature: Graql Undefine Query
       abstract-type sub entity, abstract;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: write
 
 
@@ -58,7 +58,7 @@ Feature: Graql Undefine Query
       undefine person sub entity;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -75,7 +75,7 @@ Feature: Graql Undefine Query
       """
       undefine person sub relation;
       """
-    Then the integrity is validated
+
 
 
   Scenario: a sub-entity type can be removed using 'sub' with its direct supertype, and its parent is preserved
@@ -84,7 +84,7 @@ Feature: Graql Undefine Query
       define child sub person;
       """
     Given transaction commits
-    Given the integrity is validated
+
     When session opens transaction of type: write
     Given get answers of graql match
       """
@@ -99,7 +99,7 @@ Feature: Graql Undefine Query
       undefine child sub person;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -116,7 +116,7 @@ Feature: Graql Undefine Query
       define child sub person;
       """
     Given transaction commits
-    Given the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -132,7 +132,7 @@ Feature: Graql Undefine Query
       undefine child sub entity;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -149,13 +149,13 @@ Feature: Graql Undefine Query
       define child sub person;
       """
     Given transaction commits
-    Given the integrity is validated
+
     When session opens transaction of type: write
     Then graql undefine; throws exception
       """
       undefine person sub entity;
       """
-    Then the integrity is validated
+
 
 
   Scenario: removing a playable role from a super entity type also removes it from its subtypes
@@ -164,14 +164,14 @@ Feature: Graql Undefine Query
       define child sub person;
       """
     Given transaction commits
-    Given the integrity is validated
+
     When session opens transaction of type: write
     When graql undefine
       """
       undefine person plays employment:employee;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -186,14 +186,14 @@ Feature: Graql Undefine Query
       define child sub person;
       """
     Given transaction commits
-    Given the integrity is validated
+
     When session opens transaction of type: write
     When graql undefine
       """
       undefine person owns name;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -208,14 +208,14 @@ Feature: Graql Undefine Query
       define child sub person;
       """
     Given transaction commits
-    Given the integrity is validated
+
     When session opens transaction of type: write
     When graql undefine
       """
       undefine person owns email;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -236,7 +236,7 @@ Feature: Graql Undefine Query
       | label:person        |
       | label:entity        |
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -245,7 +245,7 @@ Feature: Graql Undefine Query
       insert $x isa person, has name "Victor", has email "victor@grakn.ai";
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open schema session for database: grakn
     When session opens transaction of type: write
@@ -253,7 +253,7 @@ Feature: Graql Undefine Query
       """
       undefine person sub entity;
       """
-    Then the integrity is validated
+
     When connection close all sessions
     When connection open data session for database: grakn
     When session opens transaction of type: write
@@ -265,7 +265,7 @@ Feature: Graql Undefine Query
         $x isa person;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When connection close all sessions
     When connection open schema session for database: grakn
     When session opens transaction of type: write
@@ -274,7 +274,7 @@ Feature: Graql Undefine Query
       undefine person sub entity;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -304,7 +304,7 @@ Feature: Graql Undefine Query
       undefine employment sub relation;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -324,7 +324,7 @@ Feature: Graql Undefine Query
       contract-employment sub employment;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: write
     Given get answers of graql match
       """
@@ -338,7 +338,7 @@ Feature: Graql Undefine Query
       undefine employment plays employment-terms:employment;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -356,7 +356,7 @@ Feature: Graql Undefine Query
       contract-employment sub employment;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: write
     Given get answers of graql match
       """
@@ -371,7 +371,7 @@ Feature: Graql Undefine Query
       undefine employment owns start-date;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -389,7 +389,7 @@ Feature: Graql Undefine Query
       contract-employment sub employment;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: write
     Given get answers of graql match
       """
@@ -404,7 +404,7 @@ Feature: Graql Undefine Query
       undefine employment owns employment-reference;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -424,7 +424,7 @@ Feature: Graql Undefine Query
       $r (employee: $p) isa employment;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -436,7 +436,7 @@ Feature: Graql Undefine Query
       person plays employment:employee;
       employment sub relation;
       """
-    Then the integrity is validated
+
 
   #TODO: Reenable when deletion works
   @ignore
@@ -459,7 +459,7 @@ Feature: Graql Undefine Query
       $r (employee: $p) isa employment;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -467,7 +467,7 @@ Feature: Graql Undefine Query
       """
       undefine employment sub relation;
       """
-    Then the integrity is validated
+
     When connection close all sessions
     When connection open data session for database: grakn
     When session opens transaction of type: write
@@ -479,7 +479,7 @@ Feature: Graql Undefine Query
         $r isa employment;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When connection close all sessions
     When connection open schema session for database: grakn
     When session opens transaction of type: write
@@ -488,7 +488,7 @@ Feature: Graql Undefine Query
       undefine employment sub relation;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -514,7 +514,7 @@ Feature: Graql Undefine Query
       undefine employment sub relation;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -543,7 +543,7 @@ Feature: Graql Undefine Query
       undefine employment relates employee;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -560,7 +560,7 @@ Feature: Graql Undefine Query
       undefine person plays employment:employee;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -581,7 +581,7 @@ Feature: Graql Undefine Query
       $r (employee: $p) isa employment;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: write
     Given graql delete
       """
@@ -591,7 +591,7 @@ Feature: Graql Undefine Query
         $r isa employment;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -602,7 +602,7 @@ Feature: Graql Undefine Query
       employment relates employee;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When connection close all sessions
     When connection open data session for database: grakn
     When session opens transaction of type: write
@@ -618,7 +618,7 @@ Feature: Graql Undefine Query
       insert
         $r (employee: $p) isa employment;
       """
-    Then the integrity is validated
+
 
 
   Scenario: removing all roles from a relation type without undefining the relation type throws on commit
@@ -629,7 +629,7 @@ Feature: Graql Undefine Query
       employment relates employer;
       """
     Then transaction commits; throws exception
-    Then the integrity is validated
+
 
 
   Scenario: undefining a role type automatically detaches any possible roleplayers
@@ -647,7 +647,7 @@ Feature: Graql Undefine Query
       undefine employment relates employee;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -665,7 +665,7 @@ Feature: Graql Undefine Query
       company sub entity, owns name, plays employment:employer;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -677,7 +677,7 @@ Feature: Graql Undefine Query
       $r (employee: $p, employer: $c) isa employment;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -685,7 +685,7 @@ Feature: Graql Undefine Query
       """
       undefine employment relates employer;
       """
-    Then the integrity is validated
+
 
 
   Scenario: a role that is not played in any existing instance of its relation type can be safely removed
@@ -699,7 +699,7 @@ Feature: Graql Undefine Query
       $r (employee: $p) isa employment;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -708,7 +708,7 @@ Feature: Graql Undefine Query
       undefine employment relates employer;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -725,14 +725,14 @@ Feature: Graql Undefine Query
       define part-time sub employment;
       """
     Given transaction commits
-    Given the integrity is validated
+
     When session opens transaction of type: write
     When graql undefine
       """
       undefine employment relates employer;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -766,7 +766,7 @@ Feature: Graql Undefine Query
       $r (employee: $p) isa employment;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: write
     Given graql delete
       """
@@ -776,7 +776,7 @@ Feature: Graql Undefine Query
         $r isa employment;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -785,7 +785,7 @@ Feature: Graql Undefine Query
       undefine person plays employment:employee;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When connection close all sessions
     When connection open data session for database: grakn
     When session opens transaction of type: write
@@ -801,7 +801,7 @@ Feature: Graql Undefine Query
       insert
         $r (employee: $p) isa employment;
       """
-    Then the integrity is validated
+
 
 
   Scenario: undefining a playable role that was not actually playable to begin with throws
@@ -816,7 +816,7 @@ Feature: Graql Undefine Query
       """
       undefine person plays employment:employer;
       """
-    Then the integrity is validated
+
 
 
   Scenario: removing a playable role throws an error if it is played by existing instances
@@ -830,7 +830,7 @@ Feature: Graql Undefine Query
       $r (employee: $p) isa employment;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -838,7 +838,7 @@ Feature: Graql Undefine Query
       """
       undefine person plays employment:employee;
       """
-    Then the integrity is validated
+
 
 
   ###################
@@ -851,7 +851,7 @@ Feature: Graql Undefine Query
       define <attr> sub attribute, value <value_type>;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: write
     Given get answers of graql match
       """
@@ -863,7 +863,7 @@ Feature: Graql Undefine Query
       undefine <attr> sub attribute;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     Then graql match; throws exception
       """
@@ -885,7 +885,7 @@ Feature: Graql Undefine Query
       undefine email regex ".+@\w+\..+";
       """
     Then transaction commits
-    Then the integrity is validated
+
     When connection close all sessions
     When connection open data session for database: grakn
     When session opens transaction of type: write
@@ -894,22 +894,13 @@ Feature: Graql Undefine Query
       insert $x "not-email-regex" isa email;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
       match $x isa email;
       """
     Then answer size is: 1
-
-  #TODO: Appears to directly contradict the above? Ask why it's different
-  @ignore
-  Scenario: regex pattern should not be specified during an undefine; if it is, then an error is thrown
-    Then graql undefine; throws exception
-      """
-      undefine email regex ".+@\w.com";
-      """
-    Then the integrity is validated
 
 
   Scenario: removing playable roles from a super attribute type also removes them from its subtypes
@@ -922,7 +913,7 @@ Feature: Graql Undefine Query
       name plays employment:manager-name;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: write
     Given get answers of graql match
       """
@@ -936,7 +927,7 @@ Feature: Graql Undefine Query
       undefine name plays employment:manager-name;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -955,7 +946,7 @@ Feature: Graql Undefine Query
       name owns locale;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: write
     Given get answers of graql match
       """
@@ -970,7 +961,7 @@ Feature: Graql Undefine Query
       undefine name owns locale;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -989,7 +980,7 @@ Feature: Graql Undefine Query
       name owns name-id @key;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: write
     Given get answers of graql match
       """
@@ -1004,7 +995,7 @@ Feature: Graql Undefine Query
       undefine name owns name-id;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1020,7 +1011,7 @@ Feature: Graql Undefine Query
       name owns name;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: write
     When graql undefine
       """
@@ -1029,7 +1020,7 @@ Feature: Graql Undefine Query
       name sub attribute;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     Then graql match; throws exception
       """
@@ -1042,7 +1033,7 @@ Feature: Graql Undefine Query
       """
       undefine name value string;
       """
-    Then the integrity is validated
+
 
   #TODO: Reenable when deletion works
   @ignore
@@ -1064,7 +1055,7 @@ Feature: Graql Undefine Query
       insert $x "Colette" isa name;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -1072,7 +1063,7 @@ Feature: Graql Undefine Query
       """
       undefine name sub attribute;
       """
-    Then the integrity is validated
+
     When connection close all sessions
     When connection open data session for database: grakn
     When session opens transaction of type: write
@@ -1084,7 +1075,7 @@ Feature: Graql Undefine Query
         $x isa name;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When connection close all sessions
     When connection open schema session for database: grakn
     When session opens transaction of type: write
@@ -1093,7 +1084,7 @@ Feature: Graql Undefine Query
       undefine name sub attribute;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1124,7 +1115,7 @@ Feature: Graql Undefine Query
       undefine person owns name;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1140,7 +1131,7 @@ Feature: Graql Undefine Query
       """
       undefine employment owns name;
       """
-    Then the integrity is validated
+
 
 
   Scenario: attempting to undefine an attribute ownership inherited from a parent throws
@@ -1149,13 +1140,13 @@ Feature: Graql Undefine Query
       define child sub person;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: write
     Then graql undefine; throws exception
       """
       undefine child owns name;
       """
-    Then the integrity is validated
+
 
 
   Scenario: undefining a key ownership removes it
@@ -1164,7 +1155,7 @@ Feature: Graql Undefine Query
       undefine person owns email;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1178,7 +1169,7 @@ Feature: Graql Undefine Query
       """
       undefine person owns email @key;
       """
-    Then the integrity is validated
+
 
 
   Scenario: writing '@key' when undefining an attribute ownership is not allowed
@@ -1186,7 +1177,7 @@ Feature: Graql Undefine Query
       """
       undefine person owns name @key;
       """
-    Then the integrity is validated
+
 
 
   Scenario: when a type can own an attribute, but none of its instances actually do, the ownership can be undefined
@@ -1198,7 +1189,7 @@ Feature: Graql Undefine Query
       | x            |
       | label:person |
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -1207,7 +1198,7 @@ Feature: Graql Undefine Query
       insert $x isa person, has email "anon@grakn.ai";
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -1216,7 +1207,7 @@ Feature: Graql Undefine Query
       undefine person owns name;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1234,7 +1225,7 @@ Feature: Graql Undefine Query
       insert $x isa person, has name "Tomas", has email "tomas@grakn.ai";
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -1242,7 +1233,7 @@ Feature: Graql Undefine Query
       """
       undefine person owns name;
       """
-    Then the integrity is validated
+
 
 
   Scenario: undefining a key ownership throws an error if it is owned by existing instances
@@ -1254,7 +1245,7 @@ Feature: Graql Undefine Query
       insert $x isa person, has name "Daniel", has email "daniel@grakn.ai";
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -1262,7 +1253,7 @@ Feature: Graql Undefine Query
       """
       undefine person owns email;
       """
-    Then the integrity is validated
+
 
 
   #########
@@ -1282,7 +1273,7 @@ Feature: Graql Undefine Query
       };
       """
     Given transaction commits
-    Given the integrity is validated
+
     When session opens transaction of type: write
     Then rules contain: a-rule
     When graql undefine
@@ -1290,7 +1281,7 @@ Feature: Graql Undefine Query
       undefine rule a-rule;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     Then rules do not contain: a-rule
 
@@ -1308,7 +1299,7 @@ Feature: Graql Undefine Query
       };
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -1317,7 +1308,7 @@ Feature: Graql Undefine Query
       insert $x isa person, has email "samuel@grakn.ai";
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     Given get answers of graql match
       """
@@ -1336,7 +1327,7 @@ Feature: Graql Undefine Query
       undefine rule samuel-email-rule;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1360,7 +1351,7 @@ Feature: Graql Undefine Query
       };
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -1369,7 +1360,7 @@ Feature: Graql Undefine Query
       insert $x isa person, has email "samuel@grakn.ai";
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -1386,7 +1377,7 @@ Feature: Graql Undefine Query
       """
       undefine rule samuel-email-rule;
       """
-    Then the integrity is validated
+
     When get answers of graql match
       """
       match
@@ -1417,7 +1408,7 @@ Feature: Graql Undefine Query
       """
       insert $x isa abstract-type;
       """
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -1426,7 +1417,7 @@ Feature: Graql Undefine Query
       undefine abstract-type abstract;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -1444,7 +1435,7 @@ Feature: Graql Undefine Query
       insert $x isa abstract-type;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1459,7 +1450,7 @@ Feature: Graql Undefine Query
       undefine person abstract;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1478,14 +1469,14 @@ Feature: Graql Undefine Query
       define sub-abstract-type sub abstract-type, abstract;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: write
     When graql undefine
       """
       undefine abstract-type abstract;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1507,7 +1498,7 @@ Feature: Graql Undefine Query
       person owns vehicle-registration;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: write
     When graql undefine
       """
@@ -1515,7 +1506,7 @@ Feature: Graql Undefine Query
       vehicle-registration abstract;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1556,7 +1547,7 @@ Feature: Graql Undefine Query
       name sub attribute;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1619,7 +1610,7 @@ Feature: Graql Undefine Query
       name sub attribute;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """

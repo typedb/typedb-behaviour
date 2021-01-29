@@ -24,7 +24,7 @@ Feature: Graql Define Query
     Given connection create database: grakn
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
-    Given the integrity is validated
+
     Given graql define
       """
       define
@@ -38,7 +38,7 @@ Feature: Graql Define Query
       employment-reference-code sub attribute, value string;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: write
 
 
@@ -52,7 +52,7 @@ Feature: Graql Define Query
       define dog sub entity;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -69,7 +69,7 @@ Feature: Graql Define Query
       define child sub person;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -86,7 +86,7 @@ Feature: Graql Define Query
       """
       define book sub entity, owns pages;
       """
-    Then the integrity is validated
+
 
 
   Scenario: types cannot own entity types
@@ -94,7 +94,7 @@ Feature: Graql Define Query
       """
       define house sub entity, owns person;
       """
-    Then the integrity is validated
+
 
 
   Scenario: types cannot own relation types
@@ -102,7 +102,7 @@ Feature: Graql Define Query
       """
       define company sub entity, owns employment;
       """
-    Then the integrity is validated
+
 
 
   Scenario: when defining that a type plays a non-existent role, an error is thrown
@@ -110,7 +110,7 @@ Feature: Graql Define Query
       """
       define house sub entity, plays constructed:something;
       """
-    Then the integrity is validated
+
 
 
   Scenario: types cannot play entity types
@@ -118,7 +118,7 @@ Feature: Graql Define Query
       """
       define parrot sub entity, plays person;
       """
-    Then the integrity is validated
+
 
 
   Scenario: types can not own entity types as keys
@@ -126,7 +126,7 @@ Feature: Graql Define Query
       """
       define passport sub entity, owns person @key;
       """
-    Then the integrity is validated
+
 
 
   Scenario: a newly defined entity subtype inherits playable roles from its parent type
@@ -135,7 +135,7 @@ Feature: Graql Define Query
       define child sub person;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -156,7 +156,7 @@ Feature: Graql Define Query
       sprinter sub runner;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -176,7 +176,7 @@ Feature: Graql Define Query
       define child sub person;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -197,7 +197,7 @@ Feature: Graql Define Query
       sprinter sub runner;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -217,7 +217,7 @@ Feature: Graql Define Query
       define child sub person;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -238,7 +238,7 @@ Feature: Graql Define Query
       sprinter sub runner;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -261,7 +261,7 @@ Feature: Graql Define Query
       person plays home-ownership:owner;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -280,7 +280,7 @@ Feature: Graql Define Query
       house sub entity, owns price, owns price, owns price;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -299,7 +299,7 @@ Feature: Graql Define Query
       house sub entity, owns address @key, owns address @key, owns address @key;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -315,7 +315,7 @@ Feature: Graql Define Query
       """
       define flying-spaghetti-monster;
       """
-    Then the integrity is validated
+
 
 
   Scenario: a type cannot directly subtype 'thing' itself
@@ -323,7 +323,7 @@ Feature: Graql Define Query
       """
       define column sub thing;
       """
-    Then the integrity is validated
+
 
 
   Scenario: an entity type can not have a value type defined
@@ -331,7 +331,7 @@ Feature: Graql Define Query
       """
       define cream sub entity, value double;
       """
-    Then the integrity is validated
+
 
 
   Scenario: a type cannot have a 'when' block
@@ -339,7 +339,7 @@ Feature: Graql Define Query
       """
       define gorilla sub entity, when { $x isa gorilla; };
       """
-    Then the integrity is validated
+
 
 
   Scenario: a type cannot have a 'then' block
@@ -347,7 +347,7 @@ Feature: Graql Define Query
       """
       define godzilla sub entity, then { $x isa godzilla; };
       """
-    Then the integrity is validated
+
 
 
   Scenario: defining a thing with 'isa' is not possible in a 'define' query
@@ -355,7 +355,7 @@ Feature: Graql Define Query
       """
       define $p isa person;
       """
-    Then the integrity is validated
+
 
 
   Scenario: adding an attribute instance to a thing is not possible in a 'define' query
@@ -363,7 +363,7 @@ Feature: Graql Define Query
       """
       define $p has name "Loch Ness Monster";
       """
-    Then the integrity is validated
+
 
 
   Scenario: writing a variable in a 'define' is not allowed
@@ -371,7 +371,7 @@ Feature: Graql Define Query
       """
       define $x sub entity;
       """
-    Then the integrity is validated
+
 
 
   ##################
@@ -384,7 +384,7 @@ Feature: Graql Define Query
       define pet-ownership sub relation, relates pet-owner, relates owned-pet;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -401,7 +401,7 @@ Feature: Graql Define Query
       define fun-employment sub employment, relates employee-having-fun as employee;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -419,7 +419,7 @@ Feature: Graql Define Query
       define useless-relation sub relation;
       """
     Then transaction commits; throws exception
-    Then the integrity is validated
+
 
 
   Scenario: a newly defined relation subtype inherits roles from its supertype
@@ -428,7 +428,7 @@ Feature: Graql Define Query
       define part-time-employment sub employment;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -451,7 +451,7 @@ Feature: Graql Define Query
       father-sonhood sub parenthood, relates father as parent, relates son as child;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -481,7 +481,7 @@ Feature: Graql Define Query
       father-sonhood sub parenthood, relates father as parent, relates son as child;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -502,7 +502,7 @@ Feature: Graql Define Query
       define part-time-employment sub employment, relates part-timer as employee;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -519,7 +519,7 @@ Feature: Graql Define Query
       define
       close-friendship sub relation, relates close-friend as friend;
       """
-    Then the integrity is validated
+
 
 
   Scenario: types should be able to define roles they play with an override
@@ -532,7 +532,7 @@ Feature: Graql Define Query
         employment sub relation, relates employee, plays locates:located;
         contractor-employment sub employment, plays contractor-locates:contractor-located as located;
       """
-    Then the integrity is validated
+
 
 
   Scenario: already shadowed types should not be overrideable
@@ -547,7 +547,7 @@ Feature: Graql Define Query
         contractor-employment sub employment, plays contractor-locates:contractor-located as located;
         software-contractor-employment sub contractor-employment, plays software-contractor-locates:software-contractor-located as located;
       """
-    Then the integrity is validated
+
 
 
   Scenario: a newly defined relation subtype inherits playable roles from its parent type
@@ -556,7 +556,7 @@ Feature: Graql Define Query
       define contract-employment sub employment, relates contractor as employee;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -577,7 +577,7 @@ Feature: Graql Define Query
       flight-attendant-employment sub aviation-employment, relates flight-attendant as aviation-worker;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -597,7 +597,7 @@ Feature: Graql Define Query
       define contract-employment sub employment, relates contractor as employee;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -618,7 +618,7 @@ Feature: Graql Define Query
       flight-attendant-employment sub aviation-employment, relates flight-attendant as aviation-worker;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -638,7 +638,7 @@ Feature: Graql Define Query
       define contract-employment sub employment, relates contractor as employee;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -659,7 +659,7 @@ Feature: Graql Define Query
       flight-attendant-employment sub aviation-employment, relates flight-attendant as aviation-worker;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -679,7 +679,7 @@ Feature: Graql Define Query
       define connection sub relation, abstract;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -698,7 +698,7 @@ Feature: Graql Define Query
       person plays parenthood:parent, plays parenthood:child;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -717,7 +717,7 @@ Feature: Graql Define Query
       loan sub relation, relates owner;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -739,7 +739,7 @@ Feature: Graql Define Query
       define <label> sub attribute, value <value_type>;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -763,7 +763,7 @@ Feature: Graql Define Query
       """
       define colour sub attribute;
       """
-    Then the integrity is validated
+
 
 
   Scenario: defining an attribute type throws if the specified value type is not a recognised value type
@@ -771,7 +771,7 @@ Feature: Graql Define Query
       """
       define colour sub attribute, value rgba;
       """
-    Then the integrity is validated
+
 
 
   Scenario: a new attribute type can be defined as a subtype of an abstract attribute type
@@ -782,7 +782,7 @@ Feature: Graql Define Query
       door-code sub code;
       """
     Then transaction commits
-    Then the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -802,7 +802,7 @@ Feature: Graql Define Query
       door-code sub code;
       """
     Then transaction commits
-    Then the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -818,7 +818,7 @@ Feature: Graql Define Query
       """
       define code-name sub name, value long;
       """
-    Then the integrity is validated
+
 
 
   # TODO: re-enable when fixed (currently gives wrong answer)
@@ -829,7 +829,7 @@ Feature: Graql Define Query
       define response sub attribute, value string, regex "^(yes|no|maybe)$";
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -845,7 +845,7 @@ Feature: Graql Define Query
       """
       define name-in-binary sub attribute, value long, regex "^(0|1)+$";
       """
-    Then the integrity is validated
+
 
 
   Scenario: a newly defined attribute subtype inherits playable roles from its parent type
@@ -858,7 +858,7 @@ Feature: Graql Define Query
       grayscale-colour sub colour;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -882,7 +882,7 @@ Feature: Graql Define Query
       uk-premium-landline-number sub uk-landline-number;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -905,7 +905,7 @@ Feature: Graql Define Query
       grayscale-colour sub colour;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -928,7 +928,7 @@ Feature: Graql Define Query
       uk-premium-landline-number sub uk-landline-number;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -951,7 +951,7 @@ Feature: Graql Define Query
       grayscale-colour sub colour;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -974,7 +974,7 @@ Feature: Graql Define Query
       very-dark-red-colour sub dark-red-colour;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -996,7 +996,7 @@ Feature: Graql Define Query
       person owns <label>;
       """
     Then transaction commits
-    Then the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -1031,7 +1031,7 @@ Feature: Graql Define Query
       define animal sub entity, abstract;
       """
     Then transaction commits
-    Then the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -1050,7 +1050,7 @@ Feature: Graql Define Query
       horse sub animal;
       """
     Then transaction commits
-    Then the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -1070,7 +1070,7 @@ Feature: Graql Define Query
       fish sub animal, abstract;
       """
     Then transaction commits
-    Then the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -1090,7 +1090,7 @@ Feature: Graql Define Query
       grakn-exception sub exception, abstract;
       """
     Then transaction commits
-    Then the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -1107,7 +1107,7 @@ Feature: Graql Define Query
       define membership sub relation, abstract, relates member;
       """
     Then transaction commits
-    Then the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -1126,7 +1126,7 @@ Feature: Graql Define Query
       gym-membership sub membership, relates gym-with-members, relates gym-member as member;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1146,7 +1146,7 @@ Feature: Graql Define Query
       tool-requirement sub requirement, abstract, relates required-tool as prerequisite;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1166,7 +1166,7 @@ Feature: Graql Define Query
       tech-requirement sub requirement, abstract, relates required-tech as prerequisite;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1183,7 +1183,7 @@ Feature: Graql Define Query
       define number-of-limbs sub attribute, abstract, value long;
       """
     Then transaction commits
-    Then the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -1202,7 +1202,7 @@ Feature: Graql Define Query
       number-of-legs sub number-of-limbs;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1222,7 +1222,7 @@ Feature: Graql Define Query
       number-of-artificial-limbs sub number-of-limbs, abstract;
       """
     Then transaction commits
-    Then the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -1256,7 +1256,7 @@ Feature: Graql Define Query
     Then uniquely identify answer concepts
       | name        | location            |
       | label:name  | label:location-name |
-    Then the integrity is validated
+
 
 
   Scenario: repeating the term 'abstract' when defining a type causes an error to be thrown
@@ -1264,7 +1264,7 @@ Feature: Graql Define Query
       """
       define animal sub entity, abstract, abstract, abstract;
       """
-    Then the integrity is validated
+
 
 
   ###################
@@ -1280,7 +1280,7 @@ Feature: Graql Define Query
       person sub entity, owns name;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1296,7 +1296,7 @@ Feature: Graql Define Query
       person sub relation, relates body-part;
       arm sub entity, plays person:body-part;
       """
-    Then the integrity is validated
+
 
 
   Scenario: a relation type cannot be changed into an attribute type
@@ -1304,7 +1304,7 @@ Feature: Graql Define Query
       """
       define employment sub attribute, value string;
       """
-    Then the integrity is validated
+
 
 
   Scenario: an attribute type cannot be changed into an entity type
@@ -1312,7 +1312,7 @@ Feature: Graql Define Query
       """
       define name sub entity;
       """
-    Then the integrity is validated
+
 
 
   Scenario: a new attribute ownership can be defined on an existing type
@@ -1321,7 +1321,7 @@ Feature: Graql Define Query
       define employment owns name;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1339,7 +1339,7 @@ Feature: Graql Define Query
       define employment plays employment:employee;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1359,7 +1359,7 @@ Feature: Graql Define Query
       product sub entity, owns name, owns barcode;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -1370,7 +1370,7 @@ Feature: Graql Define Query
       $y isa product, has name "Ham", has barcode "10011";
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -1380,7 +1380,7 @@ Feature: Graql Define Query
       product owns barcode @key;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1399,7 +1399,7 @@ Feature: Graql Define Query
       product sub entity, owns name;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -1410,7 +1410,7 @@ Feature: Graql Define Query
       $y isa product, has name "Ham";
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -1419,7 +1419,7 @@ Feature: Graql Define Query
       define
       product owns barcode @key;
       """
-    Then the integrity is validated
+
 
 
   Scenario: defining a key on a type throws if there is a key collision between two existing instances
@@ -1430,7 +1430,7 @@ Feature: Graql Define Query
       product sub entity, owns name, owns barcode;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -1441,7 +1441,7 @@ Feature: Graql Define Query
       $y isa product, has name "Ham", has barcode "10000";
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -1450,7 +1450,7 @@ Feature: Graql Define Query
       define
       product owns barcode @key;
       """
-    Then the integrity is validated
+
 
 
   Scenario: a new role can be defined on an existing relation type
@@ -1461,7 +1461,7 @@ Feature: Graql Define Query
       employment relates employer;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1482,7 +1482,7 @@ Feature: Graql Define Query
       $x isa person, has name "Alice", has email "alice@grakn.ai";
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -1491,7 +1491,7 @@ Feature: Graql Define Query
       define name regex "^A.*$";
       """
     Then transaction commits
-    Then the integrity is validated
+
     Then session opens transaction of type: read
     Then get answers of graql match
       """
@@ -1512,7 +1512,7 @@ Feature: Graql Define Query
       $x isa person, has name "Maria", has email "maria@grakn.ai";
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -1520,7 +1520,7 @@ Feature: Graql Define Query
       """
       define name regex "^A.*$";
       """
-    Then the integrity is validated
+
 
 
   Scenario: a regex constraint can not be added to an existing attribute type whose value type isn't 'string'
@@ -1529,13 +1529,13 @@ Feature: Graql Define Query
       define house-number sub attribute, value long;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: write
     Then graql define; throws exception
       """
       define house-number regex "^A.*$";
       """
-    Then the integrity is validated
+
 
 
   Scenario: related roles cannot be added to existing entity types
@@ -1543,7 +1543,7 @@ Feature: Graql Define Query
       """
       define person relates employee;
       """
-    Then the integrity is validated
+
 
 
   Scenario: related roles cannot be added to existing attribute types
@@ -1551,7 +1551,7 @@ Feature: Graql Define Query
       """
       define name relates employee;
       """
-    Then the integrity is validated
+
 
 
   Scenario: the value type of an existing attribute type is not modifiable
@@ -1559,7 +1559,7 @@ Feature: Graql Define Query
       """
       define name value long;
       """
-    Then the integrity is validated
+
 
 
   Scenario: an attribute ownership can be converted to a key ownership
@@ -1568,7 +1568,7 @@ Feature: Graql Define Query
       define person owns name @key;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1585,7 +1585,7 @@ Feature: Graql Define Query
       define person owns email;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1614,7 +1614,7 @@ Feature: Graql Define Query
         $p has nickname "Bob";
       };
       """
-    Given the integrity is validated
+
     Then graql define
       """
       define
@@ -1625,7 +1625,7 @@ Feature: Graql Define Query
         $p has nickname "Bob";
       };
       """
-    Then the integrity is validated
+
 
 
   Scenario: redefining an existing rule updates its definition
@@ -1641,7 +1641,7 @@ Feature: Graql Define Query
       define person abstract;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1658,7 +1658,7 @@ Feature: Graql Define Query
       define employment abstract;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1675,7 +1675,7 @@ Feature: Graql Define Query
       define name abstract;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1696,7 +1696,7 @@ Feature: Graql Define Query
       $x isa person, has name "Jeremy", has email "jeremy@grakn.ai";
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -1704,7 +1704,7 @@ Feature: Graql Define Query
       """
       define person abstract;
       """
-    Then the integrity is validated
+
 
 
   Scenario: an existing relation type cannot be converted to abstract if it has existing instances
@@ -1718,7 +1718,7 @@ Feature: Graql Define Query
       $r (employee: $x) isa employment, has employment-reference-code "J123123";
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -1738,7 +1738,7 @@ Feature: Graql Define Query
       $x isa person, has name "Jeremy", has email "jeremy@grakn.ai";
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -1746,7 +1746,7 @@ Feature: Graql Define Query
       """
       define name abstract;
       """
-    Then the integrity is validated
+
 
 
   Scenario: changing a concrete type to abstract throws on commit if it has a concrete supertype
@@ -1771,7 +1771,7 @@ Feature: Graql Define Query
       genius sub person;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: write
     When graql define
       """
@@ -1779,7 +1779,7 @@ Feature: Graql Define Query
       genius sub apple-product;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1803,7 +1803,7 @@ Feature: Graql Define Query
       shoe sub entity, owns shoe-size;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -1812,7 +1812,7 @@ Feature: Graql Define Query
       insert $s isa shoe, has shoe-size 9;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -1823,7 +1823,7 @@ Feature: Graql Define Query
       shoe-size sub size;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1845,7 +1845,7 @@ Feature: Graql Define Query
       child sub person;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: write
     When graql define
       """
@@ -1853,7 +1853,7 @@ Feature: Graql Define Query
       person sub organism;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1874,7 +1874,7 @@ Feature: Graql Define Query
       pigeon sub bird;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -1883,7 +1883,7 @@ Feature: Graql Define Query
       insert $p isa pigeon;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -1894,7 +1894,7 @@ Feature: Graql Define Query
       pigeon sub animal;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1914,7 +1914,7 @@ Feature: Graql Define Query
       flying sub relation, relates flier;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -1923,7 +1923,7 @@ Feature: Graql Define Query
       insert $p isa pigeon;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -1934,7 +1934,7 @@ Feature: Graql Define Query
       pigeon sub animal;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -1954,7 +1954,7 @@ Feature: Graql Define Query
       pigeon sub bird;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open data session for database: grakn
     Given session opens transaction of type: write
@@ -1963,7 +1963,7 @@ Feature: Graql Define Query
       insert $p isa pigeon;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -1974,7 +1974,7 @@ Feature: Graql Define Query
       pigeon sub animal;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -2020,7 +2020,7 @@ Feature: Graql Define Query
       person sub entity, plays employment:employer;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -2042,7 +2042,7 @@ Feature: Graql Define Query
        person sub entity, owns phone-number;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -2064,7 +2064,7 @@ Feature: Graql Define Query
       person sub entity, owns phone-number @key;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -2084,7 +2084,7 @@ Feature: Graql Define Query
       employment sub relation, relates employer;
       """
     Given transaction commits
-    Given the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -2114,7 +2114,7 @@ Feature: Graql Define Query
       """
       match $x type dog;
       """
-    Then the integrity is validated
+
 
 
   ########################
@@ -2126,7 +2126,7 @@ Feature: Graql Define Query
       """
       define dog sub dog;
       """
-    Then the integrity is validated
+
 
 
   Scenario: a cyclic type hierarchy is not allowed
@@ -2137,7 +2137,7 @@ Feature: Graql Define Query
       green-giant sub giant;
       person sub green-giant;
       """
-    Then the integrity is validated
+
 
   Scenario: two attribute types can own each other in a cycle
     Given graql define
@@ -2198,7 +2198,7 @@ Feature: Graql Define Query
       recursive-function sub relation, relates function, plays recursive-function:function;
       """
     Then transaction commits
-    Then the integrity is validated
+
     Given session opens transaction of type: read
     When get answers of graql match
       """
@@ -2215,7 +2215,7 @@ Feature: Graql Define Query
       define number-of-letters sub attribute, value long, owns number-of-letters;
       """
     Then transaction commits
-    Then the integrity is validated
+
     When session opens transaction of type: read
     When get answers of graql match
       """
@@ -2233,7 +2233,7 @@ Feature: Graql Define Query
       apple sub relation, abstract, relates role1, plays big-apple:role2;
       big-apple sub apple, plays apple:role1, relates role2;
       """
-    Then the integrity is validated
+
 
 
   Scenario: relation types that play roles in their transitive subtypes can be reliably defined
@@ -2287,4 +2287,4 @@ Feature: Graql Define Query
       huge-pineapple sub big-pineapple, relates tree, relates grows-from;
       """
     Then transaction commits
-    Then the integrity is validated
+

@@ -20,13 +20,14 @@
 Feature: Concept Inequality Resolution
 
   Background: Set up databases for resolution testing
-
     Given connection has been opened
-    Given connection open sessions for databases:
-      | materialised |
+    Given connection does not have any database
+    Given connection create database: reasoned
+    Given connection create database: materialised
+    Given connection open schema sessions for databases:
       | reasoned     |
-    Given materialised database is named: materialised
-    Given reasoned database is named: reasoned
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql define
       """
       define
@@ -53,6 +54,11 @@ Feature: Concept Inequality Resolution
           (ball1:$x, ball2:$z) isa selection;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
     Given for each session, graql insert
       """
       insert
@@ -67,10 +73,15 @@ Feature: Concept Inequality Resolution
       (ball1: $b, ball2: $c) isa selection;
       (ball1: $c, ball2: $b) isa selection;
       """
+    Given for each session, transaction commits
 
 
-  # TODO: re-enable all steps when 3-hop transitivity is resolvable
   Scenario: a rule can be applied based on concept inequality
+    Given connection close all sessions
+    Given connection open schema sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql define
       """
       define
@@ -100,6 +111,12 @@ Feature: Concept Inequality Resolution
           (related-state: $st) isa holds;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -111,40 +128,53 @@ Feature: Concept Inequality Resolution
       (related-state: $s1) isa achieved;
       (related-state: $s2) isa achieved;
       """
-#    When materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions of type: write
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match (related-state: $s) isa holds;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then answer set is equivalent for graql query
       """
       match $s isa state, has name 's2';
       """
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: inferred binary relations can be filtered by concept inequality of their roleplayers
-#    When materialised database is completed
+    Given for each session, open transactions of type: write
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Given for graql query
       """
       match (ball1: $x, ball2: $y) isa selection;
       """
-#    Given all answers are correct in reasoned database
+    Given all answers are correct in reasoned database
     # materialised: [ab, ba, bc, cb]
     # inferred: [aa, ac, bb, ca, cc]
     Given answer size in reasoned database is: 9
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
         not { $x is $y; };
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     # materialised: [ab, ba, bc, cb]
     # inferred: [ac, ca]
     Then answer size in reasoned database is: 6
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     # verify that the answer pairs to the previous query have distinct names within each pair
     Then for graql query
       """
@@ -156,13 +186,16 @@ Feature: Concept Inequality Resolution
         not { $nx is $ny; };
       get $x, $y;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 6
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: inferred binary relations can be filtered by inequality to a specific concept
-#    When materialised database is completed
+    Given for each session, open transactions of type: write
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -170,8 +203,10 @@ Feature: Concept Inequality Resolution
         not { $x is $y; };
         $y has name 'c';
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     # verify answers are [ac, bc]
     Then for graql query
       """
@@ -181,9 +216,9 @@ Feature: Concept Inequality Resolution
         $y has name 'c';
         {$x has name 'a';} or {$x has name 'b';};
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: pairs of inferred relations can be filtered by inequality of players in the same role
@@ -197,7 +232,10 @@ Feature: Concept Inequality Resolution
   v     v
   y is not z
 
-#    When materialised database is completed
+    Given for each session, open transactions of type: write
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -205,11 +243,13 @@ Feature: Concept Inequality Resolution
         (ball1: $x, ball2: $z) isa selection;
         not { $y is $z; };
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     # [aab, aac, aba, abc, aca, acb,
     #  bab, bac, bba, bbc, bca, bcb,
     #  cab, cac, cba, cbc, cca, ccb]
     Then answer size in reasoned database is: 18
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     # verify that $y and $z always have distinct names
     Then for graql query
       """
@@ -222,9 +262,9 @@ Feature: Concept Inequality Resolution
         not { $ny is $nz; };
       get $x, $y, $z;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 18
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
 
@@ -240,7 +280,10 @@ Feature: Concept Inequality Resolution
   /     v
   x is not z
 
-#    When materialised database is completed
+    Given for each session, open transactions of type: write
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -248,9 +291,11 @@ Feature: Concept Inequality Resolution
         (ball1: $y, ball2: $z) isa selection;
         not { $x is $z; };
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 18
     # verify that $y and $z always have distinct names
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -262,9 +307,9 @@ Feature: Concept Inequality Resolution
         not { $nx is $nz; };
       get $x, $y, $z;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 18
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: inequality predicates can operate independently against multiple pairs of relations in the same query
@@ -282,7 +327,10 @@ Feature: Concept Inequality Resolution
   v         v
   y2 is not  z2
 
-#    When materialised database is completed
+    Given for each session, open transactions of type: write
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Given for graql query
       """
       match
@@ -291,9 +339,11 @@ Feature: Concept Inequality Resolution
         (ball1: $x, ball2: $y2) isa selection;
         (ball1: $x, ball2: $z2) isa selection;
       """
-#    Given all answers are correct in reasoned database
+    Given all answers are correct in reasoned database
     # For each of the [3] values of $x, there are 3^4 = 81 choices for {$y1, $z1, $y2, $z2}, for a total of 243
-    Given answer size in reasoned database is: 243
+    Then answer size in reasoned database is: 243
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -305,9 +355,11 @@ Feature: Concept Inequality Resolution
         not { $y1 is $z1; };
         not { $y2 is $z2; };
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     # Each neq predicate reduces the answer size by 1/3, cutting it to 162, then 108
     Then answer size in reasoned database is: 108
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     # verify that $y1 and $z1 - as well as $y2 and $z2 - always have distinct names
     Then for graql query
       """
@@ -326,9 +378,9 @@ Feature: Concept Inequality Resolution
         not { $ny2 is $nz2; };
       get $x, $y1, $z1, $y2, $z2;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 108
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
   Scenario: inequality predicates can operate independently against multiple roleplayers in the same relation
@@ -342,7 +394,10 @@ Feature: Concept Inequality Resolution
   v
   y     - is not - >  z2
 
-#    When materialised database is completed
+    Given for each session, open transactions of type: write
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Given for graql query
       """
       match
@@ -350,9 +405,11 @@ Feature: Concept Inequality Resolution
         (ball1: $x, ball2: $z1) isa selection;
         (ball1: $y, ball2: $z2) isa selection;
       """
-#    Given all answers are correct in reasoned database
+    Given all answers are correct in reasoned database
     # There are 3^4 possible choices for the set {$x, $y, $z1, $z2}, for a total of 81
-    Given answer size in reasoned database is: 81
+    Then answer size in reasoned database is: 81
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -363,9 +420,11 @@ Feature: Concept Inequality Resolution
         not { $x is $z1; };
         not { $y is $z2; };
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     # Each neq predicate reduces the answer size by 1/3, cutting it to 54, then 36
     Then answer size in reasoned database is: 36
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     # verify that $y1 and $z1 - as well as $y2 and $z2 - always have distinct names
     Then for graql query
       """
@@ -383,9 +442,9 @@ Feature: Concept Inequality Resolution
         not { $ny is $nz2; };
       get $x, $y, $z1, $z2;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 36
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
 
 
   @ignore
@@ -393,6 +452,11 @@ Feature: Concept Inequality Resolution
   # TODO: re-enable all steps once implicit attribute variables are resolvable
   # TODO: migrate to concept-inequality.feature
   Scenario: when restricting concept types of a pair of inferred attributes with '!=', the answers have distinct types
+    Given connection close all sessions
+    Given connection open schema sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql define
       """
       define
@@ -411,13 +475,23 @@ Feature: Concept Inequality Resolution
         $x has retailer 'Tesco';
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
       $x isa person, has string-attribute "Tesco";
       $y isa soft-drink, has name "Tesco";
       """
-    When materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions of type: write
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -443,6 +517,11 @@ Feature: Concept Inequality Resolution
   # TODO: re-enable all steps once implicit attribute variables are resolvable
   # TODO: migrate to concept-inequality.feature
   Scenario: inferred attribute matches can be simultaneously restricted by both concept type and attribute value
+    Given connection close all sessions
+    Given connection open schema sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql define
       """
       define
@@ -475,15 +554,25 @@ Feature: Concept Inequality Resolution
         $y has retailer $x;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
-      """
+    """
       insert
       $w isa person, has string-attribute "Ocado";
       $x isa person, has string-attribute "Tesco";
       $y isa soft-drink, has name "Sprite";
       $z "Ocado" isa retailer;
       """
-    When materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions of type: write
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -501,4 +590,4 @@ Feature: Concept Inequality Resolution
     # x      | value | type     |
     # Sprite | Tesco | retailer |
     Then answer size in reasoned database is: 1
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size

@@ -589,4 +589,4 @@ Feature: Connection Transaction
     When connection create database: grakn
     Given connection open schema session for database: grakn
     When session opens transaction of type: read
-    Then transaction commits; throws exception containing "write transactions can be committed"
+    Then transaction commits; throws exception

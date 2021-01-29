@@ -19,13 +19,14 @@
 Feature: Attribute Attachment Resolution
 
   Background: Set up databases for resolution testing
-
     Given connection has been opened
-    Given connection open sessions for databases:
-      | materialised |
+    Given connection does not have any database
+    Given connection create database: reasoned
+    Given connection create database: materialised
+    Given connection open schema sessions for databases:
       | reasoned     |
-    Given materialised database is named: materialised
-    Given reasoned database is named: reasoned
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql define
       """
       define
@@ -35,7 +36,6 @@ Feature: Attribute Attachment Resolution
           plays team:member,
           owns string-attribute,
           owns unrelated-attribute,
-          owns sub-string-attribute,
           owns age,
           owns is-old;
 
@@ -55,12 +55,12 @@ Feature: Attribute Attachment Resolution
       retailer sub attribute, value string;
       age sub attribute, value long;
       is-old sub attribute, value boolean;
-      sub-string-attribute sub string-attribute;
       unrelated-attribute sub attribute, value string;
       """
+    Given for each session, transaction commits
+    Given for each session, open transactions of type: write
 
 
-  # TODO: re-enable all steps once attribute re-attachment is resolvable
   Scenario: when a rule copies an attribute from one entity to another, the existing attribute instance is reused
     Given for each session, graql define
       """
@@ -72,29 +72,41 @@ Feature: Attribute Attachment Resolution
         $y has $r1;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
       $geX isa person, has string-attribute "banana";
       $geY isa person;
       """
-#    When materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions of type: write
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match $x isa person, has string-attribute $y;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match $x isa string-attribute;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
+    Then for each session, transaction closes
 
 
-  # TODO: re-enable all steps once attribute re-attachment is resolvable
   Scenario: when the same attribute is inferred on an entity and relation, both owners are correctly retrieved
     Given for each session, graql define
       """
@@ -113,21 +125,32 @@ Feature: Attribute Attachment Resolution
         $z has $y;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
       $geX isa person, has string-attribute "banana";
       $geY isa person;
-      (leader:$geX, team-member:$geX) isa team;
+      (leader:$geX, member:$geX) isa team;
       """
-#    When materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions of type: write
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match $x has string-attribute $y;
       """
-#    Then all answers are correct in reasoned database
+    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 3
-#    Then materialised and reasoned databases are the same size
+    Then materialised and reasoned databases are the same size
+    Then for each session, transaction closes
 
 
   Scenario: a rule can infer an attribute value that did not previously exist in the graph
@@ -148,6 +171,12 @@ Feature: Attribute Attachment Resolution
         $y has retailer 'Ocado';
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -155,19 +184,31 @@ Feature: Attribute Attachment Resolution
       $aeY isa soft-drink;
       $r "Ocado" isa retailer;
       """
-    When materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions of type: write
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match $x has retailer 'Ocado';
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
+    Then for each session, transaction closes
+    Then connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match $x has retailer $r;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 4
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match $x has retailer 'Tesco';
@@ -189,6 +230,12 @@ Feature: Attribute Attachment Resolution
         $y has $x;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -196,11 +243,14 @@ Feature: Attribute Attachment Resolution
       $aeY isa soft-drink;
       $r "Ocado" isa retailer;
       """
-    When materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions of type: write
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match $x isa soft-drink, has retailer 'Ocado';
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
-    Then materialised and reasoned databases are the same size

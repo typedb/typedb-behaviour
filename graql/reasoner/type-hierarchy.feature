@@ -24,8 +24,8 @@ Feature: Type Hierarchy Resolution
     Given connection open sessions for databases:
       | materialised |
       | reasoned     |
-    Given materialised database is named: materialised
-    Given reasoned database is named: reasoned
+
+
 
 
   Scenario: subtypes trigger rules based on their parents; parent types don't trigger rules based on their children
@@ -74,7 +74,9 @@ Feature: Type Hierarchy Resolution
       (performer:$x, writer:$v) isa performance;  # child - child    -> satisfies rule
       (performer:$y, writer:$v) isa performance;  # person - child   -> doesn't satisfy rule
       """
-    When materialised database is completed
+        Given transaction commits
+    Given for each session, open transactions with reasoning of type:read
+
     Then for graql query
       """
       match
@@ -171,7 +173,9 @@ Feature: Type Hierarchy Resolution
       $y isa person;
       (child: $x, parent: $y) isa family;
       """
-    When materialised database is completed
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     # Matching a sibling of the actual role
     Then for graql query
       """
@@ -225,7 +229,9 @@ Feature: Type Hierarchy Resolution
       $y isa person;
       (writer:$x, performer:$y) isa performance;
       """
-    When materialised database is completed
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     # sub-roles, super-relation
     Then for graql query
       """
@@ -274,7 +280,9 @@ Feature: Type Hierarchy Resolution
       $y isa person;
       (writer:$x, performer:$y) isa performance;
       """
-    When materialised database is completed
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     # super-roles, sub-relation
     Then for graql query
       """
@@ -323,7 +331,9 @@ Feature: Type Hierarchy Resolution
       $y isa person;
       (writer:$x, performer:$y) isa performance;
       """
-    When materialised database is completed
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     # super-roles, super-relation
     Then for graql query
       """
@@ -388,7 +398,9 @@ Feature: Type Hierarchy Resolution
       (performer:$x, writer:$v) isa performance;  # child - child    -> satisfies rule
       (performer:$y, writer:$v) isa performance;  # person - child   -> doesn't satisfy rule
       """
-    When materialised database is completed
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -490,7 +502,9 @@ Feature: Type Hierarchy Resolution
       $y isa person;
       (parent:$x, child:$y) isa family;
       """
-    When materialised database is completed
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match (home-owner: $x, resident: $y) isa residence;
