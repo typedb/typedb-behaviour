@@ -1979,7 +1979,7 @@ Feature: Recursion Resolution
     Then for graql query
       """
       match
-        (P-from: $x, P-to: $y) isa P;
+        (from: $x, to: $y) isa P;
         $x has index 'a';
       get $y;
       """
