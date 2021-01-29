@@ -1131,15 +1131,12 @@ Feature: Relation Inference Resolution
 
       baseRelation sub relation,
           relates baseRole;
-      subRelation sub baseRelation,
-          relates baseRole;
-      subSubRelation sub subRelation,
-          relates baseRole;
+      subRelation sub baseRelation;
+      subSubRelation sub subRelation;
 
       derivedRelation sub relation,
           relates derivedRelationRole;
-      directDerivedRelation sub derivedRelation,
-          relates derivedRelationRole;
+      directDerivedRelation sub derivedRelation;
 
       rule relationRule: when {
           ($x) isa subRelation;
