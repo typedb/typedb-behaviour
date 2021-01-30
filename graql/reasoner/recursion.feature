@@ -539,10 +539,10 @@ Feature: Recursion Resolution
         $x has index 'i';
       get $y;
       """
+    Then answer size in reasoned database is: 3
     Given for each session, transaction closes
     Given for each session, open transactions of type: write
     Then materialised database is completed
-    Then answer size in reasoned database is: 3
     Given for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
     Then answer set is equivalent for graql query
@@ -780,10 +780,10 @@ Feature: Recursion Resolution
         $Y has name $name;
       get $Y;
       """
-    Given for each session, transaction closes
-    Given for each session, open transactions of type: write
-    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
+    Given for each session, transaction closes
+    Given for each session, open transactions of type: read
+    Then all answers are correct in reasoned database
     Given for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
     Then answer set is equivalent for graql query
@@ -811,8 +811,10 @@ Feature: Recursion Resolution
         $Y has name 'd';
       get $X;
       """
-    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 3
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
+    Then all answers are correct in reasoned database
     Then for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
     Then answer set is equivalent for graql query
@@ -1400,8 +1402,8 @@ Feature: Recursion Resolution
         $x has name 'a';
       get $y;
       """
-    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 3
+    Then all answers are correct in reasoned database
     Given for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
     Then answer set is equivalent for graql query
@@ -1411,12 +1413,14 @@ Feature: Recursion Resolution
         {$name = 'b';} or {$name = 'c';} or {$name = 'd';};
       get $y;
       """
+    Given for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match (from: $x, to: $y) isa RevSG;
       """
-    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 11
+    Then all answers are correct in reasoned database
     Given for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
     Then answer set is equivalent for graql query
