@@ -571,22 +571,22 @@ Feature: Recursion Resolution
       parentship sub relation, relates parent, relates child;
       person plays parentship:parent, plays parentship:child;
 
-      Ancestor sub relation, relates ancestor, relates descendant;
-      person plays Ancestor:ancestor, plays Ancestor:descendant;
+      ancestorship sub relation, relates ancestor, relates descendant;
+      person plays ancestorship:ancestor, plays ancestorship:descendant;
 
       name sub attribute, value string;
 
       rule rule-1: when {
         (parent: $x, child: $z) isa parentship;
-        (ancestor: $z, descendant: $y) isa Ancestor;
+        (ancestor: $z, descendant: $y) isa ancestorship;
       } then {
-        (ancestor: $x, descendant: $y) isa Ancestor;
+        (ancestor: $x, descendant: $y) isa ancestorship;
       };
 
       rule rule-2: when {
         (parent: $x, child: $y) isa parentship;
       } then {
-        (ancestor: $x, descendant: $y) isa Ancestor;
+        (ancestor: $x, descendant: $y) isa ancestorship;
       };
       """
     Given for each session, transaction commits
@@ -623,7 +623,7 @@ Feature: Recursion Resolution
     Then for graql query
       """
       match
-        (ancestor: $X, descendant: $Y) isa Ancestor;
+        (ancestor: $X, descendant: $Y) isa ancestorship;
         $X has name 'aa';
         $Y has name $name;
       get $Y, $name;
@@ -642,7 +642,7 @@ Feature: Recursion Resolution
     Then for graql query
       """
       match
-        ($X, $Y) isa Ancestor;
+        ($X, $Y) isa ancestorship;
         $X has name 'aa';
       get $Y;
       """
@@ -659,7 +659,7 @@ Feature: Recursion Resolution
       """
     Then for graql query
       """
-      match (ancestor: $X, descendant: $Y) isa Ancestor;
+      match (ancestor: $X, descendant: $Y) isa ancestorship;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 10
@@ -679,7 +679,7 @@ Feature: Recursion Resolution
       """
     Then for graql query
       """
-      match ($X, $Y) isa Ancestor;
+      match ($X, $Y) isa ancestorship;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 20
