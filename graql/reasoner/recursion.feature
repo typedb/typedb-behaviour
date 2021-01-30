@@ -332,6 +332,9 @@ Feature: Recursion Resolution
     Then materialised and reasoned databases are the same size
 
 
+    # TODO this makes graph iterator fail!!!a When batch size is small, say 8
+
+
   # TODO: re-enable all steps when materialisation is possible (may be an infinite graph?) (#75)
   Scenario: when relations' and attributes' inferences are mutually recursive, the inferred concepts can be retrieved
     Given for each session, graql define
@@ -891,16 +894,13 @@ Feature: Recursion Resolution
 
       (parent: $a, child: $b) isa parentship;
       (parent: $a, child: $c) isa parentship;
-
       (parent: $b, child: $d) isa parentship;
       (parent: $c, child: $d) isa parentship;
       (parent: $e, child: $d) isa parentship;
-
       (parent: $f, child: $e) isa parentship;
 
       #Extra data
       (parent: $g, child: $f) isa parentship;
-
       (parent: $h, child: $g) isa parentship;
       """
     Given for each session, transaction commits
@@ -915,8 +915,8 @@ Feature: Recursion Resolution
         $x has name 'a';
       get $y;
       """
-    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
+    Then all answers are correct in reasoned database
     Then for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
     Then answer set is equivalent for graql query
@@ -1615,7 +1615,7 @@ Feature: Recursion Resolution
     Given for each session, open transactions with reasoning of type: read
     Then answer set is equivalent for graql query
       """
-      match { $y isa a-entity; } or { $y isa end; };
+      match $y isa $t; { $t type a-entity; } or { $t type end; }; get $y;
       """
     Then materialised and reasoned databases are the same size
 
