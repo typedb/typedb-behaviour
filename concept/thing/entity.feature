@@ -215,7 +215,7 @@ Feature: Concept Entity
     Then entity $a get attributes(email) as(string) do not contain: $email
     Then attribute $email get owners do not contain: $a
 
-
+  @ignore
   Scenario: Entity cannot be given an attribute after deletion
     When $a = entity(person) create new instance with key(username): alice
     When $email = attribute(email) as(string) put: alice@email.com
