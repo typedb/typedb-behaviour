@@ -211,3 +211,19 @@ Feature: Concept Relation
     When $m = relation(marriage) get instance with key(license): m
     Then relation $m is null: true
     Then relation(marriage) get instances is empty
+
+  Scenario: Relation cannot have roleplayers inserted after deletion
+    When $m = relation(marriage) create new instance with key(license): m
+    When $a = entity(person) create new instance with key(username): alice
+    When relation $m add player for role(wife): $a
+    When delete relation: $r
+    Then relation $r is deleted: true
+    When relation $m add player for role(wife): $a; throws exception
+
+  Scenario: Relation cannot have roleplayers inserted after indirect deletion
+    When $m = relation(marriage) create new instance with key(license): m
+    When $a = entity(person) create new instance with key(username): alice
+    When relation $m add player for role(wife): $a
+    When delete entity: $a
+    Then relation $r is deleted: true
+    When relation $m add player for role(wife): $a; throws exception
