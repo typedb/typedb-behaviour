@@ -1904,6 +1904,14 @@ Feature: Graql Match Query
       | x         |
       | key:ref:0 |
       | key:ref:1 |
+    When get answers of graql match
+      """
+      match $x isa entity; {$x has name "Jeff";} or {$x has name "Amazon";};
+      """
+    Then uniquely identify answer concepts
+      | x         |
+      | key:ref:0 |
+      | key:ref:1 |
 
 
   ##################
