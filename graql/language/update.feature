@@ -104,9 +104,9 @@ Feature: Graql Delete Query
         $y isa person, has name "Bob";
         $r (friend: $x) isa friendship;
       delete
-        $r (friend: $x)
+        $r (friend: $x);
       insert
-        $r (friend: $y)
+        $r (friend: $y);
       """
 
   Scenario: Roleplayer exchange
