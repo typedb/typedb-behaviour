@@ -16,7 +16,7 @@
 #
 
 #noinspection CucumberUndefinedStep
-Feature: Graql Delete Query
+Feature: Graql Update Query
 
   Background: Open connection and create a simple extensible schema
     Given connection has been opened
@@ -54,7 +54,7 @@ Feature: Graql Delete Query
   # THINGS #
   ##########
 
-  Scenario: simple update
+  Scenario: Update owned attribute without side effects on other owners
     Given get answers of graql insert
       """
       insert
@@ -142,6 +142,7 @@ Feature: Graql Delete Query
       $y isa person, has name "Alex", has ref 4;
       $z isa person, has name "Bob", has ref 5;
       """
+    Given transaction commits
     Given connection close all sessions
     Given connection open schema session for database: grakn
     Given session opens transaction of type: write
@@ -178,3 +179,26 @@ Feature: Graql Delete Query
         (named: $p, name: $nc) isa naming;
       """
     Then transaction commits
+    When session opens transaction of type: read
+    When get answers of graql match
+      """
+      match
+        (named: $p, name: $nc) isa naming;
+        $nc has name $n;
+      """
+    Then uniquely identify answer concepts
+      | p          | n                  |
+      | key:ref:0  | value:name:Alex    |
+      | key:ref:1  | value:name:Bob     |
+      | key:ref:2  | value:name:Charlie |
+      | key:ref:3  | value:name:Darius  |
+      | key:ref:4  | value:name:Alex    |
+      | key:ref:5  | value:name:Bob     |
+
+    When get answers of graql match
+      """
+      match
+        $p isa person;
+        $p has name $n;
+      """
+    Then answer size is: 0
