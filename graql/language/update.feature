@@ -87,6 +87,8 @@ Feature: Graql Delete Query
       | key:ref:0  | value:name:Alex |
       | key:ref:1  | value:name:Bob  |
 
+  #TODO: Remove ignore once interacting with a deleted thing is no longer possible
+  @ignore
   Scenario: Deleting the last roleplayer of a relation means it cannot be updated
     Given get answers of graql insert
       """
