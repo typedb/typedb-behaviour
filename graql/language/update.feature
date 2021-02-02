@@ -50,10 +50,6 @@ Feature: Graql Update Query
     Given session opens transaction of type: write
 
 
-  ##########
-  # THINGS #
-  ##########
-
   Scenario: Update owned attribute without side effects on other owners
     Given get answers of graql insert
       """
@@ -86,6 +82,7 @@ Feature: Graql Update Query
       | x          | n               |
       | key:ref:0  | value:name:Alex |
       | key:ref:1  | value:name:Bob  |
+
 
   #TODO: Remove ignore once interacting with a deleted thing is no longer possible
   @ignore
