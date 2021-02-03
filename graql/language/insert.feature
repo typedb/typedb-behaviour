@@ -1293,6 +1293,7 @@ Feature: Graql Insert Query
       $x 10;
       """
     Then transaction commits
+    Given session opens transaction of type: read
     Then uniquely identify answer concepts
       | x            |
       | value:age:10 |
