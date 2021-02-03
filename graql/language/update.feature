@@ -122,6 +122,23 @@ Feature: Graql Update Query
       """
 
 
+  Scenario: Unrelated insertion
+    Given get answers of graql insert
+      """
+      insert
+      $x isa person, has name "Alex", has ref 0;
+      """
+    Given transaction commits
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
+    When graql update; throws exception
+      """
+      match $p isa person;
+      delete $p isa person;
+      insert $x isa entity;
+      """
+
+
   Scenario: Complex migration
     Given get answers of graql insert
       """
