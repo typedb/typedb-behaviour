@@ -19,21 +19,19 @@
 Feature: Value Predicate Resolution
 
   Background: Set up databases for resolution testing
-
     Given connection has been opened
-    Given connection open sessions for databases:
-      | materialised |
+    Given connection does not have any database
+    Given connection create database: reasoned
+    Given connection create database: materialised
+    Given connection open schema sessions for databases:
       | reasoned     |
-
-
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql define
       """
       define
 
       person sub entity,
-        plays team:leader,
-        plays team:member,
-        owns string-attribute,
         owns unrelated-attribute,
         owns sub-string-attribute,
         owns name,
@@ -49,21 +47,18 @@ Feature: Value Predicate Resolution
         owns retailer,
         owns price;
 
-      team sub relation,
-        relates leader,
-        relates member,
-        owns string-attribute;
-
-      string-attribute sub attribute, value string;
+      string-attribute sub attribute, value string, abstract;
+      sub-string-attribute sub string-attribute;
       retailer sub attribute, value string;
       age sub attribute, value long;
       name sub attribute, value string;
       is-old sub attribute, value boolean;
       price sub attribute, value double;
-      sub-string-attribute sub string-attribute;
       unrelated-attribute sub attribute, value string;
       """
-
+    Given for each session, transaction commits
+    # each scenario specialises the schema further
+    Given for each session, open transactions of type: write
 
   Scenario: a rule can infer an attribute ownership based on a value predicate
     Given for each session, graql define
@@ -76,6 +71,12 @@ Feature: Value Predicate Resolution
         $x has is-old true;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -104,6 +105,12 @@ Feature: Value Predicate Resolution
       rule rule-1667: when { $x isa person; } then { $x has lucky-number 1667; };
       rule rule-1997: when { $x isa person; } then { $x has lucky-number 1997; };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -143,6 +150,12 @@ Feature: Value Predicate Resolution
       rule rule-1337: when { $x isa person; } then { $x has lucky-number 1337; };
       rule rule-1667: when { $x isa person; } then { $x has lucky-number 1667; };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -184,6 +197,12 @@ Feature: Value Predicate Resolution
       rule rule-1667: when { $x isa person; } then { $x has lucky-number 1667; };
       rule rule-1997: when { $x isa person; } then { $x has lucky-number 1997; };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -233,6 +252,12 @@ Feature: Value Predicate Resolution
         $y has retailer 'Ocado';
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -276,6 +301,12 @@ Feature: Value Predicate Resolution
         $y has retailer 'Ocado';
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -325,6 +356,12 @@ Feature: Value Predicate Resolution
         $x has retailer 'Londis';
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert $x isa soft-drink, has name "Fanta";
@@ -367,6 +404,12 @@ Feature: Value Predicate Resolution
         $x has retailer 'Londis';
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -422,6 +465,12 @@ Feature: Value Predicate Resolution
         $x has retailer 'Londis';
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -479,6 +528,12 @@ Feature: Value Predicate Resolution
         $y has retailer 'Ocado';
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -500,6 +555,8 @@ Feature: Value Predicate Resolution
     # Fanta | Tesco |
     # Tango | Tesco |
     Given answer size in reasoned database is: 2
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -529,6 +586,12 @@ Feature: Value Predicate Resolution
         $y has retailer 'Ocado';
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -550,6 +613,8 @@ Feature: Value Predicate Resolution
     # Fanta | Ocado |
     # Tango | Ocado |
     Given answer size in reasoned database is: 2
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -580,6 +645,12 @@ Feature: Value Predicate Resolution
         $y has retailer 'Ocado';
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -616,9 +687,10 @@ Feature: Value Predicate Resolution
       """
       define
       base-attribute sub attribute, value string, abstract;
-      string-attribute sub base-attribute;
-      name sub base-attribute;
+      base-string-attribute sub base-attribute;
       retailer sub base-attribute;
+
+      soft-drink owns retailer, owns base-string-attribute;
 
       rule tesco-sells-all-soft-drinks: when {
         $x isa soft-drink;
@@ -626,6 +698,12 @@ Feature: Value Predicate Resolution
         $x has retailer 'Tesco';
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -700,6 +778,12 @@ Feature: Value Predicate Resolution
         (priced-item: $x, price-category: $y3) isa price-classification;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -724,6 +808,8 @@ Feature: Value Predicate Resolution
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -732,6 +818,8 @@ Feature: Value Predicate Resolution
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -740,6 +828,8 @@ Feature: Value Predicate Resolution
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -748,6 +838,8 @@ Feature: Value Predicate Resolution
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -793,6 +885,12 @@ Feature: Value Predicate Resolution
           (predecessor:$s, successor:$r) isa message-succession;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
