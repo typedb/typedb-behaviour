@@ -19,13 +19,14 @@
 Feature: Rule Interaction Resolution
 
   Background: Set up databases for resolution testing
-
     Given connection has been opened
-    Given connection open sessions for databases:
-      | materialised |
+    Given connection does not have any database
+    Given connection create database: reasoned
+    Given connection create database: materialised
+    Given connection open schema sessions for databases:
       | reasoned     |
-
-
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql define
       """
       define
@@ -45,6 +46,8 @@ Feature: Rule Interaction Resolution
 
       name sub attribute, value string;
       """
+    Given for each session, transaction commits
+    Given for each session, open transactions of type: write
 
 
   ###########################
@@ -75,7 +78,7 @@ Feature: Rule Interaction Resolution
         $x isa person;
         $y isa person;
         (student: $x, teacher: $y) isa lesson;
-        (member: $x, member: $y, leader: $y) isa teams;
+        (member: $x, member: $y, leader: $y) isa team;
       } then {
         $y has tag "P";
       };
@@ -85,11 +88,17 @@ Feature: Rule Interaction Resolution
         $x isa person;
         $y isa person;
         (student: $x, teacher: $y) isa lesson;
-        (member: $x, member: $y, leader: $x) isa teams;
+        (member: $x, member: $y, leader: $x) isa team;
       } then {
         $y has tag "P";
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -99,11 +108,11 @@ Feature: Rule Interaction Resolution
       $charlie isa person, has name "charlie";
       $dennis isa person, has name "dennis";
 
-      (attendee: $bob, speaker: $alice) isa conference;
-      (member: $alice, member: $bob, host: $alice) isa party;
+      (student: $bob, teacher: $alice) isa lesson;
+      (member: $alice, member: $bob, leader: $alice) isa team;
 
-      (attendee: $charlie, speaker: $dennis) isa conference;
-      (member: $charlie, member: $dennis, host: $charlie) isa party;
+      (student: $charlie, teacher: $dennis) isa lesson;
+      (member: $charlie, member: $dennis, leader: $charlie) isa team;
       """
     Then materialised database is completed
     Given for each session, transaction commits
@@ -115,6 +124,7 @@ Feature: Rule Interaction Resolution
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
     Then materialised and reasoned databases are the same size
+
 
   Scenario: when two distinct rules have alpha-equivalent bodies and heads, the reasoner still sees them as distinct.
     More explicitly, suppose we have rule A and rule B. Suppose up to alpha equivalence A.when == B.when and
@@ -151,6 +161,12 @@ Feature: Rule Interaction Resolution
       };
       """
 
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -159,7 +175,6 @@ Feature: Rule Interaction Resolution
       $b isa person;
       (husband: $a, wife: $b) isa marriage;
       """
-
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read

@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-# TODO: re-enable all steps in file when 3-hop transitivity is resolvable
+@ignore # TODO enable when rules can resolve negation, and we're not pathetically slow with `not { $x is $y };`
 #noinspection CucumberUndefinedStep
 Feature: Concept Inequality Resolution
 
@@ -59,6 +59,7 @@ Feature: Concept Inequality Resolution
     Given connection open data sessions for databases:
       | reasoned     |
       | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -93,22 +94,19 @@ Feature: Concept Inequality Resolution
       transition sub relation,
         relates state;
 
-      achieved sub transition,
-          relates state;
+      achieved sub transition;
 
-      prior sub transition,
-          relates state;
+      prior sub transition;
 
-      holds sub transition,
-          relates state;
+      holds sub transition;
 
       rule state-rule: when {
           $st isa state;
-          (related-state: $st) isa achieved;
-          (related-state: $st2) isa prior;
+          (state: $st) isa achieved;
+          (state: $st2) isa prior;
           not { $st is $st2; };
       } then {
-          (related-state: $st) isa holds;
+          (state: $st) isa holds;
       };
       """
     Given for each session, transaction commits
@@ -124,9 +122,9 @@ Feature: Concept Inequality Resolution
       $s1 isa state, has name 's1';
       $s2 isa state, has name 's2';
 
-      (related-state: $s1) isa prior;
-      (related-state: $s1) isa achieved;
-      (related-state: $s2) isa achieved;
+      (state: $s1) isa prior;
+      (state: $s1) isa achieved;
+      (state: $s2) isa achieved;
       """
     Given for each session, transaction commits
     Given for each session, open transactions of type: write
@@ -135,7 +133,7 @@ Feature: Concept Inequality Resolution
     Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
-      match (related-state: $s) isa holds;
+      match (state: $s) isa holds;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -495,8 +493,8 @@ Feature: Concept Inequality Resolution
     Then for graql query
       """
       match
-        $x has base-attribute $ax;
-        $y has base-attribute $ay;
+        $x has $ax;
+        $y has $ay;
         $ax isa! $typeof_ax;
         $ay isa! $typeof_ay;
         not { $typeof_ax is $typeof_ay; };

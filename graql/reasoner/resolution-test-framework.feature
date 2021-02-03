@@ -19,13 +19,14 @@
 Feature: Resolution Test Framework
 
   Background: Set up databases for resolution testing
-
     Given connection has been opened
-    Given connection open sessions for databases:
-      | materialised |
+    Given connection does not have any database
+    Given connection create database: reasoned
+    Given connection create database: materialised
+    Given connection open schema sessions for databases:
       | reasoned     |
-
-
+      | materialised |
+    Given for each session, open transactions of type: write
 
 
   Scenario: basic rule
@@ -44,6 +45,12 @@ Feature: Resolution Test Framework
          $c has name "the-company";
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -87,12 +94,17 @@ Feature: Resolution Test Framework
           $c2 has is-liable true;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
       $co isa company;
       """
-
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -133,6 +145,12 @@ Feature: Resolution Test Framework
           (superior: $a, subordinate: $c) isa location-hierarchy;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -142,7 +160,6 @@ Feature: Resolution Test Framework
       (superior: $cntry, subordinate: $cit) isa location-hierarchy;
       (superior: $cit, subordinate: $ar) isa location-hierarchy;
       """
-
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -190,6 +207,12 @@ Feature: Resolution Test Framework
           (location-hierarchy_superior: $a, location-hierarchy_subordinate: $c) isa location-hierarchy;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -201,7 +224,6 @@ Feature: Resolution Test Framework
       (location-hierarchy_superior: $cntry, location-hierarchy_subordinate: $cit) isa location-hierarchy;
       (location-hierarchy_superior: $cit, location-hierarchy_subordinate: $ar) isa location-hierarchy;
       """
-
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -247,13 +269,18 @@ Feature: Resolution Test Framework
           (sibling: $p, sibling: $p1) isa siblingship;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
       $a isa woman, has name "Alice";
       $b isa man;
       """
-
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -265,7 +292,7 @@ Feature: Resolution Test Framework
     Then materialised and reasoned databases are the same size
 
 
-  @ignore
+  @ignore # TODO enable after reasoner can consume bounds
   Scenario: querying with a disjunction and a negation
     Given for each session, graql define
       """
@@ -287,6 +314,12 @@ Feature: Resolution Test Framework
           $c2 has is-liable true;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -295,7 +328,6 @@ Feature: Resolution Test Framework
       $c2 isa company;
       $c2 has name $n2; $n2 "another-company";
       """
-
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -333,6 +365,12 @@ Feature: Resolution Test Framework
           $c2 has is-liable true;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -341,7 +379,6 @@ Feature: Resolution Test Framework
       $c2 isa company;
       $c2 has name $n2; $n2 "another-company";
       """
-
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -353,6 +390,7 @@ Feature: Resolution Test Framework
     Then materialised and reasoned databases are the same size
 
 
+  @ignore # TODO enable after reasoner can consume bounds
   Scenario: querying with multiple negations
     Given for each session, graql define
       """
@@ -375,6 +413,12 @@ Feature: Resolution Test Framework
           $c2 has is-liable true;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -383,7 +427,6 @@ Feature: Resolution Test Framework
       $c2 isa company;
       $c2 has name $n2; $n2 "another-company";
       """
-
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read

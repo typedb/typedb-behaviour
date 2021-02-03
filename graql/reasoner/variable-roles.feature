@@ -20,13 +20,14 @@
 Feature: Variable Role Resolution
 
   Background: Set up databases for resolution testing
-
     Given connection has been opened
-    Given connection open sessions for databases:
-      | materialised |
+    Given connection does not have any database
+    Given connection create database: reasoned
+    Given connection create database: materialised
+    Given connection open schema sessions for databases:
       | reasoned     |
-
-
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql define
       """
       define
@@ -47,19 +48,14 @@ Feature: Variable Role Resolution
           relates role1,
           relates role2;
 
-      binary sub binary-base,
-          relates role1,
-          relates role2;
+      binary sub binary-base;
 
       ternary-base sub relation,
           relates ternary-role1,
           relates ternary-role2,
           relates ternary-role3;
 
-      ternary sub ternary-base,
-          relates ternary-role1,
-          relates ternary-role2,
-          relates ternary-role3;
+      ternary sub ternary-base;
 
       quaternary-base sub relation,
           relates quat-role1,
@@ -67,11 +63,7 @@ Feature: Variable Role Resolution
           relates quat-role3,
           relates quat-role4;
 
-      quaternary sub quaternary-base,
-          relates quat-role1,
-          relates quat-role2,
-          relates quat-role3,
-          relates quat-role4;
+      quaternary sub quaternary-base;
 
       name sub attribute, value string;
 
@@ -119,6 +111,12 @@ Feature: Variable Role Resolution
           (quat-role1:$x, quat-role2:$z1, quat-role3: $z2, quat-role4: $y) isa quaternary;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -134,6 +132,8 @@ Feature: Variable Role Resolution
       (role1: $a, role2: $b) isa binary;
       (role1: $b, role2: $a) isa binary;
       """
+    Given for each session, transaction commits
+    Given for each session, open transactions of type: write
   # Materialised binary-base: [ab, bc, cb]
   # Inferred binary-base: [aa, ac, bb, ca, cc]
   # Materialised binary: [ab, ba]
@@ -159,6 +159,8 @@ Feature: Variable Role Resolution
       """
     Given all answers are correct in reasoned database
     Given answer size in reasoned database is: 9
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match (role1: $a, $r1: $b) isa binary-base;
@@ -179,12 +181,14 @@ Feature: Variable Role Resolution
       """
     Given all answers are correct in reasoned database
     Given answer size in reasoned database is: 18
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     # This query should be equivalent to the one above
     Then for graql query
       """
       match
         ($r1: $a, $r2: $b) isa binary-base;
-        $r1 type role1;
+        $r1 type binary-base:role1;
       get $a, $b, $r2;
       """
     Then all answers are correct in reasoned database
@@ -202,6 +206,8 @@ Feature: Variable Role Resolution
       """
     Given all answers are correct in reasoned database
     Given answer size in reasoned database is: 9
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match (role: $a, $r1: $b) isa binary-base;
@@ -212,8 +218,6 @@ Feature: Variable Role Resolution
     Then materialised and reasoned databases are the same size
 
 
-  @ignore
-  # TODO: need to determine what this should do; currently it returns 12 answers (grakn#5677)
   Scenario: converting a fixed role to a variable bound with 'type role' (?)
     Then materialised database is completed
     Given for each session, transaction commits
@@ -224,12 +228,14 @@ Feature: Variable Role Resolution
       """
     Given all answers are correct in reasoned database
     Then answer size in reasoned database is: 27
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     # This query should be equivalent to the one above
     Then for graql query
       """
       match
         ($r1: $a, $r2: $b) isa binary-base;
-        $r1 type role;
+        $r1 type relation:role;
       get $a, $b, $r2;
       """
     Then all answers are correct in reasoned database
@@ -237,8 +243,6 @@ Feature: Variable Role Resolution
     Then materialised and reasoned databases are the same size
 
 
-  @ignore
-  # TODO: need to determine what this should do; currently it errors (grakn#5677)
   Scenario: converting a fixed role to a variable bound with 'sub role' (?)
     Then materialised database is completed
     Given for each session, transaction commits
@@ -249,12 +253,14 @@ Feature: Variable Role Resolution
       """
     Given all answers are correct in reasoned database
     Then answer size in reasoned database is: 27
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     # This query should be equivalent to the one above
     Then for graql query
       """
       match
         ($r1: $a, $r2: $b) isa binary-base;
-        $r1 sub role;
+        $r1 sub relation:role;
       get $a, $b, $r2;
       """
     Then all answers are correct in reasoned database
@@ -262,8 +268,6 @@ Feature: Variable Role Resolution
     Then materialised and reasoned databases are the same size
 
 
-  @ignore
-  # TODO: re-enable when converting a fixed role to a variable bound with meta 'role' does not modify the answer
   Scenario: when all other role variables are bound, introducing a meta 'role' doesn't affect the answer size
     Then materialised database is completed
     Given for each session, transaction commits
@@ -272,18 +276,20 @@ Feature: Variable Role Resolution
       """
       match
         ($r1: $a, $r2: $b) isa binary-base;
-        $r1 type role;
-        $r2 type role2;
+        $r1 type relation:role;
+        $r2 type binary-base:role2;
       """
     # $r1 must be 'role' and $r2 must be 'role2'
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 9
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     # This query is equivalent to the one above
     Then for graql query
       """
       match
         (role: $a, $r2: $b) isa binary-base;
-        $r2 type role2;
+        $r2 type binary-base:role2;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 9
@@ -300,6 +306,8 @@ Feature: Variable Role Resolution
       """
     Given all answers are correct in reasoned database
     Given answer size in reasoned database is: 9
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match ($r1: $a, $r2: $b) isa binary-base;
@@ -376,6 +384,8 @@ Feature: Variable Role Resolution
     Then all answers are correct in reasoned database
     # This query is equivalent to matching ($r2: $a2, $r3: $a3) isa binary-base, as role1 and $a1 each have only 1 value
     Then answer size in reasoned database is: 63
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match (ternary-role1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
@@ -383,6 +393,8 @@ Feature: Variable Role Resolution
     Then all answers are correct in reasoned database
     # Now the bound role 'role1' is in {a, b, c}, tripling the answer size
     Then answer size in reasoned database is: 189
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match ($r1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
@@ -419,6 +431,8 @@ Feature: Variable Role Resolution
     Then all answers are correct in reasoned database
     # This query is equivalent to matching ($r2: $a2, $r3: $a3, $r4: $a4) isa ternary-base
     Then answer size in reasoned database is: 918
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
@@ -426,6 +440,8 @@ Feature: Variable Role Resolution
     Then all answers are correct in reasoned database
     # Now the bound role 'role1' is in {a, b, c}, tripling the answer size
     Then answer size in reasoned database is: 2754
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match ($r1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
@@ -461,6 +477,8 @@ Feature: Variable Role Resolution
     Then all answers are correct in reasoned database
     # This query is equivalent to matching ($r2: $a2, $r3: $a3, $r4: $a4) isa ternary
     Then answer size in reasoned database is: 272
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
@@ -468,6 +486,8 @@ Feature: Variable Role Resolution
     Then all answers are correct in reasoned database
     # Now the bound role 'role1' is in {a, b}, doubling the answer size
     Then answer size in reasoned database is: 544
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match ($r1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
