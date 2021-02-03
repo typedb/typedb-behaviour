@@ -87,7 +87,7 @@ Feature: Graql Update Query
       insert
       $x isa person, has name "Alex", has ref 0;
       $y isa person, has name "Bob", has ref 1;
-      $r (friend: $x, friend:$y) isa friendship, has ref 0;
+      $r (friend: $x) isa friendship, has ref 0;
       """
     Given transaction commits
     Given session opens transaction of type: write
