@@ -112,7 +112,7 @@ Feature: Relation Inference Resolution
       """
       define
       rule haikal-is-employed: when {
-        $p has name "Haikal";
+        $p isa person, has name "Haikal";
       } then {
         (employee: $p) isa employment;
       };
@@ -412,8 +412,8 @@ Feature: Relation Inference Resolution
       define
       person plays employment:employer;
       rule robert-employs-jane: when {
-        $x has name "Robert";
-        $y has name "Jane";
+        $x isa person, has name "Robert";
+        $y isa person, has name "Jane";
       } then {
         (employee: $y, employer: $x) isa employment;
       };
@@ -777,9 +777,9 @@ Feature: Relation Inference Resolution
       """
       define
       rule alice-bob-and-charlie-are-friends: when {
-        $a has name "Alice";
-        $b has name "Bob";
-        $c has name "Charlie";
+        $a isa person, has name "Alice";
+        $b isa person, has name "Bob";
+        $c isa person, has name "Charlie";
       } then {
         (friend: $a, friend: $b, friend: $c) isa friendship;
       };
@@ -819,7 +819,6 @@ Feature: Relation Inference Resolution
     Then materialised and reasoned databases are the same size
 
 
-  # TODO: re-enable all steps when fixed (#75), currently they are very slow
   Scenario: inferred relations can be filtered by shared attribute ownership
     Given for each session, graql define
       """
@@ -1132,15 +1131,12 @@ Feature: Relation Inference Resolution
 
       baseRelation sub relation,
           relates baseRole;
-      subRelation sub baseRelation,
-          relates baseRole;
-      subSubRelation sub subRelation,
-          relates baseRole;
+      subRelation sub baseRelation;
+      subSubRelation sub subRelation;
 
       derivedRelation sub relation,
           relates derivedRelationRole;
-      directDerivedRelation sub derivedRelation,
-          relates derivedRelationRole;
+      directDerivedRelation sub derivedRelation;
 
       rule relationRule: when {
           ($x) isa subRelation;

@@ -22,13 +22,14 @@ Feature: Recursion Resolution
   This test feature verifies that so-called recursive inference works as intended.
 
   Background: Set up databases for resolution testing
-
     Given connection has been opened
-    Given connection open sessions for databases:
-      | materialised |
+    Given connection does not have any database
+    Given connection create database: reasoned
+    Given connection create database: materialised
+    Given connection open schema sessions for databases:
       | reasoned     |
-
-
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql define
       """
       define
@@ -60,9 +61,10 @@ Feature: Recursion Resolution
 
       name sub attribute, value string;
       """
+    Given for each session, transaction commits
+    Given for each session, open transactions of type: write
 
 
-  # TODO: re-enable all steps when query is resolvable (currently takes too long)
   Scenario: the types of entities in inferred relations can be used to make further inferences
     Given for each session, graql define
       """
@@ -77,20 +79,26 @@ Feature: Recursion Resolution
         relates big-superior as superior;
 
       rule transitive-location: when {
-        (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
-        (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
+        (subordinate: $x, superior: $y) isa location-hierarchy;
+        (subordinate: $y, superior: $z) isa location-hierarchy;
       } then {
-        (location-subordinate: $x, location-superior: $z) isa location-hierarchy;
+        (subordinate: $x, superior: $z) isa location-hierarchy;
       };
 
       rule if-a-big-thing-is-in-a-big-place-then-its-a-big-location: when {
         $x isa big-place;
         $y isa big-place;
-        (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
+        (subordinate: $x, superior: $y) isa location-hierarchy;
       } then {
-        (big-location-subordinate: $x, big-location-superior: $y) isa big-location-hierarchy;
+        (big-subordinate: $x, big-superior: $y) isa big-location-hierarchy;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -98,22 +106,23 @@ Feature: Recursion Resolution
       $y isa place, has name "Tanzania";
       $z isa big-place, has name "Africa";
 
-      (location-subordinate: $x, location-superior: $y) isa location-hierarchy;
-      (location-subordinate: $y, location-superior: $z) isa location-hierarchy;
+      (subordinate: $x, superior: $y) isa location-hierarchy;
+      (subordinate: $y, superior: $z) isa location-hierarchy;
       """
+    Given for each session, transaction commits
+    Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
-      match (big-location-subordinate: $x, big-location-superior: $y) isa big-location-hierarchy;
+      match (subordinate: $x, superior: $y) isa big-location-hierarchy;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
     Then materialised and reasoned databases are the same size
 
 
-  # TODO: re-enable all steps when resolvable (currently takes too long)
   Scenario: the types of inferred relations can be used to make further inferences
     Given for each session, graql define
       """
@@ -154,8 +163,14 @@ Feature: Recursion Resolution
           (role21:$x, role22:$z) isa relation2;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
-      """
+    """
       insert
 
       $x isa entity1;
@@ -173,6 +188,8 @@ Feature: Recursion Resolution
       (role21:$v, role22:$w) isa relation2;
       (role11:$w, role12:$q) isa relation1;
       """
+    Given for each session, transaction commits
+    Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -228,8 +245,14 @@ Feature: Recursion Resolution
           (role31:$x, role32:$y) isa relation3;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
-      """
+    """
       insert
 
       $x isa entity1;
@@ -238,6 +261,8 @@ Feature: Recursion Resolution
       (role11:$x, role12:$x) isa relation1;
       (role11:$x, role12:$y) isa relation1;
       """
+    Given for each session, transaction commits
+    Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -248,6 +273,8 @@ Feature: Recursion Resolution
     Then all answers are correct in reasoned database
     # Each of the two material relation1 instances should infer a single relation3 via 1-to-2 and 2-to-3
     Then answer size in reasoned database is: 2
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match (role21: $x, role22: $y) isa relation2;
@@ -273,18 +300,26 @@ Feature: Recursion Resolution
 
       rule inception: when {
         $x isa person;
-        $z (dreamer: $x, dream-subject: $y) isa dream;
+        $z (dreamer: $x, subject: $y) isa dream;
       } then {
-        (dreamer: $x, dream-subject: $z) isa dream;
+        (dreamer: $x, subject: $z) isa dream;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
-      """
+    """
       insert
       $x isa person, has name "Yusuf";
       # If only Yusuf didn't dream about himself...
-      (dreamer: $x, dream-subject: $x) isa dream;
+      (dreamer: $x, subject: $x) isa dream;
       """
+    Given for each session, transaction commits
+    Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -312,11 +347,6 @@ Feature: Recursion Resolution
 
       f sub word;
       o sub word;
-
-      pobj sub role;
-      prep sub role;
-      subtype sub role;
-      supertype sub role;
 
       inheritance sub relation,
           relates supertype,
@@ -359,8 +389,14 @@ Feature: Recursion Resolution
           $p has name 'fo';
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
-      """
+    """
       insert
 
       $f isa f, has name "f";
@@ -384,6 +420,8 @@ Feature: Recursion Resolution
       (supertype: $f, subtype: $rr) isa inheritance;
       (supertype: $f, subtype: $rr2) isa inheritance;
       """
+    Given for each session, transaction commits
+    Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -393,6 +431,8 @@ Feature: Recursion Resolution
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 16
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match $p isa pair;
@@ -402,7 +442,6 @@ Feature: Recursion Resolution
     Then materialised and reasoned databases are the same size
 
 
-  # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
   Scenario: non-regular transitivity requiring iterative generation of tuples
 
   from Vieille - Recursive Axioms in Deductive Databases p. 192
@@ -447,8 +486,14 @@ Feature: Recursion Resolution
         (role-A: $x, role-B: $y) isa R;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
-      """
+    """
       insert
 
       $i isa entity2, has index "i";
@@ -494,9 +539,11 @@ Feature: Recursion Resolution
         $x has index 'i';
       get $y;
       """
-    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 3
-    Given for each session, transaction commits
+    Given for each session, transaction closes
+    Given for each session, open transactions of type: write
+    Then materialised database is completed
+    Given for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
     Then answer set is equivalent for graql query
       """
@@ -521,29 +568,35 @@ Feature: Recursion Resolution
       person sub entity,
         owns name;
 
-      Parent sub relation, relates parent, relates child;
-      person plays Parent:parent, plays Parent:child;
+      parentship sub relation, relates parent, relates child;
+      person plays parentship:parent, plays parentship:child;
 
-      Ancestor sub relation, relates ancestor, relates descendant;
-      person plays Ancestor:ancestor, plays Ancestor:descendant;
+      ancestorship sub relation, relates ancestor, relates descendant;
+      person plays ancestorship:ancestor, plays ancestorship:descendant;
 
       name sub attribute, value string;
 
       rule rule-1: when {
-        (parent: $x, child: $z) isa Parent;
-        (ancestor: $z, descendant: $y) isa Ancestor;
+        (parent: $x, child: $z) isa parentship;
+        (ancestor: $z, descendant: $y) isa ancestorship;
       } then {
-        (ancestor: $x, descendant: $y) isa Ancestor;
+        (ancestor: $x, descendant: $y) isa ancestorship;
       };
 
       rule rule-2: when {
-        (parent: $x, child: $y) isa Parent;
+        (parent: $x, child: $y) isa parentship;
       } then {
-        (ancestor: $x, descendant: $y) isa Ancestor;
+        (ancestor: $x, descendant: $y) isa ancestorship;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
-      """
+    """
       insert
 
       $a isa person, has name 'a';
@@ -555,27 +608,29 @@ Feature: Recursion Resolution
       $c isa person, has name 'c';
       $ca isa person, has name 'ca';
 
-      (parent: $a, child: $aa) isa Parent;
-      (parent: $a, child: $ab) isa Parent;
-      (parent: $aa, child: $aaa) isa Parent;
-      (parent: $aa, child: $aab) isa Parent;
-      (parent: $aaa, child: $aaaa) isa Parent;
-      (parent: $c, child: $ca) isa Parent;
+      (parent: $a, child: $aa) isa parentship;
+      (parent: $a, child: $ab) isa parentship;
+      (parent: $aa, child: $aaa) isa parentship;
+      (parent: $aa, child: $aab) isa parentship;
+      (parent: $aaa, child: $aaaa) isa parentship;
+      (parent: $c, child: $ca) isa parentship;
       """
+    Given for each session, transaction commits
+    Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
-        (ancestor: $X, descendant: $Y) isa Ancestor;
+        (ancestor: $X, descendant: $Y) isa ancestorship;
         $X has name 'aa';
         $Y has name $name;
       get $Y, $name;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 3
-    Given for each session, transaction commits
+    Then for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
     Then answer set is equivalent for graql query
       """
@@ -587,13 +642,13 @@ Feature: Recursion Resolution
     Then for graql query
       """
       match
-        ($X, $Y) isa Ancestor;
+        ($X, $Y) isa ancestorship;
         $X has name 'aa';
       get $Y;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 4
-    Given for each session, transaction commits
+    Then for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
     Then answer set is equivalent for graql query
       """
@@ -604,11 +659,11 @@ Feature: Recursion Resolution
       """
     Then for graql query
       """
-      match (ancestor: $X, descendant: $Y) isa Ancestor;
+      match (ancestor: $X, descendant: $Y) isa ancestorship;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 10
-    Given for each session, transaction commits
+    Then for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
     Then answer set is equivalent for graql query
       """
@@ -624,11 +679,11 @@ Feature: Recursion Resolution
       """
     Then for graql query
       """
-      match ($X, $Y) isa Ancestor;
+      match ($X, $Y) isa ancestorship;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 20
-    Given for each session, transaction commits
+    Then for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
     Then answer set is equivalent for graql query
       """
@@ -657,7 +712,6 @@ Feature: Recursion Resolution
     Then materialised and reasoned databases are the same size
 
 
-  # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
   Scenario: ancestor-friend test
 
   from Vieille - Recursive Axioms in Deductive Databases (QSQ approach) p. 186
@@ -667,34 +721,41 @@ Feature: Recursion Resolution
       define
 
       person sub entity,
-          owns name;
+          owns name,
+          plays parentship:parent,
+          plays parentship:child,
+          plays friendship:friend,
+          plays friendship:friend,
+          plays ancestor-friendship:ancestor,
+          plays ancestor-friendship:friend;
 
-      Friend sub relation, relates friend;
-      person plays friendship:friend, plays friendship:friend;
-
-      Parent sub relation, relates parent, relates child;
-      person plays Parent:parent, plays Parent:child;
-
-      Ancestor-friend sub relation, relates ancestor, relates ancestor-friend;
-      person plays Ancestor-friend:ancestor, plays Ancestor-friend:ancestor-friend;
+      friendship sub relation, relates friend;
+      parentship sub relation, relates parent, relates child;
+      ancestor-friendship sub relation, relates ancestor, relates friend;
 
       name sub attribute, value string;
 
       rule rule-1: when {
-        (friend: $x, friend: $y) isa Friend;
+        (friend: $x, friend: $y) isa friendship;
       } then {
-        (ancestor: $x, ancestor-friend: $y) isa Ancestor-friend;
+        (ancestor: $x, friend: $y) isa ancestor-friendship;
       };
 
       rule rule-2: when {
-        (parent: $x, child: $z) isa Parent;
-        (ancestor: $z, ancestor-friend: $y) isa Ancestor-friend;
+        (parent: $x, child: $z) isa parentship;
+        (ancestor: $z, friend: $y) isa ancestor-friendship;
       } then {
-        (ancestor: $x, ancestor-friend: $y) isa Ancestor-friend;
+        (ancestor: $x, friend: $y) isa ancestor-friendship;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
-      """
+    """
       insert
 
       $a isa person, has name "a";
@@ -703,10 +764,10 @@ Feature: Recursion Resolution
       $d isa person, has name "d";
       $g isa person, has name "g";
 
-      (parent: $a, child: $b) isa Parent;
-      (parent: $b, child: $c) isa Parent;
-      (friend: $a, friend: $g) isa Friend;
-      (friend: $c, friend: $d) isa Friend;
+      (parent: $a, child: $b) isa parentship;
+      (parent: $b, child: $c) isa parentship;
+      (friend: $a, friend: $g) isa friendship;
+      (friend: $c, friend: $d) isa friendship;
       """
     Then materialised database is completed
     Given for each session, transaction commits
@@ -714,14 +775,16 @@ Feature: Recursion Resolution
     Then for graql query
       """
       match
-        (ancestor: $X, ancestor-friend: $Y) isa Ancestor-friend;
+        (ancestor: $X, friend: $Y) isa ancestor-friendship;
         $X has name 'a';
         $Y has name $name;
       get $Y;
       """
-    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
-    Given for each session, transaction commits
+    Given for each session, transaction closes
+    Given for each session, open transactions of type: read
+    Then all answers are correct in reasoned database
+    Given for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
     Then answer set is equivalent for graql query
       """
@@ -730,23 +793,29 @@ Feature: Recursion Resolution
         {$name = 'd';} or {$name = 'g';};
       get $Y;
       """
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     And answer set is equivalent for graql query
       """
       match
-        ($X, $Y) isa Ancestor-friend;
+        ($X, $Y) isa ancestor-friendship;
         $X has name 'a';
       get $Y;
       """
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
-        (ancestor: $X, ancestor-friend: $Y) isa Ancestor-friend;
+        (ancestor: $X, friend: $Y) isa ancestor-friendship;
         $Y has name 'd';
       get $X;
       """
-    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 3
-    Given for each session, transaction commits
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
+    Then all answers are correct in reasoned database
+    Then for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
     Then answer set is equivalent for graql query
       """
@@ -755,17 +824,18 @@ Feature: Recursion Resolution
         {$name = 'a';} or {$name = 'b';} or {$name = 'c';};
       get $X;
       """
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     And answer set is equivalent for graql query
       """
       match
-        ($X, $Y) isa Ancestor-friend;
+        ($X, $Y) isa ancestor-friendship;
         $Y has name 'd';
       get $X;
       """
     Then materialised and reasoned databases are the same size
 
 
-  # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
   Scenario: same-generation test
 
   from Vieille - Recursive Query Processing: The power of logic p. 25
@@ -778,8 +848,8 @@ Feature: Recursion Resolution
           owns name;
       Human sub entity2;
 
-      Parent sub relation, relates parent, relates child;
-      entity2 plays Parent:parent, plays Parent:child;
+      parentship sub relation, relates parent, relates child;
+      entity2 plays parentship:parent, plays parentship:child;
 
       SameGen sub relation, relates SG-role;
       entity2 plays SameGen:SG-role;
@@ -793,15 +863,21 @@ Feature: Recursion Resolution
       };
 
       rule rule-2: when {
-        (parent: $x, child: $u) isa Parent;
-        (parent: $y, child: $v) isa Parent;
+        (parent: $x, child: $u) isa parentship;
+        (parent: $y, child: $v) isa parentship;
         (SG-role: $u, SG-role: $v) isa SameGen;
       } then {
         (SG-role: $x, SG-role: $y) isa SameGen;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
-      """
+    """
       insert
 
       $a isa entity2, has name "a";
@@ -813,20 +889,19 @@ Feature: Recursion Resolution
       $g isa entity2, has name "g";
       $h isa entity2, has name "h";
 
-      (parent: $a, child: $b) isa Parent;
-      (parent: $a, child: $c) isa Parent;
-
-      (parent: $b, child: $d) isa Parent;
-      (parent: $c, child: $d) isa Parent;
-      (parent: $e, child: $d) isa Parent;
-
-      (parent: $f, child: $e) isa Parent;
+      (parent: $a, child: $b) isa parentship;
+      (parent: $a, child: $c) isa parentship;
+      (parent: $b, child: $d) isa parentship;
+      (parent: $c, child: $d) isa parentship;
+      (parent: $e, child: $d) isa parentship;
+      (parent: $f, child: $e) isa parentship;
 
       #Extra data
-      (parent: $g, child: $f) isa Parent;
-
-      (parent: $h, child: $g) isa Parent;
+      (parent: $g, child: $f) isa parentship;
+      (parent: $h, child: $g) isa parentship;
       """
+    Given for each session, transaction commits
+    Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -837,9 +912,9 @@ Feature: Recursion Resolution
         $x has name 'a';
       get $y;
       """
-    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
-    Given for each session, transaction commits
+    Then all answers are correct in reasoned database
+    Then for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
     Then answer set is equivalent for graql query
       """
@@ -851,7 +926,6 @@ Feature: Recursion Resolution
     Then materialised and reasoned databases are the same size
 
 
-  # TODO: re-enable all steps when resolvable ('all answers correct' takes too long, 'same size' test fails) (#75)
   Scenario: TC test
 
   from Vieille - Recursive Query Processing: The power of logic p. 18
@@ -861,51 +935,62 @@ Feature: Recursion Resolution
       define
 
       entity2 sub entity,
-          owns index;
+          owns index,
+          plays N-TC:roleB,
+          plays N-TC:roleA,
+          plays TC:roleA,
+          plays TC:roleB,
+          plays P:roleA,
+          plays P:roleB;
       q sub entity2;
 
       N-TC sub relation, relates roleB, relates roleA;
-      entity2 plays N-TC:roleB, plays N-TC:roleA;
 
       TC sub relation, relates roleA, relates roleB;
-      entity2 plays TC:roleA, plays TC:roleB;
 
       P sub relation, relates roleA, relates roleB;
-      entity2 plays P:roleA, plays P:roleB;
 
       index sub attribute, value string;
 
       rule rule-1: when {
         $x isa q;
-        (TC-roleA: $x, TC-roleB: $y) isa TC;
+        (roleA: $x, roleB: $y) isa TC;
       } then {
         (roleA: $x, roleB: $y) isa N-TC;
       };
 
       rule rule-2: when {
-        (P-roleA: $x, P-roleB: $y) isa P;
+        (roleA: $x, roleB: $y) isa P;
       } then {
-        (TC-roleA: $x, TC-roleB: $y) isa TC;
+        (roleA: $x, roleB: $y) isa TC;
       };
 
       rule rule-3: when {
-        (P-roleA: $x, P-roleB: $z) isa P;
-        (TC-roleA:$z, TC-roleB: $y) isa TC;
+        (roleA: $x, roleB: $z) isa P;
+        (roleA: $z, roleB: $y) isa TC;
       } then {
-        (TC-roleA: $x, TC-roleB: $y) isa TC;
+        (roleA: $x, roleB: $y) isa TC;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
-      """
+    """
       insert
 
       $a isa entity2, has index "a";
       $a1 isa entity2, has index "a1";
       $a2 isa q, has index "a2";
 
-      (P-roleA: $a1, P-roleB: $a) isa P;
-      (P-roleA: $a2, P-roleB: $a1) isa P;
+      (roleA: $a1, roleB: $a) isa P;
+      (roleA: $a2, roleB: $a1) isa P;
       """
+    Given for each session, transaction commits
+    Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -918,7 +1003,7 @@ Feature: Recursion Resolution
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
-    Given for each session, transaction commits
+    Then for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
     Then answer set is equivalent for graql query
       """
@@ -927,7 +1012,7 @@ Feature: Recursion Resolution
     Then materialised and reasoned databases are the same size
 
 
-  # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
+  @ignore # TODO enable after negation is available
   Scenario: given a directed graph, all pairs of vertices (x,y) such that y is reachable from x can be found
 
   test 5.2 from Green - Datalog and Recursive Query Processing
@@ -954,10 +1039,10 @@ Feature: Recursion Resolution
       node sub traversable;
 
       pair sub relation, relates from, relates to;
-      link sub pair, relates from, relates to;
-      indirect-link sub pair, relates from, relates to;
-      reachable sub pair, relates from, relates to;
-      unreachable sub pair, relates from, relates to;
+      link sub pair;
+      indirect-link sub pair;
+      reachable sub pair;
+      unreachable sub pair;
 
       index sub attribute, value string;
 
@@ -989,8 +1074,14 @@ Feature: Recursion Resolution
           (from: $x, to: $y) isa unreachable;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
-      """
+    """
       insert
 
       $aa isa node, has index "aa";
@@ -1003,6 +1094,8 @@ Feature: Recursion Resolution
       (from: $cc, to: $cc) isa link;
       (from: $cc, to: $dd) isa link;
       """
+    Given for each session, transaction commits
+    Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -1012,7 +1105,7 @@ Feature: Recursion Resolution
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 7
-    Given for each session, transaction commits
+    Given for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
     Then answer set is equivalent for graql query
       """
@@ -1031,7 +1124,6 @@ Feature: Recursion Resolution
     Then materialised and reasoned databases are the same size
 
 
-  # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
   Scenario: given an undirected graph, all vertices connected to a given vertex can be found
 
   For this test, the graph looks like the following:
@@ -1046,12 +1138,11 @@ Feature: Recursion Resolution
       define
 
       vertex sub entity,
-        owns index @key;
+        owns index @key,
+        plays reachable:coordinate;
 
       link sub relation, relates coordinate;
-      vertex plays reachable:coordinate;
-
-      reachable sub link, relates coordinate;
+      reachable sub link;
 
       index sub attribute, value string;
 
@@ -1068,8 +1159,14 @@ Feature: Recursion Resolution
         (coordinate: $x, coordinate: $y) isa reachable;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
-      """
+    """
       insert
 
       $a isa vertex, has index "a";
@@ -1082,6 +1179,8 @@ Feature: Recursion Resolution
       (coordinate: $c, coordinate: $c) isa link;
       (coordinate: $c, coordinate: $d) isa link;
       """
+    Given for each session, transaction commits
+    Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -1094,7 +1193,7 @@ Feature: Recursion Resolution
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 4
-    Given for each session, transaction commits
+    Then for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
     Then answer set is equivalent for graql query
       """
@@ -1118,8 +1217,8 @@ Feature: Recursion Resolution
       person sub entity,
         owns name;
 
-      Parent sub relation, relates parent, relates child;
-      person plays Parent:parent, plays Parent:child;
+      parentship sub relation, relates parent, relates child;
+      person plays parentship:parent, plays parentship:child;
 
       Sibling sub relation, relates A, relates B;
       person plays Sibling:A, plays Sibling:B;
@@ -1136,22 +1235,28 @@ Feature: Recursion Resolution
       };
 
       rule rule-2: when {
-        (parent: $x, child: $u) isa Parent;
+        (parent: $x, child: $u) isa parentship;
         ($u, $v) isa SameGen;
-        (parent: $y, child: $v) isa Parent;
+        (parent: $y, child: $v) isa parentship;
       } then {
         (A: $x, B: $y) isa SameGen;
       };
 
       rule rule-3: when {
-        (parent: $z, child: $x) isa Parent;
-        (parent: $z, child: $y) isa Parent;
+        (parent: $z, child: $x) isa parentship;
+        (parent: $z, child: $y) isa parentship;
       } then {
         (A: $x, B: $y) isa Sibling;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
-      """
+    """
       insert
 
       $ann isa person, has name "ann";
@@ -1159,10 +1264,12 @@ Feature: Recursion Resolution
       $john isa person, has name "john";
       $peter isa person, has name "peter";
 
-      (parent: $john, child: $ann) isa Parent;
-      (parent: $john, child: $peter) isa Parent;
-      (parent: $john, child: $bill) isa Parent;
+      (parent: $john, child: $ann) isa parentship;
+      (parent: $john, child: $peter) isa parentship;
+      (parent: $john, child: $bill) isa parentship;
       """
+    Given for each session, transaction commits
+    Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -1175,7 +1282,7 @@ Feature: Recursion Resolution
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 3
-    Given for each session, transaction commits
+    Given for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
     Then answer set is equivalent for graql query
       """
@@ -1187,7 +1294,6 @@ Feature: Recursion Resolution
     Then materialised and reasoned databases are the same size
 
 
-  # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
   Scenario: reverse same-generation test
 
   from Abiteboul - Foundations of databases p. 312/Cao test 6.14 p. 89
@@ -1197,22 +1303,27 @@ Feature: Recursion Resolution
       define
 
       person sub entity,
-        owns name;
+        owns name,
+        plays parentship:parent,
+        plays parentship:child,
+        plays RevSG:from,
+        plays RevSG:to,
+        plays up:from,
+        plays up:to,
+        plays down:from,
+        plays down:to,
+        plays flat:from,
+        plays flat:to;
 
-      Parent sub relation, relates parent, relates child;
-      person plays Parent:parent, plays Parent:child;
+      parentship sub relation, relates parent, relates child;
 
       RevSG sub relation, relates from, relates to;
-      person plays RevSG:from, plays RevSG:to;
 
       up sub relation, relates from, relates to;
-      person plays up:from, plays up:to;
 
       down sub relation, relates from, relates to;
-      person plays down:from, plays down:to;
 
       flat sub relation, relates to, relates from;
-      person plays flat:from, plays flat:to;
 
       name sub attribute, value string;
 
@@ -1230,8 +1341,14 @@ Feature: Recursion Resolution
         (from: $x, to: $y) isa RevSG;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
-      """
+    """
       insert
 
       $a isa person, has name "a";
@@ -1251,39 +1368,41 @@ Feature: Recursion Resolution
       $o isa person, has name "o";
       $p isa person, has name "p";
 
-      (up-from: $a, up-to: $e) isa up;
-      (up-from: $a, up-to: $f) isa up;
-      (up-from: $f, up-to: $m) isa up;
-      (up-from: $g, up-to: $n) isa up;
-      (up-from: $h, up-to: $n) isa up;
-      (up-from: $i, up-to: $o) isa up;
-      (up-from: $j, up-to: $o) isa up;
+      (from: $a, to: $e) isa up;
+      (from: $a, to: $f) isa up;
+      (from: $f, to: $m) isa up;
+      (from: $g, to: $n) isa up;
+      (from: $h, to: $n) isa up;
+      (from: $i, to: $o) isa up;
+      (from: $j, to: $o) isa up;
 
-      (flat-from: $g, flat-to: $f) isa flat;
-      (flat-from: $m, flat-to: $n) isa flat;
-      (flat-from: $m, flat-to: $o) isa flat;
-      (flat-from: $p, flat-to: $m) isa flat;
+      (from: $g, to: $f) isa flat;
+      (from: $m, to: $n) isa flat;
+      (from: $m, to: $o) isa flat;
+      (from: $p, to: $m) isa flat;
 
-      (down-from: $l, down-to: $f) isa down;
-      (down-from: $m, down-to: $f) isa down;
-      (down-from: $g, down-to: $b) isa down;
-      (down-from: $h, down-to: $c) isa down;
-      (down-from: $i, down-to: $d) isa down;
-      (down-from: $p, down-to: $k) isa down;
+      (from: $l, to: $f) isa down;
+      (from: $m, to: $f) isa down;
+      (from: $g, to: $b) isa down;
+      (from: $h, to: $c) isa down;
+      (from: $i, to: $d) isa down;
+      (from: $p, to: $k) isa down;
       """
+    Given for each session, transaction commits
+    Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
-        (RSG-from: $x, RSG-to: $y) isa RevSG;
+        (from: $x, to: $y) isa RevSG;
         $x has name 'a';
       get $y;
       """
-    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 3
-    Given for each session, transaction commits
+    Then all answers are correct in reasoned database
+    Given for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
     Then answer set is equivalent for graql query
       """
@@ -1292,13 +1411,15 @@ Feature: Recursion Resolution
         {$name = 'b';} or {$name = 'c';} or {$name = 'd';};
       get $y;
       """
+    Given for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
-      match (RSG-from: $x, RSG-to: $y) isa RevSG;
+      match (from: $x, to: $y) isa RevSG;
       """
-    Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 11
-    Given for each session, transaction commits
+    Then all answers are correct in reasoned database
+    Given for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
     Then answer set is equivalent for graql query
       """
@@ -1316,7 +1437,6 @@ Feature: Recursion Resolution
     Then materialised and reasoned databases are the same size
 
 
-  # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
   Scenario: dual linear transitivity matrix test
 
   test 6.1 from Cao - Methods for evaluating queries to Horn knowledge bases in first-order logic, p. 71
@@ -1380,9 +1500,15 @@ Feature: Recursion Resolution
         (from: $x, to: $y) isa P;
       };
       """
-    # These insert statements can be procedurally generated based on 'm' and 'n', the width and height of the matrix
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
-      """
+    # These insert statements can be procedurally generated based on 'm' and 'n', the width and height of the matrix
+    """
       insert
 
 
@@ -1428,69 +1554,70 @@ Feature: Recursion Resolution
       $b45 isa b-entity, has index "b45";
 
 
-      # (R1-from: $a{i}, R1-to: $a{i+1} isa R1; for 0 <= i < m
-      (R1-from: $a0, R1-to: $a1) isa R1;
-      (R1-from: $a1, R1-to: $a2) isa R1;
-      (R1-from: $a2, R1-to: $a3) isa R1;
-      (R1-from: $a3, R1-to: $a4) isa R1;
-      (R1-from: $a4, R1-to: $a5) isa R1;
+      # (from: $a{i}, to: $a{i+1} isa R1; for 0 <= i < m
+      (from: $a0, to: $a1) isa R1;
+      (from: $a1, to: $a2) isa R1;
+      (from: $a2, to: $a3) isa R1;
+      (from: $a3, to: $a4) isa R1;
+      (from: $a4, to: $a5) isa R1;
 
 
-      # (R2-from: $a0, R2-to: $b1{j}) isa R2; for 1 <= j <= n
-      # (R2-from: $b{m-1}{j}, R2-to: $a{m}) isa R2; for 1 <= j <= n
-      # (R2-from: $b{i}{j}, R2-to: $b{i+1}{j}) isa R2; for 1 <= j <= n; for 1 <= i < m - 1
-      (R2-from: $a0, R2-to: $b11) isa R2;
-      (R2-from: $b41, R2-to: $a5) isa R2;
-      (R2-from: $b11, R2-to: $b21) isa R2;
-      (R2-from: $b21, R2-to: $b31) isa R2;
-      (R2-from: $b31, R2-to: $b41) isa R2;
+      # (from: $a0, to: $b1{j}) isa R2; for 1 <= j <= n
+      # (from: $b{m-1}{j}, to: $a{m}) isa R2; for 1 <= j <= n
+      # (from: $b{i}{j}, to: $b{i+1}{j}) isa R2; for 1 <= j <= n; for 1 <= i < m - 1
+      (from: $a0, to: $b11) isa R2;
+      (from: $b41, to: $a5) isa R2;
+      (from: $b11, to: $b21) isa R2;
+      (from: $b21, to: $b31) isa R2;
+      (from: $b31, to: $b41) isa R2;
 
-      (R2-from: $a0, R2-to: $b12) isa R2;
-      (R2-from: $b42, R2-to: $a5) isa R2;
-      (R2-from: $b12, R2-to: $b22) isa R2;
-      (R2-from: $b22, R2-to: $b32) isa R2;
-      (R2-from: $b32, R2-to: $b42) isa R2;
+      (from: $a0, to: $b12) isa R2;
+      (from: $b42, to: $a5) isa R2;
+      (from: $b12, to: $b22) isa R2;
+      (from: $b22, to: $b32) isa R2;
+      (from: $b32, to: $b42) isa R2;
 
-      (R2-from: $a0, R2-to: $b13) isa R2;
-      (R2-from: $b43, R2-to: $a5) isa R2;
-      (R2-from: $b13, R2-to: $b23) isa R2;
-      (R2-from: $b23, R2-to: $b33) isa R2;
-      (R2-from: $b33, R2-to: $b43) isa R2;
+      (from: $a0, to: $b13) isa R2;
+      (from: $b43, to: $a5) isa R2;
+      (from: $b13, to: $b23) isa R2;
+      (from: $b23, to: $b33) isa R2;
+      (from: $b33, to: $b43) isa R2;
 
-      (R2-from: $a0, R2-to: $b14) isa R2;
-      (R2-from: $b44, R2-to: $a5) isa R2;
-      (R2-from: $b14, R2-to: $b24) isa R2;
-      (R2-from: $b24, R2-to: $b34) isa R2;
-      (R2-from: $b34, R2-to: $b44) isa R2;
+      (from: $a0, to: $b14) isa R2;
+      (from: $b44, to: $a5) isa R2;
+      (from: $b14, to: $b24) isa R2;
+      (from: $b24, to: $b34) isa R2;
+      (from: $b34, to: $b44) isa R2;
 
-      (R2-from: $a0, R2-to: $b15) isa R2;
-      (R2-from: $b45, R2-to: $a5) isa R2;
-      (R2-from: $b15, R2-to: $b25) isa R2;
-      (R2-from: $b25, R2-to: $b35) isa R2;
-      (R2-from: $b35, R2-to: $b45) isa R2;
+      (from: $a0, to: $b15) isa R2;
+      (from: $b45, to: $a5) isa R2;
+      (from: $b15, to: $b25) isa R2;
+      (from: $b25, to: $b35) isa R2;
+      (from: $b35, to: $b45) isa R2;
       """
+    Given for each session, transaction commits
+    Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
-        (Q1-from: $x, Q1-to: $y) isa Q1;
+        (from: $x, to: $y) isa Q1;
         $x has index 'a0';
       get $y;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 5
-    Given for each session, transaction commits
+    Given for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
     Then answer set is equivalent for graql query
       """
-      match { $y isa a-entity; } or { $y isa end; };
+      match $y isa $t; { $t type a-entity; } or { $t type end; }; get $y;
       """
     Then materialised and reasoned databases are the same size
 
 
-  # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
   Scenario: tail recursion test
 
   test 6.3 from Cao - Methods for evaluating queries to Horn knowledge bases in first-order logic, p 75
@@ -1500,15 +1627,18 @@ Feature: Recursion Resolution
       define
 
       entity2 sub entity,
-        owns index @key;
+        owns index @key,
+        plays P:from,
+        plays P:to,
+        plays Q:from,
+        plays Q:to;
+
       a-entity sub entity2;
       b-entity sub entity2;
 
       P sub relation, relates from, relates to;
-      entity2 plays P:from, plays P:to;
 
       Q sub relation, relates from, relates to;
-      entity2 plays Q:from, plays Q:to;
 
       index sub attribute, value string;
 
@@ -1525,8 +1655,14 @@ Feature: Recursion Resolution
         (from: $x, to: $y) isa P;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
-      """
+    """
       insert
 
 
@@ -1601,93 +1737,95 @@ Feature: Recursion Resolution
       $b6_10 isa b-entity, has index "b6_10";
 
 
-      # (Q-from: $a0, Q-to: $b1_{j}) isa Q; for 1 <= j <= n
-      (Q-from: $a0, Q-to: $b1_1) isa Q;
-      (Q-from: $a0, Q-to: $b1_2) isa Q;
-      (Q-from: $a0, Q-to: $b1_3) isa Q;
-      (Q-from: $a0, Q-to: $b1_4) isa Q;
-      (Q-from: $a0, Q-to: $b1_5) isa Q;
-      (Q-from: $a0, Q-to: $b1_6) isa Q;
-      (Q-from: $a0, Q-to: $b1_7) isa Q;
-      (Q-from: $a0, Q-to: $b1_8) isa Q;
-      (Q-from: $a0, Q-to: $b1_9) isa Q;
-      (Q-from: $a0, Q-to: $b1_10) isa Q;
+      # (from: $a0, to: $b1_{j}) isa Q; for 1 <= j <= n
+      (from: $a0, to: $b1_1) isa Q;
+      (from: $a0, to: $b1_2) isa Q;
+      (from: $a0, to: $b1_3) isa Q;
+      (from: $a0, to: $b1_4) isa Q;
+      (from: $a0, to: $b1_5) isa Q;
+      (from: $a0, to: $b1_6) isa Q;
+      (from: $a0, to: $b1_7) isa Q;
+      (from: $a0, to: $b1_8) isa Q;
+      (from: $a0, to: $b1_9) isa Q;
+      (from: $a0, to: $b1_10) isa Q;
 
 
-      # (Q-from: $b{i}_{j}, Q-to: $b{i+1}_{j}) isa Q; for 1 <= j <= n; for 1 <= i <= m
-      (Q-from: $b1_1, Q-to: $b2_1) isa Q;
-      (Q-from: $b2_1, Q-to: $b3_1) isa Q;
-      (Q-from: $b3_1, Q-to: $b4_1) isa Q;
-      (Q-from: $b4_1, Q-to: $b5_1) isa Q;
-      (Q-from: $b5_1, Q-to: $b6_1) isa Q;
+      # (from: $b{i}_{j}, to: $b{i+1}_{j}) isa Q; for 1 <= j <= n; for 1 <= i <= m
+      (from: $b1_1, to: $b2_1) isa Q;
+      (from: $b2_1, to: $b3_1) isa Q;
+      (from: $b3_1, to: $b4_1) isa Q;
+      (from: $b4_1, to: $b5_1) isa Q;
+      (from: $b5_1, to: $b6_1) isa Q;
 
-      (Q-from: $b1_2, Q-to: $b2_2) isa Q;
-      (Q-from: $b2_2, Q-to: $b3_2) isa Q;
-      (Q-from: $b3_2, Q-to: $b4_2) isa Q;
-      (Q-from: $b4_2, Q-to: $b5_2) isa Q;
-      (Q-from: $b5_2, Q-to: $b6_2) isa Q;
+      (from: $b1_2, to: $b2_2) isa Q;
+      (from: $b2_2, to: $b3_2) isa Q;
+      (from: $b3_2, to: $b4_2) isa Q;
+      (from: $b4_2, to: $b5_2) isa Q;
+      (from: $b5_2, to: $b6_2) isa Q;
 
-      (Q-from: $b1_3, Q-to: $b2_3) isa Q;
-      (Q-from: $b2_3, Q-to: $b3_3) isa Q;
-      (Q-from: $b3_3, Q-to: $b4_3) isa Q;
-      (Q-from: $b4_3, Q-to: $b5_3) isa Q;
-      (Q-from: $b5_3, Q-to: $b6_3) isa Q;
+      (from: $b1_3, to: $b2_3) isa Q;
+      (from: $b2_3, to: $b3_3) isa Q;
+      (from: $b3_3, to: $b4_3) isa Q;
+      (from: $b4_3, to: $b5_3) isa Q;
+      (from: $b5_3, to: $b6_3) isa Q;
 
-      (Q-from: $b1_4, Q-to: $b2_4) isa Q;
-      (Q-from: $b2_4, Q-to: $b3_4) isa Q;
-      (Q-from: $b3_4, Q-to: $b4_4) isa Q;
-      (Q-from: $b4_4, Q-to: $b5_4) isa Q;
-      (Q-from: $b5_4, Q-to: $b6_4) isa Q;
+      (from: $b1_4, to: $b2_4) isa Q;
+      (from: $b2_4, to: $b3_4) isa Q;
+      (from: $b3_4, to: $b4_4) isa Q;
+      (from: $b4_4, to: $b5_4) isa Q;
+      (from: $b5_4, to: $b6_4) isa Q;
 
-      (Q-from: $b1_5, Q-to: $b2_5) isa Q;
-      (Q-from: $b2_5, Q-to: $b3_5) isa Q;
-      (Q-from: $b3_5, Q-to: $b4_5) isa Q;
-      (Q-from: $b4_5, Q-to: $b5_5) isa Q;
-      (Q-from: $b5_5, Q-to: $b6_5) isa Q;
+      (from: $b1_5, to: $b2_5) isa Q;
+      (from: $b2_5, to: $b3_5) isa Q;
+      (from: $b3_5, to: $b4_5) isa Q;
+      (from: $b4_5, to: $b5_5) isa Q;
+      (from: $b5_5, to: $b6_5) isa Q;
 
-      (Q-from: $b1_6, Q-to: $b2_6) isa Q;
-      (Q-from: $b2_6, Q-to: $b3_6) isa Q;
-      (Q-from: $b3_6, Q-to: $b4_6) isa Q;
-      (Q-from: $b4_6, Q-to: $b5_6) isa Q;
-      (Q-from: $b5_6, Q-to: $b6_6) isa Q;
+      (from: $b1_6, to: $b2_6) isa Q;
+      (from: $b2_6, to: $b3_6) isa Q;
+      (from: $b3_6, to: $b4_6) isa Q;
+      (from: $b4_6, to: $b5_6) isa Q;
+      (from: $b5_6, to: $b6_6) isa Q;
 
-      (Q-from: $b1_7, Q-to: $b2_7) isa Q;
-      (Q-from: $b2_7, Q-to: $b3_7) isa Q;
-      (Q-from: $b3_7, Q-to: $b4_7) isa Q;
-      (Q-from: $b4_7, Q-to: $b5_7) isa Q;
-      (Q-from: $b5_7, Q-to: $b6_7) isa Q;
+      (from: $b1_7, to: $b2_7) isa Q;
+      (from: $b2_7, to: $b3_7) isa Q;
+      (from: $b3_7, to: $b4_7) isa Q;
+      (from: $b4_7, to: $b5_7) isa Q;
+      (from: $b5_7, to: $b6_7) isa Q;
 
-      (Q-from: $b1_8, Q-to: $b2_8) isa Q;
-      (Q-from: $b2_8, Q-to: $b3_8) isa Q;
-      (Q-from: $b3_8, Q-to: $b4_8) isa Q;
-      (Q-from: $b4_8, Q-to: $b5_8) isa Q;
-      (Q-from: $b5_8, Q-to: $b6_8) isa Q;
+      (from: $b1_8, to: $b2_8) isa Q;
+      (from: $b2_8, to: $b3_8) isa Q;
+      (from: $b3_8, to: $b4_8) isa Q;
+      (from: $b4_8, to: $b5_8) isa Q;
+      (from: $b5_8, to: $b6_8) isa Q;
 
-      (Q-from: $b1_9, Q-to: $b2_9) isa Q;
-      (Q-from: $b2_9, Q-to: $b3_9) isa Q;
-      (Q-from: $b3_9, Q-to: $b4_9) isa Q;
-      (Q-from: $b4_9, Q-to: $b5_9) isa Q;
-      (Q-from: $b5_9, Q-to: $b6_9) isa Q;
+      (from: $b1_9, to: $b2_9) isa Q;
+      (from: $b2_9, to: $b3_9) isa Q;
+      (from: $b3_9, to: $b4_9) isa Q;
+      (from: $b4_9, to: $b5_9) isa Q;
+      (from: $b5_9, to: $b6_9) isa Q;
 
-      (Q-from: $b1_10, Q-to: $b2_10) isa Q;
-      (Q-from: $b2_10, Q-to: $b3_10) isa Q;
-      (Q-from: $b3_10, Q-to: $b4_10) isa Q;
-      (Q-from: $b4_10, Q-to: $b5_10) isa Q;
-      (Q-from: $b5_10, Q-to: $b6_10) isa Q;
+      (from: $b1_10, to: $b2_10) isa Q;
+      (from: $b2_10, to: $b3_10) isa Q;
+      (from: $b3_10, to: $b4_10) isa Q;
+      (from: $b4_10, to: $b5_10) isa Q;
+      (from: $b5_10, to: $b6_10) isa Q;
       """
+    Given for each session, transaction commits
+    Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
-        (P-from: $x, P-to: $y) isa P;
+        (from: $x, to: $y) isa P;
         $x has index 'a0';
       get $y;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 60
-    Given for each session, transaction commits
+    Given for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
     Then answer set is equivalent for graql query
       """
@@ -1695,7 +1833,7 @@ Feature: Recursion Resolution
       """
     Then materialised and reasoned databases are the same size
 
-  # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
+
   Scenario: linear transitivity matrix test
 
   test 6.9 from Cao - Methods for evaluating queries to Horn knowledge bases in first-order logic p.82
@@ -1739,6 +1877,12 @@ Feature: Recursion Resolution
         (from: $x, to: $y) isa S;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -1776,72 +1920,74 @@ Feature: Recursion Resolution
       $a5_4 isa a-entity, has index "a5_4";
       $a5_5 isa a-entity, has index "a5_5";
 
-      (Q-from: $a, Q-to: $a1_1) isa Q;
+      (from: $a, to: $a1_1) isa Q;
 
-      # (Q-from: $a{i}_{j}, Q-to: $a{i+1}_{j}) isa Q; for 1 <= i < n; for 1 <= j <= m
-      (Q-from: $a1_1, Q-to: $a2_1) isa Q;
-      (Q-from: $a1_2, Q-to: $a2_2) isa Q;
-      (Q-from: $a1_3, Q-to: $a2_3) isa Q;
-      (Q-from: $a1_4, Q-to: $a2_4) isa Q;
-      (Q-from: $a1_5, Q-to: $a2_5) isa Q;
+      # (from: $a{i}_{j}, to: $a{i+1}_{j}) isa Q; for 1 <= i < n; for 1 <= j <= m
+      (from: $a1_1, to: $a2_1) isa Q;
+      (from: $a1_2, to: $a2_2) isa Q;
+      (from: $a1_3, to: $a2_3) isa Q;
+      (from: $a1_4, to: $a2_4) isa Q;
+      (from: $a1_5, to: $a2_5) isa Q;
 
-      (Q-from: $a2_1, Q-to: $a3_1) isa Q;
-      (Q-from: $a2_2, Q-to: $a3_2) isa Q;
-      (Q-from: $a2_3, Q-to: $a3_3) isa Q;
-      (Q-from: $a2_4, Q-to: $a3_4) isa Q;
-      (Q-from: $a2_5, Q-to: $a3_5) isa Q;
+      (from: $a2_1, to: $a3_1) isa Q;
+      (from: $a2_2, to: $a3_2) isa Q;
+      (from: $a2_3, to: $a3_3) isa Q;
+      (from: $a2_4, to: $a3_4) isa Q;
+      (from: $a2_5, to: $a3_5) isa Q;
 
-      (Q-from: $a3_1, Q-to: $a4_1) isa Q;
-      (Q-from: $a3_2, Q-to: $a4_2) isa Q;
-      (Q-from: $a3_3, Q-to: $a4_3) isa Q;
-      (Q-from: $a3_4, Q-to: $a4_4) isa Q;
-      (Q-from: $a3_5, Q-to: $a4_5) isa Q;
+      (from: $a3_1, to: $a4_1) isa Q;
+      (from: $a3_2, to: $a4_2) isa Q;
+      (from: $a3_3, to: $a4_3) isa Q;
+      (from: $a3_4, to: $a4_4) isa Q;
+      (from: $a3_5, to: $a4_5) isa Q;
 
-      (Q-from: $a4_1, Q-to: $a5_1) isa Q;
-      (Q-from: $a4_2, Q-to: $a5_2) isa Q;
-      (Q-from: $a4_3, Q-to: $a5_3) isa Q;
-      (Q-from: $a4_4, Q-to: $a5_4) isa Q;
-      (Q-from: $a4_5, Q-to: $a5_5) isa Q;
+      (from: $a4_1, to: $a5_1) isa Q;
+      (from: $a4_2, to: $a5_2) isa Q;
+      (from: $a4_3, to: $a5_3) isa Q;
+      (from: $a4_4, to: $a5_4) isa Q;
+      (from: $a4_5, to: $a5_5) isa Q;
 
-      # (Q-from: $a{i}_{j}, Q-to: $a{i}_{j+1}) isa Q; for 1 <= i <= n; for 1 <= j < m
-      (Q-from: $a1_1, Q-to: $a1_2) isa Q;
-      (Q-from: $a1_2, Q-to: $a1_3) isa Q;
-      (Q-from: $a1_3, Q-to: $a1_4) isa Q;
-      (Q-from: $a1_4, Q-to: $a1_5) isa Q;
+      # (from: $a{i}_{j}, to: $a{i}_{j+1}) isa Q; for 1 <= i <= n; for 1 <= j < m
+      (from: $a1_1, to: $a1_2) isa Q;
+      (from: $a1_2, to: $a1_3) isa Q;
+      (from: $a1_3, to: $a1_4) isa Q;
+      (from: $a1_4, to: $a1_5) isa Q;
 
-      (Q-from: $a2_1, Q-to: $a2_2) isa Q;
-      (Q-from: $a2_2, Q-to: $a2_3) isa Q;
-      (Q-from: $a2_3, Q-to: $a2_4) isa Q;
-      (Q-from: $a2_4, Q-to: $a2_5) isa Q;
+      (from: $a2_1, to: $a2_2) isa Q;
+      (from: $a2_2, to: $a2_3) isa Q;
+      (from: $a2_3, to: $a2_4) isa Q;
+      (from: $a2_4, to: $a2_5) isa Q;
 
-      (Q-from: $a3_1, Q-to: $a3_2) isa Q;
-      (Q-from: $a3_2, Q-to: $a3_3) isa Q;
-      (Q-from: $a3_3, Q-to: $a3_4) isa Q;
-      (Q-from: $a3_4, Q-to: $a3_5) isa Q;
+      (from: $a3_1, to: $a3_2) isa Q;
+      (from: $a3_2, to: $a3_3) isa Q;
+      (from: $a3_3, to: $a3_4) isa Q;
+      (from: $a3_4, to: $a3_5) isa Q;
 
-      (Q-from: $a4_1, Q-to: $a4_2) isa Q;
-      (Q-from: $a4_2, Q-to: $a4_3) isa Q;
-      (Q-from: $a4_3, Q-to: $a4_4) isa Q;
-      (Q-from: $a4_4, Q-to: $a4_5) isa Q;
+      (from: $a4_1, to: $a4_2) isa Q;
+      (from: $a4_2, to: $a4_3) isa Q;
+      (from: $a4_3, to: $a4_4) isa Q;
+      (from: $a4_4, to: $a4_5) isa Q;
 
-      (Q-from: $a5_1, Q-to: $a5_2) isa Q;
-      (Q-from: $a5_2, Q-to: $a5_3) isa Q;
-      (Q-from: $a5_3, Q-to: $a5_4) isa Q;
-      (Q-from: $a5_4, Q-to: $a5_5) isa Q;
+      (from: $a5_1, to: $a5_2) isa Q;
+      (from: $a5_2, to: $a5_3) isa Q;
+      (from: $a5_3, to: $a5_4) isa Q;
+      (from: $a5_4, to: $a5_5) isa Q;
       """
+    Given for each session, transaction commits
+    Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
-        (P-from: $x, P-to: $y) isa P;
+        (from: $x, to: $y) isa P;
         $x has index 'a';
       get $y;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 25
-    Given for each session, transaction commits
+    Given for each session, transaction closes
     Given for each session, open transactions with reasoning of type: read
     Then answer set is equivalent for graql query
       """
