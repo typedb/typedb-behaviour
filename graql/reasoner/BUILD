@@ -28,7 +28,6 @@ files = [
     "schema-queries.feature",
     "resolution-test-framework.feature",
     "type-hierarchy.feature",
-    "value-predicate.feature",
     "variable-roles.feature",
     "rule-interaction.feature",
 ]
