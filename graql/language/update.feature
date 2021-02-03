@@ -65,12 +65,10 @@ Feature: Graql Update Query
     When graql update
       """
       match
-        $x isa person, has ref 1, has $n;
-        $n isa name;
-      delete
-        $x has $n;
-      insert
-        $x has name "Bob";
+      $x isa person, has ref 1, has $n;
+      $n isa name;
+      delete $x has $n;
+      insert $x has name "Bob";
       """
     Then transaction commits
     When session opens transaction of type: read
@@ -99,13 +97,11 @@ Feature: Graql Update Query
     When graql update; throws exception
       """
       match
-        $x isa person, has name "Alex";
-        $y isa person, has name "Bob";
-        $r (friend: $x) isa friendship;
-      delete
-        $r (friend: $x);
-      insert
-        $r (friend: $y);
+      $x isa person, has name "Alex";
+      $y isa person, has name "Bob";
+      $r (friend: $x) isa friendship;
+      delete $r (friend: $x);
+      insert $r (friend: $y);
       """
 
   Scenario: Roleplayer exchange
@@ -120,12 +116,9 @@ Feature: Graql Update Query
     Given session opens transaction of type: write
     When graql update
       """
-      match
-        $r (parent: $x, child: $y) isa parenthood;
-      delete
-        $r isa parenthood;
-      insert
-        (parent: $y, child: $x) isa parenthood;
+      match $r (parent: $x, child: $y) isa parenthood;
+      delete $r isa parenthood;
+      insert (parent: $y, child: $x) isa parenthood;
       """
 
   Scenario: Complex migration
@@ -160,28 +153,24 @@ Feature: Graql Update Query
     Given session opens transaction of type: write
     When graql insert
       """
-      match
-        $att isa name;
-      insert
-        $x isa nameclass, has $att;
+      match $att isa name;
+      insert $x isa nameclass, has $att;
       """
     When graql update
       """
       match
-        $p isa person, has name $n;
-        $nc isa nameclass, has name $n;
-      delete
-        $p has $n;
-      insert
-        (named: $p, name: $nc) isa naming;
+      $p isa person, has name $n;
+      $nc isa nameclass, has name $n;
+      delete $p has $n;
+      insert (named: $p, name: $nc) isa naming;
       """
     Then transaction commits
     When session opens transaction of type: read
     When get answers of graql match
       """
       match
-        (named: $p, name: $nc) isa naming;
-        $nc has name $n;
+      (named: $p, name: $nc) isa naming;
+      $nc has name $n;
       """
     Then uniquely identify answer concepts
       | p          | n                  |
@@ -195,7 +184,7 @@ Feature: Graql Update Query
     When get answers of graql match
       """
       match
-        $p isa person;
-        $p has name $n;
+      $p isa person;
+      $p has name $n;
       """
     Then answer size is: 0
