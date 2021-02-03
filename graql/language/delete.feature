@@ -59,11 +59,11 @@ Feature: Graql Delete Query
       $n "John" isa name;
       """
     Given transaction commits
+    Given session opens transaction of type: write
 
     Given uniquely identify answer concepts
       | x             | y            | r         | n               |
       | key:name:Alex | key:name:Bob | key:ref:0 | value:name:John |
-    Given session opens transaction of type: write
     When graql delete
       """
       match
@@ -109,11 +109,11 @@ Feature: Graql Delete Query
       $n "John" isa name;
       """
     Given transaction commits
+    Given session opens transaction of type: write
 
     Then uniquely identify answer concepts
       | x             | y            | r         | n               |
       | key:name:Alex | key:name:Bob | key:ref:0 | value:name:John |
-    Given session opens transaction of type: write
     When graql delete
       """
       match
@@ -145,10 +145,10 @@ Feature: Graql Delete Query
       """
     Given transaction commits
 
+    Given session opens transaction of type: write
     Then uniquely identify answer concepts
       | x             | y            | r         | n               |
       | key:name:Alex | key:name:Bob | key:ref:0 | value:name:John |
-    Given session opens transaction of type: write
     When graql delete
       """
       match
@@ -179,11 +179,11 @@ Feature: Graql Delete Query
       $n "John" isa name;
       """
     Given transaction commits
+    Given session opens transaction of type: write
 
     Then uniquely identify answer concepts
       | x             | y            | r         | n               |
       | key:name:Alex | key:name:Bob | ket:ref:0 | value:name:John |
-    Given session opens transaction of type: write
     When graql delete
       """
       match
@@ -208,11 +208,11 @@ Feature: Graql Delete Query
       $n "John" isa name;
       """
     Given transaction commits
+    Given session opens transaction of type: write
 
     Then uniquely identify answer concepts
       | n               |
       | value:name:John |
-    Given session opens transaction of type: write
     When graql delete
       """
       match
@@ -241,11 +241,11 @@ Feature: Graql Delete Query
       $n "John" isa name;
       """
     Given transaction commits
+    Given session opens transaction of type: write
 
     Then uniquely identify answer concepts
       | x             | y            | r         | n               |
       | key:name:Alex | key:name:Bob | key:ref:0 | value:name:John |
-    Given session opens transaction of type: write
     When graql delete
       """
       match
@@ -273,11 +273,11 @@ Feature: Graql Delete Query
       $b isa person, has name "Barbara";
       """
     Given transaction commits
+    Given session opens transaction of type: write
 
     Then uniquely identify answer concepts
       | a              | b                |
       | key:name:Alice | key:name:Barbara |
-    Given session opens transaction of type: write
     When graql delete
       """
       match
@@ -386,11 +386,11 @@ Feature: Graql Delete Query
          has ref 0;
       """
     Given transaction commits
+    Given session opens transaction of type: write
 
     Then uniquely identify answer concepts
       | x             | y            | z               | r         |
       | key:name:Alex | key:name:Bob | key:name:Carrie | key:ref:0 |
-    Given session opens transaction of type: write
     When graql delete
       """
       match
@@ -426,12 +426,12 @@ Feature: Graql Delete Query
       $r2 (friend: $x, friend: $z) isa friendship, has ref 2;
       """
     Given transaction commits
+    When session opens transaction of type: write
 
     Then uniquely identify answer concepts
       | x             | y            | z               | r         | r2        |
       | key:name:Alex | key:name:Bob | key:name:Carrie | key:ref:1 | key:ref:2 |
 
-    When session opens transaction of type: write
     When graql delete
       """
       match
@@ -470,11 +470,11 @@ Feature: Graql Delete Query
       $r (friend: $x, friend: $x, friend: $y) isa friendship, has ref 0;
       """
     Given transaction commits
+    When session opens transaction of type: write
 
     Then uniquely identify answer concepts
       | x             | y            | r         |
       | key:name:Alex | key:name:Bob | key:ref:0 |
-    When session opens transaction of type: write
     When graql delete
       """
       match
@@ -503,11 +503,11 @@ Feature: Graql Delete Query
       $r (friend: $x, friend: $x, friend: $x, friend: $y) isa friendship, has ref 0;
       """
     Given transaction commits
+    When session opens transaction of type: write
 
     Then uniquely identify answer concepts
       | x             | y            | r         |
       | key:name:Alex | key:name:Bob | key:ref:0 |
-    When session opens transaction of type: write
     When graql delete
       """
       match
@@ -538,10 +538,10 @@ Feature: Graql Delete Query
       """
     Given transaction commits
 
+    When session opens transaction of type: write
     Then uniquely identify answer concepts
       | x             | y            | r         |
       | key:name:Alex | key:name:Bob | key:ref:0 |
-    When session opens transaction of type: write
     When graql delete
       """
       match
@@ -573,10 +573,10 @@ Feature: Graql Delete Query
       """
     Given transaction commits
 
+    When session opens transaction of type: write
     Then uniquely identify answer concepts
       | x             | y            | r         |
       | key:name:Alex | key:name:Bob | key:ref:0 |
-    When session opens transaction of type: write
     When graql delete
       """
       match
@@ -608,11 +608,11 @@ Feature: Graql Delete Query
       $r (friend: $x, friend: $y, friend: $z) isa friendship, has ref 0;
       """
     Given transaction commits
+    When session opens transaction of type: write
 
     Then uniquely identify answer concepts
       | x             | y            | z               | r         |
       | key:name:Alex | key:name:Bob | key:name:Carrie | key:ref:0 |
-    When session opens transaction of type: write
     When graql delete; throws exception
       """
       match
@@ -658,10 +658,10 @@ Feature: Graql Delete Query
       """
     Given transaction commits
 
+    When session opens transaction of type: write
     Then uniquely identify answer concepts
       | x             | y            | r         |
       | key:name:Alex | key:name:Bob | key:ref:0 |
-    When session opens transaction of type: write
     When graql delete
       """
       match
@@ -691,10 +691,10 @@ Feature: Graql Delete Query
       """
     Given transaction commits
 
+    When session opens transaction of type: write
     Then uniquely identify answer concepts
       | x             | y            | r         |
       | key:name:Alex | key:name:Bob | key:ref:0 |
-    When session opens transaction of type: write
     When graql delete
       """
       match
@@ -942,10 +942,10 @@ Feature: Graql Delete Query
       """
     Given transaction commits
 
+    When session opens transaction of type: write
     Then uniquely identify answer concepts
       | x             | y             |
       | key:name:Alex | key:name:John |
-    When session opens transaction of type: write
     When graql delete; throws exception
       """
       match
@@ -996,11 +996,10 @@ Feature: Graql Delete Query
       $x isa person, has name "Watson";
       """
     Given transaction commits
-
+    When session opens transaction of type: write
     Then uniquely identify answer concepts
       | x               |
       | key:name:Watson |
-    When session opens transaction of type: write
     When graql delete
       """
       match
