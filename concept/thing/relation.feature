@@ -216,8 +216,8 @@ Feature: Concept Relation
     When $m = relation(marriage) create new instance with key(license): m
     When $a = entity(person) create new instance with key(username): alice
     When relation $m add player for role(wife): $a
-    When delete relation: $r
-    Then relation $r is deleted: true
+    When delete relation: $m
+    Then relation $m is deleted: true
     When relation $m add player for role(wife): $a; throws exception
 
   Scenario: Relation cannot have roleplayers inserted after indirect deletion
@@ -225,5 +225,5 @@ Feature: Concept Relation
     When $a = entity(person) create new instance with key(username): alice
     When relation $m add player for role(wife): $a
     When delete entity: $a
-    Then relation $r is deleted: true
+    Then relation $m is deleted: true
     When relation $m add player for role(wife): $a; throws exception
