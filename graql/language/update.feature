@@ -121,6 +121,41 @@ Feature: Graql Update Query
       insert (parent: $y, child: $x) isa parenthood;
       """
 
+
+  Scenario: Unrelated insertion
+    Given get answers of graql insert
+      """
+      insert
+      $u isa person, has name "Alex", has ref 0;
+      $v isa person, has name "Bob", has ref 1;
+      $w isa person, has name "Charlie", has ref 2;
+      $x isa person, has name "Darius", has ref 3;
+      $y isa person, has name "Evelyn", has ref 4;
+      $z isa person, has name "Farah", has ref 5;
+      """
+    Given transaction commits
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
+    When graql update
+      """
+      match $p isa person;
+      delete $p;
+      insert $x isa entity;
+      """
+    Then transaction commits
+    When session opens transaction of type: read
+    When get answers of graql match
+      """
+      match $x isa entity;
+      """
+    Then answer size is: 6
+    When get answers of graql match
+      """
+      match $x isa person;
+      """
+    Then answer size is: 0
+
+
   Scenario: Complex migration
     Given get answers of graql insert
       """
@@ -188,3 +223,6 @@ Feature: Graql Update Query
       $p has name $n;
       """
     Then answer size is: 0
+
+
+
