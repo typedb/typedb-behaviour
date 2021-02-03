@@ -19,13 +19,14 @@
 Feature: Type Hierarchy Resolution
 
   Background: Set up databases for resolution testing
-
     Given connection has been opened
-    Given connection open sessions for databases:
-      | materialised |
+    Given connection does not have any database
+    Given connection create database: reasoned
+    Given connection create database: materialised
+    Given connection open schema sessions for databases:
       | reasoned     |
-
-
+      | materialised |
+    Given for each session, open transactions of type: write
 
 
   Scenario: subtypes trigger rules based on their parents; parent types don't trigger rules based on their children
@@ -60,6 +61,12 @@ Feature: Type Hierarchy Resolution
           (actor:$x, writer:$y) isa film-production;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -74,9 +81,8 @@ Feature: Type Hierarchy Resolution
       (performer:$x, writer:$v) isa performance;  # child - child    -> satisfies rule
       (performer:$y, writer:$v) isa performance;  # person - child   -> doesn't satisfy rule
       """
-        Given transaction commits
-    Given for each session, open transactions with reasoning of type:read
-
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -87,6 +93,8 @@ Feature: Type Hierarchy Resolution
     Then all answers are correct in reasoned database
     # Answers are (actor:$x, writer:$z) and (actor:$x, writer:$v)
     Then answer size in reasoned database is: 2
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -97,6 +105,8 @@ Feature: Type Hierarchy Resolution
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -107,6 +117,8 @@ Feature: Type Hierarchy Resolution
     Then all answers are correct in reasoned database
     # Answer is (actor:$x, writer:$v) ONLY
     Then answer size in reasoned database is: 1
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -117,6 +129,8 @@ Feature: Type Hierarchy Resolution
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -127,6 +141,8 @@ Feature: Type Hierarchy Resolution
     Then all answers are correct in reasoned database
     # Answers are (actor:$x, writer:$z) and (actor:$x, writer:$v)
     Then answer size in reasoned database is: 2
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -156,7 +172,6 @@ Feature: Type Hierarchy Resolution
           relates parent;
 
       large-family sub family,
-          relates child,
           relates mother as parent,
           relates father as parent;
 
@@ -166,6 +181,12 @@ Feature: Type Hierarchy Resolution
           (child: $x, mother: $y) isa large-family;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -182,6 +203,8 @@ Feature: Type Hierarchy Resolution
       match (child: $x, father: $y) isa large-family;
       """
     Then answer size in reasoned database is: 0
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     # Matching two siblings when only one is present
     Then for graql query
       """
@@ -222,6 +245,12 @@ Feature: Type Hierarchy Resolution
           (scifi-writer:$x, scifi-actor:$y) isa scifi-production;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -264,7 +293,7 @@ Feature: Type Hierarchy Resolution
           relates actor;
 
       scifi-production sub film-production,
-          relates scifi-writer as film-writer,
+          relates scifi-writer as writer,
           relates scifi-actor as actor;
 
       rule performance-to-scifi: when {
@@ -273,6 +302,12 @@ Feature: Type Hierarchy Resolution
           (scifi-writer:$x, scifi-actor:$y) isa scifi-production;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -315,7 +350,7 @@ Feature: Type Hierarchy Resolution
           relates actor;
 
       scifi-production sub film-production,
-          relates scifi-writer as film-writer,
+          relates scifi-writer as writer,
           relates scifi-actor as actor;
 
       rule performance-to-scifi: when {
@@ -324,6 +359,12 @@ Feature: Type Hierarchy Resolution
           (scifi-writer:$x, scifi-actor:$y) isa scifi-production;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -384,6 +425,12 @@ Feature: Type Hierarchy Resolution
           (performer:$x, writer:$y) isa performance;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -411,6 +458,8 @@ Feature: Type Hierarchy Resolution
     Then all answers are correct in reasoned database
     # Answers are (actor:$x, writer:$z) and (actor:$x, writer:$v)
     Then answer size in reasoned database is: 2
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -421,6 +470,8 @@ Feature: Type Hierarchy Resolution
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -431,6 +482,8 @@ Feature: Type Hierarchy Resolution
     Then all answers are correct in reasoned database
     # Answer is (actor:$x, writer:$v) ONLY
     Then answer size in reasoned database is: 1
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -441,6 +494,8 @@ Feature: Type Hierarchy Resolution
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -451,6 +506,8 @@ Feature: Type Hierarchy Resolution
     Then all answers are correct in reasoned database
     # Answers are (actor:$x, writer:$z) and (actor:$x, writer:$v)
     Then answer size in reasoned database is: 2
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -495,6 +552,12 @@ Feature: Type Hierarchy Resolution
           (parent-home-owner:$x, child-resident:$y) isa family-residence;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -511,6 +574,8 @@ Feature: Type Hierarchy Resolution
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
