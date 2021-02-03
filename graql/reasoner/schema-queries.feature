@@ -19,13 +19,14 @@
 Feature: Schema Query Resolution (Variable Types)
 
   Background: Set up databases for resolution testing
-
     Given connection has been opened
-    Given connection open sessions for databases:
-      | materialised |
+    Given connection does not have any database
+    Given connection create database: reasoned
+    Given connection create database: materialised
+    Given connection open schema sessions for databases:
       | reasoned     |
-
-
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql define
       """
       define
@@ -57,7 +58,9 @@ Feature: Schema Query Resolution (Variable Types)
 
       name sub attribute, value string;
       """
-
+    Given for each session, transaction commits
+    # each scenario specialises the schema further
+    Given for each session, open transactions of type: write
 
   # TODO: re-enable all steps once schema queries are resolvable (#75)
   Scenario: all instances and their types can be retrieved
@@ -78,6 +81,12 @@ Feature: Schema Query Resolution (Variable Types)
         (friend: $x, friend: $y) isa friendship;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -93,17 +102,23 @@ Feature: Schema Query Resolution (Variable Types)
       match $x isa entity;
       """
     Given answer size in reasoned database is: 3
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Given for graql query
       """
       match $x isa relation;
       """
     # (xx, yy, zz, xy, xz, yz)
     Given answer size in reasoned database is: 6
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Given for graql query
       """
       match $x isa attribute;
       """
     Given answer size in reasoned database is: 1
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match $x isa $type;
@@ -117,8 +132,6 @@ Feature: Schema Query Resolution (Variable Types)
     Then materialised and reasoned databases are the same size
 
 
-  @ignore
-  # TODO: re-enable when match ($a, $b) isa $type returns 'thing', 'relation' as $type for inferred rels (grakn#5850)
   # TODO: re-enable all steps once schema queries are resolvable (#75)
   Scenario: all relations and their types can be retrieved
     Given for each session, graql define
@@ -132,6 +145,12 @@ Feature: Schema Query Resolution (Variable Types)
         (friend: $x, friend: $y) isa friendship;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -148,6 +167,8 @@ Feature: Schema Query Resolution (Variable Types)
       """
     # (xx, yy, zz, xy, xz, yz, yx, zx, zy)
     Given answer size in reasoned database is: 9
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match ($u, $v) isa $type;
@@ -194,6 +215,12 @@ Feature: Schema Query Resolution (Variable Types)
         (resident: $x) isa residency;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -209,6 +236,8 @@ Feature: Schema Query Resolution (Variable Types)
       """
     Given all answers are correct in reasoned database
     Given answer size in reasoned database is: 6
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -240,6 +269,12 @@ Feature: Schema Query Resolution (Variable Types)
         (employee: $x) isa employment;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -256,6 +291,8 @@ Feature: Schema Query Resolution (Variable Types)
       """
     # 3 friendships, 3 employments
     Given answer size in reasoned database is: 6
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -304,6 +341,12 @@ Feature: Schema Query Resolution (Variable Types)
         (resident: $x) isa residency;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -319,6 +362,8 @@ Feature: Schema Query Resolution (Variable Types)
       """
     Given all answers are correct in reasoned database
     Given answer size in reasoned database is: 6
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -343,8 +388,7 @@ Feature: Schema Query Resolution (Variable Types)
       define
 
       military-person sub person;
-      colonel sub military-person,
-        plays employment:employee;
+      colonel sub military-person;
 
       rule armed-forces-employ-the-military: when {
         $x isa company, has name "Armed Forces";
@@ -353,6 +397,12 @@ Feature: Schema Query Resolution (Variable Types)
         (employee: $y, employer: $x) isa employment;
       };
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -370,6 +420,8 @@ Feature: Schema Query Resolution (Variable Types)
       """
     Given all answers are correct in reasoned database
     Given answer size in reasoned database is: 3
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -379,6 +431,8 @@ Feature: Schema Query Resolution (Variable Types)
     Then all answers are correct in reasoned database
     # 3 colonels * 5 supertypes of colonel (colonel, military-person, person, entity, thing)
     Then answer size in reasoned database is: 15
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
@@ -401,6 +455,12 @@ Feature: Schema Query Resolution (Variable Types)
       retail-company sub company;
       finance-company sub company;
       """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
     Given for each session, graql insert
       """
       insert
@@ -439,6 +499,8 @@ Feature: Schema Query Resolution (Variable Types)
     # All companies match when $type is company (or entity)
     # Query returns {ab,ac,ad,bc,bd,cd} and each of them with the variables flipped
     Then answer size in reasoned database is: 12
+    Then for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
       match
