@@ -139,7 +139,7 @@ Feature: Graql Update Query
     When graql update
       """
       match $p isa person;
-      delete $p;
+      delete $p isa person;
       insert $x isa entity;
       """
     Then transaction commits
