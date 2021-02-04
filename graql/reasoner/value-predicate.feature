@@ -682,20 +682,23 @@ Feature: Value Predicate Resolution
 
   # TODO: re-enable all steps once implicit attribute variables are resolvable
   # TODO: migrate to concept-inequality.feature
-  Scenario: when restricting the values of a pair of inferred attributes with '!=', the answers have distinct types
+  Scenario: when using 'not { $x is $y; }' over attributes of the same value, the answers have distinct types
     Given for each session, graql define
       """
       define
       base-attribute sub attribute, value string, abstract;
       base-string-attribute sub base-attribute;
       retailer sub base-attribute;
+      brand-name sub base-attribute;
 
-      soft-drink owns retailer, owns base-string-attribute;
+      person owns base-string-attribute;
+
+      soft-drink owns retailer, owns base-string-attribute, owns brand-name;
 
       rule tesco-sells-all-soft-drinks: when {
         $x isa soft-drink;
       } then {
-        $x has retailer 'Tesco';
+        $x has retailer "Tesco";
       };
       """
     Given for each session, transaction commits
@@ -707,8 +710,8 @@ Feature: Value Predicate Resolution
     Given for each session, graql insert
       """
       insert
-      $x isa person, has string-attribute "Tesco";
-      $y isa soft-drink, has name "Tesco";
+      $x isa person, has base-string-attribute "Tesco";
+      $y isa soft-drink, has brand-name "Tesco";
       """
     Then materialised database is completed
     Given for each session, transaction commits
@@ -718,14 +721,13 @@ Feature: Value Predicate Resolution
       match
         $x has base-attribute $ax;
         $y has base-attribute $ay;
-        not { $ax is $ay; };
       """
     Then all answers are correct in reasoned database
     # x   | ax  | y   | ay  |
-    # PER | STA | SOF | NAM |
-    # PER | STA | SOF | RET |
-    # SOF | NAM | PER | STA |
-    # SOF | RET | PER | STA |
+    # PER | BSA | SOF | NAM |
+    # PER | BSA | SOF | RET |
+    # SOF | NAM | PER | BSA |
+    # SOF | RET | PER | BSA |
     # SOF | NAM | SOF | RET |
     # SOF | RET | SOF | NAM |
     Then answer size in reasoned database is: 6
