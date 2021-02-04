@@ -22,8 +22,7 @@ Feature: Graql Reasoning Explanation
 
   Background: Initialise a session and transaction for each scenario
     Given connection has been opened
-    Given connection open sessions for databases:
-      | test_explanation |
+    Given connection open schema session for database: test_explanation
     Given transaction is initialised
 
   @ignore-client-java

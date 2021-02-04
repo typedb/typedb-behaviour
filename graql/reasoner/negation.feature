@@ -1084,7 +1084,7 @@ Feature: Negation Resolution
 
       session sub entity,
           plays reported-fault:parent-session,
-          plays unanswered-question:parent-session
+          plays unanswered-question:parent-session,
           plays logged-question:parent-session,
           plays diagnosis:parent-session;
 
@@ -1092,6 +1092,7 @@ Feature: Negation Resolution
           plays reported-fault:relevant-fault,
           plays fault-identification:identified-fault,
           plays diagnosis:diagnosed-fault;
+
       question sub entity,
           owns response,
           plays fault-identification:identifying-question,
@@ -1119,7 +1120,6 @@ Feature: Negation Resolution
       diagnosis sub relation,
           relates diagnosed-fault,
           relates parent-session;
-
 
       rule no-response-means-unanswered-question: when {
           $ques isa question;

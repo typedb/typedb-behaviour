@@ -1898,7 +1898,7 @@ Feature: Graql Match Query
     Given session opens transaction of type: read
     When get answers of graql match
       """
-      match {$x isa person;} or {$x isa company;};
+      match $x isa $t; { $t type person; } or {$t type company;}; get $x;
       """
     Then uniquely identify answer concepts
       | x         |
