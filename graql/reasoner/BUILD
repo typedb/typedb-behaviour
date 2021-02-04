@@ -21,6 +21,7 @@ load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 files = [
     "attribute-attachment.feature",
+    "compound-queries.feature",
     "concept-inequality.feature",
     "negation.feature",
     "recursion.feature",
