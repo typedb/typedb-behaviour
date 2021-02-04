@@ -754,31 +754,31 @@ Feature: Value Predicate Resolution
         $x has price >= 3.50;
         $y "expensive" isa price-range;
       } then {
-        (priced-item: $x, price-category: $y) isa price-classification;
+        (item: $x, category: $y) isa price-classification;
       };
 
       rule not-expensive-drinks: when {
         $x has price < 3.50;
         $y "not expensive" isa price-range;
       } then {
-        (priced-item: $x, price-category: $y) isa price-classification;
+        (item: $x, category: $y) isa price-classification;
       };
 
       rule low-price-drinks: when {
         $x has price < 1.75;
         $y "low price" isa price-range;
       } then {
-        (priced-item: $x, price-category: $y) isa price-classification;
+        (item: $x, category: $y) isa price-classification;
       };
 
       rule cheap-drinks: when {
-        (priced-item: $x, price-category: $y) isa price-classification;
+        (item: $x, category: $y) isa price-classification;
         $y "not expensive" isa price-range;
-        (priced-item: $x, price-category: $y2) isa price-classification;
+        (item: $x, category: $y2) isa price-classification;
         $y2 "low price" isa price-range;
         $y3 "cheap" isa price-range;
       } then {
-        (priced-item: $x, price-category: $y3) isa price-classification;
+        (item: $x, category: $y3) isa price-classification;
       };
       """
     Given for each session, transaction commits
@@ -807,7 +807,7 @@ Feature: Value Predicate Resolution
       """
       match
         $x "not expensive" isa price-range;
-        ($x, priced-item: $y) isa price-classification;
+        ($x, item: $y) isa price-classification;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
@@ -817,7 +817,7 @@ Feature: Value Predicate Resolution
       """
       match
         $x "low price" isa price-range;
-        ($x, priced-item: $y) isa price-classification;
+        ($x, item: $y) isa price-classification;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -827,7 +827,7 @@ Feature: Value Predicate Resolution
       """
       match
         $x "cheap" isa price-range;
-        ($x, priced-item: $y) isa price-classification;
+        ($x, item: $y) isa price-classification;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -837,7 +837,7 @@ Feature: Value Predicate Resolution
       """
       match
         $x "expensive" isa price-range;
-        ($x, priced-item: $y) isa price-classification;
+        ($x, item: $y) isa price-classification;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
@@ -847,7 +847,7 @@ Feature: Value Predicate Resolution
       """
       match
         $x isa price-range;
-        ($x, priced-item: $y) isa price-classification;
+        ($x, item: $y) isa price-classification;
       """
     Then all answers are correct in reasoned database
     # sum of all previous answers
