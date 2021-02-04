@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-@ignore # TODO enable when rules can resolve negation, and we're not pathetically slow with `not { $x is $y };`
+@ignore # TODO enable when rules can resolve negation
 #noinspection CucumberUndefinedStep
 Feature: Concept Inequality Resolution
 
