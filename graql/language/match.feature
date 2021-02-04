@@ -939,6 +939,29 @@ Feature: Graql Match Query
       | key:ref:0 | key:ref:1 |
 
 
+  Scenario: a mixture of variable and explicit roles can retrieve relations
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
+    Given graql insert
+      """
+      insert
+      $x isa company, has ref 0;
+      $y isa person, has ref 1;
+      (employer: $x, employee: $y) isa employment, has ref 2;
+      """
+    Given transaction commits
+    Given session opens transaction of type: read
+    When get answers of graql match
+      """
+      match (employer: $e, $role: $x) isa employment;
+      """
+    Then uniquely identify answer concepts
+      | e         | x         | role                      |
+      | key:ref:0 | key:ref:1 | label:employment:employee |
+      | key:ref:0 | key:ref:1 | label:relation:role       |
+
+
   Scenario: relations between distinct concepts are not retrieved when matching concepts that relate to themselves
     Given connection close all sessions
     Given connection open data session for database: grakn
