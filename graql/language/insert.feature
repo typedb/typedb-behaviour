@@ -1295,7 +1295,7 @@ Feature: Graql Insert Query
     Then uniquely identify answer concepts
       | x            |
       | value:age:10 |
-    Then transaction commits=
+    Then transaction commits
 
 
 
