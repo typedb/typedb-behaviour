@@ -1292,11 +1292,10 @@ Feature: Graql Insert Query
       $x isa age;
       $x 10;
       """
-    Then transaction commits
-    Given session opens transaction of type: read
     Then uniquely identify answer concepts
       | x            |
       | value:age:10 |
+    Then transaction commits=
 
 
 
