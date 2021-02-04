@@ -721,6 +721,7 @@ Feature: Value Predicate Resolution
       match
         $x has base-attribute $ax;
         $y has base-attribute $ay;
+        not { $ax is $ay; };
       """
     Then all answers are correct in reasoned database
     # x   | ax  | y   | ay  |
