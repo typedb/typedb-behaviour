@@ -254,3 +254,45 @@ Feature: Attribute Attachment Resolution
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
+
+
+  Scenario: Querying for anonymous attributes with predicates finds the correct answers
+    Given for each session, graql define
+      """
+      define
+      rule people-have-a-specific-age: when {
+        $x isa person;
+      } then {
+        $x has age 10;
+      };
+      """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
+    Given for each session, graql insert
+      """
+      insert
+      $geY isa person;
+      """
+    Given for each session, transaction commits
+    Given for each session, open transactions of type: write
+    Then materialised database is completed
+    Given for each session, transaction commits
+    Given for each session, open transactions with reasoning of type: read
+    Then for graql query
+      """
+      match $x has age > 20;
+      """
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 0
+    Given for each session, transaction closes
+    Given for each session, open transactions with reasoning of type: read
+    Then for graql query
+      """
+      match $x has age > 5;
+      """
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
