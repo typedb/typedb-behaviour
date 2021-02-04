@@ -177,7 +177,7 @@ Feature: Graql Delete Query
       """
     Then uniquely identify answer concepts
       | x             | y            | r         | n               |
-      | key:name:Alex | key:name:Bob | ket:ref:0 | value:name:John |
+      | key:name:Alex | key:name:Bob | key:ref:0 | value:name:John |
     Given transaction commits
     Given session opens transaction of type: write
     When graql delete
