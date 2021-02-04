@@ -46,7 +46,7 @@ Feature: Compound Query Resolution
     # each scenario specialises the schema further
     Given for each session, open transactions of type: write
 
-  Scenario: a concludable occurring multiple times in a query infers conclusions from either occurrence
+  Scenario: repeated concludable patterns within a query trigger rules from all pattern occurrences
     Given for each session, graql define
       """
       define
