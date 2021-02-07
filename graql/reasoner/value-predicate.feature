@@ -379,7 +379,7 @@ Feature: Value Predicate Resolution
     Then answer size in reasoned database is: 2
     Then materialised and reasoned databases are the same size
 
-
+  @ignore # TODO enable when we can resolve repeated concludables
   # TODO: re-enable all steps when fixed (#75)
   Scenario: inferred attributes can be matched by equality to an attribute that contains a specified string
     Given for each session, graql define
@@ -441,6 +441,7 @@ Feature: Value Predicate Resolution
     Then materialised and reasoned databases are the same size
 
 
+  @ignore # TODO enable when we can resolve repeated concludables
   # TODO: re-enable all steps when fixed (#75)
   Scenario: inferred attributes can be matched by inequality to an attribute that contains a specified string
     Given for each session, graql define
@@ -678,9 +679,7 @@ Feature: Value Predicate Resolution
     Then materialised and reasoned databases are the same size
 
 
-
-
-  # TODO: re-enable all steps once implicit attribute variables are resolvable
+  @ignore # enable when we can resolve repeated concludable
   # TODO: migrate to concept-inequality.feature
   Scenario: when using 'not { $x is $y; }' over attributes of the same value, the answers have distinct types
     Given for each session, graql define
@@ -735,7 +734,6 @@ Feature: Value Predicate Resolution
     Then materialised and reasoned databases are the same size
 
 
-  # TODO: re-enable all steps when fixed (#75)
   Scenario: rules can divide entities into groups, linking each entity group to a specific concept by attribute value
     Given for each session, graql define
       """

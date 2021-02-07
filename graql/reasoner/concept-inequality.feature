@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-@ignore # TODO enable when rules can resolve negation
+@ignore
 #noinspection CucumberUndefinedStep
 Feature: Concept Inequality Resolution
 
@@ -77,6 +77,7 @@ Feature: Concept Inequality Resolution
     Given for each session, transaction commits
 
 
+    @ignore # TODO enable when reasoner can handle negations
   Scenario: a rule can be applied based on concept inequality
     Given connection close all sessions
     Given connection open schema sessions for databases:

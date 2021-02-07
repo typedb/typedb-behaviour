@@ -292,7 +292,6 @@ Feature: Resolution Test Framework
     Then materialised and reasoned databases are the same size
 
 
-  @ignore # TODO enable after reasoner can consume bounds
   Scenario: querying with a disjunction and a negation
     Given for each session, graql define
       """
@@ -341,6 +340,7 @@ Feature: Resolution Test Framework
     Then materialised and reasoned databases are the same size
 
 
+  @ignore # TODO enable when reasoner can resolve negation
   Scenario: a rule containing a negation
     Given for each session, graql define
       """
@@ -390,7 +390,6 @@ Feature: Resolution Test Framework
     Then materialised and reasoned databases are the same size
 
 
-  @ignore # TODO enable after reasoner can consume bounds
   Scenario: querying with multiple negations
     Given for each session, graql define
       """

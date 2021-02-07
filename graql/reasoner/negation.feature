@@ -440,7 +440,7 @@ Feature: Negation Resolution
       """
       match
         ($r1: $x) isa employment;
-        not {$r1 type role;};
+        not {$r1 type relation:role;};
       """
     Then answer size in reasoned database is: 2
 
