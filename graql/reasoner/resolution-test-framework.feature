@@ -173,7 +173,6 @@ Feature: Resolution Test Framework
     Then materialised and reasoned databases are the same size
 
 
-  @ignore
   # TODO: currently this scenario takes longer than 2 hours to execute (#75) - re-enable when fixed
   Scenario: 3-hop transitivity
     Given for each session, graql define
@@ -340,7 +339,6 @@ Feature: Resolution Test Framework
     Then materialised and reasoned databases are the same size
 
 
-  @ignore # TODO enable when reasoner can resolve negation
   Scenario: a rule containing a negation
     Given for each session, graql define
       """

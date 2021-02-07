@@ -15,7 +15,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-@ignore
 #noinspection CucumberUndefinedStep
 Feature: Concept Inequality Resolution
 
@@ -77,7 +76,6 @@ Feature: Concept Inequality Resolution
     Given for each session, transaction commits
 
 
-    @ignore # TODO enable when reasoner can handle negations
   Scenario: a rule can be applied based on concept inequality
     Given connection close all sessions
     Given connection open schema sessions for databases:
@@ -446,7 +444,7 @@ Feature: Concept Inequality Resolution
     Then materialised and reasoned databases are the same size
 
 
-  @ignore
+  @ignore # TODO enable when we can resolve repeated concludables
   # TODO: re-enable once grakn#5821 is fixed (in some answers, $typeof_ax is 'base-attribute' which is incorrect)
   # TODO: re-enable all steps once implicit attribute variables are resolvable
   # TODO: migrate to concept-inequality.feature
@@ -511,7 +509,7 @@ Feature: Concept Inequality Resolution
     Then answer size in reasoned database is: 6
     Then materialised and reasoned databases are the same size
 
-  @ignore
+  @ignore # TODO enable when we can resolve repeated concludables
   # TODO: re-enable once grakn#5821 is fixed
   # TODO: re-enable all steps once implicit attribute variables are resolvable
   # TODO: migrate to concept-inequality.feature
@@ -536,7 +534,7 @@ Feature: Concept Inequality Resolution
         $x isa person, has string-attribute $r1;
         $y isa person;
       } then {
-        $y has string-attribute $r1;
+        $y has $r1;
       };
 
       rule tesco-sells-all-soft-drinks: when {
@@ -550,7 +548,7 @@ Feature: Concept Inequality Resolution
         $x = 'Ocado';
         $y isa soft-drink;
       } then {
-        $y has retailer $x;
+        $y has $x;
       };
       """
     Given for each session, transaction commits

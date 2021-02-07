@@ -767,18 +767,18 @@ Feature: Negation Resolution
       rule reachability-transitivityA: when {
           (from: $x, to: $y) isa link;
       } then {
-          (reachable-from: $x, reachable-to: $y) isa reachable;
+          (from: $x, to: $y) isa reachable;
       };
 
       rule reachability-transitivityB: when {
           (from: $x, to: $z) isa link;
-          (reachable-from: $z, reachable-to: $y) isa reachable;
+          (from: $z, to: $y) isa reachable;
       } then {
-          (reachable-from: $x, reachable-to: $y) isa reachable;
+          (from: $x, to: $y) isa reachable;
       };
 
       rule indirect-link-rule: when {
-          (reachable-from: $x, reachable-to: $y) isa reachable;
+          (from: $x, to: $y) isa reachable;
           not {(from: $x, to: $y) isa link;};
       } then {
           (from: $x, to: $y) isa indirect-link;
@@ -818,7 +818,7 @@ Feature: Negation Resolution
     Then answer set is equivalent for graql query
       """
       match
-        (reachable-from: $x, reachable-to: $y) isa reachable;
+        (from: $x, to: $y) isa reachable;
         $x has index "aa";
         not {$y has index "bb";};
       """
@@ -932,7 +932,7 @@ Feature: Negation Resolution
       rule non-uk-rule: when {
         $x isa company;
         not {
-          (country: $x, company: $y) isa company-country;
+          (country: $y, company: $x) isa company-country;
           $y has name 'UK';
         };
       } then {
@@ -956,9 +956,9 @@ Feature: Negation Resolution
       $e isa country, has name 'UK';
       $f isa country, has name 'France';
 
-      (country: $a, company: $e) isa company-country;
-      (country: $b, company: $e) isa company-country;
-      (country: $c, company: $f) isa company-country;
+      (country: $e, company: $a) isa company-country;
+      (country: $e, company: $b) isa company-country;
+      (country: $f, company: $c) isa company-country;
       """
     Then materialised database is completed
     Given for each session, transaction commits
@@ -984,7 +984,7 @@ Feature: Negation Resolution
       """
       match
         $x isa company;
-        (country: $x, company: $y) isa company-country;
+        (country: $y, company: $x) isa company-country;
         $y has name "UK";
       get $x;
       """
@@ -1013,7 +1013,7 @@ Feature: Negation Resolution
       rule non-uk-rule: when {
         $x isa company;
         not {
-          (country: $x, company: $y) isa company-country;
+          (country: $y, company: $x) isa company-country;
           $y has name 'UK';
         };
       } then {
@@ -1037,9 +1037,9 @@ Feature: Negation Resolution
       $e isa country, has name 'UK';
       $f isa country, has name 'France';
 
-      (country: $a, company: $e) isa company-country;
-      (country: $b, company: $e) isa company-country;
-      (country: $c, company: $f) isa company-country;
+      (country: $e, company: $a) isa company-country;
+      (country: $e, company: $b) isa company-country;
+      (country: $f, company: $c) isa company-country;
       """
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
@@ -1288,22 +1288,22 @@ Feature: Negation Resolution
       rule reachability-transitivityA: when {
           (from: $x, to: $y) isa link;
       } then {
-          (reachable-from: $x, reachable-to: $y) isa reachable;
+          (from: $x, to: $y) isa reachable;
       };
 
       rule reachability-transitivityB: when {
           (from: $x, to: $z) isa link;
-          (reachable-from: $z, reachable-to: $y) isa reachable;
+          (from: $z, to: $y) isa reachable;
       } then {
-          (reachable-from: $x, reachable-to: $y) isa reachable;
+          (from: $x, to: $y) isa reachable;
       };
 
       rule unreachability-rule: when {
           $x isa node;
           $y isa node;
-          not {(reachable-from: $x, reachable-to: $y) isa reachable;};
+          not {(from: $x, to: $y) isa reachable;};
       } then {
-          (unreachable-from: $x, unreachable-to: $y) isa unreachable;
+          (from: $x, to: $y) isa unreachable;
       };
       """
     Given for each session, transaction commits
@@ -1338,7 +1338,7 @@ Feature: Negation Resolution
     Then for graql query
     """
       match
-        (unreachable-from: $x, unreachable-to: $y) isa unreachable;
+        (from: $x, to: $y) isa unreachable;
         $x has index "aa";
       """
     # aa is not linked to itself. ee, ff, gg are linked to each other, but not to aa. hh is not linked to anything
