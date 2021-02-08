@@ -158,5 +158,5 @@ Feature: Connection Database
   @ignore-core
   Scenario: delete a nonexistent database is a no-op in Cluster
     Given connection does not have database: grakn
-    When connection delete database; grakn
+    When connection delete database: grakn
     Then connection does not have database: grakn
