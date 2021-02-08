@@ -149,5 +149,8 @@ Feature: Connection Database
       define person sub entity;
       """
 
+
+  # TODO: re-enable in Cluster once fully fault-tolerant database deletion is implemented
+  @ignore-cluster
   Scenario: delete a nonexistent database throws an error
     When connection delete database; throws exception: grakn
