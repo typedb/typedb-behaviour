@@ -149,5 +149,14 @@ Feature: Connection Database
       define person sub entity;
       """
 
-  Scenario: delete a nonexistent database throws an error
+
+  @ignore-cluster
+  Scenario: delete a nonexistent database throws an error in Core
     When connection delete database; throws exception: grakn
+
+
+  @ignore-core
+  Scenario: delete a nonexistent database is a no-op in Cluster
+    Given connection does not have database: grakn
+    When connection delete database; grakn
+    Then connection does not have database: grakn
