@@ -1012,7 +1012,6 @@ Feature: Recursion Resolution
     Then materialised and reasoned databases are the same size
 
 
-  @ignore # TODO enable after negation is available
   Scenario: given a directed graph, all pairs of vertices (x,y) such that y is reachable from x can be found
 
   test 5.2 from Green - Datalog and Recursive Query Processing

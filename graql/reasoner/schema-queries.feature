@@ -446,7 +446,6 @@ Feature: Schema Query Resolution (Variable Types)
     Then materialised and reasoned databases are the same size
 
 
-  # TODO: re-enable all steps once schema queries are resolvable (#75)
   Scenario: entity pairs can be matched based on the entity type they are related to
     Given for each session, graql define
       """
