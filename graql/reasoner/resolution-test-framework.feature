@@ -187,8 +187,8 @@ Feature: Resolution Test Framework
       location sub entity,
           abstract,
           owns name,
-          plays location-hierarchy_superior,
-          plays location-hierarchy_subordinate;
+          plays location-hierarchy:superior,
+          plays location-hierarchy:subordinate;
 
       area sub location;
       city sub location;
@@ -196,14 +196,14 @@ Feature: Resolution Test Framework
       continent sub location;
 
       location-hierarchy sub relation,
-          relates location-hierarchy_superior,
-          relates location-hierarchy_subordinate;
+          relates superior,
+          relates subordinate;
 
       rule location-hierarchy-transitivity: when {
-          (location-hierarchy_superior: $a, location-hierarchy_subordinate: $b) isa location-hierarchy;
-          (location-hierarchy_superior: $b, location-hierarchy_subordinate: $c) isa location-hierarchy;
+          (superior: $a, subordinate: $b) isa location-hierarchy;
+          (superior: $b, subordinate: $c) isa location-hierarchy;
       } then {
-          (location-hierarchy_superior: $a, location-hierarchy_subordinate: $c) isa location-hierarchy;
+          (superior: $a, subordinate: $c) isa location-hierarchy;
       };
       """
     Given for each session, transaction commits
@@ -219,16 +219,16 @@ Feature: Resolution Test Framework
       $cit isa city, has name "London";
       $cntry isa country, has name "UK";
       $cont isa continent, has name "Europe";
-      (location-hierarchy_superior: $cont, location-hierarchy_subordinate: $cntry) isa location-hierarchy;
-      (location-hierarchy_superior: $cntry, location-hierarchy_subordinate: $cit) isa location-hierarchy;
-      (location-hierarchy_superior: $cit, location-hierarchy_subordinate: $ar) isa location-hierarchy;
+      (superior: $cont, subordinate: $cntry) isa location-hierarchy;
+      (superior: $cntry, subordinate: $cit) isa location-hierarchy;
+      (superior: $cit, subordinate: $ar) isa location-hierarchy;
       """
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions with reasoning of type: read
     Then for graql query
       """
-      match $lh (location-hierarchy_superior: $continent, location-hierarchy_subordinate: $area) isa location-hierarchy;
+      match $lh (superior: $continent, subordinate: $area) isa location-hierarchy;
       $continent isa continent; $area isa area;
       """
     Then all answers are correct in reasoned database
