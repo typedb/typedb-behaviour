@@ -40,8 +40,6 @@ load("@graknlabs_dependencies//library/maven:rules.bzl", "maven")
 # Load //builder/python
 load("@graknlabs_dependencies//builder/python:deps.bzl", python_deps = "deps")
 python_deps()
-load("@rules_python//python:pip.bzl", "pip_repositories", "pip3_import")
-pip_repositories()
 
 # Load //builder/kotlin
 load("@graknlabs_dependencies//builder/kotlin:deps.bzl", kotlin_deps = "deps")
