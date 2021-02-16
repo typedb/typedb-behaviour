@@ -519,8 +519,8 @@ Feature: Graql Match Query
       | x                |
       | label:employment |
 
-
-  @ignore # TODO cannot currently query for schema with 'as'
+  # TODO cannot currently query for schema with 'as'
+  @ignore
   Scenario: 'relates' with 'as' matches relation types that override the specified roleplayer
     Given graql define
       """
@@ -772,8 +772,8 @@ Feature: Graql Match Query
       """
 
 
-
-  @ignore # TODO we can't query for rule anymore
+  # TODO we can't query for rule anymore
+  @ignore
   Scenario: an error is thrown when matching that a variable has a specific type, when that type is in fact a rule
     Given graql define
       """

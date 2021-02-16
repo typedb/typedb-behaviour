@@ -443,8 +443,8 @@ Feature: Concept Inequality Resolution
     Then answer size in reasoned database is: 36
     Then materialised and reasoned databases are the same size
 
-
-  @ignore # TODO enable when we can resolve repeated concludables
+  # TODO enable when we can resolve repeated concludables
+  @ignore
   # TODO: re-enable once grakn#5821 is fixed (in some answers, $typeof_ax is 'base-attribute' which is incorrect)
   # TODO: re-enable all steps once implicit attribute variables are resolvable
   # TODO: migrate to concept-inequality.feature
@@ -509,7 +509,8 @@ Feature: Concept Inequality Resolution
     Then answer size in reasoned database is: 6
     Then materialised and reasoned databases are the same size
 
-  @ignore # TODO enable when we can resolve repeated concludables
+  # TODO enable when we can resolve repeated concludables
+  @ignore
   # TODO: re-enable once grakn#5821 is fixed
   # TODO: re-enable all steps once implicit attribute variables are resolvable
   # TODO: migrate to concept-inequality.feature
