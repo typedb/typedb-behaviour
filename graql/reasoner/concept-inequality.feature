@@ -129,7 +129,7 @@ Feature: Concept Inequality Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match (state: $s) isa holds;
@@ -137,7 +137,7 @@ Feature: Concept Inequality Resolution
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then answer set is equivalent for graql query
       """
       match $s isa state, has name 's2';
@@ -149,7 +149,7 @@ Feature: Concept Inequality Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Given for graql query
       """
       match (ball1: $x, ball2: $y) isa selection;
@@ -159,7 +159,7 @@ Feature: Concept Inequality Resolution
     # inferred: [aa, ac, bb, ca, cc]
     Given answer size in reasoned database is: 9
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -171,7 +171,7 @@ Feature: Concept Inequality Resolution
     # inferred: [ac, ca]
     Then answer size in reasoned database is: 6
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     # verify that the answer pairs to the previous query have distinct names within each pair
     Then for graql query
       """
@@ -192,7 +192,7 @@ Feature: Concept Inequality Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -203,7 +203,7 @@ Feature: Concept Inequality Resolution
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     # verify answers are [ac, bc]
     Then for graql query
       """
@@ -232,7 +232,7 @@ Feature: Concept Inequality Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -246,7 +246,7 @@ Feature: Concept Inequality Resolution
     #  cab, cac, cba, cbc, cca, ccb]
     Then answer size in reasoned database is: 18
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     # verify that $y and $z always have distinct names
     Then for graql query
       """
@@ -280,7 +280,7 @@ Feature: Concept Inequality Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -292,7 +292,7 @@ Feature: Concept Inequality Resolution
     Then answer size in reasoned database is: 18
     # verify that $y and $z always have distinct names
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -327,7 +327,7 @@ Feature: Concept Inequality Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Given for graql query
       """
       match
@@ -340,7 +340,7 @@ Feature: Concept Inequality Resolution
     # For each of the [3] values of $x, there are 3^4 = 81 choices for {$y1, $z1, $y2, $z2}, for a total of 243
     Then answer size in reasoned database is: 243
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -356,7 +356,7 @@ Feature: Concept Inequality Resolution
     # Each neq predicate reduces the answer size by 1/3, cutting it to 162, then 108
     Then answer size in reasoned database is: 108
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     # verify that $y1 and $z1 - as well as $y2 and $z2 - always have distinct names
     Then for graql query
       """
@@ -394,7 +394,7 @@ Feature: Concept Inequality Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Given for graql query
       """
       match
@@ -406,7 +406,7 @@ Feature: Concept Inequality Resolution
     # There are 3^4 possible choices for the set {$x, $y, $z1, $z2}, for a total of 81
     Then answer size in reasoned database is: 81
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -421,7 +421,7 @@ Feature: Concept Inequality Resolution
     # Each neq predicate reduces the answer size by 1/3, cutting it to 54, then 36
     Then answer size in reasoned database is: 36
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     # verify that $y1 and $z1 - as well as $y2 and $z2 - always have distinct names
     Then for graql query
       """
@@ -488,7 +488,7 @@ Feature: Concept Inequality Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -509,7 +509,6 @@ Feature: Concept Inequality Resolution
     Then answer size in reasoned database is: 6
     Then materialised and reasoned databases are the same size
 
-  @ignore # TODO enable when we can resolve repeated concludables
   # TODO: re-enable once grakn#5821 is fixed
   # TODO: re-enable all steps once implicit attribute variables are resolvable
   # TODO: migrate to concept-inequality.feature
@@ -569,16 +568,17 @@ Feature: Concept Inequality Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
-        $x has base-attribute $value;
-        $y has base-attribute $unwantedValue;
+        $x has $value;
+        $y has $unwantedValue;
         not { $value is $unwantedValue; };
         $unwantedValue "Ocado";
         $value isa! $type;
         $unwantedValue isa! $type;
+        $type type base-attribute;
         not { $type is $unwantedType; };
         $unwantedType type string-attribute;
       get $x, $value, $type;
