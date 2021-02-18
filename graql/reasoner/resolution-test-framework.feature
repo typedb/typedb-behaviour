@@ -58,7 +58,7 @@ Feature: Resolution Test Framework
       """
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match $co has name $n;
@@ -107,7 +107,7 @@ Feature: Resolution Test Framework
       """
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match $co has is-liable $l;
@@ -162,7 +162,7 @@ Feature: Resolution Test Framework
       """
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -225,7 +225,7 @@ Feature: Resolution Test Framework
       """
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match $lh (superior: $continent, subordinate: $area) isa location-hierarchy;
@@ -282,7 +282,7 @@ Feature: Resolution Test Framework
       """
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match ($w, $m) isa family-relation; $w isa woman;
@@ -328,7 +328,7 @@ Feature: Resolution Test Framework
       """
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match $com isa company;
@@ -380,7 +380,7 @@ Feature: Resolution Test Framework
       """
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match $com isa company, has is-liable $lia; $lia true;
@@ -427,7 +427,7 @@ Feature: Resolution Test Framework
       """
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match $com isa company; not { $com has is-liable $lia; $lia true; }; not { $com has name $n; $n "the-company"; };

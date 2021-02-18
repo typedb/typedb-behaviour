@@ -88,7 +88,7 @@ Feature: Attribute Attachment Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match $x isa person, has string-attribute $y;
@@ -96,7 +96,7 @@ Feature: Attribute Attachment Resolution
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match $x isa string-attribute;
@@ -142,7 +142,7 @@ Feature: Attribute Attachment Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match $x has string-attribute $y;
@@ -188,7 +188,7 @@ Feature: Attribute Attachment Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match $x has retailer 'Ocado';
@@ -200,7 +200,7 @@ Feature: Attribute Attachment Resolution
     Given connection open data sessions for databases:
       | reasoned     |
       | materialised |
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match $x has retailer $r;
@@ -208,7 +208,7 @@ Feature: Attribute Attachment Resolution
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 4
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match $x has retailer 'Tesco';
@@ -247,7 +247,7 @@ Feature: Attribute Attachment Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match $x isa soft-drink, has retailer 'Ocado';
@@ -281,7 +281,7 @@ Feature: Attribute Attachment Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match $x has age > 20;
@@ -289,7 +289,7 @@ Feature: Attribute Attachment Resolution
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 0
     Given for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match $x has age > 5;
