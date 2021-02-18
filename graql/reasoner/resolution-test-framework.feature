@@ -338,7 +338,8 @@ Feature: Resolution Test Framework
     Then all answers are correct in reasoned database
     Then materialised and reasoned databases are the same size
 
-
+  # TODO: Reenable when negation in rules is permitted
+  @ignore
   Scenario: a rule containing a negation
     Given for each session, graql define
       """
