@@ -78,7 +78,7 @@ Feature: Compound Query Resolution
       """
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match

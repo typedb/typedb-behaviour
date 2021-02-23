@@ -84,7 +84,7 @@ Feature: Value Predicate Resolution
       """
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match $x has is-old $r;
@@ -119,7 +119,7 @@ Feature: Value Predicate Resolution
       """
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -164,7 +164,7 @@ Feature: Value Predicate Resolution
       """
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -211,7 +211,7 @@ Feature: Value Predicate Resolution
       """
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -267,7 +267,7 @@ Feature: Value Predicate Resolution
       """
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -316,7 +316,7 @@ Feature: Value Predicate Resolution
       """
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -368,7 +368,7 @@ Feature: Value Predicate Resolution
       """
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -418,7 +418,7 @@ Feature: Value Predicate Resolution
       """
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -480,7 +480,7 @@ Feature: Value Predicate Resolution
       """
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -544,7 +544,7 @@ Feature: Value Predicate Resolution
       """
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Given for graql query
       """
       match
@@ -557,7 +557,7 @@ Feature: Value Predicate Resolution
     # Tango | Tesco |
     Given answer size in reasoned database is: 2
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -602,7 +602,7 @@ Feature: Value Predicate Resolution
       """
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Given for graql query
       """
       match
@@ -615,7 +615,7 @@ Feature: Value Predicate Resolution
     # Tango | Ocado |
     Given answer size in reasoned database is: 2
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -661,7 +661,7 @@ Feature: Value Predicate Resolution
       """
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -714,7 +714,7 @@ Feature: Value Predicate Resolution
       """
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -800,7 +800,7 @@ Feature: Value Predicate Resolution
       """
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -810,7 +810,7 @@ Feature: Value Predicate Resolution
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 2
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -820,7 +820,7 @@ Feature: Value Predicate Resolution
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -830,7 +830,7 @@ Feature: Value Predicate Resolution
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -840,7 +840,7 @@ Feature: Value Predicate Resolution
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -911,7 +911,7 @@ Feature: Value Predicate Resolution
       """
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match (predecessor:$x1, successor:$x2) isa message-succession;
