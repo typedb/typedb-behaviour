@@ -1945,7 +1945,7 @@ Feature: Graql Match Query
       """
       insert
       $x isa person, has name "Jeff", has ref 0;
-      $x isa person, has name "Jenny", has ref 1;
+      $y isa person, has name "Jenny", has ref 1;
       """
     Given transaction commits
 
