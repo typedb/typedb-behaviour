@@ -509,11 +509,6 @@ Feature: Concept Inequality Resolution
     Then answer size in reasoned database is: 6
     Then materialised and reasoned databases are the same size
 
-  # TODO enable when we can resolve repeated concludables
-  @ignore
-  # TODO: re-enable once grakn#5821 is fixed
-  # TODO: re-enable all steps once implicit attribute variables are resolvable
-  # TODO: migrate to concept-inequality.feature
   Scenario: inferred attribute matches can be simultaneously restricted by both concept type and attribute value
     Given connection close all sessions
     Given connection open schema sessions for databases:
@@ -574,15 +569,12 @@ Feature: Concept Inequality Resolution
     Then for graql query
       """
       match
+        $value isa! retailer;
+        $unwantedValue isa! retailer;
         $x has $value;
         $y has $unwantedValue;
-        not { $value is $unwantedValue; };
         $unwantedValue "Ocado";
-        $value isa! $type;
-        $unwantedValue isa! $type;
-        $type type base-attribute;
-        not { $type is $unwantedType; };
-        $unwantedType type string-attribute;
+        not { $value is $unwantedValue; };
       get $x, $value, $type;
       """
     Then all answers are correct in reasoned database
