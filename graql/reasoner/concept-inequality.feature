@@ -574,8 +574,8 @@ Feature: Concept Inequality Resolution
         $x has $value;
         $y has $unwantedValue;
         $unwantedValue "Ocado";
-        not { $value is $unwantedValue; };
-      get $x, $value, $type;
+        $value != $unwantedValue;
+      get $x, $value;
       """
     Then all answers are correct in reasoned database
     # x      | value | type     |
