@@ -223,8 +223,6 @@ Feature: Graql Undefine Query
       """
     Then answer size is: 0
 
-  #TODO: Reenable when deletion works
-  @ignore
   Scenario: all existing instances of an entity type must be deleted in order to undefine it
     Given get answers of graql match
       """
@@ -438,8 +436,6 @@ Feature: Graql Undefine Query
       """
 
 
-  #TODO: Reenable when deletion works
-  @ignore
   Scenario: all existing instances of a relation type must be deleted in order to undefine it
     Given get answers of graql match
       """
@@ -568,7 +564,7 @@ Feature: Graql Undefine Query
       """
     Then answer size is: 0
 
-  #TODO: Reenable when deletion works
+  #TODO: test is not working
   @ignore
   Scenario: after removing a role from a relation type, relation instances can no longer be created with that role
     Given connection close all sessions
@@ -753,8 +749,6 @@ Feature: Graql Undefine Query
   # PLAYABLE ROLES ('PLAYS') #
   ############################
 
-  #TODO: Reenable when deletion works
-  @ignore
   Scenario: after undefining a playable role from a type, the type can no longer play the role
     Given connection close all sessions
     Given connection open data session for database: grakn
@@ -1035,8 +1029,6 @@ Feature: Graql Undefine Query
       """
 
 
-  #TODO: Reenable when deletion works
-  @ignore
   Scenario: all existing instances of an attribute type must be deleted in order to undefine it
     Given get answers of graql match
       """
@@ -1285,8 +1277,6 @@ Feature: Graql Undefine Query
     When session opens transaction of type: read
     Then rules do not contain: a-rule
 
-  #TODO: Reenable when rules actually do something
-  @ignore
   Scenario: after undefining a rule, concepts previously inferred by that rule are no longer inferred
     Given graql define
       """
@@ -1337,8 +1327,8 @@ Feature: Graql Undefine Query
       """
     Then answer size is: 0
 
-  #TODO: Reenable when rules actually do something
-  @ignore
+
+  @ignore # TODO enable when we can do reasoning in a schema write transaction
   Scenario: when undefining a rule, concepts inferred by that rule can still be retrieved until the next commit
     Given graql define
       """
