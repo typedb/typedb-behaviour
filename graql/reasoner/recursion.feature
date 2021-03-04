@@ -113,7 +113,7 @@ Feature: Recursion Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match (subordinate: $x, superior: $y) isa big-location-hierarchy;
@@ -192,7 +192,7 @@ Feature: Recursion Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match (role31: $x, role32: $y) isa relation3;
@@ -265,7 +265,7 @@ Feature: Recursion Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match (role31: $x, role32: $y) isa relation3;
@@ -274,7 +274,7 @@ Feature: Recursion Resolution
     # Each of the two material relation1 instances should infer a single relation3 via 1-to-2 and 2-to-3
     Then answer size in reasoned database is: 2
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match (role21: $x, role22: $y) isa relation2;
@@ -322,7 +322,7 @@ Feature: Recursion Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match $x isa dream; limit 10;
@@ -424,7 +424,7 @@ Feature: Recursion Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match $p isa pair, has name 'ff';
@@ -432,7 +432,7 @@ Feature: Recursion Resolution
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 16
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match $p isa pair;
@@ -531,7 +531,7 @@ Feature: Recursion Resolution
       """
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -544,7 +544,7 @@ Feature: Recursion Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then answer set is equivalent for graql query
       """
       match
@@ -619,7 +619,7 @@ Feature: Recursion Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -631,7 +631,7 @@ Feature: Recursion Resolution
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 3
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then answer set is equivalent for graql query
       """
       match
@@ -649,7 +649,7 @@ Feature: Recursion Resolution
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 4
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then answer set is equivalent for graql query
       """
       match
@@ -664,7 +664,7 @@ Feature: Recursion Resolution
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 10
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then answer set is equivalent for graql query
       """
       match
@@ -684,7 +684,7 @@ Feature: Recursion Resolution
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 20
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then answer set is equivalent for graql query
       """
       match
@@ -771,7 +771,7 @@ Feature: Recursion Resolution
       """
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -785,7 +785,7 @@ Feature: Recursion Resolution
     Given for each session, open transactions of type: read
     Then all answers are correct in reasoned database
     Given for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then answer set is equivalent for graql query
       """
       match
@@ -794,7 +794,7 @@ Feature: Recursion Resolution
       get $Y;
       """
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     And answer set is equivalent for graql query
       """
       match
@@ -803,7 +803,7 @@ Feature: Recursion Resolution
       get $Y;
       """
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -813,10 +813,10 @@ Feature: Recursion Resolution
       """
     Then answer size in reasoned database is: 3
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then all answers are correct in reasoned database
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then answer set is equivalent for graql query
       """
       match
@@ -825,7 +825,7 @@ Feature: Recursion Resolution
       get $X;
       """
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     And answer set is equivalent for graql query
       """
       match
@@ -904,7 +904,7 @@ Feature: Recursion Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -915,7 +915,7 @@ Feature: Recursion Resolution
     Then answer size in reasoned database is: 2
     Then all answers are correct in reasoned database
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then answer set is equivalent for graql query
       """
       match
@@ -993,7 +993,7 @@ Feature: Recursion Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -1004,7 +1004,7 @@ Feature: Recursion Resolution
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then answer set is equivalent for graql query
       """
       match $x has index 'a2';
@@ -1097,7 +1097,7 @@ Feature: Recursion Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match (from: $x, to: $y) isa reachable;
@@ -1105,7 +1105,7 @@ Feature: Recursion Resolution
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 7
     Given for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then answer set is equivalent for graql query
       """
       match
@@ -1182,7 +1182,7 @@ Feature: Recursion Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -1193,7 +1193,7 @@ Feature: Recursion Resolution
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 4
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then answer set is equivalent for graql query
       """
       match
@@ -1271,7 +1271,7 @@ Feature: Recursion Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -1282,7 +1282,7 @@ Feature: Recursion Resolution
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 3
     Given for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then answer set is equivalent for graql query
       """
       match
@@ -1391,7 +1391,7 @@ Feature: Recursion Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -1402,7 +1402,7 @@ Feature: Recursion Resolution
     Then answer size in reasoned database is: 3
     Then all answers are correct in reasoned database
     Given for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then answer set is equivalent for graql query
       """
       match
@@ -1411,7 +1411,7 @@ Feature: Recursion Resolution
       get $y;
       """
     Given for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match (from: $x, to: $y) isa RevSG;
@@ -1419,7 +1419,7 @@ Feature: Recursion Resolution
     Then answer size in reasoned database is: 11
     Then all answers are correct in reasoned database
     Given for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then answer set is equivalent for graql query
       """
       match
@@ -1598,7 +1598,7 @@ Feature: Recursion Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -1609,7 +1609,7 @@ Feature: Recursion Resolution
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 5
     Given for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then answer set is equivalent for graql query
       """
       match $y isa $t; { $t type a-entity; } or { $t type end; }; get $y;
@@ -1814,7 +1814,7 @@ Feature: Recursion Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -1825,7 +1825,7 @@ Feature: Recursion Resolution
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 60
     Given for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then answer set is equivalent for graql query
       """
       match $y isa b-entity;
@@ -1976,7 +1976,7 @@ Feature: Recursion Resolution
     Given for each session, open transactions of type: write
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -1987,7 +1987,7 @@ Feature: Recursion Resolution
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 25
     Given for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then answer set is equivalent for graql query
       """
       match $y isa a-entity;

@@ -1937,6 +1937,27 @@ Feature: Graql Match Query
       | key:ref:1 |
 
 
+  Scenario: negations can be applied to filtered variables
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
+    Given graql insert
+      """
+      insert
+      $x isa person, has name "Jeff", has ref 0;
+      $y isa person, has name "Jenny", has ref 1;
+      """
+    Given transaction commits
+
+    Given session opens transaction of type: read
+    When get answers of graql match
+      """
+      match $x isa person, has name $a; not { $a = "Jeff"; }; get $x;
+      """
+    Then uniquely identify answer concepts
+      | x         |
+      | key:ref:1 |
+
   ##################
   # VARIABLE TYPES #
   ##################

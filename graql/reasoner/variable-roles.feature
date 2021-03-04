@@ -152,7 +152,7 @@ Feature: Variable Role Resolution
   Scenario: when querying a binary relation, introducing a variable role doubles the answer size
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Given for graql query
       """
       match (role1: $a, role2: $b) isa binary-base;
@@ -160,7 +160,7 @@ Feature: Variable Role Resolution
     Given all answers are correct in reasoned database
     Given answer size in reasoned database is: 9
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match (role1: $a, $r1: $b) isa binary-base;
@@ -174,7 +174,7 @@ Feature: Variable Role Resolution
   Scenario: converting a fixed role to a variable role bound with 'type' does not modify the answer size
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Given for graql query
       """
       match (role1: $a, $r1: $b) isa binary-base;
@@ -182,7 +182,7 @@ Feature: Variable Role Resolution
     Given all answers are correct in reasoned database
     Given answer size in reasoned database is: 18
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     # This query should be equivalent to the one above
     Then for graql query
       """
@@ -199,7 +199,7 @@ Feature: Variable Role Resolution
   Scenario: when querying a binary relation, introducing a meta 'role' and a variable role triples the answer size
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Given for graql query
       """
       match (role1: $a, role2: $b) isa binary-base;
@@ -207,7 +207,7 @@ Feature: Variable Role Resolution
     Given all answers are correct in reasoned database
     Given answer size in reasoned database is: 9
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match (role: $a, $r1: $b) isa binary-base;
@@ -221,7 +221,7 @@ Feature: Variable Role Resolution
   Scenario: converting a fixed role to a variable bound with 'type role' (?)
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Given for graql query
       """
       match (role: $a, $r1: $b) isa binary-base;
@@ -229,7 +229,7 @@ Feature: Variable Role Resolution
     Given all answers are correct in reasoned database
     Then answer size in reasoned database is: 27
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     # This query should be equivalent to the one above
     Then for graql query
       """
@@ -246,7 +246,7 @@ Feature: Variable Role Resolution
   Scenario: converting a fixed role to a variable bound with 'sub role' (?)
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Given for graql query
       """
       match (role: $a, $r1: $b) isa binary-base;
@@ -254,7 +254,7 @@ Feature: Variable Role Resolution
     Given all answers are correct in reasoned database
     Then answer size in reasoned database is: 27
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     # This query should be equivalent to the one above
     Then for graql query
       """
@@ -271,7 +271,7 @@ Feature: Variable Role Resolution
   Scenario: when all other role variables are bound, introducing a meta 'role' doesn't affect the answer size
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -283,7 +283,7 @@ Feature: Variable Role Resolution
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 9
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     # This query is equivalent to the one above
     Then for graql query
       """
@@ -299,7 +299,7 @@ Feature: Variable Role Resolution
   Scenario: when querying a binary relation, introducing two variable roles multiplies the answer size by 7
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Given for graql query
       """
       match (role1: $a, role2: $b) isa binary-base;
@@ -307,7 +307,7 @@ Feature: Variable Role Resolution
     Given all answers are correct in reasoned database
     Given answer size in reasoned database is: 9
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match ($r1: $a, $r2: $b) isa binary-base;
@@ -374,7 +374,7 @@ Feature: Variable Role Resolution
   Scenario: variable roles are correctly mapped to answers for a ternary relation with 3 possible roleplayers
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -385,7 +385,7 @@ Feature: Variable Role Resolution
     # This query is equivalent to matching ($r2: $a2, $r3: $a3) isa binary-base, as role1 and $a1 each have only 1 value
     Then answer size in reasoned database is: 63
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match (ternary-role1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
@@ -394,7 +394,7 @@ Feature: Variable Role Resolution
     # Now the bound role 'role1' is in {a, b, c}, tripling the answer size
     Then answer size in reasoned database is: 189
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match ($r1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
@@ -421,7 +421,7 @@ Feature: Variable Role Resolution
   Scenario: variable roles are correctly mapped to answers for a quaternary relation with 3 possible roleplayers
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -432,7 +432,7 @@ Feature: Variable Role Resolution
     # This query is equivalent to matching ($r2: $a2, $r3: $a3, $r4: $a4) isa ternary-base
     Then answer size in reasoned database is: 918
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
@@ -441,7 +441,7 @@ Feature: Variable Role Resolution
     # Now the bound role 'role1' is in {a, b, c}, tripling the answer size
     Then answer size in reasoned database is: 2754
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match ($r1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
@@ -467,7 +467,7 @@ Feature: Variable Role Resolution
   Scenario: variable roles are correctly mapped to answers for a quaternary relation with 2 possible roleplayers
     Then materialised database is completed
     Given for each session, transaction commits
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match
@@ -478,7 +478,7 @@ Feature: Variable Role Resolution
     # This query is equivalent to matching ($r2: $a2, $r3: $a3, $r4: $a4) isa ternary
     Then answer size in reasoned database is: 272
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
@@ -487,7 +487,7 @@ Feature: Variable Role Resolution
     # Now the bound role 'role1' is in {a, b}, doubling the answer size
     Then answer size in reasoned database is: 544
     Then for each session, transaction closes
-    Given for each session, open transactions with reasoning of type: read
+    Given for each session, open transactions of type: read
     Then for graql query
       """
       match ($r1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
