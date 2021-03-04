@@ -19,8 +19,10 @@ Feature: Graql Rule Validation
 
   Background: Initialise a session and transaction for each scenario
     Given connection has been opened
-    Given connection open schema session for database: test_rule_validation
-    Given transaction is initialised
+    Given connection does not have any database
+    Given connection create database: grakn
+    Given connection open schema session for database: grakn
+    Given session opens transaction of type: write
     Given graql define
       """
       define
@@ -36,9 +38,7 @@ Feature: Graql Rule Validation
       """
 
 
-
   # Note: These tests verify only the ability to create rules, and are not concerned with their application.
-
 
   Scenario: a rule can infer both an attribute and its ownership
     Given graql define
@@ -51,15 +51,7 @@ Feature: Graql Rule Validation
         $p has nickname "Bob";
       };
       """
-
-    When get answers of graql match
-      """
-      match $x sub rule;
-      """
-    Then uniquely identify answer concepts
-      | x                             |
-      | label:robert-has-nickname-bob |
-      | label:rule                    |
+    Then transaction commits
 
 
   # Keys are validated at commit time, so integrity will not be harmed by writing one in a rule.
@@ -73,23 +65,14 @@ Feature: Graql Rule Validation
         $p has email "john.smith@gmail.com";
       };
       """
-
-    When get answers of graql match
-      """
-      match $x sub rule;
-      """
-    Then uniquely identify answer concepts
-      | x                       |
-      | label:john-smiths-email |
-      | label:rule              |
+    Then transaction commits
 
 
   Scenario: when a rule has no 'when' clause, an error is thrown
-    Then graql define throws
+    Then graql define; throws exception
       """
       define
 
-      
       has-nickname-bob sub rule,
       then {
         $p has nickname "Bob";
@@ -97,26 +80,22 @@ Feature: Graql Rule Validation
       """
 
 
-
   Scenario: when a rule has no 'then' clause, an error is thrown
-    Then graql define throws
+    Then graql define; throws exception
       """
       define
-      
-      
+
       rule robert: when {
         $p has name "Robert";
       };
       """
 
 
-
   Scenario: when a rule's 'when' clause is empty, an error is thrown
-    Then graql define throws
+    Then graql define; throws exception
       """
       define
-      
-      
+
       rule has-nickname-bob:
       when {
       } then {
@@ -125,19 +104,16 @@ Feature: Graql Rule Validation
       """
 
 
-
   Scenario: when a rule's 'then' clause is empty, an error is thrown
-    Then graql define throws
+    Then graql define; throws exception
       """
       define
-      
       
       rule robert: when {
         $p has name "Robert";
       } then {
       };
       """
-
 
 
   Scenario: a rule can have negation in its 'when' clause
@@ -156,19 +132,11 @@ Feature: Graql Rule Validation
         $p has only-child true;
       };
       """
-
-    When get answers of graql match
-      """
-      match $x sub rule;
-      """
-    Then uniquely identify answer concepts
-      | x                     |
-      | label:only-child-rule |
-      | label:rule            |
+    Then transaction commits
 
 
   Scenario: when a rule has a negation block whose pattern variables are all unbound outside it, an error is thrown
-    Then graql define throws
+    Then graql define; throws exception
       """
       define
       has-robert sub attribute, value boolean;
@@ -184,13 +152,10 @@ Feature: Graql Rule Validation
       """
 
 
-
   Scenario: when a rule has nested negation, an error is thrown
-    Then graql define throws
+    Then graql define; throws exception
       """
       define
-
-      
       rule unemployed-robert-maybe-doesnt-not-have-nickname-bob: when {
         $p isa person;
         not {
@@ -205,9 +170,8 @@ Feature: Graql Rule Validation
       """
 
 
-
-  Scenario: when a rule has multiple negations, an error is thrown
-    Then graql define throws
+  Scenario: when a rule has multiple negations, no error is thrown
+    Then graql define
       """
       define
 
@@ -228,10 +192,9 @@ Feature: Graql Rule Validation
 
 
   Scenario: a rule can have a conjunction in a negation
-    Then graql define throws
+    Then graql define
       """
       define
-
 
       residence sub relation, relates resident;
       person owns nickname, plays residence:resident;
@@ -248,16 +211,8 @@ Feature: Graql Rule Validation
       """
 
 
-
   Scenario: when a rule has two conclusions, an error is thrown
-    Given graql define
-      """
-      define
-      nickname sub name;
-      person owns nickname;
-      """
-
-    Then graql define throws
+    Then graql define; throws exception
       """
       define
       rule robert-has-nicknames-bob-and-bobby: when {
@@ -267,7 +222,6 @@ Feature: Graql Rule Validation
         $p has nickname "Bobby";
       };
       """
-
 
 
   Scenario: a rule can use conjunction in its 'when' clause
@@ -283,26 +237,11 @@ Feature: Graql Rule Validation
         (named-robert: $p, named-robert: $p2) isa both-named-robert;
       };
       """
-
-    When get answers of graql match
-      """
-      match $x sub rule;
-      """
-    Then uniquely identify answer concepts
-      | x                                       |
-      | label:two-roberts-are-both-named-robert |
-      | label:rule                              |
+    Then transaction commits
 
 
   Scenario: when a rule contains a disjunction, an error is thrown
-    Given graql define
-      """
-      define
-      nickname sub name;
-      person owns nickname;
-      """
-
-    Then graql define throws
+    Then graql define; throws exception
       """
       define
       rule sophie-and-fiona-have-nickname-fi: when {
@@ -314,16 +253,8 @@ Feature: Graql Rule Validation
       """
 
 
-
   Scenario: when a rule contains an unbound variable in the 'then' clause, an error is thrown
-    Given graql define
-      """
-      define
-      nickname sub name;
-      person owns nickname;
-      """
-
-    Then graql define throws
+    Then graql define; throws exception
       """
       define
       rule i-did-a-bad-typo: when {
@@ -334,9 +265,8 @@ Feature: Graql Rule Validation
       """
 
 
-
   Scenario: when a rule has an undefined attribute set in its 'then' clause, an error is thrown
-    Given graql define throws
+    Given graql define; throws exception
       """
       define
       rule boudicca-is-1960-years-old: when {
@@ -347,9 +277,8 @@ Feature: Graql Rule Validation
       """
 
 
-
   Scenario: when a rule attaches an attribute to a type that can't have that attribute, an error is thrown
-    Given graql define throws
+    Given graql define; throws exception
       """
       define
       age sub attribute, value long;
@@ -361,18 +290,8 @@ Feature: Graql Rule Validation
       """
 
 
-
-  @ignore
-  # TODO: re-enable when rules with attribute values set in 'then' that don't match their type throw on commit
   Scenario: when a rule creates an attribute value that doesn't match the attribute's type, an error is thrown
-    Given graql define
-      """
-      define
-      nickname sub name;
-      person owns nickname;
-      """
-
-    Then graql define throws
+    Then graql define; throws exception
       """
       define
       rule may-has-nickname-5: when {
@@ -383,9 +302,8 @@ Feature: Graql Rule Validation
       """
 
 
-
   Scenario: when a rule infers a relation whose type doesn't exist, an error is thrown
-    Then graql define throws
+    Then graql define; throws exception
       """
       define
       rule bonnie-and-clyde-are-partners-in-crime: when {
@@ -397,9 +315,8 @@ Feature: Graql Rule Validation
       """
 
 
-
   Scenario: when a rule infers a relation with an incorrect roleplayer, an error is thrown
-    Then graql define throws
+    Then graql define; throws exception
       """
       define
       partners-in-crime sub relation, relates criminal, relates sidekick;
@@ -413,10 +330,8 @@ Feature: Graql Rule Validation
       """
 
 
-  @ignore
-  # TODO: re-enable when rules cannot infer abstract relations
   Scenario: when a rule infers an abstract relation, an error is thrown
-    Then graql define throws
+    Then graql define; throws exception
       """
       define
       partners-in-crime sub relation, abstract, relates criminal, relates sidekick;
@@ -430,11 +345,8 @@ Feature: Graql Rule Validation
       """
 
 
-
-  @ignore
-  # TODO: re-enable when rules cannot infer abstract attribute values
   Scenario: when a rule infers an abstract attribute value, an error is thrown
-    Then graql define throws
+    Then graql define; throws exception
       """
       define
       number-of-devices sub attribute, value long, abstract;
@@ -447,29 +359,6 @@ Feature: Graql Rule Validation
       """
 
 
-
-
-  Scenario: attempting to 'sub' another rule label throws an error
-    Then graql define throws
-    """
-    define
-    
-    
-    rule robert-has-nickname-bob: when {
-      $p isa person, has name "Robert";
-    } then {
-      $p has nickname "Bob";
-    };
-    robert-has-nickname-bobby sub robert-has-nickname-bob,
-    when {
-      $p isa person, has name "Robert";
-    }, then {
-      $p has nickname "Bobby";
-    };
-    """
-
-
-
   Scenario: when defining a rule to generate new entities from existing ones, an error is thrown
     Given graql define
       """
@@ -479,7 +368,7 @@ Feature: Graql Rule Validation
       derivedEntity sub entity;
       """
 
-    Then graql define throws
+    Then graql define; throws exception
       """
       define
       rule rule-1: when {
@@ -488,7 +377,6 @@ Feature: Graql Rule Validation
           $y isa derivedEntity;
       };
       """
-
 
 
   Scenario: when defining a rule to generate new entities from existing relations, an error is thrown
@@ -509,7 +397,7 @@ Feature: Graql Rule Validation
           relates role2;
       """
 
-    Then graql define throws
+    Then graql define; throws exception
       """
       define
       rule rule-1: when {
@@ -519,7 +407,6 @@ Feature: Graql Rule Validation
           $u isa derivedEntity;
       };
       """
-
 
 
   Scenario: when defining a rule to generate new relations from existing ones, an error is thrown
@@ -536,7 +423,7 @@ Feature: Graql Rule Validation
           relates role2;
       """
 
-    Then graql define throws
+    Then graql define; throws exception
       """
       define
       rule rule-1: when {
@@ -548,7 +435,6 @@ Feature: Graql Rule Validation
       """
 
 
-
   Scenario: when defining a rule to infer an additional type that is missing a necessary attribute, an error is thrown
     Given graql define
       """
@@ -556,7 +442,7 @@ Feature: Graql Rule Validation
       dog sub entity;
       """
 
-    Then graql define throws
+    Then graql define; throws exception
       """
       define
       rule romeo-is-a-dog: when {
@@ -567,10 +453,9 @@ Feature: Graql Rule Validation
       """
 
 
-
   Scenario: when a rule negates its conclusion in the 'when', causing a loop, an error is thrown
     Ensure rule stratification is possible
-    Then graql define throws
+    Then graql define
       """
       define
       rule there-are-no-unemployed: when {
@@ -582,6 +467,7 @@ Feature: Graql Rule Validation
         (employee: $person) isa employment;
       };
       """
+    Then transaction commits; throws exception
 
 
   Scenario: when a rule negates itself, but only in the rule body, the rule commits
@@ -595,6 +481,7 @@ Feature: Graql Rule Validation
         (employee: $p) isa employment;
       };
       """
+    Then transaction commits
 
 
     Scenario: when a rule negates itself in the rule body, the rule commits even if that cycle involves a then clause in another rule
@@ -616,10 +503,11 @@ Feature: Graql Rule Validation
         (employee: $p) isa employment;
       };
       """
+      Then transaction commits
 
 
     Scenario: When multiple rules cause a loop with a negation, an error is thrown
-      Then graql define throws
+      Then graql define
 
       """
       define
@@ -640,6 +528,7 @@ Feature: Graql Rule Validation
         (employee: $person) isa employment;
       };
       """
+      Then transaction commits; throws exception
 
 
     Scenario: rules with cyclic inferences are allowed as long as there is no negation
@@ -662,13 +551,11 @@ Feature: Graql Rule Validation
         (employee: $p) isa employment;
       };
       """
-
-
+      Then transaction commits
 
 
   Scenario: when a rule has a conjunction as the conclusion, an error is thrown
-  Checks clause validation
-    When graql define throws
+    When graql define; throws exception
     """
     define
 
@@ -683,10 +570,8 @@ Feature: Graql Rule Validation
     """
 
 
-
   Scenario: when a rule has a down-cast in a rule conclusion, an error is thrown
-  Ensures no down casting and side casting are allowed.
-    When graql define throws
+    When graql define; throws exception
       """
       define
 
@@ -702,9 +587,8 @@ Feature: Graql Rule Validation
       """
 
 
-
     Scenario: when a rule has a side-cast in a rule, an error is thrown
-      When graql define throws
+      When graql define; throws exception
       """
       define
 
@@ -726,10 +610,9 @@ Feature: Graql Rule Validation
       """
 
 
-
   Scenario: when a rule adds a role to an existing relation, an error is thrown
     Checks adding new roles to existing relationships is not allowed
-    When graql define throws
+    When graql define; throws exception
       """
       define
 
@@ -744,7 +627,7 @@ Feature: Graql Rule Validation
 
 
   Scenario: if a rule's body uses a type that doesn't exist, an error is thrown
-    When graql define throws
+    When graql define; throws exception
       """
       define
 
@@ -758,7 +641,7 @@ Feature: Graql Rule Validation
 
 
   Scenario: if a rule that uses a missing type within a negation, an error is thrown
-    When graql define throws
+    When graql define; throws exception
       """
       define
 
@@ -786,6 +669,7 @@ Feature: Graql Rule Validation
         $p has $bob;
       };
       """
+    Then transaction commits
 
 
   Scenario: a rule may infer an attribute type when the value is concrete
@@ -801,10 +685,11 @@ Feature: Graql Rule Validation
         $p has nickname 'bob';
       };
     """
+    Then transaction commits
 
 
   Scenario: if a rule infers both an attribute type and a named variable, an error is thrown
-    When graql define throws
+    When graql define; throws exception
     """
     define
 
@@ -840,5 +725,5 @@ Feature: Graql Rule Validation
       (relative: $p, relative: $q) isa family-relation;
     };
     """
-
+    Then transaction commits
 
