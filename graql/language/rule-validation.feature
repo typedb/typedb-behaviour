@@ -28,7 +28,7 @@ Feature: Graql Rule Validation
       define
       person sub entity,
         plays employment:employee, plays scholarship:scholar,
-        plays apprenticeship:apprentice;
+        plays apprenticeship:apprentice,
         owns name, owns nickname, owns email @key;
       employment sub relation, relates employee, owns start-date;
       self-employment sub employment;
