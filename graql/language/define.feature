@@ -1752,11 +1752,11 @@ Feature: Graql Define Query
   Scenario: changing a concrete type to abstract throws on commit if it has a concrete supertype
 
   @ignore
-  # TODO: re-enable when rules cannot infer abstract relations
+  # TODO: re-enable when rules are indexed
   Scenario: changing a concrete relation type to abstract throws on commit if it appears in the conclusion of any rule
 
   @ignore
-  # TODO: re-enable when rules cannot infer abstract attributes
+  # TODO: re-enable when rules are indexed
   Scenario: changing a concrete attribute type to abstract throws on commit if it appears in the conclusion of any rule
 
   ######################

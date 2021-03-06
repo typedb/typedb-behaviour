@@ -1129,13 +1129,10 @@ Feature: Graql Delete Query
       """
 
 
-
   ####################
   # COMPLEX PATTERNS #
   ####################
 
-  # TODO: enable once query planning has been optimised
-  @ignore
   Scenario: deletion of a complex pattern
     Given connection close all sessions
     Given connection open schema session for database: grakn
@@ -1207,8 +1204,7 @@ Feature: Graql Delete Query
       | x             | n                    |
       | key:name:John | value:lastname:Smith |
 
-  # TODO: enable once query planning has been optimised
-  @ignore
+
   Scenario: deleting everything in a complex pattern
     Given connection close all sessions
     Given connection open schema session for database: grakn
@@ -1295,7 +1291,6 @@ Feature: Graql Delete Query
     Then transaction commits; throws exception
 
   @ignore
-  # TODO: re-enable when deleting an attribute instance that is owned as a has throws @key an error
   Scenario: deleting an attribute instance that is owned as a has throws @key an error
     Given graql insert
       """

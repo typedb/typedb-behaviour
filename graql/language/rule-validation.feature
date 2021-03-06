@@ -108,7 +108,7 @@ Feature: Graql Rule Validation
     Then graql define; throws exception
       """
       define
-      
+
       rule robert: when {
         $p has name "Robert";
       } then {

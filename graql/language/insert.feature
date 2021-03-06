@@ -647,7 +647,8 @@ Feature: Graql Insert Query
       | a                     |
       | value:tenure-days:365 |
 
-  #TODO: Reenable when rules actually do something
+
+  #TODO: Reenable when reasoning can run in a write transaction
   @ignore
   Scenario: an attribute ownership currently inferred by a rule can be explicitly inserted
     Given connection close all sessions
@@ -1852,7 +1853,7 @@ Feature: Graql Insert Query
   #####################################
 
   # Note: These tests have been placed here because Resolution Testing was not built to handle these kinds of cases
-  #TODO: Reenable when rules actually do something
+  #TODO: Reenable when reasoning can run in a write transaction
   @ignore
   Scenario: when inserting a thing that has inferred concepts, those concepts are not automatically materialised
     Given connection close all sessions
@@ -1908,7 +1909,7 @@ Feature: Graql Insert Query
     # If the name 'Ganesh' had been materialised, then it would still exist in the knowledge graph.
     Then answer size is: 0
 
-  #TODO: Reenable when rules actually do something
+  #TODO: Reenable when reasoning can run in a write transaction
   @ignore
   Scenario: when inserting a thing with an inferred attribute ownership, the ownership is not automatically persisted
     Given connection close all sessions
@@ -2073,7 +2074,7 @@ Feature: Graql Insert Query
       | x                 | y              |
       | value:name:Ganesh | value:letter:G |
 
-  #TODO: Reenable when rules actually do something
+  #TODO: Reenable when reasoning can run in a write transaction
   @ignore
   Scenario: when inserting things connected to an inferred relation, the inferred relation gets materialised
     Given connection close all sessions
@@ -2161,7 +2162,7 @@ Feature: Graql Insert Query
     # And the inserted relation still exists too
     Then answer size is: 1
 
-  #TODO: Reenable when rules actually do something
+  #TODO: Reenable when reasoning can run in a write transaction
   @ignore
   Scenario: when inserting things connected to a chain of inferred concepts, the whole chain is materialised
     Given connection close all sessions

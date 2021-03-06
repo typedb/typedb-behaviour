@@ -1092,16 +1092,12 @@ Feature: Graql Match Query
     Then session transaction is open: false
 
 
-
-  # TODO: fix - query does not throw exception, but it should
-  @ignore
   Scenario: an error is thrown when matching an entity type as if it were a relation type
     Then graql match; throws exception
       """
       match ($x) isa person;
       """
     Then session transaction is open: false
-
 
 
   Scenario: an error is thrown when matching a non-existent type label as if it were a relation type
@@ -1112,14 +1108,12 @@ Feature: Graql Match Query
     Then session transaction is open: false
 
 
-
   Scenario: when matching a role type that doesn't exist, an error is thrown
     Then graql match; throws exception
       """
       match (rolein-rolein-rolein: $rolein) isa relation;
       """
     Then session transaction is open: false
-
 
 
   Scenario: when matching a role in a relation type that doesn't have that role, an error is thrown
@@ -1130,9 +1124,6 @@ Feature: Graql Match Query
     Then session transaction is open: false
 
 
-
-  # TODO: re-enable when fixed (it doesn't throw)
-  @ignore
   Scenario: when matching a roleplayer in a relation that can't actually play that role, an error is thrown
     When graql match; throws exception
       """
@@ -1556,8 +1547,6 @@ Feature: Graql Match Query
       | key:ref:0 |
 
 
-  # TODO: re-enable when fixed (it doesn't throw)
-  @ignore
   Scenario: an error is thrown when matching by attribute ownership, when the owned thing is actually an entity
     Then graql match; throws exception
       """
@@ -1566,16 +1555,12 @@ Feature: Graql Match Query
     Then session transaction is open: false
 
 
-
-  # TODO: re-enable when fixed (it doesn't throw)
-  @ignore
-  Scenario: when matching by an attribute ownership, if the owner can't actually own it, an empty result is returned
+  Scenario: exception is thrown when matching by an attribute ownership, if the owner can't actually own it
     Then graql match; throws exception
       """
       match $x isa company, has age $n;
       """
     Then session transaction is open: false
-
 
 
   Scenario: an error is thrown when matching by attribute ownership, when the owned type label doesn't exist
