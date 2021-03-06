@@ -77,7 +77,6 @@ Feature: Graql Undefine Query
       """
 
 
-
   Scenario: a sub-entity type can be removed using 'sub' with its direct supertype, and its parent is preserved
     Given graql define
       """
@@ -155,7 +154,6 @@ Feature: Graql Undefine Query
       """
       undefine person sub entity;
       """
-
 
 
   Scenario: removing a playable role from a super entity type also removes it from its subtypes
@@ -616,7 +614,6 @@ Feature: Graql Undefine Query
       """
 
 
-
   Scenario: removing all roles from a relation type without undefining the relation type throws on commit
     When graql undefine
       """
@@ -625,7 +622,6 @@ Feature: Graql Undefine Query
       employment relates employer;
       """
     Then transaction commits; throws exception
-
 
 
   Scenario: undefining a role type automatically detaches any possible roleplayers
@@ -681,7 +677,6 @@ Feature: Graql Undefine Query
       """
       undefine employment relates employer;
       """
-
 
 
   Scenario: a role that is not played in any existing instance of its relation type can be safely removed
@@ -797,7 +792,6 @@ Feature: Graql Undefine Query
       """
 
 
-
   Scenario: undefining a playable role that was not actually playable to begin with throws
     Given get answers of graql match
       """
@@ -810,7 +804,6 @@ Feature: Graql Undefine Query
       """
       undefine person plays employment:employer;
       """
-
 
 
   Scenario: removing a playable role throws an error if it is played by existing instances
@@ -832,7 +825,6 @@ Feature: Graql Undefine Query
       """
       undefine person plays employment:employee;
       """
-
 
 
   ###################
@@ -1125,7 +1117,6 @@ Feature: Graql Undefine Query
       """
 
 
-
   Scenario: attempting to undefine an attribute ownership inherited from a parent throws
     Given graql define
       """
@@ -1138,7 +1129,6 @@ Feature: Graql Undefine Query
       """
       undefine child owns name;
       """
-
 
 
   Scenario: undefining a key ownership removes it
@@ -1163,13 +1153,11 @@ Feature: Graql Undefine Query
       """
 
 
-
   Scenario: writing '@key' when undefining an attribute ownership is not allowed
     Then graql undefine; throws exception
       """
       undefine person owns name @key;
       """
-
 
 
   Scenario: when a type can own an attribute, but none of its instances actually do, the ownership can be undefined
@@ -1227,7 +1215,6 @@ Feature: Graql Undefine Query
       """
 
 
-
   Scenario: undefining a key ownership throws an error if it is owned by existing instances
     Given connection close all sessions
     Given connection open data session for database: grakn
@@ -1245,7 +1232,6 @@ Feature: Graql Undefine Query
       """
       undefine person owns email;
       """
-
 
 
   #########
@@ -1328,7 +1314,8 @@ Feature: Graql Undefine Query
     Then answer size is: 0
 
 
-  @ignore # TODO enable when we can do reasoning in a schema write transaction
+  # TODO enable when we can do reasoning in a schema write transaction
+  @ignore
   Scenario: when undefining a rule, concepts inferred by that rule can still be retrieved until the next commit
     Given graql define
       """
