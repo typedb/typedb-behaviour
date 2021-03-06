@@ -499,7 +499,7 @@ Feature: Graql Rule Validation
       """
     Then transaction commits; throws exception
 
-  Scenario: When multiple rules lead to a strictly negative loop, an error is thrown
+  Scenario: When rules are mutually recursive via negated predicates (strictly negative loop), an error is thrown
     Then graql define
       """
       define
