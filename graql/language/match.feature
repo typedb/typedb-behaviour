@@ -1555,7 +1555,7 @@ Feature: Graql Match Query
     Then session transaction is open: false
 
 
-  Scenario: exception is thrown when matching by an attribute ownership, if the owner can't actually own it0
+  Scenario: exception is thrown when matching by an attribute ownership, if the owner can't actually own it
     Then graql match; throws exception
       """
       match $x isa company, has age $n;
