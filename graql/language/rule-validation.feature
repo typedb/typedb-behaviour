@@ -499,7 +499,7 @@ Feature: Graql Rule Validation
       """
     Then transaction commits; throws exception
 
-  Scenario: When multiple rules lead to negative loop, an error is thrown
+  Scenario: When multiple rules lead to a strictly negative loop, an error is thrown
     Then graql define
       """
       define
@@ -519,7 +519,7 @@ Feature: Graql Rule Validation
       """
     Then transaction commits; throws exception
 
-  Scenario: When a rule with type hierarchy results in a negated loop, an error is thrown
+  Scenario: When rule creates a loop with negation within a type hierarchy via specialisation, an error is thrown
     Then graql define
       """
       define
@@ -528,6 +528,19 @@ Feature: Graql Rule Validation
         not { (employee: $person) isa employment;};
       } then {
         (employee: $person) isa self-employment;
+      };
+      """
+    Then transaction commits; throws exception
+
+  Scenario: When rule creates a loop with negation within a type hierarchy via generalisation, an error is thrown
+    Then graql define
+      """
+      define
+      rule nonselfemployed-are-employed: when {
+        $person isa person;
+        not { (employee: $person) isa self-employment;};
+      } then {
+        (employee: $person) isa employment;
       };
       """
     Then transaction commits; throws exception
