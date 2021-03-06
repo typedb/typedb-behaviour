@@ -532,7 +532,7 @@ Feature: Graql Rule Validation
       """
     Then transaction commits; throws exception
 
-  Scenario: When rule creates a loop with negation within a type hierarchy via generalisation, an error is thrown
+  Scenario: When rule generalises a negated type, the rule commits
     Then graql define
       """
       define
@@ -543,7 +543,7 @@ Feature: Graql Rule Validation
         (employee: $person) isa employment;
       };
       """
-    Then transaction commits; throws exception
+    Then transaction commits
 
   Scenario: when a rule negates itself, but only in the rule body, the rule commits
     Given graql define
