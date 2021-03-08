@@ -28,9 +28,12 @@ Feature: Graql Rule Validation
       define
       person sub entity,
         plays employment:employee, plays scholarship:scholar,
+        plays apprenticeship:apprentice,
         owns name, owns nickname, owns email @key;
       employment sub relation, relates employee, owns start-date;
+      self-employment sub employment;
       scholarship sub relation, relates scholar;
+      apprenticeship sub relation, relates apprentice;
       name sub attribute, value string;
       nickname sub attribute, value string;
       email sub attribute, value string;
@@ -453,7 +456,7 @@ Feature: Graql Rule Validation
       """
 
 
-  Scenario: when a rule negates its conclusion in the 'when', causing a loop, an error is thrown
+  Scenario: when a rule negates its conclusion in the 'when', causing a (self-)loop, an error is thrown
     Ensure rule stratification is possible
     Then graql define
       """
@@ -469,6 +472,78 @@ Feature: Graql Rule Validation
       """
     Then transaction commits; throws exception
 
+  Scenario: When multiple rules result in a loop with negation, an error is thrown
+    Then graql define
+      """
+      define
+      rule scholar-is-employee: when {
+        $person isa person;
+        (scholar: $person) isa scholarship;
+      } then {
+        (employee: $person) isa employment;
+      };
+
+      rule unemployed-is-apprentice: when {
+        $person isa person;
+        not { (employee: $person) isa employment;};
+      } then {
+        (apprentice: $person) isa apprenticeship;
+      };
+
+      rule nonapprentice-is-scholar: when {
+        $person isa person;
+        not { (apprentice: $person) isa apprenticeship;};
+      } then {
+        (scholar: $person) isa scholarship;
+      };
+      """
+    Then transaction commits; throws exception
+
+  Scenario: When rules are mutually recursive via negated predicates (strictly negative loop), an error is thrown
+    Then graql define
+      """
+      define
+      rule employed-nonscholar-is-apprentice: when {
+        (employee: $person) isa employment;
+        not { (scholar: $person) isa scholarship;};
+      } then {
+        (apprentice: $person) isa apprenticeship;
+      };
+
+      rule employed-nonapprentice-is-scholar: when {
+        (employee: $person) isa employment;
+        not { (apprentice: $person) isa apprenticeship;};
+      } then {
+        (scholar: $person) isa scholarship;
+      };
+      """
+    Then transaction commits; throws exception
+
+  Scenario: When rule creates a loop with negation within a type hierarchy via specialisation, an error is thrown
+    Then graql define
+      """
+      define
+      rule unemployed-are-selfemployed: when {
+        $person isa person;
+        not { (employee: $person) isa employment;};
+      } then {
+        (employee: $person) isa self-employment;
+      };
+      """
+    Then transaction commits; throws exception
+
+  Scenario: When rule generalises a negated type, the rule commits
+    Then graql define
+      """
+      define
+      rule nonselfemployed-are-employed: when {
+        $person isa person;
+        not { (employee: $person) isa self-employment;};
+      } then {
+        (employee: $person) isa employment;
+      };
+      """
+    Then transaction commits
 
   Scenario: when a rule negates itself, but only in the rule body, the rule commits
     Given graql define
@@ -504,32 +579,6 @@ Feature: Graql Rule Validation
       };
       """
       Then transaction commits
-
-
-    Scenario: When multiple rules cause a loop with a negation, an error is thrown
-      Then graql define
-
-      """
-      define
-
-      rule unemployment-is-scholar: when {
-        $person isa person;
-        not {
-          (employee: $person) isa employment;
-        };
-      } then {
-        (scholar: $person) isa scholarship;
-      };
-
-      rule scholarship-means-employment: when {
-        $person isa person;
-        (scholar: $person) isa scholarship;
-      } then {
-        (employee: $person) isa employment;
-      };
-      """
-      Then transaction commits; throws exception
-
 
     Scenario: rules with cyclic inferences are allowed as long as there is no negation
       When graql define
