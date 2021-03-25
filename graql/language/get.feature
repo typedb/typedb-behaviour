@@ -640,7 +640,7 @@ Feature: Graql Get Clause
 
 
   Scenario Outline: an error is thrown when getting the '<agg_type>' of an undefined variable in an aggregate query
-    Then graql match; throws exception
+    Then graql match aggregate; throws exception
       """
       match $x isa person;
       <agg_type> $y;
@@ -664,7 +664,7 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    Then graql match; throws exception
+    Then graql match aggregate; throws exception
       """
       match $x isa person;
       min $x;
@@ -695,7 +695,7 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    Then graql match; throws exception
+    Then graql match aggregate; throws exception
       """
       match $x isa person, has <attr> $y;
       <agg_type> $y;
@@ -734,7 +734,7 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    Then graql match; throws exception
+    Then graql match aggregate; throws exception
       """
       match $x isa person, has attribute $y;
       sum $y;
@@ -818,13 +818,12 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    Then graql match; throws exception
+    Then graql match group; throws exception
       """
       match ($x, $y) isa friendship;
       get $x;
       group $y;
       """
-
 
 
   ###################
@@ -860,6 +859,7 @@ Feature: Graql Get Clause
       | key:ref:1  | 3     |
       | key:ref:2  | 3     |
       | key:ref:3  | 3     |
+
 
   Scenario: the size of answer groups is still computed correctly when restricting variables with 'get'
     Given graql insert
