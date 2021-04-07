@@ -1222,6 +1222,42 @@ Feature: Graql Match Query
     Then answer size is: 4
 
 
+  Scenario: When some relations do not satisfy the query, the correct ones are still found
+    Given graql define
+      """
+      define
+      car sub entity, plays ownership:owned, owns ref @key;
+      person plays ownership:owner;
+      company plays ownership:owner;
+      ownership sub relation, relates owned, relates owner, owns is-insured;
+      is-insured sub attribute, value boolean;
+      """
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
+    Given graql insert
+      """
+      insert
+      (owned: $c1, owner: $company) isa ownership, has is-insured true;
+      $c1 isa car, has ref 0; $company isa company, has ref 1;
+      """
+    Given transaction commits
+    Given session opens transaction of type: write
+    Given graql insert
+      """
+      insert
+      (owned: $c2, owner: $person) isa ownership, has is-insured true;
+      $c2 isa car, has ref 2; $person isa person, has ref 3;
+      """
+    Given transaction commits
+    Given session opens transaction of type: read
+    When get answers of graql match
+    """
+    match $r (owner: $x) isa ownership, has is-insured true; $x isa person;
+    """
+    Then answer size is: 1
+
   ##############
   # ATTRIBUTES #
   ##############
