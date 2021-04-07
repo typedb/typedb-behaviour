@@ -1226,11 +1226,11 @@ Feature: Graql Match Query
     Given graql define
       """
       define
-      car sub entity, plays ownership:owned;
+      car sub entity, plays ownership:owned, owns ref @key;
       person plays ownership:owner;
       company plays ownership:owner;
       ownership sub relation, relates owned, relates owner, owns is-insured;
-      is-insured sub attribute, value boolean;"
+      is-insured sub attribute, value boolean;
       """
     Given transaction commits
     Given connection close all sessions
@@ -1240,7 +1240,7 @@ Feature: Graql Match Query
       """
       insert
       (owned: $c1, owner: $company) isa ownership, has is-insured true;
-      $c1 isa car; $company isa company;
+      $c1 isa car, has ref 0; $company isa company, has ref 1;
       """
     Given transaction commits
     Given session opens transaction of type: write
@@ -1248,7 +1248,7 @@ Feature: Graql Match Query
       """
       insert
       (owned: $c2, owner: $person) isa ownership, has is-insured true;
-      $c2 isa car; $person isa person;
+      $c2 isa car, has ref 2; $person isa person, has ref 3;
       """
     Given transaction commits
     Given session opens transaction of type: read
