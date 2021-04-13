@@ -173,7 +173,7 @@ Feature: Graql Rule Validation
       """
 
 
-  Scenario: when a rule has multiple negations, no error is thrown
+  Scenario: a rule may have multiple negations
     Then graql define
       """
       define
@@ -194,7 +194,7 @@ Feature: Graql Rule Validation
       """
 
 
-  Scenario: a rule can have a conjunction in a negation
+  Scenario: a rule may have a conjunction in a negation
     Then graql define
       """
       define
@@ -305,7 +305,7 @@ Feature: Graql Rule Validation
       """
 
 
-  Scenario: when a rule creates long attribute for a double attribute type, no error is thrown
+  Scenario: a rule can materialise a long attribute for a double attribute type
     Then graql define
       """
       define
@@ -566,7 +566,7 @@ Feature: Graql Rule Validation
     Then transaction commits; throws exception
 
 
-  Scenario: When rule generalises a negated type, the rule commits
+  Scenario: a rule can insert a generalisation of a negated type
     Then graql define
       """
       define
@@ -580,7 +580,7 @@ Feature: Graql Rule Validation
     Then transaction commits
 
 
-  Scenario: when a rule negates itself, but only in the rule body, the rule commits
+  Scenario: the rule body can contradict itself
     Given graql define
       """
       define
