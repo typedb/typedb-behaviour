@@ -173,7 +173,7 @@ Feature: Graql Rule Validation
       """
 
 
-  Scenario: when a rule has multiple negations, no error is thrown
+  Scenario: a rule may have multiple negations
     Then graql define
       """
       define
@@ -194,7 +194,7 @@ Feature: Graql Rule Validation
       """
 
 
-  Scenario: a rule can have a conjunction in a negation
+  Scenario: a rule may have a conjunction in a negation
     Then graql define
       """
       define
@@ -301,6 +301,36 @@ Feature: Graql Rule Validation
         $p has name "May";
       } then {
         $p has nickname 5;
+      };
+      """
+
+
+  Scenario: a rule can materialise a long attribute for a double attribute type
+    Then graql define
+      """
+      define
+      person owns age;
+      age sub attribute, value double;
+
+      rule may-has-age-5: when {
+        $p has name "May";
+      } then {
+        $p has age 5;
+      };
+      """
+
+
+  Scenario: when a rule creates double attribute for a long attribute type, an error is thrown
+    Then graql define; throws exception
+      """
+      define
+      person owns weight;
+      grade sub attribute, value long;
+
+      rule may-has-grade-5: when {
+        $p has name "May";
+      } then {
+        $p has grade 5.0;
       };
       """
 
@@ -472,6 +502,7 @@ Feature: Graql Rule Validation
       """
     Then transaction commits; throws exception
 
+
   Scenario: When multiple rules result in a loop with negation, an error is thrown
     Then graql define
       """
@@ -499,6 +530,7 @@ Feature: Graql Rule Validation
       """
     Then transaction commits; throws exception
 
+
   Scenario: When rules are mutually recursive via negated predicates (strictly negative loop), an error is thrown
     Then graql define
       """
@@ -519,6 +551,7 @@ Feature: Graql Rule Validation
       """
     Then transaction commits; throws exception
 
+
   Scenario: When rule creates a loop with negation within a type hierarchy via specialisation, an error is thrown
     Then graql define
       """
@@ -532,7 +565,8 @@ Feature: Graql Rule Validation
       """
     Then transaction commits; throws exception
 
-  Scenario: When rule generalises a negated type, the rule commits
+
+  Scenario: a rule can insert a generalisation of a negated type
     Then graql define
       """
       define
@@ -545,7 +579,8 @@ Feature: Graql Rule Validation
       """
     Then transaction commits
 
-  Scenario: when a rule negates itself, but only in the rule body, the rule commits
+
+  Scenario: the rule body can contradict itself
     Given graql define
       """
       define
@@ -579,6 +614,7 @@ Feature: Graql Rule Validation
       };
       """
       Then transaction commits
+
 
     Scenario: rules with cyclic inferences are allowed as long as there is no negation
       When graql define
@@ -689,7 +725,7 @@ Feature: Graql Rule Validation
       """
 
 
-  Scenario: if a rule that uses a missing type within a negation, an error is thrown
+  Scenario: if a rule uses a missing type within a negation, an error is thrown
     When graql define; throws exception
       """
       define
@@ -751,28 +787,4 @@ Feature: Graql Rule Validation
         $p has nickname $b;
       };
     """
-
-
-  Scenario: a rule may have a clause asserting both an attribute type and a named variable within its when clause
-    When graql define
-    """
-    define
-
-    surname sub attribute, value string;
-
-    person owns surname,
-    plays family-relation:relative;
-
-    family-relation sub relation,
-    relates relative;
-
-    rule surnames-are-family-names:
-    when {
-      $p isa person, has surname $name;
-      $q isa person, has surname $name;
-    } then {
-      (relative: $p, relative: $q) isa family-relation;
-    };
-    """
-    Then transaction commits
 
