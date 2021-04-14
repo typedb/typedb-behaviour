@@ -521,6 +521,26 @@ Feature: Graql Define Query
       """
 
 
+  Scenario: relation subtypes can have roles that their supertypes don't have
+    Given graql define
+      """
+      define
+      plane sub entity, plays preferred-plane;
+      pilot-employment sub employment, relates pilot as employee, relates preferred-plane;
+      person plays pilot;
+      """
+    Given the integrity is validated
+    When get answers of graql query
+      """
+      match $x relates preferred-plane; get;
+      """
+    Then concept identifiers are
+      |     | check | value            |
+      | PIE | label | pilot-employment |
+    Then uniquely identify answer concepts
+      | x   |
+      | PIE |
+
 
   Scenario: types should be able to define roles they play with an override
     Then graql define
