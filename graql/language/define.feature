@@ -525,21 +525,20 @@ Feature: Graql Define Query
     Given graql define
       """
       define
-      plane sub entity, plays preferred-plane;
+      plane sub entity, plays pilot-employment:preferred-plane;
       pilot-employment sub employment, relates pilot as employee, relates preferred-plane;
-      person plays pilot;
+      person plays pilot-employment:pilot;
       """
-    Given the integrity is validated
-    When get answers of graql query
+    Given transaction commits
+
+    Given session opens transaction of type: read
+    When get answers of graql match
       """
       match $x relates preferred-plane; get;
       """
-    Then concept identifiers are
-      |     | check | value            |
-      | PIE | label | pilot-employment |
     Then uniquely identify answer concepts
-      | x   |
-      | PIE |
+      | x                       |
+      | label:pilot-employment  |
 
 
   Scenario: types should be able to define roles they play with an override
