@@ -534,7 +534,7 @@ Feature: Graql Define Query
     Given session opens transaction of type: read
     When get answers of graql match
       """
-      match $x relates preferred-plane; get;
+      match $x relates preferred-plane;
       """
     Then uniquely identify answer concepts
       | x                       |
