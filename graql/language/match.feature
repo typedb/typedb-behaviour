@@ -466,6 +466,7 @@ Feature: Graql Match Query
       define
       breed sub attribute, value string;
       dog sub entity, owns breed @key;
+      kennel sub entity, owns breed;
       """
     Given transaction commits
 
