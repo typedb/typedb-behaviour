@@ -1387,6 +1387,8 @@ Feature: Graql Define Query
       insert
       $x isa product, has name "Cheese", has barcode "10001";
       $y isa product, has name "Ham", has barcode "10011";
+      $a "Milk" isa name;
+      $b "11111" isa barcode;
       """
     Given transaction commits
 
