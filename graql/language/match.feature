@@ -709,6 +709,37 @@ Feature: Graql Match Query
       """
 
 
+  Scenario: 'iid' does not match the instance with the specified internal iid with the wrong type
+    Given graql define
+      """
+      define
+      shop sub entity, owns address;
+      grocery sub shop;
+      address sub attribute, value string;
+      """
+    Given transaction commits
+
+    Given connection close all sessions
+    Given connection open data session for database: grakn
+    Given session opens transaction of type: write
+    Given graql insert
+      """
+      insert
+      $x isa shop, has address "123 street";
+      $y isa grocery, has address "123 street";
+      """
+    Given transaction commits
+
+    Given session opens transaction of type: read
+    When get answers of graql match
+      """
+      match $x isa! shop;
+      """
+    Then each answer does not satisfy
+      """
+      match $x iid <answer.x.iid>; $x isa grocery, has address "123 street";
+      """
+
   Scenario: match returns an empty answer if there are no matches
     When get answers of graql match
       """
