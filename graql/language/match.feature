@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -16,16 +16,16 @@
 #
 
 #noinspection CucumberUndefinedStep
-Feature: Graql Match Query
+Feature: TypeQL Match Query
 
   Background: Open connection and create a simple extensible schema
     Given connection has been opened
     Given connection does not have any database
-    Given connection create database: grakn
-    Given connection open schema session for database: grakn
+    Given connection create database: typedb
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
 
-    Given graql define
+    Given typeql define
       """
       define
       person sub entity,
@@ -59,7 +59,7 @@ Feature: Graql Match Query
   ##################
 
   Scenario: 'type' matches only the specified type, and does not match subtypes
-    Given graql define
+    Given typeql define
       """
       define
       writer sub person;
@@ -68,7 +68,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x type person;
       """
@@ -78,7 +78,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'sub' can be used to match the specified type and all its subtypes, including indirect subtypes
-    Given graql define
+    Given typeql define
       """
       define
       writer sub person;
@@ -87,7 +87,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x sub person;
       """
@@ -99,7 +99,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'sub' can be used to match the specified type and all its supertypes, including indirect supertypes
-    Given graql define
+    Given typeql define
       """
       define
       writer sub person;
@@ -108,7 +108,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match writer sub $x;
       """
@@ -121,7 +121,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'sub' can be used to retrieve all instances of types that are subtypes of a given type
-    Given graql define
+    Given typeql define
       """
       define
 
@@ -139,9 +139,9 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $a isa child, has name "Alfred", has ref 0;
@@ -155,7 +155,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
         $x isa $type;
@@ -180,7 +180,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'sub!' matches the type's direct subtypes
-    Given graql define
+    Given typeql define
       """
       define
       writer sub person;
@@ -191,7 +191,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x sub! person;
       """
@@ -202,7 +202,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'sub!' can be used to match a type's direct supertype
-    Given graql define
+    Given typeql define
       """
       define
       writer sub person;
@@ -211,7 +211,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match writer sub! $x;
       """
@@ -223,7 +223,7 @@ Feature: Graql Match Query
   @ignore
   # TODO this does not work on types anymore - types cannot be specified by IID
   Scenario: subtype hierarchy satisfies transitive sub assertions
-    Given graql define
+    Given typeql define
       """
       define
       sub1 sub entity;
@@ -236,7 +236,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
         $x sub $y;
@@ -250,7 +250,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'owns' matches types that own the specified attribute type
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x owns age;
       """
@@ -260,7 +260,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'owns' can match types that can own themselves
-    Given graql define
+    Given typeql define
       """
       define
       unit sub attribute, value string, owns unit;
@@ -268,7 +268,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x owns $x;
       """
@@ -278,7 +278,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'owns' does not match types that own only a subtype of the specified attribute type
-    Given graql define
+    Given typeql define
       """
       define
       name abstract;
@@ -288,7 +288,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x owns name;
       """
@@ -299,7 +299,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'owns' does not match types that own only a supertype of the specified attribute type
-    Given graql define
+    Given typeql define
       """
       define
       name abstract;
@@ -309,7 +309,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x owns club-name;
       """
@@ -319,7 +319,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'owns' can be used to match attribute types that a given type owns
-    When get answers of graql match
+    When get answers of typeql match
       """
       match person owns $x;
       """
@@ -331,7 +331,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'owns' can be used to retrieve all instances of types that can own a given attribute type
-    Given graql define
+    Given typeql define
       """
       define
       employment owns name;
@@ -339,9 +339,9 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has ref 0;
@@ -352,7 +352,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
         $x isa $type;
@@ -367,7 +367,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'plays' matches types that can play the specified role
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x plays friendship:friend;
       """
@@ -377,7 +377,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'plays' does not match types that only play a subrole of the specified role
-    Given graql define
+    Given typeql define
       """
       define
       close-friendship sub friendship, relates close-friend as friend;
@@ -386,7 +386,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x plays friendship:friend;
       """
@@ -396,7 +396,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'plays' does not match types that only play a super-role of the specified role
-    Given graql define
+    Given typeql define
       """
       define
       close-friendship sub friendship, relates close-friend as friend;
@@ -405,7 +405,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x plays close-friendship:close-friend;
       """
@@ -415,7 +415,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'plays' can be used to match roles that a particular type can play
-    When get answers of graql match
+    When get answers of typeql match
       """
       match person plays $x;
       """
@@ -426,7 +426,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'plays' can be used to retrieve all instances of types that can play a specific role
-    Given graql define
+    Given typeql define
       """
       define
       dog sub entity,
@@ -436,9 +436,9 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has ref 0;
@@ -448,7 +448,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
         $x isa $type;
@@ -461,7 +461,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'owns @key' matches types that own the specified attribute type as a key
-    Given graql define
+    Given typeql define
       """
       define
       breed sub attribute, value string;
@@ -471,7 +471,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x owns breed @key;
       """
@@ -481,7 +481,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'key' can be used to find all attribute types that a given type owns as a key
-    When get answers of graql match
+    When get answers of typeql match
       """
       match person owns $x @key;
       """
@@ -491,7 +491,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'owns' without '@key' matches all types that own the specified attribute type, even if they use it as a key
-    Given graql define
+    Given typeql define
       """
       define
       breed sub attribute, value string;
@@ -501,7 +501,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x owns breed;
       """
@@ -512,7 +512,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'relates' matches relation types where the specified role can be played
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x relates employee;
       """
@@ -523,7 +523,7 @@ Feature: Graql Match Query
   # TODO cannot currently query for schema with 'as'
   @ignore
   Scenario: 'relates' with 'as' matches relation types that override the specified roleplayer
-    Given graql define
+    Given typeql define
       """
       define
       close-friendship sub friendship, relates close-friend as friend;
@@ -532,7 +532,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x relates close-friend as friend;
       """
@@ -542,7 +542,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'relates' without 'as' does not match relation types that override the specified roleplayer
-    Given graql define
+    Given typeql define
       """
       define
       close-friendship sub friendship, relates close-friend as friend;
@@ -551,7 +551,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x relates friend;
       """
@@ -561,7 +561,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'relates' can be used to retrieve all the roles of a relation type
-    When get answers of graql match
+    When get answers of typeql match
       """
       match employment relates $x;
       """
@@ -574,7 +574,7 @@ Feature: Graql Match Query
   # TODO we can't test like this because the IID is not a valid encoded IID -- need to rethink this test
   @ignore
   Scenario: when matching by a concept iid that doesn't exist, an empty result is returned
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
         $x iid 0x83cb2;
@@ -589,9 +589,9 @@ Feature: Graql Match Query
 
   Scenario: 'isa' gets any thing for any type
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $_ isa person, has ref 0;
@@ -600,7 +600,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa $y;
       """
@@ -620,7 +620,7 @@ Feature: Graql Match Query
       | value:ref:1 | label:thing     |
 
   Scenario: 'isa' matches things of the specified type and all its subtypes
-    Given graql define
+    Given typeql define
       """
       define
       writer sub person;
@@ -630,9 +630,9 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has ref 0;
@@ -643,7 +643,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa writer;
       """
@@ -655,7 +655,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'isa!' only matches things of the specified type, and does not match subtypes
-    Given graql define
+    Given typeql define
       """
       define
       writer sub person;
@@ -665,9 +665,9 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has ref 0;
@@ -678,7 +678,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa! writer;
       """
@@ -689,9 +689,9 @@ Feature: Graql Match Query
 
   Scenario: 'iid' matches the instance with the specified internal iid
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has ref 0;
@@ -699,7 +699,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person;
       """
@@ -710,7 +710,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'iid' does not match the instance with the specified internal iid with the wrong type
-    Given graql define
+    Given typeql define
       """
       define
       shop sub entity, owns address;
@@ -720,9 +720,9 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa shop, has address "123 street";
@@ -731,7 +731,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa! shop;
       """
@@ -741,7 +741,7 @@ Feature: Graql Match Query
       """
 
   Scenario: match returns an empty answer if there are no matches
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person, has name "Anonymous Coward";
       """
@@ -749,7 +749,7 @@ Feature: Graql Match Query
 
 
   Scenario: when matching by a type whose label doesn't exist, an error is thrown
-    Then graql match; throws exception
+    Then typeql match; throws exception
       """
       match $x isa ganesh;
       """
@@ -758,7 +758,7 @@ Feature: Graql Match Query
 
 
   Scenario: when matching by a relation type whose label doesn't exist, an error is thrown
-    Then graql match; throws exception
+    Then typeql match; throws exception
       """
       match ($x, $y) isa $type; $type type jakas-relacja;
       """
@@ -767,7 +767,7 @@ Feature: Graql Match Query
 
 
   Scenario: when matching a non-existent type label to a variable from a generic 'isa' query, an error is thrown
-    Then graql match; throws exception
+    Then typeql match; throws exception
       """
       match $x isa $type; $type type polok;
       """
@@ -777,16 +777,16 @@ Feature: Graql Match Query
 
   Scenario: when one entity exists, and we match two variables both of that entity type, the entity is returned
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert $x isa person, has ref 0;
       """
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
         $x isa person;
@@ -798,7 +798,7 @@ Feature: Graql Match Query
 
 
   Scenario: an error is thrown when matching that a variable has a specific type, when that type is in fact a role type
-    Then graql match; throws exception
+    Then typeql match; throws exception
       """
       match $x isa friendship:friend;
       """
@@ -807,7 +807,7 @@ Feature: Graql Match Query
   # TODO we can't query for rule anymore
   @ignore
   Scenario: an error is thrown when matching that a variable has a specific type, when that type is in fact a rule
-    Given graql define
+    Given typeql define
       """
       define
       rule metre-rule:
@@ -820,7 +820,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    Then graql match; throws exception
+    Then typeql match; throws exception
       """
       match $x isa metre-rule;
       """
@@ -834,9 +834,9 @@ Feature: Graql Match Query
 
   Scenario: a relation is matchable from role players without specifying relation type
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has ref 0;
@@ -847,14 +847,14 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    Then get answers of graql match
+    Then get answers of typeql match
       """
       match $x isa person; $r (employee: $x) isa relation;
       """
     Then uniquely identify answer concepts
       | x         | r         |
       | key:ref:0 | key:ref:2 |
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $y isa company; $r (employer: $y) isa relation;
       """
@@ -865,9 +865,9 @@ Feature: Graql Match Query
 
   Scenario: relations are matchable from roleplayers without specifying any roles
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has ref 0;
@@ -878,7 +878,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person; $r ($x) isa relation;
       """
@@ -889,9 +889,9 @@ Feature: Graql Match Query
 
   Scenario: all combinations of players in a relation can be retrieved
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    When graql insert
+    When typeql insert
       """
       insert $p isa person, has ref 0;
       $c isa company, has ref 1;
@@ -901,7 +901,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    Then get answers of graql match
+    Then get answers of typeql match
       """
       match $r ($x, $y) isa employment;
       """
@@ -916,7 +916,7 @@ Feature: Graql Match Query
 
 
   Scenario: repeated role players are retrieved singly when queried doubly
-    Given graql define
+    Given typeql define
       """
       define
       some-entity sub entity, plays symmetric:player, owns ref @key;
@@ -925,16 +925,16 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert $x isa some-entity, has ref 0; (player: $x, player: $x) isa symmetric, has ref 1;
       """
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $r (player: $x, player: $x) isa relation;
       """
@@ -944,7 +944,7 @@ Feature: Graql Match Query
 
 
   Scenario: repeated role players are retrieved singly when queried singly
-    Given graql define
+    Given typeql define
       """
       define
       some-entity sub entity, plays symmetric:player, owns ref @key;
@@ -953,16 +953,16 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert $x isa some-entity, has ref 0; (player: $x, player: $x) isa symmetric, has ref 1;
       """
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $r (player: $x) isa relation;
       """
@@ -973,9 +973,9 @@ Feature: Graql Match Query
 
   Scenario: a mixture of variable and explicit roles can retrieve relations
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa company, has ref 0;
@@ -984,7 +984,7 @@ Feature: Graql Match Query
       """
     Given transaction commits
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match (employer: $e, $role: $x) isa employment;
       """
@@ -996,9 +996,9 @@ Feature: Graql Match Query
 
   Scenario: relations between distinct concepts are not retrieved when matching concepts that relate to themselves
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has ref 1;
@@ -1008,7 +1008,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match (friend: $x, friend: $x) isa friendship;
       """
@@ -1016,7 +1016,7 @@ Feature: Graql Match Query
 
 
   Scenario: matching a chain of relations only returns answers if there is a chain of the required length
-    Given graql define
+    Given typeql define
       """
       define
 
@@ -1030,9 +1030,9 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x1 isa person, has name "Soroush", has ref 0;
@@ -1048,7 +1048,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
         (sender: $a, recipient: $b) isa gift-delivery;
@@ -1057,7 +1057,7 @@ Feature: Graql Match Query
     Then uniquely identify answer concepts
       | a         | b         | c         |
       | key:ref:0 | key:ref:1 | key:ref:2 |
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
         (sender: $a, recipient: $b) isa gift-delivery;
@@ -1068,7 +1068,7 @@ Feature: Graql Match Query
 
 
   Scenario: when multiple relation instances exist with the same roleplayer, matching that player returns just 1 answer
-    Given graql define
+    Given typeql define
       """
       define
       residency sub relation,
@@ -1079,9 +1079,9 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has ref 0;
@@ -1092,7 +1092,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    Given get answers of graql match
+    Given get answers of typeql match
       """
       match $r isa relation;
       """
@@ -1101,14 +1101,14 @@ Feature: Graql Match Query
       | key:ref:1 |
       | key:ref:2 |
       | key:ref:3 |
-    When get answers of graql match
+    When get answers of typeql match
       """
       match ($x) isa relation;
       """
     Then uniquely identify answer concepts
       | x         |
       | key:ref:0 |
-    When get answers of graql match
+    When get answers of typeql match
       """
       match ($x);
       """
@@ -1117,7 +1117,7 @@ Feature: Graql Match Query
       | key:ref:0 |
 
   Scenario: an error is thrown when matching an entity type as if it were a role type
-    Then graql match; throws exception
+    Then typeql match; throws exception
       """
       match (person: $x) isa relation;
       """
@@ -1125,7 +1125,7 @@ Feature: Graql Match Query
 
 
   Scenario: an error is thrown when matching an entity type as if it were a relation type
-    Then graql match; throws exception
+    Then typeql match; throws exception
       """
       match ($x) isa person;
       """
@@ -1133,7 +1133,7 @@ Feature: Graql Match Query
 
 
   Scenario: an error is thrown when matching a non-existent type label as if it were a relation type
-    Then graql match; throws exception
+    Then typeql match; throws exception
       """
       match ($x) isa bottle-of-rum;
       """
@@ -1141,7 +1141,7 @@ Feature: Graql Match Query
 
 
   Scenario: when matching a role type that doesn't exist, an error is thrown
-    Then graql match; throws exception
+    Then typeql match; throws exception
       """
       match (rolein-rolein-rolein: $rolein) isa relation;
       """
@@ -1149,7 +1149,7 @@ Feature: Graql Match Query
 
 
   Scenario: when matching a role in a relation type that doesn't have that role, an error is thrown
-    Then graql match; throws exception
+    Then typeql match; throws exception
       """
       match (friend: $x) isa employment;
       """
@@ -1157,7 +1157,7 @@ Feature: Graql Match Query
 
 
   Scenario: when matching a roleplayer in a relation that can't actually play that role, an error is thrown
-    When graql match; throws exception
+    When typeql match; throws exception
       """
       match
       $x isa company;
@@ -1167,7 +1167,7 @@ Feature: Graql Match Query
 
 
   Scenario: Relations can be queried with pairings of relation and role types that are not directly related to each other
-    Given graql define
+    Given typeql define
       """
       define
       person plays marriage:spouse, plays hetero-marriage:husband, plays hetero-marriage:wife;
@@ -1178,9 +1178,9 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $a isa person, has ref 1;
@@ -1191,63 +1191,63 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $m (wife: $x, husband: $y) isa hetero-marriage;
       """
     Then answer size is: 1
-    Then graql match; throws exception
+    Then typeql match; throws exception
       """
       match $m (wife: $x, husband: $y) isa civil-marriage;
       """
     Then session transaction is open: false
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $m (wife: $x, husband: $y) isa marriage;
       """
     Then answer size is: 1
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $m (wife: $x, husband: $y) isa relation;
       """
     Then answer size is: 1
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $m (spouse: $x, spouse: $y) isa hetero-marriage;
       """
     Then answer size is: 2
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $m (spouse: $x, spouse: $y) isa civil-marriage;
       """
     Then answer size is: 2
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $m (spouse: $x, spouse: $y) isa marriage;
       """
     Then answer size is: 4
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $m (spouse: $x, spouse: $y) isa relation;
       """
     Then answer size is: 4
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $m (role: $x, role: $y) isa hetero-marriage;
       """
     Then answer size is: 2
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $m (role: $x, role: $y) isa civil-marriage;
       """
     Then answer size is: 2
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $m (role: $x, role: $y) isa marriage;
       """
     Then answer size is: 4
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $m (role: $x, role: $y) isa relation;
       """
@@ -1255,7 +1255,7 @@ Feature: Graql Match Query
 
 
   Scenario: When some relations do not satisfy the query, the correct ones are still found
-    Given graql define
+    Given typeql define
       """
       define
       car sub entity, plays ownership:owned, owns ref @key;
@@ -1266,9 +1266,9 @@ Feature: Graql Match Query
       """
     Given transaction commits
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       (owned: $c1, owner: $company) isa ownership, has is-insured true;
@@ -1276,7 +1276,7 @@ Feature: Graql Match Query
       """
     Given transaction commits
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       (owned: $c2, owner: $person) isa ownership, has is-insured true;
@@ -1284,7 +1284,7 @@ Feature: Graql Match Query
       """
     Given transaction commits
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
     """
     match $r (owner: $x) isa ownership, has is-insured true; $x isa person;
     """
@@ -1295,23 +1295,23 @@ Feature: Graql Match Query
   ##############
 
   Scenario Outline: '<type>' attributes can be matched by value
-    Given graql define
+    Given typeql define
       """
       define <attr> sub attribute, value <type>, owns ref @key;
       """
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert $n <value> isa <attr>, has ref 0;
       """
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $a <value>;
       """
@@ -1329,14 +1329,14 @@ Feature: Graql Match Query
 
 
   Scenario Outline: when matching a '<type>' attribute by a value that doesn't exist, an empty answer is returned
-    Given graql define
+    Given typeql define
       """
       define <attr> sub attribute, value <type>, owns ref @key;
       """
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $a <value>;
       """
@@ -1353,9 +1353,9 @@ Feature: Graql Match Query
 
   Scenario: 'contains' matches strings that contain the specified substring
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x "Seven Databases in Seven Weeks" isa name;
@@ -1365,7 +1365,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x contains "Fun";
       """
@@ -1377,9 +1377,9 @@ Feature: Graql Match Query
 
   Scenario: 'contains' performs a case-insensitive match
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x "The Phantom of the Opera" isa name;
@@ -1389,7 +1389,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x contains "Bean";
       """
@@ -1401,9 +1401,9 @@ Feature: Graql Match Query
 
   Scenario: 'like' matches strings that match the specified regex
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x "ABC123" isa name;
@@ -1413,7 +1413,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x like "^[0-9]+$";
       """
@@ -1426,12 +1426,12 @@ Feature: Graql Match Query
   # TODO we can't test like this because the IID is not a valid encoded IID -- need to rethink this test
   @ignore
   Scenario: when querying for a non-existent attribute type iid, an empty result is returned
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x has name $y; $x iid 0x83cb2;
       """
     Then answer size is: 0
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x has name $y; $y iid 0x83cb2;
       """
@@ -1442,9 +1442,9 @@ Feature: Graql Match Query
   #       containing a new set of scenarios that test: traversal structure, plan and procedure
   Scenario: Traversal planner can handle "loops" in the traversal structure
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name 'alice', has ref 0;
@@ -1453,7 +1453,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
       $x isa person, has $n;
@@ -1466,20 +1466,20 @@ Feature: Graql Match Query
 
   Scenario: 'has' can be used to match things that own any instance of the specified attribute
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Leila", has ref 0;
       $y isa person, has ref 1;
-      $c isa company, has name "Grakn", has ref 2;
+      $c isa company, has name "TypeDB", has ref 2;
       $d isa company, has ref 3;
       """
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x has name $y; get $x;
       """
@@ -1490,7 +1490,7 @@ Feature: Graql Match Query
 
 
   Scenario: using the 'attribute' meta label, 'has' can match things that own any attribute with a specified value
-    Given graql define
+    Given typeql define
       """
       define
       shoe-size sub attribute, value long;
@@ -1499,9 +1499,9 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has age 9, has ref 0;
@@ -1511,7 +1511,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x has attribute 9;
       """
@@ -1522,7 +1522,7 @@ Feature: Graql Match Query
 
 
   Scenario: when an attribute instance is fully specified, 'has' matches its owners
-    Given graql define
+    Given typeql define
       """
       define
       friendship owns age;
@@ -1532,9 +1532,9 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Zoe", has age 21, has graduation-date 2020-06-01, has ref 0;
@@ -1547,7 +1547,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x has age 21;
       """
@@ -1559,7 +1559,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'has' matches an attribute's owner even if it owns more attributes of the same type
-    Given graql define
+    Given typeql define
       """
       define
       lucky-number sub attribute, value long;
@@ -1568,9 +1568,9 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has lucky-number 10, has lucky-number 20, has lucky-number 30, has ref 0;
@@ -1578,7 +1578,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x has lucky-number 20;
       """
@@ -1588,7 +1588,7 @@ Feature: Graql Match Query
 
 
   Scenario: 'has' can match instances that have themselves
-    Given graql define
+    Given typeql define
       """
       define
       unit sub attribute, value string, owns unit, owns ref;
@@ -1596,9 +1596,9 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x "meter" isa unit, has $x, has ref 0;
@@ -1606,7 +1606,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x has $x;
       """
@@ -1616,7 +1616,7 @@ Feature: Graql Match Query
 
 
   Scenario: an error is thrown when matching by attribute ownership, when the owned thing is actually an entity
-    Then graql match; throws exception
+    Then typeql match; throws exception
       """
       match $x has person "Luke";
       """
@@ -1624,7 +1624,7 @@ Feature: Graql Match Query
 
 
   Scenario: exception is thrown when matching by an attribute ownership, if the owner can't actually own it
-    Then graql match; throws exception
+    Then typeql match; throws exception
       """
       match $x isa company, has age $n;
       """
@@ -1632,7 +1632,7 @@ Feature: Graql Match Query
 
 
   Scenario: an error is thrown when matching by attribute ownership, when the owned type label doesn't exist
-    Then graql match; throws exception
+    Then typeql match; throws exception
       """
       match $x has bananananananana "rama";
       """
@@ -1645,7 +1645,7 @@ Feature: Graql Match Query
   ##############################
 
   Scenario: when things own attributes of different types but the same value, they match by equality
-    Given graql define
+    Given typeql define
       """
       define
       start-date sub attribute, value datetime;
@@ -1656,9 +1656,9 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "James", has ref 0, has graduation-date 2009-07-16;
@@ -1667,7 +1667,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    Then get answers of graql match
+    Then get answers of typeql match
       """
       match
         $x isa person, has graduation-date $date;
@@ -1681,9 +1681,9 @@ Feature: Graql Match Query
 
   Scenario: 'has $attr = $x' matches owners of any instance '$y' of '$attr' where '$y' and '$x' are equal by value
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Susie", has age 16, has ref 0;
@@ -1693,7 +1693,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x has age = 16;
       """
@@ -1704,9 +1704,9 @@ Feature: Graql Match Query
 
   Scenario: 'has $attr > $x' matches owners of any instance '$y' of '$attr' where '$y > $x'
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Susie", has age 16, has ref 0;
@@ -1716,7 +1716,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x has age > 18;
       """
@@ -1727,9 +1727,9 @@ Feature: Graql Match Query
 
   Scenario: 'has $attr < $x' matches owners of any instance '$y' of '$attr' where '$y < $x'
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Susie", has age 16, has ref 0;
@@ -1739,7 +1739,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x has age < 18;
       """
@@ -1750,9 +1750,9 @@ Feature: Graql Match Query
 
   Scenario: 'has $attr != $x' matches owners of any instance '$y' of '$attr' where '$y != $x'
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Susie", has age 16, has ref 0;
@@ -1762,7 +1762,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x has age != 18;
       """
@@ -1773,7 +1773,7 @@ Feature: Graql Match Query
 
 
   Scenario: value comparisons can be performed between a 'double' and a 'long'
-    Given graql define
+    Given typeql define
       """
       define
       house-number sub attribute, value long;
@@ -1782,9 +1782,9 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x 1 isa house-number;
@@ -1793,42 +1793,42 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
         $x isa house-number;
         $x = 1.0;
       """
     Then answer size is: 1
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
         $x isa length;
         $x = 2;
       """
     Then answer size is: 1
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
         $x isa house-number;
         $x 1.0;
       """
     Then answer size is: 1
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
         $x isa length;
         $x 2;
       """
     Then answer size is: 1
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
         $x isa attribute;
         $x >= 1;
       """
     Then answer size is: 2
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
         $x isa attribute;
@@ -1838,7 +1838,7 @@ Feature: Graql Match Query
 
 
   Scenario: when a thing owns multiple attributes of the same type, a value comparison matches if any value matches
-    Given graql define
+    Given typeql define
       """
       define
       lucky-number sub attribute, value long;
@@ -1847,9 +1847,9 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has lucky-number 10, has lucky-number 20, has lucky-number 30, has ref 0;
@@ -1857,7 +1857,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x has lucky-number > 25;
       """
@@ -1868,9 +1868,9 @@ Feature: Graql Match Query
 
   Scenario: an attribute variable used in both '=' and '>=' predicates is correctly resolved
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Susie", has age 16, has ref 0;
@@ -1880,7 +1880,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
         $x has age = $z;
@@ -1895,7 +1895,7 @@ Feature: Graql Match Query
 
 
   Scenario: when the answers of a value comparison include both a 'double' and a 'long', both answers are returned
-    Given graql define
+    Given typeql define
       """
       define
       length sub attribute, value double;
@@ -1903,9 +1903,9 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $a 24 isa age;
@@ -1916,7 +1916,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
         $x isa attribute;
@@ -1930,16 +1930,16 @@ Feature: Graql Match Query
 
   Scenario: when one entity exists, and we match two variables with concept inequality, an empty answer is returned
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert $x isa person, has ref 0;
       """
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
         $x isa person;
@@ -1949,7 +1949,7 @@ Feature: Graql Match Query
     Then answer size is: 0
 
   Scenario: concept comparison of unbound variables throws an error
-    Then graql match; throws exception
+    Then typeql match; throws exception
       """
       match not { $x is $y; };
       """
@@ -1961,9 +1961,9 @@ Feature: Graql Match Query
 
   Scenario: disjunctions return the union of composing query statements
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Jeff", has ref 0;
@@ -1972,7 +1972,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa $t; { $t type person; } or {$t type company;}; get $x;
       """
@@ -1980,7 +1980,7 @@ Feature: Graql Match Query
       | x         |
       | key:ref:0 |
       | key:ref:1 |
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa entity; {$x has name "Jeff";} or {$x has name "Amazon";};
       """
@@ -1992,9 +1992,9 @@ Feature: Graql Match Query
 
   Scenario: negations can be applied to filtered variables
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Jeff", has ref 0;
@@ -2003,7 +2003,7 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person, has name $a; not { $a = "Jeff"; }; get $x;
       """
@@ -2017,9 +2017,9 @@ Feature: Graql Match Query
 
   Scenario: all instances and their types can be retrieved
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Bertie", has ref 0;
@@ -2029,22 +2029,22 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    Given get answers of graql match
+    Given get answers of typeql match
       """
       match $x isa entity;
       """
     Given answer size is: 2
-    Given get answers of graql match
+    Given get answers of typeql match
       """
       match $r isa relation;
       """
     Given answer size is: 1
-    Given get answers of graql match
+    Given get answers of typeql match
       """
       match $x isa attribute;
       """
     Given answer size is: 5
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa $type;
       """
@@ -2056,9 +2056,9 @@ Feature: Graql Match Query
 
   Scenario: all relations and their types can be retrieved
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Bertie", has ref 0;
@@ -2068,18 +2068,18 @@ Feature: Graql Match Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    Given get answers of graql match
+    Given get answers of typeql match
       """
       match $r isa relation;
       """
     Given answer size is: 1
-    Given get answers of graql match
+    Given get answers of typeql match
       """
       match ($x, $y) isa relation;
       """
     # 2 permutations of the roleplayers
     Given answer size is: 2
-    When get answers of graql match
+    When get answers of typeql match
       """
       match ($x, $y) isa $type;
       """
@@ -2094,14 +2094,14 @@ Feature: Graql Match Query
   # Negation resolution is handled by Reasoner, but query validation is handled by the language.
   Scenario: when the entire match clause is a negation, an error is thrown
   At least one negated pattern variable must be bound outside the negation block, so this query is invalid.
-    Then graql match; throws exception
+    Then typeql match; throws exception
       """
       match not { $x has attribute "value"; };
       """
     Then session transaction is open: false
 
   Scenario: when matching a negation whose pattern variables are all unbound outside it, an error is thrown
-    Then graql match; throws exception
+    Then typeql match; throws exception
       """
       match
         $r isa entity;
@@ -2113,7 +2113,7 @@ Feature: Graql Match Query
     Then session transaction is open: false
 
   Scenario: the first variable in a negation can be unbound, as long as it is connected to a bound variable
-    Then get answers of graql match
+    Then get answers of typeql match
       """
       match
         $r isa attribute;
@@ -2124,7 +2124,7 @@ Feature: Graql Match Query
 
   # TODO: We should verify the answers
   Scenario: negations can contain disjunctions
-    Then get answers of graql match
+    Then get answers of typeql match
       """
       match
         $x isa entity;
@@ -2134,7 +2134,7 @@ Feature: Graql Match Query
       """
 
   Scenario: when negating a negation redundantly, an error is thrown
-    Then graql match; throws exception
+    Then typeql match; throws exception
       """
       match
         $x isa person, has name "Tim";

@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-# TODO: re-enable all steps in file when Grakn is faster
+# TODO: re-enable all steps in file when TypeDB is faster
 #noinspection CucumberUndefinedStep
 Feature: Variable Role Resolution
 
@@ -28,7 +28,7 @@ Feature: Variable Role Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -117,7 +117,7 @@ Feature: Variable Role Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
 
@@ -153,7 +153,7 @@ Feature: Variable Role Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Given for graql query
+    Given for typeql query
       """
       match (role1: $a, role2: $b) isa binary-base;
       """
@@ -161,7 +161,7 @@ Feature: Variable Role Resolution
     Given answer size in reasoned database is: 9
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match (role1: $a, $r1: $b) isa binary-base;
       """
@@ -175,7 +175,7 @@ Feature: Variable Role Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Given for graql query
+    Given for typeql query
       """
       match (role1: $a, $r1: $b) isa binary-base;
       """
@@ -184,7 +184,7 @@ Feature: Variable Role Resolution
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
     # This query should be equivalent to the one above
-    Then for graql query
+    Then for typeql query
       """
       match
         ($r1: $a, $r2: $b) isa binary-base;
@@ -200,7 +200,7 @@ Feature: Variable Role Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Given for graql query
+    Given for typeql query
       """
       match (role1: $a, role2: $b) isa binary-base;
       """
@@ -208,7 +208,7 @@ Feature: Variable Role Resolution
     Given answer size in reasoned database is: 9
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match (role: $a, $r1: $b) isa binary-base;
       """
@@ -222,7 +222,7 @@ Feature: Variable Role Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Given for graql query
+    Given for typeql query
       """
       match (role: $a, $r1: $b) isa binary-base;
       """
@@ -231,7 +231,7 @@ Feature: Variable Role Resolution
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
     # This query should be equivalent to the one above
-    Then for graql query
+    Then for typeql query
       """
       match
         ($r1: $a, $r2: $b) isa binary-base;
@@ -247,7 +247,7 @@ Feature: Variable Role Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Given for graql query
+    Given for typeql query
       """
       match (role: $a, $r1: $b) isa binary-base;
       """
@@ -256,7 +256,7 @@ Feature: Variable Role Resolution
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
     # This query should be equivalent to the one above
-    Then for graql query
+    Then for typeql query
       """
       match
         ($r1: $a, $r2: $b) isa binary-base;
@@ -272,7 +272,7 @@ Feature: Variable Role Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         ($r1: $a, $r2: $b) isa binary-base;
@@ -285,7 +285,7 @@ Feature: Variable Role Resolution
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
     # This query is equivalent to the one above
-    Then for graql query
+    Then for typeql query
       """
       match
         (role: $a, $r2: $b) isa binary-base;
@@ -300,7 +300,7 @@ Feature: Variable Role Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Given for graql query
+    Given for typeql query
       """
       match (role1: $a, role2: $b) isa binary-base;
       """
@@ -308,7 +308,7 @@ Feature: Variable Role Resolution
     Given answer size in reasoned database is: 9
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match ($r1: $a, $r2: $b) isa binary-base;
       """
@@ -375,7 +375,7 @@ Feature: Variable Role Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         (ternary-role1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
@@ -386,7 +386,7 @@ Feature: Variable Role Resolution
     Then answer size in reasoned database is: 63
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match (ternary-role1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
       """
@@ -395,7 +395,7 @@ Feature: Variable Role Resolution
     Then answer size in reasoned database is: 189
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match ($r1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
       """
@@ -422,7 +422,7 @@ Feature: Variable Role Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
@@ -433,7 +433,7 @@ Feature: Variable Role Resolution
     Then answer size in reasoned database is: 918
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
       """
@@ -442,7 +442,7 @@ Feature: Variable Role Resolution
     Then answer size in reasoned database is: 2754
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match ($r1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
       """
@@ -468,7 +468,7 @@ Feature: Variable Role Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
@@ -479,7 +479,7 @@ Feature: Variable Role Resolution
     Then answer size in reasoned database is: 272
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
       """
@@ -488,7 +488,7 @@ Feature: Variable Role Resolution
     Then answer size in reasoned database is: 544
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match ($r1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
       """

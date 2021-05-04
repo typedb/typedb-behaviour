@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -27,7 +27,7 @@ Feature: Attribute Attachment Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -62,7 +62,7 @@ Feature: Attribute Attachment Resolution
 
 
   Scenario: when a rule copies an attribute from one entity to another, the existing attribute instance is reused
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       rule transfer-string-attribute-to-other-people: when {
@@ -78,7 +78,7 @@ Feature: Attribute Attachment Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $geX isa person, has string-attribute "banana";
@@ -89,7 +89,7 @@ Feature: Attribute Attachment Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $x isa person, has string-attribute $y;
       """
@@ -97,7 +97,7 @@ Feature: Attribute Attachment Resolution
     Then answer size in reasoned database is: 2
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $x isa string-attribute;
       """
@@ -108,7 +108,7 @@ Feature: Attribute Attachment Resolution
 
 
   Scenario: when the same attribute is inferred on an entity and relation, both owners are correctly retrieved
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       rule transfer-string-attribute-to-other-people: when {
@@ -131,7 +131,7 @@ Feature: Attribute Attachment Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $geX isa person, has string-attribute "banana";
@@ -143,7 +143,7 @@ Feature: Attribute Attachment Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $x has string-attribute $y;
       """
@@ -154,7 +154,7 @@ Feature: Attribute Attachment Resolution
 
 
   Scenario: a rule can infer an attribute value that did not previously exist in the graph
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       rule tesco-sells-all-soft-drinks: when {
@@ -177,7 +177,7 @@ Feature: Attribute Attachment Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $aeX isa soft-drink;
@@ -189,7 +189,7 @@ Feature: Attribute Attachment Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $x has retailer 'Ocado';
       """
@@ -201,7 +201,7 @@ Feature: Attribute Attachment Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $x has retailer $r;
       """
@@ -209,7 +209,7 @@ Feature: Attribute Attachment Resolution
     Then answer size in reasoned database is: 4
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $x has retailer 'Tesco';
       """
@@ -219,7 +219,7 @@ Feature: Attribute Attachment Resolution
 
 
   Scenario: a rule can make a thing own an attribute that had no prior owners
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       rule if-ocado-exists-it-sells-all-soft-drinks: when {
@@ -236,7 +236,7 @@ Feature: Attribute Attachment Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $aeX isa soft-drink;
@@ -248,7 +248,7 @@ Feature: Attribute Attachment Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $x isa soft-drink, has retailer 'Ocado';
       """
@@ -257,7 +257,7 @@ Feature: Attribute Attachment Resolution
 
 
   Scenario: Querying for anonymous attributes with predicates finds the correct answers
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       rule people-have-a-specific-age: when {
@@ -272,7 +272,7 @@ Feature: Attribute Attachment Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $geY isa person;
@@ -282,7 +282,7 @@ Feature: Attribute Attachment Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $x has age > 20;
       """
@@ -290,7 +290,7 @@ Feature: Attribute Attachment Resolution
     Then answer size in reasoned database is: 0
     Given for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $x has age > 5;
       """

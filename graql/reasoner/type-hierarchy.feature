@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -30,7 +30,7 @@ Feature: Type Hierarchy Resolution
 
 
   Scenario: subtypes trigger rules based on their parents; parent types don't trigger rules based on their children
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -67,7 +67,7 @@ Feature: Type Hierarchy Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa child, has name "a";
@@ -83,7 +83,7 @@ Feature: Type Hierarchy Resolution
       """
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa person;
@@ -95,7 +95,7 @@ Feature: Type Hierarchy Resolution
     Then answer size in reasoned database is: 2
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa person;
@@ -107,7 +107,7 @@ Feature: Type Hierarchy Resolution
     Then answer size in reasoned database is: 2
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa person;
@@ -119,7 +119,7 @@ Feature: Type Hierarchy Resolution
     Then answer size in reasoned database is: 1
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa person;
@@ -131,7 +131,7 @@ Feature: Type Hierarchy Resolution
     Then answer size in reasoned database is: 1
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa child;
@@ -143,7 +143,7 @@ Feature: Type Hierarchy Resolution
     Then answer size in reasoned database is: 2
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa child;
@@ -157,7 +157,7 @@ Feature: Type Hierarchy Resolution
 
 
   Scenario: when matching different roles to those that are actually inferred, no answers are returned
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -187,7 +187,7 @@ Feature: Type Hierarchy Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa person;
@@ -198,7 +198,7 @@ Feature: Type Hierarchy Resolution
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
     # Matching a sibling of the actual role
-    Then for graql query
+    Then for typeql query
       """
       match (child: $x, father: $y) isa large-family;
       """
@@ -206,7 +206,7 @@ Feature: Type Hierarchy Resolution
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
     # Matching two siblings when only one is present
-    Then for graql query
+    Then for typeql query
       """
       match (mother: $x, father: $y) isa large-family;
       """
@@ -215,7 +215,7 @@ Feature: Type Hierarchy Resolution
 
 
   Scenario: when a sub-relation is inferred, it can be retrieved by matching its super-relation and sub-roles
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -251,7 +251,7 @@ Feature: Type Hierarchy Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa person;
@@ -262,7 +262,7 @@ Feature: Type Hierarchy Resolution
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
     # sub-roles, super-relation
-    Then for graql query
+    Then for typeql query
       """
       match (scifi-writer:$x, scifi-actor:$y) isa film-production;
       """
@@ -272,7 +272,7 @@ Feature: Type Hierarchy Resolution
 
 
   Scenario: when a sub-relation is inferred, it can be retrieved by matching its sub-relation and super-roles
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -308,7 +308,7 @@ Feature: Type Hierarchy Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa person;
@@ -319,7 +319,7 @@ Feature: Type Hierarchy Resolution
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
     # super-roles, sub-relation
-    Then for graql query
+    Then for typeql query
       """
       match (writer:$x, actor:$y) isa scifi-production;
       """
@@ -329,7 +329,7 @@ Feature: Type Hierarchy Resolution
 
 
   Scenario: when a sub-relation is inferred, it can be retrieved by matching its super-relation and super-roles
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -365,7 +365,7 @@ Feature: Type Hierarchy Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa person;
@@ -376,7 +376,7 @@ Feature: Type Hierarchy Resolution
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
     # super-roles, super-relation
-    Then for graql query
+    Then for typeql query
       """
       match (writer:$x, actor:$y) isa film-production;
       """
@@ -386,7 +386,7 @@ Feature: Type Hierarchy Resolution
 
 
   Scenario: when a rule is recursive, its inferences respect type hierarchies
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -431,7 +431,7 @@ Feature: Type Hierarchy Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa child, has name "a";
@@ -448,7 +448,7 @@ Feature: Type Hierarchy Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa person;
@@ -460,7 +460,7 @@ Feature: Type Hierarchy Resolution
     Then answer size in reasoned database is: 2
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa person;
@@ -472,7 +472,7 @@ Feature: Type Hierarchy Resolution
     Then answer size in reasoned database is: 2
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa person;
@@ -484,7 +484,7 @@ Feature: Type Hierarchy Resolution
     Then answer size in reasoned database is: 1
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa person;
@@ -496,7 +496,7 @@ Feature: Type Hierarchy Resolution
     Then answer size in reasoned database is: 1
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa child;
@@ -508,7 +508,7 @@ Feature: Type Hierarchy Resolution
     Then answer size in reasoned database is: 2
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa child;
@@ -522,7 +522,7 @@ Feature: Type Hierarchy Resolution
 
 
   Scenario: querying for a super-relation gives the same answer as querying for its inferred sub-relation
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -558,7 +558,7 @@ Feature: Type Hierarchy Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa person;
@@ -568,7 +568,7 @@ Feature: Type Hierarchy Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match (home-owner: $x, resident: $y) isa residence;
       """
@@ -576,7 +576,7 @@ Feature: Type Hierarchy Resolution
     Then answer size in reasoned database is: 1
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         (home-owner: $x, resident: $y) isa residence;

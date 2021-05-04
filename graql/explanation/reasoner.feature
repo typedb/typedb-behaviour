@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -16,7 +16,7 @@
 #
 
 #noinspection CucumberUndefinedStep
-Feature: Graql Reasoning Explanation
+Feature: TypeQL Reasoning Explanation
 
   Only scenarios where there is only one possible resolution path can be tested in this way
 
@@ -27,7 +27,7 @@ Feature: Graql Reasoning Explanation
 
   @ignore-client-java
   Scenario: a rule explanation is given when a rule is applied
-    Given graql define
+    Given typeql define
       """
       define
 
@@ -45,13 +45,13 @@ Feature: Graql Reasoning Explanation
       };
       """
 
-    When graql insert
+    When typeql insert
       """
       insert
       $x isa company, has company-id 0;
       """
 
-    Then get answers of graql match
+    Then get answers of typeql match
       """
       match $co has name $n;
       """
@@ -76,7 +76,7 @@ Feature: Graql Reasoning Explanation
 
   @ignore-client-java
   Scenario: nested rule explanations are given when multiple rules are applied
-    Given graql define
+    Given typeql define
       """
       define
 
@@ -107,13 +107,13 @@ Feature: Graql Reasoning Explanation
       };
       """
 
-    When graql insert
+    When typeql insert
       """
       insert
       $co isa company, has company-id 0;
       """
 
-    Then get answers of graql match
+    Then get answers of typeql match
       """
       match $co has is-liable $l;
       """
@@ -141,7 +141,7 @@ Feature: Graql Reasoning Explanation
 
   @ignore-client-java
   Scenario: a join explanation can be given directly and inside a rule explanation
-    Given graql define
+    Given typeql define
       """
       define
       name sub attribute,
@@ -169,7 +169,7 @@ Feature: Graql Reasoning Explanation
       };
       """
 
-    When graql insert
+    When typeql insert
       """
       insert
       $ar isa area, has name "King's Cross";
@@ -179,7 +179,7 @@ Feature: Graql Reasoning Explanation
       (superior: $cit, subordinate: $ar) isa location-hierarchy;
       """
 
-    Then get answers of graql match
+    Then get answers of typeql match
       """
       match
       $k isa area, has name $n;
@@ -219,7 +219,7 @@ Feature: Graql Reasoning Explanation
 
   @ignore-client-java
   Scenario: an answer with a more specific type can be retrieved from the cache with correct explanations
-    Given graql define
+    Given typeql define
       """
       define
 
@@ -255,7 +255,7 @@ Feature: Graql Reasoning Explanation
       };
       """
 
-    When graql insert
+    When typeql insert
       """
       insert
       $a isa woman, has person-id 0, has name "Alice";
@@ -274,7 +274,7 @@ Feature: Graql Reasoning Explanation
       | a-man-is-called-bob  | { $man isa man; };                                                                  | { $man has name "Bob"; };                         |
       | bobs-sister-is-alice | { $p isa man, has name $nb; $nb "Bob"; $p1 isa woman, has name $na; $na "Alice"; }; | { (sibling: $p, sibling: $p1) isa siblingship; }; |
 
-    Then get answers of graql match
+    Then get answers of typeql match
       """
       match ($w, $m) isa family-relation; $w isa woman;
       """
@@ -291,7 +291,7 @@ Feature: Graql Reasoning Explanation
       | 3 | -        | p1, na        | ALI, ALIN            | lookup               | { $p1 isa woman; $p1 has name $na; $na = "Alice"; $p1 iid <answer.p1.iid>; $na iid <answer.na.iid>; };                                                                                            |
       | 4 | -        | man           | BOB                  | lookup               | { $man isa man; $man iid <answer.man.iid>; };                                                                                                                                                      |
 
-    Then get answers of graql match
+    Then get answers of typeql match
       """
       match (sibling: $w, sibling: $m) isa siblingship; $w isa woman;
       """
@@ -313,7 +313,7 @@ Feature: Graql Reasoning Explanation
 
   A rule explanation is not be given since the rule was only used to infer facts that were later negated
 
-    Given graql define
+    Given typeql define
       """
       define
 
@@ -338,7 +338,7 @@ Feature: Graql Reasoning Explanation
       };
       """
 
-    When graql insert
+    When typeql insert
       """
       insert
       $c1 isa company, has company-id 0;
@@ -347,7 +347,7 @@ Feature: Graql Reasoning Explanation
       $c2 has name $n2; $n2 "another-company";
       """
 
-    Then get answers of graql match
+    Then get answers of typeql match
       """
       match $com isa company;
       {$com has name $n1; $n1 "the-company";} or {$com has name $n2; $n2 "another-company";};
@@ -375,7 +375,7 @@ Feature: Graql Reasoning Explanation
 
   @ignore-client-java
   Scenario: a rule containing a negation gives a rule explanation with a negation explanation inside
-    Given graql define
+    Given typeql define
       """
       define
 
@@ -403,7 +403,7 @@ Feature: Graql Reasoning Explanation
       };
       """
 
-    When graql insert
+    When typeql insert
       """
       insert
       $c1 isa company, has company-id 0;
@@ -412,7 +412,7 @@ Feature: Graql Reasoning Explanation
       $c2 has name $n2; $n2 "another-company";
       """
 
-    Then get answers of graql match
+    Then get answers of typeql match
       """
       match $com isa company, has is-liable $lia; $lia true;
       """
@@ -441,7 +441,7 @@ Feature: Graql Reasoning Explanation
 
   A rule explanation is not be given since the rule was only used to infer facts that were later negated
 
-    Given graql define
+    Given typeql define
       """
       define
 
@@ -467,7 +467,7 @@ Feature: Graql Reasoning Explanation
       };
       """
 
-    When graql insert
+    When typeql insert
       """
       insert
       $c1 isa company, has company-id 0;
@@ -476,7 +476,7 @@ Feature: Graql Reasoning Explanation
       $c2 has name $n2; $n2 "another-company";
       """
 
-    Then get answers of graql match
+    Then get answers of typeql match
       """
       match $com isa company; not { $com has is-liable $lia; $lia true; }; not { $com has name $n; $n "the-company"; };
       """

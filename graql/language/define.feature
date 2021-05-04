@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -16,16 +16,16 @@
 #
 
 #noinspection CucumberUndefinedStep
-Feature: Graql Define Query
+Feature: TypeQL Define Query
 
   Background: Open connection and create a simple extensible schema
     Given connection has been opened
     Given connection does not have any database
-    Given connection create database: grakn
-    Given connection open schema session for database: grakn
+    Given connection create database: typedb
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
 
-    Given graql define
+    Given typeql define
       """
       define
       person sub entity, plays employment:employee, plays income:earner, owns name, owns email @key;
@@ -47,14 +47,14 @@ Feature: Graql Define Query
   ################
 
   Scenario: new entity types can be defined
-    When graql define
+    When typeql define
       """
       define dog sub entity;
       """
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x type dog;
       """
@@ -64,14 +64,14 @@ Feature: Graql Define Query
 
 
   Scenario: a new entity type can be defined as a subtype, creating a new child of its parent type
-    When graql define
+    When typeql define
       """
       define child sub person;
       """
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x sub person;
       """
@@ -82,7 +82,7 @@ Feature: Graql Define Query
 
 
   Scenario: when defining that a type owns a non-existent thing, an error is thrown
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define book sub entity, owns pages;
       """
@@ -90,7 +90,7 @@ Feature: Graql Define Query
 
 
   Scenario: types cannot own entity types
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define house sub entity, owns person;
       """
@@ -98,7 +98,7 @@ Feature: Graql Define Query
 
 
   Scenario: types cannot own relation types
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define company sub entity, owns employment;
       """
@@ -106,7 +106,7 @@ Feature: Graql Define Query
 
 
   Scenario: when defining that a type plays a non-existent role, an error is thrown
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define house sub entity, plays constructed:something;
       """
@@ -114,7 +114,7 @@ Feature: Graql Define Query
 
 
   Scenario: types cannot play entity types
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define parrot sub entity, plays person;
       """
@@ -122,7 +122,7 @@ Feature: Graql Define Query
 
 
   Scenario: types can not own entity types as keys
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define passport sub entity, owns person @key;
       """
@@ -130,14 +130,14 @@ Feature: Graql Define Query
 
 
   Scenario: a newly defined entity subtype inherits playable roles from its parent type
-    Given graql define
+    Given typeql define
       """
       define child sub person;
       """
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x plays employment:employee;
       """
@@ -148,7 +148,7 @@ Feature: Graql Define Query
 
 
   Scenario: a newly defined entity subtype inherits playable roles from all of its supertypes
-    Given graql define
+    Given typeql define
       """
       define
       athlete sub person;
@@ -158,7 +158,7 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x plays employment:employee;
       """
@@ -171,14 +171,14 @@ Feature: Graql Define Query
 
 
   Scenario: a newly defined entity subtype inherits attribute ownerships from its parent type
-    Given graql define
+    Given typeql define
       """
       define child sub person;
       """
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x owns name;
       """
@@ -189,7 +189,7 @@ Feature: Graql Define Query
 
 
   Scenario: a newly defined entity subtype inherits attribute ownerships from all of its supertypes
-    Given graql define
+    Given typeql define
       """
       define
       athlete sub person;
@@ -199,7 +199,7 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x owns name;
       """
@@ -212,14 +212,14 @@ Feature: Graql Define Query
 
 
   Scenario: a newly defined entity subtype inherits keys from its parent type
-    Given graql define
+    Given typeql define
       """
       define child sub person;
       """
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x owns email @key;
       """
@@ -230,7 +230,7 @@ Feature: Graql Define Query
 
 
   Scenario: a newly defined entity subtype inherits keys from all of its supertypes
-    Given graql define
+    Given typeql define
       """
       define
       athlete sub person;
@@ -240,7 +240,7 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x owns email @key;
       """
@@ -253,7 +253,7 @@ Feature: Graql Define Query
 
 
   Scenario: defining a playable role is idempotent
-    Given graql define
+    Given typeql define
       """
       define
       house sub entity, plays home-ownership:home, plays home-ownership:home, plays home-ownership:home;
@@ -263,7 +263,7 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x plays home-ownership:home;
       """
@@ -273,7 +273,7 @@ Feature: Graql Define Query
 
 
   Scenario: defining an attribute ownership is idempotent
-    Given graql define
+    Given typeql define
       """
       define
       price sub attribute, value double;
@@ -282,7 +282,7 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x owns price;
       """
@@ -292,7 +292,7 @@ Feature: Graql Define Query
 
 
   Scenario: defining a key ownership is idempotent
-    Given graql define
+    Given typeql define
       """
       define
       address sub attribute, value string;
@@ -301,7 +301,7 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x owns address @key;
       """
@@ -311,7 +311,7 @@ Feature: Graql Define Query
 
 
   Scenario: defining a type without a 'sub' clause throws
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define flying-spaghetti-monster;
       """
@@ -319,7 +319,7 @@ Feature: Graql Define Query
 
 
   Scenario: a type cannot directly subtype 'thing' itself
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define column sub thing;
       """
@@ -327,7 +327,7 @@ Feature: Graql Define Query
 
 
   Scenario: an entity type can not have a value type defined
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define cream sub entity, value double;
       """
@@ -335,7 +335,7 @@ Feature: Graql Define Query
 
 
   Scenario: a type cannot have a 'when' block
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define gorilla sub entity, when { $x isa gorilla; };
       """
@@ -343,7 +343,7 @@ Feature: Graql Define Query
 
 
   Scenario: a type cannot have a 'then' block
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define godzilla sub entity, then { $x isa godzilla; };
       """
@@ -351,7 +351,7 @@ Feature: Graql Define Query
 
 
   Scenario: defining a thing with 'isa' is not possible in a 'define' query
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define $p isa person;
       """
@@ -359,7 +359,7 @@ Feature: Graql Define Query
 
 
   Scenario: adding an attribute instance to a thing is not possible in a 'define' query
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define $p has name "Loch Ness Monster";
       """
@@ -367,7 +367,7 @@ Feature: Graql Define Query
 
 
   Scenario: writing a variable in a 'define' is not allowed
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define $x sub entity;
       """
@@ -379,14 +379,14 @@ Feature: Graql Define Query
   ##################
 
   Scenario: new relation types can be defined
-    When graql define
+    When typeql define
       """
       define pet-ownership sub relation, relates pet-owner, relates owned-pet;
       """
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x type pet-ownership;
       """
@@ -396,14 +396,14 @@ Feature: Graql Define Query
 
 
   Scenario: a new relation type can be defined as a subtype, creating a new child of its parent type
-    When graql define
+    When typeql define
       """
       define fun-employment sub employment, relates employee-having-fun as employee;
       """
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x sub employment;
       """
@@ -414,7 +414,7 @@ Feature: Graql Define Query
 
 
   Scenario: defining a relation type throws on commit if it has no roleplayers and is not abstract
-    Then graql define
+    Then typeql define
       """
       define useless-relation sub relation;
       """
@@ -423,14 +423,14 @@ Feature: Graql Define Query
 
 
   Scenario: a newly defined relation subtype inherits roles from its supertype
-    Given graql define
+    Given typeql define
       """
       define part-time-employment sub employment;
       """
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x relates employee;
       """
@@ -444,7 +444,7 @@ Feature: Graql Define Query
 
 
   Scenario: a relation type's role can be overridden in a child relation type using 'as'
-    When graql define
+    When typeql define
       """
       define
       parenthood sub relation, relates parent, relates child;
@@ -453,7 +453,7 @@ Feature: Graql Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
         $x relates parent;
@@ -462,7 +462,7 @@ Feature: Graql Define Query
     Then uniquely identify answer concepts
       | x                 |
       | label:parenthood |
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
         $x relates father;
@@ -474,7 +474,7 @@ Feature: Graql Define Query
 
 
   Scenario: when a relation type's role is overridden, it creates a sub-role of the parent role type
-    When graql define
+    When typeql define
       """
       define
       parenthood sub relation, relates parent, relates child;
@@ -483,7 +483,7 @@ Feature: Graql Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
       $x sub parenthood:parent; $y sub parenthood:child; get $x, $y;
@@ -497,14 +497,14 @@ Feature: Graql Define Query
 
 
   Scenario: an overridden role is no longer associated with the relation type that overrides it
-    Given graql define
+    Given typeql define
       """
       define part-time-employment sub employment, relates part-timer as employee;
       """
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x relates employee;
       """
@@ -514,7 +514,7 @@ Feature: Graql Define Query
 
 
   Scenario: when overriding a role that doesn't exist on the parent relation, an error is thrown
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define
       close-friendship sub relation, relates close-friend as friend;
@@ -522,7 +522,7 @@ Feature: Graql Define Query
 
 
   Scenario: relation subtypes can have roles that their supertypes don't have
-    Given graql define
+    Given typeql define
       """
       define
       plane sub entity, plays pilot-employment:preferred-plane;
@@ -532,7 +532,7 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x relates preferred-plane;
       """
@@ -542,7 +542,7 @@ Feature: Graql Define Query
 
 
   Scenario: types should be able to define roles they play with an override
-    Then graql define
+    Then typeql define
       """
         define
         locates sub relation, relates located;
@@ -555,7 +555,7 @@ Feature: Graql Define Query
 
 
   Scenario: already shadowed types should not be overrideable
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
         define
         locates sub relation, relates located;
@@ -570,14 +570,14 @@ Feature: Graql Define Query
 
 
   Scenario: a newly defined relation subtype inherits playable roles from its parent type
-    Given graql define
+    Given typeql define
       """
       define contract-employment sub employment, relates contractor as employee;
       """
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x plays income:source;
       """
@@ -588,7 +588,7 @@ Feature: Graql Define Query
 
 
   Scenario: a newly defined relation subtype inherits playable roles from all of its supertypes
-    Given graql define
+    Given typeql define
       """
       define
       transport-employment sub employment, relates transport-worker as employee;
@@ -598,7 +598,7 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x plays income:source;
       """
@@ -611,14 +611,14 @@ Feature: Graql Define Query
 
 
   Scenario: a newly defined relation subtype inherits attribute ownerships from its parent type
-    Given graql define
+    Given typeql define
       """
       define contract-employment sub employment, relates contractor as employee;
       """
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x owns start-date;
       """
@@ -629,7 +629,7 @@ Feature: Graql Define Query
 
 
   Scenario: a newly defined relation subtype inherits attribute ownerships from all of its supertypes
-    Given graql define
+    Given typeql define
       """
       define
       transport-employment sub employment, relates transport-worker as employee;
@@ -639,7 +639,7 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x owns start-date;
       """
@@ -652,14 +652,14 @@ Feature: Graql Define Query
 
 
   Scenario: a newly defined relation subtype inherits keys from its parent type
-    Given graql define
+    Given typeql define
       """
       define contract-employment sub employment, relates contractor as employee;
       """
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x owns employment-reference-code @key;
       """
@@ -670,7 +670,7 @@ Feature: Graql Define Query
 
 
   Scenario: a newly defined relation subtype inherits keys from all of its supertypes
-    Given graql define
+    Given typeql define
       """
       define
       transport-employment sub employment, relates transport-worker as employee;
@@ -680,7 +680,7 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x owns employment-reference-code @key;
       """
@@ -693,14 +693,14 @@ Feature: Graql Define Query
 
 
   Scenario: a relation type can be defined with no roleplayers when it is marked as abstract
-    When graql define
+    When typeql define
       """
       define connection sub relation, abstract;
       """
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x type connection;
       """
@@ -710,7 +710,7 @@ Feature: Graql Define Query
 
 
   Scenario: when defining a relation type, duplicate 'relates' are idempotent
-    Given graql define
+    Given typeql define
       """
       define
       parenthood sub relation, relates parent, relates child, relates child, relates parent, relates child;
@@ -719,7 +719,7 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x relates parent; $x relates child;
       """
@@ -729,7 +729,7 @@ Feature: Graql Define Query
 
 
   Scenario: unrelated relations are allowed to have roles with the same name
-    When graql define
+    When typeql define
       """
       define
       ownership sub relation, relates owner;
@@ -738,7 +738,7 @@ Feature: Graql Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x relates owner;
       """
@@ -753,14 +753,14 @@ Feature: Graql Define Query
   ###################
 
   Scenario Outline: a '<value_type>' attribute type can be defined
-    Given graql define
+    Given typeql define
       """
       define <label> sub attribute, value <value_type>;
       """
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
         $x type <label>;
@@ -778,7 +778,7 @@ Feature: Graql Define Query
 
 
   Scenario: defining an attribute type throws if you don't specify a value type
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define colour sub attribute;
       """
@@ -786,7 +786,7 @@ Feature: Graql Define Query
 
 
   Scenario: defining an attribute type throws if the specified value type is not a recognised value type
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define colour sub attribute, value rgba;
       """
@@ -794,7 +794,7 @@ Feature: Graql Define Query
 
 
   Scenario: a new attribute type can be defined as a subtype of an abstract attribute type
-    When graql define
+    When typeql define
       """
       define
       code sub attribute, value string, abstract;
@@ -803,7 +803,7 @@ Feature: Graql Define Query
     Then transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x sub code;
       """
@@ -814,7 +814,7 @@ Feature: Graql Define Query
 
 
   Scenario: a newly defined attribute subtype inherits the value type of its parent
-    When graql define
+    When typeql define
       """
       define
       code sub attribute, value string, abstract;
@@ -823,7 +823,7 @@ Feature: Graql Define Query
     Then transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x type door-code, value string;
       """
@@ -833,7 +833,7 @@ Feature: Graql Define Query
 
 
   Scenario: defining an attribute subtype throws if it is given a different value type to what its parent has
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define code-name sub name, value long;
       """
@@ -843,14 +843,14 @@ Feature: Graql Define Query
   # TODO: re-enable when fixed (currently gives wrong answer)
   @ignore
   Scenario: a regex constraint can be defined on a 'string' attribute type
-    Given graql define
+    Given typeql define
       """
       define response sub attribute, value string, regex "^(yes|no|maybe)$";
       """
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x regex "^(yes|no|maybe)$";
       """
@@ -860,7 +860,7 @@ Feature: Graql Define Query
 
 
   Scenario: a regex constraint cannot be defined on an attribute type whose value type is anything other than 'string'
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define name-in-binary sub attribute, value long, regex "^(0|1)+$";
       """
@@ -868,7 +868,7 @@ Feature: Graql Define Query
 
 
   Scenario: a newly defined attribute subtype inherits playable roles from its parent type
-    Given graql define
+    Given typeql define
       """
       define
       car sub entity, plays car-sales-listing:listed-car;
@@ -879,7 +879,7 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x plays car-sales-listing:available-colour;
       """
@@ -890,7 +890,7 @@ Feature: Graql Define Query
 
 
   Scenario: a newly defined attribute subtype inherits playable roles from all of its supertypes
-    Given graql define
+    Given typeql define
       """
       define
       person plays phone-contact:person;
@@ -903,7 +903,7 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x plays phone-contact:number;
       """
@@ -916,7 +916,7 @@ Feature: Graql Define Query
 
 
   Scenario: a newly defined attribute subtype inherits attribute ownerships from its parent type
-    Given graql define
+    Given typeql define
       """
       define
       brightness sub attribute, value double;
@@ -926,7 +926,7 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x owns brightness;
       """
@@ -937,7 +937,7 @@ Feature: Graql Define Query
 
 
   Scenario: a newly defined attribute subtype inherits attribute ownerships from all of its supertypes
-    Given graql define
+    Given typeql define
       """
       define
       country-calling-code sub attribute, value string;
@@ -949,7 +949,7 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x owns country-calling-code;
       """
@@ -962,7 +962,7 @@ Feature: Graql Define Query
 
 
   Scenario: a newly defined attribute subtype inherits keys from its parent type
-    Given graql define
+    Given typeql define
       """
       define
       hex-value sub attribute, value string;
@@ -972,7 +972,7 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x owns hex-value @key;
       """
@@ -983,7 +983,7 @@ Feature: Graql Define Query
 
 
   Scenario: a newly defined attribute subtype inherits keys from all of its supertypes
-    Given graql define
+    Given typeql define
       """
       define
       hex-value sub attribute, value string;
@@ -995,7 +995,7 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x owns hex-value @key;
       """
@@ -1008,7 +1008,7 @@ Feature: Graql Define Query
 
 
   Scenario Outline: a type can own a '<value_type>' attribute type
-    When graql define
+    When typeql define
       """
       define
       <label> sub attribute, value <value_type>;
@@ -1017,7 +1017,7 @@ Feature: Graql Define Query
     Then transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x owns <label>;
       """
@@ -1045,14 +1045,14 @@ Feature: Graql Define Query
   ##################
 
   Scenario: an abstract entity type can be defined
-    When graql define
+    When typeql define
       """
       define animal sub entity, abstract;
       """
     Then transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x type animal; $x abstract;
       """
@@ -1062,7 +1062,7 @@ Feature: Graql Define Query
 
 
   Scenario: a concrete entity type can be defined as a subtype of an abstract entity type
-    When graql define
+    When typeql define
       """
       define
       animal sub entity, abstract;
@@ -1071,7 +1071,7 @@ Feature: Graql Define Query
     Then transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x sub animal;
       """
@@ -1082,7 +1082,7 @@ Feature: Graql Define Query
 
 
   Scenario: an abstract entity type can be defined as a subtype of another abstract entity type
-    When graql define
+    When typeql define
       """
       define
       animal sub entity, abstract;
@@ -1091,7 +1091,7 @@ Feature: Graql Define Query
     Then transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x sub animal; $x abstract;
       """
@@ -1102,33 +1102,33 @@ Feature: Graql Define Query
 
 
   Scenario: an abstract entity type can be defined as a subtype of a concrete entity type
-    When graql define
+    When typeql define
       """
       define
       exception sub entity;
-      grakn-exception sub exception, abstract;
+      typedb-exception sub exception, abstract;
       """
     Then transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x sub exception, abstract;
       """
     Then uniquely identify answer concepts
       | x                     |
-      | label:grakn-exception |
+      | label:typedb-exception |
 
 
   Scenario: an abstract relation type can be defined
-    When graql define
+    When typeql define
       """
       define membership sub relation, abstract, relates member;
       """
     Then transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x type membership; $x abstract;
       """
@@ -1138,7 +1138,7 @@ Feature: Graql Define Query
 
 
   Scenario: a concrete relation type can be defined as a subtype of an abstract relation type
-    When graql define
+    When typeql define
       """
       define
       membership sub relation, abstract, relates member;
@@ -1147,7 +1147,7 @@ Feature: Graql Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x sub membership;
       """
@@ -1158,7 +1158,7 @@ Feature: Graql Define Query
 
 
   Scenario: an abstract relation type can be defined as a subtype of another abstract relation type
-    When graql define
+    When typeql define
       """
       define
       requirement sub relation, abstract, relates prerequisite, relates outcome;
@@ -1167,7 +1167,7 @@ Feature: Graql Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x sub requirement; $x abstract;
       """
@@ -1178,7 +1178,7 @@ Feature: Graql Define Query
 
 
   Scenario: an abstract relation type can be defined as a subtype of a concrete relation type
-    When graql define
+    When typeql define
       """
       define
       requirement sub relation, relates prerequisite, relates outcome;
@@ -1187,7 +1187,7 @@ Feature: Graql Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x sub requirement; $x abstract;
       """
@@ -1197,14 +1197,14 @@ Feature: Graql Define Query
 
 
   Scenario: an abstract attribute type can be defined
-    When graql define
+    When typeql define
       """
       define number-of-limbs sub attribute, abstract, value long;
       """
     Then transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x type number-of-limbs; $x abstract;
       """
@@ -1214,7 +1214,7 @@ Feature: Graql Define Query
 
 
   Scenario: a concrete attribute type can be defined as a subtype of an abstract attribute type
-    When graql define
+    When typeql define
       """
       define
       number-of-limbs sub attribute, abstract, value long;
@@ -1223,7 +1223,7 @@ Feature: Graql Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x sub number-of-limbs;
       """
@@ -1234,7 +1234,7 @@ Feature: Graql Define Query
 
 
   Scenario: an abstract attribute type can be defined as a subtype of another abstract attribute type
-    When graql define
+    When typeql define
       """
       define
       number-of-limbs sub attribute, abstract, value long;
@@ -1243,7 +1243,7 @@ Feature: Graql Define Query
     Then transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x sub number-of-limbs; $x abstract;
       """
@@ -1254,19 +1254,19 @@ Feature: Graql Define Query
 
 
   Scenario: defining attribute type hierarchies is idempotent
-    When graql define
+    When typeql define
       """
       define name sub attribute, abstract, value string; location-name sub name;
       """
     Then transaction commits
     Then session opens transaction of type: write
-    Then graql define
+    Then typeql define
       """
       define name sub attribute, abstract, value string; location-name sub name;
       """
     Then transaction commits
     Then session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
       $name type name; $name abstract;
@@ -1279,7 +1279,7 @@ Feature: Graql Define Query
 
 
   Scenario: repeating the term 'abstract' when defining a type causes an error to be thrown
-    Given graql define; throws exception
+    Given typeql define; throws exception
       """
       define animal sub entity, abstract, abstract, abstract;
       """
@@ -1291,7 +1291,7 @@ Feature: Graql Define Query
   ###################
 
   Scenario: an existing type can be repeatedly redefined, and it is a no-op
-    When graql define
+    When typeql define
       """
       define
       person sub entity, owns name;
@@ -1301,7 +1301,7 @@ Feature: Graql Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x type person, owns name;
       """
@@ -1309,7 +1309,7 @@ Feature: Graql Define Query
 
 
   Scenario: an entity type cannot be changed into a relation type
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define
       person sub relation, relates body-part;
@@ -1319,7 +1319,7 @@ Feature: Graql Define Query
 
 
   Scenario: a relation type cannot be changed into an attribute type
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define employment sub attribute, value string;
       """
@@ -1327,7 +1327,7 @@ Feature: Graql Define Query
 
 
   Scenario: an attribute type cannot be changed into an entity type
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define name sub entity;
       """
@@ -1335,14 +1335,14 @@ Feature: Graql Define Query
 
 
   Scenario: a new attribute ownership can be defined on an existing type
-    When graql define
+    When typeql define
       """
       define employment owns name;
       """
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x owns name;
       """
@@ -1353,14 +1353,14 @@ Feature: Graql Define Query
 
 
   Scenario: a new playable role can be defined on an existing type
-    When graql define
+    When typeql define
       """
       define employment plays employment:employee;
       """
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x plays employment:employee;
       """
@@ -1371,7 +1371,7 @@ Feature: Graql Define Query
 
 
   Scenario: defining a key on an existing type is possible if existing instances have it and there are no collisions
-    Given graql define
+    Given typeql define
       """
       define
       barcode sub attribute, value string;
@@ -1380,9 +1380,9 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa product, has name "Cheese", has barcode "10001";
@@ -1393,9 +1393,9 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    When graql define
+    When typeql define
       """
       define
       product owns barcode @key;
@@ -1403,7 +1403,7 @@ Feature: Graql Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x owns barcode @key;
       """
@@ -1413,7 +1413,7 @@ Feature: Graql Define Query
 
 
   Scenario: defining a key on a type throws if existing instances don't have that key
-    Given graql define
+    Given typeql define
       """
       define
       barcode sub attribute, value string;
@@ -1422,9 +1422,9 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa product, has name "Cheese";
@@ -1433,9 +1433,9 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define
       product owns barcode @key;
@@ -1444,7 +1444,7 @@ Feature: Graql Define Query
 
 
   Scenario: defining a key on a type throws if there is a key collision between two existing instances
-    Given graql define
+    Given typeql define
       """
       define
       barcode sub attribute, value string;
@@ -1453,9 +1453,9 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa product, has name "Cheese", has barcode "10000";
@@ -1464,9 +1464,9 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define
       product owns barcode @key;
@@ -1475,7 +1475,7 @@ Feature: Graql Define Query
 
 
   Scenario: a new role can be defined on an existing relation type
-    When graql define
+    When typeql define
       """
       define
       company sub entity, plays employment:employer;
@@ -1484,7 +1484,7 @@ Feature: Graql Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x relates employer;
       """
@@ -1495,26 +1495,26 @@ Feature: Graql Define Query
 
   Scenario: a regex constraint can be added to an existing attribute type if all its instances satisfy it
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
-      $x isa person, has name "Alice", has email "alice@grakn.ai";
+      $x isa person, has name "Alice", has email "alice@vaticle.com";
       """
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    When graql define
+    When typeql define
       """
       define name regex "^A.*$";
       """
     Then transaction commits
 
     Then session opens transaction of type: read
-    Then get answers of graql match
+    Then get answers of typeql match
       """
       match $x regex "^A.*$";
       """
@@ -1525,19 +1525,19 @@ Feature: Graql Define Query
 
   Scenario: a regex cannot be added to an existing attribute type if there is an instance that doesn't satisfy it
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
-      $x isa person, has name "Maria", has email "maria@grakn.ai";
+      $x isa person, has name "Maria", has email "maria@vaticle.com";
       """
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define name regex "^A.*$";
       """
@@ -1545,14 +1545,14 @@ Feature: Graql Define Query
 
 
   Scenario: a regex constraint can not be added to an existing attribute type whose value type isn't 'string'
-    Given graql define
+    Given typeql define
       """
       define house-number sub attribute, value long;
       """
     Given transaction commits
 
     Given session opens transaction of type: write
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define house-number regex "^A.*$";
       """
@@ -1560,7 +1560,7 @@ Feature: Graql Define Query
 
 
   Scenario: related roles cannot be added to existing entity types
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define person relates employee;
       """
@@ -1568,7 +1568,7 @@ Feature: Graql Define Query
 
 
   Scenario: related roles cannot be added to existing attribute types
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define name relates employee;
       """
@@ -1576,7 +1576,7 @@ Feature: Graql Define Query
 
 
   Scenario: the value type of an existing attribute type is not modifiable
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define name value long;
       """
@@ -1584,14 +1584,14 @@ Feature: Graql Define Query
 
 
   Scenario: an attribute ownership can be converted to a key ownership
-    When graql define
+    When typeql define
       """
       define person owns name @key;
       """
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x owns name @key;
       """
@@ -1601,21 +1601,21 @@ Feature: Graql Define Query
 
 
   Scenario: an attribute key ownership can be converted to a regular ownership
-    When graql define
+    When typeql define
       """
       define person owns email;
       """
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x owns email;
       """
     Then uniquely identify answer concepts
       | x            |
       | label:person |
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x owns email @key;
       """
@@ -1623,7 +1623,7 @@ Feature: Graql Define Query
 
 
   Scenario: defining a rule is idempotent
-    Given graql define
+    Given typeql define
       """
       define
       nickname sub attribute, value string;
@@ -1636,7 +1636,7 @@ Feature: Graql Define Query
       };
       """
 
-    Then graql define
+    Then typeql define
       """
       define
       rule robert-has-nickname-bob:
@@ -1657,14 +1657,14 @@ Feature: Graql Define Query
   #############################
 
   Scenario: a concrete entity type can be converted to an abstract entity type
-    When graql define
+    When typeql define
       """
       define person abstract;
       """
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x sub person; $x abstract;
       """
@@ -1674,14 +1674,14 @@ Feature: Graql Define Query
 
 
   Scenario: a concrete relation type can be converted to an abstract relation type
-    When graql define
+    When typeql define
       """
       define employment abstract;
       """
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x sub employment; $x abstract;
       """
@@ -1691,14 +1691,14 @@ Feature: Graql Define Query
 
 
   Scenario: a concrete attribute type can be converted to an abstract attribute type
-    When graql define
+    When typeql define
       """
       define name abstract;
       """
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x sub name; $x abstract;
       """
@@ -1709,19 +1709,19 @@ Feature: Graql Define Query
 
   Scenario: an existing entity type cannot be converted to abstract if it has existing instances
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
-      $x isa person, has name "Jeremy", has email "jeremy@grakn.ai";
+      $x isa person, has name "Jeremy", has email "jeremy@vaticle.com";
       """
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define person abstract;
       """
@@ -1730,20 +1730,20 @@ Feature: Graql Define Query
 
   Scenario: an existing relation type cannot be converted to abstract if it has existing instances
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
-      $x isa person, has name "Jeremy", has email "jeremy@grakn.ai";
+      $x isa person, has name "Jeremy", has email "jeremy@vaticle.com";
       $r (employee: $x) isa employment, has employment-reference-code "J123123";
       """
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define employment abstract;
       """
@@ -1751,19 +1751,19 @@ Feature: Graql Define Query
 
   Scenario: an existing attribute type cannot be converted to abstract if it has existing instances
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
-      $x isa person, has name "Jeremy", has email "jeremy@grakn.ai";
+      $x isa person, has name "Jeremy", has email "jeremy@vaticle.com";
       """
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define name abstract;
       """
@@ -1785,7 +1785,7 @@ Feature: Graql Define Query
   ######################
 
   Scenario: an existing entity type can be switched to a new supertype
-    Given graql define
+    Given typeql define
       """
       define
       apple-product sub entity;
@@ -1794,7 +1794,7 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    When graql define
+    When typeql define
       """
       define
       genius sub apple-product;
@@ -1802,7 +1802,7 @@ Feature: Graql Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x sub apple-product;
       """
@@ -1816,7 +1816,7 @@ Feature: Graql Define Query
 
 
   Scenario: an existing attribute type can be switched to a new supertype with a matching value type
-    Given graql define
+    Given typeql define
       """
       define
       measure sub attribute, value double, abstract;
@@ -1826,18 +1826,18 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert $s isa shoe, has shoe-size 9;
       """
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    When graql define
+    When typeql define
       """
       define
       size sub attribute, value double, abstract;
@@ -1846,7 +1846,7 @@ Feature: Graql Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x sub shoe-size;
       """
@@ -1856,7 +1856,7 @@ Feature: Graql Define Query
 
 
   Scenario: assigning a new supertype succeeds even if they have different attributes + roles, if there are no instances
-    Given graql define
+    Given typeql define
       """
       define
       species sub entity, owns name, plays species-membership:species;
@@ -1868,7 +1868,7 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    When graql define
+    When typeql define
       """
       define
       person sub organism;
@@ -1876,7 +1876,7 @@ Feature: Graql Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x sub organism;
       """
@@ -1888,7 +1888,7 @@ Feature: Graql Define Query
 
 
   Scenario: assigning a new supertype succeeds even with existing data if the supertypes have no properties
-    Given graql define
+    Given typeql define
       """
       define
       bird sub entity;
@@ -1897,18 +1897,18 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert $p isa pigeon;
       """
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    When graql define
+    When typeql define
       """
       define
       animal sub entity;
@@ -1917,7 +1917,7 @@ Feature: Graql Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x sub pigeon;
       """
@@ -1927,7 +1927,7 @@ Feature: Graql Define Query
 
 
   Scenario: assigning a new supertype succeeds with existing data if the supertypes play the same roles
-    Given graql define
+    Given typeql define
       """
       define
       bird sub entity, plays flying:flier;
@@ -1937,18 +1937,18 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert $p isa pigeon;
       """
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    When graql define
+    When typeql define
       """
       define
       animal sub entity, plays flying:flier;
@@ -1957,7 +1957,7 @@ Feature: Graql Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x sub pigeon;
       """
@@ -1967,7 +1967,7 @@ Feature: Graql Define Query
 
 
   Scenario: assigning a new supertype succeeds with existing data if the supertypes have the same attributes
-    Given graql define
+    Given typeql define
       """
       define
       name sub attribute, value string;
@@ -1977,18 +1977,18 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert $p isa pigeon;
       """
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    When graql define
+    When typeql define
       """
       define
       animal sub entity, owns name;
@@ -1997,7 +1997,7 @@ Feature: Graql Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x sub pigeon;
       """
@@ -2033,7 +2033,7 @@ Feature: Graql Define Query
 
 
   Scenario: when adding a playable role to an existing type, the change is propagated to its subtypes
-    Given graql define
+    Given typeql define
       """
       define
       employment sub relation, relates employer;
@@ -2043,7 +2043,7 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x type child, plays $r;
       """
@@ -2055,7 +2055,7 @@ Feature: Graql Define Query
 
 
   Scenario: when adding an attribute ownership to an existing type, the change is propagated to its subtypes
-    Given graql define
+    Given typeql define
     """
        define
        child sub person;
@@ -2065,7 +2065,7 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x type child, owns $y;
       """
@@ -2077,7 +2077,7 @@ Feature: Graql Define Query
 
 
   Scenario: when adding a key ownership to an existing type, the change is propagated to its subtypes
-    Given graql define
+    Given typeql define
       """
       define
       child sub person;
@@ -2087,7 +2087,7 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x type child, owns $y @key;
       """
@@ -2098,7 +2098,7 @@ Feature: Graql Define Query
 
 
   Scenario: when adding a related role to an existing relation type, the change is propagated to all its subtypes
-    Given graql define
+    Given typeql define
       """
       define
       part-time-employment sub employment;
@@ -2107,7 +2107,7 @@ Feature: Graql Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x type part-time-employment, relates $r;
       """
@@ -2126,12 +2126,12 @@ Feature: Graql Define Query
   @ignore-client-nodejs
   @ignore-client-python
   Scenario: uncommitted transaction writes are not persisted
-    When graql define
+    When typeql define
       """
       define dog sub entity;
       """
     When session opens transaction of type: read
-    Then graql match; throws exception
+    Then typeql match; throws exception
       """
       match $x type dog;
       """
@@ -2143,7 +2143,7 @@ Feature: Graql Define Query
   ########################
 
   Scenario: a type cannot be a subtype of itself
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define dog sub dog;
       """
@@ -2151,7 +2151,7 @@ Feature: Graql Define Query
 
 
   Scenario: a cyclic type hierarchy is not allowed
-    Then graql define; throws exception
+    Then typeql define; throws exception
       """
       define
       giant sub person;
@@ -2161,7 +2161,7 @@ Feature: Graql Define Query
 
 
   Scenario: two attribute types can own each other in a cycle
-    Given graql define
+    Given typeql define
       """
       define
       nickname sub attribute, value string, owns surname, owns middlename;
@@ -2169,7 +2169,7 @@ Feature: Graql Define Query
       middlename sub attribute, value string, owns firstname;
       firstname sub attribute, value string, owns surname;
       """
-    Then get answers of graql match
+    Then get answers of typeql match
       """
       match $a sub attribute, owns $b; $b sub attribute, owns $a;
       """
@@ -2177,7 +2177,7 @@ Feature: Graql Define Query
       | a              | b              |
       | label:nickname | label:surname  |
       | label:surname  | label:nickname |
-    Then get answers of graql match
+    Then get answers of typeql match
       """
       match $a owns $b; $b owns $a;
       """
@@ -2187,7 +2187,7 @@ Feature: Graql Define Query
       | label:surname  | label:nickname |
 
   Scenario: many attribute types can own each other in a big cycle
-    Given graql define
+    Given typeql define
       """
       define
       nickname sub attribute, value string, owns surname, owns middlename;
@@ -2195,7 +2195,7 @@ Feature: Graql Define Query
       middlename sub attribute, value string, owns firstname;
       firstname sub attribute, value string, owns surname;
       """
-    Then get answers of graql match
+    Then get answers of typeql match
       """
       match
       $a sub attribute, owns $b;
@@ -2213,7 +2213,7 @@ Feature: Graql Define Query
       | label:nickname   | label:surname    | label:nickname   | label:surname    |
 
   Scenario: a relation type can relate to a role that it plays itself
-    When graql define
+    When typeql define
       """
       define
       recursive-function sub relation, relates function, plays recursive-function:function;
@@ -2221,7 +2221,7 @@ Feature: Graql Define Query
     Then transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x relates function; $x plays recursive-function:function;
       """
@@ -2231,14 +2231,14 @@ Feature: Graql Define Query
 
 
   Scenario: an attribute type can own itself
-    When graql define
+    When typeql define
       """
       define number-of-letters sub attribute, value long, owns number-of-letters;
       """
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x owns number-of-letters;
       """
@@ -2248,7 +2248,7 @@ Feature: Graql Define Query
 
 
   Scenario: two relation types in a type hierarchy can play each other's roles
-    When graql define
+    When typeql define
       """
       define
       apple sub relation, abstract, relates role1, plays big-apple:role2;
@@ -2263,7 +2263,7 @@ Feature: Graql Define Query
     depend on each other, creating a dependency graph, they should all define successfully regardless of
     which variable was picked as the start vertex (#131)
 
-    When graql define
+    When typeql define
       """
       define
 

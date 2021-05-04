@@ -1,1 +1,1 @@
-# Grakn Behaviour Specification
+# TypeDB Behaviour Specification

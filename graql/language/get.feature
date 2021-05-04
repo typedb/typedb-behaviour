@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -16,16 +16,16 @@
 #
 
 #noinspection CucumberUndefinedStep
-Feature: Graql Get Clause
+Feature: TypeQL Get Clause
 
   Background: Open connection and create a simple extensible schema
     Given connection has been opened
     Given connection does not have any database
-    Given connection create database: grakn
-    Given connection open schema session for database: grakn
+    Given connection create database: typedb
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
 
-    Given graql define
+    Given typeql define
       """
       define
       person sub entity,
@@ -52,7 +52,7 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
 
 
@@ -61,7 +61,7 @@ Feature: Graql Get Clause
   #############
 
   Scenario: 'get' can be used to restrict the set of variables that appear in an answer set
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x "Lisa" isa name;
@@ -71,7 +71,7 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
         $z isa person, has name $x, has age $y;
@@ -83,7 +83,7 @@ Feature: Graql Get Clause
 
 
   Scenario: when a 'get' has unbound variables, an error is thrown
-    Then graql match; throws exception
+    Then typeql match; throws exception
       """
       match $x isa person; get $y;
       """
@@ -96,9 +96,9 @@ Feature: Graql Get Clause
 
   Scenario Outline: the answers of a match can be sorted by an attribute of type '<type>'
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       <attr> sub attribute, value <type>, owns ref @key;
@@ -106,9 +106,9 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $a <val1> isa <attr>, has ref 0;
@@ -119,7 +119,7 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa <attr>;
       sort $x asc;
@@ -140,7 +140,7 @@ Feature: Graql Get Clause
 
 
   Scenario: sort order can be ascending or descending
-    Given graql insert
+    Given typeql insert
       """
       insert
       $a isa person, has name "Gary", has ref 0;
@@ -151,7 +151,7 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person, has name $y;
       sort $y asc;
@@ -162,7 +162,7 @@ Feature: Graql Get Clause
       | key:ref:2 | value:name:Frederick |
       | key:ref:0 | value:name:Gary      |
       | key:ref:1 | value:name:Jemima    |
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person, has name $y;
       sort $y desc;
@@ -176,7 +176,7 @@ Feature: Graql Get Clause
 
 
   Scenario: the default sort order is ascending
-    Given graql insert
+    Given typeql insert
       """
       insert
       $a isa person, has name "Gary", has ref 0;
@@ -187,7 +187,7 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person, has name $y;
       sort $y;
@@ -201,7 +201,7 @@ Feature: Graql Get Clause
 
 
   Scenario: a sorted result set can be limited to a specific size
-    Given graql insert
+    Given typeql insert
       """
       insert
       $a isa person, has name "Gary", has ref 0;
@@ -212,7 +212,7 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person, has name $y;
       sort $y asc;
@@ -226,7 +226,7 @@ Feature: Graql Get Clause
 
 
   Scenario: sorted results can be retrieved starting from a specific offset
-    Given graql insert
+    Given typeql insert
       """
       insert
       $a isa person, has name "Gary", has ref 0;
@@ -237,7 +237,7 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person, has name $y;
       sort $y asc;
@@ -250,7 +250,7 @@ Feature: Graql Get Clause
 
 
   Scenario: 'offset' and 'limit' can be used together to restrict the answer set
-    Given graql insert
+    Given typeql insert
       """
       insert
       $a isa person, has name "Gary", has ref 0;
@@ -261,7 +261,7 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person, has name $y;
       sort $y asc;
@@ -275,7 +275,7 @@ Feature: Graql Get Clause
 
 
   Scenario: when the answer size is limited to 0, an empty answer set is returned
-    Given graql insert
+    Given typeql insert
       """
       insert
       $a isa person, has name "Gary", has ref 0;
@@ -286,7 +286,7 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person, has name $y;
       sort $y asc;
@@ -296,7 +296,7 @@ Feature: Graql Get Clause
 
 
   Scenario: when the offset is outside the bounds of the matched answer set, an empty answer set is returned
-    Given graql insert
+    Given typeql insert
       """
       insert
       $a isa person, has name "Gary", has ref 0;
@@ -307,7 +307,7 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person, has name $y;
       sort $y asc;
@@ -317,7 +317,7 @@ Feature: Graql Get Clause
 
 
   Scenario: string sorting is case-insensitive
-    Given graql insert
+    Given typeql insert
       """
       insert
       $a "Bond" isa name;
@@ -329,7 +329,7 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    Then get answers of graql match
+    Then get answers of typeql match
       """
       match $x isa name;
       sort $x asc;
@@ -344,7 +344,7 @@ Feature: Graql Get Clause
 
 
   Scenario: sort is able to correctly handle duplicates in the value set
-    Given graql insert
+    Given typeql insert
       """
       insert
       $a isa person, has age 2, has ref 0;
@@ -356,7 +356,7 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person, has age $y;
       sort $y asc;
@@ -366,7 +366,7 @@ Feature: Graql Get Clause
       | x         | y           |
       | key:ref:0 | value:age:2 |
       | key:ref:4 | value:age:2 |
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person, has age $y;
       sort $y asc;
@@ -380,7 +380,7 @@ Feature: Graql Get Clause
 
 
   Scenario: when sorting by a variable not contained in the answer set, an error is thrown
-    Given graql insert
+    Given typeql insert
       """
       insert
       $a isa person, has age 2, has ref 0;
@@ -389,7 +389,7 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    Then graql match; throws exception
+    Then typeql match; throws exception
       """
       match
         $x isa person, has age $y;
@@ -404,7 +404,7 @@ Feature: Graql Get Clause
   #############
 
   Scenario: 'count' returns the total number of answers
-    Given graql insert
+    Given typeql insert
       """
       insert
       $p1 isa person, has name "Klaus", has ref 0;
@@ -415,7 +415,7 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
         $x isa person;
@@ -423,7 +423,7 @@ Feature: Graql Get Clause
         $f isa friendship;
       """
     Then answer size is: 9
-    When get answer of graql match aggregate
+    When get answer of typeql match aggregate
       """
       match
         $x isa person;
@@ -432,7 +432,7 @@ Feature: Graql Get Clause
       count;
       """
     Then aggregate value is: 9
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
         $x isa person;
@@ -440,7 +440,7 @@ Feature: Graql Get Clause
         $f (friend: $x) isa friendship;
       """
     Then answer size is: 6
-    When get answer of graql match aggregate
+    When get answer of typeql match aggregate
       """
       match
         $x isa person;
@@ -452,7 +452,7 @@ Feature: Graql Get Clause
 
 
   Scenario: the 'count' of an empty answer set is zero
-    When get answer of graql match aggregate
+    When get answer of typeql match aggregate
       """
       match $x isa person, has name "Voldemort";
       count;
@@ -462,9 +462,9 @@ Feature: Graql Get Clause
 
   Scenario Outline: the <agg_type> of an answer set of '<type>' values can be retrieved
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       <attr> sub attribute, value <type>;
@@ -473,9 +473,9 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $p1 isa person, has <attr> <val1>, has ref 0;
@@ -485,7 +485,7 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answer of graql match aggregate
+    When get answer of typeql match aggregate
       """
       match $x isa person, has <attr> $y;
       <agg_type> $y;
@@ -508,9 +508,9 @@ Feature: Graql Get Clause
 
   Scenario: the sample standard deviation can be retrieved for an answer set of 'double' values
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       weight sub attribute, value double;
@@ -519,9 +519,9 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $p1 isa person, has weight 61.8, has ref 0;
@@ -531,7 +531,7 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answer of graql match aggregate
+    When get answer of typeql match aggregate
       """
       match $x isa person, has weight $y;
       std $y;
@@ -541,7 +541,7 @@ Feature: Graql Get Clause
 
 
   Scenario: restricting variables with 'get' does not affect the result of a 'sum'
-    Given graql insert
+    Given typeql insert
       """
       insert
       $p1 isa person, has name "Jeff", has age 30, has ref 0;
@@ -551,13 +551,13 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answer of graql match aggregate
+    When get answer of typeql match aggregate
       """
       match $x isa person, has name $y, has age $z;
       sum $z;
       """
     Then aggregate value is: 65
-    Then get answer of graql match aggregate
+    Then get answer of typeql match aggregate
       """
       match $x isa person, has name $y, has age $z;
       get $y, $z;
@@ -566,7 +566,7 @@ Feature: Graql Get Clause
     Then aggregate value is: 65
 
   Scenario Outline: duplicate attribute values are included in a '<agg_type>'
-    Given graql insert
+    Given typeql insert
       """
       insert
       $p1 isa person, has age <val1and2>, has ref 0;
@@ -576,7 +576,7 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answer of graql match aggregate
+    When get answer of typeql match aggregate
       """
       match $x isa person, has age $y;
       <agg_type> $y;
@@ -590,7 +590,7 @@ Feature: Graql Get Clause
       | 17       | 14   | median   | 17      |
 
   Scenario: the median of an even number of values is the number halfway between the two most central values
-    Given graql insert
+    Given typeql insert
       """
       insert
       $p1 isa person, has age 42, has ref 0;
@@ -601,7 +601,7 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answer of graql match aggregate
+    When get answer of typeql match aggregate
       """
       match $x isa person, has age $y;
       median $y;
@@ -611,9 +611,9 @@ Feature: Graql Get Clause
 
   Scenario Outline: when an answer set is empty, calling '<agg_type>' on it returns an empty answer
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       income sub attribute, value double;
@@ -622,7 +622,7 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answer of graql match aggregate
+    When get answer of typeql match aggregate
       """
       match $x isa person, has income $y;
       <agg_type> $y;
@@ -640,7 +640,7 @@ Feature: Graql Get Clause
 
 
   Scenario Outline: an error is thrown when getting the '<agg_type>' of an undefined variable in an aggregate query
-    Then graql match aggregate; throws exception
+    Then typeql match aggregate; throws exception
       """
       match $x isa person;
       <agg_type> $y;
@@ -657,14 +657,14 @@ Feature: Graql Get Clause
 
 
   Scenario: aggregates can only be performed over sets of attributes
-    Given graql insert
+    Given typeql insert
       """
       insert $x isa person, has ref 0;
       """
     Given transaction commits
 
     Given session opens transaction of type: read
-    Then graql match aggregate; throws exception
+    Then typeql match aggregate; throws exception
       """
       match $x isa person;
       min $x;
@@ -674,9 +674,9 @@ Feature: Graql Get Clause
 
   Scenario Outline: an error is thrown when getting the '<agg_type>' of attributes that have the inapplicable type, '<type>'
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       <attr> sub attribute, value <type>;
@@ -685,9 +685,9 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has ref 0, has <attr> <value>;
@@ -695,7 +695,7 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    Then graql match aggregate; throws exception
+    Then typeql match aggregate; throws exception
       """
       match $x isa person, has <attr> $y;
       <agg_type> $y;
@@ -725,7 +725,7 @@ Feature: Graql Get Clause
 
 
   Scenario: when taking the sum of a set of attributes, where some are numeric and others are strings, an error is thrown
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Barry", has age 39, has ref 0;
@@ -734,7 +734,7 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    Then graql match aggregate; throws exception
+    Then typeql match aggregate; throws exception
       """
       match $x isa person, has attribute $y;
       sum $y;
@@ -743,7 +743,7 @@ Feature: Graql Get Clause
 
 
   Scenario: when taking the sum of an empty set, even if any matches would definitely be strings, no error is thrown and an empty answer is returned
-    When get answer of graql match aggregate
+    When get answer of typeql match aggregate
       """
       match $x isa person, has name $y;
       sum $y;
@@ -756,7 +756,7 @@ Feature: Graql Get Clause
   #########
 
   Scenario: answers can be grouped by a variable contained in the answer set
-    Given graql insert
+    Given typeql insert
       """
       insert
       $p1 isa person, has name "Violet", has ref 0;
@@ -768,7 +768,7 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match ($x, $y) isa friendship;
       """
@@ -786,7 +786,7 @@ Feature: Graql Get Clause
       | key:ref:3 | key:ref:0 |
       | key:ref:3 | key:ref:1 |
       | key:ref:3 | key:ref:2 |
-    When get answers of graql match group
+    When get answers of typeql match group
       """
       match ($x, $y) isa friendship;
       group $x;
@@ -808,7 +808,7 @@ Feature: Graql Get Clause
 
 
   Scenario: when grouping answers by a variable that is not contained in the answer set, an error is thrown
-    Given graql insert
+    Given typeql insert
       """
       insert
       $p1 isa person, has name "Violet", has ref 0;
@@ -818,7 +818,7 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    Then graql match group; throws exception
+    Then typeql match group; throws exception
       """
       match ($x, $y) isa friendship;
       get $x;
@@ -831,7 +831,7 @@ Feature: Graql Get Clause
   ###################
 
   Scenario: the size of each answer group can be retrieved using a group 'count'
-    Given graql insert
+    Given typeql insert
       """
       insert
       $p1 isa person, has name "Violet", has ref 0;
@@ -843,11 +843,11 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person;
       """
-    When get answers of graql match group aggregate
+    When get answers of typeql match group aggregate
       """
       match ($x, $y) isa friendship;
       group $x;
@@ -862,7 +862,7 @@ Feature: Graql Get Clause
 
 
   Scenario: the size of answer groups is still computed correctly when restricting variables with 'get'
-    Given graql insert
+    Given typeql insert
       """
       insert
       $c1 isa company, has name "Apple", has ref 0;
@@ -876,7 +876,7 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
       $x isa company;
@@ -894,7 +894,7 @@ Feature: Graql Get Clause
       | key:ref:0 | key:ref:3 | key:ref:4 |
       | key:ref:1 | key:ref:4 | key:ref:2 |
       | key:ref:1 | key:ref:4 | key:ref:3 |
-    Then get answers of graql match group aggregate
+    Then get answers of typeql match group aggregate
       """
       match
         $x isa company;
@@ -913,7 +913,7 @@ Feature: Graql Get Clause
 
 
   Scenario: the maximum value for a particular variable within each answer group can be retrieved using a group 'max'
-    Given graql insert
+    Given typeql insert
       """
       insert
       $c1 isa company, has name "Lloyds", has ref 0;
@@ -928,7 +928,7 @@ Feature: Graql Get Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of graql match group aggregate
+    When get answers of typeql match group aggregate
       """
       match
         $x isa company;

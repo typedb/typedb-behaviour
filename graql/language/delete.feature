@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -16,16 +16,16 @@
 #
 
 #noinspection CucumberUndefinedStep
-Feature: Graql Delete Query
+Feature: TypeQL Delete Query
 
   Background: Open connection and create a simple extensible schema
     Given connection has been opened
     Given connection does not have any database
-    Given connection create database: grakn
-    Given connection open schema session for database: grakn
+    Given connection create database: typedb
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
 
-    Given graql define
+    Given typeql define
       """
       define
       person sub entity,
@@ -40,7 +40,7 @@ Feature: Graql Delete Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
 
 
@@ -49,7 +49,7 @@ Feature: Graql Delete Query
   ##########
 
   Scenario: when deleting multiple variables, they all get deleted
-    Given get answers of graql insert
+    Given get answers of typeql insert
       """
       insert
       $x isa person, has name "Alex";
@@ -63,7 +63,7 @@ Feature: Graql Delete Query
       | key:name:Alex | key:name:Bob | key:ref:0 | value:name:John |
     Given transaction commits
     Given session opens transaction of type: write
-    When graql delete
+    When typeql delete
       """
       match
         $x isa person, has name "Alex";
@@ -75,19 +75,19 @@ Feature: Graql Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person;
       """
     Then uniquely identify answer concepts
       | x            |
       | key:name:Bob |
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa friendship;
       """
     Then answer size is: 0
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa name;
       """
@@ -98,7 +98,7 @@ Feature: Graql Delete Query
 
 
   Scenario: an instance can be deleted using the 'thing' meta label
-    Given get answers of graql insert
+    Given get answers of typeql insert
       """
       insert
       $x isa person, has name "Alex";
@@ -112,7 +112,7 @@ Feature: Graql Delete Query
       | key:name:Alex | key:name:Bob | key:ref:0 | value:name:John |
     Given transaction commits
     Given session opens transaction of type: write
-    When graql delete
+    When typeql delete
       """
       match
         $r isa person, has name "Alex";
@@ -122,7 +122,7 @@ Feature: Graql Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person;
       """
@@ -132,7 +132,7 @@ Feature: Graql Delete Query
 
 
   Scenario: an entity can be deleted using the 'entity' meta label
-    Given get answers of graql insert
+    Given get answers of typeql insert
       """
       insert
       $x isa person, has name "Alex";
@@ -146,7 +146,7 @@ Feature: Graql Delete Query
       | key:name:Alex | key:name:Bob | key:ref:0 | value:name:John |
     Given transaction commits
     Given session opens transaction of type: write
-    When graql delete
+    When typeql delete
       """
       match
         $r isa person, has name "Alex";
@@ -156,7 +156,7 @@ Feature: Graql Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person;
       """
@@ -166,7 +166,7 @@ Feature: Graql Delete Query
 
 
   Scenario: a relation can be deleted using the 'relation' meta label
-    Given get answers of graql insert
+    Given get answers of typeql insert
       """
       insert
       $x isa person, has name "Alex";
@@ -180,7 +180,7 @@ Feature: Graql Delete Query
       | key:name:Alex | key:name:Bob | key:ref:0 | value:name:John |
     Given transaction commits
     Given session opens transaction of type: write
-    When graql delete
+    When typeql delete
       """
       match
         $r isa friendship, has ref 0;
@@ -190,7 +190,7 @@ Feature: Graql Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa friendship;
       """
@@ -198,7 +198,7 @@ Feature: Graql Delete Query
 
 
   Scenario: an attribute can be deleted using the 'attribute' meta label
-    Given get answers of graql insert
+    Given get answers of typeql insert
       """
       insert
       $n "John" isa name;
@@ -208,7 +208,7 @@ Feature: Graql Delete Query
       | value:name:John |
     Given transaction commits
     Given session opens transaction of type: write
-    When graql delete
+    When typeql delete
       """
       match
         $r "John" isa name;
@@ -218,7 +218,7 @@ Feature: Graql Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa name;
       """
@@ -226,7 +226,7 @@ Feature: Graql Delete Query
 
 
   Scenario: an instance can be deleted using its own type label
-    Given get answers of graql insert
+    Given get answers of typeql insert
       """
       insert
       $x isa person, has name "Alex";
@@ -240,7 +240,7 @@ Feature: Graql Delete Query
       | key:name:Alex | key:name:Bob | key:ref:0 | value:name:John |
     Given transaction commits
     Given session opens transaction of type: write
-    When graql delete
+    When typeql delete
       """
       match
         $r isa person, has name "Alex";
@@ -250,7 +250,7 @@ Feature: Graql Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person;
       """
@@ -260,7 +260,7 @@ Feature: Graql Delete Query
 
 
   Scenario: one delete statement can delete multiple things
-    Given get answers of graql insert
+    Given get answers of typeql insert
       """
       insert
       $a isa person, has name "Alice";
@@ -271,7 +271,7 @@ Feature: Graql Delete Query
       | key:name:Alice | key:name:Barbara |
     Given transaction commits
     Given session opens transaction of type: write
-    When graql delete
+    When typeql delete
       """
       match
       $p isa person;
@@ -281,7 +281,7 @@ Feature: Graql Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person;
       """
@@ -289,7 +289,7 @@ Feature: Graql Delete Query
 
 
   Scenario: deleting an instance using an unrelated type label throws
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Alex";
@@ -298,7 +298,7 @@ Feature: Graql Delete Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    Then graql delete; throws exception
+    Then typeql delete; throws exception
       """
       match
         $x isa person;
@@ -310,7 +310,7 @@ Feature: Graql Delete Query
 
 
   Scenario: deleting an instance using a non-existing type label throws
-    Given graql insert
+    Given typeql insert
       """
       insert
       $n "John" isa name;
@@ -318,7 +318,7 @@ Feature: Graql Delete Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    Then graql delete; throws exception
+    Then typeql delete; throws exception
       """
       match
         $r isa name; $r "John";
@@ -330,9 +330,9 @@ Feature: Graql Delete Query
 
   Scenario: deleting a relation instance using a too-specific (downcasting) type throws
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       special-friendship sub friendship;
@@ -340,9 +340,9 @@ Feature: Graql Delete Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Alex";
@@ -352,7 +352,7 @@ Feature: Graql Delete Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    Then graql delete; throws exception
+    Then typeql delete; throws exception
       """
       match
         $r ($x, $y) isa friendship;
@@ -369,7 +369,7 @@ Feature: Graql Delete Query
   #TODO: This is flaky
   @ignore
   Scenario: deleting a role player from a relation using its role keeps the relation and removes the role player from it
-    Given get answers of graql insert
+    Given get answers of typeql insert
       """
       insert
       $x isa person, has name "Alex";
@@ -383,7 +383,7 @@ Feature: Graql Delete Query
       | key:name:Alex | key:name:Bob | key:name:Carrie | key:ref:0 |
     Given transaction commits
     Given session opens transaction of type: write
-    When graql delete
+    When typeql delete
       """
       match
         $r (friend: $x, friend: $y, friend: $z) isa friendship;
@@ -396,7 +396,7 @@ Feature: Graql Delete Query
     Then transaction commits
 
     When session opens transaction of type: write
-    When get answers of graql match
+    When get answers of typeql match
       """
       match (friend: $x, friend: $y) isa friendship;
       """
@@ -408,7 +408,7 @@ Feature: Graql Delete Query
 
 
   Scenario: deleting an instance removes it from all relations
-    Given get answers of graql insert
+    Given get answers of typeql insert
       """
       insert
       $x isa person, has name "Alex";
@@ -422,7 +422,7 @@ Feature: Graql Delete Query
       | key:name:Alex | key:name:Bob | key:name:Carrie | key:ref:1 | key:ref:2 |
     Given transaction commits
     When session opens transaction of type: write
-    When graql delete
+    When typeql delete
       """
       match
         $x isa person, has name "Alex";
@@ -432,7 +432,7 @@ Feature: Graql Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person;
       """
@@ -440,7 +440,7 @@ Feature: Graql Delete Query
       | x               |
       | key:name:Bob    |
       | key:name:Carrie |
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $r (friend: $x) isa friendship;
       """
@@ -451,7 +451,7 @@ Feature: Graql Delete Query
 
 
   Scenario: repeated role players can be deleted from a relation
-    Given get answers of graql insert
+    Given get answers of typeql insert
       """
       insert
       $x isa person, has name "Alex";
@@ -463,7 +463,7 @@ Feature: Graql Delete Query
       | key:name:Alex | key:name:Bob | key:ref:0 |
     Given transaction commits
     When session opens transaction of type: write
-    When graql delete
+    When typeql delete
       """
       match
         $r (friend: $x, friend: $x) isa friendship;
@@ -473,7 +473,7 @@ Feature: Graql Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $r (friend: $x) isa friendship;
       """
@@ -483,7 +483,7 @@ Feature: Graql Delete Query
 
 
   Scenario: when deleting multiple repeated role players from a relation, it removes the number you asked to delete
-    Given get answers of graql insert
+    Given get answers of typeql insert
       """
       insert
       $x isa person, has name "Alex";
@@ -495,7 +495,7 @@ Feature: Graql Delete Query
       | key:name:Alex | key:name:Bob | key:ref:0 |
     Given transaction commits
     When session opens transaction of type: write
-    When graql delete
+    When typeql delete
       """
       match
         $r (friend: $x, friend: $x, friend: $x) isa friendship;
@@ -505,7 +505,7 @@ Feature: Graql Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $r (friend: $x, friend: $y) isa friendship;
       """
@@ -516,7 +516,7 @@ Feature: Graql Delete Query
 
 
   Scenario: when deleting repeated role players in multiple statements, it removes the total number you asked to delete
-    Given get answers of graql insert
+    Given get answers of typeql insert
       """
       insert
       $x isa person, has name "Alex";
@@ -528,7 +528,7 @@ Feature: Graql Delete Query
       | key:name:Alex | key:name:Bob | key:ref:0 |
     Given transaction commits
     When session opens transaction of type: write
-    When graql delete
+    When typeql delete
       """
       match
         $x isa person;
@@ -539,7 +539,7 @@ Feature: Graql Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $r (friend: $x, friend: $y) isa friendship;
       """
@@ -550,7 +550,7 @@ Feature: Graql Delete Query
 
 
   Scenario: when deleting one of the repeated role players from a relation, only one duplicate is removed
-    Given get answers of graql insert
+    Given get answers of typeql insert
       """
       insert
       $x isa person, has name "Alex";
@@ -562,7 +562,7 @@ Feature: Graql Delete Query
       | key:name:Alex | key:name:Bob | key:ref:0 |
     Given transaction commits
     When session opens transaction of type: write
-    When graql delete
+    When typeql delete
       """
       match
         $r (friend: $x) isa friendship;
@@ -573,7 +573,7 @@ Feature: Graql Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $r (friend: $x, friend: $y) isa friendship;
       """
@@ -584,7 +584,7 @@ Feature: Graql Delete Query
 
   @ignore
   Scenario: deleting role players in multiple statements throws
-    Given get answers of graql insert
+    Given get answers of typeql insert
       """
       insert
       $x isa person, has name "Alex";
@@ -597,7 +597,7 @@ Feature: Graql Delete Query
       | key:name:Alex | key:name:Bob | key:name:Carrie | key:ref:0 |
     Given transaction commits
     When session opens transaction of type: write
-    When graql delete; throws exception
+    When typeql delete; throws exception
       """
       match
         $r (friend: $x, friend: $y, friend: $z) isa friendship;
@@ -610,7 +610,7 @@ Feature: Graql Delete Query
       """
 
   Scenario: when deleting more role players than actually exist, an error is thrown
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Alex";
@@ -620,7 +620,7 @@ Feature: Graql Delete Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    Then graql delete; throws exception
+    Then typeql delete; throws exception
       """
       match
         $x isa person, has name "Alex";
@@ -633,7 +633,7 @@ Feature: Graql Delete Query
 
 
   Scenario: when all instances that play roles in a relation are deleted, the relation instance gets cleaned up
-    Given get answers of graql insert
+    Given get answers of typeql insert
       """
       insert
       $x isa person, has name "Alex";
@@ -645,7 +645,7 @@ Feature: Graql Delete Query
       | key:name:Alex | key:name:Bob | key:ref:0 |
     Given transaction commits
     When session opens transaction of type: write
-    When graql delete
+    When typeql delete
       """
       match
         $x isa person, has name "Alex";
@@ -657,7 +657,7 @@ Feature: Graql Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $r isa friendship;
       """
@@ -665,7 +665,7 @@ Feature: Graql Delete Query
 
 
   Scenario: when the last role player is disassociated from a relation instance, the relation instance gets cleaned up
-    Given get answers of graql insert
+    Given get answers of typeql insert
       """
       insert
       $x isa person, has name "Alex";
@@ -677,7 +677,7 @@ Feature: Graql Delete Query
       | key:name:Alex | key:name:Bob | key:ref:0 |
     Given transaction commits
     When session opens transaction of type: write
-    When graql delete
+    When typeql delete
       """
       match
         $x isa person, has name "Alex";
@@ -689,7 +689,7 @@ Feature: Graql Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $r isa friendship;
       """
@@ -698,9 +698,9 @@ Feature: Graql Delete Query
 
   Scenario: deleting a role player with a too-specific (downcasting) role throws
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       special-friendship sub friendship,
@@ -709,9 +709,9 @@ Feature: Graql Delete Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    When graql insert
+    When typeql insert
       """
       insert
       $x isa person, has name "Alex";
@@ -721,7 +721,7 @@ Feature: Graql Delete Query
     Then transaction commits
 
     When session opens transaction of type: write
-    Then graql delete; throws exception
+    Then typeql delete; throws exception
       """
       match
         $x isa person, has name "Alex";
@@ -747,9 +747,9 @@ Feature: Graql Delete Query
 #  So, if the user does not specify a specific-enough roles, we may throw.
   Scenario: deleting a role player with a variable role throws if the role selector has multiple distinct matches
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       ship-crew sub relation, relates captain, relates navigator, relates chef;
@@ -758,9 +758,9 @@ Feature: Graql Delete Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Cook";
@@ -771,7 +771,7 @@ Feature: Graql Delete Query
     Then transaction commits
 
     When session opens transaction of type: write
-    Then graql delete; throws exception
+    Then typeql delete; throws exception
       """
       match
         $r ($role1: $x, captain: $y) isa ship-crew;
@@ -799,9 +799,9 @@ Feature: Graql Delete Query
   @ignore
   Scenario: when deleting repeated role players with a single variable role, both repetitions are removed
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       ship-crew sub relation, relates captain, relates navigator, relates chef, owns ref @key;
@@ -810,9 +810,9 @@ Feature: Graql Delete Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Cook";
@@ -822,14 +822,14 @@ Feature: Graql Delete Query
     Given transaction commits
 
     When session opens transaction of type: write
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $rel (chef: $p) isa ship-crew;
       """
     Then uniquely identify answer concepts
       | rel       | p               |
       | key:ref:0 | key:name:Joshua |
-    When graql delete
+    When typeql delete
       """
       match
         $r ($role1: $x, captain: $y) isa ship-crew;
@@ -839,7 +839,7 @@ Feature: Graql Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $rel (chef: $p) isa ship-crew;
       """
@@ -852,9 +852,9 @@ Feature: Graql Delete Query
 
   Scenario: deleting an attribute instance also deletes its ownerships
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       age sub attribute, value long;
@@ -863,9 +863,9 @@ Feature: Graql Delete Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Anna", has age 18;
@@ -873,14 +873,14 @@ Feature: Graql Delete Query
     Given transaction commits
 
     When session opens transaction of type: write
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x has age 18;
       """
     Then uniquely identify answer concepts
       | x             |
       | key:name:Anna |
-    When graql delete
+    When typeql delete
       """
       match
         $x 18 isa age;
@@ -890,7 +890,7 @@ Feature: Graql Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x has age 18;
       """
@@ -899,9 +899,9 @@ Feature: Graql Delete Query
 
   Scenario: attempting to delete an attribute ownership with a derived isa throws
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       lastname sub attribute, value string;
@@ -910,9 +910,9 @@ Feature: Graql Delete Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given get answers of graql insert
+    Given get answers of typeql insert
       """
       insert
       $x isa person,
@@ -927,7 +927,7 @@ Feature: Graql Delete Query
       | key:name:Alex | key:name:John |
     Given transaction commits
     When session opens transaction of type: write
-    When graql delete; throws exception
+    When typeql delete; throws exception
       """
       match
         $x isa person, has lastname $n, has name "Alex";
@@ -938,9 +938,9 @@ Feature: Graql Delete Query
 
   Scenario: deleting an attribute ownership using 'thing' as a label throws an error
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       address sub attribute, value string, abstract;
@@ -950,9 +950,9 @@ Feature: Graql Delete Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Sherlock", has postcode "W1U8ED";
@@ -960,7 +960,7 @@ Feature: Graql Delete Query
     Given transaction commits
 
     When session opens transaction of type: write
-    Then graql delete; throws exception
+    Then typeql delete; throws exception
       """
       match
         $x isa person, has address $a;
@@ -971,7 +971,7 @@ Feature: Graql Delete Query
 
 
   Scenario: an attribute can be specified by direct type when deleting an ownership of it
-    Given get answers of graql insert
+    Given get answers of typeql insert
       """
       insert
       $x isa person, has name "Watson";
@@ -981,7 +981,7 @@ Feature: Graql Delete Query
       | key:name:Watson |
     Given transaction commits
     When session opens transaction of type: write
-    When graql delete
+    When typeql delete
       """
       match
         $x isa person;
@@ -991,7 +991,7 @@ Feature: Graql Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person;
       """
@@ -999,7 +999,7 @@ Feature: Graql Delete Query
 
 
   Scenario: deleting an attribute ownership throws an error when the incorrect direct type is specified
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Watson";
@@ -1007,7 +1007,7 @@ Feature: Graql Delete Query
     Then transaction commits
 
     When session opens transaction of type: write
-    Then graql delete; throws exception
+    Then typeql delete; throws exception
       """
       match
         $x isa person;
@@ -1019,9 +1019,9 @@ Feature: Graql Delete Query
 
   Scenario: deleting the owner of an attribute also deletes the attribute ownership
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       duration sub attribute, value long;
@@ -1030,9 +1030,9 @@ Feature: Graql Delete Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Tom";
@@ -1042,14 +1042,14 @@ Feature: Graql Delete Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x has duration $d;
       """
     Then uniquely identify answer concepts
       | x         | d                   |
       | key:ref:0 | value:duration:1000 |
-    When graql delete
+    When typeql delete
       """
       match
         $r isa friendship;
@@ -1059,7 +1059,7 @@ Feature: Graql Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x has duration $d;
       """
@@ -1068,9 +1068,9 @@ Feature: Graql Delete Query
 
   Scenario: deleting the last roleplayer in a relation deletes both the relation and its attribute ownerships
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       duration sub attribute, value long;
@@ -1079,9 +1079,9 @@ Feature: Graql Delete Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Emma";
@@ -1090,14 +1090,14 @@ Feature: Graql Delete Query
     Given transaction commits
 
     When session opens transaction of type: write
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x has duration $d;
       """
     Then uniquely identify answer concepts
       | x         | d                   |
       | key:ref:0 | value:duration:1000 |
-    When graql delete
+    When typeql delete
       """
       match
         $r (friend: $x) isa friendship;
@@ -1107,12 +1107,12 @@ Feature: Graql Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x has duration $d;
       """
     Then answer size is: 0
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $r isa friendship;
       """
@@ -1120,7 +1120,7 @@ Feature: Graql Delete Query
 
 
   Scenario: an error is thrown when deleting the ownership of a non-existent attribute
-    Then graql delete; throws exception
+    Then typeql delete; throws exception
       """
       match
         $x has diameter $val;
@@ -1135,9 +1135,9 @@ Feature: Graql Delete Query
 
   Scenario: deletion of a complex pattern
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       lastname sub attribute, value string;
@@ -1146,9 +1146,9 @@ Feature: Graql Delete Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person,
@@ -1164,7 +1164,7 @@ Feature: Graql Delete Query
     Given transaction commits
 
     When session opens transaction of type: write
-    When graql delete
+    When typeql delete
       """
       match
         $x isa person, has name "Alex", has lastname $n;
@@ -1179,7 +1179,7 @@ Feature: Graql Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $f (friend: $x) isa friendship;
       """
@@ -1188,7 +1188,7 @@ Feature: Graql Delete Query
       | key:ref:2   | key:name:Alex |
       | key:ref:2   | key:name:John |
       | key:ref:3   | key:name:Alex |
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $n isa name;
       """
@@ -1196,7 +1196,7 @@ Feature: Graql Delete Query
       | n               |
       | value:name:John |
       | value:name:Alex |
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person, has lastname $n;
       """
@@ -1207,9 +1207,9 @@ Feature: Graql Delete Query
 
   Scenario: deleting everything in a complex pattern
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       lastname sub attribute, value string;
@@ -1218,9 +1218,9 @@ Feature: Graql Delete Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person,
@@ -1236,7 +1236,7 @@ Feature: Graql Delete Query
     Given transaction commits
 
     When session opens transaction of type: write
-    When graql delete
+    When typeql delete
       """
       match
         $x isa person, has name "Alex", has lastname $n;
@@ -1252,7 +1252,7 @@ Feature: Graql Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person, has lastname $n;
       """
@@ -1264,7 +1264,7 @@ Feature: Graql Delete Query
   ##############
 
   Scenario: deleting a variable not in the query throws, even if there were no matches
-    Then graql delete; throws exception
+    Then typeql delete; throws exception
       """
       match $x isa person; delete $n isa name;
       """
@@ -1272,7 +1272,7 @@ Feature: Graql Delete Query
 
 
   Scenario: deleting a has ownership @key throws on commit
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Alex";
@@ -1280,7 +1280,7 @@ Feature: Graql Delete Query
     Given transaction commits
 
     When session opens transaction of type: write
-    Then graql delete
+    Then typeql delete
       """
       match
         $x isa person, has name $n;
@@ -1292,7 +1292,7 @@ Feature: Graql Delete Query
 
   @ignore
   Scenario: deleting an attribute instance that is owned as a has throws @key an error
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Tatyana";
@@ -1300,14 +1300,14 @@ Feature: Graql Delete Query
     Given transaction commits
 
     When session opens transaction of type: write
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa name;
       """
     Then uniquely identify answer concepts
       | x                  |
       | value:name:Tatyana |
-    Then graql delete; throws exception
+    Then typeql delete; throws exception
       """
       match
         $x "Tatyana" isa name;
@@ -1318,7 +1318,7 @@ Feature: Graql Delete Query
 
 
   Scenario: deleting a type throws an error
-    Then graql delete; throws exception
+    Then typeql delete; throws exception
       """
       match
         $x type person;

@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -22,17 +22,17 @@ config:
 build:
   quality:
     filter:
-      owner: graknlabs
+      owner: vaticle
       branch: master
     dependency-analysis:
-      image: graknlabs-ubuntu-20.04
+      image: vaticle-ubuntu-20.04
       command: |
-        bazel run @graknlabs_dependencies//grabl/analysis:dependency-analysis
+        bazel run @vaticle_dependencies//grabl/analysis:dependency-analysis
   correctness:
     build:
-      image: graknlabs-ubuntu-20.04
+      image: vaticle-ubuntu-20.04
       command: |
         bazel build //... --test_output=errors
-        bazel run @graknlabs_dependencies//tool/checkstyle:test-coverage
+        bazel run @vaticle_dependencies//tool/checkstyle:test-coverage
         bazel test $(bazel query 'kind(checkstyle_test, //...)') --test_output=errors
       

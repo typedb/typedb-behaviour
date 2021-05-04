@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -27,7 +27,7 @@ Feature: Compound Query Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -47,7 +47,7 @@ Feature: Compound Query Resolution
     Given for each session, open transactions of type: write
 
   Scenario: repeated concludable patterns within a query trigger rules from all pattern occurrences
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       base-attribute sub attribute, value string, abstract;
@@ -70,7 +70,7 @@ Feature: Compound Query Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa person, has base-string-attribute "Tesco";
@@ -79,7 +79,7 @@ Feature: Compound Query Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x has base-attribute $ax;

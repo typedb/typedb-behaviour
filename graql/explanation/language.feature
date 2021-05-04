@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -16,7 +16,7 @@
 #
 
 #noinspection CucumberUndefinedStep
-Feature: Graql Reasoning Explanation
+Feature: TypeQL Reasoning Explanation
 
   Background: Initialise a session and transaction for each scenario
     Given connection has been opened
@@ -28,7 +28,7 @@ Feature: Graql Reasoning Explanation
 
   Verify the code path for atomic queries produces correct explanation and pattern.
 
-    Given graql define
+    Given typeql define
       """
       define
       name sub attribute,
@@ -38,13 +38,13 @@ Feature: Graql Reasoning Explanation
         owns name @key;
       """
 
-    When graql insert
+    When typeql insert
       """
       insert
       $p isa person, has name "Alice";
       """
 
-    Then get answers of graql match
+    Then get answers of typeql match
       """
       match $p isa person;
       """
@@ -59,7 +59,7 @@ Feature: Graql Reasoning Explanation
 
   @ignore-client-java
   Scenario: relation has lookup explanation
-    Given graql define
+    Given typeql define
       """
       define
       name sub attribute,
@@ -80,7 +80,7 @@ Feature: Graql Reasoning Explanation
           relates subordinate;
       """
 
-    When graql insert
+    When typeql insert
       """
       insert
       $ar isa area, has name "King's Cross";
@@ -88,7 +88,7 @@ Feature: Graql Reasoning Explanation
       (superior: $cit, subordinate: $ar) isa location-hierarchy;
       """
 
-    Then get answers of graql match
+    Then get answers of typeql match
       """
       match
       $k isa area, has name $n;
@@ -114,7 +114,7 @@ Feature: Graql Reasoning Explanation
 
   Verify the code path for non-atomic queries produces correct explanation and pattern.
 
-    Given graql define
+    Given typeql define
       """
       define
       name sub attribute,
@@ -135,7 +135,7 @@ Feature: Graql Reasoning Explanation
           relates subordinate;
       """
 
-    When graql insert
+    When typeql insert
       """
       insert
       $ar isa area, has name "King's Cross";
@@ -145,7 +145,7 @@ Feature: Graql Reasoning Explanation
       (superior: $cou, subordinate: $cit) isa location-hierarchy;
       """
 
-    Then get answers of graql match
+    Then get answers of typeql match
       """
       match
       $k isa area, has name $n;
@@ -174,7 +174,7 @@ Feature: Graql Reasoning Explanation
   A negation explanation shows the resolution that occurred. It contains the pattern for the lookup that was performed,
   indicating that this lookup was then checked against the negation to verify that it satisfied the query.
 
-    Given graql define
+    Given typeql define
       """
       define
 
@@ -189,7 +189,7 @@ Feature: Graql Reasoning Explanation
           owns name;
       """
 
-    When graql insert
+    When typeql insert
       """
       insert
       $c1 isa company, has company-id 0;
@@ -198,7 +198,7 @@ Feature: Graql Reasoning Explanation
       $c2 has name $n2; $n2 "another-company";
       """
 
-    Then get answers of graql match
+    Then get answers of typeql match
       """
       match $com isa company, has name $n; not { $n "the-company"; };
       """
@@ -223,7 +223,7 @@ Feature: Graql Reasoning Explanation
   Ids in the answer's pattern should sit outside the disjunction, this makes the disjunction valid as it provides outer scope variables for the disjunction to bind to.
   The explanation beneath should explain the disjunctive clause that was used to provide the original answer.
 
-    Given graql define
+    Given typeql define
       """
       define
 
@@ -238,14 +238,14 @@ Feature: Graql Reasoning Explanation
           owns name;
       """
 
-    When graql insert
+    When typeql insert
       """
       insert
       $c2 isa company, has company-id 1;
       $c2 has name $n2; $n2 "another-company";
       """
 
-    Then get answers of graql match
+    Then get answers of typeql match
       """
       match $com isa company;
       {$com has name $n1; $n1 "the-company";} or {$com has name $n2; $n2 "another-company";};
@@ -271,7 +271,7 @@ Feature: Graql Reasoning Explanation
   Due to the use of Disjunctive Normal Form, the answer's pattern should contain only one disjunction with ids outside as the outer scope.
   The explanation beneath should explain the disjunctive clause that was used to provide the original answer.
 
-    Given graql define
+    Given typeql define
       """
       define
 
@@ -286,14 +286,14 @@ Feature: Graql Reasoning Explanation
           owns name;
       """
 
-    When graql insert
+    When typeql insert
       """
       insert
       $c2 isa company, has company-id 1;
       $c2 has name $n2; $n2 "another-company";
       """
 
-    Then get answers of graql match
+    Then get answers of typeql match
       """
       match $com isa company;
       {$com has name $n1; $n1 "the-company";} or {$com has name $n2; {$n2 "another-company";} or {$n2 "third-company";};};

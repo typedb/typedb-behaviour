@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -30,7 +30,7 @@ Feature: Resolution Test Framework
 
 
   Scenario: basic rule
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -51,7 +51,7 @@ Feature: Resolution Test Framework
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa company;
@@ -59,7 +59,7 @@ Feature: Resolution Test Framework
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $co has name $n;
       """
@@ -68,7 +68,7 @@ Feature: Resolution Test Framework
 
 
   Scenario: compounding rules
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -100,7 +100,7 @@ Feature: Resolution Test Framework
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $co isa company;
@@ -108,7 +108,7 @@ Feature: Resolution Test Framework
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $co has is-liable $l;
       """
@@ -117,7 +117,7 @@ Feature: Resolution Test Framework
 
 
   Scenario: 2-hop transitivity
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       name sub attribute, value string;
@@ -151,7 +151,7 @@ Feature: Resolution Test Framework
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $ar isa area, has name "King's Cross";
@@ -163,7 +163,7 @@ Feature: Resolution Test Framework
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
       $k isa entity, has name "King's Cross";
@@ -175,7 +175,7 @@ Feature: Resolution Test Framework
 
   # TODO: currently this scenario takes longer than 2 hours to execute (#75) - re-enable when fixed
   Scenario: 3-hop transitivity
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       name sub attribute,
@@ -212,7 +212,7 @@ Feature: Resolution Test Framework
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $ar isa area, has name "King's Cross";
@@ -226,7 +226,7 @@ Feature: Resolution Test Framework
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $lh (superior: $continent, subordinate: $area) isa location-hierarchy;
       $continent isa continent; $area isa area;
@@ -236,7 +236,7 @@ Feature: Resolution Test Framework
 
 
   Scenario: queried relation is a supertype of the inferred relation
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -274,7 +274,7 @@ Feature: Resolution Test Framework
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $a isa woman, has name "Alice";
@@ -283,7 +283,7 @@ Feature: Resolution Test Framework
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match ($w, $m) isa family-relation; $w isa woman;
       """
@@ -292,7 +292,7 @@ Feature: Resolution Test Framework
 
 
   Scenario: querying with a disjunction and a negation
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -318,7 +318,7 @@ Feature: Resolution Test Framework
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $c1 isa company;
@@ -329,7 +329,7 @@ Feature: Resolution Test Framework
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $com isa company;
       {$com has name $n1; $n1 "the-company";} or {$com has name $n2; $n2 "another-company";};
@@ -340,7 +340,7 @@ Feature: Resolution Test Framework
 
 
   Scenario: a rule containing a negation
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -369,7 +369,7 @@ Feature: Resolution Test Framework
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $c1 isa company;
@@ -380,7 +380,7 @@ Feature: Resolution Test Framework
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $com isa company, has is-liable $lia; $lia true;
       """
@@ -389,7 +389,7 @@ Feature: Resolution Test Framework
 
 
   Scenario: querying with multiple negations
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -416,7 +416,7 @@ Feature: Resolution Test Framework
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $c1 isa company;
@@ -427,7 +427,7 @@ Feature: Resolution Test Framework
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $com isa company; not { $com has is-liable $lia; $lia true; }; not { $com has name $n; $n "the-company"; };
       """

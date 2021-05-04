@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -15,45 +15,45 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-workspace(name = "graknlabs_behaviour")
+workspace(name = "vaticle_typedb_behaviour")
 
 ################################
-# Load @graknlabs_dependencies #
+# Load @vaticle_dependencies #
 ################################
 
-load("//dependencies/graknlabs:repositories.bzl", "graknlabs_dependencies")
-graknlabs_dependencies()
+load("//dependencies/vaticle:repositories.bzl", "vaticle_dependencies")
+vaticle_dependencies()
 
 # Load //tool/checkstyle
-load("@graknlabs_dependencies//tool/checkstyle:deps.bzl", checkstyle_deps = "deps")
+load("@vaticle_dependencies//tool/checkstyle:deps.bzl", checkstyle_deps = "deps")
 checkstyle_deps()
 
 # Load //builder/bazel for RBE
-load("@graknlabs_dependencies//builder/bazel:deps.bzl", "bazel_toolchain")
+load("@vaticle_dependencies//builder/bazel:deps.bzl", "bazel_toolchain")
 bazel_toolchain()
 
 # Load //builder/java
-load("@graknlabs_dependencies//builder/java:deps.bzl", java_deps = "deps")
+load("@vaticle_dependencies//builder/java:deps.bzl", java_deps = "deps")
 java_deps()
-load("@graknlabs_dependencies//library/maven:rules.bzl", "maven")
+load("@vaticle_dependencies//library/maven:rules.bzl", "maven")
 
 # Load //builder/python
-load("@graknlabs_dependencies//builder/python:deps.bzl", python_deps = "deps")
+load("@vaticle_dependencies//builder/python:deps.bzl", python_deps = "deps")
 python_deps()
 
 # Load //builder/kotlin
-load("@graknlabs_dependencies//builder/kotlin:deps.bzl", kotlin_deps = "deps")
+load("@vaticle_dependencies//builder/kotlin:deps.bzl", kotlin_deps = "deps")
 kotlin_deps()
 load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kotlin_repositories", "kt_register_toolchains")
 kotlin_repositories()
 kt_register_toolchains()
 
-load("@graknlabs_dependencies//tool/common:deps.bzl", graknlabs_dependencies_tool_maven_artifacts = "maven_artifacts")
+load("@vaticle_dependencies//tool/common:deps.bzl", vaticle_dependencies_tool_maven_artifacts = "maven_artifacts")
 
 ############################
 # Load @maven dependencies #
 ############################
-load("@graknlabs_dependencies//library/maven:rules.bzl", "maven")
+load("@vaticle_dependencies//library/maven:rules.bzl", "maven")
 maven(
-    graknlabs_dependencies_tool_maven_artifacts
+    vaticle_dependencies_tool_maven_artifacts
 )

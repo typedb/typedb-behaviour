@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -27,7 +27,7 @@ Feature: Value Predicate Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -61,7 +61,7 @@ Feature: Value Predicate Resolution
     Given for each session, open transactions of type: write
 
   Scenario: a rule can infer an attribute ownership based on a value predicate
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       rule tortoises-become-old-at-age-1-year: when {
@@ -77,7 +77,7 @@ Feature: Value Predicate Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $se isa tortoise, has age 1;
@@ -85,7 +85,7 @@ Feature: Value Predicate Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $x has is-old $r;
       """
@@ -96,7 +96,7 @@ Feature: Value Predicate Resolution
 
   # TODO: re-enable all steps once materialised database counts duplicate attributes only once
   Scenario Outline: when querying for inferred attributes with '<op>', the answers matching the predicate are returned
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       lucky-number sub attribute, value long;
@@ -111,7 +111,7 @@ Feature: Value Predicate Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa person;
@@ -120,7 +120,7 @@ Feature: Value Predicate Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa person, has lucky-number $n;
@@ -142,7 +142,7 @@ Feature: Value Predicate Resolution
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario Outline: when both sides of a '<op>' comparison are inferred attributes, all answers satisfy the predicate
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       lucky-number sub attribute, value long;
@@ -156,7 +156,7 @@ Feature: Value Predicate Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa person, has name "Alice";
@@ -165,7 +165,7 @@ Feature: Value Predicate Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa person, has name "Alice", has lucky-number $m;
@@ -188,7 +188,7 @@ Feature: Value Predicate Resolution
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario Outline: when comparing an inferred attribute and a bound variable with '<op>', answers satisfy the predicate
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       lucky-number sub attribute, value long;
@@ -203,7 +203,7 @@ Feature: Value Predicate Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa person, has name "Alice";
@@ -212,7 +212,7 @@ Feature: Value Predicate Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa person, has name "Alice", has lucky-number $m;
@@ -235,7 +235,7 @@ Feature: Value Predicate Resolution
 
 
   Scenario: inferred attributes can be matched by inequality to a variable that is equal to a specified value
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       rule tesco-sells-all-soft-drinks: when {
@@ -258,7 +258,7 @@ Feature: Value Predicate Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa soft-drink, has name "Fanta";
@@ -268,7 +268,7 @@ Feature: Value Predicate Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x has retailer $r;
@@ -284,7 +284,7 @@ Feature: Value Predicate Resolution
 
 
   Scenario: inferred attributes can be matched by equality to a variable that is not equal to a specified value
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       rule tesco-sells-all-soft-drinks: when {
@@ -307,7 +307,7 @@ Feature: Value Predicate Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa soft-drink, has name "Fanta";
@@ -317,7 +317,7 @@ Feature: Value Predicate Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x has retailer $r;
@@ -334,7 +334,7 @@ Feature: Value Predicate Resolution
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario: inferred attributes can be filtered to include only values that contain a specified string
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -362,14 +362,14 @@ Feature: Value Predicate Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert $x isa soft-drink, has name "Fanta";
       """
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x has retailer $rx;
@@ -381,7 +381,7 @@ Feature: Value Predicate Resolution
 
 
   Scenario: inferred attributes can be matched by equality to an attribute that contains a specified string
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -409,7 +409,7 @@ Feature: Value Predicate Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa soft-drink, has name "Fanta";
@@ -418,7 +418,7 @@ Feature: Value Predicate Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x has retailer $rx;
@@ -442,7 +442,7 @@ Feature: Value Predicate Resolution
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario: inferred attributes can be matched by inequality to an attribute that contains a specified string
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -470,7 +470,7 @@ Feature: Value Predicate Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa soft-drink, has name "Fanta";
@@ -479,7 +479,7 @@ Feature: Value Predicate Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x has retailer $rx;
@@ -510,7 +510,7 @@ Feature: Value Predicate Resolution
 
 
   Scenario: in a rule, 'not { $x = $y; }' is the same as saying '$x != $y'
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       rule tesco-sells-all-soft-drinks: when {
@@ -533,7 +533,7 @@ Feature: Value Predicate Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa soft-drink, has name "Fanta";
@@ -543,7 +543,7 @@ Feature: Value Predicate Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Given for graql query
+    Given for typeql query
       """
       match
         $x has retailer $r;
@@ -556,7 +556,7 @@ Feature: Value Predicate Resolution
     Given answer size in reasoned database is: 2
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x has retailer $r;
@@ -568,7 +568,7 @@ Feature: Value Predicate Resolution
 
 
   Scenario: in a rule, 'not { $x != $y; }' is the same as saying '$x = $y'
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       rule tesco-sells-all-soft-drinks: when {
@@ -591,7 +591,7 @@ Feature: Value Predicate Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa soft-drink, has name "Fanta";
@@ -601,7 +601,7 @@ Feature: Value Predicate Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Given for graql query
+    Given for typeql query
       """
       match
         $x has retailer $r;
@@ -614,7 +614,7 @@ Feature: Value Predicate Resolution
     Given answer size in reasoned database is: 2
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x has retailer $r;
@@ -627,7 +627,7 @@ Feature: Value Predicate Resolution
 
   # TODO: move to negation.feature
   Scenario: a negation can filter out variables by equality to another variable with a specified value
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       rule tesco-sells-all-soft-drinks: when {
@@ -650,7 +650,7 @@ Feature: Value Predicate Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa soft-drink, has name "Fanta";
@@ -660,7 +660,7 @@ Feature: Value Predicate Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x has retailer $r;
@@ -679,7 +679,7 @@ Feature: Value Predicate Resolution
 
   # TODO: migrate to concept-inequality.feature
   Scenario: when using 'not { $x is $y; }' over attributes of the same value, the answers have distinct types
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       base-attribute sub attribute, value string, abstract;
@@ -703,7 +703,7 @@ Feature: Value Predicate Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa person, has base-string-attribute "Tesco";
@@ -712,7 +712,7 @@ Feature: Value Predicate Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x has base-attribute $ax;
@@ -732,7 +732,7 @@ Feature: Value Predicate Resolution
 
 
   Scenario: rules can divide entities into groups, linking each entity group to a specific concept by attribute value
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -782,7 +782,7 @@ Feature: Value Predicate Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
 
@@ -798,7 +798,7 @@ Feature: Value Predicate Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x "not expensive" isa price-range;
@@ -808,7 +808,7 @@ Feature: Value Predicate Resolution
     Then answer size in reasoned database is: 2
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x "low price" isa price-range;
@@ -818,7 +818,7 @@ Feature: Value Predicate Resolution
     Then answer size in reasoned database is: 1
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x "cheap" isa price-range;
@@ -828,7 +828,7 @@ Feature: Value Predicate Resolution
     Then answer size in reasoned database is: 1
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x "expensive" isa price-range;
@@ -838,7 +838,7 @@ Feature: Value Predicate Resolution
     Then answer size in reasoned database is: 1
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa price-range;
@@ -852,7 +852,7 @@ Feature: Value Predicate Resolution
 
   # TODO: re-enable all steps when resolvable (currently it takes too long to resolve) (#75)
   Scenario: attribute comparison can be used to classify concept pairs as predecessors and successors of each other
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -889,7 +889,7 @@ Feature: Value Predicate Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
 
@@ -909,7 +909,7 @@ Feature: Value Predicate Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match (predecessor:$x1, successor:$x2) isa message-succession;
       """

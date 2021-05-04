@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -27,7 +27,7 @@ Feature: Concept Inequality Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -59,7 +59,7 @@ Feature: Concept Inequality Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
 
@@ -82,7 +82,7 @@ Feature: Concept Inequality Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -114,7 +114,7 @@ Feature: Concept Inequality Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
 
@@ -130,7 +130,7 @@ Feature: Concept Inequality Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match (state: $s) isa holds;
       """
@@ -138,7 +138,7 @@ Feature: Concept Inequality Resolution
     Then answer size in reasoned database is: 1
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match $s isa state, has name 's2';
       """
@@ -150,7 +150,7 @@ Feature: Concept Inequality Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Given for graql query
+    Given for typeql query
       """
       match (ball1: $x, ball2: $y) isa selection;
       """
@@ -160,7 +160,7 @@ Feature: Concept Inequality Resolution
     Given answer size in reasoned database is: 9
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -173,7 +173,7 @@ Feature: Concept Inequality Resolution
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
     # verify that the answer pairs to the previous query have distinct names within each pair
-    Then for graql query
+    Then for typeql query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -193,7 +193,7 @@ Feature: Concept Inequality Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -205,7 +205,7 @@ Feature: Concept Inequality Resolution
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
     # verify answers are [ac, bc]
-    Then for graql query
+    Then for typeql query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -233,7 +233,7 @@ Feature: Concept Inequality Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -248,7 +248,7 @@ Feature: Concept Inequality Resolution
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
     # verify that $y and $z always have distinct names
-    Then for graql query
+    Then for typeql query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -281,7 +281,7 @@ Feature: Concept Inequality Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -293,7 +293,7 @@ Feature: Concept Inequality Resolution
     # verify that $y and $z always have distinct names
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -328,7 +328,7 @@ Feature: Concept Inequality Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Given for graql query
+    Given for typeql query
       """
       match
         (ball1: $x, ball2: $y1) isa selection;
@@ -341,7 +341,7 @@ Feature: Concept Inequality Resolution
     Then answer size in reasoned database is: 243
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         (ball1: $x, ball2: $y1) isa selection;
@@ -358,7 +358,7 @@ Feature: Concept Inequality Resolution
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
     # verify that $y1 and $z1 - as well as $y2 and $z2 - always have distinct names
-    Then for graql query
+    Then for typeql query
       """
       match
         (ball1: $x, ball2: $y1) isa selection;
@@ -395,7 +395,7 @@ Feature: Concept Inequality Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Given for graql query
+    Given for typeql query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -407,7 +407,7 @@ Feature: Concept Inequality Resolution
     Then answer size in reasoned database is: 81
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -423,7 +423,7 @@ Feature: Concept Inequality Resolution
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
     # verify that $y1 and $z1 - as well as $y2 and $z2 - always have distinct names
-    Then for graql query
+    Then for typeql query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -445,7 +445,7 @@ Feature: Concept Inequality Resolution
 
   # TODO enable when we can resolve repeated concludables
   @ignore
-  # TODO: re-enable once grakn#5821 is fixed (in some answers, $typeof_ax is 'base-attribute' which is incorrect)
+  # TODO: re-enable once typedb#5821 is fixed (in some answers, $typeof_ax is 'base-attribute' which is incorrect)
   # TODO: re-enable all steps once implicit attribute variables are resolvable
   # TODO: migrate to concept-inequality.feature
   Scenario: when restricting concept types of a pair of inferred attributes with '!=', the answers have distinct types
@@ -454,7 +454,7 @@ Feature: Concept Inequality Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       soft-drink sub entity,
@@ -478,7 +478,7 @@ Feature: Concept Inequality Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa person, has string-attribute "Tesco";
@@ -489,7 +489,7 @@ Feature: Concept Inequality Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x has $ax;
@@ -515,7 +515,7 @@ Feature: Concept Inequality Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       soft-drink sub entity,
@@ -553,7 +553,7 @@ Feature: Concept Inequality Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     """
       insert
       $w isa person, has string-attribute "Ocado";
@@ -566,7 +566,7 @@ Feature: Concept Inequality Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $value isa! retailer;

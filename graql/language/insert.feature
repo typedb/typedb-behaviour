@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -16,16 +16,16 @@
 #
 
 #noinspection CucumberUndefinedStep
-Feature: Graql Insert Query
+Feature: TypeQL Insert Query
 
   Background: Open connection and create a simple extensible schema
     Given connection has been opened
     Given connection does not have any database
-    Given connection create database: grakn
-    Given connection open schema session for database: grakn
+    Given connection create database: typedb
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
 
-    Given graql define
+    Given typeql define
       """
       define
 
@@ -57,7 +57,7 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
 
 
@@ -66,14 +66,14 @@ Feature: Graql Insert Query
   ####################
 
   Scenario: new entities can be inserted
-    When graql insert
+    When typeql insert
       """
       insert $x isa person, has ref 0;
       """
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person;
       """
@@ -83,7 +83,7 @@ Feature: Graql Insert Query
 
 
   Scenario: one query can insert multiple things
-    When graql insert
+    When typeql insert
       """
       insert
       $x isa person, has ref 0;
@@ -92,7 +92,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person;
       """
@@ -103,7 +103,7 @@ Feature: Graql Insert Query
 
 
   Scenario: when an insert has multiple statements with the same variable name, they refer to the same thing
-    When graql insert
+    When typeql insert
       """
       insert
       $x has name "Bond";
@@ -113,21 +113,21 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x has name "Bond";
       """
     Then uniquely identify answer concepts
       | x         |
       | key:ref:0 |
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x has name "James Bond";
       """
     Then uniquely identify answer concepts
       | x         |
       | key:ref:0 |
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x has name "Bond", has name "James Bond";
       """
@@ -138,9 +138,9 @@ Feature: Graql Insert Query
 
   Scenario: when running multiple identical insert queries in series, new things get created each time
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       breed sub attribute, value string;
@@ -149,45 +149,45 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given get answers of graql match
+    Given get answers of typeql match
       """
       match $x isa dog;
       """
     Given answer size is: 0
-    When graql insert
+    When typeql insert
       """
       insert $x isa dog, has breed "Labrador";
       """
     Then transaction commits
 
     When session opens transaction of type: write
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa dog;
       """
     Then answer size is: 1
-    Then graql insert
+    Then typeql insert
       """
       insert $x isa dog, has breed "Labrador";
       """
     Then transaction commits
 
     When session opens transaction of type: write
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa dog;
       """
     Then answer size is: 2
-    Then graql insert
+    Then typeql insert
       """
       insert $x isa dog, has breed "Labrador";
       """
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa dog;
       """
@@ -195,7 +195,7 @@ Feature: Graql Insert Query
 
 
   Scenario: an insert can be performed using a direct type specifier, and it functions equivalently to 'isa'
-    When get answers of graql insert
+    When get answers of typeql insert
       """
       insert $x isa! person, has name "Harry", has ref 0;
       """
@@ -207,9 +207,9 @@ Feature: Graql Insert Query
 
   Scenario: attempting to insert an instance of an abstract type throws an error
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       factory sub entity, abstract;
@@ -218,9 +218,9 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Then graql insert; throws exception
+    Then typeql insert; throws exception
       """
       insert $x isa factory;
       """
@@ -228,7 +228,7 @@ Feature: Graql Insert Query
 
 
   Scenario: attempting to insert an instance of type 'thing' throws an error
-    Then graql insert; throws exception
+    Then typeql insert; throws exception
       """
       insert $x isa thing;
       """
@@ -240,19 +240,19 @@ Feature: Graql Insert Query
   #######################
 
   Scenario: when inserting a new thing that owns new attributes, both the thing and the attributes get created
-    Given get answers of graql match
+    Given get answers of typeql match
       """
       match $x isa thing;
       """
     Given answer size is: 0
-    When graql insert
+    When typeql insert
       """
       insert $x isa person, has name "Wilhelmina", has age 25, has ref 0;
       """
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa thing;
       """
@@ -265,14 +265,14 @@ Feature: Graql Insert Query
 
 
   Scenario: a freshly inserted attribute has no owners
-    Given graql insert
+    Given typeql insert
       """
       insert $name "John" isa name;
       """
     Given transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x has name "John";
       """
@@ -280,21 +280,21 @@ Feature: Graql Insert Query
 
 
   Scenario: given an attribute with no owners, inserting a thing that owns it results in it having an owner
-    Given graql insert
+    Given typeql insert
       """
       insert $name "Kyle" isa name;
       """
     Given transaction commits
 
     When session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert $x isa person, has name "Kyle", has ref 0;
       """
     Given transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x has name "Kyle";
       """
@@ -304,7 +304,7 @@ Feature: Graql Insert Query
 
 
   Scenario: after inserting two things that own the same attribute, the attribute has two owners
-    When graql insert
+    When typeql insert
       """
       insert
       $p1 isa person, has name "Jack", has age 10, has ref 0;
@@ -313,7 +313,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
       $p1 isa person, has age $a;
@@ -329,9 +329,9 @@ Feature: Graql Insert Query
 
   Scenario: after inserting a new owner for every existing ownership of an attribute, its number of owners doubles
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       dog sub entity, owns name;
@@ -339,9 +339,9 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $p1 isa dog, has name "Frank";
@@ -353,14 +353,14 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $p isa dog;
       """
     Then answer size is: 5
-    When graql insert
+    When typeql insert
       """
       match
         $p has name $name;
@@ -370,7 +370,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: write
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $p isa dog;
       """
@@ -379,9 +379,9 @@ Feature: Graql Insert Query
 
   Scenario Outline: an insert can attach multiple distinct values of the same <type> attribute to a single owner
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       <attr> sub attribute, value <type>, owns ref @key;
@@ -390,9 +390,9 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    When graql insert
+    When typeql insert
       """
       insert
       $x <val1> isa <attr>, has ref 0;
@@ -402,7 +402,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $p isa person, has <attr> $x; get $x;
       """
@@ -421,7 +421,7 @@ Feature: Graql Insert Query
 
 
   Scenario: inserting an attribute onto a thing that can't have that attribute throws an error
-    Then graql insert; throws exception
+    Then typeql insert; throws exception
       """
       insert
       $x isa company, has ref 0, has age 10;
@@ -434,7 +434,7 @@ Feature: Graql Insert Query
   ########################################
 
   Scenario: when an entity owns an attribute, an additional value can be inserted on it
-    Given graql insert
+    Given typeql insert
       """
       insert
       $p isa person, has name "Peter Parker", has ref 0;
@@ -442,12 +442,12 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    Given get answers of graql match
+    Given get answers of typeql match
       """
       match $p has name "Spiderman";
       """
     Given answer size is: 0
-    When graql insert
+    When typeql insert
       """
       match
         $p isa person, has name "Peter Parker";
@@ -457,7 +457,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $p has name "Spiderman";
       """
@@ -467,7 +467,7 @@ Feature: Graql Insert Query
 
 
   Scenario: when inserting an additional attribute ownership on an entity, the entity type can be optionally specified
-    Given graql insert
+    Given typeql insert
       """
       insert
       $p isa person, has name "Peter Parker", has ref 0;
@@ -475,12 +475,12 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    Given get answers of graql match
+    Given get answers of typeql match
       """
       match $p has name "Spiderman";
       """
     Given answer size is: 0
-    When graql insert
+    When typeql insert
       """
       match
         $p isa person, has name "Peter Parker";
@@ -490,7 +490,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $p has name "Spiderman";
       """
@@ -501,9 +501,9 @@ Feature: Graql Insert Query
 
   Scenario: when an attribute owns an attribute, an instance of that attribute can be inserted onto it
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       colour sub attribute, value string, owns hex-value;
@@ -512,9 +512,9 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $c "red" isa colour;
@@ -522,12 +522,12 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    Given get answers of graql match
+    Given get answers of typeql match
       """
       match $c has hex-value "#FF0000";
       """
     Given answer size is: 0
-    When graql insert
+    When typeql insert
       """
       match
         $c "red" isa colour;
@@ -537,7 +537,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $c has hex-value "#FF0000";
       """
@@ -548,9 +548,9 @@ Feature: Graql Insert Query
 
   Scenario: when inserting an additional attribute ownership on an attribute, the owner type can be optionally specified
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       colour sub attribute, value string, owns hex-value;
@@ -559,9 +559,9 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $c "red" isa colour;
@@ -569,12 +569,12 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    Given get answers of graql match
+    Given get answers of typeql match
       """
       match $c has hex-value "#FF0000";
       """
     Given answer size is: 0
-    When graql insert
+    When typeql insert
       """
       match
         $c "red" isa colour;
@@ -584,7 +584,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $c has hex-value "#FF0000";
       """
@@ -595,9 +595,9 @@ Feature: Graql Insert Query
 
   Scenario: when linking an attribute that doesn't exist yet to a relation, the attribute gets created
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       residence sub relation,
@@ -612,9 +612,9 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    When graql insert
+    When typeql insert
       """
       insert
       $p isa person, has name "Homer", has ref 0;
@@ -624,12 +624,12 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: write
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $td isa tenure-days;
       """
     Then answer size is: 0
-    When graql insert
+    When typeql insert
       """
       match
         $r isa residence;
@@ -639,7 +639,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $r isa residence, has tenure-days $a; get $a;
       """
@@ -652,9 +652,9 @@ Feature: Graql Insert Query
   @ignore
   Scenario: an attribute ownership currently inferred by a rule can be explicitly inserted
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       rule lucy-is-aged-32:
@@ -667,23 +667,23 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert $p isa person, has name "Lucy", has ref 0;
       """
     Given transaction commits
 
     Given session opens transaction of type: write
-    Given get answers of graql match
+    Given get answers of typeql match
       """
       match $p has age 32;
       """
     Given uniquely identify answer concepts
       | p         |
       | key:ref:0 |
-    Given graql insert
+    Given typeql insert
       """
       match
         $p has name "Lucy";
@@ -693,7 +693,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $p has age 32;
       """
@@ -707,7 +707,7 @@ Feature: Graql Insert Query
   #############
 
   Scenario: new relations can be inserted
-    When graql insert
+    When typeql insert
       """
       insert
       $p isa person, has ref 0;
@@ -716,7 +716,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $r (employee: $p) isa employment;
       """
@@ -727,9 +727,9 @@ Feature: Graql Insert Query
 
   Scenario: when inserting a relation that owns an attribute and has an attribute roleplayer, both attributes are created
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       residence sub relation,
@@ -744,9 +744,9 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    When graql insert
+    When typeql insert
       """
       insert
       $p isa person, has name "Homer", has ref 0;
@@ -757,7 +757,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $r (place: $addr) isa residence, has is-permanent $perm;
       """
@@ -767,7 +767,7 @@ Feature: Graql Insert Query
 
 
   Scenario: relations can be inserted with multiple role players
-    When graql insert
+    When typeql insert
       """
       insert
       $p1 isa person, has name "Gordon", has ref 0;
@@ -778,7 +778,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
         $r (employer: $c) isa employment;
@@ -788,7 +788,7 @@ Feature: Graql Insert Query
     Then uniquely identify answer concepts
       | cname                  |
       | value:name:Morrisons   |
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
         $r (employee: $p) isa employment;
@@ -799,14 +799,14 @@ Feature: Graql Insert Query
 
 
   Scenario: an additional role player can be inserted onto an existing relation
-    Given graql insert
+    Given typeql insert
       """
       insert $p isa person, has ref 0; $r (employee: $p) isa employment, has ref 1;
       """
     Given transaction commits
 
     When session opens transaction of type: write
-    When graql insert
+    When typeql insert
       """
       match
         $r isa employment;
@@ -817,7 +817,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $r (employer: $c, employee: $p) isa employment;
       """
@@ -827,7 +827,7 @@ Feature: Graql Insert Query
 
 
   Scenario: an additional role player can be inserted into every relation matching a pattern
-    Given graql insert
+    Given typeql insert
       """
       insert
       $p isa person, has name "Ruth", has ref 0;
@@ -838,7 +838,7 @@ Feature: Graql Insert Query
     Given transaction commits
 
     When session opens transaction of type: write
-    When graql insert
+    When typeql insert
       """
       match
         $r isa employment, has ref $ref;
@@ -849,7 +849,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $r (employer: $c, employee: $p) isa employment;
       """
@@ -860,14 +860,14 @@ Feature: Graql Insert Query
 
 
   Scenario: an additional repeated role player can be inserted into an existing relation
-    Given graql insert
+    Given typeql insert
       """
       insert $p isa person, has ref 0; $r (employee: $p) isa employment, has ref 1;
       """
     Given transaction commits
 
     When session opens transaction of type: write
-    When graql insert
+    When typeql insert
       """
       match
         $r isa employment;
@@ -878,7 +878,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $r (employee: $p, employee: $p) isa employment;
       """
@@ -888,7 +888,7 @@ Feature: Graql Insert Query
 
 
   Scenario: when inserting a roleplayer that can't play the role, an error is thrown
-    Then graql insert; throws exception
+    Then typeql insert; throws exception
       """
       insert
       $r (employer: $p) isa employment, has ref 0;
@@ -899,9 +899,9 @@ Feature: Graql Insert Query
 
   Scenario: parent types are not necessarily allowed to play the roles that their children play
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       animal sub entity;
@@ -912,9 +912,9 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Then graql insert; throws exception
+    Then typeql insert; throws exception
       """
       insert
       $r (model: $x, builder: $y) isa sphinx-production;
@@ -925,7 +925,7 @@ Feature: Graql Insert Query
 
 
   Scenario: when inserting a relation with no role players, an error is thrown
-    Then graql insert; throws exception
+    Then typeql insert; throws exception
       """
       insert
       $x isa employment, has ref 0;
@@ -934,7 +934,7 @@ Feature: Graql Insert Query
 
 
   Scenario: when inserting a relation with an unbound variable as a roleplayer, an error is thrown
-    Then graql insert; throws exception
+    Then typeql insert; throws exception
       """
       insert
       $r (employee: $x, employer: $y) isa employment, has ref 0;
@@ -946,9 +946,9 @@ Feature: Graql Insert Query
   @ignore
   Scenario: a relation currently inferred by a rule can be explicitly inserted
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       gym-membership sub relation, relates member;
@@ -963,20 +963,20 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    When graql insert
+    When typeql insert
       """
       insert $p isa person, has name "Jennifer", has ref 0;
       """
     Then transaction commits
 
     When session opens transaction of type: write
-    When get answers of graql match
+    When get answers of typeql match
       """
       match (member: $p) isa gym-membership; get $p;
       """
-    Then graql insert
+    Then typeql insert
       """
       match
         $p has name "Jennifer";
@@ -986,14 +986,14 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match (member: $p) isa gym-membership; get $p;
       """
     Then uniquely identify answer concepts
       | p         |
       | key:ref:0 |
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $r isa gym-membership; get $r;
       """
@@ -1006,30 +1006,30 @@ Feature: Graql Insert Query
 
   Scenario Outline: inserting an attribute of type '<type>' creates an instance of it
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define <attr> sub attribute, value <type>, owns ref @key;
       """
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given get answers of graql match
+    Given get answers of typeql match
       """
       match $x <value> isa <attr>;
       """
     Given answer size is: 0
-    When graql insert
+    When typeql insert
       """
       insert $x <value> isa <attr>, has ref 0;
       """
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x <value> isa <attr>;
       """
@@ -1048,9 +1048,9 @@ Feature: Graql Insert Query
 
   Scenario: insert a regex attribute throws error if not conforming to regex
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       person sub entity,
@@ -1062,9 +1062,9 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Then graql insert; throws exception
+    Then typeql insert; throws exception
       """
       insert
         $x isa person, has value $a, has ref 0;
@@ -1074,7 +1074,7 @@ Feature: Graql Insert Query
 
 
   Scenario: inserting two attributes with the same type and value creates only one concept
-    When graql insert
+    When typeql insert
       """
       insert
       $x 2 isa age;
@@ -1083,7 +1083,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa age;
       """
@@ -1094,9 +1094,9 @@ Feature: Graql Insert Query
 
   Scenario: inserting two 'double' attribute values with the same integer value creates a single concept
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       length sub attribute, value double;
@@ -1104,9 +1104,9 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    When graql insert
+    When typeql insert
       """
       insert
       $x 2 isa length;
@@ -1115,7 +1115,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa length;
       """
@@ -1127,9 +1127,9 @@ Feature: Graql Insert Query
 
   Scenario: inserting the same integer twice as a 'double' in separate transactions creates a single concept
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       length sub attribute, value double;
@@ -1137,9 +1137,9 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    When graql insert
+    When typeql insert
       """
       insert
       $x 2 isa length;
@@ -1147,7 +1147,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: write
-    When graql insert
+    When typeql insert
       """
       insert
       $y 2 isa length;
@@ -1155,7 +1155,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa length;
       """
@@ -1167,9 +1167,9 @@ Feature: Graql Insert Query
 
   Scenario: inserting attribute values [2] and [2.0] with the same attribute type creates a single concept
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       length sub attribute, value double;
@@ -1177,9 +1177,9 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    When graql insert
+    When typeql insert
       """
       insert
       $x 2 isa length;
@@ -1188,7 +1188,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa length;
       """
@@ -1197,18 +1197,18 @@ Feature: Graql Insert Query
 
   Scenario Outline: a '<type>' inserted as [<insert>] is retrieved when matching [<match>]
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define <attr> sub attribute, value <type>, owns ref @key;
       """
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    When get answers of graql insert
+    When get answers of typeql insert
       """
       insert $x <insert> isa <attr>, has ref 0;
       """
@@ -1218,7 +1218,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x <match> isa <attr>;
       """
@@ -1242,18 +1242,18 @@ Feature: Graql Insert Query
 
   Scenario Outline: inserting [<value>] as a '<type>' throws an error
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define <attr> sub attribute, value <type>, owns ref @key;
       """
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Then graql insert; throws exception
+    Then typeql insert; throws exception
       """
       insert $x <value> isa <attr>, has ref 0;
       """
@@ -1287,7 +1287,7 @@ Feature: Graql Insert Query
 
 
   Scenario: when inserting an attribute, the type and value can be specified in two individual statements
-    When get answers of graql insert
+    When get answers of typeql insert
       """
       insert
       $x isa age;
@@ -1301,7 +1301,7 @@ Feature: Graql Insert Query
 
 
   Scenario: inserting an attribute with no value throws an error
-    Then graql insert; throws exception
+    Then typeql insert; throws exception
       """
       insert $x isa age;
       """
@@ -1309,7 +1309,7 @@ Feature: Graql Insert Query
 
 
   Scenario: inserting an attribute value with no type throws an error
-    Then graql insert; throws exception
+    Then typeql insert; throws exception
       """
       insert $x 18;
       """
@@ -1317,7 +1317,7 @@ Feature: Graql Insert Query
 
 
   Scenario: inserting an attribute with a predicate throws an error
-    Then graql insert; throws exception
+    Then typeql insert; throws exception
       """
       insert $x > 18 isa age;
       """
@@ -1329,14 +1329,14 @@ Feature: Graql Insert Query
   ########
 
   Scenario: a thing can be inserted with a key
-    When graql insert
+    When typeql insert
       """
       insert $x isa person, has ref 0;
       """
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person;
       """
@@ -1346,7 +1346,7 @@ Feature: Graql Insert Query
 
 
   Scenario: when a type has a key, attempting to insert it without that key throws on commit
-    When graql insert
+    When typeql insert
       """
       insert $x isa person;
       """
@@ -1355,7 +1355,7 @@ Feature: Graql Insert Query
 
 
   Scenario: inserting two distinct values of the same key on a thing throws an error
-    Then graql insert; throws exception
+    Then typeql insert; throws exception
       """
       insert $x isa person, has ref 0, has ref 1;
       """
@@ -1363,7 +1363,7 @@ Feature: Graql Insert Query
 
 
   Scenario: instances of a key must be unique among all instances of a type
-    Then graql insert; throws exception
+    Then typeql insert; throws exception
       """
       insert
       $x isa person, has ref 0;
@@ -1374,9 +1374,9 @@ Feature: Graql Insert Query
 
   Scenario: an error is thrown when inserting a second key on an attribute that already has one
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       name owns ref @key;
@@ -1384,16 +1384,16 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    When graql insert
+    When typeql insert
       """
       insert $a "john" isa name, has ref 0;
       """
     Then transaction commits
 
     When session opens transaction of type: write
-    Then graql insert; throws exception
+    Then typeql insert; throws exception
       """
       insert $a "john" isa name, has ref 1;
       """
@@ -1405,7 +1405,7 @@ Feature: Graql Insert Query
   ###########################
 
   Scenario: an insert with multiple thing variables returns a single answer that contains them all
-    When get answers of graql insert
+    When get answers of typeql insert
       """
       insert
       $x isa person, has name "Bruce Wayne", has ref 0;
@@ -1418,7 +1418,7 @@ Feature: Graql Insert Query
 
 
   Scenario: referring to a type by variable rather than by label in an insert throws
-    Then graql insert; throws exception
+    Then typeql insert; throws exception
       """
       match
         $type type company;
@@ -1433,9 +1433,9 @@ Feature: Graql Insert Query
 
   Scenario: match-insert triggers one insert per answer of the match clause
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       language sub entity, owns name, owns is-cool, owns ref @key;
@@ -1444,9 +1444,9 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa language, has name "Norwegian", has ref 0;
@@ -1455,7 +1455,7 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    When graql insert
+    When typeql insert
       """
       match
         $x isa language;
@@ -1465,7 +1465,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x has is-cool true;
       """
@@ -1473,7 +1473,7 @@ Feature: Graql Insert Query
 
 
   Scenario: the answers of a match-insert only include the variables referenced in the 'insert' block
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Eric", has ref 0;
@@ -1484,7 +1484,7 @@ Feature: Graql Insert Query
     Given transaction commits
 
     When session opens transaction of type: write
-    When get answers of graql insert
+    When get answers of typeql insert
       """
       match
         (employer: $x, employee: $z) isa employment, has ref $ref;
@@ -1501,9 +1501,9 @@ Feature: Graql Insert Query
 
   Scenario: match-insert can take an attribute's value and copy it to an attribute of a different type
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       height sub attribute, value long;
@@ -1512,9 +1512,9 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Susie", has age 16, has ref 0;
@@ -1524,7 +1524,7 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       match
         $x isa person, has age 16;
@@ -1534,7 +1534,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
         $x has height $z;
@@ -1547,9 +1547,9 @@ Feature: Graql Insert Query
 
   Scenario: if match-insert matches nothing, then nothing is inserted
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       season-ticket-ownership sub relation, relates holder;
@@ -1558,14 +1558,14 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given get answers of graql match
+    Given get answers of typeql match
       """
       match $p isa person;
       """
     Given answer size is: 0
-    When graql insert
+    When typeql insert
       """
       match
         $p isa person;
@@ -1575,7 +1575,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $r isa season-ticket-ownership;
       """
@@ -1583,7 +1583,7 @@ Feature: Graql Insert Query
 
 
   Scenario: match-inserting only existing entities is a no-op
-    Given get answers of graql insert
+    Given get answers of typeql insert
       """
       insert
       $x isa person, has name "Rebecca", has ref 0;
@@ -1596,7 +1596,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: write
-    Given get answers of graql match
+    Given get answers of typeql match
       """
       match $x isa person;
       """
@@ -1605,7 +1605,7 @@ Feature: Graql Insert Query
       | key:ref:0 |
       | key:ref:1 |
       | key:ref:2 |
-    When graql insert
+    When typeql insert
       """
       match
         $x isa person;
@@ -1615,7 +1615,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person;
       """
@@ -1627,7 +1627,7 @@ Feature: Graql Insert Query
 
 
   Scenario: match-inserting only existing relations is a no-op
-    Given get answers of graql insert
+    Given get answers of typeql insert
       """
       insert
       $x isa person, has name "Homer", has ref 0;
@@ -1644,7 +1644,7 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    Given get answers of graql match
+    Given get answers of typeql match
       """
       match $r (employee: $x, employer: $c) isa employment;
       """
@@ -1653,7 +1653,7 @@ Feature: Graql Insert Query
       | key:ref:4 | key:ref:0 | key:ref:3 |
       | key:ref:5 | key:ref:1 | key:ref:3 |
       | key:ref:6 | key:ref:2 | key:ref:3 |
-    When graql insert
+    When typeql insert
       """
       match
         $x isa employment;
@@ -1663,7 +1663,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: write
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $r (employee: $x, employer: $c) isa employment;
       """
@@ -1675,7 +1675,7 @@ Feature: Graql Insert Query
 
 
   Scenario: match-inserting only existing attributes is a no-op
-    Given get answers of graql insert
+    Given get answers of typeql insert
       """
       insert
       $x "Ash" isa name;
@@ -1688,7 +1688,7 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    Given get answers of graql match
+    Given get answers of typeql match
       """
       match $x isa name;
       """
@@ -1697,7 +1697,7 @@ Feature: Graql Insert Query
       | value:name:Ash   |
       | value:name:Misty |
       | value:name:Brock |
-    When graql insert
+    When typeql insert
       """
       match
         $x isa name;
@@ -1707,7 +1707,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: write
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa name;
       """
@@ -1719,7 +1719,7 @@ Feature: Graql Insert Query
 
 
   Scenario: re-inserting a matched instance does nothing
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has ref 0;
@@ -1727,7 +1727,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: write
-    Then graql insert
+    Then typeql insert
       """
       match
         $x isa person;
@@ -1737,7 +1737,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person;
       """
@@ -1745,7 +1745,7 @@ Feature: Graql Insert Query
 
 
   Scenario: re-inserting a matched instance as an unrelated type throws an error
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has ref 0;
@@ -1753,7 +1753,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: write
-    Then graql insert; throws exception
+    Then typeql insert; throws exception
       """
       match
         $x isa person;
@@ -1765,25 +1765,25 @@ Feature: Graql Insert Query
 
   Scenario: inserting a new type on an existing instance that is a subtype of its existing type throws
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define child sub person;
       """
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert $x isa person, has ref 0;
       """
     Given transaction commits
 
     Given session opens transaction of type: write
-    When graql insert; throws exception
+    When typeql insert; throws exception
       """
       match
         $x isa person;
@@ -1793,25 +1793,25 @@ Feature: Graql Insert Query
 
   Scenario: inserting a new type on an existing instance that is a supertype of its existing type throws
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define child sub person;
       """
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert $x isa child, has ref 0;
       """
     Given transaction commits
 
     Given session opens transaction of type: write
-    When graql insert; throws exception
+    When typeql insert; throws exception
       """
       match
         $x isa child;
@@ -1821,9 +1821,9 @@ Feature: Graql Insert Query
 
   Scenario: inserting a new type on an existing instance that is unrelated to its existing type throws
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
         car sub entity;
@@ -1831,16 +1831,16 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert $x isa person, has ref 0;
       """
     Given transaction commits
 
     Given session opens transaction of type: write
-    When graql insert; throws exception
+    When typeql insert; throws exception
       """
       match
         $x isa person;
@@ -1857,9 +1857,9 @@ Feature: Graql Insert Query
   @ignore
   Scenario: when inserting a thing that has inferred concepts, those concepts are not automatically materialised
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       person owns score;
@@ -1875,9 +1875,9 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has ref 0, has score 1.0;
@@ -1885,14 +1885,14 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: write
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa name;
       """
     Then uniquely identify answer concepts
       | x                 |
       | value:name:Ganesh |
-    When graql delete
+    When typeql delete
       """
       match
         $x isa person;
@@ -1902,7 +1902,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa name;
       """
@@ -1913,9 +1913,9 @@ Feature: Graql Insert Query
   @ignore
   Scenario: when inserting a thing with an inferred attribute ownership, the ownership is not automatically persisted
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       person owns score;
@@ -1932,9 +1932,9 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has ref 0, has name "Chris", has score 10.0;
@@ -1943,7 +1943,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: write
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person, has score $score;
       """
@@ -1951,7 +1951,7 @@ Feature: Graql Insert Query
       | x         | score            |
       | key:ref:0 | value:score:10.0 |
       | key:ref:1 | value:score:10.0 |
-    When graql delete
+    When typeql delete
       """
       match
         $x isa person, has name "Chris";
@@ -1961,7 +1961,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa score;
       """
@@ -1969,7 +1969,7 @@ Feature: Graql Insert Query
     Then uniquely identify answer concepts
       | x                |
       | value:score:10.0 |
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person, has score $score;
       """
@@ -1983,9 +1983,9 @@ Feature: Graql Insert Query
   By explicitly inserting (x,y) is a relation, we are making explicit the fact that x and y both exist.
 
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
 
@@ -2011,9 +2011,9 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has ref 0, has score 1.0;
@@ -2022,7 +2022,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: write
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa name;
       """
@@ -2030,7 +2030,7 @@ Feature: Graql Insert Query
       | x                 |
       | value:name:Ganesh |
     # At this step we materialise the inferred name 'Ganesh' because the material name-initial relation depends on it.
-    When graql insert
+    When typeql insert
       """
       match
         $p isa person, has name $x;
@@ -2042,7 +2042,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: write
-    When graql delete
+    When typeql delete
       """
       match
         $x isa person;
@@ -2052,12 +2052,12 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person;
       """
     Then answer size is: 0
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa name;
       """
@@ -2065,7 +2065,7 @@ Feature: Graql Insert Query
     Then uniquely identify answer concepts
       | x                 |
       | value:name:Ganesh |
-    When get answers of graql match
+    When get answers of typeql match
       """
       match (lettered-name: $x, initial: $y) isa name-initial;
       """
@@ -2078,9 +2078,9 @@ Feature: Graql Insert Query
   @ignore
   Scenario: when inserting things connected to an inferred relation, the inferred relation gets materialised
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql undefine
+    Given typeql undefine
       """
       undefine
       employment owns ref;
@@ -2088,7 +2088,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
 
@@ -2111,9 +2111,9 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Henry", has ref 0;
@@ -2122,13 +2122,13 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: write
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa employment;
       """
     Then answer size is: 1
     # At this step we materialise the inferred employment because the material employment-contract depends on it.
-    When graql insert
+    When typeql insert
       """
       match
         $e isa employment;
@@ -2139,9 +2139,9 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When connection close all sessions
-    When connection open schema session for database: grakn
+    When connection open schema session for database: typedb
     When session opens transaction of type: write
-    When graql undefine
+    When typeql undefine
       """
       undefine
       rule henry-is-employed;
@@ -2149,13 +2149,13 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa employment;
       """
     # We deleted the rule that infers the employment, but it still exists because it was materialised on match-insert
     Then answer size is: 1
-    When get answers of graql match
+    When get answers of typeql match
       """
       match (contracted: $x, contract: $y) isa employment-contract;
       """
@@ -2166,9 +2166,9 @@ Feature: Graql Insert Query
   @ignore
   Scenario: when inserting things connected to a chain of inferred concepts, the whole chain is materialised
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
 
@@ -2216,9 +2216,9 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
 
@@ -2235,7 +2235,7 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    When graql insert
+    When typeql insert
       """
       match
         $a isa vertex, has index "a";
@@ -2248,7 +2248,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: write
-    When graql delete
+    When typeql delete
       """
       match
         $r (coordinate: $c) isa link;
@@ -2262,7 +2262,7 @@ Feature: Graql Insert Query
     # After deleting all the links to 'c', our rules no longer infer that 'd' is reachable from 'a'. But in fact we
     # materialised this reachable link when we did our match-insert, because it played a role in our road-proposal,
     # which itself plays a role in the road-construction that we explicitly inserted:
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
         $a isa vertex, has index "a";
@@ -2273,7 +2273,7 @@ Feature: Graql Insert Query
     # On the other hand, the fact that 'c' was reachable from 'a' was not -directly- used; although it was needed
     # in order to infer that (a,d) was reachable, it did not, itself, play a role in any relation that we materialised,
     # so it is now gone.
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
         $a isa vertex, has index "a";
@@ -2285,9 +2285,9 @@ Feature: Graql Insert Query
 
   Scenario: when matching two disjoint instances of distinct types but only selecting one to insert a pattern, inserts will only happen for the selected instance
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql undefine
+    Given typeql undefine
       """
       undefine
       person owns ref;
@@ -2297,9 +2297,9 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person;
@@ -2308,7 +2308,7 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    When graql insert
+    When typeql insert
       """
       match
         $x isa person;
@@ -2320,7 +2320,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: write
-    When graql insert
+    When typeql insert
       """
       match
         $x isa person;
@@ -2332,7 +2332,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: write
-    When graql insert
+    When typeql insert
       """
       match
         $x isa person;
@@ -2344,7 +2344,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: write
-    When graql insert
+    When typeql insert
       """
       match
         $x isa person;
@@ -2356,7 +2356,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: write
-    When graql insert
+    When typeql insert
       """
       match
         $x isa person;
@@ -2368,7 +2368,7 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: write
-    When graql insert
+    When typeql insert
       """
       match
         $x isa person;
@@ -2380,12 +2380,12 @@ Feature: Graql Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person;
       """
     Then answer size is: 7
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa employment;
       """
@@ -2397,19 +2397,19 @@ Feature: Graql Insert Query
   ####################
 
   Scenario: if any insert in a transaction fails with a syntax error, none of the inserts are performed
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Derek", has ref 0;
       """
-    When graql insert; throws exception
+    When typeql insert; throws exception
       """
       insert
       $y qwertyuiop;
       """
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person, has name "Derek";
       """
@@ -2418,9 +2418,9 @@ Feature: Graql Insert Query
 
   Scenario: if any insert in a transaction fails with a semantic error, none of the inserts are performed
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       capacity sub attribute, value long;
@@ -2428,21 +2428,21 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Derek", has ref 0;
       """
-    When graql insert; throws exception
+    When typeql insert; throws exception
       """
       insert
       $y isa person, has name "Emily", has capacity 1000;
       """
 
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person, has name "Derek";
       """
@@ -2450,19 +2450,19 @@ Feature: Graql Insert Query
 
 
   Scenario: if any insert in a transaction fails with a 'key' violation, none of the inserts are performed
-    Given graql insert
+    Given typeql insert
       """
       insert
       $x isa person, has name "Derek", has ref 0;
       """
-    When graql insert; throws exception
+    When typeql insert; throws exception
       """
       insert
       $y isa person, has name "Emily", has ref 0;
       """
 
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person, has name "Derek";
       """
@@ -2473,11 +2473,11 @@ Feature: Graql Insert Query
   # EDGE CASES #
   ##############
 
-  Scenario: the 'iid' property is used internally by Grakn and cannot be manually assigned
+  Scenario: the 'iid' property is used internally by TypeDB and cannot be manually assigned
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       bird sub entity;
@@ -2485,9 +2485,9 @@ Feature: Graql Insert Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     When session opens transaction of type: write
-    Then graql insert; throws exception
+    Then typeql insert; throws exception
       """
       insert
       $x isa bird;

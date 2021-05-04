@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -16,16 +16,16 @@
 #
 
 #noinspection CucumberUndefinedStep
-Feature: Graql Update Query
+Feature: TypeQL Update Query
 
   Background: Open connection and create a simple extensible schema
     Given connection has been opened
     Given connection does not have any database
-    Given connection create database: grakn
-    Given connection open schema session for database: grakn
+    Given connection create database: typedb
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
 
-    Given graql define
+    Given typeql define
       """
       define
       person sub entity,
@@ -46,12 +46,12 @@ Feature: Graql Update Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
 
 
   Scenario: Update owned attribute without side effects on other owners
-    Given get answers of graql insert
+    Given get answers of typeql insert
       """
       insert
         $x isa person, has name "Alex", has ref 0;
@@ -62,7 +62,7 @@ Feature: Graql Update Query
       | key:ref:0 | key:ref:1 |
     Given transaction commits
     Given session opens transaction of type: write
-    When graql update
+    When typeql update
       """
       match
       $x isa person, has ref 1, has $n;
@@ -72,7 +72,7 @@ Feature: Graql Update Query
       """
     Then transaction commits
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa person, has name $n;
       """
@@ -82,7 +82,7 @@ Feature: Graql Update Query
       | key:ref:1  | value:name:Bob  |
 
   Scenario: Deleting the last roleplayer of a relation means it cannot be updated
-    Given get answers of graql insert
+    Given get answers of typeql insert
       """
       insert
       $x isa person, has name "Alex", has ref 0;
@@ -91,7 +91,7 @@ Feature: Graql Update Query
       """
     Given transaction commits
     Given session opens transaction of type: write
-    When graql update; throws exception
+    When typeql update; throws exception
       """
       match
       $x isa person, has name "Alex";
@@ -102,7 +102,7 @@ Feature: Graql Update Query
       """
 
   Scenario: Roleplayer exchange
-    Given get answers of graql insert
+    Given get answers of typeql insert
       """
       insert
       $x isa person, has name "Alex", has ref 0;
@@ -111,7 +111,7 @@ Feature: Graql Update Query
       """
     Given transaction commits
     Given session opens transaction of type: write
-    When graql update
+    When typeql update
       """
       match $r (parent: $x, child: $y) isa parenthood;
       delete $r isa parenthood;
@@ -120,15 +120,15 @@ Feature: Graql Update Query
 
 
   Scenario: Unrelated insertion
-    Given get answers of graql insert
+    Given get answers of typeql insert
       """
       insert
       $x isa person, has name "Alex", has ref 0;
       """
     Given transaction commits
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    When graql update; throws exception
+    When typeql update; throws exception
       """
       match $p isa person;
       delete $p isa person;
@@ -137,7 +137,7 @@ Feature: Graql Update Query
 
 
   Scenario: Complex migration
-    Given get answers of graql insert
+    Given get answers of typeql insert
       """
       insert
       $u isa person, has name "Alex", has ref 0;
@@ -149,9 +149,9 @@ Feature: Graql Update Query
       """
     Given transaction commits
     Given connection close all sessions
-    Given connection open schema session for database: grakn
+    Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given graql define
+    Given typeql define
       """
       define
       nameclass sub entity,
@@ -164,14 +164,14 @@ Feature: Graql Update Query
       """
     Given transaction commits
     Given connection close all sessions
-    Given connection open data session for database: grakn
+    Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    When graql insert
+    When typeql insert
       """
       match $att isa name;
       insert $x isa nameclass, has $att;
       """
-    When graql update
+    When typeql update
       """
       match
       $p isa person, has name $n;
@@ -181,7 +181,7 @@ Feature: Graql Update Query
       """
     Then transaction commits
     When session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
       (named: $p, name: $nc) isa naming;
@@ -196,7 +196,7 @@ Feature: Graql Update Query
       | key:ref:4  | value:name:Alex    |
       | key:ref:5  | value:name:Bob     |
 
-    When get answers of graql match
+    When get answers of typeql match
       """
       match
       $p isa person;

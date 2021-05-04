@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -30,7 +30,7 @@ Feature: Recursion Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -66,7 +66,7 @@ Feature: Recursion Resolution
 
 
   Scenario: the types of entities in inferred relations can be used to make further inferences
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -99,7 +99,7 @@ Feature: Recursion Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa big-place, has name "Mount Kilimanjaro";
@@ -114,7 +114,7 @@ Feature: Recursion Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match (subordinate: $x, superior: $y) isa big-location-hierarchy;
       """
@@ -124,7 +124,7 @@ Feature: Recursion Resolution
 
 
   Scenario: the types of inferred relations can be used to make further inferences
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -169,7 +169,7 @@ Feature: Recursion Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     """
       insert
 
@@ -193,7 +193,7 @@ Feature: Recursion Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match (role31: $x, role32: $y) isa relation3;
       """
@@ -203,7 +203,7 @@ Feature: Recursion Resolution
 
 
   Scenario: circular rule dependencies can be resolved
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -251,7 +251,7 @@ Feature: Recursion Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     """
       insert
 
@@ -266,7 +266,7 @@ Feature: Recursion Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match (role31: $x, role32: $y) isa relation3;
       """
@@ -275,7 +275,7 @@ Feature: Recursion Resolution
     Then answer size in reasoned database is: 2
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match (role21: $x, role22: $y) isa relation2;
       """
@@ -287,7 +287,7 @@ Feature: Recursion Resolution
 
   # TODO: re-enable all steps when we have a solution for materialisation of infinite graphs (#75)
   Scenario: when resolution produces an infinite stream of answers, limiting the answer size allows it to terminate
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -311,7 +311,7 @@ Feature: Recursion Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     """
       insert
       $x isa person, has name "Yusuf";
@@ -323,7 +323,7 @@ Feature: Recursion Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $x isa dream; limit 10;
       """
@@ -334,7 +334,7 @@ Feature: Recursion Resolution
 
   # TODO: re-enable all steps when materialisation is possible (may be an infinite graph?) (#75)
   Scenario: when relations' and attributes' inferences are mutually recursive, the inferred concepts can be retrieved
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -395,7 +395,7 @@ Feature: Recursion Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     """
       insert
 
@@ -425,7 +425,7 @@ Feature: Recursion Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $p isa pair, has name 'ff';
       """
@@ -433,7 +433,7 @@ Feature: Recursion Resolution
     Then answer size in reasoned database is: 16
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $p isa pair;
       """
@@ -446,7 +446,7 @@ Feature: Recursion Resolution
 
   from Vieille - Recursive Axioms in Deductive Databases p. 192
 
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -492,7 +492,7 @@ Feature: Recursion Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     """
       insert
 
@@ -532,7 +532,7 @@ Feature: Recursion Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         ($x, $y) isa R;
@@ -545,7 +545,7 @@ Feature: Recursion Resolution
     Then materialised database is completed
     Given for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match
         $y has index $ind;
@@ -561,7 +561,7 @@ Feature: Recursion Resolution
 
   from Bancilhon - An Amateur's Introduction to Recursive Query Processing Strategies p. 25
 
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -595,7 +595,7 @@ Feature: Recursion Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     """
       insert
 
@@ -620,7 +620,7 @@ Feature: Recursion Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         (ancestor: $X, descendant: $Y) isa ancestorship;
@@ -632,14 +632,14 @@ Feature: Recursion Resolution
     Then answer size in reasoned database is: 3
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match
         $Y isa person, has name $name;
         {$name = 'aaa';} or {$name = 'aab';} or {$name = 'aaaa';};
       get $Y, $name;
       """
-    Then for graql query
+    Then for typeql query
       """
       match
         ($X, $Y) isa ancestorship;
@@ -650,14 +650,14 @@ Feature: Recursion Resolution
     Then answer size in reasoned database is: 4
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match
         $Y isa person, has name $name;
         {$name = 'a';} or {$name = 'aaa';} or {$name = 'aab';} or {$name = 'aaaa';};
       get $Y;
       """
-    Then for graql query
+    Then for typeql query
       """
       match (ancestor: $X, descendant: $Y) isa ancestorship;
       """
@@ -665,7 +665,7 @@ Feature: Recursion Resolution
     Then answer size in reasoned database is: 10
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match
         $Y isa person, has name $nameY;
@@ -677,7 +677,7 @@ Feature: Recursion Resolution
         {$nameX = 'aaa';$nameY = 'aaaa';} or {$nameX = 'c';$nameY = 'ca';};
       get $X, $Y;
       """
-    Then for graql query
+    Then for typeql query
       """
       match ($X, $Y) isa ancestorship;
       """
@@ -685,7 +685,7 @@ Feature: Recursion Resolution
     Then answer size in reasoned database is: 20
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match
         $X isa person, has name $nameX;
@@ -716,7 +716,7 @@ Feature: Recursion Resolution
 
   from Vieille - Recursive Axioms in Deductive Databases (QSQ approach) p. 186
 
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -754,7 +754,7 @@ Feature: Recursion Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     """
       insert
 
@@ -772,7 +772,7 @@ Feature: Recursion Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         (ancestor: $X, friend: $Y) isa ancestor-friendship;
@@ -786,7 +786,7 @@ Feature: Recursion Resolution
     Then all answers are correct in reasoned database
     Given for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match
         $Y has name $name;
@@ -795,7 +795,7 @@ Feature: Recursion Resolution
       """
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    And answer set is equivalent for graql query
+    And answer set is equivalent for typeql query
       """
       match
         ($X, $Y) isa ancestor-friendship;
@@ -804,7 +804,7 @@ Feature: Recursion Resolution
       """
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         (ancestor: $X, friend: $Y) isa ancestor-friendship;
@@ -817,7 +817,7 @@ Feature: Recursion Resolution
     Then all answers are correct in reasoned database
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match
         $X has name $name;
@@ -826,7 +826,7 @@ Feature: Recursion Resolution
       """
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    And answer set is equivalent for graql query
+    And answer set is equivalent for typeql query
       """
       match
         ($X, $Y) isa ancestor-friendship;
@@ -840,7 +840,7 @@ Feature: Recursion Resolution
 
   from Vieille - Recursive Query Processing: The power of logic p. 25
 
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -876,7 +876,7 @@ Feature: Recursion Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     """
       insert
 
@@ -905,7 +905,7 @@ Feature: Recursion Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         ($x, $y) isa SameGen;
@@ -916,7 +916,7 @@ Feature: Recursion Resolution
     Then all answers are correct in reasoned database
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match
         $y has name $name;
@@ -930,7 +930,7 @@ Feature: Recursion Resolution
 
   from Vieille - Recursive Query Processing: The power of logic p. 18
 
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -978,7 +978,7 @@ Feature: Recursion Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     """
       insert
 
@@ -994,7 +994,7 @@ Feature: Recursion Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         ($x, $y) isa N-TC;
@@ -1005,7 +1005,7 @@ Feature: Recursion Resolution
     Then answer size in reasoned database is: 1
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match $x has index 'a2';
       """
@@ -1023,7 +1023,7 @@ Feature: Recursion Resolution
 
   and finds all pairs (from, to) such that 'to' is reachable from 'from'.
 
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -1079,7 +1079,7 @@ Feature: Recursion Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     """
       insert
 
@@ -1098,7 +1098,7 @@ Feature: Recursion Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match (from: $x, to: $y) isa reachable;
       """
@@ -1106,7 +1106,7 @@ Feature: Recursion Resolution
     Then answer size in reasoned database is: 7
     Given for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match
         $x has index $indX;
@@ -1132,7 +1132,7 @@ Feature: Recursion Resolution
 
   We find the set of vertices connected to 'a', which is in fact all of the vertices, including 'a' itself.
 
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -1164,7 +1164,7 @@ Feature: Recursion Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     """
       insert
 
@@ -1183,7 +1183,7 @@ Feature: Recursion Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         ($x, $y) isa reachable;
@@ -1194,7 +1194,7 @@ Feature: Recursion Resolution
     Then answer size in reasoned database is: 4
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match
         $y has index $indY;
@@ -1209,7 +1209,7 @@ Feature: Recursion Resolution
 
   test 6.6 from Cao p.76
 
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -1254,7 +1254,7 @@ Feature: Recursion Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     """
       insert
 
@@ -1272,7 +1272,7 @@ Feature: Recursion Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         ($x, $y) isa SameGen;
@@ -1283,7 +1283,7 @@ Feature: Recursion Resolution
     Then answer size in reasoned database is: 3
     Given for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match
         $y has name $name;
@@ -1297,7 +1297,7 @@ Feature: Recursion Resolution
 
   from Abiteboul - Foundations of databases p. 312/Cao test 6.14 p. 89
 
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -1346,7 +1346,7 @@ Feature: Recursion Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     """
       insert
 
@@ -1392,7 +1392,7 @@ Feature: Recursion Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         (from: $x, to: $y) isa RevSG;
@@ -1403,7 +1403,7 @@ Feature: Recursion Resolution
     Then all answers are correct in reasoned database
     Given for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match
         $y isa person, has name $name;
@@ -1412,7 +1412,7 @@ Feature: Recursion Resolution
       """
     Given for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match (from: $x, to: $y) isa RevSG;
       """
@@ -1420,7 +1420,7 @@ Feature: Recursion Resolution
     Then all answers are correct in reasoned database
     Given for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match
         $x has name $nameX;
@@ -1442,7 +1442,7 @@ Feature: Recursion Resolution
 
   Tests an 'n' x 'm' linear transitivity matrix (in this scenario, n = m = 5)
 
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -1505,7 +1505,7 @@ Feature: Recursion Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     # These insert statements can be procedurally generated based on 'm' and 'n', the width and height of the matrix
     """
       insert
@@ -1599,7 +1599,7 @@ Feature: Recursion Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         (from: $x, to: $y) isa Q1;
@@ -1610,7 +1610,7 @@ Feature: Recursion Resolution
     Then answer size in reasoned database is: 5
     Given for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match $y isa $t; { $t type a-entity; } or { $t type end; }; get $y;
       """
@@ -1621,7 +1621,7 @@ Feature: Recursion Resolution
 
   test 6.3 from Cao - Methods for evaluating queries to Horn knowledge bases in first-order logic, p 75
 
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -1660,7 +1660,7 @@ Feature: Recursion Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     """
       insert
 
@@ -1815,7 +1815,7 @@ Feature: Recursion Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         (from: $x, to: $y) isa P;
@@ -1826,7 +1826,7 @@ Feature: Recursion Resolution
     Then answer size in reasoned database is: 60
     Given for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match $y isa b-entity;
       """
@@ -1837,7 +1837,7 @@ Feature: Recursion Resolution
 
   test 6.9 from Cao - Methods for evaluating queries to Horn knowledge bases in first-order logic p.82
 
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -1882,7 +1882,7 @@ Feature: Recursion Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
 
@@ -1977,7 +1977,7 @@ Feature: Recursion Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         (from: $x, to: $y) isa P;
@@ -1988,7 +1988,7 @@ Feature: Recursion Resolution
     Then answer size in reasoned database is: 25
     Given for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match $y isa a-entity;
       """

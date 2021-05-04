@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -17,9 +17,9 @@
 
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
-def graknlabs_dependencies():
+def vaticle_dependencies():
     git_repository(
-        name = "graknlabs_dependencies",
-        remote = "https://github.com/graknlabs/dependencies",
-        commit = "36bc9911558dc4a81f1f467d5a080033b62852fe", # sync-marker: do not remove this comment, this is used for sync-dependencies by @graknlabs_dependencies
+        name = "vaticle_dependencies",
+        remote = "https://github.com/vaticle/dependencies",
+        commit = "2f55e6378d1fd4267aebc0cc9c333ab0692ab09e", # sync-marker: do not remove this comment, this is used for sync-dependencies by @vaticle_dependencies
     )

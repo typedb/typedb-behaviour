@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -27,7 +27,7 @@ Feature: Rule Interaction Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -58,7 +58,7 @@ Feature: Rule Interaction Resolution
   #  NOTE: There is a currently known bug in core 1.8.3 that makes this test fail (issue #5891)
   #  We will hope this is fixed by 2.0 as a result of mor robust alpha equivalence definition
   Scenario: when rules are similar but different the reasoner knows to distinguish the rules
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -99,7 +99,7 @@ Feature: Rule Interaction Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
 
@@ -117,7 +117,7 @@ Feature: Rule Interaction Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $x isa person, has name $n, has tag "P";
       """
@@ -130,7 +130,7 @@ Feature: Rule Interaction Resolution
     More explicitly, suppose we have rule A and rule B. Suppose up to alpha equivalence A.when == B.when and
     A.then == B.then. But the {rule A} != {rule B} because the bindings of the variables makes the meaning of A.then
     distinct from B.then. In such a situation, the reasoner does not mistake the rules as equivalent.
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -167,7 +167,7 @@ Feature: Rule Interaction Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
 
@@ -178,7 +178,7 @@ Feature: Rule Interaction Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $x isa person, has name 'tracey';
       """

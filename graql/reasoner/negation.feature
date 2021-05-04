@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -27,7 +27,7 @@ Feature: Negation Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -76,7 +76,7 @@ Feature: Negation Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     """
       insert
       $x1 isa person;
@@ -90,14 +90,14 @@ Feature: Negation Resolution
       """
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $x isa person;
       """
     Given answer size in reasoned database is: 5
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa person;
@@ -114,7 +114,7 @@ Feature: Negation Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x1 isa person;
@@ -128,14 +128,14 @@ Feature: Negation Resolution
       """
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $x isa person;
       """
     Given answer size in reasoned database is: 5
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa person;
@@ -152,7 +152,7 @@ Feature: Negation Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x1 isa person, has name "asdf";
@@ -163,14 +163,14 @@ Feature: Negation Resolution
       """
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Given for graql query
+    Given for typeql query
       """
       match $x isa person;
       """
     Given answer size in reasoned database is: 5
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa person;
@@ -187,7 +187,7 @@ Feature: Negation Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x1 isa person, has name "Bob";
@@ -198,14 +198,14 @@ Feature: Negation Resolution
       """
     Then for each session, transaction commits
     Given for each session, open transactions of type: read
-    Given for graql query
+    Given for typeql query
       """
       match $x isa person;
       """
     Given answer size in reasoned database is: 5
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa person;
@@ -222,7 +222,7 @@ Feature: Negation Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     """
       insert
       $x isa person, has age 10;
@@ -231,7 +231,7 @@ Feature: Negation Resolution
       """
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
     """
       match
         $x has age $y;
@@ -240,7 +240,7 @@ Feature: Negation Resolution
     Then answer size in reasoned database is: 1
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match
         $x has age $y;
@@ -254,7 +254,7 @@ Feature: Negation Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     """
       insert
       $x isa person, has age 10, has name "Bob";
@@ -264,7 +264,7 @@ Feature: Negation Resolution
       """
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
     """
       match
         $x has attribute $y;
@@ -273,14 +273,14 @@ Feature: Negation Resolution
     Then answer size in reasoned database is: 2
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match $x has age $y;
       """
 
 
   Scenario: negation can filter out an unwanted entity type from part of a chain of matched relations
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       dog sub entity, plays friendship:friend;
@@ -291,7 +291,7 @@ Feature: Negation Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $a isa person;
@@ -307,7 +307,7 @@ Feature: Negation Resolution
       """
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
     """
       match
         (friend: $a, friend: $b) isa friendship;
@@ -322,7 +322,7 @@ Feature: Negation Resolution
     Given answer size in reasoned database is: 24
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         (friend: $a, friend: $b) isa friendship;
@@ -334,7 +334,7 @@ Feature: Negation Resolution
     Then answer size in reasoned database is: 22
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match
         (friend: $a, friend: $b) isa friendship;
@@ -345,7 +345,7 @@ Feature: Negation Resolution
 
 
   Scenario: negation can filter out an unwanted connection between two concepts from a chain of matched relations
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       dog sub entity, owns name, plays friendship:friend;
@@ -356,7 +356,7 @@ Feature: Negation Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $a isa person, has name "a";
@@ -372,7 +372,7 @@ Feature: Negation Resolution
       """
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
     """
       match
         (friend: $a, friend: $b) isa friendship;
@@ -386,7 +386,7 @@ Feature: Negation Resolution
     Given answer size in reasoned database is: 14
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         (friend: $a, friend: $b) isa friendship;
@@ -398,7 +398,7 @@ Feature: Negation Resolution
     Then answer size in reasoned database is: 10
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match
         (friend: $a, friend: $b) isa friendship;
@@ -414,7 +414,7 @@ Feature: Negation Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     """
       insert
 
@@ -424,7 +424,7 @@ Feature: Negation Resolution
       """
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
     """
       match ($r1: $x) isa employment;
       """
@@ -436,7 +436,7 @@ Feature: Negation Resolution
     Given answer size in reasoned database is: 4
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         ($r1: $x) isa employment;
@@ -451,7 +451,7 @@ Feature: Negation Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     """
       insert
 
@@ -463,14 +463,14 @@ Feature: Negation Resolution
       """
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $x has attribute $r;
       """
     Given answer size in reasoned database is: 8
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x has attribute $r;
@@ -481,7 +481,7 @@ Feature: Negation Resolution
     Then answer size in reasoned database is: 6
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match
         $x has attribute $r;
@@ -499,7 +499,7 @@ Feature: Negation Resolution
       | reasoned      |
       | materialised  |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
 
@@ -511,14 +511,14 @@ Feature: Negation Resolution
       """
     Given for each session, transaction commits
     Given for each session, open transactions of type: write
-    Given for graql query
+    Given for typeql query
       """
       match $x has attribute $r;
       """
     Given answer size in reasoned database is: 8
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Given for graql query
+    Given for typeql query
       """
       match
         $x has attribute $r;
@@ -527,7 +527,7 @@ Feature: Negation Resolution
     Given answer size in reasoned database is: 7
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x has attribute $r;
@@ -537,7 +537,7 @@ Feature: Negation Resolution
     Then answer size in reasoned database is: 3
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x has attribute $r;
@@ -549,7 +549,7 @@ Feature: Negation Resolution
 
 
   Scenario: negation can exclude entities of specific types that play roles in a specific relation
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       pizza-company sub company;
@@ -560,7 +560,7 @@ Feature: Negation Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
 
@@ -576,14 +576,14 @@ Feature: Negation Resolution
       """
     Given for each session, transaction commits
     Given for each session, open transactions of type: write
-    Given for graql query
+    Given for typeql query
       """
       match $x isa person;
       """
     Then answer size in reasoned database is: 4
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa person;
@@ -596,7 +596,7 @@ Feature: Negation Resolution
 
 
   Scenario: when using negation to exclude entities of specific types, their subtypes are also excluded
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       pizza-company sub company;
@@ -607,7 +607,7 @@ Feature: Negation Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
 
@@ -623,7 +623,7 @@ Feature: Negation Resolution
       """
     Then for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa person;
@@ -636,7 +636,7 @@ Feature: Negation Resolution
 
 
   Scenario: answers can be returned even if a statement in a conjunction in a negation is identical to a non-negated one
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       pizza-company sub company;
@@ -647,7 +647,7 @@ Feature: Negation Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     """
       insert
 
@@ -664,7 +664,7 @@ Feature: Negation Resolution
     # We match $x isa person and not {$x isa person; ...}; answers can still be returned because of the conjunction
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
     """
       match
         $x isa person;
@@ -683,7 +683,7 @@ Feature: Negation Resolution
 
   # TODO: re-enable all steps when 3-hop transitivity is resolvable
   Scenario: negation of a transitive relation is resolvable
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -705,7 +705,7 @@ Feature: Negation Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     """
       insert
       $ar isa area, has name "King's Cross";
@@ -719,7 +719,7 @@ Feature: Negation Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Given for graql query
+    Given for typeql query
       """
       match
         $continent isa continent;
@@ -728,7 +728,7 @@ Feature: Negation Resolution
     Then answer size in reasoned database is: 1
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $continent isa continent;
@@ -740,7 +740,7 @@ Feature: Negation Resolution
 
 
   Scenario: negation can exclude a particular entity from a matched transitive relation
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -790,7 +790,7 @@ Feature: Negation Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     """
       insert
 
@@ -806,7 +806,7 @@ Feature: Negation Resolution
       """
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
     """
       match
         (from: $x, to: $y) isa indirect-link;
@@ -815,7 +815,7 @@ Feature: Negation Resolution
     Then answer size in reasoned database is: 2
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match
         (from: $x, to: $y) isa reachable;
@@ -830,7 +830,7 @@ Feature: Negation Resolution
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario: a rule can be triggered based on not having a particular attribute
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       person owns age;
@@ -848,7 +848,7 @@ Feature: Negation Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     """
       insert
       $x isa person, has age 10;
@@ -857,7 +857,7 @@ Feature: Negation Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $x has name "Not Ten", has age 20;
       """
@@ -865,7 +865,7 @@ Feature: Negation Resolution
     Then answer size in reasoned database is: 1
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $x has name "Not Ten", has age 10;
       """
@@ -874,7 +874,7 @@ Feature: Negation Resolution
 
 
   Scenario: a rule can be triggered based on not having any instances of a specified attribute type
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       person owns age;
@@ -892,7 +892,7 @@ Feature: Negation Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     """
       insert
       $x isa person, has age 10;
@@ -902,7 +902,7 @@ Feature: Negation Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Given for graql query
+    Given for typeql query
       """
       match $x isa person;
       """
@@ -910,7 +910,7 @@ Feature: Negation Resolution
     Given answer size in reasoned database is: 3
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $x isa person, has name "No Age";
       """
@@ -919,7 +919,7 @@ Feature: Negation Resolution
 
 
   Scenario: when negating a conjunction, all the conjuction statements must be met for the negation to be met
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       country sub entity, owns name, plays company-country:country;
@@ -945,7 +945,7 @@ Feature: Negation Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     """
       insert
       $a isa company, has name "a";
@@ -963,14 +963,14 @@ Feature: Negation Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Given for graql query
+    Given for typeql query
       """
       match $x isa company;
       """
     Given answer size in reasoned database is: 4
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa company;
@@ -980,7 +980,7 @@ Feature: Negation Resolution
     Then answer size in reasoned database is: 2
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match
         $x isa company;
@@ -990,7 +990,7 @@ Feature: Negation Resolution
       """
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match
         $x isa company;
@@ -1000,7 +1000,7 @@ Feature: Negation Resolution
 
 
   Scenario: when nesting multiple negations and conjunctions, they are correctly resolved
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       country sub entity, owns name, plays company-country:country;
@@ -1026,7 +1026,7 @@ Feature: Negation Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $a isa company, has name "a";
@@ -1043,7 +1043,7 @@ Feature: Negation Resolution
       """
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa company;
@@ -1057,7 +1057,7 @@ Feature: Negation Resolution
     Then answer size in reasoned database is: 3
     Given for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match
         $x isa company;
@@ -1078,7 +1078,7 @@ Feature: Negation Resolution
   As a result, if it happens that a negated query has multiple answers and is visited more than a single time
   - because of the admissibility check, answers might be missed.
 
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -1147,7 +1147,7 @@ Feature: Negation Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     """
       insert
       $sesh isa session;
@@ -1167,7 +1167,7 @@ Feature: Negation Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match (diagnosed-fault: $flt, parent-session: $ts) isa diagnosis;
       """
@@ -1178,7 +1178,7 @@ Feature: Negation Resolution
 
   # TODO: re-enable all steps when fixed (currently takes too long) (#75)
   Scenario: when evaluating negation blocks, completion of incomplete queries is not acknowledged
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       resource sub attribute, value string;
@@ -1226,7 +1226,7 @@ Feature: Negation Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     """
       insert
       $d isa entity-1, has resource "d";
@@ -1250,7 +1250,7 @@ Feature: Negation Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match (role-3: $x, role-4: $y) isa relation-4;
       """
@@ -1262,7 +1262,7 @@ Feature: Negation Resolution
 
   # TODO: re-enable all steps when fixed (currently takes too long) (#75)
   Scenario: a rule can use negation to exclude things that have any transitive relations to a specific concept
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -1312,7 +1312,7 @@ Feature: Negation Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
     """
       insert
 
@@ -1335,7 +1335,7 @@ Feature: Negation Resolution
     # Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
     """
       match
         (from: $x, to: $y) isa unreachable;
@@ -1346,7 +1346,7 @@ Feature: Negation Resolution
     Given for each session, transaction closes
     Given for each session, open transactions of type: read
     # TODO: Check again if we correctly mean '$y isa node' when we enable this test
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match
         $x has index "aa"; $y isa node;

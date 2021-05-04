@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -27,7 +27,7 @@ Feature: Schema Query Resolution (Variable Types)
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -64,7 +64,7 @@ Feature: Schema Query Resolution (Variable Types)
 
   # TODO: re-enable all steps once schema queries are resolvable (#75)
   Scenario: all instances and their types can be retrieved
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -87,7 +87,7 @@ Feature: Schema Query Resolution (Variable Types)
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa person;
@@ -97,14 +97,14 @@ Feature: Schema Query Resolution (Variable Types)
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Given for graql query
+    Given for typeql query
       """
       match $x isa entity;
       """
     Given answer size in reasoned database is: 3
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Given for graql query
+    Given for typeql query
       """
       match $x isa relation;
       """
@@ -112,14 +112,14 @@ Feature: Schema Query Resolution (Variable Types)
     Given answer size in reasoned database is: 6
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Given for graql query
+    Given for typeql query
       """
       match $x isa attribute;
       """
     Given answer size in reasoned database is: 1
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $x isa $type;
       """
@@ -134,7 +134,7 @@ Feature: Schema Query Resolution (Variable Types)
 
   # TODO: re-enable all steps once schema queries are resolvable (#75)
   Scenario: all relations and their types can be retrieved
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -151,7 +151,7 @@ Feature: Schema Query Resolution (Variable Types)
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa person, has name "Annette";
@@ -161,7 +161,7 @@ Feature: Schema Query Resolution (Variable Types)
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Given for graql query
+    Given for typeql query
       """
       match ($u, $v) isa relation;
       """
@@ -169,7 +169,7 @@ Feature: Schema Query Resolution (Variable Types)
     Given answer size in reasoned database is: 9
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match ($u, $v) isa $type;
       """
@@ -181,7 +181,7 @@ Feature: Schema Query Resolution (Variable Types)
 
   # TODO: re-enable all steps once schema queries are resolvable (#75)
   Scenario: all inferred instances of types that can own a given attribute type can be retrieved
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -221,7 +221,7 @@ Feature: Schema Query Resolution (Variable Types)
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa person, has name "Sharon";
@@ -230,7 +230,7 @@ Feature: Schema Query Resolution (Variable Types)
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Given for graql query
+    Given for typeql query
       """
       match $x isa relation;
       """
@@ -238,7 +238,7 @@ Feature: Schema Query Resolution (Variable Types)
     Given answer size in reasoned database is: 6
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa $type;
@@ -253,7 +253,7 @@ Feature: Schema Query Resolution (Variable Types)
 
   # TODO: re-enable all steps once schema queries are resolvable (#75)
   Scenario: all inferred instances of types that are subtypes of a given type can be retrieved
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -275,7 +275,7 @@ Feature: Schema Query Resolution (Variable Types)
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa person, has name "Annette";
@@ -285,7 +285,7 @@ Feature: Schema Query Resolution (Variable Types)
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Given for graql query
+    Given for typeql query
       """
       match $x isa relation;
       """
@@ -293,7 +293,7 @@ Feature: Schema Query Resolution (Variable Types)
     Given answer size in reasoned database is: 6
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa $type;
@@ -307,7 +307,7 @@ Feature: Schema Query Resolution (Variable Types)
 
   # TODO: re-enable all steps once schema queries are resolvable (#75)
   Scenario: all inferred instances of types that can play a given role can be retrieved
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -347,7 +347,7 @@ Feature: Schema Query Resolution (Variable Types)
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa person, has name "Sharon";
@@ -356,7 +356,7 @@ Feature: Schema Query Resolution (Variable Types)
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Given for graql query
+    Given for typeql query
       """
       match $x isa relation;
       """
@@ -364,7 +364,7 @@ Feature: Schema Query Resolution (Variable Types)
     Given answer size in reasoned database is: 6
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa $type;
@@ -383,7 +383,7 @@ Feature: Schema Query Resolution (Variable Types)
 
   # TODO: re-enable all steps once schema queries are resolvable (#75)
   Scenario: all roleplayers and their types can be retrieved from a relation
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -403,7 +403,7 @@ Feature: Schema Query Resolution (Variable Types)
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa company, has name "Armed Forces";
@@ -414,7 +414,7 @@ Feature: Schema Query Resolution (Variable Types)
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Given for graql query
+    Given for typeql query
       """
       match (employee: $x, employer: $y) isa employment;
       """
@@ -422,7 +422,7 @@ Feature: Schema Query Resolution (Variable Types)
     Given answer size in reasoned database is: 3
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         (employee: $x, employer: $y) isa employment;
@@ -433,7 +433,7 @@ Feature: Schema Query Resolution (Variable Types)
     Then answer size in reasoned database is: 15
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         ($x, $y) isa employment;
@@ -447,7 +447,7 @@ Feature: Schema Query Resolution (Variable Types)
 
 
   Scenario: entity pairs can be matched based on the entity type they are related to
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -460,7 +460,7 @@ Feature: Schema Query Resolution (Variable Types)
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
 
@@ -482,7 +482,7 @@ Feature: Schema Query Resolution (Variable Types)
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa person;
@@ -500,7 +500,7 @@ Feature: Schema Query Resolution (Variable Types)
     Then answer size in reasoned database is: 12
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa person;

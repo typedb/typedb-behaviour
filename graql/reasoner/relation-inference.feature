@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -27,7 +27,7 @@ Feature: Relation Inference Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -67,7 +67,7 @@ Feature: Relation Inference Resolution
   #######################
 
   Scenario: a relation can be inferred on all concepts of a given type
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       dog sub entity;
@@ -83,7 +83,7 @@ Feature: Relation Inference Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa person;
@@ -95,7 +95,7 @@ Feature: Relation Inference Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x isa person;
@@ -108,7 +108,7 @@ Feature: Relation Inference Resolution
 
 
   Scenario: a relation can be inferred based on an attribute ownership
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       rule haikal-is-employed: when {
@@ -123,7 +123,7 @@ Feature: Relation Inference Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa person, has name "Haikal";
@@ -134,7 +134,7 @@ Feature: Relation Inference Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x has name "Haikal";
@@ -144,7 +144,7 @@ Feature: Relation Inference Resolution
     Then answer size in reasoned database is: 1
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x has name "Michael";
@@ -155,7 +155,7 @@ Feature: Relation Inference Resolution
 
 
   Scenario: a rule can infer a relation with an attribute as a roleplayer
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       item sub entity, owns name, plays item-listing:item;
@@ -174,7 +174,7 @@ Feature: Relation Inference Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa item, has name "3kg jar of Nutella";
@@ -185,7 +185,7 @@ Feature: Relation Inference Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $r (item: $i, price: $p) isa item-listing;
@@ -199,7 +199,7 @@ Feature: Relation Inference Resolution
 
 
   Scenario: a rule can infer a relation based on ownership of any instance of a specific attribute type
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       year sub attribute, value long, plays employment:favourite-year;
@@ -218,7 +218,7 @@ Feature: Relation Inference Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa company, has name "Kronenbourg";
@@ -231,7 +231,7 @@ Feature: Relation Inference Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $x 1664 isa year;
@@ -248,7 +248,7 @@ Feature: Relation Inference Resolution
 
   # nth triangle number = sum of all integers from 1 to n, inclusive
   Scenario: when inferring relations on all pairs from n concepts, the number of relations is the nth triangle number
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       rule everyone-is-my-friend-including-myself: when {
@@ -264,7 +264,7 @@ Feature: Relation Inference Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $a isa person, has name "Abigail";
@@ -278,7 +278,7 @@ Feature: Relation Inference Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $r isa friendship;
       """
@@ -292,7 +292,7 @@ Feature: Relation Inference Resolution
 
 
   Scenario: when matching all possible pairs inferred from n concepts, the answer size is the square of n
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       rule everyone-is-my-friend-including-myself: when {
@@ -308,7 +308,7 @@ Feature: Relation Inference Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $a isa person, has name "Abigail";
@@ -322,7 +322,7 @@ Feature: Relation Inference Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match ($x, $y) isa friendship;
       """
@@ -333,7 +333,7 @@ Feature: Relation Inference Resolution
 
 
   Scenario: when a relation is reflexive, matching concepts are related to themselves
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       person plays employment:employer;
@@ -349,7 +349,7 @@ Feature: Relation Inference Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $f isa person, has name "Ferhat";
@@ -361,7 +361,7 @@ Feature: Relation Inference Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match (employee: $x, employer: $x) isa employment;
       """
@@ -371,7 +371,7 @@ Feature: Relation Inference Resolution
 
 
   Scenario: inferred reflexive relations can be retrieved using multiple variables to refer to the same concept
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       person plays employment:employer;
@@ -387,7 +387,7 @@ Feature: Relation Inference Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $i isa person, has name "Irma";
@@ -397,7 +397,7 @@ Feature: Relation Inference Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match (employee: $x, employer: $y) isa employment;
       """
@@ -407,7 +407,7 @@ Feature: Relation Inference Resolution
 
 
   Scenario: inferred relations between distinct concepts are not retrieved when matching concepts related to themselves
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       person plays employment:employer;
@@ -424,7 +424,7 @@ Feature: Relation Inference Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $r isa person, has name "Robert";
@@ -435,7 +435,7 @@ Feature: Relation Inference Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match (employee: $x, employer: $x) isa employment;
       """
@@ -449,7 +449,7 @@ Feature: Relation Inference Resolution
 
   # TODO: re-enable all steps when resolvable (currently takes too long)
   Scenario: when a relation is symmetric, its symmetry can be used to make additional inferences
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -490,7 +490,7 @@ Feature: Relation Inference Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $a isa robot, has name 'r1';
@@ -504,7 +504,7 @@ Feature: Relation Inference Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match (coworker: $x, coworker: $x) isa coworkers;
       """
@@ -518,7 +518,7 @@ Feature: Relation Inference Resolution
     Then answer size in reasoned database is: 2
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match (coworker: $x, coworker: $y) isa coworkers;
       """
@@ -541,7 +541,7 @@ Feature: Relation Inference Resolution
   ################
 
   Scenario: a transitive rule will not infer any new relations when there are only two related entities
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       rule transitive-location: when {
@@ -557,7 +557,7 @@ Feature: Relation Inference Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa place, has name "Delhi";
@@ -571,7 +571,7 @@ Feature: Relation Inference Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match $x isa location-hierarchy;
       """
@@ -582,7 +582,7 @@ Feature: Relation Inference Resolution
 
   # TODO: re-enable all steps when 3-hop transitivity is resolvable
   Scenario: when a query using transitivity has a limit exceeding the result size, answers are consistent between runs
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       rule transitive-location: when {
@@ -598,7 +598,7 @@ Feature: Relation Inference Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $a isa place, has name "University of Warsaw";
@@ -615,7 +615,7 @@ Feature: Relation Inference Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match (subordinate: $x1, superior: $x2) isa location-hierarchy;
       """
@@ -631,7 +631,7 @@ Feature: Relation Inference Resolution
   perform resolution steps even if the conditions of a rule are never met. In this case, 'transitive-location'
   is never triggered because there are no location-hierarchy pairs that satisfy both conditions.
 
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -661,7 +661,7 @@ Feature: Relation Inference Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x1 isa place, has name "Waterloo";
@@ -686,7 +686,7 @@ Feature: Relation Inference Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match (subordinate: $x, superior: $y) isa location-hierarchy;
       """
@@ -700,7 +700,7 @@ Feature: Relation Inference Resolution
   #######################
 
   Scenario: an inferred relation with one player in a role is not retrieved when the role appears twice in a match query
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       rule employment-rule: when {
@@ -716,7 +716,7 @@ Feature: Relation Inference Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa person;
@@ -727,7 +727,7 @@ Feature: Relation Inference Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match (employee: $x, employee: $y) isa employment;
       """
@@ -736,7 +736,7 @@ Feature: Relation Inference Resolution
 
 
   Scenario: a relation with two roleplayers inferred by the same rule is retrieved when matching only one of the roles
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       rule employment-rule: when {
@@ -752,7 +752,7 @@ Feature: Relation Inference Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa person;
@@ -763,7 +763,7 @@ Feature: Relation Inference Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match (employee: $x) isa employment;
       """
@@ -773,7 +773,7 @@ Feature: Relation Inference Resolution
 
 
   Scenario: when matching an inferred relation with repeated roles, answers contain all permutations of the roleplayers
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       rule alice-bob-and-charlie-are-friends: when {
@@ -790,7 +790,7 @@ Feature: Relation Inference Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa person, has name "Alice";
@@ -802,7 +802,7 @@ Feature: Relation Inference Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match (friend: $a, friend: $b, friend: $c) isa friendship;
       """
@@ -810,7 +810,7 @@ Feature: Relation Inference Resolution
     Then answer size in reasoned database is: 6
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match
         $r (friend: $a, friend: $b, friend: $c) isa friendship;
@@ -820,7 +820,7 @@ Feature: Relation Inference Resolution
 
 
   Scenario: inferred relations can be filtered by shared attribute ownership
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       selection sub relation, relates choice1, relates choice2;
@@ -843,7 +843,7 @@ Feature: Relation Inference Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa person, has name "a";
@@ -858,7 +858,7 @@ Feature: Relation Inference Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         (choice1: $x, choice2: $y) isa selection;
@@ -870,7 +870,7 @@ Feature: Relation Inference Resolution
     Then answer size in reasoned database is: 3
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         (choice1: $x, choice2: $y) isa selection;
@@ -883,7 +883,7 @@ Feature: Relation Inference Resolution
     Then answer size in reasoned database is: 1
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match
         (choice1: $x, choice2: $y) isa selection;
@@ -899,7 +899,7 @@ Feature: Relation Inference Resolution
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario: the relation type constraint can be excluded from a reasoned match query
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       rule transitive-location: when {
@@ -915,7 +915,7 @@ Feature: Relation Inference Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa place, has name "Turku Airport";
@@ -930,7 +930,7 @@ Feature: Relation Inference Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $a isa place, has name "Turku Airport";
@@ -946,7 +946,7 @@ Feature: Relation Inference Resolution
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario: when the relation type is excluded in a reasoned match query, all valid roleplayer combinations are matches
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       rule transitive-location: when {
@@ -962,7 +962,7 @@ Feature: Relation Inference Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa place, has name "Turku Airport";
@@ -977,7 +977,7 @@ Feature: Relation Inference Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Given for graql query
+    Given for typeql query
       """
       match
         $a isa place, has name "Turku Airport";
@@ -988,7 +988,7 @@ Feature: Relation Inference Resolution
     Given answer size in reasoned database is: 1
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         $a isa place, has name "Turku Airport";
@@ -1004,7 +1004,7 @@ Feature: Relation Inference Resolution
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario: when the relation type is excluded in a reasoned match query, all types of relations match
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -1031,7 +1031,7 @@ Feature: Relation Inference Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa place, has name "Turku Airport";
@@ -1046,7 +1046,7 @@ Feature: Relation Inference Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Given for graql query
+    Given for typeql query
       """
       match ($a, $b) isa relation;
       """
@@ -1056,7 +1056,7 @@ Feature: Relation Inference Resolution
     Then answer size in reasoned database is: 6
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then answer set is equivalent for graql query
+    Then answer set is equivalent for typeql query
       """
       match ($a, $b);
       """
@@ -1065,7 +1065,7 @@ Feature: Relation Inference Resolution
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario: conjunctions of untyped reasoned relations are correctly resolved
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
       rule transitive-location: when {
@@ -1081,7 +1081,7 @@ Feature: Relation Inference Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa place, has name "Turku Airport";
@@ -1096,7 +1096,7 @@ Feature: Relation Inference Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match
         ($a, $b);
@@ -1121,7 +1121,7 @@ Feature: Relation Inference Resolution
 
 
   Scenario: a relation can be inferred based on a direct type
-    Given for each session, graql define
+    Given for each session, typeql define
       """
       define
 
@@ -1156,7 +1156,7 @@ Feature: Relation Inference Resolution
       | reasoned     |
       | materialised |
     Given for each session, open transactions of type: write
-    Given for each session, graql insert
+    Given for each session, typeql insert
       """
       insert
       $x isa baseEntity;
@@ -1172,7 +1172,7 @@ Feature: Relation Inference Resolution
     Then materialised database is completed
     Given for each session, transaction commits
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match ($x) isa derivedRelation;
       """
@@ -1180,7 +1180,7 @@ Feature: Relation Inference Resolution
     Then answer size in reasoned database is: 2
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match ($x) isa! derivedRelation;
       """
@@ -1188,7 +1188,7 @@ Feature: Relation Inference Resolution
     Then answer size in reasoned database is: 2
     Then for each session, transaction closes
     Given for each session, open transactions of type: read
-    Then for graql query
+    Then for typeql query
       """
       match ($x) isa directDerivedRelation;
       """
