@@ -621,8 +621,8 @@ Feature: Concept Attribute Type
     Then attribute(name) get attribute owners contain:
       | person |
     Then attribute(name) get attribute owners do not contain:
-      | boy    |
-      | girl   |
+      | boy  |
+      | girl |
     Then transaction commits
     When session opens transaction of type: write
     Then attribute(age) get attribute owners contain:
@@ -632,8 +632,8 @@ Feature: Concept Attribute Type
     Then attribute(name) get attribute owners contain:
       | person |
     Then attribute(name) get attribute owners do not contain:
-      | boy    |
-      | girl   |
+      | boy  |
+      | girl |
 
   Scenario: Attribute types can be owned as keys
     When put attribute type: email, with value type: string

@@ -226,7 +226,6 @@ Feature: TypeQL Insert Query
       """
 
 
-
   Scenario: attempting to insert an instance of type 'thing' throws an error
     Then typeql insert; throws exception
       """
@@ -762,8 +761,8 @@ Feature: TypeQL Insert Query
       match $r (place: $addr) isa residence, has is-permanent $perm;
       """
     Then uniquely identify answer concepts
-      | r         | addr                                 | perm                     |
-      | key:ref:0 | value:address:742 Evergreen Terrace  | value:is-permanent:true  |
+      | r         | addr                                | perm                    |
+      | key:ref:0 | value:address:742 Evergreen Terrace | value:is-permanent:true |
 
 
   Scenario: relations can be inserted with multiple role players
@@ -786,8 +785,8 @@ Feature: TypeQL Insert Query
       get $cname;
       """
     Then uniquely identify answer concepts
-      | cname                  |
-      | value:name:Morrisons   |
+      | cname                |
+      | value:name:Morrisons |
     When get answers of typeql match
       """
       match
@@ -896,7 +895,6 @@ Feature: TypeQL Insert Query
       """
 
 
-
   Scenario: parent types are not necessarily allowed to play the roles that their children play
     Given connection close all sessions
     Given connection open schema session for database: typedb
@@ -923,14 +921,12 @@ Feature: TypeQL Insert Query
       """
 
 
-
   Scenario: when inserting a relation with no role players, an error is thrown
     Then typeql insert; throws exception
       """
       insert
       $x isa employment, has ref 0;
       """
-
 
 
   Scenario: when inserting a relation with an unbound variable as a roleplayer, an error is thrown
@@ -1070,7 +1066,6 @@ Feature: TypeQL Insert Query
         $x isa person, has value $a, has ref 0;
         $a "10.maybe";
       """
-
 
 
   Scenario: inserting two attributes with the same type and value creates only one concept
@@ -1299,7 +1294,6 @@ Feature: TypeQL Insert Query
     Then transaction commits
 
 
-
   Scenario: inserting an attribute with no value throws an error
     Then typeql insert; throws exception
       """
@@ -1307,13 +1301,11 @@ Feature: TypeQL Insert Query
       """
 
 
-
   Scenario: inserting an attribute value with no type throws an error
     Then typeql insert; throws exception
       """
       insert $x 18;
       """
-
 
 
   Scenario: inserting an attribute with a predicate throws an error
@@ -1353,13 +1345,11 @@ Feature: TypeQL Insert Query
     Then transaction commits; throws exception
 
 
-
   Scenario: inserting two distinct values of the same key on a thing throws an error
     Then typeql insert; throws exception
       """
       insert $x isa person, has ref 0, has ref 1;
       """
-
 
 
   Scenario: instances of a key must be unique among all instances of a type
@@ -1369,7 +1359,6 @@ Feature: TypeQL Insert Query
       $x isa person, has ref 0;
       $y isa person, has ref 0;
       """
-
 
 
   Scenario: an error is thrown when inserting a second key on an attribute that already has one
@@ -1760,7 +1749,6 @@ Feature: TypeQL Insert Query
       insert
         $x isa company;
       """
-
 
 
   Scenario: inserting a new type on an existing instance that is a subtype of its existing type throws

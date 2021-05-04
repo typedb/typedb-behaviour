@@ -264,8 +264,6 @@ Feature: Concept Inequality Resolution
     Then materialised and reasoned databases are the same size
 
 
-
-
   Scenario: pairs of inferred relations can be filtered by inequality of players in different roles
 
   Tests a scenario in which the neq predicate binds free variables

@@ -88,13 +88,11 @@ Feature: TypeQL Define Query
       """
 
 
-
   Scenario: types cannot own entity types
     Then typeql define; throws exception
       """
       define house sub entity, owns person;
       """
-
 
 
   Scenario: types cannot own relation types
@@ -104,13 +102,11 @@ Feature: TypeQL Define Query
       """
 
 
-
   Scenario: when defining that a type plays a non-existent role, an error is thrown
     Then typeql define; throws exception
       """
       define house sub entity, plays constructed:something;
       """
-
 
 
   Scenario: types cannot play entity types
@@ -120,13 +116,11 @@ Feature: TypeQL Define Query
       """
 
 
-
   Scenario: types can not own entity types as keys
     Then typeql define; throws exception
       """
       define passport sub entity, owns person @key;
       """
-
 
 
   Scenario: a newly defined entity subtype inherits playable roles from its parent type
@@ -317,13 +311,11 @@ Feature: TypeQL Define Query
       """
 
 
-
   Scenario: a type cannot directly subtype 'thing' itself
     Then typeql define; throws exception
       """
       define column sub thing;
       """
-
 
 
   Scenario: an entity type can not have a value type defined
@@ -333,13 +325,11 @@ Feature: TypeQL Define Query
       """
 
 
-
   Scenario: a type cannot have a 'when' block
     Then typeql define; throws exception
       """
       define gorilla sub entity, when { $x isa gorilla; };
       """
-
 
 
   Scenario: a type cannot have a 'then' block
@@ -349,7 +339,6 @@ Feature: TypeQL Define Query
       """
 
 
-
   Scenario: defining a thing with 'isa' is not possible in a 'define' query
     Then typeql define; throws exception
       """
@@ -357,13 +346,11 @@ Feature: TypeQL Define Query
       """
 
 
-
   Scenario: adding an attribute instance to a thing is not possible in a 'define' query
     Then typeql define; throws exception
       """
       define $p has name "Loch Ness Monster";
       """
-
 
 
   Scenario: writing a variable in a 'define' is not allowed
@@ -421,7 +408,6 @@ Feature: TypeQL Define Query
     Then transaction commits; throws exception
 
 
-
   Scenario: a newly defined relation subtype inherits roles from its supertype
     Given typeql define
       """
@@ -460,7 +446,7 @@ Feature: TypeQL Define Query
         $x relates child;
       """
     Then uniquely identify answer concepts
-      | x                 |
+      | x                |
       | label:parenthood |
     When get answers of typeql match
       """
@@ -537,8 +523,8 @@ Feature: TypeQL Define Query
       match $x relates preferred-plane;
       """
     Then uniquely identify answer concepts
-      | x                       |
-      | label:pilot-employment  |
+      | x                      |
+      | label:pilot-employment |
 
 
   Scenario: types should be able to define roles they play with an override
@@ -553,7 +539,6 @@ Feature: TypeQL Define Query
       """
 
 
-
   Scenario: already shadowed types should not be overrideable
     Then typeql define; throws exception
       """
@@ -566,7 +551,6 @@ Feature: TypeQL Define Query
         contractor-employment sub employment, plays contractor-locates:contractor-located as located;
         software-contractor-employment sub contractor-employment, plays software-contractor-locates:software-contractor-located as located;
       """
-
 
 
   Scenario: a newly defined relation subtype inherits playable roles from its parent type
@@ -784,13 +768,11 @@ Feature: TypeQL Define Query
       """
 
 
-
   Scenario: defining an attribute type throws if the specified value type is not a recognised value type
     Then typeql define; throws exception
       """
       define colour sub attribute, value rgba;
       """
-
 
 
   Scenario: a new attribute type can be defined as a subtype of an abstract attribute type
@@ -864,7 +846,6 @@ Feature: TypeQL Define Query
       """
       define name-in-binary sub attribute, value long, regex "^(0|1)+$";
       """
-
 
 
   Scenario: a newly defined attribute subtype inherits playable roles from its parent type
@@ -1116,7 +1097,7 @@ Feature: TypeQL Define Query
       match $x sub exception, abstract;
       """
     Then uniquely identify answer concepts
-      | x                     |
+      | x                      |
       | label:typedb-exception |
 
 
@@ -1248,9 +1229,9 @@ Feature: TypeQL Define Query
       match $x sub number-of-limbs; $x abstract;
       """
     Then uniquely identify answer concepts
-      | x                                 |
-      | label:number-of-limbs             |
-      | label:number-of-artificial-limbs  |
+      | x                                |
+      | label:number-of-limbs            |
+      | label:number-of-artificial-limbs |
 
 
   Scenario: defining attribute type hierarchies is idempotent
@@ -1273,9 +1254,8 @@ Feature: TypeQL Define Query
       $location type location-name, sub name;
       """
     Then uniquely identify answer concepts
-      | name        | location            |
-      | label:name  | label:location-name |
-
+      | name       | location            |
+      | label:name | label:location-name |
 
 
   Scenario: repeating the term 'abstract' when defining a type causes an error to be thrown
@@ -1317,7 +1297,6 @@ Feature: TypeQL Define Query
       """
 
 
-
   Scenario: a relation type cannot be changed into an attribute type
     Then typeql define; throws exception
       """
@@ -1325,13 +1304,11 @@ Feature: TypeQL Define Query
       """
 
 
-
   Scenario: an attribute type cannot be changed into an entity type
     Then typeql define; throws exception
       """
       define name sub entity;
       """
-
 
 
   Scenario: a new attribute ownership can be defined on an existing type
@@ -1442,7 +1419,6 @@ Feature: TypeQL Define Query
       """
 
 
-
   Scenario: defining a key on a type throws if there is a key collision between two existing instances
     Given typeql define
       """
@@ -1471,7 +1447,6 @@ Feature: TypeQL Define Query
       define
       product owns barcode @key;
       """
-
 
 
   Scenario: a new role can be defined on an existing relation type
@@ -1543,7 +1518,6 @@ Feature: TypeQL Define Query
       """
 
 
-
   Scenario: a regex constraint can not be added to an existing attribute type whose value type isn't 'string'
     Given typeql define
       """
@@ -1558,13 +1532,11 @@ Feature: TypeQL Define Query
       """
 
 
-
   Scenario: related roles cannot be added to existing entity types
     Then typeql define; throws exception
       """
       define person relates employee;
       """
-
 
 
   Scenario: related roles cannot be added to existing attribute types
@@ -1574,13 +1546,11 @@ Feature: TypeQL Define Query
       """
 
 
-
   Scenario: the value type of an existing attribute type is not modifiable
     Then typeql define; throws exception
       """
       define name value long;
       """
-
 
 
   Scenario: an attribute ownership can be converted to a key ownership
@@ -1646,7 +1616,6 @@ Feature: TypeQL Define Query
         $p has nickname "Bob";
       };
       """
-
 
 
   Scenario: redefining an existing rule updates its definition
@@ -1727,7 +1696,6 @@ Feature: TypeQL Define Query
       """
 
 
-
   Scenario: an existing relation type cannot be converted to abstract if it has existing instances
     Given connection close all sessions
     Given connection open data session for database: typedb
@@ -1767,7 +1735,6 @@ Feature: TypeQL Define Query
       """
       define name abstract;
       """
-
 
 
   Scenario: changing a concrete type to abstract throws on commit if it has a concrete supertype
@@ -2149,7 +2116,6 @@ Feature: TypeQL Define Query
       """
 
 
-
   Scenario: a cyclic type hierarchy is not allowed
     Then typeql define; throws exception
       """
@@ -2256,12 +2222,11 @@ Feature: TypeQL Define Query
       """
 
 
-
   Scenario: relation types that play roles in their transitive subtypes can be reliably defined
 
-    Variables from a 'define' query are selected for defining in an arbitrary order. When these variables
-    depend on each other, creating a dependency graph, they should all define successfully regardless of
-    which variable was picked as the start vertex (#131)
+  Variables from a 'define' query are selected for defining in an arbitrary order. When these variables
+  depend on each other, creating a dependency graph, they should all define successfully regardless of
+  which variable was picked as the start vertex (#131)
 
     When typeql define
       """

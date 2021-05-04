@@ -487,7 +487,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: when a rule negates its conclusion in the 'when', causing a (self-)loop, an error is thrown
-    Ensure rule stratification is possible
+  Ensure rule stratification is possible
     Then typeql define
       """
       define
@@ -594,8 +594,8 @@ Feature: TypeQL Rule Validation
     Then transaction commits
 
 
-    Scenario: when a rule negates itself in the rule body, the rule commits even if that cycle involves a then clause in another rule
-      Given typeql define
+  Scenario: when a rule negates itself in the rule body, the rule commits even if that cycle involves a then clause in another rule
+    Given typeql define
       """
       define
 
@@ -613,11 +613,11 @@ Feature: TypeQL Rule Validation
         (employee: $p) isa employment;
       };
       """
-      Then transaction commits
+    Then transaction commits
 
 
-    Scenario: rules with cyclic inferences are allowed as long as there is no negation
-      When typeql define
+  Scenario: rules with cyclic inferences are allowed as long as there is no negation
+    When typeql define
       """
       define
 
@@ -636,7 +636,7 @@ Feature: TypeQL Rule Validation
         (employee: $p) isa employment;
       };
       """
-      Then transaction commits
+    Then transaction commits
 
 
   Scenario: when a rule has a conjunction as the conclusion, an error is thrown
@@ -672,8 +672,8 @@ Feature: TypeQL Rule Validation
       """
 
 
-    Scenario: when a rule has a side-cast in a rule, an error is thrown
-      When typeql define; throws exception
+  Scenario: when a rule has a side-cast in a rule, an error is thrown
+    When typeql define; throws exception
       """
       define
 
@@ -696,7 +696,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: when a rule adds a role to an existing relation, an error is thrown
-    Checks adding new roles to existing relationships is not allowed
+  Checks adding new roles to existing relationships is not allowed
     When typeql define; throws exception
       """
       define

@@ -131,13 +131,13 @@ Feature: Value Predicate Resolution
     Then materialised and reasoned databases are the same size
 
     Examples:
-      | op  | answer-size |
-      | >   | 2           |
-      | >=  | 4           |
-      | <   | 2           |
-      | <=  | 4           |
-      | =   | 2           |
-      | !=  | 4           |
+      | op | answer-size |
+      | >  | 2           |
+      | >= | 4           |
+      | <  | 2           |
+      | <= | 4           |
+      | =  | 2           |
+      | != | 4           |
 
 
   # TODO: re-enable all steps when fixed (#75)
@@ -177,13 +177,13 @@ Feature: Value Predicate Resolution
     Then materialised and reasoned databases are the same size
 
     Examples:
-      | op  | answer-size |
-      | >   | 1           |
-      | >=  | 3           |
-      | <   | 1           |
-      | <=  | 3           |
-      | =   | 2           |
-      | !=  | 2           |
+      | op | answer-size |
+      | >  | 1           |
+      | >= | 3           |
+      | <  | 1           |
+      | <= | 3           |
+      | =  | 2           |
+      | != | 2           |
 
 
   # TODO: re-enable all steps when fixed (#75)
@@ -225,13 +225,13 @@ Feature: Value Predicate Resolution
     Then materialised and reasoned databases are the same size
 
     Examples:
-      | op  | answer-size |
-      | >   | 0           |
-      | >=  | 3           |
-      | <   | 0           |
-      | <=  | 3           |
-      | =   | 1           |
-      | !=  | 4           |
+      | op | answer-size |
+      | >  | 0           |
+      | >= | 3           |
+      | <  | 0           |
+      | <= | 3           |
+      | =  | 1           |
+      | != | 4           |
 
 
   Scenario: inferred attributes can be matched by inequality to a variable that is equal to a specified value

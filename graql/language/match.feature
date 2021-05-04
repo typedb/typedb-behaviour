@@ -756,7 +756,6 @@ Feature: TypeQL Match Query
     Then session transaction is open: false
 
 
-
   Scenario: when matching by a relation type whose label doesn't exist, an error is thrown
     Then typeql match; throws exception
       """
@@ -765,14 +764,12 @@ Feature: TypeQL Match Query
     Then session transaction is open: false
 
 
-
   Scenario: when matching a non-existent type label to a variable from a generic 'isa' query, an error is thrown
     Then typeql match; throws exception
       """
       match $x isa $type; $type type polok;
       """
     Then session transaction is open: false
-
 
 
   Scenario: when one entity exists, and we match two variables both of that entity type, the entity is returned

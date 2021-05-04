@@ -244,9 +244,9 @@ Feature: TypeQL Get Clause
       offset 2;
       """
     Then order of answer concepts is
-      | x         | y                    |
-      | key:ref:0 | value:name:Gary      |
-      | key:ref:1 | value:name:Jemima    |
+      | x         | y                 |
+      | key:ref:0 | value:name:Gary   |
+      | key:ref:1 | value:name:Jemima |
 
 
   Scenario: 'offset' and 'limit' can be used together to restrict the answer set
@@ -671,7 +671,6 @@ Feature: TypeQL Get Clause
       """
 
 
-
   Scenario Outline: an error is thrown when getting the '<agg_type>' of attributes that have the inapplicable type, '<type>'
     Given connection close all sessions
     Given connection open schema session for database: typedb
@@ -741,7 +740,6 @@ Feature: TypeQL Get Clause
       """
 
 
-
   Scenario: when taking the sum of an empty set, even if any matches would definitely be strings, no error is thrown and an empty answer is returned
     When get answer of typeql match aggregate
       """
@@ -792,19 +790,19 @@ Feature: TypeQL Get Clause
       group $x;
       """
     Then answer groups are
-      | owner      | x         | y         |
-      | key:ref:0  | key:ref:0 | key:ref:1 |
-      | key:ref:0  | key:ref:0 | key:ref:2 |
-      | key:ref:0  | key:ref:0 | key:ref:3 |
-      | key:ref:1  | key:ref:1 | key:ref:0 |
-      | key:ref:1  | key:ref:1 | key:ref:2 |
-      | key:ref:1  | key:ref:1 | key:ref:3 |
-      | key:ref:2  | key:ref:2 | key:ref:0 |
-      | key:ref:2  | key:ref:2 | key:ref:1 |
-      | key:ref:2  | key:ref:2 | key:ref:3 |
-      | key:ref:3  | key:ref:3 | key:ref:0 |
-      | key:ref:3  | key:ref:3 | key:ref:1 |
-      | key:ref:3  | key:ref:3 | key:ref:2 |
+      | owner     | x         | y         |
+      | key:ref:0 | key:ref:0 | key:ref:1 |
+      | key:ref:0 | key:ref:0 | key:ref:2 |
+      | key:ref:0 | key:ref:0 | key:ref:3 |
+      | key:ref:1 | key:ref:1 | key:ref:0 |
+      | key:ref:1 | key:ref:1 | key:ref:2 |
+      | key:ref:1 | key:ref:1 | key:ref:3 |
+      | key:ref:2 | key:ref:2 | key:ref:0 |
+      | key:ref:2 | key:ref:2 | key:ref:1 |
+      | key:ref:2 | key:ref:2 | key:ref:3 |
+      | key:ref:3 | key:ref:3 | key:ref:0 |
+      | key:ref:3 | key:ref:3 | key:ref:1 |
+      | key:ref:3 | key:ref:3 | key:ref:2 |
 
 
   Scenario: when grouping answers by a variable that is not contained in the answer set, an error is thrown
@@ -854,11 +852,11 @@ Feature: TypeQL Get Clause
       count;
       """
     Then group aggregate values are
-      | owner      | value |
-      | key:ref:0  | 3     |
-      | key:ref:1  | 3     |
-      | key:ref:2  | 3     |
-      | key:ref:3  | 3     |
+      | owner     | value |
+      | key:ref:0 | 3     |
+      | key:ref:1 | 3     |
+      | key:ref:2 | 3     |
+      | key:ref:3 | 3     |
 
 
   Scenario: the size of answer groups is still computed correctly when restricting variables with 'get'
@@ -907,9 +905,9 @@ Feature: TypeQL Get Clause
       count;
       """
     Then group aggregate values are
-      | owner      | value |
-      | key:ref:0  | 4     |
-      | key:ref:1  | 2     |
+      | owner     | value |
+      | key:ref:0 | 4     |
+      | key:ref:1 | 2     |
 
 
   Scenario: the maximum value for a particular variable within each answer group can be retrieved using a group 'max'
@@ -938,6 +936,6 @@ Feature: TypeQL Get Clause
       max $z;
       """
     Then group aggregate values are
-      | owner      | value |
-      | key:ref:0  | 57    |
-      | key:ref:1  | 45    |
+      | owner     | value |
+      | key:ref:0 | 57    |
+      | key:ref:1 | 45    |

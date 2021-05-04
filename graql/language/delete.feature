@@ -308,7 +308,6 @@ Feature: TypeQL Delete Query
       """
 
 
-
   Scenario: deleting an instance using a non-existing type label throws
     Given typeql insert
       """
@@ -325,7 +324,6 @@ Feature: TypeQL Delete Query
       delete
         $r isa heffalump;
       """
-
 
 
   Scenario: deleting a relation instance using a too-specific (downcasting) type throws
@@ -404,7 +402,6 @@ Feature: TypeQL Delete Query
       | x               | y               |
       | key:name:Bob    | key:name:Carrie |
       | key:name:Carrie | key:name:Bob    |
-
 
 
   Scenario: deleting an instance removes it from all relations
@@ -629,7 +626,6 @@ Feature: TypeQL Delete Query
       delete
         $r (friend: $x, friend: $x);
       """
-
 
 
   Scenario: when all instances that play roles in a relation are deleted, the relation instance gets cleaned up
@@ -969,7 +965,6 @@ Feature: TypeQL Delete Query
       """
 
 
-
   Scenario: an attribute can be specified by direct type when deleting an ownership of it
     Given get answers of typeql insert
       """
@@ -1014,7 +1009,6 @@ Feature: TypeQL Delete Query
       delete
         $x isa! entity;
       """
-
 
 
   Scenario: deleting the owner of an attribute also deletes the attribute ownership
@@ -1184,10 +1178,10 @@ Feature: TypeQL Delete Query
       match $f (friend: $x) isa friendship;
       """
     Then uniquely identify answer concepts
-      | f           | x             |
-      | key:ref:2   | key:name:Alex |
-      | key:ref:2   | key:name:John |
-      | key:ref:3   | key:name:Alex |
+      | f         | x             |
+      | key:ref:2 | key:name:Alex |
+      | key:ref:2 | key:name:John |
+      | key:ref:3 | key:name:Alex |
     When get answers of typeql match
       """
       match $n isa name;
@@ -1270,7 +1264,6 @@ Feature: TypeQL Delete Query
       """
 
 
-
   Scenario: deleting a has ownership @key throws on commit
     Given typeql insert
       """
@@ -1314,7 +1307,6 @@ Feature: TypeQL Delete Query
       delete
         $x isa attribute;
       """
-
 
 
   Scenario: deleting a type throws an error

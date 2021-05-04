@@ -496,8 +496,8 @@ Feature: Negation Resolution
   Scenario: a query can contain multiple negations
     Given connection close all sessions
     Given connection open data sessions for databases:
-      | reasoned      |
-      | materialised  |
+      | reasoned     |
+      | materialised |
     Given for each session, open transactions of type: write
     Given for each session, typeql insert
       """

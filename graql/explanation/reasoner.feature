@@ -134,10 +134,10 @@ Feature: TypeQL Reasoning Explanation
       | company-is-liable | { $c2 isa company, has name $name; $name "the-company"; }; | { $c2 has is-liable true; };     |
 
     Then answers contain explanation tree
-      |   | children | vars     | identifiers | explanation       | pattern                                                                                                                 |
-      | 0 | 1        | co, l    | CO, LIA     | company-is-liable | { $co iid <answer.co.iid>; $co has is-liable $l; $l iid <answer.l.iid>; };                                              |
+      |   | children | vars     | identifiers | explanation       | pattern                                                                                                                |
+      | 0 | 1        | co, l    | CO, LIA     | company-is-liable | { $co iid <answer.co.iid>; $co has is-liable $l; $l iid <answer.l.iid>; };                                             |
       | 1 | 2        | c2, name | CO, CON     | company-has-name  | { $c2 isa company; $c2 has name $name; $name = "the-company"; $c2 iid <answer.c2.iid>; $name iid <answer.name.iid>; }; |
-      | 2 | -        | c1       | CO          | lookup            | { $c1 isa company; $c1 iid <answer.c1.iid>; };                                                                          |
+      | 2 | -        | c1       | CO          | lookup            | { $c1 isa company; $c1 iid <answer.c1.iid>; };                                                                         |
 
   @ignore-client-java
   Scenario: a join explanation can be given directly and inside a rule explanation
@@ -284,12 +284,12 @@ Feature: TypeQL Reasoning Explanation
       | key:person-id:0 | key:person-id:1 |
 
     Then answers contain explanation tree
-      |   | children | vars          | identifiers          | explanation          | pattern                                                                                                                                                                                            |
-      | 0 | 1        | w, m          | ALI, BOB             | bobs-sister-is-alice | { (role: $m, role: $w) isa family-relation; $w isa woman; $w iid <answer.w.iid>; $m iid <answer.m.iid>; };                                                                                         |
+      |   | children | vars          | identifiers          | explanation          | pattern                                                                                                                                                                                          |
+      | 0 | 1        | w, m          | ALI, BOB             | bobs-sister-is-alice | { (role: $m, role: $w) isa family-relation; $w isa woman; $w iid <answer.w.iid>; $m iid <answer.m.iid>; };                                                                                       |
       | 1 | 2, 3     | p, nb, p1, na | BOB, BOBN, ALI, ALIN | join                 | { $p isa man; $p has name $nb; $nb = "Bob"; $p iid <answer.p.iid>; $nb iid <answer.nb.iid>; $p1 isa woman; $p1 has name $na; $na = "Alice"; $p1 iid <answer.p1.iid>; $na iid <answer.na.iid>; }; |
-      | 2 | 4        | p, nb         | BOB, BOBN            | a-man-is-called-bob  | { $p isa man; $p has name $nb; $nb = "Bob"; $p iid <answer.p.iid>; $nb iid <answer.nb.iid>; };                                                                                                    |
-      | 3 | -        | p1, na        | ALI, ALIN            | lookup               | { $p1 isa woman; $p1 has name $na; $na = "Alice"; $p1 iid <answer.p1.iid>; $na iid <answer.na.iid>; };                                                                                            |
-      | 4 | -        | man           | BOB                  | lookup               | { $man isa man; $man iid <answer.man.iid>; };                                                                                                                                                      |
+      | 2 | 4        | p, nb         | BOB, BOBN            | a-man-is-called-bob  | { $p isa man; $p has name $nb; $nb = "Bob"; $p iid <answer.p.iid>; $nb iid <answer.nb.iid>; };                                                                                                   |
+      | 3 | -        | p1, na        | ALI, ALIN            | lookup               | { $p1 isa woman; $p1 has name $na; $na = "Alice"; $p1 iid <answer.p1.iid>; $na iid <answer.na.iid>; };                                                                                           |
+      | 4 | -        | man           | BOB                  | lookup               | { $man isa man; $man iid <answer.man.iid>; };                                                                                                                                                    |
 
     Then get answers of typeql match
       """
@@ -301,12 +301,12 @@ Feature: TypeQL Reasoning Explanation
       | key:person-id:0 | key:person-id:1 |
 
     Then answers contain explanation tree
-      |   | children | vars          | identifiers          | explanation          | pattern                                                                                                                                                                                            |
-      | 0 | 1        | w, m          | ALI, BOB             | bobs-sister-is-alice | { (sibling: $m, sibling: $w) isa siblingship; $w isa woman; $w iid <answer.w.iid>; $m iid <answer.m.iid>; };                                                                                       |
+      |   | children | vars          | identifiers          | explanation          | pattern                                                                                                                                                                                          |
+      | 0 | 1        | w, m          | ALI, BOB             | bobs-sister-is-alice | { (sibling: $m, sibling: $w) isa siblingship; $w isa woman; $w iid <answer.w.iid>; $m iid <answer.m.iid>; };                                                                                     |
       | 1 | 2, 3     | p, nb, p1, na | BOB, BOBN, ALI, ALIN | join                 | { $p isa man; $p has name $nb; $nb = "Bob"; $p iid <answer.p.iid>; $nb iid <answer.nb.iid>; $p1 isa woman; $p1 has name $na; $na = "Alice"; $p1 iid <answer.p1.iid>; $na iid <answer.na.iid>; }; |
-      | 2 | 4        | p, nb         | BOB, BOBN            | a-man-is-called-bob  | { $p isa man; $p has name $nb; $nb = "Bob"; $p iid <answer.p.iid>; $nb iid <answer.nb.iid>; };                                                                                                    |
-      | 3 | -        | p1, na        | ALI, ALIN            | lookup               | { $p1 isa woman; $p1 has name $na; $na = "Alice"; $p1 iid <answer.p1.iid>; $na iid <answer.na.iid>; };                                                                                            |
-      | 4 | -        | man           | BOB                  | lookup               | { $man isa man; $man iid <answer.man.iid>; };                                                                                                                                                      |
+      | 2 | 4        | p, nb         | BOB, BOBN            | a-man-is-called-bob  | { $p isa man; $p has name $nb; $nb = "Bob"; $p iid <answer.p.iid>; $nb iid <answer.nb.iid>; };                                                                                                   |
+      | 3 | -        | p1, na        | ALI, ALIN            | lookup               | { $p1 isa woman; $p1 has name $na; $na = "Alice"; $p1 iid <answer.p1.iid>; $na iid <answer.na.iid>; };                                                                                           |
+      | 4 | -        | man           | BOB                  | lookup               | { $man isa man; $man iid <answer.man.iid>; };                                                                                                                                                    |
 
   @ignore-client-java
   Scenario: a query with a disjunction and negated inference has disjunctive and negation explanation but no rule explanation
@@ -368,10 +368,10 @@ Feature: TypeQL Reasoning Explanation
       | company-is-liable | { $c2 isa company, has name $n2; $n2 "the-company"; }; | { $c2 has is-liable $l; $l true; }; |
 
     Then answers contain explanation tree
-      |   | children | vars    | identifiers | explanation | pattern                                                                                                                                                                                                                                                        |
+      |   | children | vars    | identifiers | explanation | pattern                                                                                                                                                                                                                                                      |
       | 0 | 1        | com     | ACO         | disjunction | { $com iid <answer.com.iid>; { $com isa company; $com has name $n1; $n1 = "the-company"; not { { $com has is-liable $liability; }; }; } or {$com isa company; $com has name $n2; $n2 = "another-company"; not { { $com has is-liable $liability; }; }; }; }; |
-      | 1 | 2        | com, n2 | ACO, N2     | negation    | { $com isa company; $com has name $n2; $n2 = "another-company"; $com iid <answer.com.iid>; $n2 iid <answer.n2.iid>; not { { $com has is-liable $liability; }; }; };                                                                                           |
-      | 2 | -        | com, n2 | ACO, N2     | lookup      | { $com isa company; $com has name $n2; $n2 = "another-company"; $com iid <answer.com.iid>; $n2 iid <answer.n2.iid>; };                                                                                                                                        |
+      | 1 | 2        | com, n2 | ACO, N2     | negation    | { $com isa company; $com has name $n2; $n2 = "another-company"; $com iid <answer.com.iid>; $n2 iid <answer.n2.iid>; not { { $com has is-liable $liability; }; }; };                                                                                          |
+      | 2 | -        | com, n2 | ACO, N2     | lookup      | { $com isa company; $com has name $n2; $n2 = "another-company"; $com iid <answer.com.iid>; $n2 iid <answer.n2.iid>; };                                                                                                                                       |
 
   @ignore-client-java
   Scenario: a rule containing a negation gives a rule explanation with a negation explanation inside
@@ -431,10 +431,10 @@ Feature: TypeQL Reasoning Explanation
       | company-is-liable | { $c2 isa company; not { $c2 has name $n2; $n2 "the-company"; }; }; | { $c2 has is-liable $l; $l true; }; |
 
     Then answers contain explanation tree
-      |   | children | vars     | identifiers | explanation       | pattern                                                                                                             |
+      |   | children | vars     | identifiers | explanation       | pattern                                                                                                            |
       | 0 | 1        | com, lia | ACO, LIA    | company-is-liable | { $com isa company; $com has is-liable $lia; $lia = true; $com iid <answer.com.iid>; $lia iid <answer.lia.iid>; }; |
       | 1 | 2        | c2       | ACO         | negation          | { $c2 isa company; $c2 iid <answer.c2.iid>; not { { $c2 has name $n2; $n2 = "the-company"; }; }; };                |
-      | 2 | -        | c2       | ACO         | lookup            | { $c2 isa company; $c2 iid <answer.c2.iid>; };                                                                      |
+      | 2 | -        | c2       | ACO         | lookup            | { $c2 isa company; $c2 iid <answer.c2.iid>; };                                                                     |
 
   @ignore-client-java
   Scenario: a query containing multiple negations with inferred conjunctions inside has just one negation explanation
@@ -494,6 +494,6 @@ Feature: TypeQL Reasoning Explanation
       | company-is-liable | { $c2 isa company; $c2 has name $n2; $n2 "the-company"; } | { $c2 has is-liable $l; $l true; }; |
 
     Then answers contain explanation tree
-      |   | children | vars | identifiers | explanation | pattern                                                                                                                                                     |
+      |   | children | vars | identifiers | explanation | pattern                                                                                                                                                   |
       | 0 | 1        | com  | ACO         | negation    | { $com isa company; $com iid <answer.com.iid>; not { { $com has is-liable $lia; $lia = true; }; }; not { { $com has name $n; $n = "the-company"; }; }; }; |
-      | 1 | -        | com  | ACO         | lookup      | { $com isa company; $com iid <answer.com.iid>; };                                                                                                           |
+      | 1 | -        | com  | ACO         | lookup      | { $com isa company; $com iid <answer.com.iid>; };                                                                                                         |

@@ -77,9 +77,9 @@ Feature: TypeQL Update Query
       match $x isa person, has name $n;
       """
     Then uniquely identify answer concepts
-      | x          | n               |
-      | key:ref:0  | value:name:Alex |
-      | key:ref:1  | value:name:Bob  |
+      | x         | n               |
+      | key:ref:0 | value:name:Alex |
+      | key:ref:1 | value:name:Bob  |
 
   Scenario: Deleting the last roleplayer of a relation means it cannot be updated
     Given get answers of typeql insert
@@ -188,13 +188,13 @@ Feature: TypeQL Update Query
       $nc has name $n;
       """
     Then uniquely identify answer concepts
-      | p          | n                  |
-      | key:ref:0  | value:name:Alex    |
-      | key:ref:1  | value:name:Bob     |
-      | key:ref:2  | value:name:Charlie |
-      | key:ref:3  | value:name:Darius  |
-      | key:ref:4  | value:name:Alex    |
-      | key:ref:5  | value:name:Bob     |
+      | p         | n                  |
+      | key:ref:0 | value:name:Alex    |
+      | key:ref:1 | value:name:Bob     |
+      | key:ref:2 | value:name:Charlie |
+      | key:ref:3 | value:name:Darius  |
+      | key:ref:4 | value:name:Alex    |
+      | key:ref:5 | value:name:Bob     |
 
     When get answers of typeql match
       """
