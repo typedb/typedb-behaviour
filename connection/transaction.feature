@@ -61,7 +61,7 @@ Feature: Connection Transaction
     Then for each session, transaction closes
     Then for each session, transaction is open: false
 
-  @ignore-typedb-core
+  @ignore-typedb
   Scenario: one database, one session, many transactions to read
     When connection create database: typedb
     Given connection open session for database: typedb
@@ -94,7 +94,7 @@ Feature: Connection Transaction
       | read |
       | read |
 
-  @ignore-typedb-core
+  @ignore-typedb
   Scenario: one database, one session, many transactions to write
     When connection create database: typedb
     Given connection open session for database: typedb
@@ -127,7 +127,7 @@ Feature: Connection Transaction
       | write |
       | write |
 
-  @ignore-typedb-core
+  @ignore-typedb
   Scenario: one database, one session, many transactions to read and write
     When connection create database: typedb
     Given connection open session for database: typedb
@@ -296,7 +296,7 @@ Feature: Connection Transaction
     Then for each session, transaction is open: true
     Then for each session, transaction has type: write
 
-  @ignore-typedb-core
+  @ignore-typedb
   Scenario: one database, many sessions, many transactions to read
     When connection create database: typedb
     Given connection open sessions for database:
@@ -341,7 +341,7 @@ Feature: Connection Transaction
       | read |
       | read |
 
-  @ignore-typedb-core
+  @ignore-typedb
   Scenario: one database, many sessions, many transactions to write
     When connection create database: typedb
     Given connection open sessions for database:
@@ -386,7 +386,7 @@ Feature: Connection Transaction
       | write |
       | write |
 
-  @ignore-typedb-core
+  @ignore-typedb
   Scenario: one database, many sessions, many transactions to read and write
     When connection create database: typedb
     Given connection open sessions for database:

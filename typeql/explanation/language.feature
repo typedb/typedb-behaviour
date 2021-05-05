@@ -23,7 +23,7 @@ Feature: TypeQL Reasoning Explanation
     Given connection open schema session for database: test_explanation
     Given transaction is initialised
 
-  @ignore-client-java
+  @ignore-typedb-client-java
   Scenario: atomic query has lookup explanation
 
   Verify the code path for atomic queries produces correct explanation and pattern.
@@ -57,7 +57,7 @@ Feature: TypeQL Reasoning Explanation
       |   | children | vars | identifiers | explanation | pattern                                    |
       | 0 | -        | p    | AL          | lookup      | { $p isa person; $p iid <answer.p.iid>; }; |
 
-  @ignore-client-java
+  @ignore-typedb-client-java
   Scenario: relation has lookup explanation
     Given typeql define
       """
@@ -109,7 +109,7 @@ Feature: TypeQL Reasoning Explanation
       |   | children | vars    | identifiers  | explanation | pattern                                                                                                                                                        |
       | 0 | -        | k, l, n | KC, LDN, KCn | lookup      | { $k isa area; $k has name $n; (superior: $l, subordinate: $k) isa location-hierarchy; $k iid <answer.k.iid>; $n iid <answer.n.iid>; $l iid <answer.l.iid>; }; |
 
-  @ignore-client-java
+  @ignore-typedb-client-java
   Scenario: non-atomic query has lookup explanation with the full pattern
 
   Verify the code path for non-atomic queries produces correct explanation and pattern.
@@ -168,7 +168,7 @@ Feature: TypeQL Reasoning Explanation
       |   | children | vars       | identifiers      | explanation | pattern                                                                                                                                                                                                                                       |
       | 0 | -        | k, l, u, n | KC, LDN, UK, KCn | lookup      | { $k isa area; $k has name $n; (superior: $l, subordinate: $k) isa location-hierarchy; (superior: $u, subordinate: $l) isa location-hierarchy; $u iid <answer.u.iid>; $l iid <answer.l.iid>; $k iid <answer.k.iid>; $n iid <answer.n.iid>; }; |
 
-  @ignore-client-java
+  @ignore-typedb-client-java
   Scenario: a query containing a negation has a negation explanation
 
   A negation explanation shows the resolution that occurred. It contains the pattern for the lookup that was performed,
@@ -217,7 +217,7 @@ Feature: TypeQL Reasoning Explanation
       | 0 | 1        | com, n | ACO, N      | negation    | { $com isa company; $com has name $n; $com iid <answer.com.iid>; $n iid <answer.n.iid>; not { { $n = "the-company"; }; }; }; |
       | 1 | -        | com, n | ACO, N      | lookup      | { $com isa company; $com has name $n; $com iid <answer.com.iid>; $n iid <answer.n.iid>; };                                   |
 
-  @ignore-client-java
+  @ignore-typedb-client-java
   Scenario: a query containing a disjunction has a disjunctive explanation
 
   Ids in the answer's pattern should sit outside the disjunction, this makes the disjunction valid as it provides outer scope variables for the disjunction to bind to.
@@ -265,7 +265,7 @@ Feature: TypeQL Reasoning Explanation
       | 0 | 1        | com     | ACO         | disjunction | { $com iid <answer.com.iid>; { $com isa company; $com has name $n1; $n1 = "the-company";} or {$com isa company; $com has name $n2; $n2 = "another-company";}; }; |
       | 1 | -        | com, n2 | ACO, N2     | lookup      | { $com isa company; $com has name $n2; $n2 = "another-company"; $com iid <answer.com.iid>; $n2 iid <answer.n2.iid>; };                                           |
 
-  @ignore-client-java
+  @ignore-typedb-client-java
   Scenario: a query containing a nested disjunction has a single disjunctive explanation due to DNF
 
   Due to the use of Disjunctive Normal Form, the answer's pattern should contain only one disjunction with ids outside as the outer scope.
