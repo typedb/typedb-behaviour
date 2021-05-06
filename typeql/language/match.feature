@@ -1987,6 +1987,22 @@ Feature: TypeQL Match Query
       | key:ref:1 |
 
 
+  Scenario: disjunctions with no answers can be limited
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: read
+    When get answers of graql match
+      """
+      match $x isa $t; { $t type person; } or {$t type company;};
+      """
+    Then answer size is: 0
+    When get answers of graql match
+      """
+      match $x isa $t; { $t type person; } or {$t type company;}; limit 1;
+      """
+    Then answer size is: 0
+
+
   Scenario: negations can be applied to filtered variables
     Given connection close all sessions
     Given connection open data session for database: typedb
