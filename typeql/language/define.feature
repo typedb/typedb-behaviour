@@ -1639,7 +1639,7 @@ Feature: TypeQL Define Query
       person owns nickname;
       rule people-bob:
       when {
-        $p isa person, has email "bob@gmail.com";
+        $p has email "bob@gmail.com";
       } then {
         $p has name "Bob";
       };
@@ -2313,4 +2313,3 @@ Feature: TypeQL Define Query
       huge-pineapple sub big-pineapple, relates tree, relates grows-from;
       """
     Then transaction commits
-
