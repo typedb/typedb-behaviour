@@ -1617,8 +1617,48 @@ Feature: TypeQL Define Query
       };
       """
 
-
-  Scenario: redefining an existing rule updates its definition
+  Scenario: redefining a rule and querying updates its definition
+    Given typeql define
+      """
+      define
+      nickname sub attribute, value string;
+      person owns nickname;
+      rule people-bob:
+      when {
+        $p isa person;
+      } then {
+        $p has nickname "Bob";
+      };
+      """
+    Then transaction commits
+    When session opens transaction of type: write
+    Given typeql define
+      """
+      define
+      nickname sub attribute, value string;
+      person owns nickname;
+      rule people-bob:
+      when {
+        $p has email "bob@gmail.com";
+      } then {
+        $p has name "Bob";
+      };
+      """
+    Then transaction commits
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
+      """
+      insert $x isa person, has email "bob@gmail.com";
+      """
+    Then transaction commits
+    Given session opens transaction of type: read
+    When get answers of typeql match
+      """
+      match $x has name $a;
+      """
+    Then answer size is: 1
 
 
   #############################
@@ -2273,4 +2313,3 @@ Feature: TypeQL Define Query
       huge-pineapple sub big-pineapple, relates tree, relates grows-from;
       """
     Then transaction commits
-
