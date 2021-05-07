@@ -1991,12 +1991,12 @@ Feature: TypeQL Match Query
     Given connection close all sessions
     Given connection open data session for database: typedb
     Given session opens transaction of type: read
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa $t; { $t type person; } or {$t type company;};
       """
     Then answer size is: 0
-    When get answers of graql match
+    When get answers of typeql match
       """
       match $x isa $t; { $t type person; } or {$t type company;}; limit 1;
       """
