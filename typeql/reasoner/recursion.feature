@@ -712,6 +712,7 @@ Feature: Recursion Resolution
     Then materialised and reasoned databases are the same size
 
 
+  @Ignore
   Scenario: ancestor-friend test
 
   from Vieille - Recursive Axioms in Deductive Databases (QSQ approach) p. 186
@@ -1012,6 +1013,7 @@ Feature: Recursion Resolution
     Then materialised and reasoned databases are the same size
 
 
+  @Ignore
   Scenario: given a directed graph, all pairs of vertices (x,y) such that y is reachable from x can be found
 
   test 5.2 from Green - Datalog and Recursive Query Processing
