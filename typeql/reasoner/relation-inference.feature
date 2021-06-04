@@ -869,28 +869,54 @@ Feature: Relation Inference Resolution
     # (a,a), (b,b), (c,c)
     Then answer size in reasoned database is: 3
     Then for each session, transaction closes
+
+
+  Scenario: inferred relations with role players not matching the user query are excluded
+    Given for each session, typeql define
+      """
+      define
+      person plays employment:employer;
+
+      rule all-possible-employers:
+      when {
+        $x isa! $t; $t plays employment:employer;
+      } then {
+        (employer: $x) isa employment;
+      };
+
+      rule people-friends:
+      when {
+        $x isa person;
+      } then {
+        (friend: $x) isa friendship;
+      };
+      """
+    Given for each session, transaction commits
+    Given connection close all sessions
+    Given connection open data sessions for databases:
+      | reasoned     |
+      | materialised |
+    Given for each session, open transactions of type: write
+    Given for each session, typeql insert
+      """
+      insert
+      $x isa person, has name "jenny";
+      $y isa company, has name "dawg";
+      """
+    Given for each session, transaction commits
+    Given for each session, open transactions of type: write
+    Then materialised database is completed
+    Given for each session, transaction commits
     Given for each session, open transactions of type: read
     Then for typeql query
       """
       match
-        (choice1: $x, choice2: $y) isa selection;
-        $x has name $n;
-        $y has name $n;
-        $n = 'a';
-      get $x, $y;
+        (employer: $x) isa employment;
+        (friend: $x) isa friendship;
       """
     Then all answers are correct in reasoned database
     Then answer size in reasoned database is: 1
     Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then answer set is equivalent for typeql query
-      """
-      match
-        (choice1: $x, choice2: $y) isa selection;
-        $x has name 'a';
-        $y has name 'a';
-      """
-    Then materialised and reasoned databases are the same size
 
 
   #######################
