@@ -15,7 +15,9 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-@ignore-typedb
+@ignore-typedb-client-java
+@ignore-typedb-client-python
+@ignore-typedb-client-nodejs
 Feature: Connection Users
 
   Scenario: cluster users can be created and deleted
