@@ -15,19 +15,15 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-package(default_visibility = ["//visibility:public"])
+@ignore-typedb-client-java
+@ignore-typedb-client-python
+@ignore-typedb-client-nodejs
+Feature: Connection Users
 
-load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
-
-exports_files([
-    "database.feature",
-    "session.feature",
-    "transaction.feature",
-    "user.feature",
-])
-
-checkstyle_test(
-    name = "checkstyle",
-    include = glob(["*"]),
-    license_type = "agpl",
-)
+  Scenario: cluster users can be created and deleted
+    Given users contains: admin
+    Then not users contains: user
+    Then users create: user, password
+    Then users contains: user
+    Then user delete: user
+    Then not users contains: users
