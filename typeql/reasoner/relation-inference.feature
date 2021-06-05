@@ -869,6 +869,28 @@ Feature: Relation Inference Resolution
     # (a,a), (b,b), (c,c)
     Then answer size in reasoned database is: 3
     Then for each session, transaction closes
+    Given for each session, open transactions of type: read
+    Then for typeql query
+      """
+      match
+        (choice1: $x, choice2: $y) isa selection;
+        $x has name $n;
+        $y has name $n;
+        $n = 'a';
+      get $x, $y;
+      """
+    Then all answers are correct in reasoned database
+    Then answer size in reasoned database is: 1
+    Then for each session, transaction closes
+    Given for each session, open transactions of type: read
+    Then answer set is equivalent for typeql query
+      """
+      match
+        (choice1: $x, choice2: $y) isa selection;
+        $x has name 'a';
+        $y has name 'a';
+      """
+    Then materialised and reasoned databases are the same size
 
 
   #######################
