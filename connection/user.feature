@@ -20,10 +20,13 @@
 @ignore-typedb-client-nodejs
 Feature: Connection Users
 
+  Background: open client
+    Given connection has been opened
+
   Scenario: cluster users can be created and deleted
     Given users contains: admin
-    Then not users contains: user
+    Then users not contains: user
     Then users create: user, password
     Then users contains: user
     Then user delete: user
-    Then not users contains: users
+    Then users not contains: users
