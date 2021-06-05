@@ -871,54 +871,6 @@ Feature: Relation Inference Resolution
     Then for each session, transaction closes
 
 
-  Scenario: inferred relations with role players not matching the user query are excluded
-    Given for each session, typeql define
-      """
-      define
-      person plays employment:employer;
-
-      rule all-possible-employers:
-      when {
-        $x isa! $t; $t plays employment:employer;
-      } then {
-        (employer: $x) isa employment;
-      };
-
-      rule people-friends:
-      when {
-        $x isa person;
-      } then {
-        (friend: $x) isa friendship;
-      };
-      """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
-      """
-      insert
-      $x isa person, has name "jenny";
-      $y isa company, has name "dawg";
-      """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
-      """
-      match
-        (employer: $x) isa employment;
-        (friend: $x) isa friendship;
-      """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then for each session, transaction closes
-
-
   #######################
   # UNTYPED MATCH QUERY #
   #######################
