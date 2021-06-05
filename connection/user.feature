@@ -25,5 +25,5 @@ Feature: Connection Users
     Then not users contains: user
     Then users create: user, password
     Then users contains: user
-    Then users delete: user
+    Then user delete: user
     Then not users contains: users

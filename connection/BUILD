@@ -23,6 +23,7 @@ exports_files([
     "database.feature",
     "session.feature",
     "transaction.feature",
+    "user.feature",
 ])
 
 checkstyle_test(
