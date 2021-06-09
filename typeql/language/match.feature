@@ -990,6 +990,65 @@ Feature: TypeQL Match Query
       | key:ref:0 | key:ref:1 | label:employment:employee |
       | key:ref:0 | key:ref:1 | label:relation:role       |
 
+  @ignore
+  Scenario: A relation can play a role in itself
+    Given typeql define
+      """
+      define
+      comparator sub relation,
+        relates compared,
+        plays comparator:compared;
+      """
+    Given transaction commits
+
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
+      """
+      insert
+      $r(compared:$r) isa comparator;
+      """
+    Given transaction commits
+
+    Given session opens transaction of type: read
+    When get answers of typeql match
+      """
+      match $r(compared:$r) isa comparator;
+      """
+    Then answer size is: 1
+
+  @ignore
+  Scenario: A relation can play a role in itself and have additional roleplayers
+    Given typeql define
+      """
+      define
+      comparator sub relation,
+        relates compared,
+        plays comparator:compared;
+      variable sub entity,
+        plays comparator:compared;
+      """
+    Given transaction commits
+
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
+      """
+      insert
+      $r(compared: $v, compared:$r) isa comparator;
+      $v isa variable;
+      """
+    Given transaction commits
+
+    Given session opens transaction of type: read
+    When get answers of typeql match
+      """
+      match $r(compared: $v, compared:$r) isa comparator;
+      """
+    Then answer size is: 1
+
 
   Scenario: relations between distinct concepts are not retrieved when matching concepts that relate to themselves
     Given connection close all sessions
