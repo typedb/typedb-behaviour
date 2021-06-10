@@ -50,6 +50,33 @@ Feature: TypeQL Update Query
     Given session opens transaction of type: write
 
 
+  Scenario: Deleting anonymous variables throws an exception
+    Given get answers of typeql insert
+      """
+      insert
+        $x isa person, has name "Alex", has ref 0;
+        $y isa person, has name "Alex", has ref 1;
+        (friend: $y) isa friendship, has ref 2;
+      """
+    Given transaction commits
+    Given session opens transaction of type: write
+    Then typeql update; throws exception
+      """
+      match
+      $x isa person, has ref 1;
+      delete $x has name "Alex";
+      insert $x has name "Bob";
+      """
+    Then typeql update; throws exception
+      """
+      match
+      $x isa person, has ref 1;
+      delete (friend: $x) isa friendship;
+      insert (parent: $x) isa parentship;
+      """
+
+
+
   Scenario: Update owned attribute without side effects on other owners
     Given get answers of typeql insert
       """
@@ -80,6 +107,7 @@ Feature: TypeQL Update Query
       | x         | n               |
       | key:ref:0 | value:name:Alex |
       | key:ref:1 | value:name:Bob  |
+
 
   Scenario: Deleting the last roleplayer of a relation means it cannot be updated
     Given get answers of typeql insert
