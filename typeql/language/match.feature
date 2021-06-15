@@ -2083,6 +2083,17 @@ Feature: TypeQL Match Query
       | x         |
       | key:ref:1 |
 
+
+  Scenario: pattern variable without named variable is invalid
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: read
+    Then typeql match; throws exception
+      """
+      match $x isa person, has name $a; "bob" isa name;
+      """
+
+
   ##################
   # VARIABLE TYPES #
   ##################
