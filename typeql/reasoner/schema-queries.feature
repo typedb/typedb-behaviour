@@ -91,20 +91,21 @@ Feature: Schema Query Resolution (Variable Types)
       """
     Given transaction commits
     Given correctness checker is initialised
-    Given for typeql query
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match $x isa entity;
       """
     Then answer size is:  3
     Given session opens transaction of type: read
-    Given for typeql query
+    When get answers of typeql match
       """
       match $x isa relation;
       """
     # (xx, yy, zz, xy, xz, yz)
     Then answer size is:  6
     Given session opens transaction of type: read
-    Given for typeql query
+    When get answers of typeql match
       """
       match $x isa attribute;
       """
@@ -149,7 +150,8 @@ Feature: Schema Query Resolution (Variable Types)
       """
     Given transaction commits
     Given correctness checker is initialised
-    Given for typeql query
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match ($u, $v) isa relation;
       """
@@ -214,7 +216,8 @@ Feature: Schema Query Resolution (Variable Types)
       """
     Given transaction commits
     Given correctness checker is initialised
-    Given for typeql query
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match $x isa relation;
       """
@@ -266,7 +269,8 @@ Feature: Schema Query Resolution (Variable Types)
       """
     Given transaction commits
     Given correctness checker is initialised
-    Given for typeql query
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match $x isa relation;
       """
@@ -333,7 +337,8 @@ Feature: Schema Query Resolution (Variable Types)
       """
     Given transaction commits
     Given correctness checker is initialised
-    Given for typeql query
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match $x isa relation;
       """
@@ -388,7 +393,8 @@ Feature: Schema Query Resolution (Variable Types)
       """
     Given transaction commits
     Given correctness checker is initialised
-    Given for typeql query
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match (employee: $x, employer: $y) isa employment;
       """
@@ -453,6 +459,7 @@ Feature: Schema Query Resolution (Variable Types)
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match

@@ -106,6 +106,7 @@ Feature: Recursion Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match (subordinate: $x, superior: $y) isa big-location-hierarchy;
@@ -180,6 +181,7 @@ Feature: Recursion Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match (role31: $x, role32: $y) isa relation3;
@@ -248,6 +250,7 @@ Feature: Recursion Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match (role31: $x, role32: $y) isa relation3;
@@ -300,6 +303,7 @@ Feature: Recursion Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match $x isa dream; limit 10;
@@ -397,6 +401,7 @@ Feature: Recursion Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match $p isa pair, has name 'ff';
@@ -501,6 +506,7 @@ Feature: Recursion Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match
@@ -582,6 +588,7 @@ Feature: Recursion Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match
@@ -730,6 +737,7 @@ Feature: Recursion Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match
@@ -851,6 +859,7 @@ Feature: Recursion Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match
@@ -934,6 +943,7 @@ Feature: Recursion Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match
@@ -1032,6 +1042,7 @@ Feature: Recursion Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match (from: $x, to: $y) isa reachable;
@@ -1112,6 +1123,7 @@ Feature: Recursion Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match
@@ -1195,6 +1207,7 @@ Feature: Recursion Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match
@@ -1310,6 +1323,7 @@ Feature: Recursion Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match
@@ -1513,6 +1527,7 @@ Feature: Recursion Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match
@@ -1725,6 +1740,7 @@ Feature: Recursion Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match
@@ -1882,6 +1898,7 @@ Feature: Recursion Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match

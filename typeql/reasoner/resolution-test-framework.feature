@@ -53,6 +53,7 @@ Feature: Resolution Test Framework
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match $co has name $n;
@@ -99,6 +100,7 @@ Feature: Resolution Test Framework
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match $co has is-liable $l;
@@ -151,6 +153,7 @@ Feature: Resolution Test Framework
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match
@@ -211,6 +214,7 @@ Feature: Resolution Test Framework
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match $lh (superior: $continent, subordinate: $area) isa location-hierarchy;
@@ -265,6 +269,7 @@ Feature: Resolution Test Framework
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match ($w, $m) isa family-relation; $w isa woman;
@@ -308,6 +313,7 @@ Feature: Resolution Test Framework
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match $com isa company;
@@ -356,6 +362,7 @@ Feature: Resolution Test Framework
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match $com isa company, has is-liable $lia; $lia true;
@@ -400,6 +407,7 @@ Feature: Resolution Test Framework
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match $com isa company; not { $com has is-liable $lia; $lia true; }; not { $com has name $n; $n "the-company"; };

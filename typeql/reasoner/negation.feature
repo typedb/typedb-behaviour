@@ -152,7 +152,7 @@ Feature: Negation Resolution
       """
     Given transaction commits
     Given session opens transaction of type: read
-    Given for typeql query
+    When get answers of typeql match
       """
       match $x isa person;
       """
@@ -184,7 +184,7 @@ Feature: Negation Resolution
       """
     Given transaction commits
     Given session opens transaction of type: read
-    Given for typeql query
+    When get answers of typeql match
       """
       match $x isa person;
       """
@@ -473,13 +473,13 @@ Feature: Negation Resolution
       """
     Given transaction commits
     Given session opens transaction of type: write
-    Given for typeql query
+    When get answers of typeql match
       """
       match $x has attribute $r;
       """
     Then answer size is:  8
     Given session opens transaction of type: read
-    Given for typeql query
+    When get answers of typeql match
       """
       match
         $x has attribute $r;
@@ -533,7 +533,7 @@ Feature: Negation Resolution
       """
     Given transaction commits
     Given session opens transaction of type: write
-    Given for typeql query
+    When get answers of typeql match
       """
       match $x isa person;
       """
@@ -668,7 +668,8 @@ Feature: Negation Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
-    Given for typeql query
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match
         $continent isa continent;
@@ -800,6 +801,7 @@ Feature: Negation Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match $x has name "Not Ten", has age 20;
@@ -843,7 +845,8 @@ Feature: Negation Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
-    Given for typeql query
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match $x isa person;
       """
@@ -902,7 +905,8 @@ Feature: Negation Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
-    Given for typeql query
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match $x isa company;
       """
@@ -1099,6 +1103,7 @@ Feature: Negation Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match (diagnosed-fault: $flt, parent-session: $ts) isa diagnosis;
@@ -1180,6 +1185,7 @@ Feature: Negation Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match (role-3: $x, role-4: $y) isa relation-4;
@@ -1261,6 +1267,7 @@ Feature: Negation Resolution
       (from: $ff, to: $gg) isa link;
       """
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
     """
       match

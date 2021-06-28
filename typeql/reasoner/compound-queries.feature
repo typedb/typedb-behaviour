@@ -74,6 +74,7 @@ Feature: Compound Query Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match

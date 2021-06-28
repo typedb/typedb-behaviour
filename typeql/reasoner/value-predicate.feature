@@ -79,6 +79,7 @@ Feature: Value Predicate Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match $x has is-old $r;
@@ -111,6 +112,7 @@ Feature: Value Predicate Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match
@@ -153,6 +155,7 @@ Feature: Value Predicate Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match
@@ -197,6 +200,7 @@ Feature: Value Predicate Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match
@@ -250,6 +254,7 @@ Feature: Value Predicate Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match
@@ -296,6 +301,7 @@ Feature: Value Predicate Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match
@@ -345,6 +351,7 @@ Feature: Value Predicate Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match
@@ -391,6 +398,7 @@ Feature: Value Predicate Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match
@@ -449,6 +457,7 @@ Feature: Value Predicate Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match
@@ -510,7 +519,8 @@ Feature: Value Predicate Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
-    Given for typeql query
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match
         $x has retailer $r;
@@ -565,7 +575,8 @@ Feature: Value Predicate Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
-    Given for typeql query
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match
         $x has retailer $r;
@@ -621,6 +632,7 @@ Feature: Value Predicate Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match
@@ -670,6 +682,7 @@ Feature: Value Predicate Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match
@@ -753,6 +766,7 @@ Feature: Value Predicate Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match
@@ -861,6 +875,7 @@ Feature: Value Predicate Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match (predecessor:$x1, successor:$x2) isa message-succession;

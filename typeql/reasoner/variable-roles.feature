@@ -146,7 +146,8 @@ Feature: Variable Role Resolution
 
   Scenario: when querying a binary relation, introducing a variable role doubles the answer size
     Given correctness checker is initialised
-    Given for typeql query
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match (role1: $a, role2: $b) isa binary-base;
       """
@@ -166,7 +167,8 @@ Feature: Variable Role Resolution
 
   Scenario: converting a fixed role to a variable role bound with 'type' does not modify the answer size
     Given correctness checker is initialised
-    Given for typeql query
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match (role1: $a, $r1: $b) isa binary-base;
       """
@@ -189,7 +191,8 @@ Feature: Variable Role Resolution
 
   Scenario: when querying a binary relation, introducing a meta 'role' and a variable role triples the answer size
     Given correctness checker is initialised
-    Given for typeql query
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match (role1: $a, role2: $b) isa binary-base;
       """
@@ -209,7 +212,8 @@ Feature: Variable Role Resolution
 
   Scenario: converting a fixed role to a variable bound with 'type role' (?)
     Given correctness checker is initialised
-    Given for typeql query
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match (role: $a, $r1: $b) isa binary-base;
       """
@@ -232,7 +236,8 @@ Feature: Variable Role Resolution
 
   Scenario: converting a fixed role to a variable bound with 'sub role' (?)
     Given correctness checker is initialised
-    Given for typeql query
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match (role: $a, $r1: $b) isa binary-base;
       """
@@ -255,6 +260,7 @@ Feature: Variable Role Resolution
 
   Scenario: when all other role variables are bound, introducing a meta 'role' doesn't affect the answer size
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match
@@ -281,7 +287,8 @@ Feature: Variable Role Resolution
 
   Scenario: when querying a binary relation, introducing two variable roles multiplies the answer size by 7
     Given correctness checker is initialised
-    Given for typeql query
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match (role1: $a, role2: $b) isa binary-base;
       """
@@ -354,6 +361,7 @@ Feature: Variable Role Resolution
 
   Scenario: variable roles are correctly mapped to answers for a ternary relation with 3 possible roleplayers
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match
@@ -399,6 +407,7 @@ Feature: Variable Role Resolution
 
   Scenario: variable roles are correctly mapped to answers for a quaternary relation with 3 possible roleplayers
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match
@@ -443,6 +452,7 @@ Feature: Variable Role Resolution
   # If this test passes while others fail, there may be an inheritance-related issue.
   Scenario: variable roles are correctly mapped to answers for a quaternary relation with 2 possible roleplayers
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match

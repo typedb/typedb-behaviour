@@ -81,6 +81,7 @@ Feature: Attribute Attachment Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match $x isa person, has string-attribute $y;
@@ -129,6 +130,7 @@ Feature: Attribute Attachment Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match $x has string-attribute $y;
@@ -169,6 +171,7 @@ Feature: Attribute Attachment Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match $x has retailer 'Ocado';
@@ -221,6 +224,7 @@ Feature: Attribute Attachment Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match $x isa soft-drink, has retailer 'Ocado';
@@ -251,6 +255,7 @@ Feature: Attribute Attachment Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match $x has age > 20;

@@ -118,6 +118,7 @@ Feature: Concept Inequality Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match (state: $s) isa holds;
@@ -135,7 +136,7 @@ Feature: Concept Inequality Resolution
   Scenario: inferred binary relations can be filtered by concept inequality of their roleplayers
     Given correctness checker is initialised
     Given session opens transaction of type: read
-    Given for typeql query
+    When get answers of typeql match
       """
       match (ball1: $x, ball2: $y) isa selection;
       """
@@ -303,7 +304,7 @@ Feature: Concept Inequality Resolution
 
     Given correctness checker is initialised
     Given session opens transaction of type: read
-    Given for typeql query
+    When get answers of typeql match
       """
       match
         (ball1: $x, ball2: $y1) isa selection;
@@ -368,7 +369,7 @@ Feature: Concept Inequality Resolution
 
     Given correctness checker is initialised
     Given session opens transaction of type: read
-    Given for typeql query
+    When get answers of typeql match
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -455,6 +456,7 @@ Feature: Concept Inequality Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match
@@ -526,6 +528,7 @@ Feature: Concept Inequality Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     When get answers of typeql match
       """
       match
