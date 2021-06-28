@@ -804,9 +804,9 @@ Feature: Negation Resolution
       """
       match $x has name "Not Ten", has age 20;
       """
+    Then answer size is: 1
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 1
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -847,9 +847,9 @@ Feature: Negation Resolution
       """
       match $x isa person;
       """
+    Then answer size is: 3
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is:  3
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -916,6 +916,8 @@ Feature: Negation Resolution
       """
     # Should exclude both the company in France and the company with no country
     Then answer size is: 2
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     Given session opens transaction of type: read
     Then answer set is equivalent for typeql query
       """
@@ -932,8 +934,6 @@ Feature: Negation Resolution
         $x isa company;
         { $x has name "a"; } or { $x has name "b"; };
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
 
 
   Scenario: when nesting multiple negations and conjunctions, they are correctly resolved
@@ -1184,8 +1184,6 @@ Feature: Negation Resolution
       """
       match (role-3: $x, role-4: $y) isa relation-4;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 11
     Then answers are consistent across 5 executions
     Then check all answers and explanations are sound
@@ -1262,7 +1260,7 @@ Feature: Negation Resolution
       (from: $ee, to: $ff) isa link;
       (from: $ff, to: $gg) isa link;
       """
-    # Given correctness checker is initialised
+    Given correctness checker is initialised
     When get answers of typeql match
     """
       match
@@ -1272,6 +1270,8 @@ Feature: Negation Resolution
     # aa is not linked to itself. ee, ff, gg are linked to each other, but not to aa. hh is not linked to anything
     Then answer size is: 5
     Given transaction closes
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     Given session opens transaction of type: read
     # TODO: Check again if we correctly mean '$y isa node' when we enable this test
     Then answer set is equivalent for typeql query
@@ -1281,5 +1281,3 @@ Feature: Negation Resolution
         { $y has index "aa"; } or { $y has index "ee"; } or { $y has index "ff"; } or
         { $y has index "gg"; } or { $y has index "hh"; };
       """
-    # Then check all answers and explanations are sound
-    Then check all answers and explanations are complete

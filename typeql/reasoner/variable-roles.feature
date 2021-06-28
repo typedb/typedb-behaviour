@@ -150,17 +150,15 @@ Feature: Variable Role Resolution
       """
       match (role1: $a, role2: $b) isa binary-base;
       """
+    Then answer size is:  9
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is:  9
     Given session opens transaction of type: read
     When get answers of typeql match
       """
       match (role1: $a, $r1: $b) isa binary-base;
       """
     # $r1 in {role, role2} (2 options => double answer size)
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 18
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -172,9 +170,9 @@ Feature: Variable Role Resolution
       """
       match (role1: $a, $r1: $b) isa binary-base;
       """
+    Then answer size is:  18
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is:  18
     Given session opens transaction of type: read
     # This query should be equivalent to the one above
     When get answers of typeql match
@@ -184,8 +182,6 @@ Feature: Variable Role Resolution
         $r1 type binary-base:role1;
       get $a, $b, $r2;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 18
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -197,17 +193,15 @@ Feature: Variable Role Resolution
       """
       match (role1: $a, role2: $b) isa binary-base;
       """
+    Then answer size is:  9
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is:  9
     Given session opens transaction of type: read
     When get answers of typeql match
       """
       match (role: $a, $r1: $b) isa binary-base;
       """
     # $r1 in {role, role1, role2} (3 options => triple answer size)
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 27
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -219,9 +213,9 @@ Feature: Variable Role Resolution
       """
       match (role: $a, $r1: $b) isa binary-base;
       """
+    Then answer size is: 27
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 27
     Given session opens transaction of type: read
     # This query should be equivalent to the one above
     When get answers of typeql match
@@ -231,8 +225,6 @@ Feature: Variable Role Resolution
         $r1 type relation:role;
       get $a, $b, $r2;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 27
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -244,9 +236,9 @@ Feature: Variable Role Resolution
       """
       match (role: $a, $r1: $b) isa binary-base;
       """
+    Then answer size is: 27
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 27
     Given session opens transaction of type: read
     # This query should be equivalent to the one above
     When get answers of typeql match
@@ -256,8 +248,6 @@ Feature: Variable Role Resolution
         $r1 sub relation:role;
       get $a, $b, $r2;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 27
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -273,9 +263,9 @@ Feature: Variable Role Resolution
         $r2 type binary-base:role2;
       """
     # $r1 must be 'role' and $r2 must be 'role2'
+    Then answer size is: 9
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 9
     Given session opens transaction of type: read
     # This query is equivalent to the one above
     When get answers of typeql match
@@ -284,8 +274,6 @@ Feature: Variable Role Resolution
         (role: $a, $r2: $b) isa binary-base;
         $r2 type binary-base:role2;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 9
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -297,9 +285,9 @@ Feature: Variable Role Resolution
       """
       match (role1: $a, role2: $b) isa binary-base;
       """
+    Then answer size is:  9
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is:  9
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -313,8 +301,6 @@ Feature: Variable Role Resolution
     # role1 | role2 |
     # role2 | role  |
     # role2 | role1 |
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 63
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -374,26 +360,24 @@ Feature: Variable Role Resolution
         (ternary-role1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
         $a1 has name 'a';
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # This query is equivalent to matching ($r2: $a2, $r3: $a3) isa binary-base, as role1 and $a1 each have only 1 value
     Then answer size is: 63
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     Given session opens transaction of type: read
     When get answers of typeql match
       """
       match (ternary-role1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # Now the bound role 'role1' is in {a, b, c}, tripling the answer size
     Then answer size is: 189
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     Given session opens transaction of type: read
     When get answers of typeql match
       """
       match ($r1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # r1    | r2    | r3    |
     # role  | role  | role  | 1 pattern
     # roleX | role  | role  | 3 patterns: X in {1,2,3}
@@ -421,26 +405,24 @@ Feature: Variable Role Resolution
         (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
         $a1 has name 'a';
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # This query is equivalent to matching ($r2: $a2, $r3: $a3, $r4: $a4) isa ternary-base
     Then answer size is: 918
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     Given session opens transaction of type: read
     When get answers of typeql match
       """
       match (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # Now the bound role 'role1' is in {a, b, c}, tripling the answer size
     Then answer size is: 2754
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     Given session opens transaction of type: read
     When get answers of typeql match
       """
       match ($r1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # {r1,r2,r3,r4}
     # 4 occurrences of 'role' | 1 pattern
     # 3 occurrences of 'role' | 16 patterns (4 combinations of 1 role var x (4) distinct roles)
@@ -467,26 +449,24 @@ Feature: Variable Role Resolution
         (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
         $a1 has name 'a';
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # This query is equivalent to matching ($r2: $a2, $r3: $a3, $r4: $a4) isa ternary
     Then answer size is: 272
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     Given session opens transaction of type: read
     When get answers of typeql match
       """
       match (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # Now the bound role 'role1' is in {a, b}, doubling the answer size
     Then answer size is: 544
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     Given session opens transaction of type: read
     When get answers of typeql match
       """
       match ($r1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # {r1,r2,r3,r4} | 209 patterns (see 'quaternary-base' scenario for details)
     # For each pattern, we have one possible match per quaternary relation
     # and there are 16 quaternary relations in the knowledge graph (including both material and inferred)

@@ -110,8 +110,6 @@ Feature: Recursion Resolution
       """
       match (subordinate: $x, superior: $y) isa big-location-hierarchy;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 1
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -186,8 +184,6 @@ Feature: Recursion Resolution
       """
       match (role31: $x, role32: $y) isa relation3;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 1
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -256,17 +252,15 @@ Feature: Recursion Resolution
       """
       match (role31: $x, role32: $y) isa relation3;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # Each of the two material relation1 instances should infer a single relation3 via 1-to-2 and 2-to-3
     Then answer size is: 2
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     Given session opens transaction of type: read
     When get answers of typeql match
       """
       match (role21: $x, role22: $y) isa relation2;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # Relation-3-to-2 should not make any additional inferences - it should merely assert that the relations exist
     Then answer size is: 2
     Then check all answers and explanations are sound
@@ -310,8 +304,6 @@ Feature: Recursion Resolution
       """
       match $x isa dream; limit 10;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 10
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -409,16 +401,14 @@ Feature: Recursion Resolution
       """
       match $p isa pair, has name 'ff';
       """
+    Then answer size is: 16
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 16
     Given session opens transaction of type: read
     When get answers of typeql match
       """
       match $p isa pair;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 64
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -520,9 +510,8 @@ Feature: Recursion Resolution
       """
     Then answer size is: 3
     Given transaction closes
-    Given session opens transaction of type: read
-    Given correctness checker is initialised
-    Given transaction closes
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     Given session opens transaction of type: read
     Then answer set is equivalent for typeql query
       """
@@ -531,8 +520,6 @@ Feature: Recursion Resolution
         {$ind = 'j';} or {$ind = 's';} or {$ind = 'v';};
       get $y;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
 
 
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
@@ -603,9 +590,9 @@ Feature: Recursion Resolution
         $Y has name $name;
       get $Y, $name;
       """
+    Then answer size is: 3
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 3
     Given session opens transaction of type: read
     Then answer set is equivalent for typeql query
       """
@@ -621,9 +608,9 @@ Feature: Recursion Resolution
         $X has name 'aa';
       get $Y;
       """
+    Then answer size is: 4
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 4
     Given session opens transaction of type: read
     Then answer set is equivalent for typeql query
       """
@@ -636,9 +623,9 @@ Feature: Recursion Resolution
       """
       match (ancestor: $X, descendant: $Y) isa ancestorship;
       """
+    Then answer size is: 10
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 10
     Given session opens transaction of type: read
     Then answer set is equivalent for typeql query
       """
@@ -656,9 +643,9 @@ Feature: Recursion Resolution
       """
       match ($X, $Y) isa ancestorship;
       """
+    Then answer size is: 20
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 20
     Given session opens transaction of type: read
     Then answer set is equivalent for typeql query
       """
@@ -684,8 +671,6 @@ Feature: Recursion Resolution
         {$nameY = 'c';$nameX = 'ca';};
       get $X, $Y;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
 
 
   Scenario: ancestor-friend test
@@ -755,10 +740,8 @@ Feature: Recursion Resolution
       """
     Then answer size is: 2
     Given transaction closes
-    Given session opens transaction of type: read
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Given transaction closes
     Given session opens transaction of type: read
     Then answer set is equivalent for typeql query
       """
@@ -784,7 +767,6 @@ Feature: Recursion Resolution
       get $X;
       """
     Then answer size is: 3
-    Given session opens transaction of type: read
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
     Given session opens transaction of type: read
@@ -803,8 +785,6 @@ Feature: Recursion Resolution
         $Y has name 'd';
       get $X;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
 
 
   Scenario: same-generation test
@@ -889,8 +869,6 @@ Feature: Recursion Resolution
         {$name = 'f';} or {$name = 'a';};
       get $y;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
 
 
   Scenario: TC test
@@ -963,16 +941,14 @@ Feature: Recursion Resolution
         $y has index 'a';
       get $x;
       """
+    Then answer size is: 1
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 1
     Given session opens transaction of type: read
     Then answer set is equivalent for typeql query
       """
       match $x has index 'a2';
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
 
 
   Scenario: given a directed graph, all pairs of vertices (x,y) such that y is reachable from x can be found
@@ -1060,10 +1036,10 @@ Feature: Recursion Resolution
       """
       match (from: $x, to: $y) isa reachable;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 7
     Given transaction closes
+    Then check all answers and explanations are complete
+    Then check all answers and explanations are sound
     Given session opens transaction of type: read
     Then answer set is equivalent for typeql query
       """
@@ -1079,8 +1055,6 @@ Feature: Recursion Resolution
         {$indX = 'aa';$indY = 'dd';};
       get $x, $y;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
 
 
   Scenario: given an undirected graph, all vertices connected to a given vertex can be found
@@ -1145,9 +1119,9 @@ Feature: Recursion Resolution
         $x has index 'a';
       get $y;
       """
+    Then answer size is: 4
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 4
     Given session opens transaction of type: read
     Then answer set is equivalent for typeql query
       """
@@ -1156,8 +1130,6 @@ Feature: Recursion Resolution
         {$indY = 'a';} or {$indY = 'b';} or {$indY = 'c';} or {$indY = 'd';};
       get $y;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
 
 
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
@@ -1230,10 +1202,10 @@ Feature: Recursion Resolution
         $x has name 'ann';
       get $y;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 3
     Given transaction closes
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     Given session opens transaction of type: read
     Then answer set is equivalent for typeql query
       """
@@ -1242,8 +1214,6 @@ Feature: Recursion Resolution
         {$name = 'ann';} or {$name = 'bill';} or {$name = 'peter';};
       get $y;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
 
 
   Scenario: reverse same-generation test
@@ -1348,9 +1318,9 @@ Feature: Recursion Resolution
       get $y;
       """
     Then answer size is: 3
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Given transaction closes
+    Then check all answers and explanations are complete
+    Then check all answers and explanations are sound
     Given session opens transaction of type: read
     Then answer set is equivalent for typeql query
       """
@@ -1366,9 +1336,9 @@ Feature: Recursion Resolution
       match (from: $x, to: $y) isa RevSG;
       """
     Then answer size is: 11
+    Given transaction closes
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Given transaction closes
     Given session opens transaction of type: read
     Then answer set is equivalent for typeql query
       """
@@ -1383,8 +1353,6 @@ Feature: Recursion Resolution
         {$nameX = 'f';$nameY = 'k';};
       get $x, $y;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
 
 
   Scenario: dual linear transitivity matrix test
@@ -1552,17 +1520,16 @@ Feature: Recursion Resolution
         $x has index 'a0';
       get $y;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 5
     Given transaction closes
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+
     Given session opens transaction of type: read
     Then answer set is equivalent for typeql query
       """
       match $y isa $t; { $t type a-entity; } or { $t type end; }; get $y;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
 
 
   Scenario: tail recursion test
@@ -1765,17 +1732,15 @@ Feature: Recursion Resolution
         $x has index 'a0';
       get $y;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 60
     Given transaction closes
+    Then check all answers and explanations are complete
+    Then check all answers and explanations are sound
     Given session opens transaction of type: read
     Then answer set is equivalent for typeql query
       """
       match $y isa b-entity;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
 
 
   Scenario: linear transitivity matrix test
@@ -1924,14 +1889,13 @@ Feature: Recursion Resolution
         $x has index 'a';
       get $y;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 25
     Given transaction closes
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+
     Given session opens transaction of type: read
     Then answer set is equivalent for typeql query
       """
       match $y isa a-entity;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete

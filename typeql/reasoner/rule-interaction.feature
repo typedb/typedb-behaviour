@@ -115,8 +115,6 @@ Feature: Rule Interaction Resolution
       """
       match $x isa person, has name $n, has tag "P";
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 2
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -175,8 +173,6 @@ Feature: Rule Interaction Resolution
       """
       match $x isa person, has name 'tracey';
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 2
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete

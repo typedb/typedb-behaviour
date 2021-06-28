@@ -93,10 +93,9 @@ Feature: Relation Inference Resolution
         $x isa person;
         ($x) isa employment;
       """
+    Then answer size is: 2
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 2
-    Given session opens transaction of type: read
 
 
   Scenario: a relation can be inferred based on an attribute ownership
@@ -127,9 +126,9 @@ Feature: Relation Inference Resolution
         $x has name "Haikal";
         ($x) isa employment;
       """
+    Then answer size is: 1
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 1
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -176,8 +175,6 @@ Feature: Relation Inference Resolution
         $n "3kg jar of Nutella" isa name;
         $p 14.99 isa price;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 1
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -217,8 +214,6 @@ Feature: Relation Inference Resolution
         $x 1664 isa year;
         ($x, employee: $p, employer: $y) isa employment;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 2
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -300,8 +295,6 @@ Feature: Relation Inference Resolution
       """
       match ($x, $y) isa friendship;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # Here there are n choices for x, and n choices for y, so the total answer size is n^2
     Then answer size is: 25
     Then check all answers and explanations are sound
@@ -336,8 +329,6 @@ Feature: Relation Inference Resolution
       """
       match (employee: $x, employer: $x) isa employment;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 3
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -369,8 +360,6 @@ Feature: Relation Inference Resolution
       """
       match (employee: $x, employer: $y) isa employment;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 1
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -469,8 +458,6 @@ Feature: Relation Inference Resolution
       """
       match (coworker: $x, coworker: $x) isa coworkers;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # (p,p) is a coworkers since people work with themselves.
     # Applying the robot work rule we see that (r1,p) is a pet ownership, and (p,p) and (p,r2) are coworker relations,
     # so (r1,p) and (r1,r2) are both coworker relations.
@@ -478,13 +465,13 @@ Feature: Relation Inference Resolution
     # Applying the robot work rule a 2nd time, (r1,p) is a pet ownership and (p,r1) are coworkers,
     # therefore (r1,r1) is a reflexive coworker relation. So the answers are [p] and [r1].
     Then answer size is: 2
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     Given session opens transaction of type: read
     When get answers of typeql match
       """
       match (coworker: $x, coworker: $y) isa coworkers;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # $x | $y |
     # p  | p  |
     # p  | r2 |
@@ -533,8 +520,6 @@ Feature: Relation Inference Resolution
       """
       match $x isa location-hierarchy;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 3
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -574,8 +559,6 @@ Feature: Relation Inference Resolution
       """
       match (subordinate: $x1, superior: $x2) isa location-hierarchy;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 6
     Then answers are consistent across 5 executions
     Then check all answers and explanations are sound
@@ -642,8 +625,6 @@ Feature: Relation Inference Resolution
       """
       match (subordinate: $x, superior: $y) isa location-hierarchy;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 1
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -712,8 +693,6 @@ Feature: Relation Inference Resolution
       """
       match (employee: $x) isa employment;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 1
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -748,9 +727,9 @@ Feature: Relation Inference Resolution
       """
       match (friend: $a, friend: $b, friend: $c) isa friendship;
       """
+    Then answer size is: 6
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 6
     Given session opens transaction of type: read
     Then answer set is equivalent for typeql query
       """
@@ -758,8 +737,6 @@ Feature: Relation Inference Resolution
         $r (friend: $a, friend: $b, friend: $c) isa friendship;
       get $a, $b, $c;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
 
 
   Scenario: inferred relations can be filtered by shared attribute ownership
@@ -803,10 +780,10 @@ Feature: Relation Inference Resolution
         $x has name $n;
         $y has name $n;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # (a,a), (b,b), (c,c)
     Then answer size is: 3
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -817,9 +794,9 @@ Feature: Relation Inference Resolution
         $n = 'a';
       get $x, $y;
       """
+    Then answer size is: 1
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 1
     Given session opens transaction of type: read
     Then answer set is equivalent for typeql query
       """
@@ -828,8 +805,6 @@ Feature: Relation Inference Resolution
         $x has name 'a';
         $y has name 'a';
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
 
 
   #######################
@@ -872,8 +847,6 @@ Feature: Relation Inference Resolution
         $b isa place, has name "Turku";
         ($b, $c);
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # $c in {'Turku Airport', 'Finland'}
     Then answer size is: 2
     Then check all answers and explanations are sound
@@ -915,9 +888,9 @@ Feature: Relation Inference Resolution
         ($a, $b);
         $b isa place, has name "Turku";
       """
+    Then answer size is:  1
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is:  1
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -927,8 +900,6 @@ Feature: Relation Inference Resolution
         $b isa place, has name "Turku";
         ($c, $d);
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # (2 db relations + 1 inferred) x 2 for variable swap
     Then answer size is: 6
     Then check all answers and explanations are sound
@@ -988,8 +959,6 @@ Feature: Relation Inference Resolution
       """
       match ($a, $b);
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
 
 
   # TODO: re-enable all steps when fixed (#75)
@@ -1026,8 +995,6 @@ Feature: Relation Inference Resolution
         ($a, $b);
         ($b, $c);
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # a   | b   | c   |
     # AIR | TUR | FIN |
     # AIR | FIN | TUR |
@@ -1097,24 +1064,22 @@ Feature: Relation Inference Resolution
       """
       match ($x) isa derivedRelation;
       """
+    Then answer size is: 2
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 2
     Given session opens transaction of type: read
     When get answers of typeql match
       """
       match ($x) isa! derivedRelation;
       """
+    Then answer size is: 2
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 2
     Given session opens transaction of type: read
     When get answers of typeql match
       """
       match ($x) isa directDerivedRelation;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 1
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete

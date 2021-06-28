@@ -43,6 +43,7 @@ Feature: Compound Query Resolution
     # each scenario specialises the schema further
     Given session opens transaction of type: write
 
+
   Scenario: repeated concludable patterns within a query trigger rules from all pattern occurrences
     Given typeql define
       """

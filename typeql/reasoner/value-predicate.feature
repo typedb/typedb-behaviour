@@ -83,8 +83,6 @@ Feature: Value Predicate Resolution
       """
       match $x has is-old $r;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 1
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -119,8 +117,6 @@ Feature: Value Predicate Resolution
         $x isa person, has lucky-number $n;
         $n <op> 1667;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: <answer-size>
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -164,8 +160,6 @@ Feature: Value Predicate Resolution
         $y isa person, has name "Bob", has lucky-number $n;
         $m <op> $n;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: <answer-size>
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -211,8 +205,6 @@ Feature: Value Predicate Resolution
         $m <op> $n;
         $n <op> 1667;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: <answer-size>
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -265,8 +257,6 @@ Feature: Value Predicate Resolution
         $r != $unwanted;
         $unwanted = "Ocado";
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # x     | r     |
     # Fanta | Tesco |
     # Tango | Tesco |
@@ -313,8 +303,6 @@ Feature: Value Predicate Resolution
         $wanted = "Ocado";
         $r = $wanted;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # x     | r     |
     # Fanta | Ocado |
     # Tango | Ocado |
@@ -363,8 +351,6 @@ Feature: Value Predicate Resolution
         $x has retailer $rx;
         $rx contains "land";
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 2
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -413,8 +399,6 @@ Feature: Value Predicate Resolution
         $rx = $ry;
         $ry contains 'land';
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # x     | rx        | y     | ry        |
     # Fanta | Iceland   | Tango | Iceland   |
     # Tango | Iceland   | Fanta | Iceland   |
@@ -473,8 +457,6 @@ Feature: Value Predicate Resolution
         $rx != $ry;
         $ry contains 'land';
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # x     | rx        | y     | ry        |
     # Fanta | Iceland   | Tango | Poundland |
     # Tango | Iceland   | Fanta | Poundland |
@@ -534,12 +516,12 @@ Feature: Value Predicate Resolution
         $x has retailer $r;
         $r != "Ocado";
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # x     | r     |
     # Fanta | Tesco |
     # Tango | Tesco |
     Then answer size is:  2
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -547,8 +529,6 @@ Feature: Value Predicate Resolution
         $x has retailer $r;
         not { $r = "Ocado"; };
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 2
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -591,12 +571,12 @@ Feature: Value Predicate Resolution
         $x has retailer $r;
         $r = "Ocado";
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # x     | r     |
     # Fanta | Ocado |
     # Tango | Ocado |
     Then answer size is:  2
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -604,8 +584,6 @@ Feature: Value Predicate Resolution
         $x has retailer $r;
         not { $r != "Ocado"; };
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 2
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -652,8 +630,6 @@ Feature: Value Predicate Resolution
           $unwanted = "Ocado";
         };
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # x     | r     |
     # Fanta | Tesco |
     # Tango | Tesco |
@@ -701,8 +677,6 @@ Feature: Value Predicate Resolution
         $y has base-attribute $ay;
         not { $ax is $ay; };
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # x   | ax  | y   | ay  |
     # PER | BSA | SOF | NAM |
     # PER | BSA | SOF | RET |
@@ -785,9 +759,9 @@ Feature: Value Predicate Resolution
         $x "not expensive" isa price-range;
         ($x, item: $y) isa price-classification;
       """
+    Then answer size is: 2
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 2
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -795,9 +769,9 @@ Feature: Value Predicate Resolution
         $x "low price" isa price-range;
         ($x, item: $y) isa price-classification;
       """
+    Then answer size is: 1
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 1
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -805,9 +779,9 @@ Feature: Value Predicate Resolution
         $x "cheap" isa price-range;
         ($x, item: $y) isa price-classification;
       """
+    Then answer size is: 1
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 1
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -815,9 +789,9 @@ Feature: Value Predicate Resolution
         $x "expensive" isa price-range;
         ($x, item: $y) isa price-classification;
       """
+    Then answer size is: 1
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 1
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -825,8 +799,6 @@ Feature: Value Predicate Resolution
         $x isa price-range;
         ($x, item: $y) isa price-classification;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # sum of all previous answers
     Then answer size is: 5
     Then check all answers and explanations are sound
@@ -893,8 +865,6 @@ Feature: Value Predicate Resolution
       """
       match (predecessor:$x1, successor:$x2) isa message-succession;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # the (n-1)th triangle number, where n is the number of replies to the first post
     Then answer size is: 10
     Then check all answers and explanations are sound

@@ -114,8 +114,6 @@ Feature: Schema Query Resolution (Variable Types)
       """
       match $x isa $type;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # 3 people x 3 types of person {person,entity,thing}
     # 6 friendships x 3 types of friendship {friendship, relation, thing}
     # 1 name x 3 types of name {name,attribute,thing}
@@ -162,8 +160,6 @@ Feature: Schema Query Resolution (Variable Types)
       """
       match ($u, $v) isa $type;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # 3 possible $u x 3 possible $v x 3 possible $type {friendship,relation,thing}
     Then answer size is: 27
     Then check all answers and explanations are sound
@@ -222,9 +218,9 @@ Feature: Schema Query Resolution (Variable Types)
       """
       match $x isa relation;
       """
+    Then answer size is:  6
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is:  6
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -232,8 +228,6 @@ Feature: Schema Query Resolution (Variable Types)
         $x isa $type;
         $type owns contract;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # friendship can't have a contract... at least, not in this pristine test world
     # note: enforcing 'has contract' also eliminates 'relation' and 'thing' as possible types
     Then answer size is: 4
@@ -285,8 +279,6 @@ Feature: Schema Query Resolution (Variable Types)
         $x isa $type;
         $type sub relation;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # 3 friendships, 3 employments, 6 relations
     Then answer size is: 12
     Then check all answers and explanations are sound
@@ -345,9 +337,9 @@ Feature: Schema Query Resolution (Variable Types)
       """
       match $x isa relation;
       """
+    Then answer size is:  6
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is:  6
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -355,8 +347,6 @@ Feature: Schema Query Resolution (Variable Types)
         $x isa $type;
         $type plays legal-documentation:subject;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # friendship can't be a documented-thing
     # note: enforcing 'plays legal-documentation:subject' also eliminates 'relation' and 'thing' as possible types
     Then answer size is: 4
@@ -402,9 +392,9 @@ Feature: Schema Query Resolution (Variable Types)
       """
       match (employee: $x, employer: $y) isa employment;
       """
+    Then answer size is:  3
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is:  3
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -412,10 +402,10 @@ Feature: Schema Query Resolution (Variable Types)
         (employee: $x, employer: $y) isa employment;
         $x isa $type;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # 3 colonels * 5 supertypes of colonel (colonel, military-person, person, entity, thing)
     Then answer size is: 15
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -423,8 +413,6 @@ Feature: Schema Query Resolution (Variable Types)
         ($x, $y) isa employment;
         $x isa $type;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # (3 colonels * 5 supertypes of colonel * 1 company)
     # + (1 company * 3 supertypes of company * 3 colonels)
     Then answer size is: 24
@@ -477,11 +465,11 @@ Feature: Schema Query Resolution (Variable Types)
         not { $y is $x; };
       get $x, $y;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # All companies match when $type is company (or entity)
     # Query returns {ab,ac,ad,bc,bd,cd} and each of them with the variables flipped
     Then answer size is: 12
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     Given session opens transaction of type: read
     When get answers of typeql match
       """

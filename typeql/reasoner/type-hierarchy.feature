@@ -85,10 +85,10 @@ Feature: Type Hierarchy Resolution
         $y isa person;
         (actor: $x, writer: $y) isa film-production;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # Answers are (actor:$x, writer:$z) and (actor:$x, writer:$v)
     Then answer size is: 2
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -98,9 +98,9 @@ Feature: Type Hierarchy Resolution
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
       """
+    Then answer size is: 2
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 2
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -109,10 +109,10 @@ Feature: Type Hierarchy Resolution
         $y isa child;
         (actor: $x, writer: $y) isa film-production;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # Answer is (actor:$x, writer:$v) ONLY
     Then answer size is: 1
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -122,9 +122,9 @@ Feature: Type Hierarchy Resolution
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
       """
+    Then answer size is: 1
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 1
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -133,10 +133,10 @@ Feature: Type Hierarchy Resolution
         $y isa person;
         (actor: $x, writer: $y) isa film-production;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # Answers are (actor:$x, writer:$z) and (actor:$x, writer:$v)
     Then answer size is: 2
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -146,8 +146,6 @@ Feature: Type Hierarchy Resolution
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 2
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -257,8 +255,6 @@ Feature: Type Hierarchy Resolution
       """
       match (scifi-writer:$x, scifi-actor:$y) isa film-production;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 1
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -313,8 +309,6 @@ Feature: Type Hierarchy Resolution
       """
       match (writer:$x, actor:$y) isa scifi-production;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 1
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -369,8 +363,6 @@ Feature: Type Hierarchy Resolution
       """
       match (writer:$x, actor:$y) isa film-production;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 1
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -443,10 +435,10 @@ Feature: Type Hierarchy Resolution
         $y isa person;
         (actor: $x, writer: $y) isa film-production;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # Answers are (actor:$x, writer:$z) and (actor:$x, writer:$v)
     Then answer size is: 2
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -456,9 +448,9 @@ Feature: Type Hierarchy Resolution
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
       """
+    Then answer size is: 2
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 2
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -467,10 +459,10 @@ Feature: Type Hierarchy Resolution
         $y isa child;
         (actor: $x, writer: $y) isa film-production;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # Answer is (actor:$x, writer:$v) ONLY
     Then answer size is: 1
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -480,9 +472,9 @@ Feature: Type Hierarchy Resolution
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
       """
+    Then answer size is: 1
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 1
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -491,10 +483,10 @@ Feature: Type Hierarchy Resolution
         $y isa person;
         (actor: $x, writer: $y) isa film-production;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     # Answers are (actor:$x, writer:$z) and (actor:$x, writer:$v)
     Then answer size is: 2
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -504,8 +496,6 @@ Feature: Type Hierarchy Resolution
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 2
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -559,9 +549,9 @@ Feature: Type Hierarchy Resolution
       """
       match (home-owner: $x, resident: $y) isa residence;
       """
+    Then answer size is: 1
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 1
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -569,8 +559,6 @@ Feature: Type Hierarchy Resolution
         (home-owner: $x, resident: $y) isa residence;
         (parent-home-owner: $x, child-resident: $y) isa family-residence;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 1
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete

@@ -59,8 +59,6 @@ Feature: Resolution Test Framework
       """
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
 
 
   Scenario: compounding rules
@@ -105,8 +103,6 @@ Feature: Resolution Test Framework
       """
       match $co has is-liable $l;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
 
@@ -161,8 +157,6 @@ Feature: Resolution Test Framework
       $k isa entity, has name "King's Cross";
       (superior: $l, subordinate: $k) isa location-hierarchy;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
 
@@ -224,8 +218,6 @@ Feature: Resolution Test Framework
       """
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
 
 
   Scenario: queried relation is a supertype of the inferred relation
@@ -279,8 +271,6 @@ Feature: Resolution Test Framework
       """
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
 
 
   Scenario: querying with a disjunction and a negation
@@ -324,8 +314,6 @@ Feature: Resolution Test Framework
       {$com has name $n1; $n1 "the-company";} or {$com has name $n2; $n2 "another-company";};
       not {$com has is-liable $liability;};
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
 
@@ -374,8 +362,6 @@ Feature: Resolution Test Framework
       """
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
 
 
   Scenario: querying with multiple negations
@@ -418,7 +404,5 @@ Feature: Resolution Test Framework
       """
       match $com isa company; not { $com has is-liable $lia; $lia true; }; not { $com has name $n; $n "the-company"; };
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete

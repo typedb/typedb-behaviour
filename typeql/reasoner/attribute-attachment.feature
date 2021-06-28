@@ -85,20 +85,20 @@ Feature: Attribute Attachment Resolution
       """
       match $x isa person, has string-attribute $y;
       """
+    Then answer size is: 2
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 2
     Given session opens transaction of type: read
     When get answers of typeql match
       """
       match $x isa string-attribute;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 1
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Scenario: when the same attribute is inferred on an entity and relation, both owners are correctly retrieved
+
+
+  Scenario: when the same attribute is inferred on an entity and relation, both owners are correctly retrieved
     Given typeql define
       """
       define
@@ -133,12 +133,12 @@ Feature: Attribute Attachment Resolution
       """
       match $x has string-attribute $y;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 3
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Scenario: a rule can infer an attribute value that did not previously exist in the graph
+
+
+  Scenario: a rule can infer an attribute value that did not previously exist in the graph
     Given typeql define
       """
       define
@@ -173,9 +173,9 @@ Feature: Attribute Attachment Resolution
       """
       match $x has retailer 'Ocado';
       """
+    Then answer size is: 2
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 2
     Then connection close all sessions
     Given connection open data session for database: typedb
     Given session opens transaction of type: read
@@ -183,16 +183,14 @@ Feature: Attribute Attachment Resolution
       """
       match $x has retailer $r;
       """
+    Then answer size is: 4
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 4
     Given session opens transaction of type: read
     When get answers of typeql match
       """
       match $x has retailer 'Tesco';
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 2
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
@@ -227,9 +225,9 @@ Feature: Attribute Attachment Resolution
       """
       match $x isa soft-drink, has retailer 'Ocado';
       """
+    Then answer size is: 2
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 2
 
 
   Scenario: Querying for anonymous attributes with predicates finds the correct answers
@@ -257,15 +255,16 @@ Feature: Attribute Attachment Resolution
       """
       match $x has age > 20;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
     Then answer size is: 0
     Given transaction closes
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+
     Given session opens transaction of type: read
     When get answers of typeql match
       """
       match $x has age > 5;
       """
+    Then answer size is: 1
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
-    Then answer size is: 1
