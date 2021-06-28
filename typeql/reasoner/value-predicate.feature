@@ -21,13 +21,10 @@ Feature: Value Predicate Resolution
   Background: Set up databases for resolution testing
     Given connection has been opened
     Given connection does not have any database
-    Given connection create database: reasoned
-    Given connection create database: materialised
-    Given connection open schema sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql define
+    Given connection create database: typedb
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
       """
       define
 
@@ -56,12 +53,12 @@ Feature: Value Predicate Resolution
       price sub attribute, value double;
       unrelated-attribute sub attribute, value string;
       """
-    Given for each session, transaction commits
+    Given transaction commits
     # each scenario specialises the schema further
-    Given for each session, open transactions of type: write
+    Given session opens transaction of type: write
 
   Scenario: a rule can infer an attribute ownership based on a value predicate
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       rule tortoises-become-old-at-age-1-year: when {
@@ -71,32 +68,31 @@ Feature: Value Predicate Resolution
         $x has is-old true;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $se isa tortoise, has age 1;
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match $x has is-old $r;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 1
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   # TODO: re-enable all steps once materialised database counts duplicate attributes only once
   Scenario Outline: when querying for inferred attributes with '<op>', the answers matching the predicate are returned
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       lucky-number sub attribute, value long;
@@ -105,30 +101,29 @@ Feature: Value Predicate Resolution
       rule rule-1667: when { $x isa person; } then { $x has lucky-number 1667; };
       rule rule-1997: when { $x isa person; } then { $x has lucky-number 1997; };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $x isa person;
       $y isa person;
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match
         $x isa person, has lucky-number $n;
         $n <op> 1667;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: <answer-size>
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: <answer-size>
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
     Examples:
       | op | answer-size |
@@ -142,7 +137,7 @@ Feature: Value Predicate Resolution
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario Outline: when both sides of a '<op>' comparison are inferred attributes, all answers satisfy the predicate
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       lucky-number sub attribute, value long;
@@ -150,31 +145,30 @@ Feature: Value Predicate Resolution
       rule rule-1337: when { $x isa person; } then { $x has lucky-number 1337; };
       rule rule-1667: when { $x isa person; } then { $x has lucky-number 1667; };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $x isa person, has name "Alice";
       $y isa person, has name "Bob";
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match
         $x isa person, has name "Alice", has lucky-number $m;
         $y isa person, has name "Bob", has lucky-number $n;
         $m <op> $n;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: <answer-size>
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: <answer-size>
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
     Examples:
       | op | answer-size |
@@ -188,7 +182,7 @@ Feature: Value Predicate Resolution
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario Outline: when comparing an inferred attribute and a bound variable with '<op>', answers satisfy the predicate
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       lucky-number sub attribute, value long;
@@ -197,22 +191,19 @@ Feature: Value Predicate Resolution
       rule rule-1667: when { $x isa person; } then { $x has lucky-number 1667; };
       rule rule-1997: when { $x isa person; } then { $x has lucky-number 1997; };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $x isa person, has name "Alice";
       $y isa person, has name "Bob";
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match
         $x isa person, has name "Alice", has lucky-number $m;
@@ -220,9 +211,11 @@ Feature: Value Predicate Resolution
         $m <op> $n;
         $n <op> 1667;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: <answer-size>
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: <answer-size>
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
     Examples:
       | op | answer-size |
@@ -235,7 +228,7 @@ Feature: Value Predicate Resolution
 
 
   Scenario: inferred attributes can be matched by inequality to a variable that is equal to a specified value
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       rule tesco-sells-all-soft-drinks: when {
@@ -252,39 +245,38 @@ Feature: Value Predicate Resolution
         $y has retailer 'Ocado';
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $x isa soft-drink, has name "Fanta";
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match
         $x has retailer $r;
         $r != $unwanted;
         $unwanted = "Ocado";
       """
-    Given all answers are correct in reasoned database
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     # x     | r     |
     # Fanta | Tesco |
     # Tango | Tesco |
-    Then answer size in reasoned database is: 2
-    Then materialised and reasoned databases are the same size
+    Then answer size is: 2
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   Scenario: inferred attributes can be matched by equality to a variable that is not equal to a specified value
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       rule tesco-sells-all-soft-drinks: when {
@@ -301,40 +293,39 @@ Feature: Value Predicate Resolution
         $y has retailer 'Ocado';
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $x isa soft-drink, has name "Fanta";
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match
         $x has retailer $r;
         $wanted = "Ocado";
         $r = $wanted;
       """
-    Given all answers are correct in reasoned database
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     # x     | r     |
     # Fanta | Ocado |
     # Tango | Ocado |
-    Then answer size in reasoned database is: 2
-    Then materialised and reasoned databases are the same size
+    Then answer size is: 2
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario: inferred attributes can be filtered to include only values that contain a specified string
-    Given for each session, typeql define
+    Given typeql define
       """
       define
 
@@ -356,32 +347,31 @@ Feature: Value Predicate Resolution
         $x has retailer 'Londis';
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert $x isa soft-drink, has name "Fanta";
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match
         $x has retailer $rx;
         $rx contains "land";
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 2
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 2
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   Scenario: inferred attributes can be matched by equality to an attribute that contains a specified string
-    Given for each session, typeql define
+    Given typeql define
       """
       define
 
@@ -403,22 +393,19 @@ Feature: Value Predicate Resolution
         $x has retailer 'Londis';
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $x isa soft-drink, has name "Fanta";
       $y isa soft-drink, has name "Tango";
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match
         $x has retailer $rx;
@@ -426,7 +413,8 @@ Feature: Value Predicate Resolution
         $rx = $ry;
         $ry contains 'land';
       """
-    Then all answers are correct in reasoned database
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     # x     | rx        | y     | ry        |
     # Fanta | Iceland   | Tango | Iceland   |
     # Tango | Iceland   | Fanta | Iceland   |
@@ -436,13 +424,14 @@ Feature: Value Predicate Resolution
     # Fanta | Poundland | Fanta | Poundland |
     # Tango | Iceland   | Tango | Iceland   |
     # Tango | Poundland | Tango | Poundland |
-    Then answer size in reasoned database is: 8
-    Then materialised and reasoned databases are the same size
+    Then answer size is: 8
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario: inferred attributes can be matched by inequality to an attribute that contains a specified string
-    Given for each session, typeql define
+    Given typeql define
       """
       define
 
@@ -464,22 +453,19 @@ Feature: Value Predicate Resolution
         $x has retailer 'Londis';
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $x isa soft-drink, has name "Fanta";
       $y isa soft-drink, has name "Tango";
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match
         $x has retailer $rx;
@@ -487,7 +473,8 @@ Feature: Value Predicate Resolution
         $rx != $ry;
         $ry contains 'land';
       """
-    Then all answers are correct in reasoned database
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     # x     | rx        | y     | ry        |
     # Fanta | Iceland   | Tango | Poundland |
     # Tango | Iceland   | Fanta | Poundland |
@@ -505,12 +492,13 @@ Feature: Value Predicate Resolution
     # Tango | Londis    | Tango | Poundland |
     # Fanta | Londis    | Fanta | Iceland   |
     # Tango | Londis    | Tango | Iceland   |
-    Then answer size in reasoned database is: 16
-    Then materialised and reasoned databases are the same size
+    Then answer size is: 16
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   Scenario: in a rule, 'not { $x = $y; }' is the same as saying '$x != $y'
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       rule tesco-sells-all-soft-drinks: when {
@@ -527,48 +515,47 @@ Feature: Value Predicate Resolution
         $y has retailer 'Ocado';
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $x isa soft-drink, has name "Fanta";
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
+    Given transaction commits
+    Given correctness checker is initialised
     Given for typeql query
       """
       match
         $x has retailer $r;
         $r != "Ocado";
       """
-    Given all answers are correct in reasoned database
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     # x     | r     |
     # Fanta | Tesco |
     # Tango | Tesco |
-    Given answer size in reasoned database is: 2
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then answer size is:  2
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match
         $x has retailer $r;
         not { $r = "Ocado"; };
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 2
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 2
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   Scenario: in a rule, 'not { $x != $y; }' is the same as saying '$x = $y'
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       rule tesco-sells-all-soft-drinks: when {
@@ -585,49 +572,48 @@ Feature: Value Predicate Resolution
         $y has retailer 'Ocado';
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $x isa soft-drink, has name "Fanta";
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
+    Given transaction commits
+    Given correctness checker is initialised
     Given for typeql query
       """
       match
         $x has retailer $r;
         $r = "Ocado";
       """
-    Given all answers are correct in reasoned database
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     # x     | r     |
     # Fanta | Ocado |
     # Tango | Ocado |
-    Given answer size in reasoned database is: 2
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then answer size is:  2
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match
         $x has retailer $r;
         not { $r != "Ocado"; };
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 2
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 2
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   # TODO: move to negation.feature
   Scenario: a negation can filter out variables by equality to another variable with a specified value
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       rule tesco-sells-all-soft-drinks: when {
@@ -644,23 +630,20 @@ Feature: Value Predicate Resolution
         $y has retailer 'Ocado';
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $x isa soft-drink, has name "Fanta";
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match
         $x has retailer $r;
@@ -669,17 +652,19 @@ Feature: Value Predicate Resolution
           $unwanted = "Ocado";
         };
       """
-    Then all answers are correct in reasoned database
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     # x     | r     |
     # Fanta | Tesco |
     # Tango | Tesco |
-    Then answer size in reasoned database is: 2
-    Then materialised and reasoned databases are the same size
+    Then answer size is: 2
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   # TODO: migrate to concept-inequality.feature
   Scenario: when using 'not { $x is $y; }' over attributes of the same value, the answers have distinct types
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       base-attribute sub attribute, value string, abstract;
@@ -697,29 +682,27 @@ Feature: Value Predicate Resolution
         $x has retailer "Tesco";
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $x isa person, has base-string-attribute "Tesco";
       $y isa soft-drink, has brand-name "Tesco";
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match
         $x has base-attribute $ax;
         $y has base-attribute $ay;
         not { $ax is $ay; };
       """
-    Then all answers are correct in reasoned database
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     # x   | ax  | y   | ay  |
     # PER | BSA | SOF | NAM |
     # PER | BSA | SOF | RET |
@@ -727,12 +710,13 @@ Feature: Value Predicate Resolution
     # SOF | RET | PER | BSA |
     # SOF | NAM | SOF | RET |
     # SOF | RET | SOF | NAM |
-    Then answer size in reasoned database is: 6
-    Then materialised and reasoned databases are the same size
+    Then answer size is: 6
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   Scenario: rules can divide entities into groups, linking each entity group to a specific concept by attribute value
-    Given for each session, typeql define
+    Given typeql define
       """
       define
 
@@ -776,13 +760,11 @@ Feature: Value Predicate Resolution
         (item: $x, category: $y3) isa price-classification;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
 
@@ -795,64 +777,65 @@ Feature: Value Predicate Resolution
       $p3 "low price" isa price-range;
       $p4 "cheap" isa price-range;
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match
         $x "not expensive" isa price-range;
         ($x, item: $y) isa price-classification;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 2
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 2
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match
         $x "low price" isa price-range;
         ($x, item: $y) isa price-classification;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 1
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match
         $x "cheap" isa price-range;
         ($x, item: $y) isa price-classification;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 1
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match
         $x "expensive" isa price-range;
         ($x, item: $y) isa price-classification;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 1
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match
         $x isa price-range;
         ($x, item: $y) isa price-classification;
       """
-    Then all answers are correct in reasoned database
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     # sum of all previous answers
-    Then answer size in reasoned database is: 5
-    Then materialised and reasoned databases are the same size
+    Then answer size is: 5
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   # TODO: re-enable all steps when resolvable (currently it takes too long to resolve) (#75)
   Scenario: attribute comparison can be used to classify concept pairs as predecessors and successors of each other
-    Given for each session, typeql define
+    Given typeql define
       """
       define
 
@@ -883,13 +866,11 @@ Feature: Value Predicate Resolution
           (predecessor:$s, successor:$r) isa message-succession;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
 
@@ -906,14 +887,15 @@ Feature: Value Predicate Resolution
       (original:$x, reply:$x4) isa reply-of;
       (original:$x, reply:$x5) isa reply-of;
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match (predecessor:$x1, successor:$x2) isa message-succession;
       """
-    Then all answers are correct in reasoned database
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     # the (n-1)th triangle number, where n is the number of replies to the first post
-    Then answer size in reasoned database is: 10
-    Then materialised and reasoned databases are the same size
+    Then answer size is: 10
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete

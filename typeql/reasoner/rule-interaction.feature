@@ -21,13 +21,10 @@ Feature: Rule Interaction Resolution
   Background: Set up databases for resolution testing
     Given connection has been opened
     Given connection does not have any database
-    Given connection create database: reasoned
-    Given connection create database: materialised
-    Given connection open schema sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql define
+    Given connection create database: typedb
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
       """
       define
 
@@ -46,8 +43,8 @@ Feature: Rule Interaction Resolution
 
       name sub attribute, value string;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
+    Given transaction commits
+    Given session opens transaction of type: write
 
 
   ###########################
@@ -58,7 +55,7 @@ Feature: Rule Interaction Resolution
   #  NOTE: There is a currently known bug in core 1.8.3 that makes this test fail (issue #5891)
   #  We will hope this is fixed by 2.0 as a result of mor robust alpha equivalence definition
   Scenario: when rules are similar but different the reasoner knows to distinguish the rules
-    Given for each session, typeql define
+    Given typeql define
       """
       define
 
@@ -93,13 +90,11 @@ Feature: Rule Interaction Resolution
         $y has tag "P";
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
 
@@ -114,23 +109,24 @@ Feature: Rule Interaction Resolution
       (student: $charlie, teacher: $dennis) isa lesson;
       (member: $charlie, member: $dennis, leader: $charlie) isa team;
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match $x isa person, has name $n, has tag "P";
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 2
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 2
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   Scenario: when two distinct rules have alpha-equivalent bodies and heads, the reasoner still sees them as distinct.
   More explicitly, suppose we have rule A and rule B. Suppose up to alpha equivalence A.when == B.when and
   A.then == B.then. But the {rule A} != {rule B} because the bindings of the variables makes the meaning of A.then
   distinct from B.then. In such a situation, the reasoner does not mistake the rules as equivalent.
-    Given for each session, typeql define
+    Given typeql define
       """
       define
 
@@ -161,13 +157,11 @@ Feature: Rule Interaction Resolution
       };
       """
 
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
 
@@ -175,14 +169,15 @@ Feature: Rule Interaction Resolution
       $b isa person;
       (husband: $a, wife: $b) isa marriage;
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match $x isa person, has name 'tracey';
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 2
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 2
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 

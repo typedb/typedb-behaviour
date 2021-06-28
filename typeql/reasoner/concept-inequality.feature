@@ -21,13 +21,10 @@ Feature: Concept Inequality Resolution
   Background: Set up databases for resolution testing
     Given connection has been opened
     Given connection does not have any database
-    Given connection create database: reasoned
-    Given connection create database: materialised
-    Given connection open schema sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql define
+    Given connection create database: typedb
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
       """
       define
 
@@ -53,13 +50,11 @@ Feature: Concept Inequality Resolution
           (ball1:$x, ball2:$z) isa selection;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
 
@@ -73,16 +68,14 @@ Feature: Concept Inequality Resolution
       (ball1: $b, ball2: $c) isa selection;
       (ball1: $c, ball2: $b) isa selection;
       """
-    Given for each session, transaction commits
+    Given transaction commits
 
 
   Scenario: a rule can be applied based on concept inequality
     Given connection close all sessions
-    Given connection open schema sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql define
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
       """
       define
 
@@ -108,13 +101,11 @@ Feature: Concept Inequality Resolution
           (state: $st) isa holds;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
 
@@ -125,55 +116,51 @@ Feature: Concept Inequality Resolution
       (state: $s1) isa achieved;
       (state: $s2) isa achieved;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match (state: $s) isa holds;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 1
+    Given session opens transaction of type: read
     Then answer set is equivalent for typeql query
       """
       match $s isa state, has name 's2';
       """
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   Scenario: inferred binary relations can be filtered by concept inequality of their roleplayers
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
+    Given session opens transaction of type: read
+    Given correctness checker is initialised
     Given for typeql query
       """
       match (ball1: $x, ball2: $y) isa selection;
       """
-    Given all answers are correct in reasoned database
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     # materialised: [ab, ba, bc, cb]
     # inferred: [aa, ac, bb, ca, cc]
-    Given answer size in reasoned database is: 9
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then answer size is:  9
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match
         (ball1: $x, ball2: $y) isa selection;
         not { $x is $y; };
       """
-    Then all answers are correct in reasoned database
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     # materialised: [ab, ba, bc, cb]
     # inferred: [ac, ca]
-    Then answer size in reasoned database is: 6
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
+    Then answer size is: 6
+    Given session opens transaction of type: read
     # verify that the answer pairs to the previous query have distinct names within each pair
-    Then for typeql query
+    When get answers of typeql match
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -183,29 +170,29 @@ Feature: Concept Inequality Resolution
         not { $nx is $ny; };
       get $x, $y;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 6
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 6
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   Scenario: inferred binary relations can be filtered by inequality to a specific concept
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given session opens transaction of type: read
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match
         (ball1: $x, ball2: $y) isa selection;
         not { $x is $y; };
         $y has name 'c';
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 2
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 2
+    Given session opens transaction of type: read
     # verify answers are [ac, bc]
-    Then for typeql query
+    When get answers of typeql match
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -213,9 +200,11 @@ Feature: Concept Inequality Resolution
         $y has name 'c';
         {$x has name 'a';} or {$x has name 'b';};
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 2
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 2
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   Scenario: pairs of inferred relations can be filtered by inequality of players in the same role
@@ -229,26 +218,24 @@ Feature: Concept Inequality Resolution
   v     v
   y is not z
 
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given session opens transaction of type: read
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match
         (ball1: $x, ball2: $y) isa selection;
         (ball1: $x, ball2: $z) isa selection;
         not { $y is $z; };
       """
-    Then all answers are correct in reasoned database
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     # [aab, aac, aba, abc, aca, acb,
     #  bab, bac, bba, bbc, bca, bcb,
     #  cab, cac, cba, cbc, cca, ccb]
-    Then answer size in reasoned database is: 18
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
+    Then answer size is: 18
+    Given session opens transaction of type: read
     # verify that $y and $z always have distinct names
-    Then for typeql query
+    When get answers of typeql match
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -259,9 +246,11 @@ Feature: Concept Inequality Resolution
         not { $ny is $nz; };
       get $x, $y, $z;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 18
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 18
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   Scenario: pairs of inferred relations can be filtered by inequality of players in different roles
@@ -275,23 +264,21 @@ Feature: Concept Inequality Resolution
   /     v
   x is not z
 
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given session opens transaction of type: read
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match
         (ball1: $x, ball2: $y) isa selection;
         (ball1: $y, ball2: $z) isa selection;
         not { $x is $z; };
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 18
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 18
     # verify that $y and $z always have distinct names
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -302,9 +289,11 @@ Feature: Concept Inequality Resolution
         not { $nx is $nz; };
       get $x, $y, $z;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 18
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 18
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   Scenario: inequality predicates can operate independently against multiple pairs of relations in the same query
@@ -322,10 +311,8 @@ Feature: Concept Inequality Resolution
   v         v
   y2 is not  z2
 
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
+    Given session opens transaction of type: read
+    Given correctness checker is initialised
     Given for typeql query
       """
       match
@@ -334,12 +321,12 @@ Feature: Concept Inequality Resolution
         (ball1: $x, ball2: $y2) isa selection;
         (ball1: $x, ball2: $z2) isa selection;
       """
-    Given all answers are correct in reasoned database
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     # For each of the [3] values of $x, there are 3^4 = 81 choices for {$y1, $z1, $y2, $z2}, for a total of 243
-    Then answer size in reasoned database is: 243
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then answer size is: 243
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match
         (ball1: $x, ball2: $y1) isa selection;
@@ -350,13 +337,13 @@ Feature: Concept Inequality Resolution
         not { $y1 is $z1; };
         not { $y2 is $z2; };
       """
-    Then all answers are correct in reasoned database
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     # Each neq predicate reduces the answer size by 1/3, cutting it to 162, then 108
-    Then answer size in reasoned database is: 108
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
+    Then answer size is: 108
+    Given session opens transaction of type: read
     # verify that $y1 and $z1 - as well as $y2 and $z2 - always have distinct names
-    Then for typeql query
+    When get answers of typeql match
       """
       match
         (ball1: $x, ball2: $y1) isa selection;
@@ -373,9 +360,11 @@ Feature: Concept Inequality Resolution
         not { $ny2 is $nz2; };
       get $x, $y1, $z1, $y2, $z2;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 108
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 108
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   Scenario: inequality predicates can operate independently against multiple roleplayers in the same relation
@@ -389,10 +378,8 @@ Feature: Concept Inequality Resolution
   v
   y     - is not - >  z2
 
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
+    Given session opens transaction of type: read
+    Given correctness checker is initialised
     Given for typeql query
       """
       match
@@ -400,12 +387,12 @@ Feature: Concept Inequality Resolution
         (ball1: $x, ball2: $z1) isa selection;
         (ball1: $y, ball2: $z2) isa selection;
       """
-    Given all answers are correct in reasoned database
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     # There are 3^4 possible choices for the set {$x, $y, $z1, $z2}, for a total of 81
-    Then answer size in reasoned database is: 81
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then answer size is: 81
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -415,13 +402,13 @@ Feature: Concept Inequality Resolution
         not { $x is $z1; };
         not { $y is $z2; };
       """
-    Then all answers are correct in reasoned database
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     # Each neq predicate reduces the answer size by 1/3, cutting it to 54, then 36
-    Then answer size in reasoned database is: 36
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
+    Then answer size is: 36
+    Given session opens transaction of type: read
     # verify that $y1 and $z1 - as well as $y2 and $z2 - always have distinct names
-    Then for typeql query
+    When get answers of typeql match
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -437,9 +424,11 @@ Feature: Concept Inequality Resolution
         not { $ny is $nz2; };
       get $x, $y, $z1, $z2;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 36
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 36
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
   # TODO enable when we can resolve repeated concludables
   @ignore
@@ -448,11 +437,9 @@ Feature: Concept Inequality Resolution
   # TODO: migrate to concept-inequality.feature
   Scenario: when restricting concept types of a pair of inferred attributes with '!=', the answers have distinct types
     Given connection close all sessions
-    Given connection open schema sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql define
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
       """
       define
       soft-drink sub entity,
@@ -470,24 +457,19 @@ Feature: Concept Inequality Resolution
         $x has retailer 'Tesco';
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $x isa person, has string-attribute "Tesco";
       $y isa soft-drink, has name "Tesco";
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match
         $x has $ax;
@@ -496,7 +478,8 @@ Feature: Concept Inequality Resolution
         $ay isa! $typeof_ay;
         not { $typeof_ax is $typeof_ay; };
       """
-    Then all answers are correct in reasoned database
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     # x   | ax  | y   | ay  |
     # PER | STA | SOF | NAM |
     # PER | STA | SOF | RET |
@@ -504,16 +487,15 @@ Feature: Concept Inequality Resolution
     # SOF | RET | PER | STA |
     # SOF | NAM | SOF | STA |
     # SOF | STA | SOF | NAM |
-    Then answer size in reasoned database is: 6
-    Then materialised and reasoned databases are the same size
+    Then answer size is: 6
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
   Scenario: inferred attribute matches can be simultaneously restricted by both concept type and attribute value
     Given connection close all sessions
-    Given connection open schema sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql define
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
       """
       define
       soft-drink sub entity,
@@ -545,13 +527,11 @@ Feature: Concept Inequality Resolution
         $y has $x;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
     """
       insert
       $w isa person, has string-attribute "Ocado";
@@ -559,12 +539,9 @@ Feature: Concept Inequality Resolution
       $y isa soft-drink, has name "Sprite";
       $z "Ocado" isa retailer;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match
         $value isa! retailer;
@@ -575,8 +552,10 @@ Feature: Concept Inequality Resolution
         $value != $unwantedValue;
       get $x, $value;
       """
-    Then all answers are correct in reasoned database
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     # x      | value | type     |
     # Sprite | Tesco | retailer |
-    Then answer size in reasoned database is: 1
-    Then materialised and reasoned databases are the same size
+    Then answer size is: 1
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete

@@ -21,13 +21,10 @@ Feature: Compound Query Resolution
   Background: Set up databases for resolution testing
     Given connection has been opened
     Given connection does not have any database
-    Given connection create database: reasoned
-    Given connection create database: materialised
-    Given connection open schema sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql define
+    Given connection create database: typedb
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
       """
       define
 
@@ -42,12 +39,12 @@ Feature: Compound Query Resolution
       retailer sub attribute, value string;
       name sub attribute, value string;
       """
-    Given for each session, transaction commits
+    Given transaction commits
     # each scenario specialises the schema further
-    Given for each session, open transactions of type: write
+    Given session opens transaction of type: write
 
   Scenario: repeated concludable patterns within a query trigger rules from all pattern occurrences
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       base-attribute sub attribute, value string, abstract;
@@ -64,28 +61,26 @@ Feature: Compound Query Resolution
         $x has retailer "Tesco";
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $x isa person, has base-string-attribute "Tesco";
       $y isa soft-drink, has brand-name "Tesco";
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match
         $x has base-attribute $ax;
         $y has base-attribute $ay;
       """
-    Then all answers are correct in reasoned database
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     # x   | ax  | y   | ay  |
     # PER | BSA | SOF | NAM |
     # PER | BSA | SOF | RET |
@@ -93,5 +88,6 @@ Feature: Compound Query Resolution
     # SOF | RET | PER | BSA |
     # SOF | NAM | SOF | RET |
     # SOF | RET | SOF | NAM |
-    Then answer size in reasoned database is: 9
-    Then materialised and reasoned databases are the same size
+    Then answer size is: 9
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete

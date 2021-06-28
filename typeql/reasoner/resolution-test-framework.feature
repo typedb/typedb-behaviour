@@ -21,16 +21,13 @@ Feature: Resolution Test Framework
   Background: Set up databases for resolution testing
     Given connection has been opened
     Given connection does not have any database
-    Given connection create database: reasoned
-    Given connection create database: materialised
-    Given connection open schema sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
+    Given connection create database: typedb
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
 
 
   Scenario: basic rule
-    Given for each session, typeql define
+    Given typeql define
       """
       define
 
@@ -45,30 +42,29 @@ Feature: Resolution Test Framework
          $c has name "the-company";
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $x isa company;
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match $co has name $n;
       """
-    Then all answers are correct in reasoned database
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   Scenario: compounding rules
-    Given for each session, typeql define
+    Given typeql define
       """
       define
 
@@ -94,30 +90,29 @@ Feature: Resolution Test Framework
           $c2 has is-liable true;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $co isa company;
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match $co has is-liable $l;
       """
-    Then all answers are correct in reasoned database
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   Scenario: 2-hop transitivity
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       name sub attribute, value string;
@@ -145,13 +140,11 @@ Feature: Resolution Test Framework
           (superior: $a, subordinate: $c) isa location-hierarchy;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $ar isa area, has name "King's Cross";
@@ -160,22 +153,23 @@ Feature: Resolution Test Framework
       (superior: $cntry, subordinate: $cit) isa location-hierarchy;
       (superior: $cit, subordinate: $ar) isa location-hierarchy;
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match
       $k isa entity, has name "King's Cross";
       (superior: $l, subordinate: $k) isa location-hierarchy;
       """
-    Then all answers are correct in reasoned database
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   # TODO: currently this scenario takes longer than 2 hours to execute (#75) - re-enable when fixed
   Scenario: 3-hop transitivity
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       name sub attribute,
@@ -206,13 +200,11 @@ Feature: Resolution Test Framework
           (superior: $a, subordinate: $c) isa location-hierarchy;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $ar isa area, has name "King's Cross";
@@ -223,20 +215,21 @@ Feature: Resolution Test Framework
       (superior: $cntry, subordinate: $cit) isa location-hierarchy;
       (superior: $cit, subordinate: $ar) isa location-hierarchy;
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match $lh (superior: $continent, subordinate: $area) isa location-hierarchy;
       $continent isa continent; $area isa area;
       """
-    Then all answers are correct in reasoned database
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   Scenario: queried relation is a supertype of the inferred relation
-    Given for each session, typeql define
+    Given typeql define
       """
       define
 
@@ -268,31 +261,30 @@ Feature: Resolution Test Framework
           (sibling: $p, sibling: $p1) isa siblingship;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $a isa woman, has name "Alice";
       $b isa man;
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match ($w, $m) isa family-relation; $w isa woman;
       """
-    Then all answers are correct in reasoned database
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   Scenario: querying with a disjunction and a negation
-    Given for each session, typeql define
+    Given typeql define
       """
       define
 
@@ -312,13 +304,11 @@ Feature: Resolution Test Framework
           $c2 has is-liable true;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $c1 isa company;
@@ -326,21 +316,22 @@ Feature: Resolution Test Framework
       $c2 isa company;
       $c2 has name $n2; $n2 "another-company";
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match $com isa company;
       {$com has name $n1; $n1 "the-company";} or {$com has name $n2; $n2 "another-company";};
       not {$com has is-liable $liability;};
       """
-    Then all answers are correct in reasoned database
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   Scenario: a rule containing a negation
-    Given for each session, typeql define
+    Given typeql define
       """
       define
 
@@ -363,13 +354,11 @@ Feature: Resolution Test Framework
           $c2 has is-liable true;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $c1 isa company;
@@ -377,19 +366,20 @@ Feature: Resolution Test Framework
       $c2 isa company;
       $c2 has name $n2; $n2 "another-company";
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match $com isa company, has is-liable $lia; $lia true;
       """
-    Then all answers are correct in reasoned database
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   Scenario: querying with multiple negations
-    Given for each session, typeql define
+    Given typeql define
       """
       define
 
@@ -410,13 +400,11 @@ Feature: Resolution Test Framework
           $c2 has is-liable true;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $c1 isa company;
@@ -424,12 +412,13 @@ Feature: Resolution Test Framework
       $c2 isa company;
       $c2 has name $n2; $n2 "another-company";
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match $com isa company; not { $com has is-liable $lia; $lia true; }; not { $com has name $n; $n "the-company"; };
       """
-    Then all answers are correct in reasoned database
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete

@@ -21,13 +21,10 @@ Feature: Relation Inference Resolution
   Background: Set up databases for resolution testing
     Given connection has been opened
     Given connection does not have any database
-    Given connection create database: reasoned
-    Given connection create database: materialised
-    Given connection open schema sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql define
+    Given connection create database: typedb
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
       """
       define
 
@@ -58,16 +55,16 @@ Feature: Relation Inference Resolution
 
       name sub attribute, value string;
       """
-    Given for each session, transaction commits
+    Given transaction commits
     # each scenario specialises the schema further
-    Given for each session, open transactions of type: write
+    Given session opens transaction of type: write
 
   #######################
   # BASIC FUNCTIONALITY #
   #######################
 
   Scenario: a relation can be inferred on all concepts of a given type
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       dog sub entity;
@@ -77,38 +74,33 @@ Feature: Relation Inference Resolution
         (employee: $p) isa employment;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $x isa person;
       $y isa dog;
       $z isa person;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match
         $x isa person;
         ($x) isa employment;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 2
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 2
+    Given session opens transaction of type: read
 
 
   Scenario: a relation can be inferred based on an attribute ownership
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       rule haikal-is-employed: when {
@@ -117,45 +109,41 @@ Feature: Relation Inference Resolution
         (employee: $p) isa employment;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $x isa person, has name "Haikal";
       $y isa person, has name "Michael";
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match
         $x has name "Haikal";
         ($x) isa employment;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 1
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match
         $x has name "Michael";
         ($x) isa employment;
       """
-    Then answer size in reasoned database is: 0
-    Then materialised and reasoned databases are the same size
+    Then answer size is: 0
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   Scenario: a rule can infer a relation with an attribute as a roleplayer
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       item sub entity, owns name, plays item-listing:item;
@@ -168,24 +156,19 @@ Feature: Relation Inference Resolution
         (item: $x, price: $y) isa item-listing;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $x isa item, has name "3kg jar of Nutella";
       $y 14.99 isa price;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match
         $r (item: $i, price: $p) isa item-listing;
@@ -193,13 +176,15 @@ Feature: Relation Inference Resolution
         $n "3kg jar of Nutella" isa name;
         $p 14.99 isa price;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 1
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   Scenario: a rule can infer a relation based on ownership of any instance of a specific attribute type
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       year sub attribute, value long, plays employment:favourite-year;
@@ -212,13 +197,11 @@ Feature: Relation Inference Resolution
         (employee: $p, employer: $x, favourite-year: $y) isa employment;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $x isa company, has name "Kronenbourg";
@@ -226,20 +209,19 @@ Feature: Relation Inference Resolution
       $p2 isa person, has name "Prasanth";
       $y 1664 isa year;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match
         $x 1664 isa year;
         ($x, employee: $p, employer: $y) isa employment;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 2
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 2
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   ###############
@@ -248,7 +230,7 @@ Feature: Relation Inference Resolution
 
   # nth triangle number = sum of all integers from 1 to n, inclusive
   Scenario: when inferring relations on all pairs from n concepts, the number of relations is the nth triangle number
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       rule everyone-is-my-friend-including-myself: when {
@@ -258,13 +240,11 @@ Feature: Relation Inference Resolution
         (friend: $x, friend: $y) isa friendship;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $a isa person, has name "Abigail";
@@ -273,26 +253,25 @@ Feature: Relation Inference Resolution
       $d isa person, has name "Damien";
       $e isa person, has name "Eustace";
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match $r isa friendship;
       """
-    Then all answers are correct in reasoned database
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     # When there is 1 concept we have {aa}.
     # Adding a 2nd concept gives us 2 new relations - where each relation contains b, and one other concept (a or b).
     # Adding a 3rd concept gives us 3 new relations - where each relation contains c, and one other concept (a, b or c).
     # Generally, the total number of relations is the sum of all integers from 1 to n inclusive.
-    Then answer size in reasoned database is: 15
-    Then materialised and reasoned databases are the same size
+    Then answer size is: 15
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   Scenario: when matching all possible pairs inferred from n concepts, the answer size is the square of n
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       rule everyone-is-my-friend-including-myself: when {
@@ -302,13 +281,11 @@ Feature: Relation Inference Resolution
         (friend: $x, friend: $y) isa friendship;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $a isa person, has name "Abigail";
@@ -317,23 +294,22 @@ Feature: Relation Inference Resolution
       $d isa person, has name "Damien";
       $e isa person, has name "Eustace";
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match ($x, $y) isa friendship;
       """
-    Then all answers are correct in reasoned database
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     # Here there are n choices for x, and n choices for y, so the total answer size is n^2
-    Then answer size in reasoned database is: 25
-    Then materialised and reasoned databases are the same size
+    Then answer size is: 25
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   Scenario: when a relation is reflexive, matching concepts are related to themselves
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       person plays employment:employer;
@@ -343,35 +319,32 @@ Feature: Relation Inference Resolution
         (employee: $x, employer: $x) isa employment;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $f isa person, has name "Ferhat";
       $g isa person, has name "Gawain";
       $h isa person, has name "Hattie";
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match (employee: $x, employer: $x) isa employment;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 3
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 3
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   Scenario: inferred reflexive relations can be retrieved using multiple variables to refer to the same concept
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       person plays employment:employer;
@@ -381,33 +354,30 @@ Feature: Relation Inference Resolution
         (employee: $x, employer: $x) isa employment;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $i isa person, has name "Irma";
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match (employee: $x, employer: $y) isa employment;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 1
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   Scenario: inferred relations between distinct concepts are not retrieved when matching concepts related to themselves
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       person plays employment:employer;
@@ -418,29 +388,25 @@ Feature: Relation Inference Resolution
         (employee: $y, employer: $x) isa employment;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $r isa person, has name "Robert";
       $j isa person, has name "Jane";
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match (employee: $x, employer: $x) isa employment;
       """
-    Then answer size in reasoned database is: 0
-    Then materialised and reasoned databases are the same size
+    Then answer size is: 0
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   ############
@@ -449,7 +415,7 @@ Feature: Relation Inference Resolution
 
   # TODO: re-enable all steps when resolvable (currently takes too long)
   Scenario: when a relation is symmetric, its symmetry can be used to make additional inferences
-    Given for each session, typeql define
+    Given typeql define
       """
       define
 
@@ -484,13 +450,11 @@ Feature: Relation Inference Resolution
           (coworker: $c, coworker: $op) isa coworkers;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $a isa robot, has name 'r1';
@@ -499,30 +463,28 @@ Feature: Relation Inference Resolution
       (pet: $a, owner: $b) isa robot-pet-ownership;
       (coworker: $b, coworker: $c) isa coworkers;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match (coworker: $x, coworker: $x) isa coworkers;
       """
-    Then all answers are correct in reasoned database
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     # (p,p) is a coworkers since people work with themselves.
     # Applying the robot work rule we see that (r1,p) is a pet ownership, and (p,p) and (p,r2) are coworker relations,
     # so (r1,p) and (r1,r2) are both coworker relations.
     # Coworker relations are symmetric, so (r2,p), (p,r1) and (r2,r1) are all coworker relations.
     # Applying the robot work rule a 2nd time, (r1,p) is a pet ownership and (p,r1) are coworkers,
     # therefore (r1,r1) is a reflexive coworker relation. So the answers are [p] and [r1].
-    Then answer size in reasoned database is: 2
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then answer size is: 2
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match (coworker: $x, coworker: $y) isa coworkers;
       """
-    Then all answers are correct in reasoned database
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     # $x | $y |
     # p  | p  |
     # p  | r2 |
@@ -532,8 +494,9 @@ Feature: Relation Inference Resolution
     # p  | r1 |
     # r2 | r1 |
     # r1 | r1 |
-    Then answer size in reasoned database is: 8
-    Then materialised and reasoned databases are the same size
+    Then answer size is: 8
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   ################
@@ -541,7 +504,7 @@ Feature: Relation Inference Resolution
   ################
 
   Scenario: a transitive rule will not infer any new relations when there are only two related entities
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       rule transitive-location: when {
@@ -551,13 +514,11 @@ Feature: Relation Inference Resolution
         (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $x isa place, has name "Delhi";
@@ -566,23 +527,22 @@ Feature: Relation Inference Resolution
       (subordinate: $x, superior: $y) isa location-hierarchy;
       (subordinate: $y, superior: $y) isa location-hierarchy;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match $x isa location-hierarchy;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 3
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 3
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   # TODO: re-enable all steps when 3-hop transitivity is resolvable
   Scenario: when a query using transitivity has a limit exceeding the result size, answers are consistent between runs
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       rule transitive-location: when {
@@ -592,13 +552,11 @@ Feature: Relation Inference Resolution
         (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $a isa place, has name "University of Warsaw";
@@ -610,19 +568,18 @@ Feature: Relation Inference Resolution
       (subordinate: $b, superior: $c) isa location-hierarchy;
       (subordinate: $c, superior: $d) isa location-hierarchy;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match (subordinate: $x1, superior: $x2) isa location-hierarchy;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 6
-    Then answers are consistent across 5 executions in reasoned database
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 6
+    Then answers are consistent across 5 executions
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   Scenario: when a transitive rule's 'then' matches a query, but its 'when' is unmet, the material answers are returned
@@ -631,7 +588,7 @@ Feature: Relation Inference Resolution
   perform resolution steps even if the conditions of a rule are never met. In this case, 'transitive-location'
   is never triggered because there are no location-hierarchy pairs that satisfy both conditions.
 
-    Given for each session, typeql define
+    Given typeql define
       """
       define
 
@@ -655,13 +612,11 @@ Feature: Relation Inference Resolution
         (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $x1 isa place, has name "Waterloo";
@@ -681,18 +636,17 @@ Feature: Relation Inference Resolution
 
       (subordinate: $x3, superior: $x4) isa location-hierarchy;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match (subordinate: $x, superior: $y) isa location-hierarchy;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 1
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   #######################
@@ -700,7 +654,7 @@ Feature: Relation Inference Resolution
   #######################
 
   Scenario: an inferred relation with one player in a role is not retrieved when the role appears twice in a match query
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       rule employment-rule: when {
@@ -710,33 +664,29 @@ Feature: Relation Inference Resolution
         (employee: $p, employer: $c) isa employment;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $x isa person;
       $c isa company;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match (employee: $x, employee: $y) isa employment;
       """
-    Then answer size in reasoned database is: 0
-    Then materialised and reasoned databases are the same size
+    Then answer size is: 0
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   Scenario: a relation with two roleplayers inferred by the same rule is retrieved when matching only one of the roles
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       rule employment-rule: when {
@@ -746,34 +696,31 @@ Feature: Relation Inference Resolution
         (employee: $p, employer: $c) isa employment;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $x isa person;
       $c isa company;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match (employee: $x) isa employment;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 1
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   Scenario: when matching an inferred relation with repeated roles, answers contain all permutations of the roleplayers
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       rule alice-bob-and-charlie-are-friends: when {
@@ -784,43 +731,39 @@ Feature: Relation Inference Resolution
         (friend: $a, friend: $b, friend: $c) isa friendship;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $x isa person, has name "Alice";
       $y isa person, has name "Bob";
       $z isa person, has name "Charlie";
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match (friend: $a, friend: $b, friend: $c) isa friendship;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 6
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 6
+    Given session opens transaction of type: read
     Then answer set is equivalent for typeql query
       """
       match
         $r (friend: $a, friend: $b, friend: $c) isa friendship;
       get $a, $b, $c;
       """
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   Scenario: inferred relations can be filtered by shared attribute ownership
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       selection sub relation, relates choice1, relates choice2;
@@ -837,13 +780,11 @@ Feature: Relation Inference Resolution
         (choice1: $x, choice2: $z) isa selection;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $x isa person, has name "a";
@@ -853,24 +794,21 @@ Feature: Relation Inference Resolution
       (choice1: $x, choice2: $y) isa selection;
       (choice1: $y, choice2: $z) isa selection;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match
         (choice1: $x, choice2: $y) isa selection;
         $x has name $n;
         $y has name $n;
       """
-    Then all answers are correct in reasoned database
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     # (a,a), (b,b), (c,c)
-    Then answer size in reasoned database is: 3
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then answer size is: 3
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match
         (choice1: $x, choice2: $y) isa selection;
@@ -879,10 +817,10 @@ Feature: Relation Inference Resolution
         $n = 'a';
       get $x, $y;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 1
+    Given session opens transaction of type: read
     Then answer set is equivalent for typeql query
       """
       match
@@ -890,7 +828,8 @@ Feature: Relation Inference Resolution
         $x has name 'a';
         $y has name 'a';
       """
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   #######################
@@ -899,7 +838,7 @@ Feature: Relation Inference Resolution
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario: the relation type constraint can be excluded from a reasoned match query
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       rule transitive-location: when {
@@ -909,13 +848,11 @@ Feature: Relation Inference Resolution
         (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $x isa place, has name "Turku Airport";
@@ -925,12 +862,9 @@ Feature: Relation Inference Resolution
       (subordinate: $x, superior: $y) isa location-hierarchy;
       (subordinate: $y, superior: $z) isa location-hierarchy;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match
         $a isa place, has name "Turku Airport";
@@ -938,15 +872,17 @@ Feature: Relation Inference Resolution
         $b isa place, has name "Turku";
         ($b, $c);
       """
-    Then all answers are correct in reasoned database
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     # $c in {'Turku Airport', 'Finland'}
-    Then answer size in reasoned database is: 2
-    Then materialised and reasoned databases are the same size
+    Then answer size is: 2
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario: when the relation type is excluded in a reasoned match query, all valid roleplayer combinations are matches
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       rule transitive-location: when {
@@ -956,13 +892,11 @@ Feature: Relation Inference Resolution
         (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $x isa place, has name "Turku Airport";
@@ -972,11 +906,8 @@ Feature: Relation Inference Resolution
       (subordinate: $x, superior: $y) isa location-hierarchy;
       (subordinate: $y, superior: $z) isa location-hierarchy;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
+    Given transaction commits
+    Given correctness checker is initialised
     Given for typeql query
       """
       match
@@ -984,11 +915,11 @@ Feature: Relation Inference Resolution
         ($a, $b);
         $b isa place, has name "Turku";
       """
-    Given all answers are correct in reasoned database
-    Given answer size in reasoned database is: 1
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is:  1
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match
         $a isa place, has name "Turku Airport";
@@ -996,15 +927,17 @@ Feature: Relation Inference Resolution
         $b isa place, has name "Turku";
         ($c, $d);
       """
-    Then all answers are correct in reasoned database
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     # (2 db relations + 1 inferred) x 2 for variable swap
-    Then answer size in reasoned database is: 6
-    Then materialised and reasoned databases are the same size
+    Then answer size is: 6
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario: when the relation type is excluded in a reasoned match query, all types of relations match
-    Given for each session, typeql define
+    Given typeql define
       """
       define
 
@@ -1025,13 +958,11 @@ Feature: Relation Inference Resolution
         (loc-sub: $x, loc-sup: $y) isa loc-hie;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $x isa place, has name "Turku Airport";
@@ -1041,31 +972,29 @@ Feature: Relation Inference Resolution
       (subordinate: $x, superior: $y) isa location-hierarchy;
       (subordinate: $y, superior: $z) isa location-hierarchy;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
+    Given transaction commits
+    Given correctness checker is initialised
     Given for typeql query
       """
       match ($a, $b) isa relation;
       """
-    Then all answers are correct in reasoned database
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     # Despite there being more inferred relations, the answer size is still 6 (as in the previous scenario)
     # because the query is only interested in the related concepts, not in the relation instances themselves
-    Then answer size in reasoned database is: 6
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
+    Then answer size is: 6
+    Given session opens transaction of type: read
     Then answer set is equivalent for typeql query
       """
       match ($a, $b);
       """
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario: conjunctions of untyped reasoned relations are correctly resolved
-    Given for each session, typeql define
+    Given typeql define
       """
       define
       rule transitive-location: when {
@@ -1075,13 +1004,11 @@ Feature: Relation Inference Resolution
         (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $x isa place, has name "Turku Airport";
@@ -1091,18 +1018,16 @@ Feature: Relation Inference Resolution
       (subordinate: $x, superior: $y) isa location-hierarchy;
       (subordinate: $y, superior: $z) isa location-hierarchy;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match
         ($a, $b);
         ($b, $c);
       """
-    Then all answers are correct in reasoned database
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
     # a   | b   | c   |
     # AIR | TUR | FIN |
     # AIR | FIN | TUR |
@@ -1116,12 +1041,13 @@ Feature: Relation Inference Resolution
     # FIN | TUR | AIR |
     # FIN | AIR | FIN |
     # FIN | TUR | FIN |
-    Then answer size in reasoned database is: 12
-    Then materialised and reasoned databases are the same size
+    Then answer size is: 12
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
 
 
   Scenario: a relation can be inferred based on a direct type
-    Given for each session, typeql define
+    Given typeql define
       """
       define
 
@@ -1150,13 +1076,11 @@ Feature: Relation Inference Resolution
           (derivedRelationRole: $x) isa directDerivedRelation;
       };
       """
-    Given for each session, transaction commits
+    Given transaction commits
     Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
       """
       insert
       $x isa baseEntity;
@@ -1167,31 +1091,30 @@ Feature: Relation Inference Resolution
       (baseRole: $y) isa subRelation;
       (baseRole: $z) isa subSubRelation;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given transaction commits
+    Given correctness checker is initialised
+    When get answers of typeql match
       """
       match ($x) isa derivedRelation;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 2
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 2
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match ($x) isa! derivedRelation;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 2
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 2
+    Given session opens transaction of type: read
+    When get answers of typeql match
       """
       match ($x) isa directDerivedRelation;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then materialised and reasoned databases are the same size
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
+    Then answer size is: 1
+    Then check all answers and explanations are sound
+    Then check all answers and explanations are complete
