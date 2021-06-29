@@ -21,7 +21,7 @@ Feature: Recursion Resolution
   In some cases, the inferences made by a rule are used to trigger further inferences by the same rule.
   This test feature verifies that so-called recursive inference works as intended.
 
-  Background: Set up databases for resolution testing
+  Background: Set up database
     Given connection has been opened
     Given connection does not have any database
     Given connection create database: typedb
@@ -112,8 +112,8 @@ Feature: Recursion Resolution
       match (subordinate: $x, superior: $y) isa big-location-hierarchy;
       """
     Then answer size is: 1
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+     Then check all answers and explanations are sound
+     Then check all answers and explanations are complete
 
 
   Scenario: the types of inferred relations can be used to make further inferences
@@ -309,8 +309,6 @@ Feature: Recursion Resolution
       match $x isa dream; limit 10;
       """
     Then answer size is: 10
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
 
 
   # TODO: re-enable all steps when materialisation is possible (may be an infinite graph?) (#75)
@@ -416,7 +414,7 @@ Feature: Recursion Resolution
       """
     Then answer size is: 64
     Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    # Then check all answers and explanations are complete  # Not yet supported
 
 
   Scenario: non-regular transitivity requiring iterative generation of tuples
@@ -515,7 +513,7 @@ Feature: Recursion Resolution
       get $y;
       """
     Then answer size is: 3
-    Given transaction closes
+    Then session transaction closes
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
     Given session opens transaction of type: read
@@ -747,7 +745,7 @@ Feature: Recursion Resolution
       get $Y;
       """
     Then answer size is: 2
-    Given transaction closes
+    Then session transaction closes
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
     Given session opens transaction of type: read
@@ -1048,7 +1046,7 @@ Feature: Recursion Resolution
       match (from: $x, to: $y) isa reachable;
       """
     Then answer size is: 7
-    Given transaction closes
+    Then session transaction closes
     Then check all answers and explanations are complete
     Then check all answers and explanations are sound
     Given session opens transaction of type: read
@@ -1216,7 +1214,7 @@ Feature: Recursion Resolution
       get $y;
       """
     Then answer size is: 3
-    Given transaction closes
+    Then session transaction closes
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
     Given session opens transaction of type: read
@@ -1332,7 +1330,7 @@ Feature: Recursion Resolution
       get $y;
       """
     Then answer size is: 3
-    Given transaction closes
+    Then session transaction closes
     Then check all answers and explanations are complete
     Then check all answers and explanations are sound
     Given session opens transaction of type: read
@@ -1343,14 +1341,14 @@ Feature: Recursion Resolution
         {$name = 'b';} or {$name = 'c';} or {$name = 'd';};
       get $y;
       """
-    Given transaction closes
+    Then session transaction closes
     Given session opens transaction of type: read
     When get answers of typeql match
       """
       match (from: $x, to: $y) isa RevSG;
       """
     Then answer size is: 11
-    Given transaction closes
+    Then session transaction closes
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
     Given session opens transaction of type: read
@@ -1536,7 +1534,7 @@ Feature: Recursion Resolution
       get $y;
       """
     Then answer size is: 5
-    Given transaction closes
+    Then session transaction closes
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
 
@@ -1749,7 +1747,7 @@ Feature: Recursion Resolution
       get $y;
       """
     Then answer size is: 60
-    Given transaction closes
+    Then session transaction closes
     Then check all answers and explanations are complete
     Then check all answers and explanations are sound
     Given session opens transaction of type: read
@@ -1907,7 +1905,7 @@ Feature: Recursion Resolution
       get $y;
       """
     Then answer size is: 25
-    Given transaction closes
+    Then session transaction closes
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
 

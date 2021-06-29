@@ -18,7 +18,7 @@
 #noinspection CucumberUndefinedStep
 Feature: Negation Resolution
 
-  Background: Set up databases for resolution testing
+  Background: Set up database
     Given connection has been opened
     Given connection does not have any database
     Given connection create database: typedb
@@ -994,7 +994,7 @@ Feature: Negation Resolution
         };
       """
     Then answer size is: 3
-    Given transaction closes
+    Then session transaction closes
     Given session opens transaction of type: read
     Then answer set is equivalent for typeql query
       """
@@ -1276,7 +1276,7 @@ Feature: Negation Resolution
       """
     # aa is not linked to itself. ee, ff, gg are linked to each other, but not to aa. hh is not linked to anything
     Then answer size is: 5
-    Given transaction closes
+    Then session transaction closes
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
     Given session opens transaction of type: read

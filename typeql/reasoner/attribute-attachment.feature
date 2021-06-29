@@ -18,7 +18,7 @@
 #noinspection CucumberUndefinedStep
 Feature: Attribute Attachment Resolution
 
-  Background: Set up databases for resolution testing
+  Background: Set up database
     Given connection has been opened
     Given connection does not have any database
     Given connection create database: typedb
@@ -261,7 +261,7 @@ Feature: Attribute Attachment Resolution
       match $x has age > 20;
       """
     Then answer size is: 0
-    Given transaction closes
+    Then session transaction closes
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
 
