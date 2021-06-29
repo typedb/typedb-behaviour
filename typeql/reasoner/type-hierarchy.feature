@@ -77,6 +77,7 @@ Feature: Type Hierarchy Resolution
       (performer:$y, writer:$v) isa performance;  # person - child   -> doesn't satisfy rule
       """
     Given transaction commits
+    Given correctness checker is initialised
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -189,6 +190,7 @@ Feature: Type Hierarchy Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     # Matching a sibling of the actual role
     When get answers of typeql match
       """
@@ -250,6 +252,7 @@ Feature: Type Hierarchy Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     # sub-roles, super-relation
     When get answers of typeql match
       """
@@ -304,6 +307,7 @@ Feature: Type Hierarchy Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     # super-roles, sub-relation
     When get answers of typeql match
       """
@@ -358,6 +362,7 @@ Feature: Type Hierarchy Resolution
       """
     Given transaction commits
     Given correctness checker is initialised
+    Given session opens transaction of type: read
     # super-roles, super-relation
     When get answers of typeql match
       """

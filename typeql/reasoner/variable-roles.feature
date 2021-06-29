@@ -151,7 +151,7 @@ Feature: Variable Role Resolution
       """
       match (role1: $a, role2: $b) isa binary-base;
       """
-    Then answer size is:  9
+    Then answer size is: 9
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
     Given session opens transaction of type: read
@@ -172,7 +172,7 @@ Feature: Variable Role Resolution
       """
       match (role1: $a, $r1: $b) isa binary-base;
       """
-    Then answer size is:  18
+    Then answer size is: 18
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
     Given session opens transaction of type: read
@@ -196,7 +196,7 @@ Feature: Variable Role Resolution
       """
       match (role1: $a, role2: $b) isa binary-base;
       """
-    Then answer size is:  9
+    Then answer size is: 9
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
     Given session opens transaction of type: read
@@ -292,7 +292,7 @@ Feature: Variable Role Resolution
       """
       match (role1: $a, role2: $b) isa binary-base;
       """
-    Then answer size is:  9
+    Then answer size is: 9
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
     Given session opens transaction of type: read

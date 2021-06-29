@@ -96,20 +96,20 @@ Feature: Schema Query Resolution (Variable Types)
       """
       match $x isa entity;
       """
-    Then answer size is:  3
+    Then answer size is: 3
     Given session opens transaction of type: read
     When get answers of typeql match
       """
       match $x isa relation;
       """
     # (xx, yy, zz, xy, xz, yz)
-    Then answer size is:  6
+    Then answer size is: 6
     Given session opens transaction of type: read
     When get answers of typeql match
       """
       match $x isa attribute;
       """
-    Then answer size is:  1
+    Then answer size is: 1
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -156,7 +156,7 @@ Feature: Schema Query Resolution (Variable Types)
       match ($u, $v) isa relation;
       """
     # (xx, yy, zz, xy, xz, yz, yx, zx, zy)
-    Then answer size is:  9
+    Then answer size is: 9
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -221,7 +221,7 @@ Feature: Schema Query Resolution (Variable Types)
       """
       match $x isa relation;
       """
-    Then answer size is:  6
+    Then answer size is: 6
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
     Given session opens transaction of type: read
@@ -275,7 +275,7 @@ Feature: Schema Query Resolution (Variable Types)
       match $x isa relation;
       """
     # 3 friendships, 3 employments
-    Then answer size is:  6
+    Then answer size is: 6
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -342,7 +342,7 @@ Feature: Schema Query Resolution (Variable Types)
       """
       match $x isa relation;
       """
-    Then answer size is:  6
+    Then answer size is: 6
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
     Given session opens transaction of type: read
@@ -398,7 +398,7 @@ Feature: Schema Query Resolution (Variable Types)
       """
       match (employee: $x, employer: $y) isa employment;
       """
-    Then answer size is:  3
+    Then answer size is: 3
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
     Given session opens transaction of type: read

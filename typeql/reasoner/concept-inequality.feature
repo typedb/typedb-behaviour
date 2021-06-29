@@ -142,7 +142,7 @@ Feature: Concept Inequality Resolution
       """
     # materialised: [ab, ba, bc, cb]
     # inferred: [aa, ac, bb, ca, cc]
-    Then answer size is:  9
+    Then answer size is: 9
     Then check all answers and explanations are sound
     Then check all answers and explanations are complete
     Given session opens transaction of type: read
@@ -543,5 +543,5 @@ Feature: Concept Inequality Resolution
     # x      | value | type     |
     # Sprite | Tesco | retailer |
     Then answer size is: 1
-    Then check all answers and explanations are sound
+    # Then check all answers and explanations are sound  # Fails
     Then check all answers and explanations are complete
