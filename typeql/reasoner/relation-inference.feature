@@ -799,8 +799,8 @@ Feature: Relation Inference Resolution
       """
     # (a,a), (b,b), (c,c)
     Then answer size is: 3
-    # Then check all answers and explanations are sound  # Fails: runs forever
-    # Then check all answers and explanations are complete  # Fails: StackOverflowError
+    # Then check all answers and explanations are sound  # Fails
+    Then check all answers and explanations are complete
     Given session opens transaction of type: read
     When get answers of typeql match
       """
@@ -812,8 +812,8 @@ Feature: Relation Inference Resolution
       get $x, $y;
       """
     Then answer size is: 1
-    # Then check all answers and explanations are sound  # Fails: runs forever
-    # Then check all answers and explanations are complete  # Fails: StackOverflowError
+    # Then check all answers and explanations are sound  # Fails
+    Then check all answers and explanations are complete
     Given session opens transaction of type: read
     Then answer set is equivalent for typeql query
       """
