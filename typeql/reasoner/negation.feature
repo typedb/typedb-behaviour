@@ -396,7 +396,7 @@ Feature: Negation Resolution
       $w isa person, has name "Winnie";
       $c isa company, has name "Pizza Express";
       """
-    When get answers of typeql match
+    Given query
       """
       match $x has attribute $r;
       """
@@ -447,7 +447,7 @@ Feature: Negation Resolution
       (employee: $x, employer: $c) isa employment;
       (employee: $y, employer: $d) isa employment;
       """
-    When get answers of typeql match
+    Given query
       """
       match $x isa person;
       """

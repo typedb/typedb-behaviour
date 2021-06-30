@@ -545,7 +545,7 @@ Feature: Recursion Resolution
         {$name = 'aaa';} or {$name = 'aab';} or {$name = 'aaaa';};
       get $Y, $name;
       """
-    When get answers of typeql match
+    Given query
       """
       match
         ($X, $Y) isa ancestorship;
@@ -562,7 +562,7 @@ Feature: Recursion Resolution
         {$name = 'a';} or {$name = 'aaa';} or {$name = 'aab';} or {$name = 'aaaa';};
       get $Y;
       """
-    When get answers of typeql match
+    Given query
       """
       match (ancestor: $X, descendant: $Y) isa ancestorship;
       """
@@ -581,7 +581,7 @@ Feature: Recursion Resolution
         {$nameX = 'aaa';$nameY = 'aaaa';} or {$nameX = 'c';$nameY = 'ca';};
       get $X, $Y;
       """
-    When get answers of typeql match
+    Given query
       """
       match ($X, $Y) isa ancestorship;
       """
