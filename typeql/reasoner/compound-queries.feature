@@ -19,12 +19,7 @@
 Feature: Compound Query Resolution
 
   Background: Set up database
-    Given connection has been opened
-    Given connection does not have any database
-    Given connection create database: typedb
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql define
+    Given schema
       """
       define
 
@@ -39,13 +34,11 @@ Feature: Compound Query Resolution
       retailer sub attribute, value string;
       name sub attribute, value string;
       """
-    Given transaction commits
     # each scenario specialises the schema further
-    Given session opens transaction of type: write
 
 
   Scenario: repeated concludable patterns within a query trigger rules from all pattern occurrences
-    Given typeql define
+    Given schema
       """
       define
       base-attribute sub attribute, value string, abstract;
@@ -62,27 +55,20 @@ Feature: Compound Query Resolution
         $x has retailer "Tesco";
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $x isa person, has base-string-attribute "Tesco";
       $y isa soft-drink, has brand-name "Tesco";
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match
         $x has base-attribute $ax;
         $y has base-attribute $ay;
       """
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answers are sound
+    Then verify answers are complete
     # x   | ax  | y   | ay  |
     # PER | BSA | SOF | NAM |
     # PER | BSA | SOF | RET |
@@ -90,6 +76,6 @@ Feature: Compound Query Resolution
     # SOF | RET | PER | BSA |
     # SOF | NAM | SOF | RET |
     # SOF | RET | SOF | NAM |
-    Then answer size is: 9
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 9
+    Then verify answers are sound
+    Then verify answers are complete

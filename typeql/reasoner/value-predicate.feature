@@ -19,12 +19,7 @@
 Feature: Value Predicate Resolution
 
   Background: Set up database
-    Given connection has been opened
-    Given connection does not have any database
-    Given connection create database: typedb
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql define
+    Given schema
       """
       define
 
@@ -53,12 +48,10 @@ Feature: Value Predicate Resolution
       price sub attribute, value double;
       unrelated-attribute sub attribute, value string;
       """
-    Given transaction commits
     # each scenario specialises the schema further
-    Given session opens transaction of type: write
 
   Scenario: a rule can infer an attribute ownership based on a value predicate
-    Given typeql define
+    Given schema
       """
       define
       rule tortoises-become-old-at-age-1-year: when {
@@ -68,30 +61,23 @@ Feature: Value Predicate Resolution
         $x has is-old true;
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $se isa tortoise, has age 1;
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match $x has is-old $r;
       """
-    Then answer size is: 1
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   # TODO: re-enable all steps once materialised database counts duplicate attributes only once
   Scenario Outline: when querying for inferred attributes with '<op>', the answers matching the predicate are returned
-    Given typeql define
+    Given schema
       """
       define
       lucky-number sub attribute, value long;
@@ -100,28 +86,21 @@ Feature: Value Predicate Resolution
       rule rule-1667: when { $x isa person; } then { $x has lucky-number 1667; };
       rule rule-1997: when { $x isa person; } then { $x has lucky-number 1997; };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $x isa person;
       $y isa person;
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match
         $x isa person, has lucky-number $n;
         $n <op> 1667;
       """
-    Then answer size is: <answer-size>
-    # Then check all answers and explanations are sound  # Fails
-    Then check all answers and explanations are complete
+    Then verify answer size is: <answer-size>
+    # Then verify answers are sound  # Fails
+    Then verify answers are complete
 
     Examples:
       | op | answer-size |
@@ -135,7 +114,7 @@ Feature: Value Predicate Resolution
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario Outline: when both sides of a '<op>' comparison are inferred attributes, all answers satisfy the predicate
-    Given typeql define
+    Given schema
       """
       define
       lucky-number sub attribute, value long;
@@ -143,29 +122,22 @@ Feature: Value Predicate Resolution
       rule rule-1337: when { $x isa person; } then { $x has lucky-number 1337; };
       rule rule-1667: when { $x isa person; } then { $x has lucky-number 1667; };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $x isa person, has name "Alice";
       $y isa person, has name "Bob";
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match
         $x isa person, has name "Alice", has lucky-number $m;
         $y isa person, has name "Bob", has lucky-number $n;
         $m <op> $n;
       """
-    Then answer size is: <answer-size>
-    # Then check all answers and explanations are sound  # Fails
-    # Then check all answers and explanations are complete  # Unsupported
+    Then verify answer size is: <answer-size>
+    # Then verify answers are sound  # Fails
+    # Then verify answers are complete  # Unsupported
 
     Examples:
       | op | answer-size |
@@ -179,7 +151,7 @@ Feature: Value Predicate Resolution
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario Outline: when comparing an inferred attribute and a bound variable with '<op>', answers satisfy the predicate
-    Given typeql define
+    Given schema
       """
       define
       lucky-number sub attribute, value long;
@@ -188,20 +160,13 @@ Feature: Value Predicate Resolution
       rule rule-1667: when { $x isa person; } then { $x has lucky-number 1667; };
       rule rule-1997: when { $x isa person; } then { $x has lucky-number 1997; };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $x isa person, has name "Alice";
       $y isa person, has name "Bob";
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match
         $x isa person, has name "Alice", has lucky-number $m;
@@ -209,9 +174,9 @@ Feature: Value Predicate Resolution
         $m <op> $n;
         $n <op> 1667;
       """
-    Then answer size is: <answer-size>
-    # Then check all answers and explanations are sound  # Fails
-    # Then check all answers and explanations are complete  # Unsupported
+    Then verify answer size is: <answer-size>
+    # Then verify answers are sound  # Fails
+    # Then verify answers are complete  # Unsupported
 
     Examples:
       | op | answer-size |
@@ -224,7 +189,7 @@ Feature: Value Predicate Resolution
 
 
   Scenario: inferred attributes can be matched by inequality to a variable that is equal to a specified value
-    Given typeql define
+    Given schema
       """
       define
       rule tesco-sells-all-soft-drinks: when {
@@ -241,21 +206,14 @@ Feature: Value Predicate Resolution
         $y has retailer 'Ocado';
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $x isa soft-drink, has name "Fanta";
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match
         $x has retailer $r;
@@ -265,13 +223,13 @@ Feature: Value Predicate Resolution
     # x     | r     |
     # Fanta | Tesco |
     # Tango | Tesco |
-    Then answer size is: 2
-    # Then check all answers and explanations are sound  # Fails
-    # Then check all answers and explanations are complete  # Unsupported
+    Then verify answer size is: 2
+    # Then verify answers are sound  # Fails
+    # Then verify answers are complete  # Unsupported
 
 
   Scenario: inferred attributes can be matched by equality to a variable that is not equal to a specified value
-    Given typeql define
+    Given schema
       """
       define
       rule tesco-sells-all-soft-drinks: when {
@@ -288,21 +246,14 @@ Feature: Value Predicate Resolution
         $y has retailer 'Ocado';
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $x isa soft-drink, has name "Fanta";
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match
         $x has retailer $r;
@@ -312,14 +263,14 @@ Feature: Value Predicate Resolution
     # x     | r     |
     # Fanta | Ocado |
     # Tango | Ocado |
-    Then answer size is: 2
-    # Then check all answers and explanations are sound  # Fails
-    # Then check all answers and explanations are complete  # Unsupported
+    Then verify answer size is: 2
+    # Then verify answers are sound  # Fails
+    # Then verify answers are complete  # Unsupported
 
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario: inferred attributes can be filtered to include only values that contain a specified string
-    Given typeql define
+    Given schema
       """
       define
 
@@ -341,30 +292,23 @@ Feature: Value Predicate Resolution
         $x has retailer 'Londis';
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert $x isa soft-drink, has name "Fanta";
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match
         $x has retailer $rx;
         $rx contains "land";
       """
-    Then answer size is: 2
-    # Then check all answers and explanations are sound  # Fails
-    Then check all answers and explanations are complete
+    Then verify answer size is: 2
+    # Then verify answers are sound  # Fails
+    Then verify answers are complete
 
 
   Scenario: inferred attributes can be matched by equality to an attribute that contains a specified string
-    Given typeql define
+    Given schema
       """
       define
 
@@ -386,20 +330,13 @@ Feature: Value Predicate Resolution
         $x has retailer 'Londis';
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $x isa soft-drink, has name "Fanta";
       $y isa soft-drink, has name "Tango";
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match
         $x has retailer $rx;
@@ -416,14 +353,14 @@ Feature: Value Predicate Resolution
     # Fanta | Poundland | Fanta | Poundland |
     # Tango | Iceland   | Tango | Iceland   |
     # Tango | Poundland | Tango | Poundland |
-    Then answer size is: 8
-    # Then check all answers and explanations are sound  # Fails
-    # Then check all answers and explanations are complete  # Unsupported
+    Then verify answer size is: 8
+    # Then verify answers are sound  # Fails
+    # Then verify answers are complete  # Unsupported
 
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario: inferred attributes can be matched by inequality to an attribute that contains a specified string
-    Given typeql define
+    Given schema
       """
       define
 
@@ -445,20 +382,13 @@ Feature: Value Predicate Resolution
         $x has retailer 'Londis';
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $x isa soft-drink, has name "Fanta";
       $y isa soft-drink, has name "Tango";
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match
         $x has retailer $rx;
@@ -483,13 +413,13 @@ Feature: Value Predicate Resolution
     # Tango | Londis    | Tango | Poundland |
     # Fanta | Londis    | Fanta | Iceland   |
     # Tango | Londis    | Tango | Iceland   |
-    Then answer size is: 16
-    # Then check all answers and explanations are sound  # Fails
-    # Then check all answers and explanations are complete  # Unsupported
+    Then verify answer size is: 16
+    # Then verify answers are sound  # Fails
+    # Then verify answers are complete  # Unsupported
 
 
   Scenario: in a rule, 'not { $x = $y; }' is the same as saying '$x != $y'
-    Given typeql define
+    Given schema
       """
       define
       rule tesco-sells-all-soft-drinks: when {
@@ -506,21 +436,14 @@ Feature: Value Predicate Resolution
         $y has retailer 'Ocado';
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $x isa soft-drink, has name "Fanta";
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match
         $x has retailer $r;
@@ -529,23 +452,22 @@ Feature: Value Predicate Resolution
     # x     | r     |
     # Fanta | Tesco |
     # Tango | Tesco |
-    Then answer size is: 2
-    # Then check all answers and explanations are sound  # Fails
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 2
+    # Then verify answers are sound  # Fails
+    Then verify answers are complete
+    Given query
       """
       match
         $x has retailer $r;
         not { $r = "Ocado"; };
       """
-    Then answer size is: 2
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: in a rule, 'not { $x != $y; }' is the same as saying '$x = $y'
-    Given typeql define
+    Given schema
       """
       define
       rule tesco-sells-all-soft-drinks: when {
@@ -562,21 +484,14 @@ Feature: Value Predicate Resolution
         $y has retailer 'Ocado';
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $x isa soft-drink, has name "Fanta";
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match
         $x has retailer $r;
@@ -585,24 +500,23 @@ Feature: Value Predicate Resolution
     # x     | r     |
     # Fanta | Ocado |
     # Tango | Ocado |
-    Then answer size is: 2
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
+    Given query
       """
       match
         $x has retailer $r;
         not { $r != "Ocado"; };
       """
-    Then answer size is: 2
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   # TODO: move to negation.feature
   Scenario: a negation can filter out variables by equality to another variable with a specified value
-    Given typeql define
+    Given schema
       """
       define
       rule tesco-sells-all-soft-drinks: when {
@@ -619,21 +533,14 @@ Feature: Value Predicate Resolution
         $y has retailer 'Ocado';
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $x isa soft-drink, has name "Fanta";
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match
         $x has retailer $r;
@@ -645,14 +552,14 @@ Feature: Value Predicate Resolution
     # x     | r     |
     # Fanta | Tesco |
     # Tango | Tesco |
-    Then answer size is: 2
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   # TODO: migrate to concept-inequality.feature
   Scenario: when using 'not { $x is $y; }' over attributes of the same value, the answers have distinct types
-    Given typeql define
+    Given schema
       """
       define
       base-attribute sub attribute, value string, abstract;
@@ -670,20 +577,13 @@ Feature: Value Predicate Resolution
         $x has retailer "Tesco";
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $x isa person, has base-string-attribute "Tesco";
       $y isa soft-drink, has brand-name "Tesco";
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match
         $x has base-attribute $ax;
@@ -697,13 +597,13 @@ Feature: Value Predicate Resolution
     # SOF | RET | PER | BSA |
     # SOF | NAM | SOF | RET |
     # SOF | RET | SOF | NAM |
-    Then answer size is: 6
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 6
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: rules can divide entities into groups, linking each entity group to a specific concept by attribute value
-    Given typeql define
+    Given schema
       """
       define
 
@@ -747,11 +647,7 @@ Feature: Value Predicate Resolution
         (item: $x, category: $y3) isa price-classification;
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
 
@@ -764,64 +660,57 @@ Feature: Value Predicate Resolution
       $p3 "low price" isa price-range;
       $p4 "cheap" isa price-range;
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match
         $x "not expensive" isa price-range;
         ($x, item: $y) isa price-classification;
       """
-    Then answer size is: 2
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
+    Given query
       """
       match
         $x "low price" isa price-range;
         ($x, item: $y) isa price-classification;
       """
-    Then answer size is: 1
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
+    Given query
       """
       match
         $x "cheap" isa price-range;
         ($x, item: $y) isa price-classification;
       """
-    Then answer size is: 1
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
+    Given query
       """
       match
         $x "expensive" isa price-range;
         ($x, item: $y) isa price-classification;
       """
-    Then answer size is: 1
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
+    Given query
       """
       match
         $x isa price-range;
         ($x, item: $y) isa price-classification;
       """
     # sum of all previous answers
-    Then answer size is: 5
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 5
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   # TODO: re-enable all steps when resolvable (currently it takes too long to resolve) (#75)
   Scenario: attribute comparison can be used to classify concept pairs as predecessors and successors of each other
-    Given typeql define
+    Given schema
       """
       define
 
@@ -852,11 +741,7 @@ Feature: Value Predicate Resolution
           (predecessor:$s, successor:$r) isa message-succession;
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
 
@@ -873,14 +758,11 @@ Feature: Value Predicate Resolution
       (original:$x, reply:$x4) isa reply-of;
       (original:$x, reply:$x5) isa reply-of;
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match (predecessor:$x1, successor:$x2) isa message-succession;
       """
     # the (n-1)th triangle number, where n is the number of replies to the first post
-    Then answer size is: 10
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 10
+    Then verify answers are sound
+    Then verify answers are complete

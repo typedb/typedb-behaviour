@@ -19,12 +19,7 @@
 Feature: Schema Query Resolution (Variable Types)
 
   Background: Set up database
-    Given connection has been opened
-    Given connection does not have any database
-    Given connection create database: typedb
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql define
+    Given schema
       """
       define
 
@@ -55,13 +50,11 @@ Feature: Schema Query Resolution (Variable Types)
 
       name sub attribute, value string;
       """
-    Given transaction commits
     # each scenario specialises the schema further
-    Given session opens transaction of type: write
 
   # TODO: re-enable all steps once schema queries are resolvable (#75)
   Scenario: all instances and their types can be retrieved
-    Given typeql define
+    Given schema
       """
       define
 
@@ -78,40 +71,30 @@ Feature: Schema Query Resolution (Variable Types)
         (friend: $x, friend: $y) isa friendship;
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $x isa person;
       $y isa person;
       $z isa person;
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match $x isa entity;
       """
-    Then answer size is: 3
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 3
+    Given query
       """
       match $x isa relation;
       """
     # (xx, yy, zz, xy, xz, yz)
-    Then answer size is: 6
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 6
+    Given query
       """
       match $x isa attribute;
       """
-    Then answer size is: 1
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 1
+    Given query
       """
       match $x isa $type;
       """
@@ -119,14 +102,14 @@ Feature: Schema Query Resolution (Variable Types)
     # 6 friendships x 3 types of friendship {friendship, relation, thing}
     # 1 name x 3 types of name {name,attribute,thing}
     # = 9 + 18 + 3 = 30
-    Then answer size is: 30
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 30
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   # TODO: re-enable all steps once schema queries are resolvable (#75)
   Scenario: all relations and their types can be retrieved
-    Given typeql define
+    Given schema
       """
       define
 
@@ -137,40 +120,32 @@ Feature: Schema Query Resolution (Variable Types)
         (friend: $x, friend: $y) isa friendship;
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $x isa person, has name "Annette";
       $y isa person, has name "Richard";
       $z isa person, has name "Rupert";
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match ($u, $v) isa relation;
       """
     # (xx, yy, zz, xy, xz, yz, yx, zx, zy)
-    Then answer size is: 9
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 9
+    Given query
       """
       match ($u, $v) isa $type;
       """
     # 3 possible $u x 3 possible $v x 3 possible $type {friendship,relation,thing}
-    Then answer size is: 27
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 27
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   # TODO: re-enable all steps once schema queries are resolvable (#75)
   Scenario: all inferred instances of types that can own a given attribute type can be retrieved
-    Given typeql define
+    Given schema
       """
       define
 
@@ -204,28 +179,20 @@ Feature: Schema Query Resolution (Variable Types)
         (resident: $x) isa residency;
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $x isa person, has name "Sharon";
       $y isa person, has name "Tobias";
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match $x isa relation;
       """
-    Then answer size is: 6
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 6
+    Then verify answers are sound
+    Then verify answers are complete
+    Given query
       """
       match
         $x isa $type;
@@ -233,14 +200,14 @@ Feature: Schema Query Resolution (Variable Types)
       """
     # friendship can't have a contract... at least, not in this pristine test world
     # note: enforcing 'has contract' also eliminates 'relation' and 'thing' as possible types
-    Then answer size is: 4
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 4
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   # TODO: re-enable all steps once schema queries are resolvable (#75)
   Scenario: all inferred instances of types that are subtypes of a given type can be retrieved
-    Given typeql define
+    Given schema
       """
       define
 
@@ -256,42 +223,34 @@ Feature: Schema Query Resolution (Variable Types)
         (employee: $x) isa employment;
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $x isa person, has name "Annette";
       $y isa person, has name "Richard";
       $z isa person, has name "Rupert";
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match $x isa relation;
       """
     # 3 friendships, 3 employments
-    Then answer size is: 6
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 6
+    Given query
       """
       match
         $x isa $type;
         $type sub relation;
       """
     # 3 friendships, 3 employments, 6 relations
-    Then answer size is: 12
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 12
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   # TODO: re-enable all steps once schema queries are resolvable (#75)
   Scenario: all inferred instances of types that can play a given role can be retrieved
-    Given typeql define
+    Given schema
       """
       define
 
@@ -325,28 +284,20 @@ Feature: Schema Query Resolution (Variable Types)
         (resident: $x) isa residency;
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $x isa person, has name "Sharon";
       $y isa person, has name "Tobias";
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match $x isa relation;
       """
-    Then answer size is: 6
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 6
+    Then verify answers are sound
+    Then verify answers are complete
+    Given query
       """
       match
         $x isa $type;
@@ -354,9 +305,9 @@ Feature: Schema Query Resolution (Variable Types)
       """
     # friendship can't be a documented-thing
     # note: enforcing 'plays legal-documentation:subject' also eliminates 'relation' and 'thing' as possible types
-    Then answer size is: 4
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 4
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   # TODO: implement this once roles are scoped to relations
@@ -365,7 +316,7 @@ Feature: Schema Query Resolution (Variable Types)
 
   # TODO: re-enable all steps once schema queries are resolvable (#75)
   Scenario: all roleplayers and their types can be retrieved from a relation
-    Given typeql define
+    Given schema
       """
       define
 
@@ -379,11 +330,7 @@ Feature: Schema Query Resolution (Variable Types)
         (employee: $y, employer: $x) isa employment;
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $x isa company, has name "Armed Forces";
@@ -391,29 +338,24 @@ Feature: Schema Query Resolution (Variable Types)
       $z isa colonel;
       $w isa colonel;
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match (employee: $x, employer: $y) isa employment;
       """
-    Then answer size is: 3
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 3
+    Then verify answers are sound
+    Then verify answers are complete
+    Given query
       """
       match
         (employee: $x, employer: $y) isa employment;
         $x isa $type;
       """
     # 3 colonels * 5 supertypes of colonel (colonel, military-person, person, entity, thing)
-    Then answer size is: 15
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 15
+    Then verify answers are sound
+    Then verify answers are complete
+    Given query
       """
       match
         ($x, $y) isa employment;
@@ -421,24 +363,20 @@ Feature: Schema Query Resolution (Variable Types)
       """
     # (3 colonels * 5 supertypes of colonel * 1 company)
     # + (1 company * 3 supertypes of company * 3 colonels)
-    Then answer size is: 24
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 24
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: entity pairs can be matched based on the entity type they are related to
-    Given typeql define
+    Given schema
       """
       define
 
       retail-company sub company;
       finance-company sub company;
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
 
@@ -457,10 +395,7 @@ Feature: Schema Query Resolution (Variable Types)
       (employee: $s3, employer: $c2) isa employment;
       (employee: $s4, employer: $c2prime) isa employment;
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match
         $x isa person;
@@ -474,11 +409,10 @@ Feature: Schema Query Resolution (Variable Types)
       """
     # All companies match when $type is company (or entity)
     # Query returns {ab,ac,ad,bc,bd,cd} and each of them with the variables flipped
-    Then answer size is: 12
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 12
+    Then verify answers are sound
+    Then verify answers are complete
+    Given query
       """
       match
         $x isa person;
@@ -496,6 +430,6 @@ Feature: Schema Query Resolution (Variable Types)
     # $type is forced to be either finance-company or retail-company, restricting the answer space
     # Query returns {ab,cd} and each of them with the variables flipped
     # Note: the two Captain Obvious rules should not affect the answer, as the concepts retain their original types
-    Then answer size is: 4
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 4
+    Then verify answers are sound
+    Then verify answers are complete

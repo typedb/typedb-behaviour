@@ -19,12 +19,7 @@
 Feature: Rule Interaction Resolution
 
   Background: Set up database
-    Given connection has been opened
-    Given connection does not have any database
-    Given connection create database: typedb
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql define
+    Given schema
       """
       define
 
@@ -43,8 +38,6 @@ Feature: Rule Interaction Resolution
 
       name sub attribute, value string;
       """
-    Given transaction commits
-    Given session opens transaction of type: write
 
 
   ###########################
@@ -55,7 +48,7 @@ Feature: Rule Interaction Resolution
   #  NOTE: There is a currently known bug in core 1.8.3 that makes this test fail (issue #5891)
   #  We will hope this is fixed by 2.0 as a result of mor robust alpha equivalence definition
   Scenario: when rules are similar but different the reasoner knows to distinguish the rules
-    Given typeql define
+    Given schema
       """
       define
 
@@ -90,11 +83,7 @@ Feature: Rule Interaction Resolution
         $y has tag "P";
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
 
@@ -109,23 +98,20 @@ Feature: Rule Interaction Resolution
       (student: $charlie, teacher: $dennis) isa lesson;
       (member: $charlie, member: $dennis, leader: $charlie) isa team;
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match $x isa person, has name $n, has tag "P";
       """
-    Then answer size is: 2
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: when two distinct rules have alpha-equivalent bodies and heads, the reasoner still sees them as distinct.
   More explicitly, suppose we have rule A and rule B. Suppose up to alpha equivalence A.when == B.when and
   A.then == B.then. But the {rule A} != {rule B} because the bindings of the variables makes the meaning of A.then
   distinct from B.then. In such a situation, the reasoner does not mistake the rules as equivalent.
-    Given typeql define
+    Given schema
       """
       define
 
@@ -156,11 +142,7 @@ Feature: Rule Interaction Resolution
       };
       """
 
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
 
@@ -168,14 +150,11 @@ Feature: Rule Interaction Resolution
       $b isa person;
       (husband: $a, wife: $b) isa marriage;
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match $x isa person, has name 'tracey';
       """
-    Then answer size is: 2
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
 

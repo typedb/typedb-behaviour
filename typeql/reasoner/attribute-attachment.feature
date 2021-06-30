@@ -19,12 +19,7 @@
 Feature: Attribute Attachment Resolution
 
   Background: Set up database
-    Given connection has been opened
-    Given connection does not have any database
-    Given connection create database: typedb
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql define
+    Given schema
       """
       define
 
@@ -54,12 +49,10 @@ Feature: Attribute Attachment Resolution
       is-old sub attribute, value boolean;
       unrelated-attribute sub attribute, value string;
       """
-    Given transaction commits
-    Given session opens transaction of type: write
 
 
   Scenario: when a rule copies an attribute from one entity to another, the existing attribute instance is reused
-    Given typeql define
+    Given schema
       """
       define
       rule transfer-string-attribute-to-other-people: when {
@@ -69,38 +62,30 @@ Feature: Attribute Attachment Resolution
         $y has $r1;
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $geX isa person, has string-attribute "banana";
       $geY isa person;
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match $x isa person, has string-attribute $y;
       """
-    Then answer size is: 2
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
+    Given query
       """
       match $x isa string-attribute;
       """
-    Then answer size is: 1
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: when the same attribute is inferred on an entity and relation, both owners are correctly retrieved
-    Given typeql define
+    Given schema
       """
       define
       rule transfer-string-attribute-to-other-people: when {
@@ -117,31 +102,24 @@ Feature: Attribute Attachment Resolution
         $z has $y;
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $geX isa person, has string-attribute "banana";
       $geY isa person;
       (leader:$geX, member:$geX) isa team;
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match $x has string-attribute $y;
       """
-    Then answer size is: 3
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 3
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: a rule can infer an attribute value that did not previously exist in the graph
-    Given typeql define
+    Given schema
       """
       define
       rule tesco-sells-all-soft-drinks: when {
@@ -158,48 +136,38 @@ Feature: Attribute Attachment Resolution
         $y has retailer 'Ocado';
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $aeX isa soft-drink;
       $aeY isa soft-drink;
       $r "Ocado" isa retailer;
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match $x has retailer 'Ocado';
       """
-    Then answer size is: 2
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Then session transaction close
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
+    Given query
       """
       match $x has retailer $r;
       """
-    Then answer size is: 4
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 4
+    Then verify answers are sound
+    Then verify answers are complete
+    Given query
       """
       match $x has retailer 'Tesco';
       """
-    Then answer size is: 2
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: a rule can make a thing own an attribute that had no prior owners
-    Given typeql define
+    Given schema
       """
       define
       rule if-ocado-exists-it-sells-all-soft-drinks: when {
@@ -210,31 +178,24 @@ Feature: Attribute Attachment Resolution
         $y has $x;
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $aeX isa soft-drink;
       $aeY isa soft-drink;
       $r "Ocado" isa retailer;
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match $x isa soft-drink, has retailer 'Ocado';
       """
-    Then answer size is: 2
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: Querying for anonymous attributes with predicates finds the correct answers
-    Given typeql define
+    Given schema
       """
       define
       rule people-have-a-specific-age: when {
@@ -243,32 +204,23 @@ Feature: Attribute Attachment Resolution
         $x has age 10;
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $geY isa person;
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match $x has age > 20;
       """
-    Then answer size is: 0
-    Then session transaction closes
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 0
+    Then verify answers are sound
+    Then verify answers are complete
 
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match $x has age > 5;
       """
-    Then answer size is: 1
-    # Then check all answers and explanations are sound  # Fails
-    Then check all answers and explanations are complete
+    Then verify answer size is: 1
+    # Then verify answers are sound  # Fails
+    Then verify answers are complete

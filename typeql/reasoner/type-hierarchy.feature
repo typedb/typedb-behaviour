@@ -18,16 +18,8 @@
 #noinspection CucumberUndefinedStep
 Feature: Type Hierarchy Resolution
 
-  Background: Set up database
-    Given connection has been opened
-    Given connection does not have any database
-    Given connection create database: typedb
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
-
-
   Scenario: subtypes trigger rules based on their parents; parent types don't trigger rules based on their children
-    Given typeql define
+    Given schema
       """
       define
 
@@ -58,11 +50,7 @@ Feature: Type Hierarchy Resolution
           (actor:$x, writer:$y) isa film-production;
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $x isa child, has name "a";
@@ -76,10 +64,7 @@ Feature: Type Hierarchy Resolution
       (performer:$x, writer:$v) isa performance;  # child - child    -> satisfies rule
       (performer:$y, writer:$v) isa performance;  # person - child   -> doesn't satisfy rule
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match
         $x isa person;
@@ -87,11 +72,10 @@ Feature: Type Hierarchy Resolution
         (actor: $x, writer: $y) isa film-production;
       """
     # Answers are (actor:$x, writer:$z) and (actor:$x, writer:$v)
-    Then answer size is: 2
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
+    Given query
       """
       match
         $x isa person;
@@ -99,11 +83,10 @@ Feature: Type Hierarchy Resolution
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
       """
-    Then answer size is: 2
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
+    Given query
       """
       match
         $x isa person;
@@ -111,11 +94,10 @@ Feature: Type Hierarchy Resolution
         (actor: $x, writer: $y) isa film-production;
       """
     # Answer is (actor:$x, writer:$v) ONLY
-    Then answer size is: 1
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
+    Given query
       """
       match
         $x isa person;
@@ -123,11 +105,10 @@ Feature: Type Hierarchy Resolution
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
       """
-    Then answer size is: 1
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
+    Given query
       """
       match
         $x isa child;
@@ -135,11 +116,10 @@ Feature: Type Hierarchy Resolution
         (actor: $x, writer: $y) isa film-production;
       """
     # Answers are (actor:$x, writer:$z) and (actor:$x, writer:$v)
-    Then answer size is: 2
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
+    Given query
       """
       match
         $x isa child;
@@ -147,13 +127,13 @@ Feature: Type Hierarchy Resolution
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
       """
-    Then answer size is: 2
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: when matching different roles to those that are actually inferred, no answers are returned
-    Given typeql define
+    Given schema
       """
       define
 
@@ -177,39 +157,31 @@ Feature: Type Hierarchy Resolution
           (child: $x, mother: $y) isa large-family;
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $x isa person;
       $y isa person;
       (child: $x, parent: $y) isa family;
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
     # Matching a sibling of the actual role
-    When get answers of typeql match
+    Given query
       """
       match (child: $x, father: $y) isa large-family;
       """
-    Then answer size is: 0
-    Given session opens transaction of type: read
+    Then verify answer size is: 0
     # Matching two siblings when only one is present
-    When get answers of typeql match
+    Given query
       """
       match (mother: $x, father: $y) isa large-family;
       """
-    Then answer size is: 0
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 0
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: when a sub-relation is inferred, it can be retrieved by matching its super-relation and sub-roles
-    Given typeql define
+    Given schema
       """
       define
 
@@ -239,32 +211,25 @@ Feature: Type Hierarchy Resolution
           (scifi-writer:$x, scifi-actor:$y) isa scifi-production;
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $x isa person;
       $y isa person;
       (writer:$x, performer:$y) isa performance;
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
     # sub-roles, super-relation
-    When get answers of typeql match
+    Given query
       """
       match (scifi-writer:$x, scifi-actor:$y) isa film-production;
       """
-    Then answer size is: 1
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: when a sub-relation is inferred, it can be retrieved by matching its sub-relation and super-roles
-    Given typeql define
+    Given schema
       """
       define
 
@@ -294,32 +259,25 @@ Feature: Type Hierarchy Resolution
           (scifi-writer:$x, scifi-actor:$y) isa scifi-production;
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $x isa person;
       $y isa person;
       (writer:$x, performer:$y) isa performance;
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
     # super-roles, sub-relation
-    When get answers of typeql match
+    Given query
       """
       match (writer:$x, actor:$y) isa scifi-production;
       """
-    Then answer size is: 1
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: when a sub-relation is inferred, it can be retrieved by matching its super-relation and super-roles
-    Given typeql define
+    Given schema
       """
       define
 
@@ -349,32 +307,25 @@ Feature: Type Hierarchy Resolution
           (scifi-writer:$x, scifi-actor:$y) isa scifi-production;
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $x isa person;
       $y isa person;
       (writer:$x, performer:$y) isa performance;
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
     # super-roles, super-relation
-    When get answers of typeql match
+    Given query
       """
       match (writer:$x, actor:$y) isa film-production;
       """
-    Then answer size is: 1
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: when a rule is recursive, its inferences respect type hierarchies
-    Given typeql define
+    Given schema
       """
       define
 
@@ -413,11 +364,7 @@ Feature: Type Hierarchy Resolution
           (performer:$x, writer:$y) isa performance;
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $x isa child, has name "a";
@@ -431,10 +378,7 @@ Feature: Type Hierarchy Resolution
       (performer:$x, writer:$v) isa performance;  # child - child    -> satisfies rule
       (performer:$y, writer:$v) isa performance;  # person - child   -> doesn't satisfy rule
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match
         $x isa person;
@@ -442,11 +386,10 @@ Feature: Type Hierarchy Resolution
         (actor: $x, writer: $y) isa film-production;
       """
     # Answers are (actor:$x, writer:$z) and (actor:$x, writer:$v)
-    Then answer size is: 2
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
+    Given query
       """
       match
         $x isa person;
@@ -454,11 +397,10 @@ Feature: Type Hierarchy Resolution
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
       """
-    Then answer size is: 2
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
+    Given query
       """
       match
         $x isa person;
@@ -466,11 +408,10 @@ Feature: Type Hierarchy Resolution
         (actor: $x, writer: $y) isa film-production;
       """
     # Answer is (actor:$x, writer:$v) ONLY
-    Then answer size is: 1
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
+    Given query
       """
       match
         $x isa person;
@@ -478,11 +419,10 @@ Feature: Type Hierarchy Resolution
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
       """
-    Then answer size is: 1
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
+    Given query
       """
       match
         $x isa child;
@@ -490,11 +430,10 @@ Feature: Type Hierarchy Resolution
         (actor: $x, writer: $y) isa film-production;
       """
     # Answers are (actor:$x, writer:$z) and (actor:$x, writer:$v)
-    Then answer size is: 2
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
+    Given query
       """
       match
         $x isa child;
@@ -502,13 +441,13 @@ Feature: Type Hierarchy Resolution
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
       """
-    Then answer size is: 2
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: querying for a super-relation gives the same answer as querying for its inferred sub-relation
-    Given typeql define
+    Given schema
       """
       define
 
@@ -538,34 +477,26 @@ Feature: Type Hierarchy Resolution
           (parent-home-owner:$x, child-resident:$y) isa family-residence;
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $x isa person;
       $y isa person;
       (parent:$x, child:$y) isa family;
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match (home-owner: $x, resident: $y) isa residence;
       """
-    Then answer size is: 1
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
+    Given query
       """
       match
         (home-owner: $x, resident: $y) isa residence;
         (parent-home-owner: $x, child-resident: $y) isa family-residence;
       """
-    Then answer size is: 1
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete

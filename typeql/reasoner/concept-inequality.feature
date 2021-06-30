@@ -19,12 +19,7 @@
 Feature: Concept Inequality Resolution
 
   Background: Set up database
-    Given connection has been opened
-    Given connection does not have any database
-    Given connection create database: typedb
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql define
+    Given schema
       """
       define
 
@@ -50,11 +45,7 @@ Feature: Concept Inequality Resolution
           (ball1:$x, ball2:$z) isa selection;
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
 
@@ -68,14 +59,10 @@ Feature: Concept Inequality Resolution
       (ball1: $b, ball2: $c) isa selection;
       (ball1: $c, ball2: $b) isa selection;
       """
-    Given transaction commits
 
 
   Scenario: a rule can be applied based on concept inequality
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql define
+    Given schema
       """
       define
 
@@ -101,11 +88,7 @@ Feature: Concept Inequality Resolution
           (state: $st) isa holds;
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
 
@@ -116,37 +99,30 @@ Feature: Concept Inequality Resolution
       (state: $s1) isa achieved;
       (state: $s2) isa achieved;
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match (state: $s) isa holds;
       """
-    Then answer size is: 1
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
-    Then answer set is equivalent for typeql query
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
+    Then verify answer set is equivalent for query
       """
       match $s isa state, has name 's2';
       """
 
 
   Scenario: inferred binary relations can be filtered by concept inequality of their roleplayers
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match (ball1: $x, ball2: $y) isa selection;
       """
     # materialised: [ab, ba, bc, cb]
     # inferred: [aa, ac, bb, ca, cc]
-    Then answer size is: 9
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 9
+    Then verify answers are sound
+    Then verify answers are complete
+    Given query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -154,12 +130,11 @@ Feature: Concept Inequality Resolution
       """
     # materialised: [ab, ba, bc, cb]
     # inferred: [ac, ca]
-    Then answer size is: 6
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
+    Then verify answer size is: 6
+    Then verify answers are sound
+    Then verify answers are complete
     # verify that the answer pairs to the previous query have distinct names within each pair
-    When get answers of typeql match
+    Given query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -169,27 +144,24 @@ Feature: Concept Inequality Resolution
         not { $nx is $ny; };
       get $x, $y;
       """
-    Then answer size is: 6
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 6
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: inferred binary relations can be filtered by inequality to a specific concept
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
         not { $x is $y; };
         $y has name 'c';
       """
-    Then answer size is: 2
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
     # verify answers are [ac, bc]
-    When get answers of typeql match
+    When query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -197,9 +169,9 @@ Feature: Concept Inequality Resolution
         $y has name 'c';
         {$x has name 'a';} or {$x has name 'b';};
       """
-    Then answer size is: 2
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: pairs of inferred relations can be filtered by inequality of players in the same role
@@ -213,9 +185,7 @@ Feature: Concept Inequality Resolution
   v     v
   y is not z
 
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -225,12 +195,11 @@ Feature: Concept Inequality Resolution
     # [aab, aac, aba, abc, aca, acb,
     #  bab, bac, bba, bbc, bca, bcb,
     #  cab, cac, cba, cbc, cca, ccb]
-    Then answer size is: 18
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
+    Then verify answer size is: 18
+    Then verify answers are sound
+    Then verify answers are complete
     # verify that $y and $z always have distinct names
-    When get answers of typeql match
+    Given query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -241,9 +210,9 @@ Feature: Concept Inequality Resolution
         not { $ny is $nz; };
       get $x, $y, $z;
       """
-    Then answer size is: 18
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 18
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: pairs of inferred relations can be filtered by inequality of players in different roles
@@ -257,21 +226,18 @@ Feature: Concept Inequality Resolution
   /     v
   x is not z
 
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
         (ball1: $y, ball2: $z) isa selection;
         not { $x is $z; };
       """
-    Then answer size is: 18
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 18
+    Then verify answers are sound
+    Then verify answers are complete
     # verify that $y and $z always have distinct names
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -282,9 +248,9 @@ Feature: Concept Inequality Resolution
         not { $nx is $nz; };
       get $x, $y, $z;
       """
-    Then answer size is: 18
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 18
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: inequality predicates can operate independently against multiple pairs of relations in the same query
@@ -302,9 +268,7 @@ Feature: Concept Inequality Resolution
   v         v
   y2 is not  z2
 
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match
         (ball1: $x, ball2: $y1) isa selection;
@@ -313,11 +277,10 @@ Feature: Concept Inequality Resolution
         (ball1: $x, ball2: $z2) isa selection;
       """
     # For each of the [3] values of $x, there are 3^4 = 81 choices for {$y1, $z1, $y2, $z2}, for a total of 243
-    Then answer size is: 243
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 243
+    Then verify answers are sound
+    Then verify answers are complete
+    Given query
       """
       match
         (ball1: $x, ball2: $y1) isa selection;
@@ -328,13 +291,12 @@ Feature: Concept Inequality Resolution
         not { $y1 is $z1; };
         not { $y2 is $z2; };
       """
-    Then answer size is: 108
+    Then verify answer size is: 108
     # Each neq predicate reduces the answer size by 1/3, cutting it to 162, then 108
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
+    Then verify answers are sound
+    Then verify answers are complete
     # verify that $y1 and $z1 - as well as $y2 and $z2 - always have distinct names
-    When get answers of typeql match
+    Given query
       """
       match
         (ball1: $x, ball2: $y1) isa selection;
@@ -351,9 +313,9 @@ Feature: Concept Inequality Resolution
         not { $ny2 is $nz2; };
       get $x, $y1, $z1, $y2, $z2;
       """
-    Then answer size is: 108
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 108
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: inequality predicates can operate independently against multiple roleplayers in the same relation
@@ -367,9 +329,7 @@ Feature: Concept Inequality Resolution
   v
   y     - is not - >  z2
 
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -377,11 +337,10 @@ Feature: Concept Inequality Resolution
         (ball1: $y, ball2: $z2) isa selection;
       """
     # There are 3^4 possible choices for the set {$x, $y, $z1, $z2}, for a total of 81
-    Then answer size is: 81
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Then verify answer size is: 81
+    Then verify answers are sound
+    Then verify answers are complete
+    Given query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -392,12 +351,11 @@ Feature: Concept Inequality Resolution
         not { $y is $z2; };
       """
     # Each neq predicate reduces the answer size by 1/3, cutting it to 54, then 36
-    Then answer size is: 36
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
-    Given session opens transaction of type: read
+    Then verify answer size is: 36
+    Then verify answers are sound
+    Then verify answers are complete
     # verify that $y1 and $z1 - as well as $y2 and $z2 - always have distinct names
-    When get answers of typeql match
+    Given query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -413,9 +371,9 @@ Feature: Concept Inequality Resolution
         not { $ny is $nz2; };
       get $x, $y, $z1, $z2;
       """
-    Then answer size is: 36
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 36
+    Then verify answers are sound
+    Then verify answers are complete
 
   # TODO enable when we can resolve repeated concludables
   @ignore
@@ -423,10 +381,7 @@ Feature: Concept Inequality Resolution
   # TODO: re-enable all steps once implicit attribute variables are resolvable
   # TODO: migrate to concept-inequality.feature
   Scenario: when restricting concept types of a pair of inferred attributes with '!=', the answers have distinct types
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql define
+    Given schema
       """
       define
       soft-drink sub entity,
@@ -444,20 +399,13 @@ Feature: Concept Inequality Resolution
         $x has retailer 'Tesco';
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
       """
       insert
       $x isa person, has string-attribute "Tesco";
       $y isa soft-drink, has name "Tesco";
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match
         $x has $ax;
@@ -473,16 +421,13 @@ Feature: Concept Inequality Resolution
     # SOF | RET | PER | STA |
     # SOF | NAM | SOF | STA |
     # SOF | STA | SOF | NAM |
-    Then answer size is: 6
-    Then check all answers and explanations are sound
-    Then check all answers and explanations are complete
+    Then verify answer size is: 6
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: inferred attribute matches can be simultaneously restricted by both concept type and attribute value
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql define
+    Given schema
       """
       define
       soft-drink sub entity,
@@ -514,11 +459,7 @@ Feature: Concept Inequality Resolution
         $y has $x;
       };
       """
-    Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given data
     """
       insert
       $w isa person, has string-attribute "Ocado";
@@ -526,10 +467,7 @@ Feature: Concept Inequality Resolution
       $y isa soft-drink, has name "Sprite";
       $z "Ocado" isa retailer;
       """
-    Given transaction commits
-    Given correctness checker is initialised
-    Given session opens transaction of type: read
-    When get answers of typeql match
+    Given query
       """
       match
         $value isa! retailer;
@@ -542,6 +480,6 @@ Feature: Concept Inequality Resolution
       """
     # x      | value | type     |
     # Sprite | Tesco | retailer |
-    Then answer size is: 1
-    # Then check all answers and explanations are sound  # Fails
-    # Then check all answers and explanations are complete  # Fails
+    Then verify answer size is: 1
+    # Then verify answers are sound  # Fails
+    # Then verify answers are complete  # Fails
