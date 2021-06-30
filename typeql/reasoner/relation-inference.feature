@@ -479,7 +479,7 @@ Feature: Relation Inference Resolution
       match (subordinate: $x1, superior: $x2) isa location-hierarchy;
       """
     Then verify answer size is: 6
-    Then answers are consistent across 5 executions
+    Then verify answers are consistent across 5 executions
     Then verify answers are sound
     Then verify answers are complete
 

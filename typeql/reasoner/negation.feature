@@ -953,7 +953,7 @@ Feature: Negation Resolution
       match (diagnosed-fault: $flt, parent-session: $ts) isa diagnosis;
       """
     Then verify answer size is: 0
-    Then answers are consistent across 5 executions
+    Then verify answers are consistent across 5 executions
     Then verify answers are sound
     # Then verify answers are complete  # Fails
 
@@ -1027,7 +1027,7 @@ Feature: Negation Resolution
       match (role-3: $x, role-4: $y) isa relation-4;
       """
     Then verify answer size is: 11
-    Then answers are consistent across 5 executions
+    Then verify answers are consistent across 5 executions
     # Then verify answers are sound  # Fails
     Then verify answers are complete
 
