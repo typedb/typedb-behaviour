@@ -165,7 +165,7 @@ Feature: Value Predicate Resolution
       """
     Then answer size is: <answer-size>
     # Then check all answers and explanations are sound  # Fails
-    Then check all answers and explanations are complete
+    # Then check all answers and explanations are complete  # Unsupported
 
     Examples:
       | op | answer-size |
@@ -211,7 +211,7 @@ Feature: Value Predicate Resolution
       """
     Then answer size is: <answer-size>
     # Then check all answers and explanations are sound  # Fails
-    Then check all answers and explanations are complete
+    # Then check all answers and explanations are complete  # Unsupported
 
     Examples:
       | op | answer-size |
@@ -267,7 +267,7 @@ Feature: Value Predicate Resolution
     # Tango | Tesco |
     Then answer size is: 2
     # Then check all answers and explanations are sound  # Fails
-    Then check all answers and explanations are complete
+    # Then check all answers and explanations are complete  # Unsupported
 
 
   Scenario: inferred attributes can be matched by equality to a variable that is not equal to a specified value
@@ -314,7 +314,7 @@ Feature: Value Predicate Resolution
     # Tango | Ocado |
     Then answer size is: 2
     # Then check all answers and explanations are sound  # Fails
-    Then check all answers and explanations are complete
+    # Then check all answers and explanations are complete  # Unsupported
 
 
   # TODO: re-enable all steps when fixed (#75)
@@ -418,7 +418,7 @@ Feature: Value Predicate Resolution
     # Tango | Poundland | Tango | Poundland |
     Then answer size is: 8
     # Then check all answers and explanations are sound  # Fails
-    Then check all answers and explanations are complete
+    # Then check all answers and explanations are complete  # Unsupported
 
 
   # TODO: re-enable all steps when fixed (#75)
@@ -485,7 +485,7 @@ Feature: Value Predicate Resolution
     # Tango | Londis    | Tango | Iceland   |
     Then answer size is: 16
     # Then check all answers and explanations are sound  # Fails
-    Then check all answers and explanations are complete
+    # Then check all answers and explanations are complete  # Unsupported
 
 
   Scenario: in a rule, 'not { $x = $y; }' is the same as saying '$x != $y'
