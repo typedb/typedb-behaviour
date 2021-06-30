@@ -261,14 +261,14 @@ Feature: Recursion Resolution
         (dreamer: $x, subject: $z) isa dream;
       };
       """
-    Given data
+    Given data without correctness verification
     """
       insert
       $x isa person, has name "Yusuf";
       # If only Yusuf didn't dream about himself...
       (dreamer: $x, subject: $x) isa dream;
       """
-    Given query without correctness verification
+    Given query
       """
       match $x isa dream; limit 10;
       """
