@@ -268,7 +268,7 @@ Feature: Recursion Resolution
       # If only Yusuf didn't dream about himself...
       (dreamer: $x, subject: $x) isa dream;
       """
-    Given query without correctness checking enabled
+    Given query without correctness verification
       """
       match $x isa dream; limit 10;
       """
