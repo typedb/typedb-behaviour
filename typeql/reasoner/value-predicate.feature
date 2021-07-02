@@ -137,7 +137,7 @@ Feature: Value Predicate Resolution
       """
     Then verify answer size is: <answer-size>
     # Then verify answers are sound  # Fails
-    # Then verify answers are complete  # Unsupported
+    # Then verify answers are complete  # Fails
 
     Examples:
       | op | answer-size |
@@ -176,7 +176,7 @@ Feature: Value Predicate Resolution
       """
     Then verify answer size is: <answer-size>
     # Then verify answers are sound  # Fails
-    # Then verify answers are complete  # Unsupported
+    # Then verify answers are complete  # Fails
 
     Examples:
       | op | answer-size |
@@ -225,7 +225,7 @@ Feature: Value Predicate Resolution
     # Tango | Tesco |
     Then verify answer size is: 2
     # Then verify answers are sound  # Fails
-    # Then verify answers are complete  # Unsupported
+    # Then verify answers are complete  # Fails
 
 
   Scenario: inferred attributes can be matched by equality to a variable that is not equal to a specified value
@@ -265,7 +265,7 @@ Feature: Value Predicate Resolution
     # Tango | Ocado |
     Then verify answer size is: 2
     # Then verify answers are sound  # Fails
-    # Then verify answers are complete  # Unsupported
+    # Then verify answers are complete  # Fails
 
 
   # TODO: re-enable all steps when fixed (#75)
@@ -355,7 +355,7 @@ Feature: Value Predicate Resolution
     # Tango | Poundland | Tango | Poundland |
     Then verify answer size is: 8
     # Then verify answers are sound  # Fails
-    # Then verify answers are complete  # Unsupported
+    # Then verify answers are complete  # Fails
 
 
   # TODO: re-enable all steps when fixed (#75)
@@ -415,7 +415,7 @@ Feature: Value Predicate Resolution
     # Tango | Londis    | Tango | Iceland   |
     Then verify answer size is: 16
     # Then verify answers are sound  # Fails
-    # Then verify answers are complete  # Unsupported
+    # Then verify answers are complete  # Fails
 
 
   Scenario: in a rule, 'not { $x = $y; }' is the same as saying '$x != $y'
