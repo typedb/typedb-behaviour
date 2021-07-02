@@ -27,7 +27,6 @@ files = [
     "recursion.feature",
     "relation-inference.feature",
     "schema-queries.feature",
-    "resolution-test-framework.feature",
     "rule-interaction.feature",
     "type-hierarchy.feature",
     "variable-roles.feature",
