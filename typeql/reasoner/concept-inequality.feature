@@ -164,7 +164,7 @@ Feature: Concept Inequality Resolution
     Then verify answers are sound
     Then verify answers are complete
     # verify answers are [ac, bc]
-    When query
+    Given reasoning query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
