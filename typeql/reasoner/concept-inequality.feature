@@ -273,6 +273,7 @@ Feature: Concept Inequality Resolution
   v         v
   y2 is not  z2
 
+    Given verifier is initialised
     Given reasoning query
       """
       match
@@ -334,6 +335,7 @@ Feature: Concept Inequality Resolution
   v
   y     - is not - >  z2
 
+    Given verifier is initialised
     Given reasoning query
       """
       match
@@ -410,6 +412,7 @@ Feature: Concept Inequality Resolution
       $x isa person, has string-attribute "Tesco";
       $y isa soft-drink, has name "Tesco";
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match
@@ -472,6 +475,7 @@ Feature: Concept Inequality Resolution
       $y isa soft-drink, has name "Sprite";
       $z "Ocado" isa retailer;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match

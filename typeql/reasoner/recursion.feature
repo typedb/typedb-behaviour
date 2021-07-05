@@ -271,6 +271,7 @@ Feature: Recursion Resolution
       # If only Yusuf didn't dream about himself...
       (dreamer: $x, subject: $x) isa dream;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match $x isa dream; limit 10;
@@ -360,6 +361,7 @@ Feature: Recursion Resolution
       (supertype: $f, subtype: $rr) isa inheritance;
       (supertype: $f, subtype: $rr2) isa inheritance;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match $p isa pair, has name 'ff';
@@ -457,6 +459,7 @@ Feature: Recursion Resolution
       (role-A: $r, role-B: $s) isa H;
       (role-A: $u, role-B: $v) isa H;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match
@@ -530,6 +533,7 @@ Feature: Recursion Resolution
       (parent: $aaa, child: $aaaa) isa parentship;
       (parent: $c, child: $ca) isa parentship;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match
@@ -668,6 +672,7 @@ Feature: Recursion Resolution
       (friend: $a, friend: $g) isa friendship;
       (friend: $c, friend: $d) isa friendship;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match
@@ -777,6 +782,7 @@ Feature: Recursion Resolution
       (parent: $g, child: $f) isa parentship;
       (parent: $h, child: $g) isa parentship;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match

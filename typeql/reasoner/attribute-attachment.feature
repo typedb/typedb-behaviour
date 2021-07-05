@@ -221,7 +221,6 @@ Feature: Attribute Attachment Resolution
     Then verify answer size is: 0
     Then verify answers are sound
     Then verify answers are complete
-
     Given reasoning query
       """
       match $x has age > 5;

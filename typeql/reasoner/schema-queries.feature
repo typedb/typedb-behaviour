@@ -401,6 +401,7 @@ Feature: Schema Query Resolution (Variable Types)
       (employee: $s3, employer: $c2) isa employment;
       (employee: $s4, employer: $c2prime) isa employment;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match

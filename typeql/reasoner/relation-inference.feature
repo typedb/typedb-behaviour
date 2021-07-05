@@ -451,6 +451,7 @@ Feature: Relation Inference Resolution
       (subordinate: $x, superior: $y) isa location-hierarchy;
       (subordinate: $y, superior: $y) isa location-hierarchy;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match $x isa location-hierarchy;
@@ -484,6 +485,7 @@ Feature: Relation Inference Resolution
       (subordinate: $b, superior: $c) isa location-hierarchy;
       (subordinate: $c, superior: $d) isa location-hierarchy;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match (subordinate: $x1, superior: $x2) isa location-hierarchy;
@@ -544,6 +546,7 @@ Feature: Relation Inference Resolution
 
       (subordinate: $x3, superior: $x4) isa location-hierarchy;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match (subordinate: $x, superior: $y) isa location-hierarchy;
@@ -574,6 +577,7 @@ Feature: Relation Inference Resolution
       $x isa person;
       $c isa company;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match (employee: $x, employee: $y) isa employment;
@@ -600,6 +604,7 @@ Feature: Relation Inference Resolution
       $x isa person;
       $c isa company;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match (employee: $x) isa employment;
@@ -628,6 +633,7 @@ Feature: Relation Inference Resolution
       $y isa person, has name "Bob";
       $z isa person, has name "Charlie";
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match (friend: $a, friend: $b, friend: $c) isa friendship;
@@ -671,6 +677,7 @@ Feature: Relation Inference Resolution
       (choice1: $x, choice2: $y) isa selection;
       (choice1: $y, choice2: $z) isa selection;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match
@@ -729,6 +736,7 @@ Feature: Relation Inference Resolution
       (subordinate: $x, superior: $y) isa location-hierarchy;
       (subordinate: $y, superior: $z) isa location-hierarchy;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match
@@ -765,6 +773,7 @@ Feature: Relation Inference Resolution
       (subordinate: $x, superior: $y) isa location-hierarchy;
       (subordinate: $y, superior: $z) isa location-hierarchy;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match
@@ -822,6 +831,7 @@ Feature: Relation Inference Resolution
       (subordinate: $x, superior: $y) isa location-hierarchy;
       (subordinate: $y, superior: $z) isa location-hierarchy;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match ($a, $b) isa relation;
@@ -859,6 +869,7 @@ Feature: Relation Inference Resolution
       (subordinate: $x, superior: $y) isa location-hierarchy;
       (subordinate: $y, superior: $z) isa location-hierarchy;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match
@@ -924,6 +935,7 @@ Feature: Relation Inference Resolution
       (baseRole: $y) isa subRelation;
       (baseRole: $z) isa subSubRelation;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match ($x) isa derivedRelation;
