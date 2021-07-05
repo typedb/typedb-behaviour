@@ -271,7 +271,6 @@ Feature: Recursion Resolution
       # If only Yusuf didn't dream about himself...
       (dreamer: $x, subject: $x) isa dream;
       """
-    Given verifier is initialised
     Given reasoning query
       """
       match $x isa dream; limit 10;
