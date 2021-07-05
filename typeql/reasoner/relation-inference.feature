@@ -19,7 +19,7 @@
 Feature: Relation Inference Resolution
 
   Background: Set up database
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -57,7 +57,7 @@ Feature: Relation Inference Resolution
   #######################
 
   Scenario: a relation can be inferred on all concepts of a given type
-    Given schema
+    Given reasoning schema
       """
       define
       dog sub entity;
@@ -67,14 +67,15 @@ Feature: Relation Inference Resolution
         (employee: $p) isa employment;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa person;
       $y isa dog;
       $z isa person;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         $x isa person;
@@ -86,7 +87,7 @@ Feature: Relation Inference Resolution
 
 
   Scenario: a relation can be inferred based on an attribute ownership
-    Given schema
+    Given reasoning schema
       """
       define
       rule haikal-is-employed: when {
@@ -95,13 +96,14 @@ Feature: Relation Inference Resolution
         (employee: $p) isa employment;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa person, has name "Haikal";
       $y isa person, has name "Michael";
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         $x has name "Haikal";
@@ -110,7 +112,7 @@ Feature: Relation Inference Resolution
     Then verify answer size is: 1
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match
         $x has name "Michael";
@@ -122,7 +124,7 @@ Feature: Relation Inference Resolution
 
 
   Scenario: a rule can infer a relation with an attribute as a roleplayer
-    Given schema
+    Given reasoning schema
       """
       define
       item sub entity, owns name, plays item-listing:item;
@@ -135,13 +137,14 @@ Feature: Relation Inference Resolution
         (item: $x, price: $y) isa item-listing;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa item, has name "3kg jar of Nutella";
       $y 14.99 isa price;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         $r (item: $i, price: $p) isa item-listing;
@@ -155,7 +158,7 @@ Feature: Relation Inference Resolution
 
 
   Scenario: a rule can infer a relation based on ownership of any instance of a specific attribute type
-    Given schema
+    Given reasoning schema
       """
       define
       year sub attribute, value long, plays employment:favourite-year;
@@ -168,7 +171,7 @@ Feature: Relation Inference Resolution
         (employee: $p, employer: $x, favourite-year: $y) isa employment;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa company, has name "Kronenbourg";
@@ -176,7 +179,8 @@ Feature: Relation Inference Resolution
       $p2 isa person, has name "Prasanth";
       $y 1664 isa year;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         $x 1664 isa year;
@@ -193,7 +197,7 @@ Feature: Relation Inference Resolution
 
   # nth triangle number = sum of all integers from 1 to n, inclusive
   Scenario: when inferring relations on all pairs from n concepts, the number of relations is the nth triangle number
-    Given schema
+    Given reasoning schema
       """
       define
       rule everyone-is-my-friend-including-myself: when {
@@ -203,7 +207,7 @@ Feature: Relation Inference Resolution
         (friend: $x, friend: $y) isa friendship;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $a isa person, has name "Abigail";
@@ -212,7 +216,8 @@ Feature: Relation Inference Resolution
       $d isa person, has name "Damien";
       $e isa person, has name "Eustace";
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match $r isa friendship;
       """
@@ -228,7 +233,7 @@ Feature: Relation Inference Resolution
 
 
   Scenario: when matching all possible pairs inferred from n concepts, the answer size is the square of n
-    Given schema
+    Given reasoning schema
       """
       define
       rule everyone-is-my-friend-including-myself: when {
@@ -238,7 +243,7 @@ Feature: Relation Inference Resolution
         (friend: $x, friend: $y) isa friendship;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $a isa person, has name "Abigail";
@@ -247,7 +252,8 @@ Feature: Relation Inference Resolution
       $d isa person, has name "Damien";
       $e isa person, has name "Eustace";
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match ($x, $y) isa friendship;
       """
@@ -258,7 +264,7 @@ Feature: Relation Inference Resolution
 
 
   Scenario: when a relation is reflexive, matching concepts are related to themselves
-    Given schema
+    Given reasoning schema
       """
       define
       person plays employment:employer;
@@ -268,14 +274,15 @@ Feature: Relation Inference Resolution
         (employee: $x, employer: $x) isa employment;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $f isa person, has name "Ferhat";
       $g isa person, has name "Gawain";
       $h isa person, has name "Hattie";
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (employee: $x, employer: $x) isa employment;
       """
@@ -285,7 +292,7 @@ Feature: Relation Inference Resolution
 
 
   Scenario: inferred reflexive relations can be retrieved using multiple variables to refer to the same concept
-    Given schema
+    Given reasoning schema
       """
       define
       person plays employment:employer;
@@ -295,12 +302,13 @@ Feature: Relation Inference Resolution
         (employee: $x, employer: $x) isa employment;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $i isa person, has name "Irma";
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (employee: $x, employer: $y) isa employment;
       """
@@ -310,7 +318,7 @@ Feature: Relation Inference Resolution
 
 
   Scenario: inferred relations between distinct concepts are not retrieved when matching concepts related to themselves
-    Given schema
+    Given reasoning schema
       """
       define
       person plays employment:employer;
@@ -321,13 +329,14 @@ Feature: Relation Inference Resolution
         (employee: $y, employer: $x) isa employment;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $r isa person, has name "Robert";
       $j isa person, has name "Jane";
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (employee: $x, employer: $x) isa employment;
       """
@@ -342,7 +351,7 @@ Feature: Relation Inference Resolution
 
   # TODO: re-enable all steps when resolvable (currently takes too long)
   Scenario: when a relation is symmetric, its symmetry can be used to make additional inferences
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -377,7 +386,7 @@ Feature: Relation Inference Resolution
           (coworker: $c, coworker: $op) isa coworkers;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $a isa robot, has name 'r1';
@@ -386,7 +395,8 @@ Feature: Relation Inference Resolution
       (pet: $a, owner: $b) isa robot-pet-ownership;
       (coworker: $b, coworker: $c) isa coworkers;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (coworker: $x, coworker: $x) isa coworkers;
       """
@@ -399,7 +409,7 @@ Feature: Relation Inference Resolution
     Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match (coworker: $x, coworker: $y) isa coworkers;
       """
@@ -422,7 +432,7 @@ Feature: Relation Inference Resolution
   ################
 
   Scenario: a transitive rule will not infer any new relations when there are only two related entities
-    Given schema
+    Given reasoning schema
       """
       define
       rule transitive-location: when {
@@ -432,7 +442,7 @@ Feature: Relation Inference Resolution
         (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa place, has name "Delhi";
@@ -441,7 +451,7 @@ Feature: Relation Inference Resolution
       (subordinate: $x, superior: $y) isa location-hierarchy;
       (subordinate: $y, superior: $y) isa location-hierarchy;
       """
-    Given query
+    Given reasoning query
       """
       match $x isa location-hierarchy;
       """
@@ -452,7 +462,7 @@ Feature: Relation Inference Resolution
 
   # TODO: re-enable all steps when 3-hop transitivity is resolvable
   Scenario: when a query using transitivity has a limit exceeding the result size, answers are consistent between runs
-    Given schema
+    Given reasoning schema
       """
       define
       rule transitive-location: when {
@@ -462,7 +472,7 @@ Feature: Relation Inference Resolution
         (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $a isa place, has name "University of Warsaw";
@@ -474,7 +484,7 @@ Feature: Relation Inference Resolution
       (subordinate: $b, superior: $c) isa location-hierarchy;
       (subordinate: $c, superior: $d) isa location-hierarchy;
       """
-    Given query
+    Given reasoning query
       """
       match (subordinate: $x1, superior: $x2) isa location-hierarchy;
       """
@@ -490,7 +500,7 @@ Feature: Relation Inference Resolution
   perform resolution steps even if the conditions of a rule are never met. In this case, 'transitive-location'
   is never triggered because there are no location-hierarchy pairs that satisfy both conditions.
 
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -514,7 +524,7 @@ Feature: Relation Inference Resolution
         (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x1 isa place, has name "Waterloo";
@@ -534,7 +544,7 @@ Feature: Relation Inference Resolution
 
       (subordinate: $x3, superior: $x4) isa location-hierarchy;
       """
-    Given query
+    Given reasoning query
       """
       match (subordinate: $x, superior: $y) isa location-hierarchy;
       """
@@ -548,7 +558,7 @@ Feature: Relation Inference Resolution
   ######################
 
   Scenario: an inferred relation with one player in a role is not retrieved when the role appears twice in a match query
-    Given schema
+    Given reasoning schema
       """
       define
       rule employment-rule: when {
@@ -558,13 +568,13 @@ Feature: Relation Inference Resolution
         (employee: $p, employer: $c) isa employment;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa person;
       $c isa company;
       """
-    Given query
+    Given reasoning query
       """
       match (employee: $x, employee: $y) isa employment;
       """
@@ -574,7 +584,7 @@ Feature: Relation Inference Resolution
 
 
   Scenario: a relation with two roleplayers inferred by the same rule is retrieved when matching only one of the roles
-    Given schema
+    Given reasoning schema
       """
       define
       rule employment-rule: when {
@@ -584,13 +594,13 @@ Feature: Relation Inference Resolution
         (employee: $p, employer: $c) isa employment;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa person;
       $c isa company;
       """
-    Given query
+    Given reasoning query
       """
       match (employee: $x) isa employment;
       """
@@ -600,7 +610,7 @@ Feature: Relation Inference Resolution
 
 
   Scenario: when matching an inferred relation with repeated roles, answers contain all permutations of the roleplayers
-    Given schema
+    Given reasoning schema
       """
       define
       rule alice-bob-and-charlie-are-friends: when {
@@ -611,14 +621,14 @@ Feature: Relation Inference Resolution
         (friend: $a, friend: $b, friend: $c) isa friendship;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa person, has name "Alice";
       $y isa person, has name "Bob";
       $z isa person, has name "Charlie";
       """
-    Given query
+    Given reasoning query
       """
       match (friend: $a, friend: $b, friend: $c) isa friendship;
       """
@@ -634,7 +644,7 @@ Feature: Relation Inference Resolution
 
 
   Scenario: inferred relations can be filtered by shared attribute ownership
-    Given schema
+    Given reasoning schema
       """
       define
       selection sub relation, relates choice1, relates choice2;
@@ -651,7 +661,7 @@ Feature: Relation Inference Resolution
         (choice1: $x, choice2: $z) isa selection;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa person, has name "a";
@@ -661,7 +671,7 @@ Feature: Relation Inference Resolution
       (choice1: $x, choice2: $y) isa selection;
       (choice1: $y, choice2: $z) isa selection;
       """
-    Given query
+    Given reasoning query
       """
       match
         (choice1: $x, choice2: $y) isa selection;
@@ -672,7 +682,7 @@ Feature: Relation Inference Resolution
     Then verify answer size is: 3
     # Then verify answers are sound  # Fails
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match
         (choice1: $x, choice2: $y) isa selection;
@@ -699,7 +709,7 @@ Feature: Relation Inference Resolution
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario: the relation type constraint can be excluded from a reasoned match query
-    Given schema
+    Given reasoning schema
       """
       define
       rule transitive-location: when {
@@ -709,7 +719,7 @@ Feature: Relation Inference Resolution
         (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa place, has name "Turku Airport";
@@ -719,7 +729,7 @@ Feature: Relation Inference Resolution
       (subordinate: $x, superior: $y) isa location-hierarchy;
       (subordinate: $y, superior: $z) isa location-hierarchy;
       """
-    Given query
+    Given reasoning query
       """
       match
         $a isa place, has name "Turku Airport";
@@ -735,7 +745,7 @@ Feature: Relation Inference Resolution
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario: when the relation type is excluded in a reasoned match query, all valid roleplayer combinations are matches
-    Given schema
+    Given reasoning schema
       """
       define
       rule transitive-location: when {
@@ -745,7 +755,7 @@ Feature: Relation Inference Resolution
         (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa place, has name "Turku Airport";
@@ -755,7 +765,7 @@ Feature: Relation Inference Resolution
       (subordinate: $x, superior: $y) isa location-hierarchy;
       (subordinate: $y, superior: $z) isa location-hierarchy;
       """
-    Given query
+    Given reasoning query
       """
       match
         $a isa place, has name "Turku Airport";
@@ -765,7 +775,7 @@ Feature: Relation Inference Resolution
     Then verify answer size is: 1
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match
         $a isa place, has name "Turku Airport";
@@ -781,7 +791,7 @@ Feature: Relation Inference Resolution
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario: when the relation type is excluded in a reasoned match query, all types of relations match
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -802,7 +812,7 @@ Feature: Relation Inference Resolution
         (loc-sub: $x, loc-sup: $y) isa loc-hie;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa place, has name "Turku Airport";
@@ -812,7 +822,7 @@ Feature: Relation Inference Resolution
       (subordinate: $x, superior: $y) isa location-hierarchy;
       (subordinate: $y, superior: $z) isa location-hierarchy;
       """
-    Given query
+    Given reasoning query
       """
       match ($a, $b) isa relation;
       """
@@ -829,7 +839,7 @@ Feature: Relation Inference Resolution
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario: conjunctions of untyped reasoned relations are correctly resolved
-    Given schema
+    Given reasoning schema
       """
       define
       rule transitive-location: when {
@@ -839,7 +849,7 @@ Feature: Relation Inference Resolution
         (subordinate: $x, superior: $z) isa location-hierarchy;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa place, has name "Turku Airport";
@@ -849,7 +859,7 @@ Feature: Relation Inference Resolution
       (subordinate: $x, superior: $y) isa location-hierarchy;
       (subordinate: $y, superior: $z) isa location-hierarchy;
       """
-    Given query
+    Given reasoning query
       """
       match
         ($a, $b);
@@ -874,7 +884,7 @@ Feature: Relation Inference Resolution
 
 
   Scenario: a relation can be inferred based on a direct type
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -903,7 +913,7 @@ Feature: Relation Inference Resolution
           (derivedRelationRole: $x) isa directDerivedRelation;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa baseEntity;
@@ -914,21 +924,21 @@ Feature: Relation Inference Resolution
       (baseRole: $y) isa subRelation;
       (baseRole: $z) isa subSubRelation;
       """
-    Given query
+    Given reasoning query
       """
       match ($x) isa derivedRelation;
       """
     Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match ($x) isa! derivedRelation;
       """
     Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match ($x) isa directDerivedRelation;
       """

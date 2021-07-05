@@ -19,7 +19,7 @@
 Feature: Concept Inequality Resolution
 
   Background: Set up database
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -45,7 +45,7 @@ Feature: Concept Inequality Resolution
           (ball1:$x, ball2:$z) isa selection;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
 
@@ -62,7 +62,7 @@ Feature: Concept Inequality Resolution
 
 
   Scenario: a rule can be applied based on concept inequality
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -88,7 +88,7 @@ Feature: Concept Inequality Resolution
           (state: $st) isa holds;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
 
@@ -99,7 +99,8 @@ Feature: Concept Inequality Resolution
       (state: $s1) isa achieved;
       (state: $s2) isa achieved;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (state: $s) isa holds;
       """
@@ -113,7 +114,8 @@ Feature: Concept Inequality Resolution
 
 
   Scenario: inferred binary relations can be filtered by concept inequality of their roleplayers
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (ball1: $x, ball2: $y) isa selection;
       """
@@ -122,7 +124,7 @@ Feature: Concept Inequality Resolution
     Then verify answer size is: 9
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -134,7 +136,7 @@ Feature: Concept Inequality Resolution
     Then verify answers are sound
     Then verify answers are complete
     # verify that the answer pairs to the previous query have distinct names within each pair
-    Given query
+    Given reasoning query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -150,7 +152,8 @@ Feature: Concept Inequality Resolution
 
 
   Scenario: inferred binary relations can be filtered by inequality to a specific concept
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -185,7 +188,8 @@ Feature: Concept Inequality Resolution
   v     v
   y is not z
 
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -199,7 +203,7 @@ Feature: Concept Inequality Resolution
     Then verify answers are sound
     Then verify answers are complete
     # verify that $y and $z always have distinct names
-    Given query
+    Given reasoning query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -226,7 +230,8 @@ Feature: Concept Inequality Resolution
   /     v
   x is not z
 
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -237,7 +242,7 @@ Feature: Concept Inequality Resolution
     Then verify answers are sound
     Then verify answers are complete
     # verify that $y and $z always have distinct names
-    Given query
+    Given reasoning query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -268,7 +273,7 @@ Feature: Concept Inequality Resolution
   v         v
   y2 is not  z2
 
-    Given query
+    Given reasoning query
       """
       match
         (ball1: $x, ball2: $y1) isa selection;
@@ -280,7 +285,7 @@ Feature: Concept Inequality Resolution
     Then verify answer size is: 243
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match
         (ball1: $x, ball2: $y1) isa selection;
@@ -296,7 +301,7 @@ Feature: Concept Inequality Resolution
     Then verify answers are sound
     Then verify answers are complete
     # verify that $y1 and $z1 - as well as $y2 and $z2 - always have distinct names
-    Given query
+    Given reasoning query
       """
       match
         (ball1: $x, ball2: $y1) isa selection;
@@ -329,7 +334,7 @@ Feature: Concept Inequality Resolution
   v
   y     - is not - >  z2
 
-    Given query
+    Given reasoning query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -340,7 +345,7 @@ Feature: Concept Inequality Resolution
     Then verify answer size is: 81
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -355,7 +360,7 @@ Feature: Concept Inequality Resolution
     Then verify answers are sound
     Then verify answers are complete
     # verify that $y1 and $z1 - as well as $y2 and $z2 - always have distinct names
-    Given query
+    Given reasoning query
       """
       match
         (ball1: $x, ball2: $y) isa selection;
@@ -381,7 +386,7 @@ Feature: Concept Inequality Resolution
   # TODO: re-enable all steps once implicit attribute variables are resolvable
   # TODO: migrate to concept-inequality.feature
   Scenario: when restricting concept types of a pair of inferred attributes with '!=', the answers have distinct types
-    Given schema
+    Given reasoning schema
       """
       define
       soft-drink sub entity,
@@ -399,13 +404,13 @@ Feature: Concept Inequality Resolution
         $x has retailer 'Tesco';
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa person, has string-attribute "Tesco";
       $y isa soft-drink, has name "Tesco";
       """
-    Given query
+    Given reasoning query
       """
       match
         $x has $ax;
@@ -427,7 +432,7 @@ Feature: Concept Inequality Resolution
 
 
   Scenario: inferred attribute matches can be simultaneously restricted by both concept type and attribute value
-    Given schema
+    Given reasoning schema
       """
       define
       soft-drink sub entity,
@@ -459,7 +464,7 @@ Feature: Concept Inequality Resolution
         $y has $x;
       };
       """
-    Given data
+    Given reasoning data
     """
       insert
       $w isa person, has string-attribute "Ocado";
@@ -467,7 +472,7 @@ Feature: Concept Inequality Resolution
       $y isa soft-drink, has name "Sprite";
       $z "Ocado" isa retailer;
       """
-    Given query
+    Given reasoning query
       """
       match
         $value isa! retailer;

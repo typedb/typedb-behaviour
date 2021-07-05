@@ -22,7 +22,7 @@ Feature: Recursion Resolution
   This test feature verifies that so-called recursive inference works as intended.
 
   Background: Set up database
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -56,7 +56,7 @@ Feature: Recursion Resolution
 
 
   Scenario: the types of entities in inferred relations can be used to make further inferences
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -83,7 +83,7 @@ Feature: Recursion Resolution
         (big-subordinate: $x, big-superior: $y) isa big-location-hierarchy;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa big-place, has name "Mount Kilimanjaro";
@@ -93,7 +93,8 @@ Feature: Recursion Resolution
       (subordinate: $x, superior: $y) isa location-hierarchy;
       (subordinate: $y, superior: $z) isa location-hierarchy;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (subordinate: $x, superior: $y) isa big-location-hierarchy;
       """
@@ -103,7 +104,7 @@ Feature: Recursion Resolution
 
 
   Scenario: the types of inferred relations can be used to make further inferences
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -142,7 +143,7 @@ Feature: Recursion Resolution
           (role21:$x, role22:$z) isa relation2;
       };
       """
-    Given data
+    Given reasoning data
     """
       insert
 
@@ -161,7 +162,8 @@ Feature: Recursion Resolution
       (role21:$v, role22:$w) isa relation2;
       (role11:$w, role12:$q) isa relation1;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (role31: $x, role32: $y) isa relation3;
       """
@@ -171,7 +173,7 @@ Feature: Recursion Resolution
 
 
   Scenario: circular rule dependencies can be resolved
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -213,7 +215,7 @@ Feature: Recursion Resolution
           (role31:$x, role32:$y) isa relation3;
       };
       """
-    Given data
+    Given reasoning data
     """
       insert
 
@@ -223,7 +225,8 @@ Feature: Recursion Resolution
       (role11:$x, role12:$x) isa relation1;
       (role11:$x, role12:$y) isa relation1;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (role31: $x, role32: $y) isa relation3;
       """
@@ -231,7 +234,7 @@ Feature: Recursion Resolution
     Then verify answer size is: 2
     # Then verify answers are sound  # Fails
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match (role21: $x, role22: $y) isa relation2;
       """
@@ -243,7 +246,7 @@ Feature: Recursion Resolution
 
   # TODO: re-enable all steps when we have a solution for materialisation of infinite graphs (#75)
   Scenario: when resolution produces an infinite stream of answers, limiting the answer size allows it to terminate
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -261,14 +264,14 @@ Feature: Recursion Resolution
         (dreamer: $x, subject: $z) isa dream;
       };
       """
-    Given data without correctness verification
+    Given reasoning data
     """
       insert
       $x isa person, has name "Yusuf";
       # If only Yusuf didn't dream about himself...
       (dreamer: $x, subject: $x) isa dream;
       """
-    Given query
+    Given reasoning query
       """
       match $x isa dream; limit 10;
       """
@@ -277,7 +280,7 @@ Feature: Recursion Resolution
 
   # TODO: re-enable all steps when materialisation is possible (may be an infinite graph?) (#75)
   Scenario: when relations' and attributes' inferences are mutually recursive, the inferred concepts can be retrieved
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -332,7 +335,7 @@ Feature: Recursion Resolution
           $p has name 'fo';
       };
       """
-    Given data
+    Given reasoning data
     """
       insert
 
@@ -357,14 +360,14 @@ Feature: Recursion Resolution
       (supertype: $f, subtype: $rr) isa inheritance;
       (supertype: $f, subtype: $rr2) isa inheritance;
       """
-    Given query
+    Given reasoning query
       """
       match $p isa pair, has name 'ff';
       """
     Then verify answer size is: 16
     Then verify answers are sound
     # Then verify answers are complete  # Not yet supported
-    Given query
+    Given reasoning query
       """
       match $p isa pair;
       """
@@ -377,7 +380,7 @@ Feature: Recursion Resolution
 
   from Vieille - Recursive Axioms in Deductive Databases p. 192
 
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -417,7 +420,7 @@ Feature: Recursion Resolution
         (role-A: $x, role-B: $y) isa R;
       };
       """
-    Given data
+    Given reasoning data
     """
       insert
 
@@ -454,7 +457,7 @@ Feature: Recursion Resolution
       (role-A: $r, role-B: $s) isa H;
       (role-A: $u, role-B: $v) isa H;
       """
-    Given query
+    Given reasoning query
       """
       match
         ($x, $y) isa R;
@@ -479,7 +482,7 @@ Feature: Recursion Resolution
 
   from Bancilhon - An Amateur's Introduction to Recursive Query Processing Strategies p. 25
 
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -507,7 +510,7 @@ Feature: Recursion Resolution
         (ancestor: $x, descendant: $y) isa ancestorship;
       };
       """
-    Given data
+    Given reasoning data
     """
       insert
 
@@ -527,7 +530,7 @@ Feature: Recursion Resolution
       (parent: $aaa, child: $aaaa) isa parentship;
       (parent: $c, child: $ca) isa parentship;
       """
-    Given query
+    Given reasoning query
       """
       match
         (ancestor: $X, descendant: $Y) isa ancestorship;
@@ -545,7 +548,7 @@ Feature: Recursion Resolution
         {$name = 'aaa';} or {$name = 'aab';} or {$name = 'aaaa';};
       get $Y, $name;
       """
-    Given query
+    Given reasoning query
       """
       match
         ($X, $Y) isa ancestorship;
@@ -562,7 +565,7 @@ Feature: Recursion Resolution
         {$name = 'a';} or {$name = 'aaa';} or {$name = 'aab';} or {$name = 'aaaa';};
       get $Y;
       """
-    Given query
+    Given reasoning query
       """
       match (ancestor: $X, descendant: $Y) isa ancestorship;
       """
@@ -581,7 +584,7 @@ Feature: Recursion Resolution
         {$nameX = 'aaa';$nameY = 'aaaa';} or {$nameX = 'c';$nameY = 'ca';};
       get $X, $Y;
       """
-    Given query
+    Given reasoning query
       """
       match ($X, $Y) isa ancestorship;
       """
@@ -618,7 +621,7 @@ Feature: Recursion Resolution
 
   from Vieille - Recursive Axioms in Deductive Databases (QSQ approach) p. 186
 
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -650,7 +653,7 @@ Feature: Recursion Resolution
         (ancestor: $x, friend: $y) isa ancestor-friendship;
       };
       """
-    Given data
+    Given reasoning data
     """
       insert
 
@@ -665,7 +668,7 @@ Feature: Recursion Resolution
       (friend: $a, friend: $g) isa friendship;
       (friend: $c, friend: $d) isa friendship;
       """
-    Given query
+    Given reasoning query
       """
       match
         (ancestor: $X, friend: $Y) isa ancestor-friendship;
@@ -690,7 +693,7 @@ Feature: Recursion Resolution
         $X has name 'a';
       get $Y;
       """
-    Given query
+    Given reasoning query
       """
       match
         (ancestor: $X, friend: $Y) isa ancestor-friendship;
@@ -720,7 +723,7 @@ Feature: Recursion Resolution
 
   from Vieille - Recursive Query Processing: The power of logic p. 25
 
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -750,7 +753,7 @@ Feature: Recursion Resolution
         (SG-role: $x, SG-role: $y) isa SameGen;
       };
       """
-    Given data
+    Given reasoning data
     """
       insert
 
@@ -774,7 +777,7 @@ Feature: Recursion Resolution
       (parent: $g, child: $f) isa parentship;
       (parent: $h, child: $g) isa parentship;
       """
-    Given query
+    Given reasoning query
       """
       match
         ($x, $y) isa SameGen;
@@ -797,7 +800,7 @@ Feature: Recursion Resolution
 
   from Vieille - Recursive Query Processing: The power of logic p. 18
 
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -839,7 +842,7 @@ Feature: Recursion Resolution
         (roleA: $x, roleB: $y) isa TC;
       };
       """
-    Given data
+    Given reasoning data
     """
       insert
 
@@ -850,7 +853,7 @@ Feature: Recursion Resolution
       (roleA: $a1, roleB: $a) isa P;
       (roleA: $a2, roleB: $a1) isa P;
       """
-    Given query
+    Given reasoning query
       """
       match
         ($x, $y) isa N-TC;
@@ -877,7 +880,7 @@ Feature: Recursion Resolution
 
   and finds all pairs (from, to) such that 'to' is reachable from 'from'.
 
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -927,7 +930,7 @@ Feature: Recursion Resolution
           (from: $x, to: $y) isa unreachable;
       };
       """
-    Given data
+    Given reasoning data
     """
       insert
 
@@ -941,7 +944,7 @@ Feature: Recursion Resolution
       (from: $cc, to: $cc) isa link;
       (from: $cc, to: $dd) isa link;
       """
-    Given query
+    Given reasoning query
       """
       match (from: $x, to: $y) isa reachable;
       """
@@ -973,7 +976,7 @@ Feature: Recursion Resolution
 
   We find the set of vertices connected to 'a', which is in fact all of the vertices, including 'a' itself.
 
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -999,7 +1002,7 @@ Feature: Recursion Resolution
         (coordinate: $x, coordinate: $y) isa reachable;
       };
       """
-    Given data
+    Given reasoning data
     """
       insert
 
@@ -1013,7 +1016,7 @@ Feature: Recursion Resolution
       (coordinate: $c, coordinate: $c) isa link;
       (coordinate: $c, coordinate: $d) isa link;
       """
-    Given query
+    Given reasoning query
       """
       match
         ($x, $y) isa reachable;
@@ -1037,7 +1040,7 @@ Feature: Recursion Resolution
 
   test 6.6 from Cao p.76
 
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -1076,7 +1079,7 @@ Feature: Recursion Resolution
         (A: $x, B: $y) isa Sibling;
       };
       """
-    Given data
+    Given reasoning data
     """
       insert
 
@@ -1089,7 +1092,7 @@ Feature: Recursion Resolution
       (parent: $john, child: $peter) isa parentship;
       (parent: $john, child: $bill) isa parentship;
       """
-    Given query
+    Given reasoning query
       """
       match
         ($x, $y) isa SameGen;
@@ -1112,7 +1115,7 @@ Feature: Recursion Resolution
 
   from Abiteboul - Foundations of databases p. 312/Cao test 6.14 p. 89
 
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -1155,7 +1158,7 @@ Feature: Recursion Resolution
         (from: $x, to: $y) isa RevSG;
       };
       """
-    Given data
+    Given reasoning data
     """
       insert
 
@@ -1196,7 +1199,7 @@ Feature: Recursion Resolution
       (from: $i, to: $d) isa down;
       (from: $p, to: $k) isa down;
       """
-    Given query
+    Given reasoning query
       """
       match
         (from: $x, to: $y) isa RevSG;
@@ -1213,7 +1216,7 @@ Feature: Recursion Resolution
         {$name = 'b';} or {$name = 'c';} or {$name = 'd';};
       get $y;
       """
-    Given query
+    Given reasoning query
       """
       match (from: $x, to: $y) isa RevSG;
       """
@@ -1241,7 +1244,7 @@ Feature: Recursion Resolution
 
   Tests an 'n' x 'm' linear transitivity matrix (in this scenario, n = m = 5)
 
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -1298,7 +1301,7 @@ Feature: Recursion Resolution
         (from: $x, to: $y) isa P;
       };
       """
-    Given data
+    Given reasoning data
     # These insert statements can be procedurally generated based on 'm' and 'n', the width and height of the matrix
     """
       insert
@@ -1387,7 +1390,7 @@ Feature: Recursion Resolution
       (from: $b25, to: $b35) isa R2;
       (from: $b35, to: $b45) isa R2;
       """
-    Given query
+    Given reasoning query
       """
       match
         (from: $x, to: $y) isa Q1;
@@ -1408,7 +1411,7 @@ Feature: Recursion Resolution
 
   test 6.3 from Cao - Methods for evaluating queries to Horn knowledge bases in first-order logic, p 75
 
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -1441,7 +1444,7 @@ Feature: Recursion Resolution
         (from: $x, to: $y) isa P;
       };
       """
-    Given data
+    Given reasoning data
     """
       insert
 
@@ -1591,7 +1594,7 @@ Feature: Recursion Resolution
       (from: $b4_10, to: $b5_10) isa Q;
       (from: $b5_10, to: $b6_10) isa Q;
       """
-    Given query
+    Given reasoning query
       """
       match
         (from: $x, to: $y) isa P;
@@ -1611,7 +1614,7 @@ Feature: Recursion Resolution
 
   test 6.9 from Cao - Methods for evaluating queries to Horn knowledge bases in first-order logic p.82
 
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -1650,7 +1653,7 @@ Feature: Recursion Resolution
         (from: $x, to: $y) isa S;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
 
@@ -1740,7 +1743,7 @@ Feature: Recursion Resolution
       (from: $a5_3, to: $a5_4) isa Q;
       (from: $a5_4, to: $a5_5) isa Q;
       """
-    Given query
+    Given reasoning query
       """
       match
         (from: $x, to: $y) isa P;

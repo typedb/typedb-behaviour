@@ -19,7 +19,7 @@
 Feature: Value Predicate Resolution
 
   Background: Set up database
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -51,7 +51,7 @@ Feature: Value Predicate Resolution
     # each scenario specialises the schema further
 
   Scenario: a rule can infer an attribute ownership based on a value predicate
-    Given schema
+    Given reasoning schema
       """
       define
       rule tortoises-become-old-at-age-1-year: when {
@@ -61,12 +61,13 @@ Feature: Value Predicate Resolution
         $x has is-old true;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $se isa tortoise, has age 1;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match $x has is-old $r;
       """
@@ -77,7 +78,7 @@ Feature: Value Predicate Resolution
 
   # TODO: re-enable all steps once materialised database counts duplicate attributes only once
   Scenario Outline: when querying for inferred attributes with '<op>', the answers matching the predicate are returned
-    Given schema
+    Given reasoning schema
       """
       define
       lucky-number sub attribute, value long;
@@ -86,13 +87,14 @@ Feature: Value Predicate Resolution
       rule rule-1667: when { $x isa person; } then { $x has lucky-number 1667; };
       rule rule-1997: when { $x isa person; } then { $x has lucky-number 1997; };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa person;
       $y isa person;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         $x isa person, has lucky-number $n;
@@ -114,7 +116,7 @@ Feature: Value Predicate Resolution
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario Outline: when both sides of a '<op>' comparison are inferred attributes, all answers satisfy the predicate
-    Given schema
+    Given reasoning schema
       """
       define
       lucky-number sub attribute, value long;
@@ -122,13 +124,14 @@ Feature: Value Predicate Resolution
       rule rule-1337: when { $x isa person; } then { $x has lucky-number 1337; };
       rule rule-1667: when { $x isa person; } then { $x has lucky-number 1667; };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa person, has name "Alice";
       $y isa person, has name "Bob";
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         $x isa person, has name "Alice", has lucky-number $m;
@@ -151,7 +154,7 @@ Feature: Value Predicate Resolution
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario Outline: when comparing an inferred attribute and a bound variable with '<op>', answers satisfy the predicate
-    Given schema
+    Given reasoning schema
       """
       define
       lucky-number sub attribute, value long;
@@ -160,13 +163,14 @@ Feature: Value Predicate Resolution
       rule rule-1667: when { $x isa person; } then { $x has lucky-number 1667; };
       rule rule-1997: when { $x isa person; } then { $x has lucky-number 1997; };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa person, has name "Alice";
       $y isa person, has name "Bob";
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         $x isa person, has name "Alice", has lucky-number $m;
@@ -189,7 +193,7 @@ Feature: Value Predicate Resolution
 
 
   Scenario: inferred attributes can be matched by inequality to a variable that is equal to a specified value
-    Given schema
+    Given reasoning schema
       """
       define
       rule tesco-sells-all-soft-drinks: when {
@@ -206,14 +210,15 @@ Feature: Value Predicate Resolution
         $y has retailer 'Ocado';
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa soft-drink, has name "Fanta";
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         $x has retailer $r;
@@ -229,7 +234,7 @@ Feature: Value Predicate Resolution
 
 
   Scenario: inferred attributes can be matched by equality to a variable that is not equal to a specified value
-    Given schema
+    Given reasoning schema
       """
       define
       rule tesco-sells-all-soft-drinks: when {
@@ -246,14 +251,15 @@ Feature: Value Predicate Resolution
         $y has retailer 'Ocado';
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa soft-drink, has name "Fanta";
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         $x has retailer $r;
@@ -270,7 +276,7 @@ Feature: Value Predicate Resolution
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario: inferred attributes can be filtered to include only values that contain a specified string
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -292,11 +298,12 @@ Feature: Value Predicate Resolution
         $x has retailer 'Londis';
       };
       """
-    Given data
+    Given reasoning data
       """
       insert $x isa soft-drink, has name "Fanta";
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         $x has retailer $rx;
@@ -308,7 +315,7 @@ Feature: Value Predicate Resolution
 
 
   Scenario: inferred attributes can be matched by equality to an attribute that contains a specified string
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -330,13 +337,14 @@ Feature: Value Predicate Resolution
         $x has retailer 'Londis';
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa soft-drink, has name "Fanta";
       $y isa soft-drink, has name "Tango";
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         $x has retailer $rx;
@@ -360,7 +368,7 @@ Feature: Value Predicate Resolution
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario: inferred attributes can be matched by inequality to an attribute that contains a specified string
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -382,13 +390,14 @@ Feature: Value Predicate Resolution
         $x has retailer 'Londis';
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa soft-drink, has name "Fanta";
       $y isa soft-drink, has name "Tango";
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         $x has retailer $rx;
@@ -419,7 +428,7 @@ Feature: Value Predicate Resolution
 
 
   Scenario: in a rule, 'not { $x = $y; }' is the same as saying '$x != $y'
-    Given schema
+    Given reasoning schema
       """
       define
       rule tesco-sells-all-soft-drinks: when {
@@ -436,14 +445,15 @@ Feature: Value Predicate Resolution
         $y has retailer 'Ocado';
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa soft-drink, has name "Fanta";
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         $x has retailer $r;
@@ -455,7 +465,7 @@ Feature: Value Predicate Resolution
     Then verify answer size is: 2
     # Then verify answers are sound  # Fails
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match
         $x has retailer $r;
@@ -467,7 +477,7 @@ Feature: Value Predicate Resolution
 
 
   Scenario: in a rule, 'not { $x != $y; }' is the same as saying '$x = $y'
-    Given schema
+    Given reasoning schema
       """
       define
       rule tesco-sells-all-soft-drinks: when {
@@ -484,14 +494,15 @@ Feature: Value Predicate Resolution
         $y has retailer 'Ocado';
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa soft-drink, has name "Fanta";
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         $x has retailer $r;
@@ -503,7 +514,7 @@ Feature: Value Predicate Resolution
     Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match
         $x has retailer $r;
@@ -516,7 +527,7 @@ Feature: Value Predicate Resolution
 
   # TODO: move to negation.feature
   Scenario: a negation can filter out variables by equality to another variable with a specified value
-    Given schema
+    Given reasoning schema
       """
       define
       rule tesco-sells-all-soft-drinks: when {
@@ -533,14 +544,15 @@ Feature: Value Predicate Resolution
         $y has retailer 'Ocado';
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa soft-drink, has name "Fanta";
       $y isa soft-drink, has name "Tango";
       $r "Ocado" isa retailer;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         $x has retailer $r;
@@ -559,7 +571,7 @@ Feature: Value Predicate Resolution
 
   # TODO: migrate to concept-inequality.feature
   Scenario: when using 'not { $x is $y; }' over attributes of the same value, the answers have distinct types
-    Given schema
+    Given reasoning schema
       """
       define
       base-attribute sub attribute, value string, abstract;
@@ -577,13 +589,14 @@ Feature: Value Predicate Resolution
         $x has retailer "Tesco";
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa person, has base-string-attribute "Tesco";
       $y isa soft-drink, has brand-name "Tesco";
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         $x has base-attribute $ax;
@@ -603,7 +616,7 @@ Feature: Value Predicate Resolution
 
 
   Scenario: rules can divide entities into groups, linking each entity group to a specific concept by attribute value
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -647,7 +660,7 @@ Feature: Value Predicate Resolution
         (item: $x, category: $y3) isa price-classification;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
 
@@ -660,7 +673,7 @@ Feature: Value Predicate Resolution
       $p3 "low price" isa price-range;
       $p4 "cheap" isa price-range;
       """
-    Given query
+    Given reasoning query
       """
       match
         $x "not expensive" isa price-range;
@@ -669,7 +682,7 @@ Feature: Value Predicate Resolution
     Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match
         $x "low price" isa price-range;
@@ -678,7 +691,7 @@ Feature: Value Predicate Resolution
     Then verify answer size is: 1
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match
         $x "cheap" isa price-range;
@@ -687,7 +700,7 @@ Feature: Value Predicate Resolution
     Then verify answer size is: 1
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match
         $x "expensive" isa price-range;
@@ -696,7 +709,7 @@ Feature: Value Predicate Resolution
     Then verify answer size is: 1
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match
         $x isa price-range;
@@ -710,7 +723,7 @@ Feature: Value Predicate Resolution
 
   # TODO: re-enable all steps when resolvable (currently it takes too long to resolve) (#75)
   Scenario: attribute comparison can be used to classify concept pairs as predecessors and successors of each other
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -741,7 +754,7 @@ Feature: Value Predicate Resolution
           (predecessor:$s, successor:$r) isa message-succession;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
 
@@ -758,7 +771,7 @@ Feature: Value Predicate Resolution
       (original:$x, reply:$x4) isa reply-of;
       (original:$x, reply:$x5) isa reply-of;
       """
-    Given query
+    Given reasoning query
       """
       match (predecessor:$x1, successor:$x2) isa message-succession;
       """

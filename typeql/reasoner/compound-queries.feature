@@ -19,7 +19,7 @@
 Feature: Compound Query Resolution
 
   Background: Set up database
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -38,7 +38,7 @@ Feature: Compound Query Resolution
 
 
   Scenario: repeated concludable patterns within a query trigger rules from all pattern occurrences
-    Given schema
+    Given reasoning schema
       """
       define
       base-attribute sub attribute, value string, abstract;
@@ -55,13 +55,14 @@ Feature: Compound Query Resolution
         $x has retailer "Tesco";
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa person, has base-string-attribute "Tesco";
       $y isa soft-drink, has brand-name "Tesco";
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         $x has base-attribute $ax;

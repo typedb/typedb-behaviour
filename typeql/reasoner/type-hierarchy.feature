@@ -19,7 +19,7 @@
 Feature: Type Hierarchy Resolution
 
   Scenario: subtypes trigger rules based on their parents; parent types don't trigger rules based on their children
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -50,7 +50,7 @@ Feature: Type Hierarchy Resolution
           (actor:$x, writer:$y) isa film-production;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa child, has name "a";
@@ -64,7 +64,8 @@ Feature: Type Hierarchy Resolution
       (performer:$x, writer:$v) isa performance;  # child - child    -> satisfies rule
       (performer:$y, writer:$v) isa performance;  # person - child   -> doesn't satisfy rule
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         $x isa person;
@@ -75,7 +76,7 @@ Feature: Type Hierarchy Resolution
     Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match
         $x isa person;
@@ -86,7 +87,7 @@ Feature: Type Hierarchy Resolution
     Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match
         $x isa person;
@@ -97,7 +98,7 @@ Feature: Type Hierarchy Resolution
     Then verify answer size is: 1
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match
         $x isa person;
@@ -108,7 +109,7 @@ Feature: Type Hierarchy Resolution
     Then verify answer size is: 1
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match
         $x isa child;
@@ -119,7 +120,7 @@ Feature: Type Hierarchy Resolution
     Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match
         $x isa child;
@@ -133,7 +134,7 @@ Feature: Type Hierarchy Resolution
 
 
   Scenario: when matching different roles to those that are actually inferred, no answers are returned
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -157,7 +158,7 @@ Feature: Type Hierarchy Resolution
           (child: $x, mother: $y) isa large-family;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa person;
@@ -165,13 +166,14 @@ Feature: Type Hierarchy Resolution
       (child: $x, parent: $y) isa family;
       """
     # Matching a sibling of the actual role
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (child: $x, father: $y) isa large-family;
       """
     Then verify answer size is: 0
     # Matching two siblings when only one is present
-    Given query
+    Given reasoning query
       """
       match (mother: $x, father: $y) isa large-family;
       """
@@ -181,7 +183,7 @@ Feature: Type Hierarchy Resolution
 
 
   Scenario: when a sub-relation is inferred, it can be retrieved by matching its super-relation and sub-roles
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -211,7 +213,7 @@ Feature: Type Hierarchy Resolution
           (scifi-writer:$x, scifi-actor:$y) isa scifi-production;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa person;
@@ -219,7 +221,8 @@ Feature: Type Hierarchy Resolution
       (writer:$x, performer:$y) isa performance;
       """
     # sub-roles, super-relation
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (scifi-writer:$x, scifi-actor:$y) isa film-production;
       """
@@ -229,7 +232,7 @@ Feature: Type Hierarchy Resolution
 
 
   Scenario: when a sub-relation is inferred, it can be retrieved by matching its sub-relation and super-roles
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -259,7 +262,7 @@ Feature: Type Hierarchy Resolution
           (scifi-writer:$x, scifi-actor:$y) isa scifi-production;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa person;
@@ -267,7 +270,7 @@ Feature: Type Hierarchy Resolution
       (writer:$x, performer:$y) isa performance;
       """
     # super-roles, sub-relation
-    Given query
+    Given reasoning query
       """
       match (writer:$x, actor:$y) isa scifi-production;
       """
@@ -277,7 +280,7 @@ Feature: Type Hierarchy Resolution
 
 
   Scenario: when a sub-relation is inferred, it can be retrieved by matching its super-relation and super-roles
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -307,7 +310,7 @@ Feature: Type Hierarchy Resolution
           (scifi-writer:$x, scifi-actor:$y) isa scifi-production;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa person;
@@ -315,7 +318,7 @@ Feature: Type Hierarchy Resolution
       (writer:$x, performer:$y) isa performance;
       """
     # super-roles, super-relation
-    Given query
+    Given reasoning query
       """
       match (writer:$x, actor:$y) isa film-production;
       """
@@ -325,7 +328,7 @@ Feature: Type Hierarchy Resolution
 
 
   Scenario: when a rule is recursive, its inferences respect type hierarchies
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -364,7 +367,7 @@ Feature: Type Hierarchy Resolution
           (performer:$x, writer:$y) isa performance;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa child, has name "a";
@@ -378,7 +381,7 @@ Feature: Type Hierarchy Resolution
       (performer:$x, writer:$v) isa performance;  # child - child    -> satisfies rule
       (performer:$y, writer:$v) isa performance;  # person - child   -> doesn't satisfy rule
       """
-    Given query
+    Given reasoning query
       """
       match
         $x isa person;
@@ -389,7 +392,7 @@ Feature: Type Hierarchy Resolution
     Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match
         $x isa person;
@@ -400,7 +403,7 @@ Feature: Type Hierarchy Resolution
     Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match
         $x isa person;
@@ -411,7 +414,7 @@ Feature: Type Hierarchy Resolution
     Then verify answer size is: 1
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match
         $x isa person;
@@ -422,7 +425,7 @@ Feature: Type Hierarchy Resolution
     Then verify answer size is: 1
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match
         $x isa child;
@@ -433,7 +436,7 @@ Feature: Type Hierarchy Resolution
     Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match
         $x isa child;
@@ -447,7 +450,7 @@ Feature: Type Hierarchy Resolution
 
 
   Scenario: querying for a super-relation gives the same answer as querying for its inferred sub-relation
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -477,21 +480,21 @@ Feature: Type Hierarchy Resolution
           (parent-home-owner:$x, child-resident:$y) isa family-residence;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa person;
       $y isa person;
       (parent:$x, child:$y) isa family;
       """
-    Given query
+    Given reasoning query
       """
       match (home-owner: $x, resident: $y) isa residence;
       """
     Then verify answer size is: 1
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match
         (home-owner: $x, resident: $y) isa residence;

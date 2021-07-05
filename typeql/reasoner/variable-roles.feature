@@ -20,7 +20,7 @@
 Feature: Variable Role Resolution
 
   Background: Set up database
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -103,7 +103,7 @@ Feature: Variable Role Resolution
           (quat-role1:$x, quat-role2:$z1, quat-role3: $z2, quat-role4: $y) isa quaternary;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
 
@@ -134,14 +134,15 @@ Feature: Variable Role Resolution
 
 
   Scenario: when querying a binary relation, introducing a variable role doubles the answer size
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (role1: $a, role2: $b) isa binary-base;
       """
     Then verify answer size is: 9
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match (role1: $a, $r1: $b) isa binary-base;
       """
@@ -152,7 +153,8 @@ Feature: Variable Role Resolution
 
 
   Scenario: converting a fixed role to a variable role bound with 'type' does not modify the answer size
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (role1: $a, $r1: $b) isa binary-base;
       """
@@ -160,7 +162,7 @@ Feature: Variable Role Resolution
     Then verify answers are sound
     Then verify answers are complete
     # This query should be equivalent to the one above
-    Given query
+    Given reasoning query
       """
       match
         ($r1: $a, $r2: $b) isa binary-base;
@@ -173,14 +175,15 @@ Feature: Variable Role Resolution
 
 
   Scenario: when querying a binary relation, introducing a meta 'role' and a variable role triples the answer size
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (role1: $a, role2: $b) isa binary-base;
       """
     Then verify answer size is: 9
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match (role: $a, $r1: $b) isa binary-base;
       """
@@ -191,7 +194,8 @@ Feature: Variable Role Resolution
 
 
   Scenario: converting a fixed role to a variable bound with 'type role' (?)
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (role: $a, $r1: $b) isa binary-base;
       """
@@ -199,7 +203,7 @@ Feature: Variable Role Resolution
     Then verify answers are sound
     Then verify answers are complete
     # This query should be equivalent to the one above
-    Given query
+    Given reasoning query
       """
       match
         ($r1: $a, $r2: $b) isa binary-base;
@@ -212,7 +216,8 @@ Feature: Variable Role Resolution
 
 
   Scenario: converting a fixed role to a variable bound with 'sub role' (?)
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (role: $a, $r1: $b) isa binary-base;
       """
@@ -220,7 +225,7 @@ Feature: Variable Role Resolution
     Then verify answers are sound
     Then verify answers are complete
     # This query should be equivalent to the one above
-    Given query
+    Given reasoning query
       """
       match
         ($r1: $a, $r2: $b) isa binary-base;
@@ -233,7 +238,8 @@ Feature: Variable Role Resolution
 
 
   Scenario: when all other role variables are bound, introducing a meta 'role' doesn't affect the answer size
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         ($r1: $a, $r2: $b) isa binary-base;
@@ -245,7 +251,7 @@ Feature: Variable Role Resolution
     Then verify answers are sound
     Then verify answers are complete
     # This query is equivalent to the one above
-    Given query
+    Given reasoning query
       """
       match
         (role: $a, $r2: $b) isa binary-base;
@@ -257,14 +263,15 @@ Feature: Variable Role Resolution
 
 
   Scenario: when querying a binary relation, introducing two variable roles multiplies the answer size by 7
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (role1: $a, role2: $b) isa binary-base;
       """
     Then verify answer size is: 9
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match ($r1: $a, $r2: $b) isa binary-base;
       """
@@ -328,7 +335,7 @@ Feature: Variable Role Resolution
   #  }
 
   Scenario: variable roles are correctly mapped to answers for a ternary relation with 3 possible roleplayers
-    Given query
+    Given reasoning query
       """
       match
         (ternary-role1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
@@ -338,7 +345,7 @@ Feature: Variable Role Resolution
     Then verify answer size is: 63
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match (ternary-role1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
       """
@@ -346,7 +353,7 @@ Feature: Variable Role Resolution
     Then verify answer size is: 189
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match ($r1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
       """
@@ -370,7 +377,7 @@ Feature: Variable Role Resolution
 
 
   Scenario: variable roles are correctly mapped to answers for a quaternary relation with 3 possible roleplayers
-    Given query
+    Given reasoning query
       """
       match
         (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
@@ -380,7 +387,7 @@ Feature: Variable Role Resolution
     Then verify answer size is: 918
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
       """
@@ -388,7 +395,7 @@ Feature: Variable Role Resolution
     Then verify answer size is: 2754
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match ($r1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
       """
@@ -411,7 +418,7 @@ Feature: Variable Role Resolution
   # Note: This test uses the sub-relation 'quaternary' while the others use the super-relations '{n}-ary-base'.
   # If this test passes while others fail, there may be an inheritance-related issue.
   Scenario: variable roles are correctly mapped to answers for a quaternary relation with 2 possible roleplayers
-    Given query
+    Given reasoning query
       """
       match
         (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
@@ -421,7 +428,7 @@ Feature: Variable Role Resolution
     Then verify answer size is: 272
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
       """
@@ -429,7 +436,7 @@ Feature: Variable Role Resolution
     Then verify answer size is: 544
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match ($r1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
       """

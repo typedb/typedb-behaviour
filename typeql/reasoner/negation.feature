@@ -19,7 +19,7 @@
 Feature: Negation Resolution
 
   Background: Set up database
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -61,7 +61,7 @@ Feature: Negation Resolution
   # Negation is currently handled by Reasoner, even inside a match clause.
 
   Scenario: negation can check that an entity does not play a specified role in any relation
-    Given data
+    Given reasoning data
     """
       insert
       $x1 isa person;
@@ -73,12 +73,13 @@ Feature: Negation Resolution
       $e1 (employee: $x1, employer: $c) isa employment;
       $e2 (employee: $x2, employer: $c) isa employment;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match $x isa person;
       """
     Then verify answer size is: 5
-    Given query
+    Given reasoning query
       """
       match
         $x isa person;
@@ -90,7 +91,7 @@ Feature: Negation Resolution
 
 
   Scenario: negation can check that an entity does not play any role in any relation
-    Given data
+    Given reasoning data
       """
       insert
       $x1 isa person;
@@ -102,12 +103,13 @@ Feature: Negation Resolution
       $e1 (employee: $x1, employer: $c) isa employment;
       $e2 (employee: $x2, employer: $c) isa employment;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match $x isa person;
       """
     Then verify answer size is: 5
-    Given query
+    Given reasoning query
       """
       match
         $x isa person;
@@ -119,7 +121,7 @@ Feature: Negation Resolution
 
 
   Scenario: negation can check that an entity does not own any instance of a specific attribute type
-    Given data
+    Given reasoning data
       """
       insert
       $x1 isa person, has name "asdf";
@@ -128,12 +130,13 @@ Feature: Negation Resolution
       $x4 isa person, has name "bleh";
       $x5 isa person;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match $x isa person;
       """
     Then verify answer size is: 5
-    Given query
+    Given reasoning query
       """
       match
         $x isa person;
@@ -145,7 +148,7 @@ Feature: Negation Resolution
 
 
   Scenario: negation can check that an entity does not own a particular attribute
-    Given data
+    Given reasoning data
       """
       insert
       $x1 isa person, has name "Bob";
@@ -154,12 +157,13 @@ Feature: Negation Resolution
       $x4 isa person, has name "bleh";
       $x5 isa person;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match $x isa person;
       """
     Then verify answer size is: 5
-    Given query
+    Given reasoning query
       """
       match
         $x isa person;
@@ -171,14 +175,15 @@ Feature: Negation Resolution
 
 
   Scenario: negation can check that an entity owns an attribute which is not equal to a specific value
-    Given data
+    Given reasoning data
     """
       insert
       $x isa person, has age 10;
       $y isa person, has age 20;
       $z isa person;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
     """
       match
         $x has age $y;
@@ -194,7 +199,7 @@ Feature: Negation Resolution
 
 
   Scenario: negation can check that an entity owns an attribute that is not of a specified type
-    Given data
+    Given reasoning data
     """
       insert
       $x isa person, has age 10, has name "Bob";
@@ -202,7 +207,8 @@ Feature: Negation Resolution
       $z isa person;
       $w isa person, has name "Charlie";
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
     """
       match
         $x has attribute $y;
@@ -216,12 +222,12 @@ Feature: Negation Resolution
 
 
   Scenario: negation can filter out an unwanted entity type from part of a chain of matched relations
-    Given schema
+    Given reasoning schema
       """
       define
       dog sub entity, plays friendship:friend;
       """
-    Given data
+    Given reasoning data
       """
       insert
       $a isa person;
@@ -235,7 +241,8 @@ Feature: Negation Resolution
       (friend: $c, friend: $d) isa friendship;
       (friend: $d, friend: $z) isa friendship;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
     """
       match
         (friend: $a, friend: $b) isa friendship;
@@ -248,7 +255,7 @@ Feature: Negation Resolution
     # dcba, dcbc, dcdc, dcdz, dzdc, dzdz,
     # zdcb, zdcd, zdzd
     Then verify answer size is: 24
-    Given query
+    Given reasoning query
       """
       match
         (friend: $a, friend: $b) isa friendship;
@@ -269,12 +276,12 @@ Feature: Negation Resolution
 
 
   Scenario: negation can filter out an unwanted connection between two concepts from a chain of matched relations
-    Given schema
+    Given reasoning schema
       """
       define
       dog sub entity, owns name, plays friendship:friend;
       """
-    Given data
+    Given reasoning data
       """
       insert
       $a isa person, has name "a";
@@ -288,7 +295,8 @@ Feature: Negation Resolution
       (friend: $c, friend: $d) isa friendship;
       (friend: $d, friend: $z) isa friendship;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
     """
       match
         (friend: $a, friend: $b) isa friendship;
@@ -300,7 +308,7 @@ Feature: Negation Resolution
     # dcb, dcd, dzd
     # zdc, zdz
     Then verify answer size is: 14
-    Given query
+    Given reasoning query
       """
       match
         (friend: $a, friend: $b) isa friendship;
@@ -321,7 +329,7 @@ Feature: Negation Resolution
 
 
   Scenario: negation can filter out an unwanted role from a variable role query
-    Given data
+    Given reasoning data
     """
       insert
 
@@ -329,7 +337,8 @@ Feature: Negation Resolution
       $c isa company;
       (employee: $x, employer: $c) isa employment;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
     """
       match ($r1: $x) isa employment;
       """
@@ -339,7 +348,7 @@ Feature: Negation Resolution
     # role     | COM |
     # employer | COM |
     Then verify answer size is: 4
-    Given query
+    Given reasoning query
       """
       match
         ($r1: $x) isa employment;
@@ -349,7 +358,7 @@ Feature: Negation Resolution
 
 
   Scenario: a negated statement with multiple properties can be re-written as a negation of multiple statements
-    Given data
+    Given reasoning data
     """
       insert
 
@@ -359,12 +368,12 @@ Feature: Negation Resolution
       $w isa person, has name "Winnie";
       $c isa company, has name "Pizza Express";
       """
-    Given query
+    Given reasoning query
       """
       match $x has attribute $r;
       """
     Then verify answer size is: 8
-    Given query
+    Given reasoning query
       """
       match
         $x has attribute $r;
@@ -386,7 +395,7 @@ Feature: Negation Resolution
 
 
   Scenario: a query can contain multiple negations
-    Given data
+    Given reasoning data
       """
       insert
 
@@ -396,19 +405,19 @@ Feature: Negation Resolution
       $w isa person, has name "Winnie";
       $c isa company, has name "Pizza Express";
       """
-    Given query
+    Given reasoning query
       """
       match $x has attribute $r;
       """
     Then verify answer size is: 8
-    Given query
+    Given reasoning query
       """
       match
         $x has attribute $r;
         not { $x isa company; };
       """
     Then verify answer size is: 7
-    Given query
+    Given reasoning query
       """
       match
         $x has attribute $r;
@@ -416,7 +425,7 @@ Feature: Negation Resolution
         not { $x has name "Tim"; };
       """
     Then verify answer size is: 3
-    Given query
+    Given reasoning query
       """
       match
         $x has attribute $r;
@@ -428,12 +437,12 @@ Feature: Negation Resolution
 
 
   Scenario: negation can exclude entities of specific types that play roles in a specific relation
-    Given schema
+    Given reasoning schema
       """
       define
       pizza-company sub company;
       """
-    Given data
+    Given reasoning data
       """
       insert
 
@@ -447,12 +456,12 @@ Feature: Negation Resolution
       (employee: $x, employer: $c) isa employment;
       (employee: $y, employer: $d) isa employment;
       """
-    Given query
+    Given reasoning query
       """
       match $x isa person;
       """
     Then verify answer size is: 4
-    Given query
+    Given reasoning query
       """
       match
         $x isa person;
@@ -465,12 +474,12 @@ Feature: Negation Resolution
 
 
   Scenario: when using negation to exclude entities of specific types, their subtypes are also excluded
-    Given schema
+    Given reasoning schema
       """
       define
       pizza-company sub company;
       """
-    Given data
+    Given reasoning data
       """
       insert
 
@@ -484,7 +493,7 @@ Feature: Negation Resolution
       (employee: $x, employer: $c) isa employment;
       (employee: $y, employer: $d) isa employment;
       """
-    Given query
+    Given reasoning query
       """
       match
         $x isa person;
@@ -497,12 +506,12 @@ Feature: Negation Resolution
 
 
   Scenario: answers can be returned even if a statement in a conjunction in a negation is identical to a non-negated one
-    Given schema
+    Given reasoning schema
       """
       define
       pizza-company sub company;
       """
-    Given data
+    Given reasoning data
     """
       insert
 
@@ -517,7 +526,7 @@ Feature: Negation Resolution
       (employee: $y, employer: $d) isa employment;
       """
     # We match $x isa person and not {$x isa person; ...}; answers can still be returned because of the conjunction
-    Given query
+    Given reasoning query
     """
       match
         $x isa person;
@@ -536,7 +545,7 @@ Feature: Negation Resolution
 
   # TODO: re-enable all steps when 3-hop transitivity is resolvable
   Scenario: negation of a transitive relation is resolvable
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -552,7 +561,7 @@ Feature: Negation Resolution
           (superior: $a, subordinate: $c) isa location-hierarchy;
       };
       """
-    Given data
+    Given reasoning data
     """
       insert
       $ar isa area, has name "King's Cross";
@@ -563,14 +572,14 @@ Feature: Negation Resolution
       (superior: $cntry, subordinate: $cit) isa location-hierarchy;
       (superior: $cit, subordinate: $ar) isa location-hierarchy;
       """
-    Given query
+    Given reasoning query
       """
       match
         $continent isa continent;
         $area isa area;
       """
     Then verify answer size is: 1
-    Given query
+    Given reasoning query
       """
       match
         $continent isa continent;
@@ -583,7 +592,7 @@ Feature: Negation Resolution
 
 
   Scenario: negation can exclude a particular entity from a matched transitive relation
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -627,7 +636,7 @@ Feature: Negation Resolution
           (from: $x, to: $y) isa indirect-link;
       };
       """
-    Given data
+    Given reasoning data
     """
       insert
 
@@ -641,7 +650,7 @@ Feature: Negation Resolution
       (from: $cc, to: $cc) isa link;
       (from: $cc, to: $dd) isa link;
       """
-    Given query
+    Given reasoning query
     """
       match
         (from: $x, to: $y) isa indirect-link;
@@ -663,7 +672,7 @@ Feature: Negation Resolution
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario: a rule can be triggered based on not having a particular attribute
-    Given schema
+    Given reasoning schema
       """
       define
       person owns age;
@@ -675,20 +684,20 @@ Feature: Negation Resolution
         $x has name "Not Ten";
       };
       """
-    Given data
+    Given reasoning data
     """
       insert
       $x isa person, has age 10;
       $y isa person, has age 20;
       """
-    Given query
+    Given reasoning query
       """
       match $x has name "Not Ten", has age 20;
       """
     Then verify answer size is: 1
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match $x has name "Not Ten", has age 10;
       """
@@ -698,7 +707,7 @@ Feature: Negation Resolution
 
 
   Scenario: a rule can be triggered based on not having any instances of a specified attribute type
-    Given schema
+    Given reasoning schema
       """
       define
       person owns age;
@@ -710,21 +719,21 @@ Feature: Negation Resolution
         $x has name "No Age";
       };
       """
-    Given data
+    Given reasoning data
     """
       insert
       $x isa person, has age 10;
       $y isa person, has age 20;
       $z isa person;
       """
-    Given query
+    Given reasoning query
       """
       match $x isa person;
       """
     Then verify answer size is: 3
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match $x isa person, has name "No Age";
       """
@@ -734,7 +743,7 @@ Feature: Negation Resolution
 
 
   Scenario: when negating a conjunction, all the conjuction statements must be met for the negation to be met
-    Given schema
+    Given reasoning schema
       """
       define
       country sub entity, owns name, plays company-country:country;
@@ -754,7 +763,7 @@ Feature: Negation Resolution
         (not-in-uk: $x) isa non-uk;
       };
       """
-    Given data
+    Given reasoning data
     """
       insert
       $a isa company, has name "a";
@@ -769,12 +778,12 @@ Feature: Negation Resolution
       (country: $e, company: $b) isa company-country;
       (country: $f, company: $c) isa company-country;
       """
-    Given query
+    Given reasoning query
       """
       match $x isa company;
       """
     Then verify answer size is: 4
-    Given query
+    Given reasoning query
       """
       match
         $x isa company;
@@ -801,7 +810,7 @@ Feature: Negation Resolution
 
 
   Scenario: when nesting multiple negations and conjunctions, they are correctly resolved
-    Given schema
+    Given reasoning schema
       """
       define
       country sub entity, owns name, plays company-country:country;
@@ -821,7 +830,7 @@ Feature: Negation Resolution
         (not-in-uk: $x) isa non-uk;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $a isa company, has name "a";
@@ -836,7 +845,7 @@ Feature: Negation Resolution
       (country: $e, company: $b) isa company-country;
       (country: $f, company: $c) isa company-country;
       """
-    Given query
+    Given reasoning query
       """
       match
         $x isa company;
@@ -868,7 +877,7 @@ Feature: Negation Resolution
   As a result, if it happens that a negated query has multiple answers and is visited more than a single time
   - because of the admissibility check, answers might be missed.
 
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -931,7 +940,7 @@ Feature: Negation Resolution
           (diagnosed-fault: $flt, parent-session: $ts) isa diagnosis;
       };
       """
-    Given data
+    Given reasoning data
     """
       insert
       $sesh isa session;
@@ -948,7 +957,7 @@ Feature: Negation Resolution
       (identified-fault: $f1, identifying-question: $q1) isa fault-identification;
       (identified-fault: $f2, identifying-question: $q2) isa fault-identification;
       """
-    Given query
+    Given reasoning query
       """
       match (diagnosed-fault: $flt, parent-session: $ts) isa diagnosis;
       """
@@ -959,7 +968,7 @@ Feature: Negation Resolution
 
 
   Scenario: when evaluating negation blocks, completion of incomplete queries is not acknowledged
-    Given schema
+    Given reasoning schema
       """
       define
       resource sub attribute, value string;
@@ -1001,7 +1010,7 @@ Feature: Negation Resolution
           (role-3: $y, role-4: $x) isa relation-5;
       };
       """
-    Given data
+    Given reasoning data
     """
       insert
       $d isa entity-1, has resource "d";
@@ -1022,7 +1031,7 @@ Feature: Negation Resolution
 
       (symmetric-role: $c, symmetric-role: $b ) isa symmetric-relation;
       """
-    Given query
+    Given reasoning query
       """
       match (role-3: $x, role-4: $y) isa relation-4;
       """
@@ -1035,7 +1044,7 @@ Feature: Negation Resolution
   # TODO: Re-enable once fixed
   @ignore
   Scenario: a rule can use negation to exclude things that have any transitive relations to a specific concept
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -1079,7 +1088,7 @@ Feature: Negation Resolution
           (from: $x, to: $y) isa unreachable;
       };
       """
-    Given data
+    Given reasoning data
     """
       insert
 
@@ -1099,7 +1108,7 @@ Feature: Negation Resolution
       (from: $ee, to: $ff) isa link;
       (from: $ff, to: $gg) isa link;
       """
-    Given query
+    Given reasoning query
     """
       match
         (from: $x, to: $y) isa unreachable;

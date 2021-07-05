@@ -19,7 +19,7 @@
 Feature: Attribute Attachment Resolution
 
   Background: Set up database
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -52,7 +52,7 @@ Feature: Attribute Attachment Resolution
 
 
   Scenario: when a rule copies an attribute from one entity to another, the existing attribute instance is reused
-    Given schema
+    Given reasoning schema
       """
       define
       rule transfer-string-attribute-to-other-people: when {
@@ -62,20 +62,21 @@ Feature: Attribute Attachment Resolution
         $y has $r1;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $geX isa person, has string-attribute "banana";
       $geY isa person;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match $x isa person, has string-attribute $y;
       """
     Then verify answer size is: 2
     # Then verify answers are sound  # Fails
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match $x isa string-attribute;
       """
@@ -85,7 +86,7 @@ Feature: Attribute Attachment Resolution
 
 
   Scenario: when the same attribute is inferred on an entity and relation, both owners are correctly retrieved
-    Given schema
+    Given reasoning schema
       """
       define
       rule transfer-string-attribute-to-other-people: when {
@@ -102,14 +103,15 @@ Feature: Attribute Attachment Resolution
         $z has $y;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $geX isa person, has string-attribute "banana";
       $geY isa person;
       (leader:$geX, member:$geX) isa team;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match $x has string-attribute $y;
       """
@@ -119,7 +121,7 @@ Feature: Attribute Attachment Resolution
 
 
   Scenario: a rule can infer an attribute value that did not previously exist in the graph
-    Given schema
+    Given reasoning schema
       """
       define
       rule tesco-sells-all-soft-drinks: when {
@@ -136,28 +138,29 @@ Feature: Attribute Attachment Resolution
         $y has retailer 'Ocado';
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $aeX isa soft-drink;
       $aeY isa soft-drink;
       $r "Ocado" isa retailer;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match $x has retailer 'Ocado';
       """
     Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match $x has retailer $r;
       """
     Then verify answer size is: 4
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match $x has retailer 'Tesco';
       """
@@ -167,7 +170,7 @@ Feature: Attribute Attachment Resolution
 
 
   Scenario: a rule can make a thing own an attribute that had no prior owners
-    Given schema
+    Given reasoning schema
       """
       define
       rule if-ocado-exists-it-sells-all-soft-drinks: when {
@@ -178,14 +181,15 @@ Feature: Attribute Attachment Resolution
         $y has $x;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $aeX isa soft-drink;
       $aeY isa soft-drink;
       $r "Ocado" isa retailer;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match $x isa soft-drink, has retailer 'Ocado';
       """
@@ -195,7 +199,7 @@ Feature: Attribute Attachment Resolution
 
 
   Scenario: Querying for anonymous attributes with predicates finds the correct answers
-    Given schema
+    Given reasoning schema
       """
       define
       rule people-have-a-specific-age: when {
@@ -204,12 +208,13 @@ Feature: Attribute Attachment Resolution
         $x has age 10;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $geY isa person;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match $x has age > 20;
       """
@@ -217,7 +222,7 @@ Feature: Attribute Attachment Resolution
     Then verify answers are sound
     Then verify answers are complete
 
-    Given query
+    Given reasoning query
       """
       match $x has age > 5;
       """

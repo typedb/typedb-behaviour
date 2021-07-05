@@ -19,7 +19,7 @@
 Feature: Schema Query Resolution (Variable Types)
 
   Background: Set up database
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -54,7 +54,7 @@ Feature: Schema Query Resolution (Variable Types)
 
   # TODO: re-enable all steps once schema queries are resolvable (#75)
   Scenario: all instances and their types can be retrieved
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -71,30 +71,31 @@ Feature: Schema Query Resolution (Variable Types)
         (friend: $x, friend: $y) isa friendship;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa person;
       $y isa person;
       $z isa person;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match $x isa entity;
       """
     Then verify answer size is: 3
-    Given query
+    Given reasoning query
       """
       match $x isa relation;
       """
     # (xx, yy, zz, xy, xz, yz)
     Then verify answer size is: 6
-    Given query
+    Given reasoning query
       """
       match $x isa attribute;
       """
     Then verify answer size is: 1
-    Given query
+    Given reasoning query
       """
       match $x isa $type;
       """
@@ -109,7 +110,7 @@ Feature: Schema Query Resolution (Variable Types)
 
   # TODO: re-enable all steps once schema queries are resolvable (#75)
   Scenario: all relations and their types can be retrieved
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -120,20 +121,21 @@ Feature: Schema Query Resolution (Variable Types)
         (friend: $x, friend: $y) isa friendship;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa person, has name "Annette";
       $y isa person, has name "Richard";
       $z isa person, has name "Rupert";
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match ($u, $v) isa relation;
       """
     # (xx, yy, zz, xy, xz, yz, yx, zx, zy)
     Then verify answer size is: 9
-    Given query
+    Given reasoning query
       """
       match ($u, $v) isa $type;
       """
@@ -145,7 +147,7 @@ Feature: Schema Query Resolution (Variable Types)
 
   # TODO: re-enable all steps once schema queries are resolvable (#75)
   Scenario: all inferred instances of types that can own a given attribute type can be retrieved
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -179,20 +181,21 @@ Feature: Schema Query Resolution (Variable Types)
         (resident: $x) isa residency;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa person, has name "Sharon";
       $y isa person, has name "Tobias";
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match $x isa relation;
       """
     Then verify answer size is: 6
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match
         $x isa $type;
@@ -207,7 +210,7 @@ Feature: Schema Query Resolution (Variable Types)
 
   # TODO: re-enable all steps once schema queries are resolvable (#75)
   Scenario: all inferred instances of types that are subtypes of a given type can be retrieved
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -223,20 +226,21 @@ Feature: Schema Query Resolution (Variable Types)
         (employee: $x) isa employment;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa person, has name "Annette";
       $y isa person, has name "Richard";
       $z isa person, has name "Rupert";
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match $x isa relation;
       """
     # 3 friendships, 3 employments
     Then verify answer size is: 6
-    Given query
+    Given reasoning query
       """
       match
         $x isa $type;
@@ -250,7 +254,7 @@ Feature: Schema Query Resolution (Variable Types)
 
   # TODO: re-enable all steps once schema queries are resolvable (#75)
   Scenario: all inferred instances of types that can play a given role can be retrieved
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -284,20 +288,21 @@ Feature: Schema Query Resolution (Variable Types)
         (resident: $x) isa residency;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa person, has name "Sharon";
       $y isa person, has name "Tobias";
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match $x isa relation;
       """
     Then verify answer size is: 6
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match
         $x isa $type;
@@ -316,7 +321,7 @@ Feature: Schema Query Resolution (Variable Types)
 
   # TODO: re-enable all steps once schema queries are resolvable (#75)
   Scenario: all roleplayers and their types can be retrieved from a relation
-    Given schema
+    Given reasoning schema
       """
       define
 
@@ -330,7 +335,7 @@ Feature: Schema Query Resolution (Variable Types)
         (employee: $y, employer: $x) isa employment;
       };
       """
-    Given data
+    Given reasoning data
       """
       insert
       $x isa company, has name "Armed Forces";
@@ -338,14 +343,15 @@ Feature: Schema Query Resolution (Variable Types)
       $z isa colonel;
       $w isa colonel;
       """
-    Given query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (employee: $x, employer: $y) isa employment;
       """
     Then verify answer size is: 3
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match
         (employee: $x, employer: $y) isa employment;
@@ -355,7 +361,7 @@ Feature: Schema Query Resolution (Variable Types)
     Then verify answer size is: 15
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match
         ($x, $y) isa employment;
@@ -369,14 +375,14 @@ Feature: Schema Query Resolution (Variable Types)
 
 
   Scenario: entity pairs can be matched based on the entity type they are related to
-    Given schema
+    Given reasoning schema
       """
       define
 
       retail-company sub company;
       finance-company sub company;
       """
-    Given data
+    Given reasoning data
       """
       insert
 
@@ -395,7 +401,7 @@ Feature: Schema Query Resolution (Variable Types)
       (employee: $s3, employer: $c2) isa employment;
       (employee: $s4, employer: $c2prime) isa employment;
       """
-    Given query
+    Given reasoning query
       """
       match
         $x isa person;
@@ -412,7 +418,7 @@ Feature: Schema Query Resolution (Variable Types)
     Then verify answer size is: 12
     Then verify answers are sound
     Then verify answers are complete
-    Given query
+    Given reasoning query
       """
       match
         $x isa person;
