@@ -673,6 +673,7 @@ Feature: Value Predicate Resolution
       $p3 "low price" isa price-range;
       $p4 "cheap" isa price-range;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match
@@ -771,6 +772,7 @@ Feature: Value Predicate Resolution
       (original:$x, reply:$x4) isa reply-of;
       (original:$x, reply:$x5) isa reply-of;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match (predecessor:$x1, successor:$x2) isa message-succession;

@@ -368,6 +368,7 @@ Feature: Negation Resolution
       $w isa person, has name "Winnie";
       $c isa company, has name "Pizza Express";
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match $x has attribute $r;
@@ -405,6 +406,7 @@ Feature: Negation Resolution
       $w isa person, has name "Winnie";
       $c isa company, has name "Pizza Express";
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match $x has attribute $r;
@@ -456,6 +458,7 @@ Feature: Negation Resolution
       (employee: $x, employer: $c) isa employment;
       (employee: $y, employer: $d) isa employment;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match $x isa person;
@@ -493,6 +496,7 @@ Feature: Negation Resolution
       (employee: $x, employer: $c) isa employment;
       (employee: $y, employer: $d) isa employment;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match
@@ -572,6 +576,7 @@ Feature: Negation Resolution
       (superior: $cntry, subordinate: $cit) isa location-hierarchy;
       (superior: $cit, subordinate: $ar) isa location-hierarchy;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match
@@ -650,6 +655,7 @@ Feature: Negation Resolution
       (from: $cc, to: $cc) isa link;
       (from: $cc, to: $dd) isa link;
       """
+    Given verifier is initialised
     Given reasoning query
     """
       match
@@ -690,6 +696,7 @@ Feature: Negation Resolution
       $x isa person, has age 10;
       $y isa person, has age 20;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match $x has name "Not Ten", has age 20;
@@ -726,6 +733,7 @@ Feature: Negation Resolution
       $y isa person, has age 20;
       $z isa person;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match $x isa person;
@@ -778,6 +786,7 @@ Feature: Negation Resolution
       (country: $e, company: $b) isa company-country;
       (country: $f, company: $c) isa company-country;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match $x isa company;
@@ -845,6 +854,7 @@ Feature: Negation Resolution
       (country: $e, company: $b) isa company-country;
       (country: $f, company: $c) isa company-country;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match
@@ -957,6 +967,7 @@ Feature: Negation Resolution
       (identified-fault: $f1, identifying-question: $q1) isa fault-identification;
       (identified-fault: $f2, identifying-question: $q2) isa fault-identification;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match (diagnosed-fault: $flt, parent-session: $ts) isa diagnosis;
@@ -1031,6 +1042,7 @@ Feature: Negation Resolution
 
       (symmetric-role: $c, symmetric-role: $b ) isa symmetric-relation;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match (role-3: $x, role-4: $y) isa relation-4;
@@ -1108,6 +1120,7 @@ Feature: Negation Resolution
       (from: $ee, to: $ff) isa link;
       (from: $ff, to: $gg) isa link;
       """
+    Given verifier is initialised
     Given reasoning query
     """
       match

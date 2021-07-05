@@ -859,6 +859,7 @@ Feature: Recursion Resolution
       (roleA: $a1, roleB: $a) isa P;
       (roleA: $a2, roleB: $a1) isa P;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match
@@ -950,6 +951,7 @@ Feature: Recursion Resolution
       (from: $cc, to: $cc) isa link;
       (from: $cc, to: $dd) isa link;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match (from: $x, to: $y) isa reachable;
@@ -1022,6 +1024,7 @@ Feature: Recursion Resolution
       (coordinate: $c, coordinate: $c) isa link;
       (coordinate: $c, coordinate: $d) isa link;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match
@@ -1098,6 +1101,7 @@ Feature: Recursion Resolution
       (parent: $john, child: $peter) isa parentship;
       (parent: $john, child: $bill) isa parentship;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match
@@ -1205,6 +1209,7 @@ Feature: Recursion Resolution
       (from: $i, to: $d) isa down;
       (from: $p, to: $k) isa down;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match
@@ -1396,6 +1401,7 @@ Feature: Recursion Resolution
       (from: $b25, to: $b35) isa R2;
       (from: $b35, to: $b45) isa R2;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match
@@ -1600,6 +1606,7 @@ Feature: Recursion Resolution
       (from: $b4_10, to: $b5_10) isa Q;
       (from: $b5_10, to: $b6_10) isa Q;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match
@@ -1749,6 +1756,7 @@ Feature: Recursion Resolution
       (from: $a5_3, to: $a5_4) isa Q;
       (from: $a5_4, to: $a5_5) isa Q;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match

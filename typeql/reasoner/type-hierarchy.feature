@@ -270,6 +270,7 @@ Feature: Type Hierarchy Resolution
       (writer:$x, performer:$y) isa performance;
       """
     # super-roles, sub-relation
+    Given verifier is initialised
     Given reasoning query
       """
       match (writer:$x, actor:$y) isa scifi-production;
@@ -318,6 +319,7 @@ Feature: Type Hierarchy Resolution
       (writer:$x, performer:$y) isa performance;
       """
     # super-roles, super-relation
+    Given verifier is initialised
     Given reasoning query
       """
       match (writer:$x, actor:$y) isa film-production;
@@ -381,6 +383,7 @@ Feature: Type Hierarchy Resolution
       (performer:$x, writer:$v) isa performance;  # child - child    -> satisfies rule
       (performer:$y, writer:$v) isa performance;  # person - child   -> doesn't satisfy rule
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match
@@ -487,6 +490,7 @@ Feature: Type Hierarchy Resolution
       $y isa person;
       (parent:$x, child:$y) isa family;
       """
+    Given verifier is initialised
     Given reasoning query
       """
       match (home-owner: $x, resident: $y) isa residence;
