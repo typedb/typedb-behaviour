@@ -99,8 +99,8 @@ Feature: Recursion Resolution
       match (subordinate: $x, superior: $y) isa big-location-hierarchy;
       """
     Then verify answer size is: 1
-     Then verify answers are sound
-     Then verify answers are complete
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: the types of inferred relations can be used to make further inferences
