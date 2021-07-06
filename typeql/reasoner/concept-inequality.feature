@@ -490,5 +490,5 @@ Feature: Concept Inequality Resolution
     # x      | value | type     |
     # Sprite | Tesco | retailer |
     Then verify answer size is: 1
-    # Then verify answers are sound  # Fails
-    # Then verify answers are complete  # Fails
+    # Then verify answers are sound  # TODO: Fails
+    # Then verify answers are complete  # TODO: Fails

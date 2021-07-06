@@ -687,7 +687,7 @@ Feature: Relation Inference Resolution
       """
     # (a,a), (b,b), (c,c)
     Then verify answer size is: 3
-    # Then verify answers are sound  # Fails
+    # Then verify answers are sound  # TODO: Fails
     Then verify answers are complete
     Given reasoning query
       """
@@ -699,7 +699,7 @@ Feature: Relation Inference Resolution
       get $x, $y;
       """
     Then verify answer size is: 1
-    # Then verify answers are sound  # Fails
+    # Then verify answers are sound  # TODO: Fails
     Then verify answers are complete
     Then verify answer set is equivalent for query
       """

@@ -975,7 +975,7 @@ Feature: Negation Resolution
     Then verify answer size is: 0
     Then verify answers are consistent across 5 executions
     Then verify answers are sound
-    # Then verify answers are complete  # Fails
+    # Then verify answers are complete  # TODO: Fails
 
 
   Scenario: when evaluating negation blocks, completion of incomplete queries is not acknowledged
@@ -1049,7 +1049,7 @@ Feature: Negation Resolution
       """
     Then verify answer size is: 11
     Then verify answers are consistent across 5 executions
-    # Then verify answers are sound  # Fails
+    # Then verify answers are sound  # TODO: Fails
     Then verify answers are complete
 
 
