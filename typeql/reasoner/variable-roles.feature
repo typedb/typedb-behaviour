@@ -19,16 +19,8 @@
 #noinspection CucumberUndefinedStep
 Feature: Variable Role Resolution
 
-  Background: Set up databases for resolution testing
-    Given connection has been opened
-    Given connection does not have any database
-    Given connection create database: reasoned
-    Given connection create database: materialised
-    Given connection open schema sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql define
+  Background: Set up database
+    Given reasoning schema
       """
       define
 
@@ -111,13 +103,7 @@ Feature: Variable Role Resolution
           (quat-role1:$x, quat-role2:$z1, quat-role3: $z2, quat-role4: $y) isa quaternary;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
       """
       insert
 
@@ -132,8 +118,6 @@ Feature: Variable Role Resolution
       (role1: $a, role2: $b) isa binary;
       (role1: $b, role2: $a) isa binary;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
   # Materialised binary-base: [ab, bc, cb]
   # Inferred binary-base: [aa, ac, bb, ca, cc]
   # Materialised binary: [ab, ba]
@@ -150,129 +134,112 @@ Feature: Variable Role Resolution
 
 
   Scenario: when querying a binary relation, introducing a variable role doubles the answer size
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Given for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (role1: $a, role2: $b) isa binary-base;
       """
-    Given all answers are correct in reasoned database
-    Given answer size in reasoned database is: 9
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 9
+    Then verify answers are sound
+    Then verify answers are complete
+    Given reasoning query
       """
       match (role1: $a, $r1: $b) isa binary-base;
       """
     # $r1 in {role, role2} (2 options => double answer size)
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 18
-    Then materialised and reasoned databases are the same size
+    Then verify answer size is: 18
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: converting a fixed role to a variable role bound with 'type' does not modify the answer size
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Given for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (role1: $a, $r1: $b) isa binary-base;
       """
-    Given all answers are correct in reasoned database
-    Given answer size in reasoned database is: 18
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
+    Then verify answer size is: 18
+    Then verify answers are sound
+    Then verify answers are complete
     # This query should be equivalent to the one above
-    Then for typeql query
+    Given reasoning query
       """
       match
         ($r1: $a, $r2: $b) isa binary-base;
         $r1 type binary-base:role1;
       get $a, $b, $r2;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 18
-    Then materialised and reasoned databases are the same size
+    Then verify answer size is: 18
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: when querying a binary relation, introducing a meta 'role' and a variable role triples the answer size
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Given for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (role1: $a, role2: $b) isa binary-base;
       """
-    Given all answers are correct in reasoned database
-    Given answer size in reasoned database is: 9
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 9
+    Then verify answers are sound
+    Then verify answers are complete
+    Given reasoning query
       """
       match (role: $a, $r1: $b) isa binary-base;
       """
     # $r1 in {role, role1, role2} (3 options => triple answer size)
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 27
-    Then materialised and reasoned databases are the same size
+    Then verify answer size is: 27
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: converting a fixed role to a variable bound with 'type role' (?)
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Given for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (role: $a, $r1: $b) isa binary-base;
       """
-    Given all answers are correct in reasoned database
-    Then answer size in reasoned database is: 27
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
+    Then verify answer size is: 27
+    Then verify answers are sound
+    Then verify answers are complete
     # This query should be equivalent to the one above
-    Then for typeql query
+    Given reasoning query
       """
       match
         ($r1: $a, $r2: $b) isa binary-base;
         $r1 type relation:role;
       get $a, $b, $r2;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 27
-    Then materialised and reasoned databases are the same size
+    Then verify answer size is: 27
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: converting a fixed role to a variable bound with 'sub role' (?)
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Given for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (role: $a, $r1: $b) isa binary-base;
       """
-    Given all answers are correct in reasoned database
-    Then answer size in reasoned database is: 27
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
+    Then verify answer size is: 27
+    Then verify answers are sound
+    Then verify answers are complete
     # This query should be equivalent to the one above
-    Then for typeql query
+    Given reasoning query
       """
       match
         ($r1: $a, $r2: $b) isa binary-base;
         $r1 sub relation:role;
       get $a, $b, $r2;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 27
-    Then materialised and reasoned databases are the same size
+    Then verify answer size is: 27
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: when all other role variables are bound, introducing a meta 'role' doesn't affect the answer size
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         ($r1: $a, $r2: $b) isa binary-base;
@@ -280,35 +247,31 @@ Feature: Variable Role Resolution
         $r2 type binary-base:role2;
       """
     # $r1 must be 'role' and $r2 must be 'role2'
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 9
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
+    Then verify answer size is: 9
+    Then verify answers are sound
+    Then verify answers are complete
     # This query is equivalent to the one above
-    Then for typeql query
+    Given reasoning query
       """
       match
         (role: $a, $r2: $b) isa binary-base;
         $r2 type binary-base:role2;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 9
-    Then materialised and reasoned databases are the same size
+    Then verify answer size is: 9
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: when querying a binary relation, introducing two variable roles multiplies the answer size by 7
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Given for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (role1: $a, role2: $b) isa binary-base;
       """
-    Given all answers are correct in reasoned database
-    Given answer size in reasoned database is: 9
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 9
+    Then verify answers are sound
+    Then verify answers are complete
+    Given reasoning query
       """
       match ($r1: $a, $r2: $b) isa binary-base;
       """
@@ -320,9 +283,9 @@ Feature: Variable Role Resolution
     # role1 | role2 |
     # role2 | role  |
     # role2 | role1 |
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 63
-    Then materialised and reasoned databases are the same size
+    Then verify answer size is: 63
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   # General formula for the answer size with K degrees of freedom [*] on an N-ary relation
@@ -372,34 +335,28 @@ Feature: Variable Role Resolution
   #  }
 
   Scenario: variable roles are correctly mapped to answers for a ternary relation with 3 possible roleplayers
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given reasoning query
       """
       match
         (ternary-role1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
         $a1 has name 'a';
       """
-    Then all answers are correct in reasoned database
     # This query is equivalent to matching ($r2: $a2, $r3: $a3) isa binary-base, as role1 and $a1 each have only 1 value
-    Then answer size in reasoned database is: 63
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 63
+    Then verify answers are sound
+    Then verify answers are complete
+    Given reasoning query
       """
       match (ternary-role1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
       """
-    Then all answers are correct in reasoned database
     # Now the bound role 'role1' is in {a, b, c}, tripling the answer size
-    Then answer size in reasoned database is: 189
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 189
+    Then verify answers are sound
+    Then verify answers are complete
+    Given reasoning query
       """
       match ($r1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
       """
-    Then all answers are correct in reasoned database
     # r1    | r2    | r3    |
     # role  | role  | role  | 1 pattern
     # roleX | role  | role  | 3 patterns: X in {1,2,3}
@@ -414,39 +371,34 @@ Feature: Variable Role Resolution
     # For each pattern, we have one possible match per ternary-base relation
     # and there are 27 ternary-base relations in the knowledge graph (including both material and inferred)
     # giving an answer size of 34 * 27 = 918
-    Then answer size in reasoned database is: 918
-    Then materialised and reasoned databases are the same size
+    Then verify answer size is: 918
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: variable roles are correctly mapped to answers for a quaternary relation with 3 possible roleplayers
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given reasoning query
       """
       match
         (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
         $a1 has name 'a';
       """
-    Then all answers are correct in reasoned database
     # This query is equivalent to matching ($r2: $a2, $r3: $a3, $r4: $a4) isa ternary-base
-    Then answer size in reasoned database is: 918
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 918
+    Then verify answers are sound
+    Then verify answers are complete
+    Given reasoning query
       """
       match (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
       """
-    Then all answers are correct in reasoned database
     # Now the bound role 'role1' is in {a, b, c}, tripling the answer size
-    Then answer size in reasoned database is: 2754
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 2754
+    Then verify answers are sound
+    Then verify answers are complete
+    Given reasoning query
       """
       match ($r1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
       """
-    Then all answers are correct in reasoned database
     # {r1,r2,r3,r4}
     # 4 occurrences of 'role' | 1 pattern
     # 3 occurrences of 'role' | 16 patterns (4 combinations of 1 role var x (4) distinct roles)
@@ -458,44 +410,40 @@ Feature: Variable Role Resolution
     # For each pattern, we have one possible match per quaternary-base relation
     # and there are 81 quaternary-base relations in the knowledge graph (including both material and inferred)
     # giving an answer size of 209 * 81 = 16929
-    Then answer size in reasoned database is: 16929
-    Then materialised and reasoned databases are the same size
+    Then verify answer size is: 16929
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   # Note: This test uses the sub-relation 'quaternary' while the others use the super-relations '{n}-ary-base'.
   # If this test passes while others fail, there may be an inheritance-related issue.
   Scenario: variable roles are correctly mapped to answers for a quaternary relation with 2 possible roleplayers
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given reasoning query
       """
       match
         (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
         $a1 has name 'a';
       """
-    Then all answers are correct in reasoned database
     # This query is equivalent to matching ($r2: $a2, $r3: $a3, $r4: $a4) isa ternary
-    Then answer size in reasoned database is: 272
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 272
+    Then verify answers are sound
+    Then verify answers are complete
+    Given reasoning query
       """
       match (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
       """
-    Then all answers are correct in reasoned database
     # Now the bound role 'role1' is in {a, b}, doubling the answer size
-    Then answer size in reasoned database is: 544
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 544
+    Then verify answers are sound
+    Then verify answers are complete
+    Given reasoning query
       """
       match ($r1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
       """
-    Then all answers are correct in reasoned database
     # {r1,r2,r3,r4} | 209 patterns (see 'quaternary-base' scenario for details)
     # For each pattern, we have one possible match per quaternary relation
     # and there are 16 quaternary relations in the knowledge graph (including both material and inferred)
     # giving an answer size of 209 * 16 = 3344
-    Then answer size in reasoned database is: 3344
-    Then materialised and reasoned databases are the same size
+    Then verify answer size is: 3344
+    Then verify answers are sound
+    Then verify answers are complete

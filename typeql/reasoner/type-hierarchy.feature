@@ -18,19 +18,8 @@
 #noinspection CucumberUndefinedStep
 Feature: Type Hierarchy Resolution
 
-  Background: Set up databases for resolution testing
-    Given connection has been opened
-    Given connection does not have any database
-    Given connection create database: reasoned
-    Given connection create database: materialised
-    Given connection open schema sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-
-
   Scenario: subtypes trigger rules based on their parents; parent types don't trigger rules based on their children
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
 
@@ -61,13 +50,7 @@ Feature: Type Hierarchy Resolution
           (actor:$x, writer:$y) isa film-production;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
       """
       insert
       $x isa child, has name "a";
@@ -81,21 +64,19 @@ Feature: Type Hierarchy Resolution
       (performer:$x, writer:$v) isa performance;  # child - child    -> satisfies rule
       (performer:$y, writer:$v) isa performance;  # person - child   -> doesn't satisfy rule
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         $x isa person;
         $y isa person;
         (actor: $x, writer: $y) isa film-production;
       """
-    Then all answers are correct in reasoned database
     # Answers are (actor:$x, writer:$z) and (actor:$x, writer:$v)
-    Then answer size in reasoned database is: 2
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
+    Given reasoning query
       """
       match
         $x isa person;
@@ -103,23 +84,21 @@ Feature: Type Hierarchy Resolution
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 2
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
+    Given reasoning query
       """
       match
         $x isa person;
         $y isa child;
         (actor: $x, writer: $y) isa film-production;
       """
-    Then all answers are correct in reasoned database
     # Answer is (actor:$x, writer:$v) ONLY
-    Then answer size in reasoned database is: 1
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
+    Given reasoning query
       """
       match
         $x isa person;
@@ -127,23 +106,21 @@ Feature: Type Hierarchy Resolution
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
+    Given reasoning query
       """
       match
         $x isa child;
         $y isa person;
         (actor: $x, writer: $y) isa film-production;
       """
-    Then all answers are correct in reasoned database
     # Answers are (actor:$x, writer:$z) and (actor:$x, writer:$v)
-    Then answer size in reasoned database is: 2
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
+    Given reasoning query
       """
       match
         $x isa child;
@@ -151,13 +128,13 @@ Feature: Type Hierarchy Resolution
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 2
-    Then materialised and reasoned databases are the same size
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: when matching different roles to those that are actually inferred, no answers are returned
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
 
@@ -181,41 +158,32 @@ Feature: Type Hierarchy Resolution
           (child: $x, mother: $y) isa large-family;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
       """
       insert
       $x isa person;
       $y isa person;
       (child: $x, parent: $y) isa family;
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
     # Matching a sibling of the actual role
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (child: $x, father: $y) isa large-family;
       """
-    Then answer size in reasoned database is: 0
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
+    Then verify answer size is: 0
     # Matching two siblings when only one is present
-    Then for typeql query
+    Given reasoning query
       """
       match (mother: $x, father: $y) isa large-family;
       """
-    Then answer size in reasoned database is: 0
-    Then materialised and reasoned databases are the same size
+    Then verify answer size is: 0
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: when a sub-relation is inferred, it can be retrieved by matching its super-relation and sub-roles
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
 
@@ -245,34 +213,26 @@ Feature: Type Hierarchy Resolution
           (scifi-writer:$x, scifi-actor:$y) isa scifi-production;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
       """
       insert
       $x isa person;
       $y isa person;
       (writer:$x, performer:$y) isa performance;
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
     # sub-roles, super-relation
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (scifi-writer:$x, scifi-actor:$y) isa film-production;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then materialised and reasoned databases are the same size
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: when a sub-relation is inferred, it can be retrieved by matching its sub-relation and super-roles
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
 
@@ -302,34 +262,26 @@ Feature: Type Hierarchy Resolution
           (scifi-writer:$x, scifi-actor:$y) isa scifi-production;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
       """
       insert
       $x isa person;
       $y isa person;
       (writer:$x, performer:$y) isa performance;
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
     # super-roles, sub-relation
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (writer:$x, actor:$y) isa scifi-production;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then materialised and reasoned databases are the same size
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: when a sub-relation is inferred, it can be retrieved by matching its super-relation and super-roles
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
 
@@ -359,34 +311,26 @@ Feature: Type Hierarchy Resolution
           (scifi-writer:$x, scifi-actor:$y) isa scifi-production;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
       """
       insert
       $x isa person;
       $y isa person;
       (writer:$x, performer:$y) isa performance;
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
     # super-roles, super-relation
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (writer:$x, actor:$y) isa film-production;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then materialised and reasoned databases are the same size
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: when a rule is recursive, its inferences respect type hierarchies
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
 
@@ -425,13 +369,7 @@ Feature: Type Hierarchy Resolution
           (performer:$x, writer:$y) isa performance;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
       """
       insert
       $x isa child, has name "a";
@@ -445,22 +383,19 @@ Feature: Type Hierarchy Resolution
       (performer:$x, writer:$v) isa performance;  # child - child    -> satisfies rule
       (performer:$y, writer:$v) isa performance;  # person - child   -> doesn't satisfy rule
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         $x isa person;
         $y isa person;
         (actor: $x, writer: $y) isa film-production;
       """
-    Then all answers are correct in reasoned database
     # Answers are (actor:$x, writer:$z) and (actor:$x, writer:$v)
-    Then answer size in reasoned database is: 2
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
+    Given reasoning query
       """
       match
         $x isa person;
@@ -468,23 +403,21 @@ Feature: Type Hierarchy Resolution
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 2
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
+    Given reasoning query
       """
       match
         $x isa person;
         $y isa child;
         (actor: $x, writer: $y) isa film-production;
       """
-    Then all answers are correct in reasoned database
     # Answer is (actor:$x, writer:$v) ONLY
-    Then answer size in reasoned database is: 1
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
+    Given reasoning query
       """
       match
         $x isa person;
@@ -492,23 +425,21 @@ Feature: Type Hierarchy Resolution
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
+    Given reasoning query
       """
       match
         $x isa child;
         $y isa person;
         (actor: $x, writer: $y) isa film-production;
       """
-    Then all answers are correct in reasoned database
     # Answers are (actor:$x, writer:$z) and (actor:$x, writer:$v)
-    Then answer size in reasoned database is: 2
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
+    Given reasoning query
       """
       match
         $x isa child;
@@ -516,13 +447,13 @@ Feature: Type Hierarchy Resolution
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 2
-    Then materialised and reasoned databases are the same size
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: querying for a super-relation gives the same answer as querying for its inferred sub-relation
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
 
@@ -552,36 +483,27 @@ Feature: Type Hierarchy Resolution
           (parent-home-owner:$x, child-resident:$y) isa family-residence;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
       """
       insert
       $x isa person;
       $y isa person;
       (parent:$x, child:$y) isa family;
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (home-owner: $x, resident: $y) isa residence;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
+    Given reasoning query
       """
       match
         (home-owner: $x, resident: $y) isa residence;
         (parent-home-owner: $x, child-resident: $y) isa family-residence;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then materialised and reasoned databases are the same size
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete

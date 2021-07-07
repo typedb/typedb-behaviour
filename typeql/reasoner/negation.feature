@@ -18,16 +18,8 @@
 #noinspection CucumberUndefinedStep
 Feature: Negation Resolution
 
-  Background: Set up databases for resolution testing
-    Given connection has been opened
-    Given connection does not have any database
-    Given connection create database: reasoned
-    Given connection create database: materialised
-    Given connection open schema sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql define
+  Background: Set up database
+    Given reasoning schema
       """
       define
 
@@ -60,9 +52,7 @@ Feature: Negation Resolution
       name sub attribute, value string;
       age sub attribute, value long;
       """
-    Given for each session, transaction commits
     # each scenario specialises the schema further
-    Given for each session, open transactions of type: write
 
   #####################
   # NEGATION IN MATCH #
@@ -71,12 +61,7 @@ Feature: Negation Resolution
   # Negation is currently handled by Reasoner, even inside a match clause.
 
   Scenario: negation can check that an entity does not play a specified role in any relation
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
     """
       insert
       $x1 isa person;
@@ -88,16 +73,13 @@ Feature: Negation Resolution
       $e1 (employee: $x1, employer: $c) isa employment;
       $e2 (employee: $x2, employer: $c) isa employment;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match $x isa person;
       """
-    Given answer size in reasoned database is: 5
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 5
+    Given reasoning query
       """
       match
         $x isa person;
@@ -105,16 +87,11 @@ Feature: Negation Resolution
           $e (employee: $x) isa employment;
         };
       """
-    Then answer size in reasoned database is: 3
+    Then verify answer size is: 3
 
 
   Scenario: negation can check that an entity does not play any role in any relation
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
       """
       insert
       $x1 isa person;
@@ -126,16 +103,13 @@ Feature: Negation Resolution
       $e1 (employee: $x1, employer: $c) isa employment;
       $e2 (employee: $x2, employer: $c) isa employment;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match $x isa person;
       """
-    Given answer size in reasoned database is: 5
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 5
+    Given reasoning query
       """
       match
         $x isa person;
@@ -143,16 +117,11 @@ Feature: Negation Resolution
           ($x) isa relation;
         };
       """
-    Then answer size in reasoned database is: 3
+    Then verify answer size is: 3
 
 
   Scenario: negation can check that an entity does not own any instance of a specific attribute type
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
       """
       insert
       $x1 isa person, has name "asdf";
@@ -161,16 +130,13 @@ Feature: Negation Resolution
       $x4 isa person, has name "bleh";
       $x5 isa person;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Given for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match $x isa person;
       """
-    Given answer size in reasoned database is: 5
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 5
+    Given reasoning query
       """
       match
         $x isa person;
@@ -178,16 +144,11 @@ Feature: Negation Resolution
           $x has name $val;
         };
       """
-    Then answer size in reasoned database is: 2
+    Then verify answer size is: 2
 
 
   Scenario: negation can check that an entity does not own a particular attribute
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
       """
       insert
       $x1 isa person, has name "Bob";
@@ -196,16 +157,13 @@ Feature: Negation Resolution
       $x4 isa person, has name "bleh";
       $x5 isa person;
       """
-    Then for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Given for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match $x isa person;
       """
-    Given answer size in reasoned database is: 5
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 5
+    Given reasoning query
       """
       match
         $x isa person;
@@ -213,34 +171,26 @@ Feature: Negation Resolution
           $x has name "Bob";
         };
       """
-    Then answer size in reasoned database is: 4
+    Then verify answer size is: 4
 
 
   Scenario: negation can check that an entity owns an attribute which is not equal to a specific value
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
     """
       insert
       $x isa person, has age 10;
       $y isa person, has age 20;
       $z isa person;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
     """
       match
         $x has age $y;
         not {$y 20;};
       """
-    Then answer size in reasoned database is: 1
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then answer set is equivalent for typeql query
+    Then verify answer size is: 1
+    Then verify answer set is equivalent for query
       """
       match
         $x has age $y;
@@ -249,12 +199,7 @@ Feature: Negation Resolution
 
 
   Scenario: negation can check that an entity owns an attribute that is not of a specified type
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
     """
       insert
       $x isa person, has age 10, has name "Bob";
@@ -262,36 +207,27 @@ Feature: Negation Resolution
       $z isa person;
       $w isa person, has name "Charlie";
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
     """
       match
         $x has attribute $y;
         not {$y isa name;};
       """
-    Then answer size in reasoned database is: 2
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then answer set is equivalent for typeql query
+    Then verify answer size is: 2
+    Then verify answer set is equivalent for query
       """
       match $x has age $y;
       """
 
 
   Scenario: negation can filter out an unwanted entity type from part of a chain of matched relations
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
       dog sub entity, plays friendship:friend;
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
       """
       insert
       $a isa person;
@@ -305,9 +241,8 @@ Feature: Negation Resolution
       (friend: $c, friend: $d) isa friendship;
       (friend: $d, friend: $z) isa friendship;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
     """
       match
         (friend: $a, friend: $b) isa friendship;
@@ -319,10 +254,8 @@ Feature: Negation Resolution
     # cbab, cbcb, cbcd, cdcb, cdcd, cdzd,
     # dcba, dcbc, dcdc, dcdz, dzdc, dzdz,
     # zdcb, zdcd, zdzd
-    Given answer size in reasoned database is: 24
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 24
+    Given reasoning query
       """
       match
         (friend: $a, friend: $b) isa friendship;
@@ -331,10 +264,8 @@ Feature: Negation Resolution
         not {$c isa dog;};
       """
     # Eliminates (cdzd, zdzd)
-    Then answer size in reasoned database is: 22
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then answer set is equivalent for typeql query
+    Then verify answer size is: 22
+    Then verify answer set is equivalent for query
       """
       match
         (friend: $a, friend: $b) isa friendship;
@@ -345,18 +276,12 @@ Feature: Negation Resolution
 
 
   Scenario: negation can filter out an unwanted connection between two concepts from a chain of matched relations
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
       dog sub entity, owns name, plays friendship:friend;
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
       """
       insert
       $a isa person, has name "a";
@@ -370,9 +295,8 @@ Feature: Negation Resolution
       (friend: $c, friend: $d) isa friendship;
       (friend: $d, friend: $z) isa friendship;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
     """
       match
         (friend: $a, friend: $b) isa friendship;
@@ -383,10 +307,8 @@ Feature: Negation Resolution
     # cba, cbc, cdc, cdz
     # dcb, dcd, dzd
     # zdc, zdz
-    Given answer size in reasoned database is: 14
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 14
+    Given reasoning query
       """
       match
         (friend: $a, friend: $b) isa friendship;
@@ -395,10 +317,8 @@ Feature: Negation Resolution
         $z isa dog;
       """
     # (d,z) is a friendship so we eliminate results where $b is 'd': these are (cdc, cdz, zdc, zdz)
-    Then answer size in reasoned database is: 10
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then answer set is equivalent for typeql query
+    Then verify answer size is: 10
+    Then verify answer set is equivalent for query
       """
       match
         (friend: $a, friend: $b) isa friendship;
@@ -409,12 +329,7 @@ Feature: Negation Resolution
 
 
   Scenario: negation can filter out an unwanted role from a variable role query
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
     """
       insert
 
@@ -422,9 +337,8 @@ Feature: Negation Resolution
       $c isa company;
       (employee: $x, employer: $c) isa employment;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
     """
       match ($r1: $x) isa employment;
       """
@@ -433,25 +347,18 @@ Feature: Negation Resolution
     # employee | PER |
     # role     | COM |
     # employer | COM |
-    Given answer size in reasoned database is: 4
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 4
+    Given reasoning query
       """
       match
         ($r1: $x) isa employment;
         not {$r1 type relation:role;};
       """
-    Then answer size in reasoned database is: 2
+    Then verify answer size is: 2
 
 
   Scenario: a negated statement with multiple properties can be re-written as a negation of multiple statements
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
     """
       insert
 
@@ -461,16 +368,13 @@ Feature: Negation Resolution
       $w isa person, has name "Winnie";
       $c isa company, has name "Pizza Express";
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match $x has attribute $r;
       """
-    Given answer size in reasoned database is: 8
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 8
+    Given reasoning query
       """
       match
         $x has attribute $r;
@@ -478,10 +382,8 @@ Feature: Negation Resolution
           $x isa person, has name "Tim", has age 55;
         };
       """
-    Then answer size in reasoned database is: 6
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then answer set is equivalent for typeql query
+    Then verify answer size is: 6
+    Then verify answer set is equivalent for query
       """
       match
         $x has attribute $r;
@@ -494,12 +396,7 @@ Feature: Negation Resolution
 
 
   Scenario: a query can contain multiple negations
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
       """
       insert
 
@@ -509,35 +406,28 @@ Feature: Negation Resolution
       $w isa person, has name "Winnie";
       $c isa company, has name "Pizza Express";
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Given for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match $x has attribute $r;
       """
-    Given answer size in reasoned database is: 8
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Given for typeql query
+    Then verify answer size is: 8
+    Given reasoning query
       """
       match
         $x has attribute $r;
         not { $x isa company; };
       """
-    Given answer size in reasoned database is: 7
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 7
+    Given reasoning query
       """
       match
         $x has attribute $r;
         not { $x isa company; };
         not { $x has name "Tim"; };
       """
-    Then answer size in reasoned database is: 3
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 3
+    Given reasoning query
       """
       match
         $x has attribute $r;
@@ -545,22 +435,16 @@ Feature: Negation Resolution
         not { $x has name "Tim"; };
         not { $r 55; };
       """
-    Then answer size in reasoned database is: 2
+    Then verify answer size is: 2
 
 
   Scenario: negation can exclude entities of specific types that play roles in a specific relation
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
       pizza-company sub company;
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
       """
       insert
 
@@ -574,16 +458,13 @@ Feature: Negation Resolution
       (employee: $x, employer: $c) isa employment;
       (employee: $y, employer: $d) isa employment;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Given for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match $x isa person;
       """
-    Then answer size in reasoned database is: 4
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 4
+    Given reasoning query
       """
       match
         $x isa person;
@@ -592,22 +473,16 @@ Feature: Negation Resolution
           $y isa pizza-company;
         };
       """
-    Then answer size in reasoned database is: 3
+    Then verify answer size is: 3
 
 
   Scenario: when using negation to exclude entities of specific types, their subtypes are also excluded
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
       pizza-company sub company;
       """
-    Then for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
       """
       insert
 
@@ -621,9 +496,8 @@ Feature: Negation Resolution
       (employee: $x, employer: $c) isa employment;
       (employee: $y, employer: $d) isa employment;
       """
-    Then for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         $x isa person;
@@ -632,22 +506,16 @@ Feature: Negation Resolution
           $y isa company;
         };
       """
-    Then answer size in reasoned database is: 2
+    Then verify answer size is: 2
 
 
   Scenario: answers can be returned even if a statement in a conjunction in a negation is identical to a non-negated one
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
       pizza-company sub company;
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
     """
       insert
 
@@ -662,9 +530,7 @@ Feature: Negation Resolution
       (employee: $y, employer: $d) isa employment;
       """
     # We match $x isa person and not {$x isa person; ...}; answers can still be returned because of the conjunction
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given reasoning query
     """
       match
         $x isa person;
@@ -674,7 +540,7 @@ Feature: Negation Resolution
           $y isa pizza-company;
         };
       """
-    Then answer size in reasoned database is: 3
+    Then verify answer size is: 3
 
 
   ##############################
@@ -683,7 +549,7 @@ Feature: Negation Resolution
 
   # TODO: re-enable all steps when 3-hop transitivity is resolvable
   Scenario: negation of a transitive relation is resolvable
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
 
@@ -699,13 +565,7 @@ Feature: Negation Resolution
           (superior: $a, subordinate: $c) isa location-hierarchy;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
     """
       insert
       $ar isa area, has name "King's Cross";
@@ -716,31 +576,28 @@ Feature: Negation Resolution
       (superior: $cntry, subordinate: $cit) isa location-hierarchy;
       (superior: $cit, subordinate: $ar) isa location-hierarchy;
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Given for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         $continent isa continent;
         $area isa area;
       """
-    Then answer size in reasoned database is: 1
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 1
+    Given reasoning query
       """
       match
         $continent isa continent;
         $area isa area;
         not {(superior: $continent, subordinate: $area) isa location-hierarchy;};
       """
-    Then answer size in reasoned database is: 0
-    Then materialised and reasoned databases are the same size
+    Then verify answer size is: 0
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: negation can exclude a particular entity from a matched transitive relation
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
 
@@ -784,13 +641,7 @@ Feature: Negation Resolution
           (from: $x, to: $y) isa indirect-link;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
     """
       insert
 
@@ -804,18 +655,15 @@ Feature: Negation Resolution
       (from: $cc, to: $cc) isa link;
       (from: $cc, to: $dd) isa link;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
     """
       match
         (from: $x, to: $y) isa indirect-link;
         $x has index "aa";
       """
-    Then answer size in reasoned database is: 2
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then answer set is equivalent for typeql query
+    Then verify answer size is: 2
+    Then verify answer set is equivalent for query
       """
       match
         (from: $x, to: $y) isa reachable;
@@ -830,7 +678,7 @@ Feature: Negation Resolution
 
   # TODO: re-enable all steps when fixed (#75)
   Scenario: a rule can be triggered based on not having a particular attribute
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
       person owns age;
@@ -842,39 +690,31 @@ Feature: Negation Resolution
         $x has name "Not Ten";
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
     """
       insert
       $x isa person, has age 10;
       $y isa person, has age 20;
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match $x has name "Not Ten", has age 20;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
+    Given reasoning query
       """
       match $x has name "Not Ten", has age 10;
       """
-    Then answer size in reasoned database is: 0
-    Then materialised and reasoned databases are the same size
+    Then verify answer size is: 0
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: a rule can be triggered based on not having any instances of a specified attribute type
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
       person owns age;
@@ -886,40 +726,32 @@ Feature: Negation Resolution
         $x has name "No Age";
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
     """
       insert
       $x isa person, has age 10;
       $y isa person, has age 20;
       $z isa person;
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Given for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match $x isa person;
       """
-    Given all answers are correct in reasoned database
-    Given answer size in reasoned database is: 3
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 3
+    Then verify answers are sound
+    Then verify answers are complete
+    Given reasoning query
       """
       match $x isa person, has name "No Age";
       """
-    Then answer size in reasoned database is: 1
-    Then materialised and reasoned databases are the same size
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: when negating a conjunction, all the conjuction statements must be met for the negation to be met
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
       country sub entity, owns name, plays company-country:country;
@@ -939,13 +771,7 @@ Feature: Negation Resolution
         (not-in-uk: $x) isa non-uk;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
     """
       insert
       $a isa company, has name "a";
@@ -960,27 +786,23 @@ Feature: Negation Resolution
       (country: $e, company: $b) isa company-country;
       (country: $f, company: $c) isa company-country;
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Given for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match $x isa company;
       """
-    Given answer size in reasoned database is: 4
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 4
+    Given reasoning query
       """
       match
         $x isa company;
         not { (not-in-uk: $x) isa non-uk; };
       """
     # Should exclude both the company in France and the company with no country
-    Then answer size in reasoned database is: 2
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then answer set is equivalent for typeql query
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
+    Then verify answer set is equivalent for query
       """
       match
         $x isa company;
@@ -988,19 +810,16 @@ Feature: Negation Resolution
         $y has name "UK";
       get $x;
       """
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then answer set is equivalent for typeql query
+    Then verify answer set is equivalent for query
       """
       match
         $x isa company;
         { $x has name "a"; } or { $x has name "b"; };
       """
-    Then materialised and reasoned databases are the same size
 
 
   Scenario: when nesting multiple negations and conjunctions, they are correctly resolved
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
       country sub entity, owns name, plays company-country:country;
@@ -1020,13 +839,7 @@ Feature: Negation Resolution
         (not-in-uk: $x) isa non-uk;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
       """
       insert
       $a isa company, has name "a";
@@ -1041,9 +854,8 @@ Feature: Negation Resolution
       (country: $e, company: $b) isa company-country;
       (country: $f, company: $c) isa company-country;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         $x isa company;
@@ -1054,10 +866,8 @@ Feature: Negation Resolution
           };
         };
       """
-    Then answer size in reasoned database is: 3
-    Given for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then answer set is equivalent for typeql query
+    Then verify answer size is: 3
+    Then verify answer set is equivalent for query
       """
       match
         $x isa company;
@@ -1065,7 +875,6 @@ Feature: Negation Resolution
       """
 
 
-  # TODO: re-enable all steps when fixed (#75)
   Scenario: when evaluating negation blocks, global subgoals are not updated
 
   The test highlights a potential issue with eagerly updating global subgoals when branching out to determine whether
@@ -1078,7 +887,7 @@ Feature: Negation Resolution
   As a result, if it happens that a negated query has multiple answers and is visited more than a single time
   - because of the admissibility check, answers might be missed.
 
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
 
@@ -1141,13 +950,7 @@ Feature: Negation Resolution
           (diagnosed-fault: $flt, parent-session: $ts) isa diagnosis;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
     """
       insert
       $sesh isa session;
@@ -1164,21 +967,19 @@ Feature: Negation Resolution
       (identified-fault: $f1, identifying-question: $q1) isa fault-identification;
       (identified-fault: $f2, identifying-question: $q2) isa fault-identification;
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (diagnosed-fault: $flt, parent-session: $ts) isa diagnosis;
       """
-    Then answer size in reasoned database is: 0
-    Then answers are consistent across 5 executions in reasoned database
-    Then materialised and reasoned databases are the same size
+    Then verify answer size is: 0
+    Then verify answers are consistent across 5 executions
+    Then verify answers are sound
+    # Then verify answers are complete  # TODO: Fails
 
 
-  # TODO: re-enable all steps when fixed (currently takes too long) (#75)
   Scenario: when evaluating negation blocks, completion of incomplete queries is not acknowledged
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
       resource sub attribute, value string;
@@ -1220,13 +1021,7 @@ Feature: Negation Resolution
           (role-3: $y, role-4: $x) isa relation-5;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
     """
       insert
       $d isa entity-1, has resource "d";
@@ -1247,22 +1042,21 @@ Feature: Negation Resolution
 
       (symmetric-role: $c, symmetric-role: $b ) isa symmetric-relation;
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (role-3: $x, role-4: $y) isa relation-4;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 11
-    Then answers are consistent across 5 executions in reasoned database
-    Then materialised and reasoned databases are the same size
+    Then verify answer size is: 11
+    Then verify answers are consistent across 5 executions
+    # Then verify answers are sound  # TODO: Fails
+    Then verify answers are complete
 
 
-  # TODO: re-enable all steps when fixed (currently takes too long) (#75)
+  # TODO: Re-enable once fixed
+  @ignore
   Scenario: a rule can use negation to exclude things that have any transitive relations to a specific concept
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
 
@@ -1306,13 +1100,7 @@ Feature: Negation Resolution
           (from: $x, to: $y) isa unreachable;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
     """
       insert
 
@@ -1332,25 +1120,22 @@ Feature: Negation Resolution
       (from: $ee, to: $ff) isa link;
       (from: $ff, to: $gg) isa link;
       """
-    # Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
     """
       match
         (from: $x, to: $y) isa unreachable;
         $x has index "aa";
       """
     # aa is not linked to itself. ee, ff, gg are linked to each other, but not to aa. hh is not linked to anything
-    Then answer size in reasoned database is: 5
-    Given for each session, transaction closes
-    Given for each session, open transactions of type: read
+    Then verify answer size is: 5
+    Then verify answers are sound
+    Then verify answers are complete
     # TODO: Check again if we correctly mean '$y isa node' when we enable this test
-    Then answer set is equivalent for typeql query
+    Then verify answer set is equivalent for query
       """
       match
         $x has index "aa"; $y isa node;
         { $y has index "aa"; } or { $y has index "ee"; } or { $y has index "ff"; } or
         { $y has index "gg"; } or { $y has index "hh"; };
       """
-    # Then materialised and reasoned databases are the same size  

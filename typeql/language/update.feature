@@ -67,7 +67,7 @@ Feature: TypeQL Update Query
       delete $x has name "Alex";
       insert $x has name "Bob";
       """
-    Then for each session, transaction closes
+    Then session transaction closes
     Given session opens transaction of type: write
     Then typeql update; throws exception
       """

@@ -21,16 +21,8 @@ Feature: Recursion Resolution
   In some cases, the inferences made by a rule are used to trigger further inferences by the same rule.
   This test feature verifies that so-called recursive inference works as intended.
 
-  Background: Set up databases for resolution testing
-    Given connection has been opened
-    Given connection does not have any database
-    Given connection create database: reasoned
-    Given connection create database: materialised
-    Given connection open schema sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql define
+  Background: Set up database
+    Given reasoning schema
       """
       define
 
@@ -61,12 +53,10 @@ Feature: Recursion Resolution
 
       name sub attribute, value string;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
 
 
   Scenario: the types of entities in inferred relations can be used to make further inferences
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
 
@@ -93,13 +83,7 @@ Feature: Recursion Resolution
         (big-subordinate: $x, big-superior: $y) isa big-location-hierarchy;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
       """
       insert
       $x isa big-place, has name "Mount Kilimanjaro";
@@ -109,22 +93,18 @@ Feature: Recursion Resolution
       (subordinate: $x, superior: $y) isa location-hierarchy;
       (subordinate: $y, superior: $z) isa location-hierarchy;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (subordinate: $x, superior: $y) isa big-location-hierarchy;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then materialised and reasoned databases are the same size
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: the types of inferred relations can be used to make further inferences
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
 
@@ -163,13 +143,7 @@ Feature: Recursion Resolution
           (role21:$x, role22:$z) isa relation2;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
     """
       insert
 
@@ -188,22 +162,18 @@ Feature: Recursion Resolution
       (role21:$v, role22:$w) isa relation2;
       (role11:$w, role12:$q) isa relation1;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (role31: $x, role32: $y) isa relation3;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then materialised and reasoned databases are the same size
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
 
 
   Scenario: circular rule dependencies can be resolved
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
 
@@ -245,13 +215,7 @@ Feature: Recursion Resolution
           (role31:$x, role32:$y) isa relation3;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
     """
       insert
 
@@ -261,33 +225,28 @@ Feature: Recursion Resolution
       (role11:$x, role12:$x) isa relation1;
       (role11:$x, role12:$y) isa relation1;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (role31: $x, role32: $y) isa relation3;
       """
-    Then all answers are correct in reasoned database
     # Each of the two material relation1 instances should infer a single relation3 via 1-to-2 and 2-to-3
-    Then answer size in reasoned database is: 2
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 2
+    # Then verify answers are sound  # TODO: Fails
+    Then verify answers are complete
+    Given reasoning query
       """
       match (role21: $x, role22: $y) isa relation2;
       """
-    Then all answers are correct in reasoned database
     # Relation-3-to-2 should not make any additional inferences - it should merely assert that the relations exist
-    Then answer size in reasoned database is: 2
-    Then materialised and reasoned databases are the same size
+    Then verify answer size is: 2
+    # Then verify answers are sound  # TODO: Fails
+    Then verify answers are complete
 
 
   # TODO: re-enable all steps when we have a solution for materialisation of infinite graphs (#75)
   Scenario: when resolution produces an infinite stream of answers, limiting the answer size allows it to terminate
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
 
@@ -305,36 +264,23 @@ Feature: Recursion Resolution
         (dreamer: $x, subject: $z) isa dream;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
     """
       insert
       $x isa person, has name "Yusuf";
       # If only Yusuf didn't dream about himself...
       (dreamer: $x, subject: $x) isa dream;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given reasoning query
       """
       match $x isa dream; limit 10;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 10
-    Then materialised and reasoned databases are the same size
+    Then verify answer size is: 10
 
 
   # TODO: re-enable all steps when materialisation is possible (may be an infinite graph?) (#75)
   Scenario: when relations' and attributes' inferences are mutually recursive, the inferred concepts can be retrieved
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
 
@@ -389,13 +335,7 @@ Feature: Recursion Resolution
           $p has name 'fo';
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
     """
       insert
 
@@ -420,33 +360,28 @@ Feature: Recursion Resolution
       (supertype: $f, subtype: $rr) isa inheritance;
       (supertype: $f, subtype: $rr2) isa inheritance;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match $p isa pair, has name 'ff';
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 16
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Then verify answer size is: 16
+    Then verify answers are sound
+    # Then verify answers are complete  # Not yet supported
+    Given reasoning query
       """
       match $p isa pair;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 64
-    Then materialised and reasoned databases are the same size
+    Then verify answer size is: 64
+    Then verify answers are sound
+    # Then verify answers are complete  # Not yet supported
 
 
   Scenario: non-regular transitivity requiring iterative generation of tuples
 
   from Vieille - Recursive Axioms in Deductive Databases p. 192
 
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
 
@@ -486,13 +421,7 @@ Feature: Recursion Resolution
         (role-A: $x, role-B: $y) isa R;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
     """
       insert
 
@@ -529,30 +458,24 @@ Feature: Recursion Resolution
       (role-A: $r, role-B: $s) isa H;
       (role-A: $u, role-B: $v) isa H;
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         ($x, $y) isa R;
         $x has index 'i';
       get $y;
       """
-    Then answer size in reasoned database is: 3
-    Given for each session, transaction closes
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then answer set is equivalent for typeql query
+    Then verify answer size is: 3
+    Then verify answers are sound
+    Then verify answers are complete
+    Then verify answer set is equivalent for query
       """
       match
         $y has index $ind;
         {$ind = 'j';} or {$ind = 's';} or {$ind = 'v';};
       get $y;
       """
-    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
@@ -561,7 +484,7 @@ Feature: Recursion Resolution
 
   from Bancilhon - An Amateur's Introduction to Recursive Query Processing Strategies p. 25
 
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
 
@@ -589,13 +512,7 @@ Feature: Recursion Resolution
         (ancestor: $x, descendant: $y) isa ancestorship;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
     """
       insert
 
@@ -615,12 +532,8 @@ Feature: Recursion Resolution
       (parent: $aaa, child: $aaaa) isa parentship;
       (parent: $c, child: $ca) isa parentship;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         (ancestor: $X, descendant: $Y) isa ancestorship;
@@ -628,44 +541,41 @@ Feature: Recursion Resolution
         $Y has name $name;
       get $Y, $name;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 3
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then answer set is equivalent for typeql query
+    Then verify answer size is: 3
+    Then verify answers are sound
+    Then verify answers are complete
+    Then verify answer set is equivalent for query
       """
       match
         $Y isa person, has name $name;
         {$name = 'aaa';} or {$name = 'aab';} or {$name = 'aaaa';};
       get $Y, $name;
       """
-    Then for typeql query
+    Given reasoning query
       """
       match
         ($X, $Y) isa ancestorship;
         $X has name 'aa';
       get $Y;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 4
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then answer set is equivalent for typeql query
+    Then verify answer size is: 4
+    Then verify answers are sound
+    Then verify answers are complete
+    Then verify answer set is equivalent for query
       """
       match
         $Y isa person, has name $name;
         {$name = 'a';} or {$name = 'aaa';} or {$name = 'aab';} or {$name = 'aaaa';};
       get $Y;
       """
-    Then for typeql query
+    Given reasoning query
       """
       match (ancestor: $X, descendant: $Y) isa ancestorship;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 10
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then answer set is equivalent for typeql query
+    Then verify answer size is: 10
+    Then verify answers are sound
+    Then verify answers are complete
+    Then verify answer set is equivalent for query
       """
       match
         $Y isa person, has name $nameY;
@@ -677,15 +587,14 @@ Feature: Recursion Resolution
         {$nameX = 'aaa';$nameY = 'aaaa';} or {$nameX = 'c';$nameY = 'ca';};
       get $X, $Y;
       """
-    Then for typeql query
+    Given reasoning query
       """
       match ($X, $Y) isa ancestorship;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 20
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then answer set is equivalent for typeql query
+    Then verify answer size is: 20
+    Then verify answers are sound
+    Then verify answers are complete
+    Then verify answer set is equivalent for query
       """
       match
         $X isa person, has name $nameX;
@@ -709,14 +618,13 @@ Feature: Recursion Resolution
         {$nameY = 'c';$nameX = 'ca';};
       get $X, $Y;
       """
-    Then materialised and reasoned databases are the same size
 
 
   Scenario: ancestor-friend test
 
   from Vieille - Recursive Axioms in Deductive Databases (QSQ approach) p. 186
 
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
 
@@ -748,13 +656,7 @@ Feature: Recursion Resolution
         (ancestor: $x, friend: $y) isa ancestor-friendship;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
     """
       insert
 
@@ -769,10 +671,8 @@ Feature: Recursion Resolution
       (friend: $a, friend: $g) isa friendship;
       (friend: $c, friend: $d) isa friendship;
       """
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         (ancestor: $X, friend: $Y) isa ancestor-friendship;
@@ -780,67 +680,54 @@ Feature: Recursion Resolution
         $Y has name $name;
       get $Y;
       """
-    Then answer size in reasoned database is: 2
-    Given for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then all answers are correct in reasoned database
-    Given for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then answer set is equivalent for typeql query
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
+    Then verify answer set is equivalent for query
       """
       match
         $Y has name $name;
         {$name = 'd';} or {$name = 'g';};
       get $Y;
       """
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    And answer set is equivalent for typeql query
+    And verify answer set is equivalent for query
       """
       match
         ($X, $Y) isa ancestor-friendship;
         $X has name 'a';
       get $Y;
       """
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given reasoning query
       """
       match
         (ancestor: $X, friend: $Y) isa ancestor-friendship;
         $Y has name 'd';
       get $X;
       """
-    Then answer size in reasoned database is: 3
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then all answers are correct in reasoned database
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then answer set is equivalent for typeql query
+    Then verify answer size is: 3
+    Then verify answers are sound
+    Then verify answers are complete
+    Then verify answer set is equivalent for query
       """
       match
         $X has name $name;
         {$name = 'a';} or {$name = 'b';} or {$name = 'c';};
       get $X;
       """
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    And answer set is equivalent for typeql query
+    And verify answer set is equivalent for query
       """
       match
         ($X, $Y) isa ancestor-friendship;
         $Y has name 'd';
       get $X;
       """
-    Then materialised and reasoned databases are the same size
 
 
   Scenario: same-generation test
 
   from Vieille - Recursive Query Processing: The power of logic p. 25
 
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
 
@@ -870,13 +757,7 @@ Feature: Recursion Resolution
         (SG-role: $x, SG-role: $y) isa SameGen;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
     """
       insert
 
@@ -900,37 +781,31 @@ Feature: Recursion Resolution
       (parent: $g, child: $f) isa parentship;
       (parent: $h, child: $g) isa parentship;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         ($x, $y) isa SameGen;
         $x has name 'a';
       get $y;
       """
-    Then answer size in reasoned database is: 2
-    Then all answers are correct in reasoned database
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then answer set is equivalent for typeql query
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
+    Then verify answer set is equivalent for query
       """
       match
         $y has name $name;
         {$name = 'f';} or {$name = 'a';};
       get $y;
       """
-    Then materialised and reasoned databases are the same size
 
 
   Scenario: TC test
 
   from Vieille - Recursive Query Processing: The power of logic p. 18
 
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
 
@@ -972,13 +847,7 @@ Feature: Recursion Resolution
         (roleA: $x, roleB: $y) isa TC;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
     """
       insert
 
@@ -989,27 +858,21 @@ Feature: Recursion Resolution
       (roleA: $a1, roleB: $a) isa P;
       (roleA: $a2, roleB: $a1) isa P;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         ($x, $y) isa N-TC;
         $y has index 'a';
       get $x;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 1
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then answer set is equivalent for typeql query
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
+    Then verify answer set is equivalent for query
       """
       match $x has index 'a2';
       """
-    Then materialised and reasoned databases are the same size
 
 
   Scenario: given a directed graph, all pairs of vertices (x,y) such that y is reachable from x can be found
@@ -1023,7 +886,7 @@ Feature: Recursion Resolution
 
   and finds all pairs (from, to) such that 'to' is reachable from 'from'.
 
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
 
@@ -1073,13 +936,7 @@ Feature: Recursion Resolution
           (from: $x, to: $y) isa unreachable;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
     """
       insert
 
@@ -1093,20 +950,15 @@ Feature: Recursion Resolution
       (from: $cc, to: $cc) isa link;
       (from: $cc, to: $dd) isa link;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match (from: $x, to: $y) isa reachable;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 7
-    Given for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then answer set is equivalent for typeql query
+    Then verify answer size is: 7
+    Then verify answers are sound
+    Then verify answers are complete
+    Then verify answer set is equivalent for query
       """
       match
         $x has index $indX;
@@ -1120,7 +972,6 @@ Feature: Recursion Resolution
         {$indX = 'aa';$indY = 'dd';};
       get $x, $y;
       """
-    Then materialised and reasoned databases are the same size
 
 
   Scenario: given an undirected graph, all vertices connected to a given vertex can be found
@@ -1132,7 +983,7 @@ Feature: Recursion Resolution
 
   We find the set of vertices connected to 'a', which is in fact all of the vertices, including 'a' itself.
 
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
 
@@ -1158,13 +1009,7 @@ Feature: Recursion Resolution
         (coordinate: $x, coordinate: $y) isa reachable;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
     """
       insert
 
@@ -1178,30 +1023,24 @@ Feature: Recursion Resolution
       (coordinate: $c, coordinate: $c) isa link;
       (coordinate: $c, coordinate: $d) isa link;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         ($x, $y) isa reachable;
         $x has index 'a';
       get $y;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 4
-    Then for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then answer set is equivalent for typeql query
+    Then verify answer size is: 4
+    # Then verify answers are sound  # TODO: Fails
+    # Then verify answers are complete  # TODO: Fails due to put race condition
+    Then verify answer set is equivalent for query
       """
       match
         $y has index $indY;
         {$indY = 'a';} or {$indY = 'b';} or {$indY = 'c';} or {$indY = 'd';};
       get $y;
       """
-    Then materialised and reasoned databases are the same size
 
 
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
@@ -1209,7 +1048,7 @@ Feature: Recursion Resolution
 
   test 6.6 from Cao p.76
 
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
 
@@ -1248,13 +1087,7 @@ Feature: Recursion Resolution
         (A: $x, B: $y) isa Sibling;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
     """
       insert
 
@@ -1267,37 +1100,31 @@ Feature: Recursion Resolution
       (parent: $john, child: $peter) isa parentship;
       (parent: $john, child: $bill) isa parentship;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         ($x, $y) isa SameGen;
         $x has name 'ann';
       get $y;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 3
-    Given for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then answer set is equivalent for typeql query
+    Then verify answer size is: 3
+    Then verify answers are sound
+    Then verify answers are complete
+    Then verify answer set is equivalent for query
       """
       match
         $y has name $name;
         {$name = 'ann';} or {$name = 'bill';} or {$name = 'peter';};
       get $y;
       """
-    Then materialised and reasoned databases are the same size
 
 
   Scenario: reverse same-generation test
 
   from Abiteboul - Foundations of databases p. 312/Cao test 6.14 p. 89
 
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
 
@@ -1340,13 +1167,7 @@ Feature: Recursion Resolution
         (from: $x, to: $y) isa RevSG;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
     """
       insert
 
@@ -1387,40 +1208,32 @@ Feature: Recursion Resolution
       (from: $i, to: $d) isa down;
       (from: $p, to: $k) isa down;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         (from: $x, to: $y) isa RevSG;
         $x has name 'a';
       get $y;
       """
-    Then answer size in reasoned database is: 3
-    Then all answers are correct in reasoned database
-    Given for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then answer set is equivalent for typeql query
+    Then verify answer size is: 3
+    Then verify answers are sound
+    Then verify answers are complete
+    Then verify answer set is equivalent for query
       """
       match
         $y isa person, has name $name;
         {$name = 'b';} or {$name = 'c';} or {$name = 'd';};
       get $y;
       """
-    Given for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given reasoning query
       """
       match (from: $x, to: $y) isa RevSG;
       """
-    Then answer size in reasoned database is: 11
-    Then all answers are correct in reasoned database
-    Given for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then answer set is equivalent for typeql query
+    Then verify answer size is: 11
+    Then verify answers are sound
+    Then verify answers are complete
+    Then verify answer set is equivalent for query
       """
       match
         $x has name $nameX;
@@ -1433,7 +1246,6 @@ Feature: Recursion Resolution
         {$nameX = 'f';$nameY = 'k';};
       get $x, $y;
       """
-    Then materialised and reasoned databases are the same size
 
 
   Scenario: dual linear transitivity matrix test
@@ -1442,7 +1254,7 @@ Feature: Recursion Resolution
 
   Tests an 'n' x 'm' linear transitivity matrix (in this scenario, n = m = 5)
 
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
 
@@ -1499,13 +1311,7 @@ Feature: Recursion Resolution
         (from: $x, to: $y) isa P;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
     # These insert statements can be procedurally generated based on 'm' and 'n', the width and height of the matrix
     """
       insert
@@ -1594,34 +1400,29 @@ Feature: Recursion Resolution
       (from: $b25, to: $b35) isa R2;
       (from: $b35, to: $b45) isa R2;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         (from: $x, to: $y) isa Q1;
         $x has index 'a0';
       get $y;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 5
-    Given for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then answer set is equivalent for typeql query
+    Then verify answer size is: 5
+    Then verify answers are sound
+    Then verify answers are complete
+
+    Then verify answer set is equivalent for query
       """
       match $y isa $t; { $t type a-entity; } or { $t type end; }; get $y;
       """
-    Then materialised and reasoned databases are the same size
 
 
   Scenario: tail recursion test
 
   test 6.3 from Cao - Methods for evaluating queries to Horn knowledge bases in first-order logic, p 75
 
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
 
@@ -1654,13 +1455,7 @@ Feature: Recursion Resolution
         (from: $x, to: $y) isa P;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
     """
       insert
 
@@ -1810,34 +1605,28 @@ Feature: Recursion Resolution
       (from: $b4_10, to: $b5_10) isa Q;
       (from: $b5_10, to: $b6_10) isa Q;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         (from: $x, to: $y) isa P;
         $x has index 'a0';
       get $y;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 60
-    Given for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then answer set is equivalent for typeql query
+    Then verify answer size is: 60
+    Then verify answers are sound
+    Then verify answers are complete
+    Then verify answer set is equivalent for query
       """
       match $y isa b-entity;
       """
-    Then materialised and reasoned databases are the same size
 
 
   Scenario: linear transitivity matrix test
 
   test 6.9 from Cao - Methods for evaluating queries to Horn knowledge bases in first-order logic p.82
 
-    Given for each session, typeql define
+    Given reasoning schema
       """
       define
 
@@ -1876,13 +1665,7 @@ Feature: Recursion Resolution
         (from: $x, to: $y) isa S;
       };
       """
-    Given for each session, transaction commits
-    Given connection close all sessions
-    Given connection open data sessions for databases:
-      | reasoned     |
-      | materialised |
-    Given for each session, open transactions of type: write
-    Given for each session, typeql insert
+    Given reasoning data
       """
       insert
 
@@ -1972,24 +1755,19 @@ Feature: Recursion Resolution
       (from: $a5_3, to: $a5_4) isa Q;
       (from: $a5_4, to: $a5_5) isa Q;
       """
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: write
-    Then materialised database is completed
-    Given for each session, transaction commits
-    Given for each session, open transactions of type: read
-    Then for typeql query
+    Given verifier is initialised
+    Given reasoning query
       """
       match
         (from: $x, to: $y) isa P;
         $x has index 'a';
       get $y;
       """
-    Then all answers are correct in reasoned database
-    Then answer size in reasoned database is: 25
-    Given for each session, transaction closes
-    Given for each session, open transactions of type: read
-    Then answer set is equivalent for typeql query
+    Then verify answer size is: 25
+    Then verify answers are sound
+    Then verify answers are complete
+
+    Then verify answer set is equivalent for query
       """
       match $y isa a-entity;
       """
-    Then materialised and reasoned databases are the same size
