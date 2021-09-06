@@ -200,6 +200,31 @@ Feature: TypeQL Get Clause
       | key:ref:1 | value:name:Jemima    |
 
 
+  Scenario: multiple sort variables may be used
+    Given typeql insert
+      """
+      insert
+      $a isa person, has name "Gary", has ref 0, has age 15;
+      $b isa person, has name "Gary", has ref 1, has age 5;
+      $c isa person, has name "Gary", has ref 2, has age 25;
+      $d isa person, has name "Brenda", has ref 3, has age 12;
+      """
+    Given transaction commits
+
+    Given session opens transaction of type: read
+    When get answers of typeql match
+      """
+      match $x isa person, has name $y, has ref $r, has age $a;
+      sort $y, $a, $r;
+      """
+    Then order of answer concepts is
+      | x         |  a           | y                 |
+      | key:ref:3 | value:age:12 | value:name:Brenda |
+      | key:ref:1 | value:age:5  | value:name:Gary   |
+      | key:ref:0 | value:age:15 | value:name:Gary   |
+      | key:ref:2 | value:age:25 | value:name:Gary   |
+
+
   Scenario: a sorted result set can be limited to a specific size
     Given typeql insert
       """
