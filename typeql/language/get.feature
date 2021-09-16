@@ -218,11 +218,11 @@ Feature: TypeQL Get Clause
       sort $y, $a, $r;
       """
     Then order of answer concepts is
-      | x         |  a           | y                 |
-      | key:ref:3 | value:age:12 | value:name:Brenda |
-      | key:ref:1 | value:age:5  | value:name:Gary   |
-      | key:ref:0 | value:age:15 | value:name:Gary   |
-      | key:ref:2 | value:age:25 | value:name:Gary   |
+     | y                 |  a           | x         |
+     | value:name:Brenda | value:age:12 | key:ref:3 |
+     | value:name:Gary   | value:age:5  | key:ref:1 |
+     | value:name:Gary   | value:age:15 | key:ref:0 |
+     | value:name:Gary   | value:age:25 | key:ref:2 |
 
 
   Scenario: a sorted result set can be limited to a specific size
