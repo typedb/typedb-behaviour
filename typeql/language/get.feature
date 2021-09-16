@@ -200,6 +200,56 @@ Feature: TypeQL Get Clause
       | key:ref:1 | value:name:Jemima    |
 
 
+  Scenario: multiple sort variables may be used to sort ascending
+    Given typeql insert
+      """
+      insert
+      $a isa person, has name "Gary", has ref 0, has age 15;
+      $b isa person, has name "Gary", has ref 1, has age 5;
+      $c isa person, has name "Gary", has ref 2, has age 25;
+      $d isa person, has name "Brenda", has ref 3, has age 12;
+      """
+    Given transaction commits
+
+    Given session opens transaction of type: read
+    When get answers of typeql match
+      """
+      match $x isa person, has name $y, has ref $r, has age $a;
+      sort $y, $a, $r asc;
+      """
+    Then order of answer concepts is
+     | y                 |  a           | x         |
+     | value:name:Brenda | value:age:12 | key:ref:3 |
+     | value:name:Gary   | value:age:5  | key:ref:1 |
+     | value:name:Gary   | value:age:15 | key:ref:0 |
+     | value:name:Gary   | value:age:25 | key:ref:2 |
+
+
+  Scenario: multiple sort variables may be used to sort descending
+    Given typeql insert
+      """
+      insert
+      $a isa person, has name "Gary", has ref 0, has age 15;
+      $b isa person, has name "Gary", has ref 1, has age 5;
+      $c isa person, has name "Gary", has ref 2, has age 25;
+      $d isa person, has name "Brenda", has ref 3, has age 12;
+      """
+    Given transaction commits
+
+    Given session opens transaction of type: read
+    When get answers of typeql match
+      """
+      match $x isa person, has name $y, has ref $r, has age $a;
+      sort $y, $a, $r desc;
+      """
+    Then order of answer concepts is
+      | y                 |  a           | x         |
+      | value:name:Gary   | value:age:25 | key:ref:2 |
+      | value:name:Gary   | value:age:15 | key:ref:0 |
+      | value:name:Gary   | value:age:5  | key:ref:1 |
+      | value:name:Brenda | value:age:12 | key:ref:3 |
+
+
   Scenario: a sorted result set can be limited to a specific size
     Given typeql insert
       """
