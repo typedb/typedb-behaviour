@@ -2084,6 +2084,18 @@ Feature: TypeQL Match Query
       | key:ref:1 |
 
 
+  Scenario: multiple negations can be applied
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: read
+    When get answers of typeql match
+      """
+      match $x sub! thing; not { $x type thing; }; not { $x type entity; }; not { $x type relation; };
+      """
+    Then uniquely identify answer concepts
+      | x               |
+      | label:attribute |
+
   Scenario: pattern variable without named variable is invalid
     Given connection close all sessions
     Given connection open data session for database: typedb
