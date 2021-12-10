@@ -590,3 +590,21 @@ Feature: Connection Transaction
     Given connection open schema session for database: typedb
     When session opens transaction of type: read
     Then transaction commits; throws exception
+
+
+  @ignore-typedb
+  Scenario: transaction timeouts are configurable
+    When connection create database: typedb
+    Given connection open schema session for database: typedb
+    When session opens transaction of type: read
+    # default transaction timeout is 5 minutes
+    Then wait 310 seconds
+    Then typeql define; throw exception containing "transaction timeout"
+    # configure transaction timeout to 1 minutes
+    Given set option transaction-timeout-millis to: 60000
+    When session opens transaction of type with options: read
+    Then wait 70 seconds
+    Then typeql define; throw exception containing "transaction timeout"
+
+
+
