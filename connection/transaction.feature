@@ -595,12 +595,16 @@ Feature: Connection Transaction
   @ignore-typedb
   Scenario: transaction timeouts are configurable
     When connection create database: typedb
-    Then set session option session-idle-timeout-millis to: 120000
+    Then set session option session-idle-timeout-millis to: 20000
     Given connection open schema session for database: typedb
-    # configure transaction timeout to 1 minute
-    Given set transaction option transaction-timeout-millis to: 60000
-    When session opens transaction of type: read
-    Then wait 70 seconds
+    Given set transaction option transaction-timeout-millis to: 10000
+    When session opens transaction of type: write
+    Then wait 8 seconds
+    Then typeql define
+      """
+      define person sub entity;
+      """
+    Then wait 4 seconds
     Then typeql define; throws exception containing "Transaction exceeded maximum configured duration"
       """
       define person sub entity;
