@@ -525,7 +525,6 @@ Feature: Value Predicate Resolution
     Then verify answers are complete
 
 
-  # TODO: move to negation.feature
   Scenario: a negation can filter out variables by equality to another variable with a specified value
     Given reasoning schema
       """
