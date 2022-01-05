@@ -161,6 +161,10 @@ Feature: Concept Attribute Type
     When session opens transaction of type: write
     Then attribute(email) is abstract: true
     Then attribute(email) as(string) put: alice@email.com; throws exception
+    When session opens transaction of type: write
+    When put attribute type: company-email, with value type: string
+    When attribute(company-email) set supertype: email
+    Then attribute(email) set abstract: false; throws exception
 
   Scenario: Attribute types can be subtypes of other attribute types
     When put attribute type: first-name, with value type: string
