@@ -184,8 +184,6 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) get role(wife) is abstract: true
     When transaction commits
     When session opens transaction of type: write
-    Then relation(marriage) create new instance; throws exception
-    When session opens transaction of type: write
     Then relation(parentship) is abstract: false
     Then relation(parentship) get role(parent) is abstract: false
     Then relation(parentship) get role(child) is abstract: false
@@ -196,8 +194,6 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) get role(wife) is abstract: true
     When transaction commits
     When session opens transaction of type: write
-    Then relation(marriage) create new instance; throws exception
-    When session opens transaction of type: write
     Then relation(parentship) is abstract: false
     Then relation(parentship) get role(parent) is abstract: false
     Then relation(parentship) get role(child) is abstract: false
@@ -206,15 +202,15 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(parent) is abstract: true
     Then relation(parentship) get role(child) is abstract: true
     When transaction commits
-    When session opens transaction of type: write
-    Then relation(parentship) create new instance; throws exception
     When session opens transaction of type: read
     Then relation(parentship) is abstract: true
     Then relation(parentship) get role(parent) is abstract: true
     Then relation(parentship) get role(child) is abstract: true
-    Then relation(parentship) create new instance; throws exception
-    When session opens transaction of type: write
-    When relation(parentship) set abstract: false
+
+  Scenario: relation and role types can be set to abstract when a subtype has instances
+    When put relation type: parentship
+    When relation(parentship) set relates role: parent
+    When relation(parentship) set relates role: child
     When put relation type: fathership
     When relation(fathership) set supertype: parentship
     When relation(fathership) set relates role: father as parent

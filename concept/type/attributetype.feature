@@ -143,24 +143,16 @@ Feature: Concept Attribute Type
     Then attribute(name) is abstract: true
     When transaction commits
     When session opens transaction of type: write
-    Then attribute(name) as(string) put: alice; throws exception
-    When session opens transaction of type: write
     When put attribute type: email, with value type: string
     Then attribute(email) is abstract: false
     When transaction commits
-    When session opens transaction of type: write
+    When session opens transaction of type: read
     Then attribute(name) is abstract: true
-    Then attribute(name) as(string) put: alice; throws exception
     When session opens transaction of type: write
     Then attribute(email) is abstract: false
     When attribute(email) set abstract: true
     Then attribute(email) is abstract: true
     When transaction commits
-    When session opens transaction of type: write
-    Then attribute(email) as(string) put: alice@email.com; throws exception
-    When session opens transaction of type: write
-    Then attribute(email) is abstract: true
-    Then attribute(email) as(string) put: alice@email.com; throws exception
     When session opens transaction of type: write
     When put attribute type: company-email, with value type: string
     When attribute(company-email) set supertype: email
