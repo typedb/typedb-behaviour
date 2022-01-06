@@ -184,8 +184,6 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) get role(wife) is abstract: true
     When transaction commits
     When session opens transaction of type: write
-    Then relation(marriage) create new instance; throws exception
-    When session opens transaction of type: write
     Then relation(parentship) is abstract: false
     Then relation(parentship) get role(parent) is abstract: false
     Then relation(parentship) get role(child) is abstract: false
@@ -196,8 +194,6 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) get role(wife) is abstract: true
     When transaction commits
     When session opens transaction of type: write
-    Then relation(marriage) create new instance; throws exception
-    When session opens transaction of type: write
     Then relation(parentship) is abstract: false
     Then relation(parentship) get role(parent) is abstract: false
     Then relation(parentship) get role(child) is abstract: false
@@ -206,13 +202,36 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(parent) is abstract: true
     Then relation(parentship) get role(child) is abstract: true
     When transaction commits
-    When session opens transaction of type: write
-    Then relation(parentship) create new instance; throws exception
     When session opens transaction of type: read
     Then relation(parentship) is abstract: true
     Then relation(parentship) get role(parent) is abstract: true
     Then relation(parentship) get role(child) is abstract: true
-    Then relation(parentship) create new instance; throws exception
+
+  Scenario: relation and role types can be set to abstract when a subtype has instances
+    When put relation type: parentship
+    When relation(parentship) set relates role: parent
+    When relation(parentship) set relates role: child
+    When put relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) set relates role: father as parent
+    When relation(fathership) set relates role: father-child as child
+    When put entity type: person
+    When entity(person) set plays role: fathership:father
+    Then transaction commits
+    When connection close all sessions
+    When connection open data session for database: typedb
+    When session opens transaction of type: write
+    Then $m = relation(fathership) create new instance
+    When $a = entity(person) create new instance
+    When relation $m add player for role(father): $a
+    Then transaction commits
+    When connection close all sessions
+    When connection open schema session for database: typedb
+    When session opens transaction of type: write
+    Then relation(parentship) set abstract: true
+    Then transaction commits
+    When session opens transaction of type: read
+    Then relation(parentship) is abstract: true
 
   Scenario: Relation types must have at least one role in order to commit, unless they are abstract
     When put relation type: connection
