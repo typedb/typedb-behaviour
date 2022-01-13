@@ -709,7 +709,7 @@ Feature: TypeQL Match Query
       """
 
 
-  Scenario: 'iid' does not match the instance with the specified internal iid with the wrong type
+  Scenario: 'iid' for a variable of a different type throws
     Given typeql define
       """
       define
@@ -735,10 +735,11 @@ Feature: TypeQL Match Query
       """
       match $x isa! shop;
       """
-    Then each answer does not satisfy
+    Then templated typeql match; throw exception
       """
       match $x iid <answer.x.iid>; $x isa grocery, has address "123 street";
       """
+
 
   Scenario: match returns an empty answer if there are no matches
     When get answers of typeql match
