@@ -735,7 +735,7 @@ Feature: TypeQL Match Query
       """
       match $x isa! shop;
       """
-    Then templated typeql match; throw exception
+    Then templated typeql match; throws exception
       """
       match $x iid <answer.x.iid>; $x isa grocery, has address "123 street";
       """
