@@ -1139,3 +1139,30 @@ Feature: Negation Resolution
         { $y has index "aa"; } or { $y has index "ee"; } or { $y has index "ff"; } or
         { $y has index "gg"; } or { $y has index "hh"; };
       """
+
+  Scenario: negated and non-negated clauses can use the same rule
+    Given reasoning schema
+      """
+      define
+      rule ocado-sells-all-soft-drinks: when {
+        $y isa soft-drink;
+      } then {
+        $y has retailer 'Ocado';
+      };
+      """
+    Given reasoning data
+      """
+      insert
+      $x isa soft-drink, has name "Fanta";
+      $r "Ocado" isa retailer;
+      """
+    Then verify answers are complete
+    Given reasoning query
+      """
+      match
+        $x has retailer $r;
+        not { $r = "Ocado"; };
+      """
+    Then verify answer size is: 0
+    Then verify answers are sound
+    Then verify answers are complete
