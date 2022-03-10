@@ -1144,6 +1144,12 @@ Feature: Negation Resolution
     Given reasoning schema
       """
       define
+      name sub attribute, value string;
+      retailer sub attribute, value string;
+      soft-drink sub entity,
+        owns name,
+        owns retailer;
+
       rule ocado-sells-all-soft-drinks: when {
         $y isa soft-drink;
       } then {
@@ -1166,3 +1172,33 @@ Feature: Negation Resolution
     Then verify answer size is: 0
     Then verify answers are sound
     Then verify answers are complete
+
+  Scenario: Double negatives are resolved correctly
+    Given reasoning schema
+      """
+      define
+      enemies sub relation,
+        relates enemy;
+      person plays enemies:enemy;
+
+      rule non-friends-are-enemies:
+      when {
+        $p1 isa person;
+        $p2 isa person;
+        not { ($p1, $p2) isa friendship; };
+      } then {
+        (enemy: $p1, enemy: $p2) isa enemies;
+      };
+      """
+    Given reasoning data
+      """
+      insert
+      $p1 isa person, has name "a";
+      """
+    Given verifier is initialised
+    Given reasoning query
+      """
+      match $p isa person; not { ($p, $f) isa enemies; };
+      """
+    Then verify answer size is: 0
+#    TODO: Add a case with non-zero answers
