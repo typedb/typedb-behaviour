@@ -1173,7 +1173,7 @@ Feature: Negation Resolution
     Then verify answers are sound
     Then verify answers are complete
 
-  Scenario: Double negatives are resolved correctly
+  Scenario: double nested negations are resolved correctly
     Given reasoning schema
       """
       define
