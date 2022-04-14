@@ -341,6 +341,7 @@ Feature: Concept Relation Type and Role Type
       | fathership:father |
     Then relation(fathership) get role(child) get subtypes contain:
       | parentship:child |
+      | father-son:son   |
     Then relation(parentship) get role(parent) get subtypes contain:
       | parentship:parent |
       | fathership:father |
