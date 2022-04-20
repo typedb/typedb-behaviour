@@ -1162,7 +1162,7 @@ Feature: Negation Resolution
       $x isa soft-drink, has name "Fanta";
       $r "Ocado" isa retailer;
       """
-    Then verify answers are complete
+    Given verifier is initialised
     Given reasoning query
       """
       match
