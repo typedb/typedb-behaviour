@@ -335,6 +335,7 @@ Feature: Variable Role Resolution
   #  }
 
   Scenario: variable roles are correctly mapped to answers for a ternary relation with 3 possible roleplayers
+    Given verifier is initialised
     Given reasoning query
       """
       match
@@ -377,6 +378,7 @@ Feature: Variable Role Resolution
 
 
   Scenario: variable roles are correctly mapped to answers for a quaternary relation with 3 possible roleplayers
+    Given verifier is initialised
     Given reasoning query
       """
       match
@@ -418,6 +420,7 @@ Feature: Variable Role Resolution
   # Note: This test uses the sub-relation 'quaternary' while the others use the super-relations '{n}-ary-base'.
   # If this test passes while others fail, there may be an inheritance-related issue.
   Scenario: variable roles are correctly mapped to answers for a quaternary relation with 2 possible roleplayers
+    Given verifier is initialised
     Given reasoning query
       """
       match
