@@ -281,8 +281,9 @@ Feature: TypeQL Match Query
     Given typeql define
       """
       define
-      name abstract;
-      club-name sub name;
+      general-name sub attribute, abstract, value string;
+      institution sub entity, abstract, owns general-name;
+      club-name sub general-name;
       club sub entity, owns club-name;
       """
     Given transaction commits
@@ -290,20 +291,20 @@ Feature: TypeQL Match Query
     Given session opens transaction of type: read
     When get answers of typeql match
       """
-      match $x owns name;
+      match $x owns general-name;
       """
     Then uniquely identify answer concepts
-      | x             |
-      | label:person  |
-      | label:company |
+      | x                 |
+      | label:institution |
 
 
   Scenario: 'owns' does not match types that own only a supertype of the specified attribute type
     Given typeql define
       """
       define
-      name abstract;
-      club-name sub name;
+      general-name sub attribute, abstract, value string;
+      institution sub entity, abstract, owns general-name;
+      club-name sub general-name;
       club sub entity, owns club-name;
       """
     Given transaction commits
