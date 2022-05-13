@@ -893,10 +893,9 @@ Feature: TypeQL Undefine Query
     Given typeql define
       """
       define
-      name abstract;
-      first-name sub name;
       employment relates manager-name;
-      name plays employment:manager-name;
+      abstract-name sub attribute, abstract, value string, plays employment:manager-name;
+      first-name sub abstract-name;
       """
     Given transaction commits
 
@@ -910,7 +909,7 @@ Feature: TypeQL Undefine Query
       | label:employment:manager-name |
     When typeql undefine
       """
-      undefine name plays employment:manager-name;
+      undefine abstract-name plays employment:manager-name;
       """
     Then transaction commits
 
@@ -926,10 +925,9 @@ Feature: TypeQL Undefine Query
     Given typeql define
       """
       define
-      name abstract;
-      first-name sub name;
       locale sub attribute, value string;
-      name owns locale;
+      abstract-name sub attribute, abstract, value string, owns locale;
+      first-name sub abstract-name;
       """
     Given transaction commits
 
@@ -939,12 +937,12 @@ Feature: TypeQL Undefine Query
       match $x owns locale;
       """
     Given uniquely identify answer concepts
-      | x                |
-      | label:name       |
-      | label:first-name |
+      | x                   |
+      | label:abstract-name |
+      | label:first-name    |
     When typeql undefine
       """
-      undefine name owns locale;
+      undefine abstract-name owns locale;
       """
     Then transaction commits
 
@@ -960,10 +958,9 @@ Feature: TypeQL Undefine Query
     Given typeql define
       """
       define
-      name abstract;
-      first-name sub name;
       name-id sub attribute, value long;
-      name owns name-id @key;
+      abstract-name sub attribute, abstract, value string, owns name-id @key;
+      first-name sub abstract-name;
       """
     Given transaction commits
 
@@ -973,12 +970,12 @@ Feature: TypeQL Undefine Query
       match $x owns name-id @key;
       """
     Given uniquely identify answer concepts
-      | x                |
-      | label:name       |
-      | label:first-name |
+      | x                   |
+      | label:abstract-name |
+      | label:first-name    |
     When typeql undefine
       """
-      undefine name owns name-id;
+      undefine abstract-name owns name-id;
       """
     Then transaction commits
 

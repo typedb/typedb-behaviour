@@ -1685,18 +1685,24 @@ Feature: TypeQL Define Query
   Scenario: a concrete relation type can be converted to an abstract relation type
     When typeql define
       """
-      define employment abstract;
+      define friendship sub relation, relates friend;
+      """
+    Then transaction commits
+    When session opens transaction of type: write
+    When typeql define
+      """
+      define friendship abstract;
       """
     Then transaction commits
 
     When session opens transaction of type: read
     When get answers of typeql match
       """
-      match $x sub employment; $x abstract;
+      match $x sub friendship, abstract;
       """
     Then uniquely identify answer concepts
       | x                |
-      | label:employment |
+      | label:friendship |
 
 
   Scenario: a concrete attribute type can be converted to an abstract attribute type
