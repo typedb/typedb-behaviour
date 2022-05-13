@@ -1237,25 +1237,25 @@ Feature: TypeQL Define Query
   Scenario: defining attribute type hierarchies is idempotent
     When typeql define
       """
-      define name sub attribute, abstract, value string; location-name sub name;
+      define super-name sub attribute, abstract, value string; location-name sub name;
       """
     Then transaction commits
     Then session opens transaction of type: write
     Then typeql define
       """
-      define name sub attribute, abstract, value string; location-name sub name;
+      define super-name sub attribute, abstract, value string; location-name sub name;
       """
     Then transaction commits
     Then session opens transaction of type: read
     When get answers of typeql match
       """
       match
-      $name type name; $name abstract;
-      $location type location-name, sub name;
+      $name type super-name, abstract;
+      $location type location-name, sub super-name;
       """
     Then uniquely identify answer concepts
-      | name       | location            |
-      | label:name | label:location-name |
+      | name             | location            |
+      | label:super-name | label:location-name |
 
 
   Scenario: repeating the term 'abstract' when defining a type causes an error to be thrown
@@ -1702,18 +1702,23 @@ Feature: TypeQL Define Query
   Scenario: a concrete attribute type can be converted to an abstract attribute type
     When typeql define
       """
-      define name abstract;
+      define age sub attribute, value long;
       """
     Then transaction commits
-
+    Given session opens transaction of type: write
+    When typeql define
+      """
+      define age abstract;
+      """
+    Then transaction commits
     When session opens transaction of type: read
     When get answers of typeql match
       """
-      match $x sub name; $x abstract;
+      match $x sub age, abstract;
       """
     Then uniquely identify answer concepts
-      | x          |
-      | label:name |
+      | x         |
+      | label:age |
 
 
   Scenario: an existing entity type cannot be converted to abstract if it has existing instances
