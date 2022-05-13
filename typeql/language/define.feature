@@ -1237,13 +1237,13 @@ Feature: TypeQL Define Query
   Scenario: defining attribute type hierarchies is idempotent
     When typeql define
       """
-      define super-name sub attribute, abstract, value string; location-name sub name;
+      define super-name sub attribute, abstract, value string; location-name sub super-name;
       """
     Then transaction commits
     Then session opens transaction of type: write
     Then typeql define
       """
-      define super-name sub attribute, abstract, value string; location-name sub name;
+      define super-name sub attribute, abstract, value string; location-name sub super-name;
       """
     Then transaction commits
     Then session opens transaction of type: read
