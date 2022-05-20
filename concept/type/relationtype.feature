@@ -433,6 +433,10 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get related roles contain:
       | fathership:father |
       | parentship:child  |
+    Then relation(fathership) get related explicit roles contain:
+      | fathership:father |
+    Then relation(fathership) get related explicit roles do not contain:
+      | parentship:child  |
     When transaction commits
     When session opens transaction of type: write
     When put relation type: mothership
@@ -441,13 +445,25 @@ Feature: Concept Relation Type and Role Type
     Then relation(mothership) get related roles contain:
       | mothership:mother |
       | parentship:child  |
+    Then relation(mothership) get related explicit roles contain:
+      | mothership:mother |
+    Then relation(mothership) get related explicit roles do not contain:
+      | parentship:child  |
     When transaction commits
     When session opens transaction of type: read
     Then relation(fathership) get related roles contain:
       | fathership:father |
       | parentship:child  |
+    Then relation(fathership) get related explicit roles contain:
+      | fathership:father |
+    Then relation(fathership) get related explicit roles do not contain:
+      | parentship:child  |
     Then relation(mothership) get related roles contain:
       | mothership:mother |
+      | parentship:child  |
+    Then relation(mothership) get related explicit roles contain:
+      | mothership:mother |
+    Then relation(mothership) get related explicit roles do not contain:
       | parentship:child  |
 
   Scenario: Relation types can override inherited related role types
@@ -457,6 +473,8 @@ Feature: Concept Relation Type and Role Type
     When put relation type: fathership
     When relation(fathership) set supertype: parentship
     When relation(fathership) set relates role: father as parent
+    Then relation(fathership) get overridden role(father) is null: false
+    Then relation(fathership) get overridden role(father) get label: parent
     Then relation(fathership) get related roles do not contain:
       | parentship:parent |
     When transaction commits
