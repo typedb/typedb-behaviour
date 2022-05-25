@@ -192,7 +192,7 @@ Feature: Variable Role Resolution
     Then verify answers are sound
     Then verify answers are complete
 
-
+  @ignore
   Scenario: converting a fixed role to a variable bound with 'type role' (?)
     Given verifier is initialised
     Given reasoning query
