@@ -192,7 +192,7 @@ Feature: Variable Role Resolution
     Then verify answers are sound
     Then verify answers are complete
 
-
+  @ignore
   Scenario: converting a fixed role to a variable bound with 'type role' (?)
     Given verifier is initialised
     Given reasoning query
@@ -343,16 +343,12 @@ Feature: Variable Role Resolution
       """
     # This query is equivalent to matching ($r2: $a2, $r3: $a3) isa binary-base, as role1 and $a1 each have only 1 value
     Then verify answer size is: 63
-    Then verify answers are sound
-    Then verify answers are complete
     Given reasoning query
       """
       match (ternary-role1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
       """
     # Now the bound role 'role1' is in {a, b, c}, tripling the answer size
     Then verify answer size is: 189
-    Then verify answers are sound
-    Then verify answers are complete
     Given reasoning query
       """
       match ($r1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
@@ -372,8 +368,6 @@ Feature: Variable Role Resolution
     # and there are 27 ternary-base relations in the knowledge graph (including both material and inferred)
     # giving an answer size of 34 * 27 = 918
     Then verify answer size is: 918
-    Then verify answers are sound
-    Then verify answers are complete
 
 
   Scenario: variable roles are correctly mapped to answers for a quaternary relation with 3 possible roleplayers
@@ -385,16 +379,12 @@ Feature: Variable Role Resolution
       """
     # This query is equivalent to matching ($r2: $a2, $r3: $a3, $r4: $a4) isa ternary-base
     Then verify answer size is: 918
-    Then verify answers are sound
-    Then verify answers are complete
     Given reasoning query
       """
       match (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
       """
     # Now the bound role 'role1' is in {a, b, c}, tripling the answer size
     Then verify answer size is: 2754
-    Then verify answers are sound
-    Then verify answers are complete
     Given reasoning query
       """
       match ($r1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
@@ -411,8 +401,6 @@ Feature: Variable Role Resolution
     # and there are 81 quaternary-base relations in the knowledge graph (including both material and inferred)
     # giving an answer size of 209 * 81 = 16929
     Then verify answer size is: 16929
-    Then verify answers are sound
-    Then verify answers are complete
 
 
   # Note: This test uses the sub-relation 'quaternary' while the others use the super-relations '{n}-ary-base'.
@@ -426,16 +414,12 @@ Feature: Variable Role Resolution
       """
     # This query is equivalent to matching ($r2: $a2, $r3: $a3, $r4: $a4) isa ternary
     Then verify answer size is: 272
-    Then verify answers are sound
-    Then verify answers are complete
     Given reasoning query
       """
       match (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
       """
     # Now the bound role 'role1' is in {a, b}, doubling the answer size
     Then verify answer size is: 544
-    Then verify answers are sound
-    Then verify answers are complete
     Given reasoning query
       """
       match ($r1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
@@ -445,5 +429,3 @@ Feature: Variable Role Resolution
     # and there are 16 quaternary relations in the knowledge graph (including both material and inferred)
     # giving an answer size of 209 * 16 = 3344
     Then verify answer size is: 3344
-    Then verify answers are sound
-    Then verify answers are complete

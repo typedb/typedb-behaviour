@@ -440,3 +440,51 @@ Feature: Schema Query Resolution (Variable Types)
     Then verify answer size is: 4
     Then verify answers are sound
     Then verify answers are complete
+
+  Scenario: an inferred relation is correctly matched by a variable type bound to the base relation type
+    Given reasoning schema
+      """
+      define
+      rule strictly-typed-rule:
+      when {
+        $p isa person;
+      } then {
+        (friend: $p) isa friendship;
+      };
+      """
+    Given reasoning data
+      """
+      insert $p isa person;
+      """
+    Given reasoning query
+      """
+      match
+        $p isa person;
+        ($p) isa $f;
+        $f type relation;
+      """
+    Then verify answer size is: 1
+
+  Scenario: an inferred relation is correctly matched with a variable role type bound to the base role type
+    Given reasoning schema
+      """
+      define
+      rule strictly-typed-rule:
+      when {
+        $p isa person;
+      } then {
+        (friend: $p) isa friendship;
+      };
+      """
+    Given reasoning data
+      """
+      insert $p isa person;
+      """
+    Given reasoning query
+      """
+      match
+        $p isa person;
+        ($role: $p) isa friendship;
+        $role type relation:role;
+      """
+    Then verify answer size is: 1
