@@ -1139,3 +1139,70 @@ Feature: Negation Resolution
         { $y has index "aa"; } or { $y has index "ee"; } or { $y has index "ff"; } or
         { $y has index "gg"; } or { $y has index "hh"; };
       """
+
+  Scenario: Negated relation which is both retrievable and concludable must always consider both (issue#6500)
+    # In the issue, (from: door, to:common-room) was incorrectly returned, as it contradicts a retrievable.
+    Given reasoning schema
+      """
+      define
+
+      place plays passage:from,
+            plays passage:to,
+            plays reachable:from,
+            plays reachable:to;
+
+      passage sub relation,
+          relates from,
+          relates to;
+
+      reachable sub relation,
+          relates from,
+          relates to;
+
+      rule location-hierarchy-transitivity: when {
+          (superior: $a, subordinate: $b) isa location-hierarchy;
+          (superior: $b, subordinate: $c) isa location-hierarchy;
+      } then {
+          (superior: $a, subordinate: $c) isa location-hierarchy;
+      };
+
+      rule buggy-reachable-rule:
+          when {
+              $from isa place;
+              $to isa place;
+              $common-superior isa place;
+
+              (superior: $common-superior, subordinate: $from) isa location-hierarchy;
+              (from: $common-superior, to: $to) isa passage;
+              not {$common-superior is $to;};
+              not {(superior: $to, subordinate: $from) isa location-hierarchy;};
+          } then {
+              (from: $from, to: $to) isa reachable;
+          };
+      """
+    Given reasoning data
+      """
+      insert
+      $forest isa place, has name "forest";
+      $cabin isa place, has name "cabin";
+      $common-room isa place, has name "common room";
+      $fridge isa place, has name "fridge";
+
+      (superior: $forest,       subordinate: $cabin) isa location-hierarchy;
+      (superior: $cabin,        subordinate: $common-room) isa location-hierarchy;
+      (superior: $common-room,  subordinate: $fridge) isa location-hierarchy;
+
+      (from: $forest, to: $common-room) isa passage;
+      """
+    Given verifier is initialised
+    Given reasoning query
+      """
+      match
+      $from isa place, has name $from-name;
+      $to isa place, has name $to-name;
+      (from: $from, to: $to) isa reachable;
+      get $from-name, $to-name;
+      """
+    Then verify answer size is: 2
+    Then verify answers are sound
+    Then verify answers are complete
