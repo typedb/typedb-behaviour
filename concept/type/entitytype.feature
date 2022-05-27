@@ -418,21 +418,41 @@ Feature: Concept Entity Type
     Then entity(customer) get owns key types contain:
       | email     |
       | reference |
+    Then entity(customer) get owns explicit key types contain:
+      | reference |
+    Then entity(customer) get owns explicit key types do not contain:
+      | email     |
     Then entity(customer) get owns attribute types contain:
       | email     |
       | reference |
       | name      |
       | rating    |
+    Then entity(customer) get owns explicit attribute types contain:
+      | reference |
+      | rating    |
+    Then entity(customer) get owns explicit attribute types do not contain:
+      | email     |
+      | name      |
     When transaction commits
     When session opens transaction of type: write
     Then entity(customer) get owns key types contain:
       | email     |
       | reference |
+    Then entity(customer) get owns explicit key types contain:
+      | reference |
+    Then entity(customer) get owns explicit key types do not contain:
+      | email     |
     Then entity(customer) get owns attribute types contain:
       | email     |
       | reference |
       | name      |
       | rating    |
+    Then entity(customer) get owns explicit attribute types contain:
+      | reference |
+      | rating    |
+    Then entity(customer) get owns explicit attribute types do not contain:
+      | email     |
+      | name      |
     When put attribute type: license, with value type: string
     When put attribute type: points, with value type: double
     When put entity type: subscriber
@@ -444,15 +464,30 @@ Feature: Concept Entity Type
     Then entity(customer) get owns key types contain:
       | email     |
       | reference |
+    Then entity(customer) get owns explicit key types contain:
+      | reference |
+    Then entity(customer) get owns explicit key types do not contain:
+      | email     |
     Then entity(customer) get owns attribute types contain:
       | email     |
       | reference |
       | name      |
       | rating    |
+    Then entity(customer) get owns explicit attribute types contain:
+      | reference |
+      | rating    |
+    Then entity(customer) get owns explicit attribute types do not contain:
+      | email     |
+      | name      |
     Then entity(subscriber) get owns key types contain:
       | email     |
       | reference |
       | license   |
+    Then entity(subscriber) get owns explicit key types contain:
+      | license   |
+    Then entity(subscriber) get owns explicit key types do not contain:
+      | email     |
+      | reference |
     Then entity(subscriber) get owns attribute types contain:
       | email     |
       | reference |
@@ -460,6 +495,14 @@ Feature: Concept Entity Type
       | name      |
       | rating    |
       | points    |
+    Then entity(subscriber) get owns explicit attribute types contain:
+      | license   |
+      | points    |
+    Then entity(subscriber) get owns explicit attribute types do not contain:
+      | email     |
+      | reference |
+      | name      |
+      | rating    |
 
   Scenario: Entity types can inherit keys and attributes that are subtypes of each other
     When put attribute type: username, with value type: string
@@ -484,21 +527,41 @@ Feature: Concept Entity Type
     Then entity(customer) get owns key types contain:
       | username  |
       | reference |
+    Then entity(customer) get owns explicit key types contain:
+      | reference |
+    Then entity(customer) get owns explicit key types do not contain:
+      | username  |
     Then entity(customer) get owns attribute types contain:
       | username  |
       | reference |
       | score     |
       | rating    |
+    Then entity(customer) get owns explicit attribute types contain:
+      | reference |
+      | rating    |
+    Then entity(customer) get owns explicit attribute types do not contain:
+      | username  |
+      | score     |
     When transaction commits
     When session opens transaction of type: write
     Then entity(customer) get owns key types contain:
       | username  |
       | reference |
+    Then entity(customer) get owns explicit key types contain:
+      | reference |
+    Then entity(customer) get owns explicit key types do not contain:
+      | username  |
     Then entity(customer) get owns attribute types contain:
       | username  |
       | reference |
       | score     |
       | rating    |
+    Then entity(customer) get owns explicit attribute types contain:
+      | reference |
+      | rating    |
+    Then entity(customer) get owns explicit attribute types do not contain:
+      | username  |
+      | score     |
     When put attribute type: license, with value type: string
     When attribute(license) set supertype: reference
     When put attribute type: points, with value type: double
@@ -513,15 +576,30 @@ Feature: Concept Entity Type
     Then entity(customer) get owns key types contain:
       | username  |
       | reference |
+    Then entity(customer) get owns explicit key types contain:
+      | reference |
+    Then entity(customer) get owns explicit key types do not contain:
+      | username  |
     Then entity(customer) get owns attribute types contain:
       | username  |
       | reference |
       | score     |
       | rating    |
+    Then entity(customer) get owns explicit attribute types contain:
+      | reference |
+      | rating    |
+    Then entity(customer) get owns explicit attribute types do not contain:
+      | username  |
+      | score     |
     Then entity(subscriber) get owns key types contain:
       | username  |
       | reference |
       | license   |
+    Then entity(subscriber) get owns explicit key types contain:
+      | license   |
+    Then entity(subscriber) get owns explicit key types do not contain:
+      | username  |
+      | reference |
     Then entity(subscriber) get owns attribute types contain:
       | username  |
       | reference |
@@ -529,6 +607,14 @@ Feature: Concept Entity Type
       | score     |
       | rating    |
       | points    |
+    Then entity(subscriber) get owns explicit attribute types contain:
+      | license   |
+      | points    |
+    Then entity(subscriber) get owns explicit attribute types do not contain:
+      | username  |
+      | reference |
+      | score     |
+      | rating    |
 
   Scenario: Entity types can override inherited keys and attributes
     When put attribute type: username, with value type: string
@@ -558,12 +644,20 @@ Feature: Concept Entity Type
     When entity(customer) set owns key type: work-email as email
     When entity(customer) set owns attribute type: rating
     When entity(customer) set owns attribute type: nick-name as name
+    Then entity(customer) get owns overridden attribute(work-email) get label: email
+    Then entity(customer) get owns overridden attribute(nick-name) get label: name
     Then entity(customer) get owns key types contain:
       | username   |
       | reference  |
       | work-email |
     Then entity(customer) get owns key types do not contain:
       | email |
+    Then entity(customer) get owns explicit key types contain:
+      | reference  |
+      | work-email |
+    Then entity(customer) get owns explicit key types do not contain:
+      | username   |
+      | email      |
     Then entity(customer) get owns attribute types contain:
       | username   |
       | reference  |
@@ -574,14 +668,32 @@ Feature: Concept Entity Type
     Then entity(customer) get owns attribute types do not contain:
       | email |
       | name  |
+    Then entity(customer) get owns explicit attribute types contain:
+      | reference  |
+      | work-email |
+      | rating     |
+      | nick-name  |
+    Then entity(customer) get owns explicit attribute types do not contain:
+      | username   |
+      | age        |
+      | email      |
+      | name       |
     When transaction commits
     When session opens transaction of type: write
+    Then entity(customer) get owns overridden attribute(work-email) get label: email
+    Then entity(customer) get owns overridden attribute(nick-name) get label: name
     Then entity(customer) get owns key types contain:
       | username   |
       | reference  |
       | work-email |
     Then entity(customer) get owns key types do not contain:
       | email |
+    Then entity(customer) get owns explicit key types contain:
+      | reference  |
+      | work-email |
+    Then entity(customer) get owns explicit key types do not contain:
+      | username   |
+      | email      |
     Then entity(customer) get owns attribute types contain:
       | username   |
       | reference  |
@@ -592,6 +704,16 @@ Feature: Concept Entity Type
     Then entity(customer) get owns attribute types do not contain:
       | email |
       | name  |
+    Then entity(customer) get owns explicit attribute types contain:
+      | reference  |
+      | work-email |
+      | rating     |
+      | nick-name  |
+    Then entity(customer) get owns explicit attribute types do not contain:
+      | username   |
+      | age        |
+      | email      |
+      | name       |
     When put attribute type: license, with value type: string
     When attribute(license) set supertype: reference
     When put attribute type: points, with value type: double
@@ -608,6 +730,12 @@ Feature: Concept Entity Type
       | work-email |
     Then entity(customer) get owns key types do not contain:
       | email |
+    Then entity(customer) get owns explicit key types contain:
+      | reference  |
+      | work-email |
+    Then entity(customer) get owns explicit key types do not contain:
+      | username   |
+      | email      |
     Then entity(customer) get owns attribute types contain:
       | username   |
       | reference  |
@@ -618,11 +746,30 @@ Feature: Concept Entity Type
     Then entity(customer) get owns attribute types do not contain:
       | email |
       | name  |
+    Then entity(customer) get owns explicit attribute types contain:
+      | reference  |
+      | work-email |
+      | rating     |
+      | nick-name  |
+    Then entity(customer) get owns explicit attribute types do not contain:
+      | username   |
+      | age        |
+      | email      |
+      | name       |
+    Then entity(subscriber) get owns overridden attribute(license) get label: reference
+    Then entity(subscriber) get owns overridden attribute(points) get label: rating
     Then entity(subscriber) get owns key types contain:
       | username   |
       | license    |
       | work-email |
     Then entity(subscriber) get owns key types do not contain:
+      | email     |
+      | reference |
+    Then entity(subscriber) get owns explicit key types contain:
+      | license    |
+    Then entity(subscriber) get owns explicit key types do not contain:
+      | username   |
+      | work-email |
       | email     |
       | reference |
     Then entity(subscriber) get owns attribute types contain:
@@ -633,6 +780,18 @@ Feature: Concept Entity Type
       | points     |
       | nick-name  |
     Then entity(subscriber) get owns attribute types do not contain:
+      | email      |
+      | references |
+      | name       |
+      | rating     |
+    Then entity(subscriber) get owns explicit attribute types contain:
+      | license    |
+      | points     |
+    Then entity(subscriber) get owns explicit attribute types do not contain:
+      | username   |
+      | work-email |
+      | age        |
+      | nick-name  |
       | email      |
       | references |
       | name       |
@@ -649,6 +808,7 @@ Feature: Concept Entity Type
     When put entity type: customer
     When entity(customer) set supertype: person
     When entity(customer) set owns key type: username as name
+    Then entity(customer) get owns overridden attribute(username) get label: name
     Then entity(customer) get owns key types contain:
       | username |
     Then entity(customer) get owns key types do not contain:
@@ -659,6 +819,7 @@ Feature: Concept Entity Type
       | name |
     When transaction commits
     When session opens transaction of type: read
+    Then entity(customer) get owns overridden attribute(username) get label: name
     Then entity(customer) get owns key types contain:
       | username |
     Then entity(customer) get owns key types do not contain:
@@ -702,9 +863,11 @@ Feature: Concept Entity Type
     When entity(customer) set abstract: true
     When entity(customer) set supertype: person
     When entity(customer) set owns key type: work-email as email
+    Then entity(customer) get owns overridden attribute(work-email) get label: email
     When transaction commits
     When session opens transaction of type: write
     When entity(customer) set owns key type: work-email as email
+    Then entity(customer) get owns overridden attribute(work-email) get label: email
 
   Scenario: Entity types can re-override attributes as attributes
     When put attribute type: name, with value type: string
@@ -718,9 +881,11 @@ Feature: Concept Entity Type
     When entity(customer) set abstract: true
     When entity(customer) set supertype: person
     When entity(customer) set owns attribute type: nick-name as name
+    Then entity(customer) get owns overridden attribute(nick-name) get label: name
     When transaction commits
     When session opens transaction of type: write
     When entity(customer) set owns attribute type: nick-name as name
+    Then entity(customer) get owns overridden attribute(nick-name) get label: name
 
   Scenario: Entity types can redeclare keys as attributes
     When put attribute type: name, with value type: string
@@ -748,9 +913,12 @@ Feature: Concept Entity Type
     When put attribute type: email, with value type: string
     When put entity type: person
     When entity(person) set owns attribute type: email
+    Then entity(person) get owns overridden attribute(email) is null: true
     When put entity type: customer
     When entity(customer) set supertype: person
     Then entity(customer) set owns key type: email
+    Then entity(customer) get owns overridden attribute(email) is null: false
+    Then entity(customer) get owns overridden attribute(email) get label: email
     Then entity(customer) get owns key types contain:
       | email |
     When transaction commits
@@ -1002,6 +1170,12 @@ Feature: Concept Entity Type
       | parentship:child  |
       | marriage:husband  |
       | marriage:wife     |
+    Then entity(person) get playing roles explicit contain:
+      | marriage:husband  |
+      | marriage:wife     |
+    Then entity(person) get playing roles explicit do not contain:
+      | parentship:parent |
+      | parentship:child  |
     When transaction commits
     When session opens transaction of type: write
     Then entity(person) get playing roles contain:
@@ -1009,6 +1183,12 @@ Feature: Concept Entity Type
       | parentship:child  |
       | marriage:husband  |
       | marriage:wife     |
+    Then entity(person) get playing roles explicit contain:
+      | marriage:husband  |
+      | marriage:wife     |
+    Then entity(person) get playing roles explicit do not contain:
+      | parentship:parent |
+      | parentship:child  |
     When put relation type: sales
     When relation(sales) set relates role: buyer
     When put entity type: customer
@@ -1020,6 +1200,13 @@ Feature: Concept Entity Type
       | marriage:husband  |
       | marriage:wife     |
       | sales:buyer       |
+    Then entity(customer) get playing roles explicit contain:
+      | sales:buyer       |
+    Then entity(customer) get playing roles explicit do not contain:
+      | parentship:parent |
+      | parentship:child  |
+      | marriage:husband  |
+      | marriage:wife     |
     When transaction commits
     When session opens transaction of type: read
     Then entity(animal) get playing roles contain:
@@ -1054,11 +1241,21 @@ Feature: Concept Entity Type
       | parentship:parent |
       | fathership:father |
       | parentship:child  |
+    Then entity(man) get playing roles explicit contain:
+      | fathership:father |
+    Then entity(man) get playing roles explicit do not contain:
+      | parentship:parent |
+      | parentship:child  |
     When transaction commits
     When session opens transaction of type: write
     Then entity(man) get playing roles contain:
       | parentship:parent |
       | fathership:father |
+      | parentship:child  |
+    Then entity(man) get playing roles explicit contain:
+      | fathership:father |
+    Then entity(man) get playing roles explicit do not contain:
+      | parentship:parent |
       | parentship:child  |
     When put relation type: mothership
     When relation(mothership) set supertype: parentship
@@ -1070,6 +1267,11 @@ Feature: Concept Entity Type
       | parentship:parent |
       | mothership:mother |
       | parentship:child  |
+    Then entity(woman) get playing roles explicit contain:
+      | mothership:mother |
+    Then entity(woman) get playing roles explicit do not contain:
+      | parentship:parent |
+      | parentship:child  |
     When transaction commits
     When session opens transaction of type: read
     Then entity(person) get playing roles contain:
@@ -1079,9 +1281,19 @@ Feature: Concept Entity Type
       | parentship:parent |
       | fathership:father |
       | parentship:child  |
+    Then entity(man) get playing roles explicit contain:
+      | fathership:father |
+    Then entity(man) get playing roles explicit do not contain:
+      | parentship:parent |
+      | parentship:child  |
     Then entity(woman) get playing roles contain:
       | parentship:parent |
       | mothership:mother |
+      | parentship:child  |
+    Then entity(woman) get playing roles explicit contain:
+      | mothership:mother |
+    Then entity(woman) get playing roles explicit do not contain:
+      | parentship:parent |
       | parentship:child  |
 
   Scenario: Entity types can override inherited playing role types
@@ -1102,12 +1314,22 @@ Feature: Concept Entity Type
       | parentship:child  |
     Then entity(man) get playing roles do not contain:
       | parentship:parent |
+    Then entity(man) get playing roles explicit contain:
+      | fathership:father |
+    Then entity(man) get playing roles explicit do not contain:
+      | parentship:child  |
+      | parentship:parent |
     When transaction commits
     When session opens transaction of type: write
     Then entity(man) get playing roles contain:
       | fathership:father |
       | parentship:child  |
     Then entity(man) get playing roles do not contain:
+      | parentship:parent |
+    Then entity(man) get playing roles explicit contain:
+      | fathership:father |
+    Then entity(man) get playing roles explicit do not contain:
+      | parentship:child  |
       | parentship:parent |
     When put relation type: mothership
     When relation(mothership) set supertype: parentship
@@ -1120,6 +1342,11 @@ Feature: Concept Entity Type
       | parentship:child  |
     Then entity(woman) get playing roles do not contain:
       | parentship:parent |
+    Then entity(woman) get playing roles explicit contain:
+      | mothership:mother |
+    Then entity(woman) get playing roles explicit do not contain:
+      | parentship:child  |
+      | parentship:parent |
     When transaction commits
     When session opens transaction of type: read
     Then entity(person) get playing roles contain:
@@ -1130,10 +1357,20 @@ Feature: Concept Entity Type
       | parentship:child  |
     Then entity(man) get playing roles do not contain:
       | parentship:parent |
+    Then entity(man) get playing roles explicit contain:
+      | fathership:father |
+    Then entity(man) get playing roles explicit do not contain:
+      | parentship:child  |
+      | parentship:parent |
     Then entity(woman) get playing roles contain:
       | mothership:mother |
       | parentship:child  |
     Then entity(woman) get playing roles do not contain:
+      | parentship:parent |
+    Then entity(woman) get playing roles explicit contain:
+      | mothership:mother |
+    Then entity(woman) get playing roles explicit do not contain:
+      | parentship:child  |
       | parentship:parent |
 
   Scenario: Entity types can redeclare playing role types

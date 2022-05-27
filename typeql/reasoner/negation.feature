@@ -1140,6 +1140,70 @@ Feature: Negation Resolution
         { $y has index "gg"; } or { $y has index "hh"; };
       """
 
+  Scenario: negated and non-negated clauses can use the same rule
+    Given reasoning schema
+      """
+      define
+      name sub attribute, value string;
+      retailer sub attribute, value string;
+      soft-drink sub entity,
+        owns name,
+        owns retailer;
+
+      rule ocado-sells-all-soft-drinks: when {
+        $y isa soft-drink;
+      } then {
+        $y has retailer 'Ocado';
+      };
+      """
+    Given reasoning data
+      """
+      insert
+      $x isa soft-drink, has name "Fanta";
+      $r "Ocado" isa retailer;
+      """
+    Given verifier is initialised
+    Given reasoning query
+      """
+      match
+        $x has retailer $r;
+        not { $r = "Ocado"; };
+      """
+    Then verify answer size is: 0
+    Then verify answers are sound
+    Then verify answers are complete
+
+  Scenario: double nested negations are resolved correctly
+    Given reasoning schema
+      """
+      define
+      enemies sub relation,
+        relates enemy;
+      person plays enemies:enemy;
+
+      rule non-friends-are-enemies:
+      when {
+        $p1 isa person;
+        $p2 isa person;
+        not { ($p1, $p2) isa friendship; };
+      } then {
+        (enemy: $p1, enemy: $p2) isa enemies;
+      };
+      """
+    Given reasoning data
+      """
+      insert
+      $p1 isa person, has name "a";
+      """
+    Given verifier is initialised
+    Given reasoning query
+      """
+      match $p isa person; not { ($p, $f) isa enemies; };
+      """
+    Then verify answer size is: 0
+#    TODO: Add a case with non-zero answers
+
+
   Scenario: Negated relation which is both retrievable and concludable must always consider both (issue#6500)
     # In the issue, (from: door, to:common-room) was incorrectly returned, as it contradicts a retrievable.
     Given reasoning schema

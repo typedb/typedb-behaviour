@@ -221,8 +221,6 @@ Feature: Relation Inference Resolution
       """
       match $r isa friendship;
       """
-    Then verify answers are sound
-    Then verify answers are complete
     # When there is 1 concept we have {aa}.
     # Adding a 2nd concept gives us 2 new relations - where each relation contains b, and one other concept (a or b).
     # Adding a 3rd concept gives us 3 new relations - where each relation contains c, and one other concept (a, b or c).

@@ -704,7 +704,7 @@ Feature: TypeQL Rule Validation
       rule add-bob-to-all-employment:
       when {
         $r isa employment;
-        $p isa person, has name bob;
+        $p isa person, has name "bob";
       } then {
         $r (employee: $p) isa employment;
       };

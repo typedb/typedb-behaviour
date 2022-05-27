@@ -614,9 +614,19 @@ Feature: Concept Attribute Type
       | person |
       | boy    |
       | girl   |
+    Then attribute(age) get attribute owners explicit contain:
+      | person |
+    Then attribute(age) get attribute owners explicit do not contain:
+      | boy    |
+      | girl   |
     Then attribute(name) get attribute owners contain:
       | person |
+    Then attribute(name) get attribute owners explicit contain:
+      | person |
     Then attribute(name) get attribute owners do not contain:
+      | boy  |
+      | girl |
+    Then attribute(name) get attribute owners explicit do not contain:
       | boy  |
       | girl |
     Then transaction commits
@@ -625,9 +635,19 @@ Feature: Concept Attribute Type
       | person |
       | boy    |
       | girl   |
+    Then attribute(age) get attribute owners explicit contain:
+      | person |
+    Then attribute(age) get attribute owners explicit do not contain:
+      | boy    |
+      | girl   |
     Then attribute(name) get attribute owners contain:
       | person |
+    Then attribute(name) get attribute owners explicit contain:
+      | person |
     Then attribute(name) get attribute owners do not contain:
+      | boy  |
+      | girl |
+    Then attribute(name) get attribute owners explicit do not contain:
       | boy  |
       | girl |
 
@@ -640,18 +660,32 @@ Feature: Concept Attribute Type
     Then attribute(email) get attribute owners contain:
       | company |
       | person  |
+    Then attribute(email) get attribute owners explicit contain:
+      | company |
+      | person  |
     Then attribute(email) get key owners contain:
       | person |
+    Then attribute(email) get key owners explicit contain:
+      | person |
     Then attribute(email) get key owners do not contain:
+      | company |
+    Then attribute(email) get key owners explicit do not contain:
       | company |
     Then transaction commits
     When session opens transaction of type: write
     Then attribute(email) get attribute owners contain:
       | company |
       | person  |
+    Then attribute(email) get attribute owners explicit contain:
+      | company |
+      | person  |
     Then attribute(email) get key owners contain:
       | person |
+    Then attribute(email) get key owners explicit contain:
+      | person |
     Then attribute(email) get key owners do not contain:
+      | company |
+    Then attribute(email) get key owners explicit do not contain:
       | company |
 
   Scenario: Attribute types with value type string can unset their regular expression
