@@ -1205,7 +1205,6 @@ Feature: Negation Resolution
 
 
   Scenario: Negated relation which is both retrievable and concludable must always consider both (issue#6500)
-    # In the issue, (from: door, to:common-room) was incorrectly returned, as it contradicts a retrievable.
     Given reasoning schema
       """
       define
@@ -1230,12 +1229,11 @@ Feature: Negation Resolution
           (superior: $a, subordinate: $c) isa location-hierarchy;
       };
 
-      rule buggy-reachable-rule:
+      rule reachable-rule:
           when {
               $from isa place;
               $to isa place;
               $common-superior isa place;
-
               (superior: $common-superior, subordinate: $from) isa location-hierarchy;
               (from: $common-superior, to: $to) isa passage;
               not {$common-superior is $to;};
@@ -1252,10 +1250,9 @@ Feature: Negation Resolution
       $common-room isa place, has name "common room";
       $fridge isa place, has name "fridge";
 
-      (superior: $forest,       subordinate: $cabin) isa location-hierarchy;
-      (superior: $cabin,        subordinate: $common-room) isa location-hierarchy;
-      (superior: $common-room,  subordinate: $fridge) isa location-hierarchy;
-
+      (superior: $forest, subordinate: $cabin) isa location-hierarchy;
+      (superior: $cabin, subordinate: $common-room) isa location-hierarchy;
+      (superior: $common-room, subordinate: $fridge) isa location-hierarchy;
       (from: $forest, to: $common-room) isa passage;
       """
     Given verifier is initialised
