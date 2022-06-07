@@ -108,7 +108,6 @@ Feature: Schema Query Resolution (Variable Types)
     Then verify answers are complete
 
 
-  # TODO: re-enable all steps once schema queries are resolvable (#75)
   Scenario: all relations and their types can be retrieved
     Given reasoning schema
       """
@@ -145,7 +144,6 @@ Feature: Schema Query Resolution (Variable Types)
     Then verify answers are complete
 
 
-  # TODO: re-enable all steps once schema queries are resolvable (#75)
   Scenario: all inferred instances of types that can own a given attribute type can be retrieved
     Given reasoning schema
       """
@@ -319,7 +317,6 @@ Feature: Schema Query Resolution (Variable Types)
   Scenario: all inferred instances of relation types that relate a given role can be retrieved
 
 
-  # TODO: re-enable all steps once schema queries are resolvable (#75)
   Scenario: all roleplayers and their types can be retrieved from a relation
     Given reasoning schema
       """

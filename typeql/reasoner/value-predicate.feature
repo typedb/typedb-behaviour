@@ -101,7 +101,8 @@ Feature: Value Predicate Resolution
         $n <op> 1667;
       """
     Then verify answer size is: <answer-size>
-    # Then verify answers are sound  # TODO: Fails
+    Then verify answers are sound
+
     Then verify answers are complete
 
     Examples:
@@ -138,8 +139,9 @@ Feature: Value Predicate Resolution
         $y isa person, has name "Bob", has lucky-number $n;
         $m <op> $n;
       """
+     # TODO: Answer size?
     Then verify answer size is: <answer-size>
-    # Then verify answers are sound  # TODO: Fails
+    Then verify answers are sound
     # Then verify answers are complete  # TODO: Fails
 
     Examples:
@@ -178,8 +180,10 @@ Feature: Value Predicate Resolution
         $m <op> $n;
         $n <op> 1667;
       """
+
+    # TODO: Answer size?
     Then verify answer size is: <answer-size>
-    # Then verify answers are sound  # TODO: Fails
+    Then verify answers are sound
     # Then verify answers are complete  # TODO: Fails
 
     Examples:
@@ -229,7 +233,7 @@ Feature: Value Predicate Resolution
     # Fanta | Tesco |
     # Tango | Tesco |
     Then verify answer size is: 2
-    # Then verify answers are sound  # TODO: Fails
+    Then verify answers are sound
     # Then verify answers are complete  # TODO: Fails
 
 
@@ -270,7 +274,7 @@ Feature: Value Predicate Resolution
     # Fanta | Ocado |
     # Tango | Ocado |
     Then verify answer size is: 2
-    # Then verify answers are sound  # TODO: Fails
+    Then verify answers are sound
     # Then verify answers are complete  # TODO: Fails
 
 
@@ -310,7 +314,7 @@ Feature: Value Predicate Resolution
         $rx contains "land";
       """
     Then verify answer size is: 2
-    # Then verify answers are sound  # TODO: Fails
+    Then verify answers are sound
     Then verify answers are complete
 
 
@@ -362,7 +366,7 @@ Feature: Value Predicate Resolution
     # Tango | Iceland   | Tango | Iceland   |
     # Tango | Poundland | Tango | Poundland |
     Then verify answer size is: 8
-    # Then verify answers are sound  # TODO: Fails
+    Then verify answers are sound
     # Then verify answers are complete  # TODO: Fails
 
 
@@ -423,7 +427,7 @@ Feature: Value Predicate Resolution
     # Fanta | Londis    | Fanta | Iceland   |
     # Tango | Londis    | Tango | Iceland   |
     Then verify answer size is: 16
-    # Then verify answers are sound  # TODO: Fails
+    Then verify answers are sound
     # Then verify answers are complete  # TODO: Fails
 
 
@@ -463,7 +467,7 @@ Feature: Value Predicate Resolution
     # Fanta | Tesco |
     # Tango | Tesco |
     Then verify answer size is: 2
-    # Then verify answers are sound  # TODO: Fails
+    Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
       """

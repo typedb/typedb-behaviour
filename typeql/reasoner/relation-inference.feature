@@ -347,7 +347,6 @@ Feature: Relation Inference Resolution
   # SYMMETRY #
   ############
 
-  # TODO: re-enable all steps when resolvable (currently takes too long)
   Scenario: when a relation is symmetric, its symmetry can be used to make additional inferences
     Given reasoning schema
       """
@@ -459,7 +458,6 @@ Feature: Relation Inference Resolution
     Then verify answers are complete
 
 
-  # TODO: re-enable all steps when 3-hop transitivity is resolvable
   Scenario: when a query using transitivity has a limit exceeding the result size, answers are consistent between runs
     Given reasoning schema
       """
@@ -685,7 +683,8 @@ Feature: Relation Inference Resolution
       """
     # (a,a), (b,b), (c,c)
     Then verify answer size is: 3
-    # Then verify answers are sound  # TODO: Fails
+    # TODO: Fails # bug: ConceptMapping
+    Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
       """
@@ -697,7 +696,8 @@ Feature: Relation Inference Resolution
       get $x, $y;
       """
     Then verify answer size is: 1
-    # Then verify answers are sound  # TODO: Fails
+    # TODO: Fails # bug: ConceptMapping
+    Then verify answers are sound
     Then verify answers are complete
     Then verify answer set is equivalent for query
       """
@@ -712,7 +712,6 @@ Feature: Relation Inference Resolution
   # UNTYPED MATCH QUERY #
   #######################
 
-  # TODO: re-enable all steps when fixed (#75)
   Scenario: the relation type constraint can be excluded from a reasoned match query
     Given reasoning schema
       """
@@ -749,7 +748,6 @@ Feature: Relation Inference Resolution
     Then verify answers are complete
 
 
-  # TODO: re-enable all steps when fixed (#75)
   Scenario: when the relation type is excluded in a reasoned match query, all valid roleplayer combinations are matches
     Given reasoning schema
       """
@@ -796,7 +794,6 @@ Feature: Relation Inference Resolution
     Then verify answers are complete
 
 
-  # TODO: re-enable all steps when fixed (#75)
   Scenario: when the relation type is excluded in a reasoned match query, all types of relations match
     Given reasoning schema
       """
@@ -844,8 +841,6 @@ Feature: Relation Inference Resolution
       match ($a, $b);
       """
 
-
-  # TODO: re-enable all steps when fixed (#75)
   Scenario: conjunctions of untyped reasoned relations are correctly resolved
     Given reasoning schema
       """
