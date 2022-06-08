@@ -1204,7 +1204,7 @@ Feature: Negation Resolution
 #    TODO: Add a case with non-zero answers
 
 
-  Scenario: Negated relation which is both retrievable and concludable must always consider both (issue#6500)
+  Scenario: Negated concept considers all rules & retrievables
     Given reasoning schema
       """
       define
