@@ -1205,6 +1205,7 @@ Feature: Negation Resolution
 
 
   Scenario: Negated concept considers all rules & retrievables
+    Derived from issue #6500
     Given reasoning schema
       """
       define
