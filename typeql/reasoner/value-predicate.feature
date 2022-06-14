@@ -139,7 +139,6 @@ Feature: Value Predicate Resolution
         $y isa person, has name "Bob", has lucky-number $n;
         $m <op> $n;
       """
-     # TODO: Answer size?
     Then verify answer size is: <answer-size>
     Then verify answers are sound
     # Then verify answers are complete  # TODO: Fails
@@ -180,8 +179,6 @@ Feature: Value Predicate Resolution
         $m <op> $n;
         $n <op> 1667;
       """
-
-    # TODO: Answer size?
     Then verify answer size is: <answer-size>
     Then verify answers are sound
     # Then verify answers are complete  # TODO: Fails
