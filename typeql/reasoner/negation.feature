@@ -1048,12 +1048,11 @@ Feature: Negation Resolution
       """
     Then verify answer size is: 11
     Then verify answers are consistent across 5 executions
-    # TODO: Fails # bug: ConceptMapping
     Then verify answers are sound
     Then verify answers are complete
 
 
-  # TODO: Re-enable once fixed (Completness found missing answer)
+  # TODO: Re-enable once fixed (Completeness found missing answer)
   @ignore
   Scenario: a rule can use negation to exclude things that have any transitive relations to a specific concept
     Given reasoning schema

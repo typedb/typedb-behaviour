@@ -240,7 +240,6 @@ Feature: Recursion Resolution
       """
     # Relation-3-to-2 should not make any additional inferences - it should merely assert that the relations exist
     Then verify answer size is: 2
-    # TODO: Fails # bug: ConceptMapping
     Then verify answers are sound
     Then verify answers are complete
 
@@ -1033,7 +1032,6 @@ Feature: Recursion Resolution
       """
     Then verify answer size is: 4
 
-    # TODO: Fails # bug: ConceptMapping
     Then verify answers are sound
     # Then verify answers are complete  # TODO: Fails due to put race condition
     Then verify answer set is equivalent for query

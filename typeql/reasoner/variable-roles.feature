@@ -170,7 +170,6 @@ Feature: Variable Role Resolution
       get $a, $b, $r2;
       """
     Then verify answer size is: 18
-    # TODO: Fails non-deterministically with ArrayIndexOutOfBoundsException
     Then verify answers are sound
     Then verify answers are complete
 
@@ -193,7 +192,6 @@ Feature: Variable Role Resolution
     Then verify answers are sound
     Then verify answers are complete
 
-  # TODO: Fails non-deterministically with ArrayIndexOutOfBoundsException
   @ignore
   Scenario: converting a fixed role to a variable bound with 'type role' (?)
     Given verifier is initialised
@@ -217,7 +215,6 @@ Feature: Variable Role Resolution
     Then verify answers are complete
 
 
-  # TODO: Fails non-deterministically with ArrayIndexOutOfBoundsException
   Scenario: converting a fixed role to a variable bound with 'sub role' (?)
     Given verifier is initialised
     Given reasoning query

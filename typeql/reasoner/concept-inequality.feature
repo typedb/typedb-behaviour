@@ -491,4 +491,4 @@ Feature: Concept Inequality Resolution
     # Sprite | Tesco | retailer |
     Then verify answer size is: 1
     Then verify answers are sound
-    # Then verify answers are complete # TODO: Fails
+    # Then verify answers are complete  # TODO: Fails
