@@ -52,7 +52,6 @@ Feature: Schema Query Resolution (Variable Types)
       """
     # each scenario specialises the schema further
 
-  # TODO: re-enable all steps once schema queries are resolvable (#75)
   Scenario: all instances and their types can be retrieved
     Given reasoning schema
       """
@@ -206,7 +205,6 @@ Feature: Schema Query Resolution (Variable Types)
     Then verify answers are complete
 
 
-  # TODO: re-enable all steps once schema queries are resolvable (#75)
   Scenario: all inferred instances of types that are subtypes of a given type can be retrieved
     Given reasoning schema
       """
@@ -250,7 +248,6 @@ Feature: Schema Query Resolution (Variable Types)
     Then verify answers are complete
 
 
-  # TODO: re-enable all steps once schema queries are resolvable (#75)
   Scenario: all inferred instances of types that can play a given role can be retrieved
     Given reasoning schema
       """
