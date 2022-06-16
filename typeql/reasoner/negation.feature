@@ -974,7 +974,7 @@ Feature: Negation Resolution
     Then verify answer size is: 0
     Then verify answers are consistent across 5 executions
     Then verify answers are sound
-    # Then verify answers are complete  # TODO: Fails
+    Then verify answers are complete
 
 
   Scenario: when evaluating negation blocks, completion of incomplete queries is not acknowledged
@@ -1130,7 +1130,6 @@ Feature: Negation Resolution
     Then verify answer size is: 5
     Then verify answers are sound
     Then verify answers are complete
-    # TODO: Check again if we correctly mean '$y isa node' when we enable this test
     Then verify answer set is equivalent for query
       """
       match
