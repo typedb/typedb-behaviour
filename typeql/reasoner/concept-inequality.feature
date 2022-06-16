@@ -382,7 +382,7 @@ Feature: Concept Inequality Resolution
     Then verify answers are sound
     Then verify answers are complete
 
-  # TODO enable when we can resolve repeated concludables ( Receives 8 answers instead of 6)
+  # TODO enable when we can resolve repeated concludables ( Receives 2 answers instead of 6)
   @ignore
   # TODO: re-enable once typedb#5821 is fixed (in some answers, $typeof_ax is 'base-attribute' which is incorrect)
   # TODO: re-enable all steps once implicit attribute variables are resolvable
