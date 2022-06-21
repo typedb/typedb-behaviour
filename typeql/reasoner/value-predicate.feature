@@ -102,7 +102,6 @@ Feature: Value Predicate Resolution
       """
     Then verify answer size is: <answer-size>
     Then verify answers are sound
-
     Then verify answers are complete
 
     Examples:
