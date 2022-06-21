@@ -382,7 +382,7 @@ Feature: Concept Inequality Resolution
     Then verify answers are sound
     Then verify answers are complete
 
-  # TODO enable when we can resolve repeated concludables
+  # TODO enable when we can resolve repeated concludables ( Receives 2 answers instead of 6)
   @ignore
   # TODO: re-enable once typedb#5821 is fixed (in some answers, $typeof_ax is 'base-attribute' which is incorrect)
   # TODO: re-enable all steps once implicit attribute variables are resolvable
@@ -490,5 +490,5 @@ Feature: Concept Inequality Resolution
     # x      | value | type     |
     # Sprite | Tesco | retailer |
     Then verify answer size is: 1
-    # Then verify answers are sound  # TODO: Fails
+    Then verify answers are sound
     # Then verify answers are complete  # TODO: Fails

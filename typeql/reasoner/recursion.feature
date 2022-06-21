@@ -232,7 +232,7 @@ Feature: Recursion Resolution
       """
     # Each of the two material relation1 instances should infer a single relation3 via 1-to-2 and 2-to-3
     Then verify answer size is: 2
-    # Then verify answers are sound  # TODO: Fails
+    Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
       """
@@ -240,7 +240,7 @@ Feature: Recursion Resolution
       """
     # Relation-3-to-2 should not make any additional inferences - it should merely assert that the relations exist
     Then verify answer size is: 2
-    # Then verify answers are sound  # TODO: Fails
+    Then verify answers are sound
     Then verify answers are complete
 
 
@@ -973,7 +973,6 @@ Feature: Recursion Resolution
       get $x, $y;
       """
 
-
   Scenario: given an undirected graph, all vertices connected to a given vertex can be found
 
   For this test, the graph looks like the following:
@@ -1032,7 +1031,7 @@ Feature: Recursion Resolution
       get $y;
       """
     Then verify answer size is: 4
-    # Then verify answers are sound  # TODO: Fails
+    Then verify answers are sound
     # Then verify answers are complete  # TODO: Fails due to put race condition
     Then verify answer set is equivalent for query
       """
