@@ -20,10 +20,19 @@ load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 checkstyle_test(
     name = "checkstyle",
     include = glob([
-        "*",
+        ".bazelrc",
+        ".gitignore",
         ".grabl/*",
+        "BUILD",
+        "WORKSPACE",
     ]),
-    license_type = "agpl",
+    license_type = "agpl-header",
+)
+
+checkstyle_test(
+    name = "checkstyle-license",
+    include = ["LICENSE"],
+    license_type = "agpl-fulltext",
 )
 
 # CI targets that are not declared in any BUILD file, but are called externally
