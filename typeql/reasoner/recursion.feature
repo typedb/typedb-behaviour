@@ -1032,7 +1032,7 @@ Feature: Recursion Resolution
       """
     Then verify answer size is: 4
     # Then verify answers are sound     # TODO: Runs out of memory on grabl
-    # Then verify answers are complete  # TODO: Fails due to put race condition
+    Then verify answers are complete
     Then verify answer set is equivalent for query
       """
       match
