@@ -138,6 +138,29 @@ Feature: TypeQL Get Clause
       | correlation   | double   | -29.7      | -0.9             | 0.01             | 100.0      |
       | date-of-birth | datetime | 1970-01-01 | 1999-12-31T23:00 | 1999-12-31T23:01 | 2020-02-29 |
 
+  Scenario:
+    Given typeql insert
+      """
+      insert
+      $a isa person, has name "Gary", has ref 0;
+      $b isa person, has name "Jemima", has ref 1;
+      $c isa person, has name "Frederick", has ref 2;
+      $d isa person, has name "Brenda", has ref 3;
+      """
+    Given transaction commits
+
+    Given session opens transaction of type: read
+    When get answers of typeql match
+      """
+      match $x isa person, has name $y;
+      sort $y;
+      """
+    Then order of answer concepts is
+      | x         | y                    |
+      | key:ref:3 | value:name:Brenda    |
+      | key:ref:2 | value:name:Frederick |
+      | key:ref:0 | value:name:Gary      |
+      | key:ref:1 | value:name:Jemima    |
 
   Scenario: sort order can be ascending or descending
     Given typeql insert
@@ -225,7 +248,7 @@ Feature: TypeQL Get Clause
      | value:name:Gary   | value:age:25 | key:ref:2 |
 
 
-  Scenario: multiple sort variables may be used to sort descending
+  Scenario: multiple sort variables may be used to sort ascending or descending
     Given typeql insert
       """
       insert
@@ -240,14 +263,14 @@ Feature: TypeQL Get Clause
     When get answers of typeql match
       """
       match $x isa person, has name $y, has ref $r, has age $a;
-      sort $y, $a, $r desc;
+      sort $y asc, $a desc, $r desc;
       """
     Then order of answer concepts is
       | y                 |  a           | x         |
+      | value:name:Brenda | value:age:12 | key:ref:3 |
       | value:name:Gary   | value:age:25 | key:ref:2 |
       | value:name:Gary   | value:age:15 | key:ref:0 |
       | value:name:Gary   | value:age:5  | key:ref:1 |
-      | value:name:Brenda | value:age:12 | key:ref:3 |
 
 
   Scenario: a sorted result set can be limited to a specific size
@@ -448,6 +471,22 @@ Feature: TypeQL Get Clause
       limit 2;
       """
 
+  Scenario: when sorting by a variable that may contain incomparable values, an error is thrown
+    Given typeql insert
+      """
+      insert
+      $a isa person, has age 2, has name "Abby", has ref 0;
+      $b isa person, has age 6, has name "Bobby", has ref 1;
+      """
+    Given transaction commits
+
+    Given session opens transaction of type: read
+    Then typeql match; throws exception
+      """
+      match
+        $x isa person, attribute $a;
+      sort $a asc;
+      """
 
   #############
   # AGGREGATE #
