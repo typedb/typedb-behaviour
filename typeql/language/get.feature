@@ -89,7 +89,6 @@ Feature: TypeQL Get Clause
       """
 
 
-
   ########
   # SORT #
   ########
@@ -225,7 +224,7 @@ Feature: TypeQL Get Clause
      | value:name:Gary   | value:age:25 | key:ref:2 |
 
 
-  Scenario: multiple sort variables may be used to sort descending
+  Scenario: multiple sort variables may be used to sort ascending or descending
     Given typeql insert
       """
       insert
@@ -240,14 +239,14 @@ Feature: TypeQL Get Clause
     When get answers of typeql match
       """
       match $x isa person, has name $y, has ref $r, has age $a;
-      sort $y, $a, $r desc;
+      sort $y asc, $a desc, $r desc;
       """
     Then order of answer concepts is
       | y                 |  a           | x         |
+      | value:name:Brenda | value:age:12 | key:ref:3 |
       | value:name:Gary   | value:age:25 | key:ref:2 |
       | value:name:Gary   | value:age:15 | key:ref:0 |
       | value:name:Gary   | value:age:5  | key:ref:1 |
-      | value:name:Brenda | value:age:12 | key:ref:3 |
 
 
   Scenario: a sorted result set can be limited to a specific size
@@ -448,6 +447,22 @@ Feature: TypeQL Get Clause
       limit 2;
       """
 
+  Scenario: when sorting by a variable that may contain incomparable values, an error is thrown
+    Given typeql insert
+      """
+      insert
+      $a isa person, has age 2, has name "Abby", has ref 0;
+      $b isa person, has age 6, has name "Bobby", has ref 1;
+      """
+    Given transaction commits
+
+    Given session opens transaction of type: read
+    Then typeql match; throws exception
+      """
+      match
+        $x isa person, attribute $a;
+      sort $a asc;
+      """
 
   #############
   # AGGREGATE #
