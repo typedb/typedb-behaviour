@@ -365,7 +365,7 @@ Feature: TypeQL Get Clause
     Then answer size is: 0
 
 
-  Scenario: string sorting is case-insensitive
+  Scenario: string sorting is case-sensitive
     Given typeql insert
       """
       insert
@@ -386,9 +386,9 @@ Feature: TypeQL Get Clause
     Then order of answer concepts is
       | x                       |
       | value:name:007          |
-      | value:name:agent        |
       | value:name:Bond         |
       | value:name:James Bond   |
+      | value:name:agent        |
       | value:name:secret agent |
 
 
