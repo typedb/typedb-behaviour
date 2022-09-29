@@ -464,6 +464,118 @@ Feature: TypeQL Get Clause
       sort $a asc;
       """
 
+
+  Scenario Outline: sorting and query predicates agree for type '<type>'
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
+      """
+      define
+      <attr> sub attribute, value <type>, owns ref @key;
+      """
+    Given transaction commits
+
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
+      """
+      insert
+      $a <pivot> isa <attr>, has ref 0;
+      $b <lesser> isa <attr>, has ref 1;
+      $c <greater> isa <attr>, has ref 2;
+      """
+    Given transaction commits
+
+    Given session opens transaction of type: read
+
+    # ascending
+    When get answers of typeql match
+      """
+      match $x isa <attr>; $x < <pivot>;
+      sort $x asc;
+      """
+    Then order of answer concepts is
+      | x         |
+      | key:ref:1 |
+
+    When get answers of typeql match
+      """
+      match $x isa <attr>; $x <= <pivot>;
+      sort $x asc;
+      """
+    Then order of answer concepts is
+      | x         |
+      | key:ref:1 |
+      | key:ref:0 |
+
+    When get answers of typeql match
+      """
+      match $x isa <attr>; $x > <pivot>;
+      sort $x asc;
+      """
+    Then order of answer concepts is
+      | x         |
+      | key:ref:2 |
+
+    When get answers of typeql match
+      """
+      match $x isa <attr>; $x >= <pivot>;
+      sort $x asc;
+      """
+    Then order of answer concepts is
+      | x         |
+      | key:ref:0 |
+      | key:ref:2 |
+
+    # descending
+    When get answers of typeql match
+      """
+      match $x isa <attr>; $x < <pivot>;
+      sort $x desc;
+      """
+    Then order of answer concepts is
+      | x         |
+      | key:ref:1 |
+
+    When get answers of typeql match
+      """
+      match $x isa <attr>; $x <= <pivot>;
+      sort $x desc;
+      """
+    Then order of answer concepts is
+      | x         |
+      | key:ref:0 |
+      | key:ref:1 |
+
+    When get answers of typeql match
+      """
+      match $x isa <attr>; $x > <pivot>;
+      sort $x desc;
+      """
+    Then order of answer concepts is
+      | x         |
+      | key:ref:2 |
+
+    When get answers of typeql match
+      """
+      match $x isa <attr>; $x >= <pivot>;
+      sort $x desc;
+      """
+    Then order of answer concepts is
+      | x         |
+      | key:ref:2 |
+      | key:ref:0 |
+
+    Examples:
+      | attr          | type     | pivot      | lesser       | greater          |
+      | colour        | string   | "green"    | "blue"       | "red"            |
+      | score         | long     | -4         | -38          | 18               |
+      | correlation   | double   | -0.9       | -1.2         | 0.01             |
+      | date-of-birth | datetime | 1970-02-01 |  1970-01-01  | 1999-12-31T23:01 |
+
+
   #############
   # AGGREGATE #
   #############
