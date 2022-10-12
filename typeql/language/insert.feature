@@ -1386,6 +1386,18 @@ Feature: TypeQL Insert Query
       insert $y isa derived, has ref 0;
       """
 
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+
+    When typeql insert
+      """
+      insert $y isa derived, has ref 0;
+      """
+    Then typeql insert; throws exception
+      """
+      insert $x isa base, has ref 0;
+      """
+
   Scenario: instances of an inherited key must be unique among all instances of its subtypes
     Given connection close all sessions
     Given connection open schema session for database: typedb
