@@ -1360,6 +1360,58 @@ Feature: TypeQL Insert Query
       $y isa person, has ref 0;
       """
 
+  Scenario: instances of an inherited key must be unique among all instances of a type and its subtypes
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
+      """
+      define
+      ref sub attribute, value long;
+      base sub entity, owns ref @key;
+      derived sub base;
+      """
+    Given transaction commits
+
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+
+    When typeql insert
+      """
+      insert $x isa base, has ref 0;
+      """
+    Then typeql insert; throws exception
+      """
+      insert $y isa derived, has ref 0;
+      """
+
+  Scenario: instances of an inherited key must be unique among all instances of its subtypes
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
+      """
+      define
+      ref sub attribute, value long;
+      base sub entity, owns ref @key;
+      derived-a sub base;
+      derived-b sub base;
+      """
+    Given transaction commits
+
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+
+    When typeql insert
+      """
+      insert $x isa derived-a, has ref 0;
+      """
+    Then typeql insert; throws exception
+      """
+      insert $y isa derived-b, has ref 0;
+      """
 
   Scenario: an error is thrown when inserting a second key on an attribute that already has one
     Given connection close all sessions
@@ -2481,4 +2533,3 @@ Feature: TypeQL Insert Query
       $x isa bird;
       $x iid V123;
       """
-
