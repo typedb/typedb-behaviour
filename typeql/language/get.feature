@@ -609,7 +609,9 @@ Feature: TypeQL Get Clause
     # ascending
     When get answers of typeql match
       """
-      match $x isa attribute;
+      match $x isa $t;
+      { $t type <firstAttr>; } or { $t type <secondAttr>;} or { $t type <thirdAttr>; } or { $t type <fourthAttr>; };
+      get $x;
       sort $x asc;
       """
     Then order of answer concepts is
@@ -622,7 +624,9 @@ Feature: TypeQL Get Clause
 
     When get answers of typeql match
       """
-      match $x isa attribute; $x < <fourthValuePivot>;
+      match $x isa $t; $x < <fourthValuePivot>;
+      { $t type <firstAttr>; } or { $t type <secondAttr>;} or { $t type <thirdAttr>; } or { $t type <fourthAttr>; };
+      get $x;
       sort $x asc;
       """
     Then order of answer concepts is
@@ -632,7 +636,9 @@ Feature: TypeQL Get Clause
 
     When get answers of typeql match
       """
-      match $x isa attribute; $x <= <fourthValuePivot>;
+      match $x isa $t; $x <= <fourthValuePivot>;
+      { $t type <firstAttr>; } or { $t type <secondAttr>;} or { $t type <thirdAttr>; } or { $t type <fourthAttr>; };
+      get $x;
       sort $x asc;
       """
     Then order of answer concepts is
@@ -643,7 +649,9 @@ Feature: TypeQL Get Clause
 
     When get answers of typeql match
       """
-      match $x isa attribute; $x > <fourthValuePivot>;
+      match $x isa $t; $x > <fourthValuePivot>;
+      { $t type <firstAttr>; } or { $t type <secondAttr>;} or { $t type <thirdAttr>; } or { $t type <fourthAttr>; };
+      get $x;
       sort $x asc;
       """
     Then order of answer concepts is
@@ -653,7 +661,9 @@ Feature: TypeQL Get Clause
 
     When get answers of typeql match
       """
-      match $x isa attribute; $x >= <fourthValuePivot>;
+      match $x isa $t; $x >= <fourthValuePivot>;
+      { $t type <firstAttr>; } or { $t type <secondAttr>;} or { $t type <thirdAttr>; } or { $t type <fourthAttr>; };
+      get $x;
       sort $x asc;
       """
     Then order of answer concepts is
@@ -665,7 +675,9 @@ Feature: TypeQL Get Clause
     # descending
     When get answers of typeql match
       """
-      match $x isa attribute;
+      match $x isa $t;
+      { $t type <firstAttr>; } or { $t type <secondAttr>;} or { $t type <thirdAttr>; } or { $t type <fourthAttr>; };
+      get $x;
       sort $x desc;
       """
     Then order of answer concepts is
@@ -678,28 +690,9 @@ Feature: TypeQL Get Clause
 
     When get answers of typeql match
       """
-      match $x isa attribute; $x < <fourthValuePivot>;
-      sort $x desc;
-      """
-    Then order of answer concepts is
-      | x         |
-      | key:ref:3 |
-      | key:ref:0 |
-
-    When get answers of typeql match
-      """
-      match $x isa attribute; $x <= <fourthValuePivot>;
-      sort $x desc;
-      """
-    Then order of answer concepts is
-      | x         |
-      | key:ref:3 |
-      | key:ref:0 |
-      | key:ref:4 |
-
-    When get answers of typeql match
-      """
-      match $x isa attribute; $x > <fourthValuePivot>;
+      match $x isa $t; $x < <fourthValuePivot>;
+      { $t type <firstAttr>; } or { $t type <secondAttr>;} or { $t type <thirdAttr>; } or { $t type <fourthAttr>; };
+      get $x;
       sort $x desc;
       """
     Then order of answer concepts is
@@ -709,7 +702,9 @@ Feature: TypeQL Get Clause
 
     When get answers of typeql match
       """
-      match $x isa attribute; $x >= <fourthValuePivot>;
+      match $x isa $t; $x <= <fourthValuePivot>;
+      { $t type <firstAttr>; } or { $t type <secondAttr>;} or { $t type <thirdAttr>; } or { $t type <fourthAttr>; };
+      get $x;
       sort $x desc;
       """
     Then order of answer concepts is
@@ -717,16 +712,41 @@ Feature: TypeQL Get Clause
       | key:ref:4 |
       | key:ref:1 |
       | key:ref:2 |
+
+    When get answers of typeql match
+      """
+      match $x isa $t; $x > <fourthValuePivot>;
+      { $t type <firstAttr>; } or { $t type <secondAttr>;} or { $t type <thirdAttr>; } or { $t type <fourthAttr>; };
+      get $x;
+      sort $x desc;
+      """
+    Then order of answer concepts is
+      | x         |
+      | key:ref:3 |
+      | key:ref:0 |
+
+    When get answers of typeql match
+      """
+      match $x isa $t; $x >= <fourthValuePivot>;
+      { $t type <firstAttr>; } or { $t type <secondAttr>;} or { $t type <thirdAttr>; } or { $t type <fourthAttr>; };
+      get $x;
+      sort $x desc;
+      """
+    Then order of answer concepts is
+      | x         |
+      | key:ref:3 |
+      | key:ref:0 |
+      | key:ref:4 |
 
     Examples:
       # NOTE: fourthValuePivot is expected to be the middle of the sort order (pivot)
       | firstAttr   | firstType | firstValue1 | firstValue2 | secondAttr | secondType | secondValue | thirdAttr | thirdType | thirdValue | fourthAttr | fourthType | fourthValuePivot |
       | colour      | string    | "green"     | "blue"      | name       | string     | "alice"     | shape     | string    | "square"   | street     | string     | "carnaby"        |
-      | score       | long      | -4          | -38         | quantity   | long       | -50         | area      | long      | 100        | length     | long       | 0                |
-      | correlation | double    | -4.1        | 38.999      | quantity   | double     | -101.4      | area      | double    | 110.0555   | length     | double     | 0.5              |
+      | score       | long      | 4           | -38         | quantity   | long       | -50         | area      | long      | 100        | length     | long       | 0                |
+      | correlation | double    | 4.1         | -38.999     | quantity   | double     | -101.4      | area      | double    | 110.0555   | length     | double     | 0.5              |
       # mixed double-long data
-      | score       | long      | -4          | 38          | quantity   | double     | -55.123     | area      | long      | 100        | length     | double     | 0.5              |
-      | dob         | datetime  | 1970-02-01  | 2970-01-01  | start-date | datetime   | 1970-01-01  | end-date  | datetime  | 3100-11-20 | last-date  | datetime   | 2000-00-00       |
+      | score       | long      | 4           | -38         | quantity   | double     | -55.123     | area      | long      | 100        | length     | double     | 0.5              |
+      | dob         | datetime  | 2970-01-01   | 1970-02-01 | start-date | datetime   | 1970-01-01  | end-date  | datetime  | 3100-11-20 | last-date  | datetime   | 2000-08-03       |
 
 
   #############
