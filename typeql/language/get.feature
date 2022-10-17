@@ -609,8 +609,7 @@ Feature: TypeQL Get Clause
     # ascending
     When get answers of typeql match
       """
-      match $x isa $t;
-      { $t type <firstAttr>; } or { $t type <secondAttr>;} or { $t type <thirdAttr>; } or { $t type <fourthAttr>; };
+      match $x isa $t; $t owns ref;
       get $x;
       sort $x asc;
       """
@@ -624,8 +623,7 @@ Feature: TypeQL Get Clause
 
     When get answers of typeql match
       """
-      match $x isa $t; $x < <fourthValuePivot>;
-      { $t type <firstAttr>; } or { $t type <secondAttr>;} or { $t type <thirdAttr>; } or { $t type <fourthAttr>; };
+      match $x isa $t; $t owns ref; $x < <fourthValuePivot>;
       get $x;
       sort $x asc;
       """
@@ -636,8 +634,7 @@ Feature: TypeQL Get Clause
 
     When get answers of typeql match
       """
-      match $x isa $t; $x <= <fourthValuePivot>;
-      { $t type <firstAttr>; } or { $t type <secondAttr>;} or { $t type <thirdAttr>; } or { $t type <fourthAttr>; };
+      match $x isa $t; $t owns ref; $x <= <fourthValuePivot>;
       get $x;
       sort $x asc;
       """
@@ -649,8 +646,7 @@ Feature: TypeQL Get Clause
 
     When get answers of typeql match
       """
-      match $x isa $t; $x > <fourthValuePivot>;
-      { $t type <firstAttr>; } or { $t type <secondAttr>;} or { $t type <thirdAttr>; } or { $t type <fourthAttr>; };
+      match $x isa $t; $t owns ref; $x > <fourthValuePivot>;
       get $x;
       sort $x asc;
       """
@@ -661,8 +657,7 @@ Feature: TypeQL Get Clause
 
     When get answers of typeql match
       """
-      match $x isa $t; $x >= <fourthValuePivot>;
-      { $t type <firstAttr>; } or { $t type <secondAttr>;} or { $t type <thirdAttr>; } or { $t type <fourthAttr>; };
+      match $x isa $t; $t owns ref; $x >= <fourthValuePivot>;
       get $x;
       sort $x asc;
       """
@@ -675,8 +670,7 @@ Feature: TypeQL Get Clause
     # descending
     When get answers of typeql match
       """
-      match $x isa $t;
-      { $t type <firstAttr>; } or { $t type <secondAttr>;} or { $t type <thirdAttr>; } or { $t type <fourthAttr>; };
+      match $x isa $t; $t owns ref;
       get $x;
       sort $x desc;
       """
@@ -690,8 +684,7 @@ Feature: TypeQL Get Clause
 
     When get answers of typeql match
       """
-      match $x isa $t; $x < <fourthValuePivot>;
-      { $t type <firstAttr>; } or { $t type <secondAttr>;} or { $t type <thirdAttr>; } or { $t type <fourthAttr>; };
+      match $x isa $t; $t owns ref; $x < <fourthValuePivot>;
       get $x;
       sort $x desc;
       """
@@ -702,8 +695,7 @@ Feature: TypeQL Get Clause
 
     When get answers of typeql match
       """
-      match $x isa $t; $x <= <fourthValuePivot>;
-      { $t type <firstAttr>; } or { $t type <secondAttr>;} or { $t type <thirdAttr>; } or { $t type <fourthAttr>; };
+      match $x isa $t; $t owns ref; $x <= <fourthValuePivot>;
       get $x;
       sort $x desc;
       """
@@ -715,8 +707,7 @@ Feature: TypeQL Get Clause
 
     When get answers of typeql match
       """
-      match $x isa $t; $x > <fourthValuePivot>;
-      { $t type <firstAttr>; } or { $t type <secondAttr>;} or { $t type <thirdAttr>; } or { $t type <fourthAttr>; };
+      match $x isa $t; $t owns ref; $x > <fourthValuePivot>;
       get $x;
       sort $x desc;
       """
@@ -727,8 +718,7 @@ Feature: TypeQL Get Clause
 
     When get answers of typeql match
       """
-      match $x isa $t; $x >= <fourthValuePivot>;
-      { $t type <firstAttr>; } or { $t type <secondAttr>;} or { $t type <thirdAttr>; } or { $t type <fourthAttr>; };
+      match $x isa $t; $t owns ref; $x >= <fourthValuePivot>;
       get $x;
       sort $x desc;
       """
