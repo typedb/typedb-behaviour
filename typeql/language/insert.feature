@@ -426,7 +426,7 @@ Feature: TypeQL Insert Query
       $x isa company, has ref 0, has age 10;
       """
 
-
+  @ignore-typeql
   Scenario: string attributes with newlines retain the newline character
     Given typeql insert
       """
