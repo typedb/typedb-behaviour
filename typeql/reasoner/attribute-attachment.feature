@@ -198,6 +198,43 @@ Feature: Attribute Attachment Resolution
     Then verify answers are complete
 
 
+  Scenario: a rule with disjunctions considers every branch
+    Given reasoning schema
+      """
+      define
+      crisps sub entity, owns retailer;
+      rule tesco-sells-everything-ocado-sells-and-all-soft-drinks: when {
+        {$x has retailer 'Ocado';} or {$x isa soft-drink;};
+      } then {
+        $x has retailer 'Tesco';
+      };
+      """
+    Given reasoning data
+      """
+      insert
+      $aeW isa crisps;
+      $aeX isa crisps, has retailer 'Ocado';
+      $aeY isa soft-drink;
+      $aeZ isa soft-drink;
+      """
+    Given verifier is initialised
+    Given reasoning query
+      """
+      match $x has retailer 'Tesco';
+      """
+    Then verify answer size is: 3
+    Then verify answers are sound
+    Then verify answers are complete
+    Then verify answer set is equivalent for query
+      """
+      match
+      $x isa $t;
+      {$x has retailer 'Ocado';} or {$t type soft-drink;};
+      get $x;
+      """
+
+
+
   Scenario: Querying for anonymous attributes with predicates finds the correct answers
     Given reasoning schema
       """
@@ -226,5 +263,12 @@ Feature: Attribute Attachment Resolution
       match $x has age > 5;
       """
     Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
+    Given reasoning query
+      """
+      match $x has age > 5; $x has age < 8;
+      """
+    Then verify answer size is: 0
     Then verify answers are sound
     Then verify answers are complete
