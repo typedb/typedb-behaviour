@@ -1377,7 +1377,7 @@ Parker";
       $y isa person, has ref 0;
       """
 
-  Scenario: instances of an inherited key must be unique among all instances of a type and its subtypes
+  Scenario: instances of an inherited key don't have to be unique among instances of a type and its subtypes
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
@@ -1398,7 +1398,7 @@ Parker";
       """
       insert $x isa base, has ref 0;
       """
-    Then typeql insert; throws exception
+    Then typeql insert
       """
       insert $y isa derived, has ref 0;
       """
@@ -1410,12 +1410,12 @@ Parker";
       """
       insert $y isa derived, has ref 0;
       """
-    Then typeql insert; throws exception
+    Then typeql insert
       """
       insert $x isa base, has ref 0;
       """
 
-  Scenario: instances of an inherited key must be unique among all instances of its subtypes
+  Scenario: instances of an inherited key don't have be unique among its subtypes
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
@@ -1437,7 +1437,7 @@ Parker";
       """
       insert $x isa derived-a, has ref 0;
       """
-    Then typeql insert; throws exception
+    Then typeql insert
       """
       insert $y isa derived-b, has ref 0;
       """
