@@ -1415,7 +1415,7 @@ Parker";
       insert $x isa base, has ref 0;
       """
 
-  Scenario: instances of an inherited key don't have be unique among its subtypes
+  Scenario: instances of an inherited key don't have to be unique among its subtypes
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
