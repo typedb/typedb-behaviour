@@ -234,7 +234,6 @@ Feature: Attribute Attachment Resolution
       """
 
 
-
   Scenario: Querying for anonymous attributes with predicates finds the correct answers
     Given reasoning schema
       """
