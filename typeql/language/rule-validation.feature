@@ -257,6 +257,20 @@ Feature: TypeQL Rule Validation
     Then transaction commits
 
 
+  Scenario: a rule can use a negated disjunction in its 'when' clause
+    Then typeql define
+      """
+      define
+      rule those-who-arent-sophie-and-fiona-have-nickname-notfi: when {
+        $p isa person;
+        not { {$p has name "Sophie";} or {$p has name "Fiona";}; };
+      } then {
+        $p has nickname "NotFi";
+      };
+      """
+    Then transaction commits
+
+
   Scenario: when a rule contains an unbound variable in the 'then' clause, an error is thrown
     Then typeql define; throws exception
       """
