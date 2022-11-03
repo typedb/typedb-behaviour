@@ -234,6 +234,42 @@ Feature: Attribute Attachment Resolution
       """
 
 
+  Scenario: a rule with negated disjunctions considers every branch
+    Given reasoning schema
+      """
+      define
+      crisps sub entity, owns retailer;
+      rule tesco-sells-everything-that-Ocado-doesnt-except-soft-drinks: when {
+        not { {$x has retailer 'Ocado';} or {$x isa soft-drink;}; };
+      } then {
+        $x has retailer 'Tesco';
+      };
+      """
+    Given reasoning data
+      """
+      insert
+      $aeW isa crisps;
+      $aeX isa crisps, has retailer 'Ocado';
+      $aeY isa soft-drink;
+      $aeZ isa soft-drink;
+      """
+    Given verifier is initialised
+    Given reasoning query
+      """
+      match $x has retailer 'Tesco';
+      """
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
+    Then verify answer set is equivalent for query
+      """
+      match
+      $x isa $t;
+      not {$x has retailer 'Ocado';}; not {$t type soft-drink;};
+      get $x;
+      """
+
+
   Scenario: Querying for anonymous attributes with predicates finds the correct answers
     Given reasoning schema
       """
