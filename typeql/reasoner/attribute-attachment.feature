@@ -204,7 +204,8 @@ Feature: Attribute Attachment Resolution
       define
       crisps sub entity, owns retailer;
       rule tesco-sells-everything-ocado-sells-and-all-soft-drinks: when {
-        {$x has retailer 'Ocado';} or {$x isa soft-drink;};
+        $x isa $t;
+        {$x has retailer 'Ocado';} or {$t type soft-drink;};
       } then {
         $x has retailer 'Tesco';
       };
@@ -240,7 +241,8 @@ Feature: Attribute Attachment Resolution
       define
       crisps sub entity, owns retailer;
       rule tesco-sells-everything-that-Ocado-doesnt-except-soft-drinks: when {
-        not { {$x has retailer 'Ocado';} or {$x isa soft-drink;}; };
+        $x isa $t;
+        not { {$x has retailer 'Ocado';} or {$t type soft-drink;}; };
       } then {
         $x has retailer 'Tesco';
       };
