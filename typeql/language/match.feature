@@ -688,6 +688,27 @@ Feature: TypeQL Match Query
       | key:ref:1 |
 
 
+  Scenario: 'isa' matches no answers if the type tree is fully abstract
+    Given typeql define
+      """
+      define
+      person sub entity, abstract;
+      writer sub person, abstract;
+      scifi-writer sub writer, abstract;
+      good-scifi-writer sub scifi-writer, abstract;
+      """
+    Given transaction commits
+
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: read
+    When get answers of typeql match
+      """
+      match $x isa person;
+      """
+    Then answer size is: 0
+
+
   Scenario: 'iid' matches the instance with the specified internal iid
     Given connection close all sessions
     Given connection open data session for database: typedb
