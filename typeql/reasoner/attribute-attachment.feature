@@ -241,7 +241,7 @@ Feature: Attribute Attachment Resolution
       define
       crisps sub entity, owns retailer;
       rule tesco-sells-everything-that-Ocado-doesnt-except-soft-drinks: when {
-        $x isa $t;
+        $x isa $t; $t owns retailer;
         not { {$x has retailer 'Ocado';} or {$t type soft-drink;}; };
       } then {
         $x has retailer 'Tesco';
@@ -266,7 +266,7 @@ Feature: Attribute Attachment Resolution
     Then verify answer set is equivalent for query
       """
       match
-      $x isa $t;
+      $x isa $t; $t owns retailer;
       not {$x has retailer 'Ocado';}; not {$t type soft-drink;};
       get $x;
       """
