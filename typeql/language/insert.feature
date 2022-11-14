@@ -430,15 +430,15 @@ Feature: TypeQL Insert Query
   Scenario: string attributes with newlines retain the newline character
     Given typeql insert
       """
-insert
-$p isa person, has name "Peter
+      insert
+      $p isa person, has name "Peter
 Parker", has ref 0;
       """
     Given transaction commits
     When session opens transaction of type: read
     When get answers of typeql match
       """
-match $p has name "Peter
+      match $p has name "Peter
 Parker";
       """
     Then uniquely identify answer concepts
