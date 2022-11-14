@@ -243,8 +243,8 @@ Feature: TypeQL Rule Validation
     Then transaction commits
 
 
-  Scenario: when a rule contains a disjunction, an error is thrown
-    Then typeql define; throws exception
+  Scenario: a rule can use disjunction in its 'when' clause
+    Then typeql define
       """
       define
       rule sophie-and-fiona-have-nickname-fi: when {
@@ -254,6 +254,21 @@ Feature: TypeQL Rule Validation
         $p has nickname "Fi";
       };
       """
+    Then transaction commits
+
+
+  Scenario: a rule can use a negated disjunction in its 'when' clause
+    Then typeql define
+      """
+      define
+      rule those-who-arent-sophie-and-fiona-have-nickname-notfi: when {
+        $p isa person;
+        not { {$p has name "Sophie";} or {$p has name "Fiona";}; };
+      } then {
+        $p has nickname "NotFi";
+      };
+      """
+    Then transaction commits
 
 
   Scenario: when a rule contains an unbound variable in the 'then' clause, an error is thrown
@@ -267,6 +282,20 @@ Feature: TypeQL Rule Validation
       };
       """
 
+
+  Scenario: the variables in the conclusion of a rule must be bound in the trunk of its 'when' clause
+    Then typeql define; throws exception
+      """
+      define
+      person plays both-named-robert:named-robert;
+      both-named-robert sub relation, relates named-robert;
+      rule two-roberts-are-both-named-robert-with-branches: when {
+        $p1 isa person, has name "Robert";
+        {$p2 isa person, has name "Robert";} or {$p2 isa person, has name "Bob";};
+      } then {
+        (named-robert: $p1, named-robert: $p2) isa both-named-robert;
+      };
+      """
 
   Scenario: when a rule has an undefined attribute set in its 'then' clause, an error is thrown
     Given typeql define; throws exception
@@ -547,6 +576,23 @@ Feature: TypeQL Rule Validation
         not { (apprentice: $person) isa apprenticeship;};
       } then {
         (scholar: $person) isa scholarship;
+      };
+      """
+    Then transaction commits; throws exception
+
+  Scenario: When any branch in a disjunction creates a negative loop, an error is thrown
+    Then typeql define
+      """
+      define
+      rule employed-nonscholar-whois-apprentice: when {
+        (employee: $person) isa employment;
+        {
+          not { (employee: $person) isa self-employment;};
+        } or {
+          not { (apprentice: $person) isa apprenticeship;};
+        };
+      } then {
+        (apprentice: $person) isa apprenticeship;
       };
       """
     Then transaction commits; throws exception
