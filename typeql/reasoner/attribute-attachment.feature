@@ -134,7 +134,7 @@ Feature: Attribute Attachment Resolution
 
       rule if-ocado-exists-it-sells-all-soft-drinks: when {
         $x isa retailer;
-        $x = 'Ocado';
+        $x == 'Ocado';
         $y isa soft-drink;
       } then {
         $y has retailer 'Ocado';
@@ -177,7 +177,7 @@ Feature: Attribute Attachment Resolution
       define
       rule if-ocado-exists-it-sells-all-soft-drinks: when {
         $x isa retailer;
-        $x = 'Ocado';
+        $x == 'Ocado';
         $y isa soft-drink;
       } then {
         $y has $x;
@@ -311,3 +311,52 @@ Feature: Attribute Attachment Resolution
     Then verify answer size is: 0
     Then verify answers are sound
     Then verify answers are complete
+
+
+  Scenario: A rule can infer an attribute from a value derived from an expression
+    Given reasoning schema
+      """
+      define
+      age-in-days sub attribute, value long;
+      tortoise owns age-in-days;
+      person owns age-in-days;
+
+      rule infer-age-in-days-from-age-in-years:
+      when {
+        $x has age $age;
+        ?age-in-days = $age * 365;
+      } then {
+        $x has age-in-days ?age-in-days;
+      };
+      """
+    Given reasoning data
+      """
+      insert
+      $t isa tortoise, has age 60;
+      """
+    Given verifier is initialised
+    Given reasoning query
+      """
+      match $x has age-in-days $days;
+      """
+    Then verify answer size is: 1
+    Then verify answers are sound
+    Then verify answers are complete
+
+    Given reasoning query
+      """
+      match
+        $x has age-in-days $days-thing;
+        ?days = $days-thing;
+      get
+        ?days;
+      """
+    Then verify answer size is: 1
+    Then verify answer set is equivalent for query
+      """
+      match
+        $x type thing;    # Query needs a concrete variable
+        ?days = 21900;
+      get
+        ?days;
+      """

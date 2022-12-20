@@ -161,6 +161,34 @@ Feature: Concept Serialization
       ]
       """
 
+  Scenario: Serialized values contain value, and value type, but no type label.
+    Given typeql insert
+      """
+      insert
+      $x isa person, has ref 0, has name "Alan";
+      """
+    When get answers of typeql match
+      """
+      match
+        ?s = "Alan";
+        ?l = 123;
+        ?d = 543.21;
+        ?b = false;
+        ?t = 2023-03-21T12:34;
+      """
+    Then JSON serialization of answers matches
+      """
+      [
+        {
+          "s" : { "value_type": "string", "value": "Alan" } ,
+          "l" : { "value_type": "long", "value": 123 },
+          "d" : { "value_type": "double", "value": 543.21 },
+          "b" : { "value_type": "boolean", "value": false },
+          "t" : { "value_type": "datetime", "value": "2023-03-21T12:34:00.000" }
+         }
+      ]
+      """
+
   Scenario: Serialized concept map can contain a mix of types, role types, and entities
     Given typeql insert
       """

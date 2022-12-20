@@ -1284,6 +1284,7 @@ Feature: TypeQL Match Query
       | x         |
       | key:ref:0 |
 
+
   Scenario: an error is thrown when matching an entity type as if it were a role type
     Then typeql match; throws exception
       """
@@ -1839,7 +1840,7 @@ Feature: TypeQL Match Query
       """
       match
         $x isa person, has graduation-date $date;
-        $r (employee: $x) isa employment, has start-date = $date;
+        $r (employee: $x) isa employment, has start-date == $date;
       """
     Then answer size is: 1
     Then uniquely identify answer concepts
@@ -1847,7 +1848,7 @@ Feature: TypeQL Match Query
       | key:ref:0 | key:ref:1 | value:graduation-date:2009-07-16 |
 
 
-  Scenario: 'has $attr = $x' matches owners of any instance '$y' of '$attr' where '$y' and '$x' are equal by value
+  Scenario: 'has $attr == $x' matches owners of any instance '$y' of '$attr' where '$y' and '$x' are equal by value
     Given connection close all sessions
     Given connection open data session for database: typedb
     Given session opens transaction of type: write
@@ -1863,7 +1864,7 @@ Feature: TypeQL Match Query
     Given session opens transaction of type: read
     When get answers of typeql match
       """
-      match $x has age = 16;
+      match $x has age == 16;
       """
     Then uniquely identify answer concepts
       | x         |
@@ -1965,14 +1966,14 @@ Feature: TypeQL Match Query
       """
       match
         $x isa house-number;
-        $x = 1.0;
+        $x == 1.0;
       """
     Then answer size is: 1
     When get answers of typeql match
       """
       match
         $x isa length;
-        $x = 2;
+        $x == 2;
       """
     Then answer size is: 1
     When get answers of typeql match
@@ -2001,6 +2002,15 @@ Feature: TypeQL Match Query
       match
         $x isa attribute;
         $x < 2.0;
+      """
+    Then answer size is: 1
+
+    When get answers of typeql match
+      """
+      match
+        $x isa house-number;
+        $y isa length;
+        $x < $y;
       """
     Then answer size is: 1
 
@@ -2051,7 +2061,7 @@ Feature: TypeQL Match Query
     When get answers of typeql match
       """
       match
-        $x has age = $z;
+        $x has age == $z;
         $z >= 17;
         $z isa age;
       get $x;
@@ -2115,6 +2125,7 @@ Feature: TypeQL Match Query
         not { $x is $y; };
       """
     Then answer size is: 0
+
 
   Scenario: concept comparison of unbound variables throws an error
     Then typeql match; throws exception
@@ -2189,7 +2200,7 @@ Feature: TypeQL Match Query
     Given session opens transaction of type: read
     When get answers of typeql match
       """
-      match $x isa person, has name $a; not { $a = "Jeff"; }; get $x;
+      match $x isa person, has name $a; not { $a == "Jeff"; }; get $x;
       """
     Then uniquely identify answer concepts
       | x         |

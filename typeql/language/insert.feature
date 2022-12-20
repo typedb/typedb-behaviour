@@ -268,6 +268,31 @@ Feature: TypeQL Insert Query
       | value:age:25          |
       | value:ref:0           |
 
+  Scenario: when inserting a new thing that owns new attributes via a value variable, both the thing and the attributes get created
+    Given get answers of typeql match
+      """
+      match $x isa thing;
+      """
+    Given answer size is: 0
+    When typeql insert
+      """
+      match  ?a = 25;
+      insert $x isa person, has name "Wilhelmina", has age ?a, has ref 0;
+      """
+    Then transaction commits
+
+    When session opens transaction of type: read
+    When get answers of typeql match
+      """
+      match $x isa thing;
+      """
+    Then uniquely identify answer concepts
+      | x                     |
+      | key:ref:0             |
+      | value:name:Wilhelmina |
+      | value:age:25          |
+      | value:ref:0           |
+
 
   Scenario: a freshly inserted attribute has no owners
     Given typeql insert
@@ -1045,6 +1070,49 @@ Parker";
     When typeql insert
       """
       insert $x <value> isa <attr>, has ref 0;
+      """
+    Then transaction commits
+
+    When session opens transaction of type: read
+    When get answers of typeql match
+      """
+      match $x <value> isa <attr>;
+      """
+    Then uniquely identify answer concepts
+      | x         |
+      | key:ref:0 |
+
+    Examples:
+      | attr           | type     | value      |
+      | title          | string   | "Prologue" |
+      | page-number    | long     | 233        |
+      | price          | double   | 15.99      |
+      | purchased      | boolean  | true       |
+      | published-date | datetime | 2020-01-01 |
+
+
+  Scenario Outline: Attributes of type '<type>' can be inserted via value variables
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
+      """
+      define <attr> sub attribute, value <type>, owns ref @key;
+      """
+    Given transaction commits
+
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given get answers of typeql match
+      """
+      match $x <value> isa <attr>;
+      """
+    Given answer size is: 0
+    When typeql insert
+      """
+      match ?x = <value>;
+      insert $a isa <attr>, has ref 0; $a == ?x;
       """
     Then transaction commits
 

@@ -90,6 +90,28 @@ Feature: TypeQL Get Clause
       match $x isa person; get $y;
       """
 
+  Scenario: Value variables can be specified in a 'get'
+    Given typeql insert
+      """
+      insert
+      $x "Lisa" isa name;
+      $y 16 isa age;
+      $z isa person, has name $x, has age $y, has ref 0;
+      """
+    Given transaction commits
+
+    Given session opens transaction of type: read
+    When get answers of typeql match
+      """
+      match
+        $z isa person, has name $x, has age $y;
+        ?b = 2017 - $y;
+      get $z, $x, ?b;
+      """
+    Then uniquely identify answer concepts
+      | z         | x               | b             |
+      | key:ref:0 | value:name:Lisa | raw:long:2001 |
+
 
   ########
   # SORT #
@@ -199,6 +221,34 @@ Feature: TypeQL Get Clause
       | key:ref:2 | value:name:Frederick |
       | key:ref:0 | value:name:Gary      |
       | key:ref:1 | value:name:Jemima    |
+
+
+  Scenario: Sorting on value variables is supported
+    Given typeql insert
+      """
+      insert
+      $a isa person, has age 18, has ref 0;
+      $b isa person, has age 14, has ref 1;
+      $c isa person, has age 20, has ref 2;
+      $d isa person, has age 16, has ref 3;
+      """
+    Given transaction commits
+
+    Given session opens transaction of type: read
+    When get answers of typeql match
+      """
+      match
+        $x isa person, has age $a;
+        ?to20 = 20 - $a;
+      sort
+        ?to20 desc;
+      """
+    Then order of answer concepts is
+      | x         | to20       |
+      | key:ref:1 | raw:long:6 |
+      | key:ref:3 | raw:long:4 |
+      | key:ref:0 | raw:long:2 |
+      | key:ref:2 | raw:long:0 |
 
 
   Scenario: multiple sort variables may be used to sort ascending
@@ -740,7 +790,6 @@ Feature: TypeQL Get Clause
       | score       | long      | 4           | -38         | quantity   | double     | -55.123     | area      | long      | 100        | length     | double     | 0.5              |
       | dob         | datetime  | 2970-01-01   | 1970-02-01 | start-date | datetime   | 1970-01-01  | end-date  | datetime  | 3100-11-20 | last-date  | datetime   | 2000-08-03       |
 
-
   #############
   # AGGREGATE #
   #############
@@ -1146,6 +1195,32 @@ Feature: TypeQL Get Clause
       | key:ref:3 | key:ref:3 | key:ref:1 |
       | key:ref:3 | key:ref:3 | key:ref:2 |
 
+  Scenario: answers can be grouped by a value variable contained in the answer set
+    Given typeql insert
+      """
+      insert
+      $p1 isa person, has name "Violet", has ref 1250;
+      $p2 isa person, has name "Rupert", has ref 1750;
+      $p3 isa person, has name "Bernard", has ref 2050;
+      $p4 isa person, has name "Colin", has ref 3000;
+      """
+    Given transaction commits
+
+    Given session opens transaction of type: read
+    When get answers of typeql match group
+      """
+      match
+       $x isa person, has ref $r;
+       ?bracket = floor($r/1000) * 1000;
+       get $x, ?bracket;
+       group ?bracket;
+      """
+    Then answer groups are
+      | owner         | x            |
+      | raw:long:1000 | key:ref:1250 |
+      | raw:long:1000 | key:ref:1750 |
+      | raw:long:2000 | key:ref:2050 |
+      | raw:long:3000 | key:ref:3000 |
 
   Scenario: when grouping answers by a variable that is not contained in the answer set, an error is thrown
     Given typeql insert
@@ -1164,6 +1239,7 @@ Feature: TypeQL Get Clause
       get $x;
       group $y;
       """
+
 
 
   ###################
@@ -1281,3 +1357,30 @@ Feature: TypeQL Get Clause
       | owner     | value |
       | key:ref:0 | 57    |
       | key:ref:1 | 45    |
+
+
+  Scenario: Grouped aggregates can be performed on value variables
+    Given typeql insert
+      """
+      insert
+        $a1 isa person, has name "Alice", has age 22, has ref 0;
+        $a2 isa person, has name "Alice", has age 18, has ref 1;
+        $b1 isa person, has name "Bob", has age 21, has ref 2;
+        $b2 isa person, has name "Bob", has age 24, has ref 3;
+      """
+    Then transaction commits
+
+    When session opens transaction of type: read
+    When get answers of typeql match group aggregate
+      """
+      match
+       $p isa person, has name $name, has age $a;
+       ?n = $name;
+       ?to25 = 25 - $a;
+      get   ?n, ?to25;
+      group ?n; sum ?to25;
+      """
+    Then group aggregate values are
+      | owner            | value |
+      | raw:string:Alice |  10   |
+      | raw:string:Bob   |   5   |
