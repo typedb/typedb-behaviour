@@ -1309,6 +1309,7 @@ Feature: TypeQL Delete Query
       """
     Then transaction commits; throws exception
 
+
   Scenario: deleting a type throws an error
     Then typeql delete; throws exception
       """
