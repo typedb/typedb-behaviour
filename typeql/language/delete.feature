@@ -1283,7 +1283,7 @@ Feature: TypeQL Delete Query
       """
     Then transaction commits; throws exception
 
-  @ignore
+
   Scenario: deleting an attribute instance that is owned as a has throws @key an error
     Given typeql insert
       """
@@ -1300,14 +1300,14 @@ Feature: TypeQL Delete Query
     Then uniquely identify answer concepts
       | x                  |
       | value:name:Tatyana |
-    Then typeql delete; throws exception
+    Then typeql delete
       """
       match
         $x "Tatyana" isa name;
       delete
         $x isa attribute;
       """
-
+    Then transaction commits; throws exception
 
   Scenario: deleting a type throws an error
     Then typeql delete; throws exception
