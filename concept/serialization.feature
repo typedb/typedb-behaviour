@@ -142,9 +142,9 @@ Feature: Concept Serialization
     Given typeql insert
       """
       insert
-      $dob 2023-03-21T12:34:56 isa date-of-birth;
-      $dob 2023-03-21T12:34 isa date-of-birth;
-      $dob 2023-03-21 isa date-of-birth;
+      $a 2023-03-21T12:34:56 isa date-of-birth;
+      $b 2023-03-21T12:34 isa date-of-birth;
+      $c 2023-03-21 isa date-of-birth;
       """
     When get answers of typeql match
       """
