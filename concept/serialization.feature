@@ -135,8 +135,27 @@ Feature: Concept Serialization
       """
     Then JSON of answer concepts matches
       """
+      [ { "x": { "type": "date-of-birth", "value_type": "datetime", "value": "2023-03-21T12:34:56.789" } } ]
+      """
+
+  Scenario: Serialized datetime attribute always has resolution of milliseconds
+    Given typeql insert
+      """
+      insert
+      $dob 2023-03-21T12:34:56 isa date-of-birth;
+      $dob 2023-03-21T12:34 isa date-of-birth;
+      $dob 2023-03-21 isa date-of-birth;
+      """
+    When get answers of typeql match
+      """
+      match $x isa date-of-birth;
+      """
+    Then JSON of answer concepts matches
+      """
       [
-        { "x": { "type": "date-of-birth", "value_type": "datetime", "value": "2023-03-21T12:34:56.789" } }
+        { "x": { "type": "date-of-birth", "value_type": "datetime", "value": "2023-03-21T12:34:56.000" } },
+        { "x": { "type": "date-of-birth", "value_type": "datetime", "value": "2023-03-21T12:34:00.000" } },
+        { "x": { "type": "date-of-birth", "value_type": "datetime", "value": "2023-03-21T00:00:00.000" } }
       ]
       """
 
