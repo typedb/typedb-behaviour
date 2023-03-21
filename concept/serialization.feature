@@ -58,7 +58,7 @@ Feature: Concept Serialization
   Scenario: Serialized type contains its label
     When get answers of typeql match
       """
-      match $x isa person;
+      match $x type person;
       """
     Then JSON of answer concepts matches
       """
@@ -101,9 +101,7 @@ Feature: Concept Serialization
       """
       [
         { "x": { "type": "friendship" } },
-        { "x": { "type": "relation" } },
-        { "x": { "type": "employment" } },
-        { "x": { "type": "relation" } }
+        { "x": { "type": "employment" } }
       ]
       """
 
@@ -129,7 +127,7 @@ Feature: Concept Serialization
     Given typeql insert
       """
       insert
-      $dob isa date-of-birth, value 2023-03-21T14:18:02.607;
+      $dob 2023-03-21T12:34:56.789 isa date-of-birth;
       """
     When get answers of typeql match
       """
@@ -138,7 +136,7 @@ Feature: Concept Serialization
     Then JSON of answer concepts matches
       """
       [
-        { "x": { "type": "date-of-birth", "value_type": "datetime", "value": "2023-03-21T14:18:02.607" } }
+        { "x": { "type": "date-of-birth", "value_type": "datetime", "value": "2023-03-21T12:34:56.789" } }
       ]
       """
 
