@@ -19,6 +19,7 @@
 Feature: Connection Session
 
   Background:
+    When connect as user admin with password password
     Given connection has been opened
     Given connection does not have any database
 
