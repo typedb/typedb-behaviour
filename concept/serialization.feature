@@ -105,7 +105,7 @@ Feature: Concept Serialization
       ]
       """
 
-  Scenario: Serialized attribute contains its type label, value and value type
+  Scenario: Serialized attribute contains its type label, value, and value type
     Given typeql insert
       """
       insert
