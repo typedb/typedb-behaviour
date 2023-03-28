@@ -60,7 +60,7 @@ Feature: Concept Serialization
       """
       match $x type person;
       """
-    Then JSON of answer concepts matches
+    Then JSON serialization of answers matches
       """
       [ { "x": { "label": "person" } } ]
       """
@@ -76,7 +76,7 @@ Feature: Concept Serialization
       """
       match $x isa person;
       """
-    Then JSON of answer concepts matches
+    Then JSON serialization of answers matches
       """
       [
         { "x": { "type": "person" } },
@@ -97,7 +97,7 @@ Feature: Concept Serialization
       """
       match $x isa relation;
       """
-    Then JSON of answer concepts matches
+    Then JSON serialization of answers matches
       """
       [
         { "x": { "type": "friendship" } },
@@ -115,7 +115,7 @@ Feature: Concept Serialization
       """
       match $x isa attribute;
       """
-    Then JSON of answer concepts matches
+    Then JSON serialization of answers matches
       """
       [
         { "x": { "type": "name", "value_type": "string", "value": "Alan" } },
@@ -133,7 +133,7 @@ Feature: Concept Serialization
       """
       match $x isa date-of-birth;
       """
-    Then JSON of answer concepts matches
+    Then JSON serialization of answers matches
       """
       [ { "x": { "type": "date-of-birth", "value_type": "datetime", "value": "2023-03-21T12:34:56.789" } } ]
       """
@@ -150,7 +150,7 @@ Feature: Concept Serialization
       """
       match $x isa date-of-birth;
       """
-    Then JSON of answer concepts matches
+    Then JSON serialization of answers matches
       """
       [
         { "x": { "type": "date-of-birth", "value_type": "datetime", "value": "2023-03-21T12:34:56.000" } },
@@ -171,7 +171,7 @@ Feature: Concept Serialization
       """
       match $x($r:$y) isa! $t, has ref $z;
       """
-    Then JSON of answer concepts matches
+    Then JSON serialization of answers matches
       """
       [
         {
