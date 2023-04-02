@@ -21,13 +21,15 @@
 Feature: Connection Users
 
   Scenario: users can be created and deleted
-    When connect as user admin with password password
+    When cluster starts
+    And user connect: admin, password
     Then users contains: admin
     And users not contains: user
     When users create: user, password
     And users contains: user
     And user password set: user, new-password
-    And user connect: user, new-password
+    And disconnect current user
+    And user connect: admin, password
     And users delete: user
     Then users not contains: user
 
@@ -36,7 +38,7 @@ Feature: Connection Users
       |server.authentication.password-policy.complexity.min-length|5|
       |server.authentication.password-policy.complexity.enable|true|
     When cluster starts
-    And connect as user admin with password password
+    And user connect: admin, password
     And users create: user, password
     And users create: user2, passw
     And users create: user3, pass; throws exception
@@ -46,51 +48,53 @@ Feature: Connection Users
       |server.authentication.password-policy.complexity.min-lowercase|2|
       |server.authentication.password-policy.complexity.enable|true|
     When cluster starts
-    And connect as user admin with password password
+    And user connect: admin, password
     And users create: user, password
     And users create: user2, paSSWORD
     And users create: user3, PASSWORD; throws exception
 
   Scenario: user passwords must be unique for a certain history size
     Given cluster has configuration
-      |server.authentication.password-policy.unique-history-size|3|
+      |server.authentication.password-policy.unique-history-size|2|
     When cluster starts
-    And connect as user admin with password password
+    And user connect: admin, password
     And users create: user, password
     And disconnect current user
-    And connect as user user with password password
+    And user connect: user, password
+    And user password update: password, password; throws exception
     And user password update: password, new-password
+    And disconnect current user
+    And user connect: user, new-password
+    And user password update: new-password, password; throws exception
+    And disconnect current user
+    And user connect: user, new-password
     And user password update: new-password, newer-password
-    And user password update: newer-password password; throws exception
-    And user password update: newer-password newest-password
+    And disconnect current user
+    And user connect: user, newer-password
+    And user password update: newer-password, newest-password
+    And user connect: user, newest-password
+    And user password update: newest-password, password
 
-  Scenario non-admin user cannot perform permissioned actions
+  Scenario: non-admin user cannot perform permissioned actions
     When cluster starts
-    And connect as user admin with password password
+    And user connect: admin, password
     And users create: user, password
     And users create: user2, password2
     And disconnect current user
-    And connect as user user with password password
+    And user connect: user, password
     And users get all; throws exception
-    And users get user admin; throws exception
+    And users get user: admin; throws exception
     And users create: user3, password; throws exception
-    And users contains admin; throws exception
-    And users delete admin; throws exception
-    And users delete user2; throws exception
+    And users contains: admin; throws exception
+    And users delete: admin; throws exception
+    And users delete: user2; throws exception
     And users password set: user2, new-password; throws exception
 
 
-  testMinLength
-  testMinLowercase
-  testMinUppercase
-  testMinNumerics
-  testMinSpecialChars
-  testMinDifferentChars
-  testUniqueHistorySize
-  testUserCannotGetAll
-  testUserCannotCreate
-  testUserCannotDelete
-  testUserCannotContains
-  testUserCannotPasswordSet
-  testUserCannotPasswordUpdateAnotherUser
-  testDeletion
+
+
+#  testMinUppercase
+#  testMinNumerics
+#  testMinSpecialChars
+#  testMinDifferentChars
+#  testDeletion
