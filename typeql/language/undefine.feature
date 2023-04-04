@@ -1362,6 +1362,31 @@ Feature: TypeQL Undefine Query
       | n                 |
       | value:name:Samuel |
 
+  Scenario: You cannot undefine a type if it is used in any disjunction of a rule
+    Given typeql define
+    """
+    define
+
+    type-to-undefine sub entity, owns name;
+
+    rule rule-referencing-type-to-undefine:
+    when {
+      $x has name $y;
+      { $x isa person; } or { $x isa type-to-undefine; };
+    } then {
+      $x has name "dummy";
+    };
+    """
+    Given transaction commits
+
+    Given session opens transaction of type: write
+
+    Given typeql undefine; throws exception
+    """
+    undefine
+      type-to-undefine sub entity;
+    """
+
 
   ############
   # ABSTRACT #
