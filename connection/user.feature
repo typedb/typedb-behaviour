@@ -26,9 +26,14 @@ Feature: Connection Users
     Then users contains: admin
     And users not contains: user
     When users create: user, password
+    And users create: user2, password2
     And users contains: user
-    And user password set: user, new-password
-    And disconnect current user
+    And users contains: user2
+    And users password set: user, new-password
+    And users delete: user2
+    And user disconnect
+    And user connect: user, new-password
+    And user disconnect
     And user connect: admin, password
     And users delete: user
     Then users not contains: user
@@ -53,34 +58,93 @@ Feature: Connection Users
     And users create: user2, paSSWORD
     And users create: user3, PASSWORD; throws exception
 
+  Scenario: user passwords must comply with the minimum number of uppercase characters
+    Given cluster has configuration
+      |server.authentication.password-policy.complexity.min-uppercase|2|
+      |server.authentication.password-policy.complexity.enable|true|
+    When cluster starts
+    And user connect: admin, password
+    And users create: user, PASSWORD
+    And users create: user2, PAssword
+    And users create: user3, password; throws exception
+
+  Scenario: user passwords must comply with the minimum number of numeric characters
+    Given cluster has configuration
+      |server.authentication.password-policy.complexity.min-numerics|2|
+      |server.authentication.password-policy.complexity.enable|true|
+    When cluster starts
+    And user connect: admin, password
+    And users create: user, PASSWORD789
+    And users create: user2, PASSWORD78
+    And users create: user3, PASSWORD7; throws exception
+
+  Scenario: user passwords must comply with the minimum number of special characters
+    Given cluster has configuration
+      |server.authentication.password-policy.complexity.min-special-chars|2|
+      |server.authentication.password-policy.complexity.enable|true|
+    When cluster starts
+    And user connect: admin, password
+    And users create: user, PASSWORD!@£
+    And users create: user2, PASSWORD&(
+    And users create: user3, PASSWORD); throws exception
+
+  Scenario: user passwords must comply with the minimum number of different characters
+    Given cluster has configuration
+      |server.authentication.password-policy.complexity.min-different-chars|4|
+      |server.authentication.password-policy.complexity.enable|true|
+    When cluster starts
+    And user connect: admin, password
+    And users create: user, password
+    And user disconnect
+    And user connect: user, password
+    And user password update: password, new-password
+    And user disconnect
+    And user connect: user, new-password
+    And user password update: new-password, bad-password; throws exception
+    And user password update: new-password, even-newer-password
+    And user disconnect
+    And user connect: user, even-newer-password
+
   Scenario: user passwords must be unique for a certain history size
     Given cluster has configuration
       |server.authentication.password-policy.unique-history-size|2|
     When cluster starts
     And user connect: admin, password
     And users create: user, password
-    And disconnect current user
+    And user disconnect
     And user connect: user, password
     And user password update: password, password; throws exception
     And user password update: password, new-password
-    And disconnect current user
+    And user disconnect
     And user connect: user, new-password
     And user password update: new-password, password; throws exception
-    And disconnect current user
+    And user disconnect
     And user connect: user, new-password
     And user password update: new-password, newer-password
-    And disconnect current user
+    And user disconnect
     And user connect: user, newer-password
     And user password update: newer-password, newest-password
     And user connect: user, newest-password
     And user password update: newest-password, password
+
+  Scenario: user can check their own password expiration days
+    Given cluster has configuration
+      |server.authentication.password-policy.expiration.enable|true|
+      |server.authentication.password-policy.expiration.min-days|0|
+      |server.authentication.password-policy.expiration.max-days|5|
+    When cluster starts
+    And user connect: admin, password
+    And users create: user, password
+    And user disconnect
+    And user connect: user, password
+    And user expiry-days
 
   Scenario: non-admin user cannot perform permissioned actions
     When cluster starts
     And user connect: admin, password
     And users create: user, password
     And users create: user2, password2
-    And disconnect current user
+    And user disconnect
     And user connect: user, password
     And users get all; throws exception
     And users get user: admin; throws exception
@@ -89,12 +153,3 @@ Feature: Connection Users
     And users delete: admin; throws exception
     And users delete: user2; throws exception
     And users password set: user2, new-password; throws exception
-
-
-
-
-#  testMinUppercase
-#  testMinNumerics
-#  testMinSpecialChars
-#  testMinDifferentChars
-#  testDeletion
