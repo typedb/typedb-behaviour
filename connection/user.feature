@@ -127,17 +127,29 @@ Feature: Connection Users
     And user connect: user, newest-password
     And user password update: newest-password, password
 
-  Scenario: user can check their own password expiration days
+  Scenario: user can check their own password expiration seconds
     Given cluster has configuration
       |server.authentication.password-policy.expiration.enable|true|
-      |server.authentication.password-policy.expiration.min-days|0|
-      |server.authentication.password-policy.expiration.max-days|5|
+      |server.authentication.password-policy.expiration.min-duration|0s|
+      |server.authentication.password-policy.expiration.max-duration|5d|
     When cluster starts
     And user connect: admin, password
     And users create: user, password
     And user disconnect
     And user connect: user, password
-    And user expiry-days
+    And user expiry-seconds
+
+  Scenario: user passwords expire
+    Given cluster has configuration
+      |server.authentication.password-policy.expiration.enable|true|
+      |server.authentication.password-policy.expiration.min-duration|0s|
+      |server.authentication.password-policy.expiration.max-duration|5s|
+    When cluster starts
+    And user connect: admin, password
+    And users create: user, password
+    And user disconnect
+    And wait 5 seconds
+    And user connect: user, password; throws exception
 
   Scenario: non-admin user cannot perform permissioned actions
     When cluster starts
