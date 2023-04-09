@@ -19,6 +19,8 @@
 Feature: Concept Entity Type
 
   Background:
+    When typedb starts
+    And open connection
     Given connection has been opened
     Given connection does not have any database
     Given connection create database: typedb

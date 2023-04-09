@@ -19,6 +19,8 @@
 Feature: TypeQL Update Query
 
   Background: Open connection and create a simple extensible schema
+    When typedb starts
+    And open connection
     Given connection has been opened
     Given connection does not have any database
     Given connection create database: typedb

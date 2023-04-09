@@ -19,6 +19,8 @@
 Feature: Negation Resolution
 
   Background: Set up database
+    When typedb starts
+    And open connection
     Given reasoning schema
       """
       define

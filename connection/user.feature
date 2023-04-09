@@ -15,13 +15,10 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-@ignore-typedb-client-java
-@ignore-typedb-client-python
-@ignore-typedb-client-nodejs
 Feature: Connection Users
 
   Scenario: users can be created and deleted
-    When cluster starts
+    When typedb starts
     And user connect: admin, password
     Then users contains: admin
     And users not contains: user
@@ -39,60 +36,60 @@ Feature: Connection Users
     Then users not contains: user
 
   Scenario: user passwords must comply with the minimum length
-    Given cluster has configuration
+    Given typedb has configuration
       |server.authentication.password-policy.complexity.min-length|5|
       |server.authentication.password-policy.complexity.enable|true|
-    When cluster starts
+    When typedb starts
     And user connect: admin, password
     And users create: user, password
     And users create: user2, passw
     And users create: user3, pass; throws exception
 
   Scenario: user passwords must comply with the minimum number of lowercase characters
-    Given cluster has configuration
+    Given typedb has configuration
       |server.authentication.password-policy.complexity.min-lowercase|2|
       |server.authentication.password-policy.complexity.enable|true|
-    When cluster starts
+    When typedb starts
     And user connect: admin, password
     And users create: user, password
     And users create: user2, paSSWORD
     And users create: user3, PASSWORD; throws exception
 
   Scenario: user passwords must comply with the minimum number of uppercase characters
-    Given cluster has configuration
+    Given typedb has configuration
       |server.authentication.password-policy.complexity.min-uppercase|2|
       |server.authentication.password-policy.complexity.enable|true|
-    When cluster starts
+    When typedb starts
     And user connect: admin, password
     And users create: user, PASSWORD
     And users create: user2, PAssword
     And users create: user3, password; throws exception
 
   Scenario: user passwords must comply with the minimum number of numeric characters
-    Given cluster has configuration
+    Given typedb has configuration
       |server.authentication.password-policy.complexity.min-numerics|2|
       |server.authentication.password-policy.complexity.enable|true|
-    When cluster starts
+    When typedb starts
     And user connect: admin, password
     And users create: user, PASSWORD789
     And users create: user2, PASSWORD78
     And users create: user3, PASSWORD7; throws exception
 
   Scenario: user passwords must comply with the minimum number of special characters
-    Given cluster has configuration
+    Given typedb has configuration
       |server.authentication.password-policy.complexity.min-special-chars|2|
       |server.authentication.password-policy.complexity.enable|true|
-    When cluster starts
+    When typedb starts
     And user connect: admin, password
     And users create: user, PASSWORD!@£
     And users create: user2, PASSWORD&(
     And users create: user3, PASSWORD); throws exception
 
   Scenario: user passwords must comply with the minimum number of different characters
-    Given cluster has configuration
+    Given typedb has configuration
       |server.authentication.password-policy.complexity.min-different-chars|4|
       |server.authentication.password-policy.complexity.enable|true|
-    When cluster starts
+    When typedb starts
     And user connect: admin, password
     And users create: user, password
     And user disconnect
@@ -106,9 +103,9 @@ Feature: Connection Users
     And user connect: user, even-newer-password
 
   Scenario: user passwords must be unique for a certain history size
-    Given cluster has configuration
+    Given typedb has configuration
       |server.authentication.password-policy.unique-history-size|2|
-    When cluster starts
+    When typedb starts
     And user connect: admin, password
     And users create: user, password
     And user disconnect
@@ -128,11 +125,11 @@ Feature: Connection Users
     And user password update: newest-password, password
 
   Scenario: user can check their own password expiration seconds
-    Given cluster has configuration
+    Given typedb has configuration
       |server.authentication.password-policy.expiration.enable|true|
       |server.authentication.password-policy.expiration.min-duration|0s|
       |server.authentication.password-policy.expiration.max-duration|5d|
-    When cluster starts
+    When typedb starts
     And user connect: admin, password
     And users create: user, password
     And user disconnect
@@ -140,11 +137,11 @@ Feature: Connection Users
     And user expiry-seconds
 
   Scenario: user passwords expire
-    Given cluster has configuration
+    Given typedb has configuration
       |server.authentication.password-policy.expiration.enable|true|
       |server.authentication.password-policy.expiration.min-duration|0s|
       |server.authentication.password-policy.expiration.max-duration|5s|
-    When cluster starts
+    When typedb starts
     And user connect: admin, password
     And users create: user, password
     And user disconnect
@@ -152,7 +149,7 @@ Feature: Connection Users
     And user connect: user, password; throws exception
 
   Scenario: non-admin user cannot perform permissioned actions
-    When cluster starts
+    When typedb starts
     And user connect: admin, password
     And users create: user, password
     And users create: user2, password2

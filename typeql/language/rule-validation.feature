@@ -18,6 +18,8 @@
 Feature: TypeQL Rule Validation
 
   Background: Initialise a session and transaction for each scenario
+    When typedb starts
+    And open connection
     Given connection has been opened
     Given connection does not have any database
     Given connection create database: typedb
