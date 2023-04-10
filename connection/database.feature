@@ -19,7 +19,8 @@
 Feature: Connection Database
 
   Background:
-    When user connect: admin, password
+    When typedb starts
+    And open connection
     Given connection has been opened
     Given connection does not have any database
 
