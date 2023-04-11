@@ -19,6 +19,8 @@
 Feature: Type Hierarchy Resolution
 
   Scenario: subtypes trigger rules based on their parents; parent types don't trigger rules based on their children
+    When typedb starts
+    And open connection
     Given reasoning schema
       """
       define

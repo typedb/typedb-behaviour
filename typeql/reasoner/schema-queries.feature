@@ -19,6 +19,8 @@
 Feature: Schema Query Resolution (Variable Types)
 
   Background: Set up database
+    When typedb starts
+    And open connection
     Given reasoning schema
       """
       define
