@@ -30,7 +30,7 @@ Feature: TypeQL Define Query
     Given typeql define
       """
       define
-      person sub entity, plays employment:employee, plays income:earner, owns name, owns email @key;
+      person sub entity, plays employment:employee, plays income:earner, owns name, owns email @key, owns phone-nr @unique;
       employment sub relation, relates employee, plays income:source, owns start-date, owns employment-reference-code @key;
       income sub relation, relates earner, relates source;
 
@@ -38,6 +38,7 @@ Feature: TypeQL Define Query
       email sub attribute, value string;
       start-date sub attribute, value datetime;
       employment-reference-code sub attribute, value string;
+      phone-nr sub attribute, value string;
       """
     Given transaction commits
 
@@ -1349,7 +1350,7 @@ Feature: TypeQL Define Query
       | label:employment |
 
 
-  Scenario: defining a key on an existing type is possible if existing instances have it and there are no collisions
+  Scenario: defining a key on an existing ownership is possible if data already conforms to key requirements
     Given typeql define
       """
       define
@@ -1611,6 +1612,152 @@ Feature: TypeQL Define Query
       match $x owns email @key;
       """
     Then answer size is: 0
+
+
+  Scenario: defining a uniqueness on existing ownership is possible if data conforms to uniqueness requirements
+    When typeql insert
+      """
+      insert $x isa person, has name "Bob", has ref 0;
+      """
+    Then typeql insert
+      """
+      insert $x isa person, has name "Jane", has name "Doe", has ref 1;
+      """
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
+      """
+      define person owns name @unique;
+      """
+    Then transaction commits
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert; throws exception
+      """
+      insert $x isa person, has name "Bob", has ref 2;
+      """
+
+
+  Scenario: defining a uniqueness on existing ownership fail if data does not conform to uniqueness requirements
+    When typeql insert
+      """
+      insert $x isa person, has name "Bob", has ref 0;
+      """
+    Then typeql insert
+      """
+      insert $x isa person, has name "Bob", has ref 1;
+      """
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define; throws exception
+      """
+      define person owns name @unique;
+      """
+
+
+  Scenario: a key ownership can be converted to a unique ownership
+    Given typeql insert
+      """
+      insert
+      $x isa person, has ref 0;
+      $y isa person, has ref 1;
+      """
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
+      """
+      define person owns ref @unique;
+      """
+    Then transaction commits
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    When get answers of typeql match
+      """
+      match $x owns $y @unique;
+      """
+    Then uniquely identify answer concepts
+      | x            | y              |
+      | label:person | label:ref      |
+      | label:person | label:phone-nr |
+    When get answers of typeql match
+      """
+      match $x owns $y @key;
+      """
+    Then answer size is: 0
+    Given typeql insert; throw exception
+      """
+      insert $x isa person, has ref 2;
+      """
+
+
+  Scenario: ownership uniqueness can be removed
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
+      """
+      define person owns phone-nr;
+      """
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
+      """
+      insert $x isa person, has phone-nr "123", has ref 0;
+      insert $y isa person, has phone-nr "456", has ref 1;
+      """
+    Given transaction commits
+
+
+  Scenario: converting unique to key is possible if the data conforms to key requirements
+    Given typeql insert
+      """
+      insert
+      $x isa person, has phone-nr "123", has ref 0;
+      $y isa person, has phone-nr "456", has ref 1;
+      """
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
+      """
+      define
+      person owns phone-nr @key;
+      """
+    Then transaction commits
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Then typeql insert; throws exception
+      """
+      insert $x isa person, has phone-nr "9999", has phone-nr "8888" has ref 2;
+      """
+
+
+  Scenario: converting unique to key fails if the data does not conform to key requirements
+    Given typeql insert
+      """
+      insert $x isa person, has phone-nr 123, has phone-nr 456, has ref 0;
+      """
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Then typeql define; throws exception
+      """
+      define
+      person owns phone-nr @key;
+      """
 
 
   Scenario: defining a rule is idempotent
