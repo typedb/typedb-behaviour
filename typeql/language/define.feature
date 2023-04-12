@@ -1468,6 +1468,20 @@ Feature: TypeQL Define Query
       | label:employment |
 
 
+  Scenario: Redefining an attribute type succeeds if and only if the value type remains unchanged
+    Then typeql define; throws exception
+      """
+      define name sub attribute, value long;
+      """
+
+    When session opens transaction of type: write
+    When typeql define
+      """
+      define name sub attribute, value string;
+      """
+    Then transaction commits
+
+
   Scenario: a regex constraint can be added to an existing attribute type if all its instances satisfy it
     Given connection close all sessions
     Given connection open data session for database: typedb
@@ -1557,13 +1571,6 @@ Feature: TypeQL Define Query
       """
       define name sub attribute, value long;
       """
-
-    When session opens transaction of type: write
-    When typeql define
-      """
-      define name sub attribute, value string;
-      """
-    Then transaction commits
 
   Scenario: an attribute ownership can be converted to a key ownership
     When typeql define
