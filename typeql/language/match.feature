@@ -35,7 +35,8 @@ Feature: TypeQL Match Query
         plays employment:employee,
         owns name,
         owns age,
-        owns ref @key;
+        owns ref @key,
+        owns email @unique;
       company sub entity,
         plays employment:employer,
         owns name,
@@ -50,6 +51,7 @@ Feature: TypeQL Match Query
       name sub attribute, value string;
       age sub attribute, value long;
       ref sub attribute, value long;
+      email sub attribute, value string;
       """
     Given transaction commits
 
@@ -331,6 +333,78 @@ Feature: TypeQL Match Query
       | label:name |
       | label:age  |
       | label:ref  |
+
+
+  Scenario: directly declared 'owns' annotations are queryable
+    When get answers of typeql match
+      """
+      match $x owns ref @key;
+      """
+    Then unique identify answer concepts
+      | x            |
+      | label:person |
+    When get answers of typeql match
+      """
+      match $x owns $a @key;
+      """
+    Then unique identify answer concepts
+      | x            | a            |
+      | label:person | label:ref    |
+    When get answers of typeql match
+      """
+      match $x owns email @unique;
+      """
+    Then unique identify answer concepts
+      | x            |
+      | label:person |
+    When get answers of typeql match
+      """
+      match $x owns $a @unique;
+      """
+    Then unique identify answer concepts
+      | x            | a            |
+      | label:person | label:email  |
+
+
+  Scenario: inherited 'owns' annotations are queryable
+    Given typeql define
+      """
+      define child sub person;
+      """
+    Given transaction commits
+    Given session opens transaction of type: write
+    When get answers of typeql match
+      """
+      match $x owns ref @key;
+      """
+    Then unique identify answer concepts
+      | x            |
+      | label:person |
+      | label:child  |
+    When get answers of typeql match
+      """
+      match $x owns $a @key;
+      """
+    Then unique identify answer concepts
+      | x            | a            |
+      | label:person | label:ref    |
+      | label:child  | label:ref    |
+    When get answers of typeql match
+      """
+      match $x owns email @unique;
+      """
+    Then unique identify answer concepts
+      | x            |
+      | label:person |
+      | label:child  |
+    When get answers of typeql match
+      """
+      match $x owns $a @unique;
+      """
+    Then unique identify answer concepts
+      | x            | a            |
+      | label:person | label:email  |
+      | label:child  | label:email  |
 
 
   Scenario: 'owns' can be used to retrieve all instances of types that can own a given attribute type

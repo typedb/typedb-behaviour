@@ -1773,7 +1773,6 @@ Feature: TypeQL Define Query
         $p has nickname "Bob";
       };
       """
-
     Then typeql define
       """
       define
@@ -1784,6 +1783,7 @@ Feature: TypeQL Define Query
         $p has nickname "Bob";
       };
       """
+
 
   Scenario: redefining a rule and querying updates its definition
     Given typeql define
