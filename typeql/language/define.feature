@@ -1552,6 +1552,18 @@ Feature: TypeQL Define Query
       define name value long;
       """
 
+    When session opens transaction of type: write
+    Then typeql define; throws exception
+      """
+      define name sub attribute, value long;
+      """
+
+    When session opens transaction of type: write
+    When typeql define
+      """
+      define name sub attribute, value string;
+      """
+    Then transaction commits
 
   Scenario: an attribute ownership can be converted to a key ownership
     When typeql define
