@@ -1319,6 +1319,46 @@ Feature: TypeQL Define Query
       """
 
 
+  Scenario: annotations are inherited through overrides
+    Given typeql define
+      """
+      define
+      person abstract;
+      phone-nr abstract;
+      child sub person, owns mobile as phone-nr;
+      mobile sub phone-nr;
+      """
+    Given transaction commits
+    Then session opens transaction of type: write
+    When get answers of typeql match
+      """
+      match $t owns $a @unique;
+      """
+    Then uniquely identify answer concepts
+      | t             | a               |
+      | label:person  | label:phone-nr  |
+      | label:child   | label:mobile    |
+    Given typeql define
+      """
+      define
+      child abstract;
+      mobile abstract;
+      infant sub child, owns baby-phone-nr as mobile;
+      baby-phone-nr sub mobile;
+      """
+    Given transaction commits
+    Then session opens transaction of type: read
+    When get answers of typeql match
+      """
+      match $t owns $a @unique;
+      """
+    Then uniquely identify answer concepts
+      | t             | a                   |
+      | label:person  | label:phone-nr      |
+      | label:child   | label:mobile        |
+      | label:infant  | label:baby-phone-nr |
+
+
   Scenario: redefining inherited annotations on overrides throws
     Given typeql define
       """
@@ -1333,6 +1373,13 @@ Feature: TypeQL Define Query
     Then typeql define; throws exception
       """
       define child owns mobile as phone-nr @unique;
+      """
+
+
+  Scenario: defining a less strict annotation on an inherited ownership throws
+    Then typeql define; throws exception
+      """
+      define child, owns email @unique;
       """
 
 
