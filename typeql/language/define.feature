@@ -1267,6 +1267,30 @@ Feature: TypeQL Define Query
       define animal sub entity, abstract, abstract, abstract;
       """
 
+  ##############
+  # Annotation #
+  ##############
+
+  # 1. it should be allowed to inherit annototations without doing anything
+  Scenario: annotations are inherited
+#    When typeql define
+#      """
+#      define
+#      person sub entity, owns name;
+#      person sub entity, owns name;
+#      person sub entity, owns name;
+#      """
+#    Then transaction commits
+#
+#    When session opens transaction of type: read
+#    When get answers of typeql match
+#      """
+#      match $x type person, owns name;
+#      """
+#    Then answer size is: 1
+
+  # 2. it should not be allowed to redeclare the same annotations as those that were inherited - only specialisation is allowed just like we don't allow redeclaring inherited plays/owns/relates
+  # 3. it should not be allowed to redeclare the same annotations when overriding with 'as' - the annotations must be inherited
 
 
   ###################
