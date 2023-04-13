@@ -1490,24 +1490,24 @@ Parker";
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When session opens transaction of type: write
     When get answers of typeql match
       """
-      match $x isa person, has email "abc@gmail.com";;
+      match $x isa person, has email "abc@gmail.com";
       """
     Then uniquely identify answer concepts
       | x         |
       | key:ref:0 |
     When typeql insert
       """
-      insert $x isa person, has ref 1, has email "abc@gmail.com", has email "xyz@gmail.com";
+      insert $x isa person, has ref 1, has email "mnp@gmail.com", has email "xyz@gmail.com";
       """
     Then transaction commits
 
     When session opens transaction of type: read
     When get answers of typeql match
       """
-      match $x isa person, has email "abc@gmail.com", has email "xyz@gmail.com";
+      match $x isa person, has email "mnp@gmail.com", has email "xyz@gmail.com";
       """
     Then uniquely identify answer concepts
       | x         |
@@ -1524,14 +1524,13 @@ Parker";
     Given session opens transaction of type: write
     Given typeql insert
       """
-      $x isa person, has ref 0, has email "abc@gmail.com";
+      insert $x isa person, has ref 0, has email "abc@gmail.com";
       """
     Then transaction commits
     Given session opens transaction of type: write
     Then typeql insert; throws exception
       """
-      insert
-      $y isa person, has ref 1, has email "abc@gmail.com";
+      insert $y isa person, has ref 1, has email "abc@gmail.com";
       """
 
 
@@ -1568,16 +1567,19 @@ Parker";
     Given typeql define
       """
       define
+      person sub entity, abstract;
+      email sub attribute, value string, abstract;
       email-outlook sub email, value string;
       child sub person, owns email-outlook as email;
       """
     Given transaction commits
+    Given connection close all sessions
 
     Given connection open data session for database: typedb
     Given session opens transaction of type: write
     Given typeql insert
       """
-      insert $x isa child, has email-outlook "abc@outlook.com", has email-outloop "xyz@outlook.com", has ref 0;
+      insert $x isa child, has email-outlook "abc@outlook.com", has email-outlook "xyz@outlook.com", has ref 0;
       """
     Then transaction commits
     Given session opens transaction of type: write
