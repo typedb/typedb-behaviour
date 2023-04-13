@@ -18,9 +18,11 @@
 #noinspection CucumberUndefinedStep
 Feature: Type Hierarchy Resolution
 
-  Scenario: subtypes trigger rules based on their parents; parent types don't trigger rules based on their children
+  Background: Set up database
     When typedb starts
     And open connection
+
+  Scenario: subtypes trigger rules based on their parents; parent types don't trigger rules based on their children
     Given reasoning schema
       """
       define
