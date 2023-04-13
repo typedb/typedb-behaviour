@@ -329,10 +329,11 @@ Feature: TypeQL Match Query
       match person owns $x;
       """
     Then uniquely identify answer concepts
-      | x          |
-      | label:name |
-      | label:age  |
-      | label:ref  |
+      | x           |
+      | label:name  |
+      | label:email |
+      | label:age   |
+      | label:ref   |
 
 
   Scenario: directly declared 'owns' annotations are queryable
@@ -340,28 +341,34 @@ Feature: TypeQL Match Query
       """
       match $x owns ref @key;
       """
-    Then unique identify answer concepts
-      | x            |
-      | label:person |
+    Then uniquely identify answer concepts
+      | x                |
+      | label:person     |
+      | label:company    |
+      | label:friendship |
+      | label:employment |
     When get answers of typeql match
       """
       match $x owns $a @key;
       """
-    Then unique identify answer concepts
-      | x            | a            |
-      | label:person | label:ref    |
+    Then uniquely identify answer concepts
+      | x                | a            |
+      | label:person     | label:ref    |
+      | label:company    | label:ref    |
+      | label:friendship | label:ref    |
+      | label:employment | label:ref    |
     When get answers of typeql match
       """
       match $x owns email @unique;
       """
-    Then unique identify answer concepts
+    Then uniquely identify answer concepts
       | x            |
       | label:person |
     When get answers of typeql match
       """
       match $x owns $a @unique;
       """
-    Then unique identify answer concepts
+    Then uniquely identify answer concepts
       | x            | a            |
       | label:person | label:email  |
 
@@ -377,23 +384,29 @@ Feature: TypeQL Match Query
       """
       match $x owns ref @key;
       """
-    Then unique identify answer concepts
-      | x            |
-      | label:person |
-      | label:child  |
+    Then uniquely identify answer concepts
+      | x                |
+      | label:person     |
+      | label:child      |
+      | label:company    |
+      | label:friendship |
+      | label:employment |
     When get answers of typeql match
       """
       match $x owns $a @key;
       """
-    Then unique identify answer concepts
-      | x            | a            |
-      | label:person | label:ref    |
-      | label:child  | label:ref    |
+    Then uniquely identify answer concepts
+      | x                | a            |
+      | label:person     | label:ref    |
+      | label:child      | label:ref    |
+      | label:company    | label:ref    |
+      | label:friendship | label:ref    |
+      | label:employment | label:ref    |
     When get answers of typeql match
       """
       match $x owns email @unique;
       """
-    Then unique identify answer concepts
+    Then uniquely identify answer concepts
       | x            |
       | label:person |
       | label:child  |
@@ -401,7 +414,7 @@ Feature: TypeQL Match Query
       """
       match $x owns $a @unique;
       """
-    Then unique identify answer concepts
+    Then uniquely identify answer concepts
       | x            | a            |
       | label:person | label:email  |
       | label:child  | label:email  |

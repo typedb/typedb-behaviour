@@ -1615,13 +1615,16 @@ Feature: TypeQL Define Query
 
 
   Scenario: defining a uniqueness on existing ownership is possible if data conforms to uniqueness requirements
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
     When typeql insert
       """
-      insert $x isa person, has name "Bob", has ref 0;
+      insert $x isa person, has name "Bob", has email "bob@gmail.com";
       """
     Then typeql insert
       """
-      insert $x isa person, has name "Jane", has name "Doe", has ref 1;
+      insert $x isa person, has name "Jane", has name "Doe", has email "janedoe@gmail.com";
       """
     Given transaction commits
     Given connection close all sessions
@@ -1637,18 +1640,21 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: write
     Given typeql insert; throws exception
       """
-      insert $x isa person, has name "Bob", has ref 2;
+      insert $x isa person, has name "Bob", has email "bob2@gmail.com";
       """
 
 
   Scenario: defining a uniqueness on existing ownership fail if data does not conform to uniqueness requirements
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
     When typeql insert
       """
-      insert $x isa person, has name "Bob", has ref 0;
+      insert $x isa person, has name "Bob", has email "bob@gmail.com";
       """
     Then typeql insert
       """
-      insert $x isa person, has name "Bob", has ref 1;
+      insert $x isa person, has name "Bob", has email "bob2@gmail.com";
       """
     Given transaction commits
     Given connection close all sessions
@@ -1661,11 +1667,14 @@ Feature: TypeQL Define Query
 
 
   Scenario: a key ownership can be converted to a unique ownership
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
     Given typeql insert
       """
       insert
-      $x isa person, has ref 0;
-      $y isa person, has ref 1;
+      $x isa person, has email "jane@gmail.com";
+      $y isa person, has email "john@gmail.com";
       """
     Given transaction commits
     Given connection close all sessions
@@ -1673,7 +1682,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: write
     Given typeql define
       """
-      define person owns ref @unique;
+      define person owns email @unique;
       """
     Then transaction commits
     Given connection close all sessions
@@ -1685,23 +1694,20 @@ Feature: TypeQL Define Query
       """
     Then uniquely identify answer concepts
       | x            | y              |
-      | label:person | label:ref      |
+      | label:person | label:email    |
       | label:person | label:phone-nr |
     When get answers of typeql match
       """
-      match $x owns $y @key;
+      match person owns $y @key;
       """
     Then answer size is: 0
-    Given typeql insert; throw exception
+    Given typeql insert; throws exception
       """
-      insert $x isa person, has ref 2;
+      insert $x isa person, has email "jane@gmail.com";
       """
 
 
   Scenario: ownership uniqueness can be removed
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
     Given typeql define
       """
       define person owns phone-nr;
@@ -1712,18 +1718,22 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: write
     Given typeql insert
       """
-      insert $x isa person, has phone-nr "123", has ref 0;
-      insert $y isa person, has phone-nr "456", has ref 1;
+      insert
+      $x isa person, has phone-nr "123", has email "abc@gmail.com";
+      $y isa person, has phone-nr "456", has email "xyz@gmail.com";
       """
     Given transaction commits
 
 
   Scenario: converting unique to key is possible if the data conforms to key requirements
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
     Given typeql insert
       """
       insert
-      $x isa person, has phone-nr "123", has ref 0;
-      $y isa person, has phone-nr "456", has ref 1;
+      $x isa person, has phone-nr "123", has email "abc@gmail.com";
+      $y isa person, has phone-nr "456", has email "xyz@gmail.com";
       """
     Given transaction commits
     Given connection close all sessions
@@ -1740,14 +1750,17 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: write
     Then typeql insert; throws exception
       """
-      insert $x isa person, has phone-nr "9999", has phone-nr "8888" has ref 2;
+      insert $x isa person, has phone-nr "9999", has phone-nr "8888", has email "pqr@gmail.com";
       """
 
 
   Scenario: converting unique to key fails if the data does not conform to key requirements
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
     Given typeql insert
       """
-      insert $x isa person, has phone-nr 123, has phone-nr 456, has ref 0;
+      insert $x isa person, has phone-nr "123", has phone-nr "456", has email "abc@gmail.com";
       """
     Given transaction commits
     Given connection close all sessions
@@ -2244,9 +2257,9 @@ Feature: TypeQL Define Query
     Given typeql define
     """
        define
+       person sub entity, owns mobile;
+       mobile sub attribute, value long;
        child sub person;
-       phone-number sub attribute, value long;
-       person sub entity, owns phone-number;
       """
     Given transaction commits
 
@@ -2258,8 +2271,9 @@ Feature: TypeQL Define Query
     Then uniquely identify answer concepts
       | x           | y                  |
       | label:child | label:name         |
-      | label:child | label:phone-number |
+      | label:child | label:mobile       |
       | label:child | label:email        |
+      | label:child | label:phone-nr     |
 
 
   Scenario: when adding a key ownership to an existing type, the change is propagated to its subtypes
