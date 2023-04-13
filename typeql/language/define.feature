@@ -1271,26 +1271,69 @@ Feature: TypeQL Define Query
   # Annotation #
   ##############
 
-  # 1. it should be allowed to inherit annototations without doing anything
-  Scenario: annotations are inherited
-#    When typeql define
-#      """
-#      define
-#      person sub entity, owns name;
-#      person sub entity, owns name;
-#      person sub entity, owns name;
-#      """
-#    Then transaction commits
-#
-#    When session opens transaction of type: read
-#    When get answers of typeql match
-#      """
-#      match $x type person, owns name;
-#      """
-#    Then answer size is: 1
+  Scenario: annotations can be added on subtypes
+    Given typeql define
+      """
+      define
+      child sub person, owns school-id @unique;
+      school-id sub attribute, value string;
+      """
+    Then transaction commits
 
-  # 2. it should not be allowed to redeclare the same annotations as those that were inherited - only specialisation is allowed just like we don't allow redeclaring inherited plays/owns/relates
-  # 3. it should not be allowed to redeclare the same annotations when overriding with 'as' - the annotations must be inherited
+
+  Scenario: annotations are inherited
+    Given typeql define
+      """
+      define child sub person;
+      """
+    Given transaction commits
+    Then session opens transaction of type: read
+    When get answers of typeql match
+      """
+      match $t owns $a @key;
+      """
+    Then uniquely identify answer concepts
+      | t                | a                               |
+      | label:person     | label:email                     |
+      | label:child      | label:email                     |
+      | label:employment | label:employment-reference-code |
+    When get answers of typeql match
+      """
+      match $t owns $a @unique;
+      """
+    Then uniquely identify answer concepts
+      | t             | a               |
+      | label:person  | label:phone-nr  |
+      | label:child   | label:phone-nr  |
+
+
+  Scenario: redefining inherited annotations throws
+    Then typeql define; throws exception
+      """
+      define child sub person, owns email @key;
+      """
+    Then session opens transaction of type: write
+    Then typeql define; throws exception
+      """
+      define child sub person, owns phone-nr @unique;
+      """
+
+
+  Scenario: redefining inherited annotations on overrides throws
+    Given typeql define
+      """
+      define
+      person abstract;
+      phone-nr abstract;
+      child sub person, owns mobile as phone-nr;
+      mobile sub phone-nr;
+      """
+    Then transaction commits
+    Given session opens transaction of type: write
+    Then typeql define; throws exception
+      """
+      define child owns mobile as phone-nr @unique;
+      """
 
 
   ###################
