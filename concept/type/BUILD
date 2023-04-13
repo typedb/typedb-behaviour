@@ -23,7 +23,6 @@ exports_files([
     "attributetype.feature",
     "entitytype.feature",
     "relationtype.feature",
-    "thingtype.feature",
 ])
 
 checkstyle_test(
