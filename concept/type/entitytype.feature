@@ -324,10 +324,8 @@ Feature: Concept Entity Type
     When entity(person) set owns attribute type: age, with annotations: key
     When entity(person) set owns attribute type: name, with annotations: key
     When entity(person) set owns attribute type: timestamp, with annotations: key
-    When entity(person) set owns attribute type: timestamp, with annotations: key
+    Then entity(person) set owns attribute type: is-open, with annotations: key
     When transaction commits
-    When session opens transaction of type: write
-    Then entity(person) set owns attribute type: is-open, with annotations: key; throws exception
     When session opens transaction of type: write
     Then entity(person) set owns attribute type: rating, with annotations: key; throws exception
 
@@ -646,7 +644,7 @@ Feature: Concept Entity Type
     When entity(customer) set abstract: true
     When entity(customer) set supertype: person
     When entity(customer) set owns attribute type: reference, with annotations: key
-    When entity(customer) set owns attribute type: work-email as email, with annotations: key
+    When entity(customer) set owns attribute type: work-email as email
     When entity(customer) set owns attribute type: rating
     When entity(customer) set owns attribute type: nick-name as name
     Then entity(customer) get owns overridden attribute(work-email) get label: email
@@ -725,7 +723,7 @@ Feature: Concept Entity Type
     When attribute(points) set supertype: rating
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
-    When entity(subscriber) set owns attribute type: license as reference, with annotations: key
+    When entity(subscriber) set owns attribute type: license as reference
     When entity(subscriber) set owns attribute type: points as rating
     When transaction commits
     When session opens transaction of type: read
@@ -856,7 +854,7 @@ Feature: Concept Entity Type
     When session opens transaction of type: write
     Then entity(person) set owns attribute type: email
 
-  Scenario: Entity types can re-override keys as keys
+  Scenario: Entity types can re-override keys
     When put attribute type: email, with value type: string
     When attribute(email) set abstract: true
     When put attribute type: work-email, with value type: string
@@ -867,11 +865,11 @@ Feature: Concept Entity Type
     When put entity type: customer
     When entity(customer) set abstract: true
     When entity(customer) set supertype: person
-    When entity(customer) set owns attribute type: work-email as email, with annotations: key
+    When entity(customer) set owns attribute type: work-email as email
     Then entity(customer) get owns overridden attribute(work-email) get label: email
     When transaction commits
     When session opens transaction of type: write
-    When entity(customer) set owns attribute type: work-email as email, with annotations: key
+    When entity(customer) set owns attribute type: work-email as email
     Then entity(customer) get owns overridden attribute(work-email) get label: email
 
   Scenario: Entity types can re-override attributes as attributes
@@ -1036,18 +1034,6 @@ Feature: Concept Entity Type
     Then entity(person) set owns attribute type: email as username, with annotations: key; throws exception
     When session opens transaction of type: write
     Then entity(person) set owns attribute type: first-name as name; throws exception
-
-  Scenario: Entity types cannot override inherited keys as attributes
-    When put attribute type: username, with value type: string
-    When attribute(username) set abstract: true
-    When put attribute type: email, with value type: string
-    When attribute(email) set supertype: username
-    When put entity type: person
-    When entity(person) set abstract: true
-    When entity(person) set owns attribute type: username, with annotations: key
-    When put entity type: customer
-    When entity(customer) set supertype: person
-    Then entity(customer) set owns attribute type: email as username; throws exception
 
   Scenario: Entity types cannot override inherited keys and attributes other than with their subtypes
     When put attribute type: username, with value type: string

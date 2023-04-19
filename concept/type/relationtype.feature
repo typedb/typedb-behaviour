@@ -552,8 +552,7 @@ Feature: Concept Relation Type and Role Type
   Scenario: Relation types cannot have keys of attributes that are not keyable
     When put attribute type: is-permanent, with value type: boolean
     When put relation type: employment
-    Then relation(employment) set owns attribute type: is-permanent, with annotations: key; throws exception
-    When session opens transaction of type: write
+    Then relation(employment) set owns attribute type: is-permanent, with annotations: key
     When put attribute type: salary, with value type: double
     When put relation type: employment
     Then relation(employment) set owns attribute type: salary, with annotations: key; throws exception
@@ -794,7 +793,7 @@ Feature: Concept Relation Type and Role Type
     When put relation type: contractor-employment
     When relation(contractor-employment) set abstract: true
     When relation(contractor-employment) set supertype: employment
-    When relation(contractor-employment) set owns attribute type: contractor-reference as employment-reference, with annotations: key
+    When relation(contractor-employment) set owns attribute type: contractor-reference as employment-reference
     When relation(contractor-employment) set owns attribute type: contractor-hours as employment-hours
     Then relation(contractor-employment) get owns types with annotations: key; contain:
       | contractor-reference |
@@ -826,7 +825,7 @@ Feature: Concept Relation Type and Role Type
     When relation(parttime-employment) set supertype: contractor-employment
     When relation(parttime-employment) set relates role: parttime-employer as employer
     When relation(parttime-employment) set relates role: parttime-employee as employee
-    When relation(parttime-employment) set owns attribute type: parttime-reference as contractor-reference, with annotations: key
+    When relation(parttime-employment) set owns attribute type: parttime-reference as contractor-reference
     When relation(parttime-employment) set owns attribute type: parttime-hours as contractor-hours
     Then relation(parttime-employment) get owns types with annotations: key; contain:
       | parttime-reference |
@@ -957,7 +956,7 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set owns attribute type: employment-reference, with annotations: key
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    When relation(contractor-employment) set owns attribute type: contractor-reference as employment-reference, with annotations: key
+    When relation(contractor-employment) set owns attribute type: contractor-reference as employment-reference
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
     Then relation(parttime-employment) set owns attribute type: contractor-reference, with annotations: key; throws exception
@@ -1011,20 +1010,6 @@ Feature: Concept Relation Type and Role Type
     Then relation(employment) set owns attribute type: social-security-number as reference, with annotations: key; throws exception
     When session opens transaction of type: write
     Then relation(employment) set owns attribute type: max-hours as hours; throws exception
-
-  Scenario: Relation types cannot override inherited keys as attributes
-    When put attribute type: employment-reference, with value type: string
-    When attribute(employment-reference) set abstract: true
-    When put attribute type: contractor-reference, with value type: string
-    When attribute(contractor-reference) set supertype: employment-reference
-    When put relation type: employment
-    When relation(employment) set abstract: true
-    When relation(employment) set relates role: employer
-    When relation(employment) set relates role: employee
-    When relation(employment) set owns attribute type: employment-reference, with annotations: key
-    When put relation type: contractor-employment
-    When relation(contractor-employment) set supertype: employment
-    Then relation(contractor-employment) set owns attribute type: contractor-reference as employment-reference; throws exception
 
   Scenario: Relation types cannot override inherited keys and attributes other than with their subtypes
     When put attribute type: employment-reference, with value type: string
