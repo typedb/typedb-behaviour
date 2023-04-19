@@ -486,27 +486,27 @@ Feature: Concept Attribute Type
   Scenario: Attribute types can have keys
     When put attribute type: country-code, with value type: string
     When put attribute type: country-name, with value type: string
-    When attribute(country-name) set owns key type: country-code
-    Then attribute(country-name) get owns key types contain:
+    When attribute(country-name) set owns attribute type: country-code, with annotations: key
+    Then attribute(country-name) get owns types with annotations: key; contain:
       | country-code |
     When transaction commits
     When session opens transaction of type: read
-    Then attribute(country-name) get owns key types contain:
+    Then attribute(country-name) get owns types with annotations: key; contain:
       | country-code |
 
   Scenario: Attribute types can unset keys
     When put attribute type: country-code-1, with value type: string
     When put attribute type: country-code-2, with value type: string
     When put attribute type: country-name, with value type: string
-    When attribute(country-name) set owns key type: country-code-1
-    When attribute(country-name) set owns key type: country-code-2
-    When attribute(country-name) unset owns key type: country-code-1
-    Then attribute(country-name) get owns key types do not contain:
+    When attribute(country-name) set owns attribute type: country-code-1, with annotations: key
+    When attribute(country-name) set owns attribute type: country-code-2, with annotations: key
+    When attribute(country-name) unset owns attribute type: country-code-1
+    Then attribute(country-name) get owns types with annotations: key; do not contain:
       | country-code-1 |
     When transaction commits
     When session opens transaction of type: write
-    When attribute(country-name) unset owns key type: country-code-2
-    Then attribute(country-name) get owns key types do not contain:
+    When attribute(country-name) unset owns attribute type: country-code-2
+    Then attribute(country-name) get owns types with annotations: key; do not contain:
       | country-code-1 |
       | country-code-2 |
 
@@ -545,16 +545,16 @@ Feature: Concept Attribute Type
     When put attribute type: country-code, with value type: string
     When put attribute type: country-abbreviation, with value type: string
     When put attribute type: country-name, with value type: string
-    When attribute(country-name) set owns key type: country-code
+    When attribute(country-name) set owns attribute type: country-code, with annotations: key
     When attribute(country-name) set owns attribute type: country-abbreviation
-    Then attribute(country-name) get owns key types contain:
+    Then attribute(country-name) get owns types with annotations: key; contain:
       | country-code |
     Then attribute(country-name) get owns attribute types contain:
       | country-code         |
       | country-abbreviation |
     When transaction commits
     When session opens transaction of type: read
-    Then attribute(country-name) get owns key types contain:
+    Then attribute(country-name) get owns types with annotations: key; contain:
       | country-code |
     Then attribute(country-name) get owns attribute types contain:
       | country-code         |
@@ -565,19 +565,19 @@ Feature: Concept Attribute Type
     When put attribute type: abbreviation, with value type: string
     When put attribute type: name, with value type: string
     When attribute(name) set abstract: true
-    When attribute(name) set owns key type: hash
+    When attribute(name) set owns attribute type: hash, with annotations: key
     When attribute(name) set owns attribute type: abbreviation
     When put attribute type: real-name, with value type: string
     When attribute(real-name) set abstract: true
     When attribute(real-name) set supertype: name
-    Then attribute(real-name) get owns key types contain:
+    Then attribute(real-name) get owns types with annotations: key; contain:
       | hash |
     Then attribute(real-name) get owns attribute types contain:
       | hash         |
       | abbreviation |
     When transaction commits
     When session opens transaction of type: write
-    Then attribute(real-name) get owns key types contain:
+    Then attribute(real-name) get owns types with annotations: key; contain:
       | hash |
     Then attribute(real-name) get owns attribute types contain:
       | hash         |
@@ -586,12 +586,12 @@ Feature: Concept Attribute Type
     When attribute(last-name) set supertype: real-name
     When transaction commits
     When session opens transaction of type: read
-    Then attribute(real-name) get owns key types contain:
+    Then attribute(real-name) get owns types with annotations: key; contain:
       | hash |
     Then attribute(real-name) get owns attribute types contain:
       | hash         |
       | abbreviation |
-    Then attribute(last-name) get owns key types contain:
+    Then attribute(last-name) get owns types with annotations: key; contain:
       | hash |
     Then attribute(last-name) get owns attribute types contain:
       | hash         |
@@ -661,20 +661,20 @@ Feature: Concept Attribute Type
     When put entity type: company
     When entity(company) set owns attribute type: email
     When put entity type: person
-    When entity(person) set owns key type: email
+    When entity(person) set owns attribute type: email, with annotations: key
     Then attribute(email) get attribute owners contain:
       | company |
       | person  |
     Then attribute(email) get attribute owners explicit contain:
       | company |
       | person  |
-    Then attribute(email) get key owners contain:
+    Then attribute(email) get owners with annotations: key; contain:
       | person |
-    Then attribute(email) get key owners explicit contain:
+    Then attribute(email) get owners explicit with annotations: key; contain:
       | person |
-    Then attribute(email) get key owners do not contain:
+    Then attribute(email) get owners with annotations: key; do not contain:
       | company |
-    Then attribute(email) get key owners explicit do not contain:
+    Then attribute(email) get owners explicit with annotations: key; do not contain:
       | company |
     Then transaction commits
     When session opens transaction of type: write
@@ -684,13 +684,13 @@ Feature: Concept Attribute Type
     Then attribute(email) get attribute owners explicit contain:
       | company |
       | person  |
-    Then attribute(email) get key owners contain:
+    Then attribute(email) get owners with annotations: key; contain:
       | person |
-    Then attribute(email) get key owners explicit contain:
+    Then attribute(email) get owners explicit with annotations: key; contain:
       | person |
-    Then attribute(email) get key owners do not contain:
+    Then attribute(email) get owners with annotations: key; do not contain:
       | company |
-    Then attribute(email) get key owners explicit do not contain:
+    Then attribute(email) get owners explicit with annotations: key; do not contain:
       | company |
 
   Scenario: Attribute types with value type string can unset their regular expression

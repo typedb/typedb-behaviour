@@ -33,10 +33,10 @@ Feature: Concept Relation
     Given put relation type: marriage
     Given relation(marriage) set relates role: wife
     Given relation(marriage) set relates role: husband
-    Given relation(marriage) set owns key type: license
+    Given relation(marriage) set owns attribute type: license, with annotations: key
     Given relation(marriage) set owns attribute type: date
     Given put entity type: person
-    Given entity(person) set owns key type: username
+    Given entity(person) set owns attribute type: username, with annotations: key
     Given entity(person) set plays role: marriage:wife
     Given entity(person) set plays role: marriage:husband
     Given transaction commits

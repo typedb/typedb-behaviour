@@ -74,9 +74,9 @@ Feature: Concept Thing Type
     When put attribute type: birth-date, with value type: datetime
     When put relation type: marriage
     When relation(marriage) set relates role: wife
-    When relation(marriage) set owns key type: license
+    When relation(marriage) set owns attribute type: license, with annotations: key
     When put entity type: person
-    When entity(person) set owns key type: username
+    When entity(person) set owns attribute type: username, with annotations: key
     When transaction commits
     When connection close all sessions
     When connection open data session for database: typedb
