@@ -25,6 +25,9 @@ Feature: Concept Entity Type
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
 
+  Scenario: Root entity type cannot be deleted
+    Then delete entity type: entity; throws exception
+
   Scenario: Entity types can be created
     When put entity type: person
     Then entity(person) is null: false
