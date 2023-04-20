@@ -21,8 +21,8 @@ Feature: TypeQL Reasoning Explanation
   Only scenarios where there is only one possible resolution path can be tested in this way
 
   Background: Initialise a session and transaction for each scenario
-    When typedb starts
-    And open connection
+    Given typedb starts
+    Given connection opens without authentication
     Given connection has been opened
     Given connection open schema session for database: test_explanation
     Given transaction is initialised

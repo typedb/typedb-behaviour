@@ -19,8 +19,8 @@
 Feature: Attribute Attachment Resolution
 
   Background: Set up database
-    When typedb starts
-    And open connection
+    Given typedb starts
+    Given connection opens without authentication
     Given reasoning schema
       """
       define

@@ -19,8 +19,8 @@
 Feature: TypeQL Define Query
 
   Background: Open connection and create a simple extensible schema
-    When typedb starts
-    And open connection
+    Given typedb starts
+    Given connection opens without authentication
     Given connection has been opened
     Given connection does not have any database
     Given connection create database: typedb
