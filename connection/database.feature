@@ -19,8 +19,8 @@
 Feature: Connection Database
 
   Background:
-    When typedb starts
-    And open connection
+    Given typedb starts
+    Given connection opens without authentication
     Given connection has been opened
     Given connection does not have any database
 

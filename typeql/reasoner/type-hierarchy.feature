@@ -19,8 +19,8 @@
 Feature: Type Hierarchy Resolution
 
   Background: Set up database
-    When typedb starts
-    And open connection
+    Given typedb starts
+    Given connection opens without authentication
 
   Scenario: subtypes trigger rules based on their parents; parent types don't trigger rules based on their children
     Given reasoning schema

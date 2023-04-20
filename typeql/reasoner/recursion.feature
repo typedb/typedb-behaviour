@@ -22,8 +22,8 @@ Feature: Recursion Resolution
   This test feature verifies that so-called recursive inference works as intended.
 
   Background: Set up database
-    When typedb starts
-    And open connection
+    Given typedb starts
+    Given connection opens without authentication
     Given reasoning schema
       """
       define
