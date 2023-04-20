@@ -15,6 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+# TODO: remove ignores for client-python and client-node once bootup can be configured through BDD
 Feature: Connection Users
 
   Scenario: users can be created and deleted
@@ -35,6 +36,7 @@ Feature: Connection Users
     And users delete: user
     Then users not contains: user
 
+  @ignore-typedb-client-python @ignore-typedb-client-nodejs
   Scenario: user passwords must comply with the minimum length
     Given typedb has configuration
       |server.authentication.password-policy.complexity.min-length|5|
@@ -45,6 +47,7 @@ Feature: Connection Users
     And users create: user2, passw
     And users create: user3, pass; throws exception
 
+  @ignore-typedb-client-python @ignore-typedb-client-nodejs
   Scenario: user passwords must comply with the minimum number of lowercase characters
     Given typedb has configuration
       |server.authentication.password-policy.complexity.min-lowercase|2|
@@ -55,6 +58,7 @@ Feature: Connection Users
     And users create: user2, paSSWORD
     And users create: user3, PASSWORD; throws exception
 
+  @ignore-typedb-client-python @ignore-typedb-client-nodejs
   Scenario: user passwords must comply with the minimum number of uppercase characters
     Given typedb has configuration
       |server.authentication.password-policy.complexity.min-uppercase|2|
@@ -65,6 +69,7 @@ Feature: Connection Users
     And users create: user2, PAssword
     And users create: user3, password; throws exception
 
+  @ignore-typedb-client-python @ignore-typedb-client-nodejs
   Scenario: user passwords must comply with the minimum number of numeric characters
     Given typedb has configuration
       |server.authentication.password-policy.complexity.min-numerics|2|
@@ -75,6 +80,7 @@ Feature: Connection Users
     And users create: user2, PASSWORD78
     And users create: user3, PASSWORD7; throws exception
 
+  @ignore-typedb-client-python @ignore-typedb-client-nodejs
   Scenario: user passwords must comply with the minimum number of special characters
     Given typedb has configuration
       |server.authentication.password-policy.complexity.min-special-chars|2|
@@ -85,6 +91,7 @@ Feature: Connection Users
     And users create: user2, PASSWORD&(
     And users create: user3, PASSWORD); throws exception
 
+  @ignore-typedb-client-python @ignore-typedb-client-nodejs
   Scenario: user passwords must comply with the minimum number of different characters
     Given typedb has configuration
       |server.authentication.password-policy.complexity.min-different-chars|4|
@@ -102,6 +109,7 @@ Feature: Connection Users
     And user disconnect
     And user connect: user, even-newer-password
 
+  @ignore-typedb-client-python @ignore-typedb-client-nodejs
   Scenario: user passwords must be unique for a certain history size
     Given typedb has configuration
       |server.authentication.password-policy.unique-history-size|2|
@@ -124,6 +132,7 @@ Feature: Connection Users
     And user connect: user, newest-password
     And user password update: newest-password, password
 
+  @ignore-typedb-client-python @ignore-typedb-client-nodejs
   Scenario: user can check their own password expiration seconds
     Given typedb has configuration
       |server.authentication.password-policy.expiration.enable|true|
@@ -136,6 +145,7 @@ Feature: Connection Users
     And user connect: user, password
     And user expiry-seconds
 
+  @ignore-typedb-client-python @ignore-typedb-client-nodejs
   Scenario: user passwords expire
     Given typedb has configuration
       |server.authentication.password-policy.expiration.enable|true|
