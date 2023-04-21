@@ -27,6 +27,9 @@ Feature: Concept Attribute Type
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
 
+  Scenario: Root attribute type cannot be deleted
+    Then delete attribute type: attribute; throws exception
+
   Scenario: Attribute types can be created
     When put attribute type: name, with value type: string
     Then attribute(name) is null: false

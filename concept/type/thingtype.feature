@@ -27,6 +27,9 @@ Feature: Concept Thing Type
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
 
+  Scenario: Root thing type cannot be deleted
+    Then delete thing type: thing; throws exception
+
   Scenario: Root thing type can retrieve all types
     When put entity type: person
     When put attribute type: is-alive, with value type: boolean
