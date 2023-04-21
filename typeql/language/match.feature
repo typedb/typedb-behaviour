@@ -20,7 +20,7 @@ Feature: TypeQL Match Query
 
   Background: Open connection and create a simple extensible schema
     Given typedb starts
-    Given connection opens without authentication
+    Given connection opens with default authentication
     Given connection has been opened
     Given connection does not have any database
     Given connection create database: typedb

@@ -20,7 +20,7 @@ Feature: Schema Query Resolution (Variable Types)
 
   Background: Set up database
     Given typedb starts
-    Given connection opens without authentication
+    Given connection opens with default authentication
     Given reasoning schema
       """
       define

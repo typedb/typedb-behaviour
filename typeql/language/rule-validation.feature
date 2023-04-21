@@ -19,7 +19,7 @@ Feature: TypeQL Rule Validation
 
   Background: Initialise a session and transaction for each scenario
     Given typedb starts
-    Given connection opens without authentication
+    Given connection opens with default authentication
     Given connection has been opened
     Given connection does not have any database
     Given connection create database: typedb

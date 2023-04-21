@@ -20,7 +20,7 @@ Feature: Connection Transaction
 
   Background:
     Given typedb starts
-    Given connection opens without authentication
+    Given connection opens with default authentication
     Given connection has been opened
     Given connection does not have any database
 
