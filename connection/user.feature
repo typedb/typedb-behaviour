@@ -36,6 +36,14 @@ Feature: Connection Users
     Given users delete: user
     Then users not contains: user
 
+  Scenario: users can get themselves
+    Given typedb starts
+    Given connection opens with authentication: admin, password
+    When users create: user, password
+    Then connection closes
+    Given connection opens with authentication: user, password
+    Then user get self
+
   @ignore-typedb-client-python @ignore-typedb-client-nodejs
   Scenario: user passwords must comply with the minimum length
     Given typedb has configuration
