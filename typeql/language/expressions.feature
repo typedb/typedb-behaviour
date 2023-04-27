@@ -135,7 +135,7 @@ Feature: TypeQL Match Queries with expressions
       """
     Then uniquely identify answer concepts
       | x               |
-      | value:name:Lisa |
+      | attr:name:Lisa  |
 
 
   Scenario: Value variables and concept variables may not share name
@@ -176,8 +176,8 @@ Feature: TypeQL Match Queries with expressions
         ?a, ?b, ?c, ?d;
       """
     Then uniquely identify answer concepts
-      | a               | b               | c                | d                |
-      | raw:double: 9.0 | raw:double: 3.0 | raw:double: 18.0 | raw:double: 2.0  |
+      | a                 | b                 | c                  | d                  |
+      | value:double: 9.0 | value:double: 3.0 | value:double: 18.0 | value:double: 2.0  |
 
     When get answers of typeql match
     """
@@ -190,8 +190,8 @@ Feature: TypeQL Match Queries with expressions
         ?a, ?b, ?c, ?d;
       """
     Then uniquely identify answer concepts
-      | a           | b          | c           | d                |
-      | raw:long: 9 | raw:long:3 | raw:long:18 | raw:double: 2.0  |
+      | a             | b            | c             | d                  |
+      | value:long: 9 | value:long:3 | value:long:18 | value:double: 2.0  |
 
     When get answers of typeql match
     """
@@ -204,8 +204,8 @@ Feature: TypeQL Match Queries with expressions
         ?a, ?b, ?c, ?d;
       """
     Then uniquely identify answer concepts
-      | a               | b               | c                | d                |
-      | raw:double: 9.0 | raw:double: 3.0 | raw:double: 18.0 | raw:double: 2.0  |
+      | a                 | b                 | c                  | d                  |
+      | value:double: 9.0 | value:double: 3.0 | value:double: 18.0 | value:double: 2.0  |
 
     When get answers of typeql match
     """
@@ -218,8 +218,8 @@ Feature: TypeQL Match Queries with expressions
         ?a, ?b, ?c, ?d;
       """
     Then uniquely identify answer concepts
-      | a               | b               | c                | d                |
-      | raw:double: 9.0 | raw:double: 3.0 | raw:double: 18.0 | raw:double: 2.0  |
+      | a                 | b                 | c                  | d                  |
+      | value:double: 9.0 | value:double: 3.0 | value:double: 18.0 | value:double: 2.0  |
 
 
   Scenario: Test functions
@@ -235,8 +235,8 @@ Feature: TypeQL Match Queries with expressions
         ?a, ?b;
       """
     Then uniquely identify answer concepts
-      | a           | b           |
-      | raw:long: 1 | raw:long: 2 |
+      | a             | b             |
+      | value:long: 1 | value:long: 2 |
 
     When get answers of typeql match
     """
@@ -247,8 +247,8 @@ Feature: TypeQL Match Queries with expressions
         ?a, ?b;
       """
     Then uniquely identify answer concepts
-      | a           | b               |
-      | raw:long: 1 | raw:double: 0.5 |
+      | a             | b                 |
+      | value:long: 1 | value:double: 0.5 |
 
     When get answers of typeql match
     """
@@ -259,8 +259,8 @@ Feature: TypeQL Match Queries with expressions
         ?a, ?b;
       """
     Then uniquely identify answer concepts
-      | a           | b            |
-      | raw:long: 2 | raw:long: -3 |
+      | a             | b              |
+      | value:long: 2 | value:long: -3 |
 
 
 
@@ -294,8 +294,8 @@ Feature: TypeQL Match Queries with expressions
       """
 
     Then uniquely identify answer concepts
-      | name             | hours-since-18     | bmi                  |
-      | value:name:Steve | raw:double:17532.0 | raw:double:23.4375   |
+      | name             | hours-since-18       | bmi                    |
+      | attr:name:Steve  | value:double:17532.0 | value:double:23.4375   |
 
 
   Scenario: Test predicates between value variables and constants

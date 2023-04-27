@@ -65,7 +65,7 @@ Feature: TypeQL Reasoning Explanation
 
     Then uniquely identify answer concepts
       | co               | n                      |
-      | key:company-id:0 | value:name:the-company |
+      | key:company-id:0 | attr:name:the-company  |
 
     Then rules are
       |                  | when                 | then                            |
@@ -128,7 +128,7 @@ Feature: TypeQL Reasoning Explanation
 
     Then uniquely identify answer concepts
       | co               | l                    |
-      | key:company-id:0 | value:is-liable:true |
+      | key:company-id:0 | attr:is-liable:true |
 
     Then rules are
       |                   | when                                                       | then                             |
@@ -197,8 +197,8 @@ Feature: TypeQL Reasoning Explanation
 
     Then uniquely identify answer concepts
       | k                     | l               | n                       |
-      | key:name:King's Cross | key:name:UK     | value:name:King's Cross |
-      | key:name:King's Cross | key:name:London | value:name:King's Cross |
+      | key:name:King's Cross | key:name:UK     | attr:name:King's Cross  |
+      | key:name:King's Cross | key:name:London | attr:name:King's Cross  |
 
     Then rules are
       |                                 | when                                                                                                                 | then                                                         |
@@ -426,7 +426,7 @@ Feature: TypeQL Reasoning Explanation
 
     Then uniquely identify answer concepts
       | com              | lia                  |
-      | key:company-id:1 | value:is-liable:true |
+      | key:company-id:1 | attr:is-liable:true  |
 
     Then rules are
       |                   | when                                                                | then                                |

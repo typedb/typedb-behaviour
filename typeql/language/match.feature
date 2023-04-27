@@ -702,12 +702,12 @@ Feature: TypeQL Match Query
       | key:ref:1   | label:person    |
       | key:ref:1   | label:entity    |
       | key:ref:1   | label:thing     |
-      | value:ref:0 | label:ref       |
-      | value:ref:0 | label:attribute |
-      | value:ref:0 | label:thing     |
-      | value:ref:1 | label:ref       |
-      | value:ref:1 | label:attribute |
-      | value:ref:1 | label:thing     |
+      | attr:ref:0  | label:ref        |
+      | attr:ref:0  | label:attribute  |
+      | attr:ref:0  | label:thing      |
+      | attr:ref:1  | label:ref        |
+      | attr:ref:1  | label:attribute  |
+      | attr:ref:1  | label:thing      |
 
   Scenario: 'isa' matches things of the specified type and all its subtypes
     Given typeql define
@@ -1540,8 +1540,8 @@ Feature: TypeQL Match Query
       """
     Then uniquely identify answer concepts
       | x                                      |
-      | value:name:Four Weddings and a Funeral |
-      | value:name:Fun Facts about Space       |
+      | attr:name:Four Weddings and a Funeral  |
+      | attr:name:Fun Facts about Space        |
 
 
   Scenario: 'contains' performs a case-insensitive match
@@ -1564,8 +1564,8 @@ Feature: TypeQL Match Query
       """
     Then uniquely identify answer concepts
       | x                                   |
-      | value:name:Pirates of the Caribbean |
-      | value:name:Mr. Bean                 |
+      | attr:name:Pirates of the Caribbean  |
+      | attr:name:Mr. Bean                  |
 
 
   Scenario: 'like' matches strings that match the specified regex
@@ -1588,8 +1588,8 @@ Feature: TypeQL Match Query
       """
     Then uniquely identify answer concepts
       | x                 |
-      | value:name:123456 |
-      | value:name:9      |
+      | attr:name:123456  |
+      | attr:name:9       |
 
 
   # TODO we can't test like this because the IID is not a valid encoded IID -- need to rethink this test
@@ -1845,7 +1845,7 @@ Feature: TypeQL Match Query
     Then answer size is: 1
     Then uniquely identify answer concepts
       | x         | r         | date                             |
-      | key:ref:0 | key:ref:1 | value:graduation-date:2009-07-16 |
+      | key:ref:0 | key:ref:1 | attr:graduation-date:2009-07-16  |
 
 
   Scenario: 'has $attr == $x' matches owners of any instance '$y' of '$attr' where '$y' and '$x' are equal by value
@@ -2102,8 +2102,8 @@ Feature: TypeQL Match Query
       """
     Then uniquely identify answer concepts
       | x                 |
-      | value:age:24      |
-      | value:length:20.9 |
+      | attr:age:24       |
+      | attr:length:20.9  |
 
 
   Scenario: when one entity exists, and we match two variables with concept inequality, an empty answer is returned

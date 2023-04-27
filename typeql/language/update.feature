@@ -109,8 +109,8 @@ Feature: TypeQL Update Query
       """
     Then uniquely identify answer concepts
       | x         | n               |
-      | key:ref:0 | value:name:Alex |
-      | key:ref:1 | value:name:Bob  |
+      | key:ref:0 | attr:name:Alex  |
+      | key:ref:1 | attr:name:Bob   |
 
 
   Scenario: Deleting the last roleplayer of a relation means it cannot be updated
@@ -221,12 +221,12 @@ Feature: TypeQL Update Query
       """
     Then uniquely identify answer concepts
       | p         | n                  |
-      | key:ref:0 | value:name:Alex    |
-      | key:ref:1 | value:name:Bob     |
-      | key:ref:2 | value:name:Charlie |
-      | key:ref:3 | value:name:Darius  |
-      | key:ref:4 | value:name:Alex    |
-      | key:ref:5 | value:name:Bob     |
+      | key:ref:0 | attr:name:Alex     |
+      | key:ref:1 | attr:name:Bob      |
+      | key:ref:2 | attr:name:Charlie  |
+      | key:ref:3 | attr:name:Darius   |
+      | key:ref:4 | attr:name:Alex     |
+      | key:ref:5 | attr:name:Bob      |
 
     When get answers of typeql match
       """

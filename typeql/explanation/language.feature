@@ -105,7 +105,7 @@ Feature: TypeQL Reasoning Explanation
 
     Then uniquely identify answer concepts
       | k                     | l               | n                       |
-      | key:name:King's Cross | key:name:London | value:name:King's Cross |
+      | key:name:King's Cross | key:name:London | attr:name:King's Cross  |
 
     Then answers contain explanation tree
       |   | children | vars    | identifiers  | explanation | pattern                                                                                                                                                        |
@@ -164,7 +164,7 @@ Feature: TypeQL Reasoning Explanation
 
     Then uniquely identify answer concepts
       | k                     | l               | u           | n                       |
-      | key:name:King's Cross | key:name:London | key:name:UK | value:name:King's Cross |
+      | key:name:King's Cross | key:name:London | key:name:UK | attr:name:King's Cross  |
 
     Then answers contain explanation tree
       |   | children | vars       | identifiers      | explanation | pattern                                                                                                                                                                                                                                       |
@@ -212,7 +212,7 @@ Feature: TypeQL Reasoning Explanation
 
     Then uniquely identify answer concepts
       | com              | n                          |
-      | key:company-id:1 | value:name:another-company |
+      | key:company-id:1 | attr:name:another-company  |
 
     Then answers contain explanation tree
       |   | children | vars   | identifiers | explanation | pattern                                                                                                                       |

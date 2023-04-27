@@ -62,7 +62,7 @@ Feature: TypeQL Delete Query
       """
     Given uniquely identify answer concepts
       | x             | y            | r         | n               |
-      | key:name:Alex | key:name:Bob | key:ref:0 | value:name:John |
+      | key:name:Alex | key:name:Bob | key:ref:0 | attr:name:John  |
     Given transaction commits
     Given session opens transaction of type: write
     When typeql delete
@@ -95,8 +95,8 @@ Feature: TypeQL Delete Query
       """
     Then uniquely identify answer concepts
       | x               |
-      | value:name:Alex |
-      | value:name:Bob  |
+      | attr:name:Alex  |
+      | attr:name:Bob   |
 
 
   Scenario: an instance can be deleted using the 'thing' meta label
@@ -111,7 +111,7 @@ Feature: TypeQL Delete Query
       """
     Then uniquely identify answer concepts
       | x             | y            | r         | n               |
-      | key:name:Alex | key:name:Bob | key:ref:0 | value:name:John |
+      | key:name:Alex | key:name:Bob | key:ref:0 | attr:name:John  |
     Given transaction commits
     Given session opens transaction of type: write
     When typeql delete
@@ -145,7 +145,7 @@ Feature: TypeQL Delete Query
       """
     Then uniquely identify answer concepts
       | x             | y            | r         | n               |
-      | key:name:Alex | key:name:Bob | key:ref:0 | value:name:John |
+      | key:name:Alex | key:name:Bob | key:ref:0 | attr:name:John  |
     Given transaction commits
     Given session opens transaction of type: write
     When typeql delete
@@ -179,7 +179,7 @@ Feature: TypeQL Delete Query
       """
     Then uniquely identify answer concepts
       | x             | y            | r         | n               |
-      | key:name:Alex | key:name:Bob | key:ref:0 | value:name:John |
+      | key:name:Alex | key:name:Bob | key:ref:0 | attr:name:John  |
     Given transaction commits
     Given session opens transaction of type: write
     When typeql delete
@@ -207,7 +207,7 @@ Feature: TypeQL Delete Query
       """
     Then uniquely identify answer concepts
       | n               |
-      | value:name:John |
+      | attr:name:John |
     Given transaction commits
     Given session opens transaction of type: write
     When typeql delete
@@ -239,7 +239,7 @@ Feature: TypeQL Delete Query
       """
     Then uniquely identify answer concepts
       | x             | y            | r         | n               |
-      | key:name:Alex | key:name:Bob | key:ref:0 | value:name:John |
+      | key:name:Alex | key:name:Bob | key:ref:0 | attr:name:John  |
     Given transaction commits
     Given session opens transaction of type: write
     When typeql delete
@@ -1044,7 +1044,7 @@ Feature: TypeQL Delete Query
       """
     Then uniquely identify answer concepts
       | x         | d                   |
-      | key:ref:0 | value:duration:1000 |
+      | key:ref:0 | attr:duration:1000  |
     When typeql delete
       """
       match
@@ -1092,7 +1092,7 @@ Feature: TypeQL Delete Query
       """
     Then uniquely identify answer concepts
       | x         | d                   |
-      | key:ref:0 | value:duration:1000 |
+      | key:ref:0 | attr:duration:1000  |
     When typeql delete
       """
       match
@@ -1190,15 +1190,15 @@ Feature: TypeQL Delete Query
       """
     Then uniquely identify answer concepts
       | n               |
-      | value:name:John |
-      | value:name:Alex |
+      | attr:name:John  |
+      | attr:name:Alex  |
     When get answers of typeql match
       """
       match $x isa person, has lastname $n;
       """
     Then uniquely identify answer concepts
       | x             | n                    |
-      | key:name:John | value:lastname:Smith |
+      | key:name:John | attr:lastname:Smith  |
 
 
   Scenario: deleting everything in a complex pattern
@@ -1301,7 +1301,7 @@ Feature: TypeQL Delete Query
       """
     Then uniquely identify answer concepts
       | x                  |
-      | value:name:Tatyana |
+      | attr:name:Tatyana |
     Then typeql delete
       """
       match
