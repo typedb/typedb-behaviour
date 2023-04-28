@@ -46,7 +46,7 @@ Feature: TypeQL Match Queries with expressions
     Given connection close all sessions
 
 
-  Scenario: A value variable must have exactly one assignment constraint
+  Scenario: A value variable must have exactly one assignment constraint in the same scope
     Given connection open data session for database: typedb
 
     Given session opens transaction of type: read
@@ -72,15 +72,29 @@ Feature: TypeQL Match Queries with expressions
       """
 
 
-  Scenario: A value variable's assignment constraint may not be in a negation
+  Scenario: A value variable must have exactly one assignment constraint recursively
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: read
+    When typeql match; throws exception containing "The value variable '?v' is assigned to more than once"
+    """
+      match
+        $x isa person, has age $a, has age $h;
+        ?v  = $a + $h;
+        not { $a > 10; not { $v = 10; }; };
+      get
+        $x, ?v;
+      """
+
+
+  Scenario: A value variable's assignment must be in the highest scope
     Given connection open data session for database: typedb
     Given session opens transaction of type: read
     When typeql match; throws exception containing "The value variable '?v' is never assigned to"
     """
       match
         $x isa person, has age $a, has age $h;
-        not { ?v = $a / 2;};
         ?v > $h;
+        not { ?v = $a / 2;};
       get
         $x, ?v;
       """
