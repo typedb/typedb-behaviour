@@ -61,7 +61,7 @@ Feature: TypeQL Match Queries with expressions
       """
 
     Given session opens transaction of type: read
-    When typeql match; throws exception containing "The value variable '?v' is assigned to more than once"
+    When typeql match; throws exception containing "The value variable '?v' can only have one assignment in the first scope"
     """
       match
         $x isa person, has age $a, has age $h;
@@ -75,12 +75,12 @@ Feature: TypeQL Match Queries with expressions
   Scenario: A value variable must have exactly one assignment constraint recursively
     Given connection open data session for database: typedb
     Given session opens transaction of type: read
-    When typeql match; throws exception containing "The value variable '?v' is assigned to more than once"
+    When typeql match; throws exception containing "The value variable '?v' can only have one assignment in the first scope"
     """
       match
         $x isa person, has age $a, has age $h;
         ?v  = $a + $h;
-        not { $a > 10; not { $v = 10; }; };
+        not { $a > 10; not { ?v = 10; }; };
       get
         $x, ?v;
       """
@@ -89,7 +89,7 @@ Feature: TypeQL Match Queries with expressions
   Scenario: A value variable's assignment must be in the highest scope
     Given connection open data session for database: typedb
     Given session opens transaction of type: read
-    When typeql match; throws exception containing "The value variable '?v' is never assigned to"
+    When typeql match; throws exception containing "The value variable '?v' can only have one assignment in the first scope"
     """
       match
         $x isa person, has age $a, has age $h;
@@ -338,7 +338,7 @@ Feature: TypeQL Match Queries with expressions
 
     Then uniquely identify answer concepts
       | name             |
-      | value:name:b22.2 |
+      | attr:name:b22.2 |
 
     Given session opens transaction of type: read
     When get answers of typeql match
@@ -353,8 +353,8 @@ Feature: TypeQL Match Queries with expressions
 
     Then uniquely identify answer concepts
       | name             |
-      | value:name:b22.2 |
-      | value:name:b25.0 |
+      | attr:name:b22.2 |
+      | attr:name:b25.0 |
 
 
   Scenario: Test predicates between value variables and value variables
@@ -384,7 +384,7 @@ Feature: TypeQL Match Queries with expressions
 
     Then uniquely identify answer concepts
       | name             |
-      | value:name:b22.2 |
+      | attr:name:b22.2 |
 
     Given session opens transaction of type: read
     When get answers of typeql match
@@ -400,8 +400,8 @@ Feature: TypeQL Match Queries with expressions
 
     Then uniquely identify answer concepts
       | name             |
-      | value:name:b22.2 |
-      | value:name:b25.0 |
+      | attr:name:b22.2 |
+      | attr:name:b25.0 |
 
 
   Scenario: Test predicates between value variables and thing variables
@@ -431,7 +431,7 @@ Feature: TypeQL Match Queries with expressions
 
     Then uniquely identify answer concepts
       | name             |
-      | value:name:b22.2 |
+      | attr:name:b22.2 |
 
     Given session opens transaction of type: read
     When get answers of typeql match
@@ -447,8 +447,8 @@ Feature: TypeQL Match Queries with expressions
 
     Then uniquely identify answer concepts
       | name             |
-      | value:name:b22.2 |
-      | value:name:b25.0 |
+      | attr:name:b22.2 |
+      | attr:name:b25.0 |
 
 
   Scenario: Test predicates between thing variables and value variables
@@ -478,7 +478,7 @@ Feature: TypeQL Match Queries with expressions
 
     Then uniquely identify answer concepts
       | name             |
-      | value:name:b22.2 |
+      | attr:name:b22.2 |
 
     Given session opens transaction of type: read
     When get answers of typeql match
@@ -494,8 +494,8 @@ Feature: TypeQL Match Queries with expressions
 
     Then uniquely identify answer concepts
       | name             |
-      | value:name:b22.2 |
-      | value:name:b25.0 |
+      | attr:name:b22.2 |
+      | attr:name:b25.0 |
 
 
   Scenario: Expressions which perform illegal arithmetic throw appropriate errors
