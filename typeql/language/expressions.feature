@@ -166,7 +166,7 @@ Feature: TypeQL Match Queries with expressions
     Given transaction commits
 
     Given session opens transaction of type: read
-    Then typeql match; throws exception containing "Invalid Query Pattern: The variable name 'y' was used both for a concept variable and a value variable"
+    Then typeql match; throws exception containing "The variable(s) named 'y' cannot be used for both concept variables and a value variables"
       """
       match
         $z isa person, has age $y;
