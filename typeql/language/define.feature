@@ -30,7 +30,7 @@ Feature: TypeQL Define Query
     Given typeql define
       """
       define
-      person sub entity, plays employment:employee, plays income:earner, owns name, owns email @key;
+      person sub entity, plays employment:employee, plays income:earner, owns name, owns email @key, owns phone-nr @unique;
       employment sub relation, relates employee, plays income:source, owns start-date, owns employment-reference-code @key;
       income sub relation, relates earner, relates source;
 
@@ -38,6 +38,7 @@ Feature: TypeQL Define Query
       email sub attribute, value string;
       start-date sub attribute, value datetime;
       employment-reference-code sub attribute, value string;
+      phone-nr sub attribute, value string;
       """
     Given transaction commits
 
@@ -1266,6 +1267,120 @@ Feature: TypeQL Define Query
       define animal sub entity, abstract, abstract, abstract;
       """
 
+  ##############
+  # Annotation #
+  ##############
+
+  Scenario: annotations can be added on subtypes
+    Given typeql define
+      """
+      define
+      child sub person, owns school-id @unique;
+      school-id sub attribute, value string;
+      """
+    Then transaction commits
+
+
+  Scenario: annotations are inherited
+    Given typeql define
+      """
+      define child sub person;
+      """
+    Given transaction commits
+    Then session opens transaction of type: read
+    When get answers of typeql match
+      """
+      match $t owns $a @key;
+      """
+    Then uniquely identify answer concepts
+      | t                | a                               |
+      | label:person     | label:email                     |
+      | label:child      | label:email                     |
+      | label:employment | label:employment-reference-code |
+    When get answers of typeql match
+      """
+      match $t owns $a @unique;
+      """
+    Then uniquely identify answer concepts
+      | t             | a               |
+      | label:person  | label:phone-nr  |
+      | label:child   | label:phone-nr  |
+
+
+  Scenario: redefining inherited annotations throws
+    Then typeql define; throws exception
+      """
+      define child sub person, owns email @key;
+      """
+    Then session opens transaction of type: write
+    Then typeql define; throws exception
+      """
+      define child sub person, owns phone-nr @unique;
+      """
+
+
+  Scenario: annotations are inherited through overrides
+    Given typeql define
+      """
+      define
+      person abstract;
+      phone-nr abstract;
+      child sub person, owns mobile as phone-nr;
+      mobile sub phone-nr;
+      """
+    Given transaction commits
+    Then session opens transaction of type: write
+    When get answers of typeql match
+      """
+      match $t owns $a @unique;
+      """
+    Then uniquely identify answer concepts
+      | t             | a               |
+      | label:person  | label:phone-nr  |
+      | label:child   | label:mobile    |
+    Given typeql define
+      """
+      define
+      child abstract;
+      mobile abstract;
+      infant sub child, owns baby-phone-nr as mobile;
+      baby-phone-nr sub mobile;
+      """
+    Given transaction commits
+    Then session opens transaction of type: read
+    When get answers of typeql match
+      """
+      match $t owns $a @unique;
+      """
+    Then uniquely identify answer concepts
+      | t             | a                   |
+      | label:person  | label:phone-nr      |
+      | label:child   | label:mobile        |
+      | label:infant  | label:baby-phone-nr |
+
+
+  Scenario: redefining inherited annotations on overrides throws
+    Given typeql define
+      """
+      define
+      person abstract;
+      phone-nr abstract;
+      child sub person, owns mobile as phone-nr;
+      mobile sub phone-nr;
+      """
+    Then transaction commits
+    Given session opens transaction of type: write
+    Then typeql define; throws exception
+      """
+      define child owns mobile as phone-nr @unique;
+      """
+
+
+  Scenario: defining a less strict annotation on an inherited ownership throws
+    Then typeql define; throws exception
+      """
+      define child, owns email @unique;
+      """
 
 
   ###################
@@ -1349,7 +1464,7 @@ Feature: TypeQL Define Query
       | label:employment |
 
 
-  Scenario: defining a key on an existing type is possible if existing instances have it and there are no collisions
+  Scenario: defining a key on an existing ownership is possible if data already conforms to key requirements
     Given typeql define
       """
       define
@@ -1613,6 +1728,165 @@ Feature: TypeQL Define Query
     Then answer size is: 0
 
 
+  Scenario: defining a uniqueness on existing ownership is possible if data conforms to uniqueness requirements
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    When typeql insert
+      """
+      insert $x isa person, has name "Bob", has email "bob@gmail.com";
+      """
+    Then typeql insert
+      """
+      insert $x isa person, has name "Jane", has name "Doe", has email "janedoe@gmail.com";
+      """
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
+      """
+      define person owns name @unique;
+      """
+    Then transaction commits
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert; throws exception
+      """
+      insert $x isa person, has name "Bob", has email "bob2@gmail.com";
+      """
+
+
+  Scenario: defining a uniqueness on existing ownership fail if data does not conform to uniqueness requirements
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    When typeql insert
+      """
+      insert $x isa person, has name "Bob", has email "bob@gmail.com";
+      """
+    Then typeql insert
+      """
+      insert $x isa person, has name "Bob", has email "bob2@gmail.com";
+      """
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define; throws exception
+      """
+      define person owns name @unique;
+      """
+
+
+  Scenario: a key ownership can be converted to a unique ownership
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
+      """
+      insert
+      $x isa person, has email "jane@gmail.com";
+      $y isa person, has email "john@gmail.com";
+      """
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
+      """
+      define person owns email @unique;
+      """
+    Then transaction commits
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    When get answers of typeql match
+      """
+      match $x owns $y @unique;
+      """
+    Then uniquely identify answer concepts
+      | x            | y              |
+      | label:person | label:email    |
+      | label:person | label:phone-nr |
+    When get answers of typeql match
+      """
+      match person owns $y @key;
+      """
+    Then answer size is: 0
+    Given typeql insert; throws exception
+      """
+      insert $x isa person, has email "jane@gmail.com";
+      """
+
+
+  Scenario: ownership uniqueness can be removed
+    Given typeql define
+      """
+      define person owns phone-nr;
+      """
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
+      """
+      insert
+      $x isa person, has phone-nr "123", has email "abc@gmail.com";
+      $y isa person, has phone-nr "456", has email "xyz@gmail.com";
+      """
+    Given transaction commits
+
+
+  Scenario: converting unique to key is possible if the data conforms to key requirements
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
+      """
+      insert
+      $x isa person, has phone-nr "123", has email "abc@gmail.com";
+      $y isa person, has phone-nr "456", has email "xyz@gmail.com";
+      """
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
+      """
+      define
+      person owns phone-nr @key;
+      """
+    Then transaction commits
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Then typeql insert; throws exception
+      """
+      insert $x isa person, has phone-nr "9999", has phone-nr "8888", has email "pqr@gmail.com";
+      """
+
+
+  Scenario: converting unique to key fails if the data does not conform to key requirements
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
+      """
+      insert $x isa person, has phone-nr "123", has phone-nr "456", has email "abc@gmail.com";
+      """
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Then typeql define; throws exception
+      """
+      define
+      person owns phone-nr @key;
+      """
+
+
   Scenario: defining a rule is idempotent
     Given typeql define
       """
@@ -1626,7 +1900,6 @@ Feature: TypeQL Define Query
         $p has nickname "Bob";
       };
       """
-
     Then typeql define
       """
       define
@@ -1637,6 +1910,7 @@ Feature: TypeQL Define Query
         $p has nickname "Bob";
       };
       """
+
 
   Scenario: redefining a rule and querying updates its definition
     Given typeql define
@@ -2097,9 +2371,9 @@ Feature: TypeQL Define Query
     Given typeql define
     """
        define
+       person sub entity, owns mobile;
+       mobile sub attribute, value long;
        child sub person;
-       phone-number sub attribute, value long;
-       person sub entity, owns phone-number;
       """
     Given transaction commits
 
@@ -2111,8 +2385,9 @@ Feature: TypeQL Define Query
     Then uniquely identify answer concepts
       | x           | y                  |
       | label:child | label:name         |
-      | label:child | label:phone-number |
+      | label:child | label:mobile       |
       | label:child | label:email        |
+      | label:child | label:phone-nr     |
 
 
   Scenario: when adding a key ownership to an existing type, the change is propagated to its subtypes

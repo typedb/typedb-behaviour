@@ -35,7 +35,8 @@ Feature: TypeQL Insert Query
         plays employment:employee,
         owns name,
         owns age,
-        owns ref @key;
+        owns ref @key,
+        owns email @unique;
 
       company sub entity,
         plays employment:employer,
@@ -55,6 +56,9 @@ Feature: TypeQL Insert Query
 
       ref sub attribute,
         value long;
+
+      email sub attribute,
+        value string;
       """
     Given transaction commits
 
@@ -1336,11 +1340,11 @@ Parker";
 
 
 
-  ########
-  # KEYS #
-  ########
+  #################
+  # KEY OWNERSHIP #
+  #################
 
-  Scenario: a thing can be inserted with a key
+  Scenario: a thing can be inserted with a key attribute
     When typeql insert
       """
       insert $x isa person, has ref 0;
@@ -1357,7 +1361,7 @@ Parker";
       | key:ref:0 |
 
 
-  Scenario: when a type has a key, attempting to insert it without that key throws on commit
+  Scenario: when a type has a key, attempting to insert it without that key attribute throws on commit
     When typeql insert
       """
       insert $x isa person;
@@ -1365,14 +1369,14 @@ Parker";
     Then transaction commits; throws exception
 
 
-  Scenario: inserting two distinct values of the same key on a thing throws an error
+  Scenario: inserting two distinct values of the same key attribute on a thing throws an error
     Then typeql insert; throws exception
       """
       insert $x isa person, has ref 0, has ref 1;
       """
 
 
-  Scenario: instances of a key must be unique among all instances of a type
+  Scenario: instances of a key attribute must be unique among all instances of a type
     Then typeql insert; throws exception
       """
       insert
@@ -1380,7 +1384,8 @@ Parker";
       $y isa person, has ref 0;
       """
 
-  Scenario: instances of an inherited key don't have to be unique among instances of a type and its subtypes
+
+  Scenario: instances of an inherited key attribute don't have to be unique among instances of a type and its subtypes
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
@@ -1418,7 +1423,8 @@ Parker";
       insert $x isa base, has ref 0;
       """
 
-  Scenario: instances of an inherited key don't have to be unique among its subtypes
+
+  Scenario: instances of an inherited key attribute don't have to be unique among its subtypes
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
@@ -1445,7 +1451,8 @@ Parker";
       insert $y isa derived-b, has ref 0;
       """
 
-  Scenario: an error is thrown when inserting a second key on an attribute that already has one
+
+  Scenario: an error is thrown when inserting a second key attribute on an attribute that already has one
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
@@ -1471,6 +1478,138 @@ Parker";
       insert $a "john" isa name, has ref 1;
       """
 
+
+  ####################
+  # UNIQUE OWNERSHIP #
+  ####################
+
+  Scenario: a thing can be inserted with a unique attribute(s)
+    When typeql insert
+      """
+      insert $x isa person, has ref 0, has email "abc@gmail.com";
+      """
+    Then transaction commits
+
+    When session opens transaction of type: write
+    When get answers of typeql match
+      """
+      match $x isa person, has email "abc@gmail.com";
+      """
+    Then uniquely identify answer concepts
+      | x         |
+      | key:ref:0 |
+    When typeql insert
+      """
+      insert $x isa person, has ref 1, has email "mnp@gmail.com", has email "xyz@gmail.com";
+      """
+    Then transaction commits
+
+    When session opens transaction of type: read
+    When get answers of typeql match
+      """
+      match $x isa person, has email "mnp@gmail.com", has email "xyz@gmail.com";
+      """
+    Then uniquely identify answer concepts
+      | x         |
+      | key:ref:1 |
+
+
+  Scenario: two different owners cannot own the same unique attribute
+    Then typeql insert; throws exception
+      """
+      insert
+      $x isa person, has ref 0, has email "abc@gmail.com";
+      $y isa person, has ref 1, has email "abc@gmail.com";
+      """
+    Given session opens transaction of type: write
+    Given typeql insert
+      """
+      insert $x isa person, has ref 0, has email "abc@gmail.com";
+      """
+    Then transaction commits
+    Given session opens transaction of type: write
+    Then typeql insert; throws exception
+      """
+      insert $y isa person, has ref 1, has email "abc@gmail.com";
+      """
+
+
+  Scenario: inherited uniqueness is respected
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
+      """
+      define
+      child sub person;
+      """
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
+      """
+      insert $x isa child, has email "abc@gmail.com", has email "xyz@gmail.com", has ref 0;
+      """
+    Then transaction commits
+    Given session opens transaction of type: write
+    Then typeql insert; throws exception
+      """
+      insert $x isa child, has email "abc@gmail.com", has ref 1;
+      """
+
+
+  Scenario: overridden uniqueness is respected
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+
+    Given typeql define
+      """
+      define
+      person sub entity, abstract;
+      email sub attribute, value string, abstract;
+      email-outlook sub email, value string;
+      child sub person, owns email-outlook as email;
+      """
+    Given transaction commits
+    Given connection close all sessions
+
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
+      """
+      insert $x isa child, has email-outlook "abc@outlook.com", has email-outlook "xyz@outlook.com", has ref 0;
+      """
+    Then transaction commits
+    Given session opens transaction of type: write
+    Then typeql insert; throws exception
+      """
+      insert $x isa child, has email-outloko "abc@outlook.com", has ref 1;
+      """
+
+
+  Scenario: instances of an inherited unique attribute don't have to be unique among instances of the type and its subtypes
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
+      """
+      define
+      child sub person;
+      adult sub person;
+      """
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
+      """
+      insert
+      $x isa child, has email "abc@gmail.com", has email "xyz@gmail.com", has ref 0;
+      $y isa adult, has email "abc@gmail.com", has email "xyz@gmail.com", has ref 1;
+      """
+    Then transaction commits
 
 
   ###########################
