@@ -421,9 +421,9 @@ Feature: Concept Entity Type
     Then entity(customer) get owns attribute types with annotations: key; contain:
       | email     |
       | reference |
-    Then entity(customer) get owns explicit types with annotations: key; contain:
+    Then entity(customer) get owns explicit attribute types with annotations: key; contain:
       | reference |
-    Then entity(customer) get owns explicit types with annotations: key; do not contain:
+    Then entity(customer) get owns explicit attribute types with annotations: key; do not contain:
       | email     |
     Then entity(customer) get owns attribute types contain:
       | email     |
@@ -441,9 +441,9 @@ Feature: Concept Entity Type
     Then entity(customer) get owns attribute types with annotations: key; contain:
       | email     |
       | reference |
-    Then entity(customer) get owns explicit types with annotations: key; contain:
+    Then entity(customer) get owns explicit attribute types with annotations: key; contain:
       | reference |
-    Then entity(customer) get owns explicit types with annotations: key; do not contain:
+    Then entity(customer) get owns explicit attribute types with annotations: key; do not contain:
       | email     |
     Then entity(customer) get owns attribute types contain:
       | email     |
@@ -467,9 +467,9 @@ Feature: Concept Entity Type
     Then entity(customer) get owns attribute types with annotations: key; contain:
       | email     |
       | reference |
-    Then entity(customer) get owns explicit types with annotations: key; contain:
+    Then entity(customer) get owns explicit attribute types with annotations: key; contain:
       | reference |
-    Then entity(customer) get owns explicit types with annotations: key; do not contain:
+    Then entity(customer) get owns explicit attribute types with annotations: key; do not contain:
       | email     |
     Then entity(customer) get owns attribute types contain:
       | email     |
@@ -486,9 +486,9 @@ Feature: Concept Entity Type
       | email     |
       | reference |
       | license   |
-    Then entity(subscriber) get owns explicit types with annotations: key; contain:
+    Then entity(subscriber) get owns explicit attribute types with annotations: key; contain:
       | license   |
-    Then entity(subscriber) get owns explicit types with annotations: key; do not contain:
+    Then entity(subscriber) get owns explicit attribute types with annotations: key; do not contain:
       | email     |
       | reference |
     Then entity(subscriber) get owns attribute types contain:
@@ -530,9 +530,9 @@ Feature: Concept Entity Type
     Then entity(customer) get owns attribute types with annotations: key; contain:
       | username  |
       | reference |
-    Then entity(customer) get owns explicit types with annotations: key; contain:
+    Then entity(customer) get owns explicit attribute types with annotations: key; contain:
       | reference |
-    Then entity(customer) get owns explicit types with annotations: key; do not contain:
+    Then entity(customer) get owns explicit attribute types with annotations: key; do not contain:
       | username  |
     Then entity(customer) get owns attribute types contain:
       | username  |
@@ -550,9 +550,9 @@ Feature: Concept Entity Type
     Then entity(customer) get owns attribute types with annotations: key; contain:
       | username  |
       | reference |
-    Then entity(customer) get owns explicit types with annotations: key; contain:
+    Then entity(customer) get owns explicit attribute types with annotations: key; contain:
       | reference |
-    Then entity(customer) get owns explicit types with annotations: key; do not contain:
+    Then entity(customer) get owns explicit attribute types with annotations: key; do not contain:
       | username  |
     Then entity(customer) get owns attribute types contain:
       | username  |
@@ -579,9 +579,9 @@ Feature: Concept Entity Type
     Then entity(customer) get owns attribute types with annotations: key; contain:
       | username  |
       | reference |
-    Then entity(customer) get owns explicit types with annotations: key; contain:
+    Then entity(customer) get owns explicit attribute types with annotations: key; contain:
       | reference |
-    Then entity(customer) get owns explicit types with annotations: key; do not contain:
+    Then entity(customer) get owns explicit attribute types with annotations: key; do not contain:
       | username  |
     Then entity(customer) get owns attribute types contain:
       | username  |
@@ -598,9 +598,9 @@ Feature: Concept Entity Type
       | username  |
       | reference |
       | license   |
-    Then entity(subscriber) get owns explicit types with annotations: key; contain:
+    Then entity(subscriber) get owns explicit attribute types with annotations: key; contain:
       | license   |
-    Then entity(subscriber) get owns explicit types with annotations: key; do not contain:
+    Then entity(subscriber) get owns explicit attribute types with annotations: key; do not contain:
       | username  |
       | reference |
     Then entity(subscriber) get owns attribute types contain:
@@ -655,10 +655,10 @@ Feature: Concept Entity Type
       | work-email |
     Then entity(customer) get owns attribute types with annotations: key; do not contain:
       | email |
-    Then entity(customer) get owns explicit types with annotations: key; contain:
+    Then entity(customer) get owns explicit attribute types with annotations: key; contain:
       | reference  |
       | work-email |
-    Then entity(customer) get owns explicit types with annotations: key; do not contain:
+    Then entity(customer) get owns explicit attribute types with annotations: key; do not contain:
       | username   |
       | email      |
     Then entity(customer) get owns attribute types contain:
@@ -691,10 +691,10 @@ Feature: Concept Entity Type
       | work-email |
     Then entity(customer) get owns attribute types with annotations: key; do not contain:
       | email |
-    Then entity(customer) get owns explicit types with annotations: key; contain:
+    Then entity(customer) get owns explicit attribute types with annotations: key; contain:
       | reference  |
       | work-email |
-    Then entity(customer) get owns explicit types with annotations: key; do not contain:
+    Then entity(customer) get owns explicit attribute types with annotations: key; do not contain:
       | username   |
       | email      |
     Then entity(customer) get owns attribute types contain:
@@ -733,10 +733,10 @@ Feature: Concept Entity Type
       | work-email |
     Then entity(customer) get owns attribute types with annotations: key; do not contain:
       | email |
-    Then entity(customer) get owns explicit types with annotations: key; contain:
+    Then entity(customer) get owns explicit attribute types with annotations: key; contain:
       | reference  |
       | work-email |
-    Then entity(customer) get owns explicit types with annotations: key; do not contain:
+    Then entity(customer) get owns explicit attribute types with annotations: key; do not contain:
       | username   |
       | email      |
     Then entity(customer) get owns attribute types contain:
@@ -768,9 +768,9 @@ Feature: Concept Entity Type
     Then entity(subscriber) get owns attribute types with annotations: key; do not contain:
       | email     |
       | reference |
-    Then entity(subscriber) get owns explicit types with annotations: key; contain:
+    Then entity(subscriber) get owns explicit attribute types with annotations: key; contain:
       | license    |
-    Then entity(subscriber) get owns explicit types with annotations: key; do not contain:
+    Then entity(subscriber) get owns explicit attribute types with annotations: key; do not contain:
       | username   |
       | work-email |
       | email     |
