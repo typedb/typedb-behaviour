@@ -247,12 +247,12 @@ Feature: Concept Entity Type
     When put entity type: person
     When entity(person) set owns attribute type: email, with annotations: key
     When entity(person) set owns attribute type: username, with annotations: key
-    Then entity(person) get owns types with annotations: key; contain:
+    Then entity(person) get owns attribute types with annotations: key; contain:
       | email    |
       | username |
     When transaction commits
     When session opens transaction of type: read
-    Then entity(person) get owns types with annotations: key; contain:
+    Then entity(person) get owns attribute types with annotations: key; contain:
       | email    |
       | username |
 
@@ -289,12 +289,12 @@ Feature: Concept Entity Type
     When connection open schema session for database: typedb
     When session opens transaction of type: write
     When entity(person) set owns attribute type: email, with annotations: key
-    Then entity(person) get owns types with annotations: key; contain:
+    Then entity(person) get owns attribute types with annotations: key; contain:
       | email    |
       | username |
     Then transaction commits
     When session opens transaction of type: read
-    Then entity(person) get owns types with annotations: key; contain:
+    Then entity(person) get owns attribute types with annotations: key; contain:
       | email    |
       | username |
 
@@ -305,12 +305,12 @@ Feature: Concept Entity Type
     When entity(person) set owns attribute type: email, with annotations: key
     When entity(person) set owns attribute type: username, with annotations: key
     When entity(person) unset owns attribute type: email
-    Then entity(person) get owns types with annotations: key; do not contain:
+    Then entity(person) get owns attribute types with annotations: key; do not contain:
       | email |
     When transaction commits
     When session opens transaction of type: write
     When entity(person) unset owns attribute type: username
-    Then entity(person) get owns types with annotations: key; do not contain:
+    Then entity(person) get owns attribute types with annotations: key; do not contain:
       | email    |
       | username |
 
@@ -387,7 +387,7 @@ Feature: Concept Entity Type
     When entity(person) set owns attribute type: username, with annotations: key
     When entity(person) set owns attribute type: name
     When entity(person) set owns attribute type: age
-    Then entity(person) get owns types with annotations: key; contain:
+    Then entity(person) get owns attribute types with annotations: key; contain:
       | email    |
       | username |
     Then entity(person) get owns attribute types contain:
@@ -397,7 +397,7 @@ Feature: Concept Entity Type
       | age      |
     When transaction commits
     When session opens transaction of type: read
-    Then entity(person) get owns types with annotations: key; contain:
+    Then entity(person) get owns attribute types with annotations: key; contain:
       | email    |
       | username |
     Then entity(person) get owns attribute types contain:
@@ -418,7 +418,7 @@ Feature: Concept Entity Type
     When entity(customer) set supertype: person
     When entity(customer) set owns attribute type: reference, with annotations: key
     When entity(customer) set owns attribute type: rating
-    Then entity(customer) get owns types with annotations: key; contain:
+    Then entity(customer) get owns attribute types with annotations: key; contain:
       | email     |
       | reference |
     Then entity(customer) get owns explicit types with annotations: key; contain:
@@ -438,7 +438,7 @@ Feature: Concept Entity Type
       | name      |
     When transaction commits
     When session opens transaction of type: write
-    Then entity(customer) get owns types with annotations: key; contain:
+    Then entity(customer) get owns attribute types with annotations: key; contain:
       | email     |
       | reference |
     Then entity(customer) get owns explicit types with annotations: key; contain:
@@ -464,7 +464,7 @@ Feature: Concept Entity Type
     When entity(subscriber) set owns attribute type: points
     When transaction commits
     When session opens transaction of type: read
-    Then entity(customer) get owns types with annotations: key; contain:
+    Then entity(customer) get owns attribute types with annotations: key; contain:
       | email     |
       | reference |
     Then entity(customer) get owns explicit types with annotations: key; contain:
@@ -482,7 +482,7 @@ Feature: Concept Entity Type
     Then entity(customer) get owns explicit attribute types do not contain:
       | email     |
       | name      |
-    Then entity(subscriber) get owns types with annotations: key; contain:
+    Then entity(subscriber) get owns attribute types with annotations: key; contain:
       | email     |
       | reference |
       | license   |
@@ -527,7 +527,7 @@ Feature: Concept Entity Type
     When entity(customer) set supertype: person
     When entity(customer) set owns attribute type: reference, with annotations: key
     When entity(customer) set owns attribute type: rating
-    Then entity(customer) get owns types with annotations: key; contain:
+    Then entity(customer) get owns attribute types with annotations: key; contain:
       | username  |
       | reference |
     Then entity(customer) get owns explicit types with annotations: key; contain:
@@ -547,7 +547,7 @@ Feature: Concept Entity Type
       | score     |
     When transaction commits
     When session opens transaction of type: write
-    Then entity(customer) get owns types with annotations: key; contain:
+    Then entity(customer) get owns attribute types with annotations: key; contain:
       | username  |
       | reference |
     Then entity(customer) get owns explicit types with annotations: key; contain:
@@ -576,7 +576,7 @@ Feature: Concept Entity Type
     When entity(subscriber) set owns attribute type: points
     When transaction commits
     When session opens transaction of type: read
-    Then entity(customer) get owns types with annotations: key; contain:
+    Then entity(customer) get owns attribute types with annotations: key; contain:
       | username  |
       | reference |
     Then entity(customer) get owns explicit types with annotations: key; contain:
@@ -594,7 +594,7 @@ Feature: Concept Entity Type
     Then entity(customer) get owns explicit attribute types do not contain:
       | username  |
       | score     |
-    Then entity(subscriber) get owns types with annotations: key; contain:
+    Then entity(subscriber) get owns attribute types with annotations: key; contain:
       | username  |
       | reference |
       | license   |
@@ -649,11 +649,11 @@ Feature: Concept Entity Type
     When entity(customer) set owns attribute type: nick-name as name
     Then entity(customer) get owns overridden attribute(work-email) get label: email
     Then entity(customer) get owns overridden attribute(nick-name) get label: name
-    Then entity(customer) get owns types with annotations: key; contain:
+    Then entity(customer) get owns attribute types with annotations: key; contain:
       | username   |
       | reference  |
       | work-email |
-    Then entity(customer) get owns types with annotations: key; do not contain:
+    Then entity(customer) get owns attribute types with annotations: key; do not contain:
       | email |
     Then entity(customer) get owns explicit types with annotations: key; contain:
       | reference  |
@@ -685,11 +685,11 @@ Feature: Concept Entity Type
     When session opens transaction of type: write
     Then entity(customer) get owns overridden attribute(work-email) get label: email
     Then entity(customer) get owns overridden attribute(nick-name) get label: name
-    Then entity(customer) get owns types with annotations: key; contain:
+    Then entity(customer) get owns attribute types with annotations: key; contain:
       | username   |
       | reference  |
       | work-email |
-    Then entity(customer) get owns types with annotations: key; do not contain:
+    Then entity(customer) get owns attribute types with annotations: key; do not contain:
       | email |
     Then entity(customer) get owns explicit types with annotations: key; contain:
       | reference  |
@@ -727,11 +727,11 @@ Feature: Concept Entity Type
     When entity(subscriber) set owns attribute type: points as rating
     When transaction commits
     When session opens transaction of type: read
-    Then entity(customer) get owns types with annotations: key; contain:
+    Then entity(customer) get owns attribute types with annotations: key; contain:
       | username   |
       | reference  |
       | work-email |
-    Then entity(customer) get owns types with annotations: key; do not contain:
+    Then entity(customer) get owns attribute types with annotations: key; do not contain:
       | email |
     Then entity(customer) get owns explicit types with annotations: key; contain:
       | reference  |
@@ -761,11 +761,11 @@ Feature: Concept Entity Type
       | name       |
     Then entity(subscriber) get owns overridden attribute(license) get label: reference
     Then entity(subscriber) get owns overridden attribute(points) get label: rating
-    Then entity(subscriber) get owns types with annotations: key; contain:
+    Then entity(subscriber) get owns attribute types with annotations: key; contain:
       | username   |
       | license    |
       | work-email |
-    Then entity(subscriber) get owns types with annotations: key; do not contain:
+    Then entity(subscriber) get owns attribute types with annotations: key; do not contain:
       | email     |
       | reference |
     Then entity(subscriber) get owns explicit types with annotations: key; contain:
@@ -812,9 +812,9 @@ Feature: Concept Entity Type
     When entity(customer) set supertype: person
     When entity(customer) set owns attribute type: username as name, with annotations: key
     Then entity(customer) get owns overridden attribute(username) get label: name
-    Then entity(customer) get owns types with annotations: key; contain:
+    Then entity(customer) get owns attribute types with annotations: key; contain:
       | username |
-    Then entity(customer) get owns types with annotations: key; do not contain:
+    Then entity(customer) get owns attribute types with annotations: key; do not contain:
       | name |
     Then entity(customer) get owns attribute types contain:
       | username |
@@ -823,9 +823,9 @@ Feature: Concept Entity Type
     When transaction commits
     When session opens transaction of type: read
     Then entity(customer) get owns overridden attribute(username) get label: name
-    Then entity(customer) get owns types with annotations: key; contain:
+    Then entity(customer) get owns attribute types with annotations: key; contain:
       | username |
-    Then entity(customer) get owns types with annotations: key; do not contain:
+    Then entity(customer) get owns attribute types with annotations: key; do not contain:
       | name |
     Then entity(customer) get owns attribute types contain:
       | username |
@@ -922,16 +922,16 @@ Feature: Concept Entity Type
     Then entity(customer) set owns attribute type: email, with annotations: key
     Then entity(customer) get owns overridden attribute(email) is null: false
     Then entity(customer) get owns overridden attribute(email) get label: email
-    Then entity(customer) get owns types with annotations: key; contain:
+    Then entity(customer) get owns attribute types with annotations: key; contain:
       | email |
     When transaction commits
     When session opens transaction of type: write
-    Then entity(customer) get owns types with annotations: key; contain:
+    Then entity(customer) get owns attribute types with annotations: key; contain:
       | email |
     When put entity type: subscriber
     When entity(subscriber) set supertype: person
     Then entity(subscriber) set owns attribute type: email, with annotations: key
-    Then entity(subscriber) get owns types with annotations: key; contain:
+    Then entity(subscriber) get owns attribute types with annotations: key; contain:
       | email |
 
   Scenario: Entity types cannot redeclare inherited attributes as attributes

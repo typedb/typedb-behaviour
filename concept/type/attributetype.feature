@@ -487,11 +487,11 @@ Feature: Concept Attribute Type
     When put attribute type: country-code, with value type: string
     When put attribute type: country-name, with value type: string
     When attribute(country-name) set owns attribute type: country-code, with annotations: key
-    Then attribute(country-name) get owns types with annotations: key; contain:
+    Then attribute(country-name) get owns attribute types with annotations: key; contain:
       | country-code |
     When transaction commits
     When session opens transaction of type: read
-    Then attribute(country-name) get owns types with annotations: key; contain:
+    Then attribute(country-name) get owns attribute types with annotations: key; contain:
       | country-code |
 
   Scenario: Attribute types can unset keys
@@ -501,12 +501,12 @@ Feature: Concept Attribute Type
     When attribute(country-name) set owns attribute type: country-code-1, with annotations: key
     When attribute(country-name) set owns attribute type: country-code-2, with annotations: key
     When attribute(country-name) unset owns attribute type: country-code-1
-    Then attribute(country-name) get owns types with annotations: key; do not contain:
+    Then attribute(country-name) get owns attribute types with annotations: key; do not contain:
       | country-code-1 |
     When transaction commits
     When session opens transaction of type: write
     When attribute(country-name) unset owns attribute type: country-code-2
-    Then attribute(country-name) get owns types with annotations: key; do not contain:
+    Then attribute(country-name) get owns attribute types with annotations: key; do not contain:
       | country-code-1 |
       | country-code-2 |
 
@@ -547,14 +547,14 @@ Feature: Concept Attribute Type
     When put attribute type: country-name, with value type: string
     When attribute(country-name) set owns attribute type: country-code, with annotations: key
     When attribute(country-name) set owns attribute type: country-abbreviation
-    Then attribute(country-name) get owns types with annotations: key; contain:
+    Then attribute(country-name) get owns attribute types with annotations: key; contain:
       | country-code |
     Then attribute(country-name) get owns attribute types contain:
       | country-code         |
       | country-abbreviation |
     When transaction commits
     When session opens transaction of type: read
-    Then attribute(country-name) get owns types with annotations: key; contain:
+    Then attribute(country-name) get owns attribute types with annotations: key; contain:
       | country-code |
     Then attribute(country-name) get owns attribute types contain:
       | country-code         |
@@ -570,14 +570,14 @@ Feature: Concept Attribute Type
     When put attribute type: real-name, with value type: string
     When attribute(real-name) set abstract: true
     When attribute(real-name) set supertype: name
-    Then attribute(real-name) get owns types with annotations: key; contain:
+    Then attribute(real-name) get owns attribute types with annotations: key; contain:
       | hash |
     Then attribute(real-name) get owns attribute types contain:
       | hash         |
       | abbreviation |
     When transaction commits
     When session opens transaction of type: write
-    Then attribute(real-name) get owns types with annotations: key; contain:
+    Then attribute(real-name) get owns attribute types with annotations: key; contain:
       | hash |
     Then attribute(real-name) get owns attribute types contain:
       | hash         |
@@ -586,12 +586,12 @@ Feature: Concept Attribute Type
     When attribute(last-name) set supertype: real-name
     When transaction commits
     When session opens transaction of type: read
-    Then attribute(real-name) get owns types with annotations: key; contain:
+    Then attribute(real-name) get owns attribute types with annotations: key; contain:
       | hash |
     Then attribute(real-name) get owns attribute types contain:
       | hash         |
       | abbreviation |
-    Then attribute(last-name) get owns types with annotations: key; contain:
+    Then attribute(last-name) get owns attribute types with annotations: key; contain:
       | hash |
     Then attribute(last-name) get owns attribute types contain:
       | hash         |

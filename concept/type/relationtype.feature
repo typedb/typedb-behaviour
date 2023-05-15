@@ -514,11 +514,11 @@ Feature: Concept Relation Type and Role Type
     When put relation type: marriage
     When relation(marriage) set relates role: spouse
     When relation(marriage) set owns attribute type: license, with annotations: key
-    Then relation(marriage) get owns types with annotations: key; contain:
+    Then relation(marriage) get owns attribute types with annotations: key; contain:
       | license |
     When transaction commits
     When session opens transaction of type: read
-    Then relation(marriage) get owns types with annotations: key; contain:
+    Then relation(marriage) get owns attribute types with annotations: key; contain:
       | license |
 
   Scenario: Relation types can unset keys
@@ -529,12 +529,12 @@ Feature: Concept Relation Type and Role Type
     When relation(marriage) set owns attribute type: license, with annotations: key
     When relation(marriage) set owns attribute type: certificate, with annotations: key
     When relation(marriage) unset owns attribute type: license
-    Then relation(marriage) get owns types with annotations: key; do not contain:
+    Then relation(marriage) get owns attribute types with annotations: key; do not contain:
       | license |
     When transaction commits
     When session opens transaction of type: write
     When relation(marriage) unset owns attribute type: certificate
-    Then relation(marriage) get owns types with annotations: key; do not contain:
+    Then relation(marriage) get owns attribute types with annotations: key; do not contain:
       | license     |
       | certificate |
 
@@ -601,7 +601,7 @@ Feature: Concept Relation Type and Role Type
     When relation(marriage) set owns attribute type: certificate, with annotations: key
     When relation(marriage) set owns attribute type: date
     When relation(marriage) set owns attribute type: religion
-    Then relation(marriage) get owns types with annotations: key; contain:
+    Then relation(marriage) get owns attribute types with annotations: key; contain:
       | license     |
       | certificate |
     Then relation(marriage) get owns attribute types contain:
@@ -611,7 +611,7 @@ Feature: Concept Relation Type and Role Type
       | religion    |
     When transaction commits
     When session opens transaction of type: read
-    Then relation(marriage) get owns types with annotations: key; contain:
+    Then relation(marriage) get owns attribute types with annotations: key; contain:
       | license     |
       | certificate |
     Then relation(marriage) get owns attribute types contain:
@@ -634,7 +634,7 @@ Feature: Concept Relation Type and Role Type
     When relation(contractor-employment) set supertype: employment
     When relation(contractor-employment) set owns attribute type: contractor-reference, with annotations: key
     When relation(contractor-employment) set owns attribute type: contractor-hours
-    Then relation(contractor-employment) get owns types with annotations: key; contain:
+    Then relation(contractor-employment) get owns attribute types with annotations: key; contain:
       | employment-reference |
       | contractor-reference |
     Then relation(contractor-employment) get owns attribute types contain:
@@ -644,7 +644,7 @@ Feature: Concept Relation Type and Role Type
       | contractor-hours     |
     When transaction commits
     When session opens transaction of type: write
-    Then relation(contractor-employment) get owns types with annotations: key; contain:
+    Then relation(contractor-employment) get owns attribute types with annotations: key; contain:
       | employment-reference |
       | contractor-reference |
     Then relation(contractor-employment) get owns attribute types contain:
@@ -658,7 +658,7 @@ Feature: Concept Relation Type and Role Type
     When relation(parttime-employment) set supertype: contractor-employment
     When relation(parttime-employment) set owns attribute type: parttime-reference, with annotations: key
     When relation(parttime-employment) set owns attribute type: parttime-hours
-    Then relation(parttime-employment) get owns types with annotations: key; contain:
+    Then relation(parttime-employment) get owns attribute types with annotations: key; contain:
       | employment-reference |
       | contractor-reference |
       | parttime-reference   |
@@ -671,7 +671,7 @@ Feature: Concept Relation Type and Role Type
       | parttime-hours       |
     When transaction commits
     When session opens transaction of type: read
-    Then relation(contractor-employment) get owns types with annotations: key; contain:
+    Then relation(contractor-employment) get owns attribute types with annotations: key; contain:
       | employment-reference |
       | contractor-reference |
     Then relation(contractor-employment) get owns attribute types contain:
@@ -679,7 +679,7 @@ Feature: Concept Relation Type and Role Type
       | contractor-reference |
       | employment-hours     |
       | contractor-hours     |
-    Then relation(parttime-employment) get owns types with annotations: key; contain:
+    Then relation(parttime-employment) get owns attribute types with annotations: key; contain:
       | employment-reference |
       | contractor-reference |
       | parttime-reference   |
@@ -713,7 +713,7 @@ Feature: Concept Relation Type and Role Type
     When relation(contractor-employment) set supertype: employment
     When relation(contractor-employment) set owns attribute type: contractor-reference, with annotations: key
     When relation(contractor-employment) set owns attribute type: contractor-hours
-    Then relation(contractor-employment) get owns types with annotations: key; contain:
+    Then relation(contractor-employment) get owns attribute types with annotations: key; contain:
       | employment-reference |
       | contractor-reference |
     Then relation(contractor-employment) get owns attribute types contain:
@@ -723,7 +723,7 @@ Feature: Concept Relation Type and Role Type
       | contractor-hours     |
     When transaction commits
     When session opens transaction of type: write
-    Then relation(contractor-employment) get owns types with annotations: key; contain:
+    Then relation(contractor-employment) get owns attribute types with annotations: key; contain:
       | employment-reference |
       | contractor-reference |
     Then relation(contractor-employment) get owns attribute types contain:
@@ -740,7 +740,7 @@ Feature: Concept Relation Type and Role Type
     When relation(parttime-employment) set supertype: contractor-employment
     When relation(parttime-employment) set owns attribute type: parttime-reference, with annotations: key
     When relation(parttime-employment) set owns attribute type: parttime-hours
-    Then relation(parttime-employment) get owns types with annotations: key; contain:
+    Then relation(parttime-employment) get owns attribute types with annotations: key; contain:
       | employment-reference |
       | contractor-reference |
       | parttime-reference   |
@@ -753,7 +753,7 @@ Feature: Concept Relation Type and Role Type
       | parttime-hours       |
     When transaction commits
     When session opens transaction of type: read
-    Then relation(contractor-employment) get owns types with annotations: key; contain:
+    Then relation(contractor-employment) get owns attribute types with annotations: key; contain:
       | employment-reference |
       | contractor-reference |
     Then relation(contractor-employment) get owns attribute types contain:
@@ -761,7 +761,7 @@ Feature: Concept Relation Type and Role Type
       | contractor-reference |
       | employment-hours     |
       | contractor-hours     |
-    Then relation(parttime-employment) get owns types with annotations: key; contain:
+    Then relation(parttime-employment) get owns attribute types with annotations: key; contain:
       | employment-reference |
       | contractor-reference |
       | parttime-reference   |
@@ -795,9 +795,9 @@ Feature: Concept Relation Type and Role Type
     When relation(contractor-employment) set supertype: employment
     When relation(contractor-employment) set owns attribute type: contractor-reference as employment-reference
     When relation(contractor-employment) set owns attribute type: contractor-hours as employment-hours
-    Then relation(contractor-employment) get owns types with annotations: key; contain:
+    Then relation(contractor-employment) get owns attribute types with annotations: key; contain:
       | contractor-reference |
-    Then relation(contractor-employment) get owns types with annotations: key; do not contain:
+    Then relation(contractor-employment) get owns attribute types with annotations: key; do not contain:
       | employment-reference |
     Then relation(contractor-employment) get owns attribute types contain:
       | contractor-reference |
@@ -807,9 +807,9 @@ Feature: Concept Relation Type and Role Type
       | employment-hours     |
     When transaction commits
     When session opens transaction of type: write
-    Then relation(contractor-employment) get owns types with annotations: key; contain:
+    Then relation(contractor-employment) get owns attribute types with annotations: key; contain:
       | contractor-reference |
-    Then relation(contractor-employment) get owns types with annotations: key; do not contain:
+    Then relation(contractor-employment) get owns attribute types with annotations: key; do not contain:
       | employment-reference |
     Then relation(contractor-employment) get owns attribute types contain:
       | contractor-reference |
@@ -827,16 +827,16 @@ Feature: Concept Relation Type and Role Type
     When relation(parttime-employment) set relates role: parttime-employee as employee
     When relation(parttime-employment) set owns attribute type: parttime-reference as contractor-reference
     When relation(parttime-employment) set owns attribute type: parttime-hours as contractor-hours
-    Then relation(parttime-employment) get owns types with annotations: key; contain:
+    Then relation(parttime-employment) get owns attribute types with annotations: key; contain:
       | parttime-reference |
     Then relation(parttime-employment) get owns attribute types contain:
       | parttime-reference |
       | parttime-hours     |
     When transaction commits
     When session opens transaction of type: read
-    Then relation(contractor-employment) get owns types with annotations: key; contain:
+    Then relation(contractor-employment) get owns attribute types with annotations: key; contain:
       | contractor-reference |
-    Then relation(contractor-employment) get owns types with annotations: key; do not contain:
+    Then relation(contractor-employment) get owns attribute types with annotations: key; do not contain:
       | employment-reference |
     Then relation(contractor-employment) get owns attribute types contain:
       | contractor-reference |
@@ -844,15 +844,15 @@ Feature: Concept Relation Type and Role Type
     Then relation(contractor-employment) get owns attribute types do not contain:
       | employment-reference |
       | employment-hours     |
-    Then relation(parttime-employment) get owns types with annotations: key; contain:
+    Then relation(parttime-employment) get owns attribute types with annotations: key; contain:
       | parttime-reference |
-    Then relation(parttime-employment) get owns types with annotations: key; do not contain:
+    Then relation(parttime-employment) get owns attribute types with annotations: key; do not contain:
       | employment-reference |
       | contractor-reference |
     Then relation(parttime-employment) get owns attribute types contain:
       | parttime-reference |
       | parttime-hours     |
-    Then relation(parttime-employment) get owns types with annotations: key; do not contain:
+    Then relation(parttime-employment) get owns attribute types with annotations: key; do not contain:
       | employment-reference |
       | contractor-reference |
       | employment-hours     |
@@ -873,9 +873,9 @@ Feature: Concept Relation Type and Role Type
     When relation(contractor-employment) set relates role: contractor-employer as employer
     When relation(contractor-employment) set relates role: contractor-employee as employee
     When relation(contractor-employment) set owns attribute type: contractor-reference as employment-reference, with annotations: key
-    Then relation(contractor-employment) get owns types with annotations: key; contain:
+    Then relation(contractor-employment) get owns attribute types with annotations: key; contain:
       | contractor-reference |
-    Then relation(contractor-employment) get owns types with annotations: key; do not contain:
+    Then relation(contractor-employment) get owns attribute types with annotations: key; do not contain:
       | employment-reference |
     Then relation(contractor-employment) get owns attribute types contain:
       | contractor-reference |
@@ -883,9 +883,9 @@ Feature: Concept Relation Type and Role Type
       | employment-reference |
     When transaction commits
     When session opens transaction of type: read
-    Then relation(contractor-employment) get owns types with annotations: key; contain:
+    Then relation(contractor-employment) get owns attribute types with annotations: key; contain:
       | contractor-reference |
-    Then relation(contractor-employment) get owns types with annotations: key; do not contain:
+    Then relation(contractor-employment) get owns attribute types with annotations: key; do not contain:
       | employment-reference |
     Then relation(contractor-employment) get owns attribute types contain:
       | contractor-reference |
