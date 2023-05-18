@@ -670,11 +670,11 @@ Feature: Concept Attribute Type
       | person  |
     Then attribute(email) get owners, with annotations: key; contain:
       | person |
-    Then attribute(email) get owners explicit with annotations: key; contain:
+    Then attribute(email) get owners explicit, with annotations: key; contain:
       | person |
     Then attribute(email) get owners, with annotations: key; do not contain:
       | company |
-    Then attribute(email) get owners explicit with annotations: key; do not contain:
+    Then attribute(email) get owners explicit, with annotations: key; do not contain:
       | company |
     Then transaction commits
     When session opens transaction of type: write
@@ -686,11 +686,11 @@ Feature: Concept Attribute Type
       | person  |
     Then attribute(email) get owners, with annotations: key; contain:
       | person |
-    Then attribute(email) get owners explicit with annotations: key; contain:
+    Then attribute(email) get owners explicit, with annotations: key; contain:
       | person |
     Then attribute(email) get owners, with annotations: key; do not contain:
       | company |
-    Then attribute(email) get owners explicit with annotations: key; do not contain:
+    Then attribute(email) get owners explicit, with annotations: key; do not contain:
       | company |
 
   Scenario: Attribute types with value type string can unset their regular expression
