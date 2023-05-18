@@ -615,44 +615,44 @@ Feature: Concept Attribute Type
     When put entity type: girl
     When entity(girl) set supertype: person
     When entity(girl) set owns attribute type: girl-name as name
-    Then attribute(age) get attribute owners contain:
+    Then attribute(age) get owners contain:
       | person |
       | boy    |
       | girl   |
-    Then attribute(age) get attribute owners explicit contain:
+    Then attribute(age) get owners explicit contain:
       | person |
-    Then attribute(age) get attribute owners explicit do not contain:
+    Then attribute(age) get owners explicit do not contain:
       | boy    |
       | girl   |
-    Then attribute(name) get attribute owners contain:
+    Then attribute(name) get owners contain:
       | person |
-    Then attribute(name) get attribute owners explicit contain:
+    Then attribute(name) get owners explicit contain:
       | person |
-    Then attribute(name) get attribute owners do not contain:
+    Then attribute(name) get owners do not contain:
       | boy  |
       | girl |
-    Then attribute(name) get attribute owners explicit do not contain:
+    Then attribute(name) get owners explicit do not contain:
       | boy  |
       | girl |
     Then transaction commits
     When session opens transaction of type: write
-    Then attribute(age) get attribute owners contain:
+    Then attribute(age) get owners contain:
       | person |
       | boy    |
       | girl   |
-    Then attribute(age) get attribute owners explicit contain:
+    Then attribute(age) get owners explicit contain:
       | person |
-    Then attribute(age) get attribute owners explicit do not contain:
+    Then attribute(age) get owners explicit do not contain:
       | boy    |
       | girl   |
-    Then attribute(name) get attribute owners contain:
+    Then attribute(name) get owners contain:
       | person |
-    Then attribute(name) get attribute owners explicit contain:
+    Then attribute(name) get owners explicit contain:
       | person |
-    Then attribute(name) get attribute owners do not contain:
+    Then attribute(name) get owners do not contain:
       | boy  |
       | girl |
-    Then attribute(name) get attribute owners explicit do not contain:
+    Then attribute(name) get owners explicit do not contain:
       | boy  |
       | girl |
 
@@ -662,10 +662,10 @@ Feature: Concept Attribute Type
     When entity(company) set owns attribute type: email
     When put entity type: person
     When entity(person) set owns attribute type: email, with annotations: key
-    Then attribute(email) get attribute owners contain:
+    Then attribute(email) get owners contain:
       | company |
       | person  |
-    Then attribute(email) get attribute owners explicit contain:
+    Then attribute(email) get owners explicit contain:
       | company |
       | person  |
     Then attribute(email) get owners, with annotations: key; contain:
@@ -678,10 +678,10 @@ Feature: Concept Attribute Type
       | company |
     Then transaction commits
     When session opens transaction of type: write
-    Then attribute(email) get attribute owners contain:
+    Then attribute(email) get owners contain:
       | company |
       | person  |
-    Then attribute(email) get attribute owners explicit contain:
+    Then attribute(email) get owners explicit contain:
       | company |
       | person  |
     Then attribute(email) get owners, with annotations: key; contain:
