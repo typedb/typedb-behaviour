@@ -268,13 +268,13 @@ Feature: TypeQL Match Queries with expressions
     """
       match
         ?a = max(2, -3);
-        ?b = min(2, -3);
+        ?b = min(2, -3, -5);
       get
         ?a, ?b;
       """
     Then uniquely identify answer concepts
       | a             | b              |
-      | value:long: 2 | value:long: -3 |
+      | value:long: 2 | value:long: -5 |
 
 
 
@@ -511,7 +511,7 @@ Feature: TypeQL Match Queries with expressions
     Given transaction commits
 
     Given session opens transaction of type: read
-    Then typeql match; throws exception containing "Invalid expression operation: An error occured while evaluating an expression"
+    Then typeql match; throws exception containing "Invalid expression operation: An error occurred while evaluating an expression"
       """
       match
         $p isa person, has age $a;
