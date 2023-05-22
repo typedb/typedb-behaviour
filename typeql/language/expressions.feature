@@ -498,7 +498,7 @@ Feature: TypeQL Match Queries with expressions
       | attr:name:b25.0 |
 
 
-  Scenario: Expressions which perform illegal arithmetic throw appropriate errors
+  Scenario: Division by zero throws a useful error
     Given connection open data session for database: typedb
     Given session opens transaction of type: write
     Given typeql insert
@@ -511,10 +511,10 @@ Feature: TypeQL Match Queries with expressions
     Given transaction commits
 
     Given session opens transaction of type: read
-    Then typeql match; throws exception containing "Invalid expression operation: An error occurred while evaluating an expression"
+    Then typeql match; throws exception containing "division by zero"
       """
       match
         $p isa person, has age $a;
-        ?div-zero = $a / 0;
+        ?div-zero = $a / 0.0;
       get $p;
       """
