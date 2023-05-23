@@ -257,7 +257,6 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get role(father) get supertype: parentship:parent
     Then relation(fathership) get role(child) get supertype: relation:role
     Then relation(fathership) get supertypes contain:
-      | thing      |
       | relation   |
       | parentship |
       | fathership |
@@ -291,7 +290,6 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get role(father) get supertype: parentship:parent
     Then relation(fathership) get role(child) get supertype: relation:role
     Then relation(fathership) get supertypes contain:
-      | thing      |
       | relation   |
       | parentship |
       | fathership |
@@ -326,7 +324,6 @@ Feature: Concept Relation Type and Role Type
     Then relation(father-son) get role(father) get supertype: parentship:parent
     Then relation(father-son) get role(son) get supertype: parentship:child
     Then relation(father-son) get supertypes contain:
-      | thing      |
       | relation   |
       | parentship |
       | fathership |
@@ -369,7 +366,6 @@ Feature: Concept Relation Type and Role Type
     Then relation(father-son) get role(father) get supertype: parentship:parent
     Then relation(father-son) get role(son) get supertype: parentship:child
     Then relation(father-son) get supertypes contain:
-      | thing      |
       | relation   |
       | parentship |
       | fathership |
@@ -386,7 +382,6 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get role(father) get supertype: parentship:parent
     Then relation(fathership) get role(child) get supertype: relation:role
     Then relation(fathership) get supertypes contain:
-      | thing      |
       | relation   |
       | parentship |
       | fathership |
