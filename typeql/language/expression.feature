@@ -50,7 +50,7 @@ Feature: TypeQL Match Queries with expressions
     Given connection open data session for database: typedb
 
     Given session opens transaction of type: read
-    When typeql match; throws exception containing "The value variable '?v' is never assigned to"
+    When typeql match; throws exception containing "value variable '?v' is never assigned to"
     """
       match
         $x isa person, has age $a, has age $h;
@@ -61,7 +61,7 @@ Feature: TypeQL Match Queries with expressions
       """
 
     Given session opens transaction of type: read
-    When typeql match; throws exception containing "The value variable '?v' can only have one assignment in the first scope"
+    When typeql match; throws exception containing "value variable '?v' can only have one assignment in the first scope"
     """
       match
         $x isa person, has age $a, has age $h;
@@ -75,7 +75,7 @@ Feature: TypeQL Match Queries with expressions
   Scenario: A value variable must have exactly one assignment constraint recursively
     Given connection open data session for database: typedb
     Given session opens transaction of type: read
-    When typeql match; throws exception containing "The value variable '?v' can only have one assignment in the first scope"
+    When typeql match; throws exception containing "value variable '?v' can only have one assignment in the first scope"
     """
       match
         $x isa person, has age $a, has age $h;
@@ -89,7 +89,7 @@ Feature: TypeQL Match Queries with expressions
   Scenario: A value variable's assignment must be in the highest scope
     Given connection open data session for database: typedb
     Given session opens transaction of type: read
-    When typeql match; throws exception containing "The value variable '?v' can only have one assignment in the first scope"
+    When typeql match; throws exception containing "value variable '?v' can only have one assignment in the first scope"
     """
       match
         $x isa person, has age $a, has age $h;
@@ -104,7 +104,7 @@ Feature: TypeQL Match Queries with expressions
     Given connection open data session for database: typedb
 
     Given session opens transaction of type: read
-    When typeql match; throws exception containing "A cyclic assignment between value variables was detected"
+    When typeql match; throws exception containing "cyclic assignment between value variables was detected"
     """
       match
         $x isa person, has age $a, has age $h;
@@ -114,7 +114,7 @@ Feature: TypeQL Match Queries with expressions
       """
 
     Given session opens transaction of type: read
-    When typeql match; throws exception containing "A cyclic assignment between value variables was detected"
+    When typeql match; throws exception containing "cyclic assignment between value variables was detected"
     """
       match
         $x isa person, has age $a, has age $h;
