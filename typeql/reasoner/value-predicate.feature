@@ -112,7 +112,7 @@ Feature: Value Predicate Resolution
       | >= | 4           |
       | <  | 2           |
       | <= | 4           |
-      | =  | 2           |
+      | == | 2           |
       | != | 4           |
 
 
@@ -150,7 +150,7 @@ Feature: Value Predicate Resolution
       | >= | 3           |
       | <  | 1           |
       | <= | 3           |
-      | =  | 2           |
+      | == | 2           |
       | != | 2           |
 
 
@@ -190,7 +190,7 @@ Feature: Value Predicate Resolution
       | >= | 3           |
       | <  | 0           |
       | <= | 3           |
-      | =  | 1           |
+      | == | 1           |
       | != | 4           |
 
 
@@ -206,7 +206,7 @@ Feature: Value Predicate Resolution
 
       rule if-ocado-exists-it-sells-all-soft-drinks: when {
         $x isa retailer;
-        $x = 'Ocado';
+        $x == 'Ocado';
         $y isa soft-drink;
       } then {
         $y has retailer 'Ocado';
@@ -225,7 +225,7 @@ Feature: Value Predicate Resolution
       match
         $x has retailer $r;
         $r != $unwanted;
-        $unwanted = "Ocado";
+        $unwanted == "Ocado";
       """
     # x     | r     |
     # Fanta | Tesco |
@@ -247,7 +247,7 @@ Feature: Value Predicate Resolution
 
       rule if-ocado-exists-it-sells-all-soft-drinks: when {
         $x isa retailer;
-        $x = 'Ocado';
+        $x == 'Ocado';
         $y isa soft-drink;
       } then {
         $y has retailer 'Ocado';
@@ -265,8 +265,8 @@ Feature: Value Predicate Resolution
       """
       match
         $x has retailer $r;
-        $wanted = "Ocado";
-        $r = $wanted;
+        $wanted == "Ocado";
+        $r == $wanted;
       """
     # x     | r     |
     # Fanta | Ocado |
@@ -351,7 +351,7 @@ Feature: Value Predicate Resolution
       match
         $x has retailer $rx;
         $y has retailer $ry;
-        $rx = $ry;
+        $rx == $ry;
         $ry contains 'land';
       """
     # x     | rx        | y     | ry        |
@@ -429,7 +429,7 @@ Feature: Value Predicate Resolution
     Then verify answers are complete
 
 
-  Scenario: in a rule, 'not { $x = $y; }' is the same as saying '$x != $y'
+  Scenario: in a rule, 'not { $x == $y; }' is the same as saying '$x != $y'
     Given reasoning schema
       """
       define
@@ -441,7 +441,7 @@ Feature: Value Predicate Resolution
 
       rule if-ocado-exists-it-sells-all-soft-drinks: when {
         $x isa retailer;
-        $x = 'Ocado';
+        $x == 'Ocado';
         $y isa soft-drink;
       } then {
         $y has retailer 'Ocado';
@@ -471,14 +471,14 @@ Feature: Value Predicate Resolution
       """
       match
         $x has retailer $r;
-        not { $r = "Ocado"; };
+        not { $r == "Ocado"; };
       """
     Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
 
 
-  Scenario: in a rule, 'not { $x != $y; }' is the same as saying '$x = $y'
+  Scenario: in a rule, 'not { $x != $y; }' is the same as saying '$x == $y'
     Given reasoning schema
       """
       define
@@ -490,7 +490,7 @@ Feature: Value Predicate Resolution
 
       rule if-ocado-exists-it-sells-all-soft-drinks: when {
         $x isa retailer;
-        $x = 'Ocado';
+        $x == 'Ocado';
         $y isa soft-drink;
       } then {
         $y has retailer 'Ocado';
@@ -508,7 +508,7 @@ Feature: Value Predicate Resolution
       """
       match
         $x has retailer $r;
-        $r = "Ocado";
+        $r == "Ocado";
       """
     # x     | r     |
     # Fanta | Ocado |
@@ -539,7 +539,7 @@ Feature: Value Predicate Resolution
 
       rule if-ocado-exists-it-sells-all-soft-drinks: when {
         $x isa retailer;
-        $x = 'Ocado';
+        $x == 'Ocado';
         $y isa soft-drink;
       } then {
         $y has retailer 'Ocado';
@@ -558,8 +558,8 @@ Feature: Value Predicate Resolution
       match
         $x has retailer $r;
         not {
-          $r = $unwanted;
-          $unwanted = "Ocado";
+          $r == $unwanted;
+          $unwanted == "Ocado";
         };
       """
     # x     | r     |

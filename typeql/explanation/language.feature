@@ -105,7 +105,7 @@ Feature: TypeQL Reasoning Explanation
 
     Then uniquely identify answer concepts
       | k                     | l               | n                       |
-      | key:name:King's Cross | key:name:London | value:name:King's Cross |
+      | key:name:King's Cross | key:name:London | attr:name:King's Cross  |
 
     Then answers contain explanation tree
       |   | children | vars    | identifiers  | explanation | pattern                                                                                                                                                        |
@@ -164,7 +164,7 @@ Feature: TypeQL Reasoning Explanation
 
     Then uniquely identify answer concepts
       | k                     | l               | u           | n                       |
-      | key:name:King's Cross | key:name:London | key:name:UK | value:name:King's Cross |
+      | key:name:King's Cross | key:name:London | key:name:UK | attr:name:King's Cross  |
 
     Then answers contain explanation tree
       |   | children | vars       | identifiers      | explanation | pattern                                                                                                                                                                                                                                       |
@@ -212,12 +212,12 @@ Feature: TypeQL Reasoning Explanation
 
     Then uniquely identify answer concepts
       | com              | n                          |
-      | key:company-id:1 | value:name:another-company |
+      | key:company-id:1 | attr:name:another-company  |
 
     Then answers contain explanation tree
-      |   | children | vars   | identifiers | explanation | pattern                                                                                                                      |
-      | 0 | 1        | com, n | ACO, N      | negation    | { $com isa company; $com has name $n; $com iid <answer.com.iid>; $n iid <answer.n.iid>; not { { $n = "the-company"; }; }; }; |
-      | 1 | -        | com, n | ACO, N      | lookup      | { $com isa company; $com has name $n; $com iid <answer.com.iid>; $n iid <answer.n.iid>; };                                   |
+      |   | children | vars   | identifiers | explanation | pattern                                                                                                                       |
+      | 0 | 1        | com, n | ACO, N      | negation    | { $com isa company; $com has name $n; $com iid <answer.com.iid>; $n iid <answer.n.iid>; not { { $n == "the-company"; }; }; }; |
+      | 1 | -        | com, n | ACO, N      | lookup      | { $com isa company; $com has name $n; $com iid <answer.com.iid>; $n iid <answer.n.iid>; };                                    |
 
   @ignore-typedb-client-java
   Scenario: a query containing a disjunction has a disjunctive explanation
@@ -263,9 +263,9 @@ Feature: TypeQL Reasoning Explanation
       | key:company-id:1 |
 
     Then answers contain explanation tree
-      |   | children | vars    | identifiers | explanation | pattern                                                                                                                                                          |
-      | 0 | 1        | com     | ACO         | disjunction | { $com iid <answer.com.iid>; { $com isa company; $com has name $n1; $n1 = "the-company";} or {$com isa company; $com has name $n2; $n2 = "another-company";}; }; |
-      | 1 | -        | com, n2 | ACO, N2     | lookup      | { $com isa company; $com has name $n2; $n2 = "another-company"; $com iid <answer.com.iid>; $n2 iid <answer.n2.iid>; };                                           |
+      |   | children | vars    | identifiers | explanation | pattern                                                                                                                                                            |
+      | 0 | 1        | com     | ACO         | disjunction | { $com iid <answer.com.iid>; { $com isa company; $com has name $n1; $n1 == "the-company";} or {$com isa company; $com has name $n2; $n2 == "another-company";}; }; |
+      | 1 | -        | com, n2 | ACO, N2     | lookup      | { $com isa company; $com has name $n2; $n2 == "another-company"; $com iid <answer.com.iid>; $n2 iid <answer.n2.iid>; };                                            |
 
   @ignore-typedb-client-java
   Scenario: a query containing a nested disjunction has a single disjunctive explanation due to DNF
@@ -311,6 +311,6 @@ Feature: TypeQL Reasoning Explanation
       | key:company-id:1 |
 
     Then answers contain explanation tree
-      |   | children | vars    | identifiers | explanation | pattern                                                                                                                                                                                                                           |
-      | 0 | 1        | com     | ACO         | disjunction | { $com iid <answer.com.iid>; { $com isa company; $com has name $n1; $n1 = "the-company";} or {$com isa company; $com has name $n2; $n2 = "another-company";} or {$com isa company; $com has name $n2; $n2 = "third-company";}; }; |
-      | 1 | -        | com, n2 | ACO, N2     | lookup      | { $com isa company; $com has name $n2; $n2 = "another-company"; $com iid <answer.com.iid>; $n2 iid <answer.n2.iid>; };                                                                                                            |
+      |   | children | vars    | identifiers | explanation | pattern                                                                                                                                                                                                                              |
+      | 0 | 1        | com     | ACO         | disjunction | { $com iid <answer.com.iid>; { $com isa company; $com has name $n1; $n1 == "the-company";} or {$com isa company; $com has name $n2; $n2 == "another-company";} or {$com isa company; $com has name $n2; $n2 == "third-company";}; }; |
+      | 1 | -        | com, n2 | ACO, N2     | lookup      | { $com isa company; $com has name $n2; $n2 == "another-company"; $com iid <answer.com.iid>; $n2 iid <answer.n2.iid>; };                                                                                                              |

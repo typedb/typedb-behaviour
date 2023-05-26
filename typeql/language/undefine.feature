@@ -1293,7 +1293,7 @@ Feature: TypeQL Undefine Query
       """
     Given uniquely identify answer concepts
       | n                 |
-      | value:name:Samuel |
+      | attr:name:Samuel  |
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
@@ -1348,7 +1348,7 @@ Feature: TypeQL Undefine Query
       """
     Given uniquely identify answer concepts
       | n                 |
-      | value:name:Samuel |
+      | attr:name:Samuel  |
     When typeql undefine
       """
       undefine rule samuel-email-rule;
@@ -1362,7 +1362,7 @@ Feature: TypeQL Undefine Query
       """
     Then uniquely identify answer concepts
       | n                 |
-      | value:name:Samuel |
+      | attr:name:Samuel  |
 
   Scenario: You cannot undefine a type if it is used in a rule
     Given typeql define

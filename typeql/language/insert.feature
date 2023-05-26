@@ -264,9 +264,34 @@ Feature: TypeQL Insert Query
     Then uniquely identify answer concepts
       | x                     |
       | key:ref:0             |
-      | value:name:Wilhelmina |
-      | value:age:25          |
-      | value:ref:0           |
+      | attr:name:Wilhelmina  |
+      | attr:age:25           |
+      | attr:ref:0            |
+
+  Scenario: when inserting a new thing that owns new attributes via a value variable, both the thing and the attributes get created
+    Given get answers of typeql match
+      """
+      match $x isa thing;
+      """
+    Given answer size is: 0
+    When typeql insert
+      """
+      match  ?a = 25;
+      insert $x isa person, has name "Wilhelmina", has age ?a, has ref 0;
+      """
+    Then transaction commits
+
+    When session opens transaction of type: read
+    When get answers of typeql match
+      """
+      match $x isa thing;
+      """
+    Then uniquely identify answer concepts
+      | x                     |
+      | key:ref:0             |
+      | attr:name:Wilhelmina  |
+      | attr:age:25           |
+      | attr:ref:0            |
 
 
   Scenario: a freshly inserted attribute has no owners
@@ -566,7 +591,7 @@ Parker";
       """
     Then uniquely identify answer concepts
       | c                |
-      | value:colour:red |
+      | attr:colour:red  |
 
 
   Scenario: when inserting an additional attribute ownership on an attribute, the owner type can be optionally specified
@@ -613,7 +638,7 @@ Parker";
       """
     Then uniquely identify answer concepts
       | c                |
-      | value:colour:red |
+      | attr:colour:red  |
 
 
   Scenario: when linking an attribute that doesn't exist yet to a relation, the attribute gets created
@@ -668,7 +693,7 @@ Parker";
       """
     Then uniquely identify answer concepts
       | a                     |
-      | value:tenure-days:365 |
+      | attr:tenure-days:365 |
 
 
   #TODO: Reenable when reasoning can run in a write transaction
@@ -786,7 +811,7 @@ Parker";
       """
     Then uniquely identify answer concepts
       | r         | addr                                | perm                    |
-      | key:ref:0 | value:address:742 Evergreen Terrace | value:is-permanent:true |
+      | key:ref:0 | attr:address:742 Evergreen Terrace  | attr:is-permanent:true  |
 
 
   Scenario: relations can be inserted with multiple role players
@@ -810,7 +835,7 @@ Parker";
       """
     Then uniquely identify answer concepts
       | cname                |
-      | value:name:Morrisons |
+      | attr:name:Morrisons  |
     When get answers of typeql match
       """
       match
@@ -1066,6 +1091,49 @@ Parker";
       | published-date | datetime | 2020-01-01 |
 
 
+  Scenario Outline: Attributes of type '<type>' can be inserted via value variables
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
+      """
+      define <attr> sub attribute, value <type>, owns ref @key;
+      """
+    Given transaction commits
+
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given get answers of typeql match
+      """
+      match $x <value> isa <attr>;
+      """
+    Given answer size is: 0
+    When typeql insert
+      """
+      match ?x = <value>;
+      insert $a isa <attr>, has ref 0; $a == ?x;
+      """
+    Then transaction commits
+
+    When session opens transaction of type: read
+    When get answers of typeql match
+      """
+      match $x <value> isa <attr>;
+      """
+    Then uniquely identify answer concepts
+      | x         |
+      | key:ref:0 |
+
+    Examples:
+      | attr           | type     | value      |
+      | title          | string   | "Prologue" |
+      | page-number    | long     | 233        |
+      | price          | double   | 15.99      |
+      | purchased      | boolean  | true       |
+      | published-date | datetime | 2020-01-01 |
+
+
   Scenario: insert a regex attribute throws error if not conforming to regex
     Given connection close all sessions
     Given connection open schema session for database: typedb
@@ -1108,7 +1176,7 @@ Parker";
       """
     Then uniquely identify answer concepts
       | x           |
-      | value:age:2 |
+      | attr:age:2  |
 
 
   Scenario: inserting two 'double' attribute values with the same integer value creates a single concept
@@ -1141,7 +1209,7 @@ Parker";
     Then answer size is: 1
     Then uniquely identify answer concepts
       | x                |
-      | value:length:2.0 |
+      | attr:length:2.0  |
 
 
   Scenario: inserting the same integer twice as a 'double' in separate transactions creates a single concept
@@ -1181,7 +1249,7 @@ Parker";
     Then answer size is: 1
     Then uniquely identify answer concepts
       | x                |
-      | value:length:2.0 |
+      | attr:length:2.0  |
 
 
   Scenario: inserting attribute values [2] and [2.0] with the same attribute type creates a single concept
@@ -1314,7 +1382,7 @@ Parker";
       """
     Then uniquely identify answer concepts
       | x            |
-      | value:age:10 |
+      | attr:age:10  |
     Then transaction commits
 
 
@@ -1896,7 +1964,7 @@ Parker";
       """
     Given uniquely identify answer concepts
       | x              | y                | z                |
-      | value:name:Ash | value:name:Misty | value:name:Brock |
+      | attr:name:Ash  | attr:name:Misty  | attr:name:Brock  |
     Given transaction commits
 
     Given session opens transaction of type: write
@@ -1906,9 +1974,9 @@ Parker";
       """
     Given uniquely identify answer concepts
       | x                |
-      | value:name:Ash   |
-      | value:name:Misty |
-      | value:name:Brock |
+      | attr:name:Ash    |
+      | attr:name:Misty  |
+      | attr:name:Brock  |
     When typeql insert
       """
       match
@@ -1925,9 +1993,9 @@ Parker";
       """
     Then uniquely identify answer concepts
       | x                |
-      | value:name:Ash   |
-      | value:name:Misty |
-      | value:name:Brock |
+      | attr:name:Ash    |
+      | attr:name:Misty  |
+      | attr:name:Brock  |
 
 
   Scenario: re-inserting a matched instance does nothing
@@ -2102,7 +2170,7 @@ Parker";
       """
     Then uniquely identify answer concepts
       | x                 |
-      | value:name:Ganesh |
+      | attr:name:Ganesh  |
     When typeql delete
       """
       match
@@ -2160,8 +2228,8 @@ Parker";
       """
     Then uniquely identify answer concepts
       | x         | score            |
-      | key:ref:0 | value:score:10.0 |
-      | key:ref:1 | value:score:10.0 |
+      | key:ref:0 | attr:score:10.0  |
+      | key:ref:1 | attr:score:10.0  |
     When typeql delete
       """
       match
@@ -2179,7 +2247,7 @@ Parker";
     # The score '10.0' still exists, we never deleted it
     Then uniquely identify answer concepts
       | x                |
-      | value:score:10.0 |
+      | attr:score:10.0  |
     When get answers of typeql match
       """
       match $x isa person, has score $score;
@@ -2239,7 +2307,7 @@ Parker";
       """
     Then uniquely identify answer concepts
       | x                 |
-      | value:name:Ganesh |
+      | attr:name:Ganesh  |
     # At this step we materialise the inferred name 'Ganesh' because the material name-initial relation depends on it.
     When typeql insert
       """
@@ -2275,7 +2343,7 @@ Parker";
     # We deleted the person called 'Ganesh', but the name still exists because it was materialised on match-insert
     Then uniquely identify answer concepts
       | x                 |
-      | value:name:Ganesh |
+      | attr:name:Ganesh  |
     When get answers of typeql match
       """
       match (lettered-name: $x, initial: $y) isa name-initial;
@@ -2283,7 +2351,7 @@ Parker";
     # And the inserted relation still exists too
     Then uniquely identify answer concepts
       | x                 | y              |
-      | value:name:Ganesh | value:letter:G |
+      | attr:name:Ganesh  | attr:letter:G  |
 
   #TODO: Reenable when reasoning can run in a write transaction
   @ignore

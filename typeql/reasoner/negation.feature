@@ -1167,7 +1167,7 @@ Feature: Negation Resolution
       """
       match
         $x has retailer $r;
-        not { $r = "Ocado"; };
+        not { $r == "Ocado"; };
       """
     Then verify answer size is: 0
     Then verify answers are sound

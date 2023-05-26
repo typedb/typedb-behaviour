@@ -693,7 +693,7 @@ Feature: Relation Inference Resolution
         (choice1: $x, choice2: $y) isa selection;
         $x has name $n;
         $y has name $n;
-        $n = 'a';
+        $n == 'a';
       get $x, $y;
       """
     Then verify answer size is: 1

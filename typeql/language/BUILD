@@ -23,6 +23,7 @@ files = [
     "compute.feature",
     "define.feature",
     "delete.feature",
+    "expression.feature",
     "get.feature",
     "insert.feature",
     "match.feature",
