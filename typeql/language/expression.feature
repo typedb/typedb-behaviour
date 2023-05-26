@@ -16,7 +16,7 @@
 #
 
 #noinspection CucumberUndefinedStep
-Feature: TypeQL Match Queries with expressions
+Feature: TypeQL Match Query with Expressions
 
   Background: Open connection and create a simple extensible schema
     Given typedb starts
@@ -173,6 +173,31 @@ Feature: TypeQL Match Queries with expressions
         ?y = $y;
       get $z, $y, ?y;
       """
+
+
+  Scenario: Test unary minus sign
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
+      """
+      insert
+      $x 16 isa age;
+      """
+    Given transaction commits
+
+    Given session opens transaction of type: read
+    Then get answers of typeql match
+      """
+      match
+        $x isa age;
+        ?const = -10;
+        ?plus-negative = $x + -10;
+        ?minus-negative = $x - -10;
+      """
+    Then uniquely identify answer concepts
+      | x            | const           | plus-negative  | minus-negative  |
+      | attr:age:16  | value:long:-10  | value:long:6   | value:long:26   |
 
 
   Scenario: Test operator definitions
