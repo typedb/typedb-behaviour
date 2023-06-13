@@ -1260,7 +1260,8 @@ Feature: TypeQL Define Query
       | name             | location            |
       | label:super-name | label:location-name |
 
-
+  # TODO: Reenable this scenario after closing https://github.com/vaticle/typeql/issues/281
+  @ignore-typedb-client-rust
   Scenario: repeating the term 'abstract' when defining a type causes an error to be thrown
     Given typeql define; throws exception
       """
