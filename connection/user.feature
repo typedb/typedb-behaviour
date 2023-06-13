@@ -44,7 +44,7 @@ Feature: Connection Users
     Given connection opens with authentication: user, password
     Then get connected user
 
-  @ignore-typedb-client-python @ignore-typedb-client-nodejs
+  @ignore-typedb-client-python @ignore-typedb-client-nodejs @ignore-typedb-client-rust
   Scenario: user passwords must comply with the minimum length
     Given typedb has configuration
       |server.authentication.password-policy.complexity.min-length|5|
@@ -55,7 +55,7 @@ Feature: Connection Users
     Then users create: user2, passw
     Then users create: user3, pass; throws exception
 
-  @ignore-typedb-client-python @ignore-typedb-client-nodejs
+  @ignore-typedb-client-python @ignore-typedb-client-nodejs @ignore-typedb-client-rust
   Scenario: user passwords must comply with the minimum number of lowercase characters
     Given typedb has configuration
       |server.authentication.password-policy.complexity.min-lowercase|2|
@@ -66,7 +66,7 @@ Feature: Connection Users
     Then users create: user2, paSSWORD
     Then users create: user3, PASSWORD; throws exception
 
-  @ignore-typedb-client-python @ignore-typedb-client-nodejs
+  @ignore-typedb-client-python @ignore-typedb-client-nodejs @ignore-typedb-client-rust
   Scenario: user passwords must comply with the minimum number of uppercase characters
     Given typedb has configuration
       |server.authentication.password-policy.complexity.min-uppercase|2|
@@ -77,7 +77,7 @@ Feature: Connection Users
     Then users create: user2, PAssword
     Then users create: user3, password; throws exception
 
-  @ignore-typedb-client-python @ignore-typedb-client-nodejs
+  @ignore-typedb-client-python @ignore-typedb-client-nodejs @ignore-typedb-client-rust
   Scenario: user passwords must comply with the minimum number of numeric characters
     Given typedb has configuration
       |server.authentication.password-policy.complexity.min-numerics|2|
@@ -88,7 +88,7 @@ Feature: Connection Users
     Then users create: user2, PASSWORD78
     Then users create: user3, PASSWORD7; throws exception
 
-  @ignore-typedb-client-python @ignore-typedb-client-nodejs
+  @ignore-typedb-client-python @ignore-typedb-client-nodejs @ignore-typedb-client-rust
   Scenario: user passwords must comply with the minimum number of special characters
     Given typedb has configuration
       |server.authentication.password-policy.complexity.min-special-chars|2|
@@ -99,7 +99,7 @@ Feature: Connection Users
     Then users create: user2, PASSWORD&(
     Then users create: user3, PASSWORD); throws exception
 
-  @ignore-typedb-client-python @ignore-typedb-client-nodejs
+  @ignore-typedb-client-python @ignore-typedb-client-nodejs @ignore-typedb-client-rust
   Scenario: user passwords must comply with the minimum number of different characters
     Given typedb has configuration
       |server.authentication.password-policy.complexity.min-different-chars|4|
@@ -117,7 +117,7 @@ Feature: Connection Users
     Then connection closes
     Given connection opens with authentication: user, even-newer-password
 
-  @ignore-typedb-client-python @ignore-typedb-client-nodejs
+  @ignore-typedb-client-python @ignore-typedb-client-nodejs @ignore-typedb-client-rust
   Scenario: user passwords must be unique for a certain history size
     Given typedb has configuration
       |server.authentication.password-policy.unique-history-size|2|
@@ -140,7 +140,7 @@ Feature: Connection Users
     Given connection opens with authentication: user, newest-password
     And user password update: newest-password, password
 
-  @ignore-typedb-client-python @ignore-typedb-client-nodejs
+  @ignore-typedb-client-python @ignore-typedb-client-nodejs @ignore-typedb-client-rust
   Scenario: user can check their own password expiration seconds
     Given typedb has configuration
       |server.authentication.password-policy.expiration.enable|true|
@@ -153,7 +153,7 @@ Feature: Connection Users
     Given connection opens with authentication: user, password
     Then user expiry-seconds
 
-  @ignore-typedb-client-python @ignore-typedb-client-nodejs
+  @ignore-typedb-client-python @ignore-typedb-client-nodejs @ignore-typedb-client-rust
   Scenario: user passwords expire
     Given typedb has configuration
       |server.authentication.password-policy.expiration.enable|true|
