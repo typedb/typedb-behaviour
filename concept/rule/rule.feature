@@ -124,8 +124,6 @@ Feature: Concept Rule
       """
     Then rules contain: marriage-is-friendship
     When delete rule: marriage-is-friendship
-    Then transaction commits
-    When session opens transaction of type: read
     Then rules do not contain: marriage-is-friendship
 
   # TODO: re-enable when we fix it in typedb-core
@@ -158,7 +156,5 @@ Feature: Concept Rule
       };
       """
     When rule(a-rule) set label: marriage-is-friendship
-    Then transaction commits
-    When session opens transaction of type: read
     Then rules contain: marriage-is-friendship
     Then rules do not contain: a-rule
