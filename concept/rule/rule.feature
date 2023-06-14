@@ -54,7 +54,6 @@ Feature: Concept Rule
         (friend: $x, friend: $y) isa friendship;
       };
       """
-    Then transaction commits
     Then rules contain: marriage-is-friendship
     When delete rule: marriage-is-friendship
     Then rules do not contain: marriage-is-friendship
@@ -86,7 +85,6 @@ Feature: Concept Rule
         (friend: $x, friend: $y) isa friendship;
       };
       """
-    Then transaction commits
     When rule(a-rule) set label: marriage-is-friendship
     Then rules contain: marriage-is-friendship
     Then rules do not contain: a-rule
