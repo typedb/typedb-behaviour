@@ -56,6 +56,8 @@ Feature: Concept Rule
       """
     Then rules contain: marriage-is-friendship
     When delete rule: marriage-is-friendship
+    Then transaction commits
+    When session opens transaction of type: read
     Then rules do not contain: marriage-is-friendship
 
   Scenario: Rule can be renamed
@@ -86,5 +88,77 @@ Feature: Concept Rule
       };
       """
     When rule(a-rule) set label: marriage-is-friendship
+    Then transaction commits
+    When session opens transaction of type: read
+    Then rules contain: marriage-is-friendship
+    Then rules do not contain: a-rule
+
+  # TODO: re-enable when we fix it in typedb-core
+  @ignore
+  Scenario: Rule can be deleted without committing
+    Given typeql define
+      """
+      define
+
+      person sub entity,
+        owns name,
+        plays friendship:friend,
+        plays marriage:husband,
+        plays marriage:wife;
+      name sub attribute, value string;
+      friendship sub relation,
+        relates friend;
+      marriage sub relation,
+        relates husband, relates wife;
+      """
+    Given typeql define
+      """
+      define
+
+      rule marriage-is-friendship: when {
+        $x isa person; $y isa person;
+        (husband: $x, wife: $y) isa marriage;
+      } then {
+        (friend: $x, friend: $y) isa friendship;
+      };
+      """
+    Then rules contain: marriage-is-friendship
+    When delete rule: marriage-is-friendship
+    Then transaction commits
+    When session opens transaction of type: read
+    Then rules do not contain: marriage-is-friendship
+
+  # TODO: re-enable when we fix it in typedb-core
+  @ignore
+  Scenario: Rule can be renamed without committing
+    Given typeql define
+      """
+      define
+
+      person sub entity,
+        owns name,
+        plays friendship:friend,
+        plays marriage:husband,
+        plays marriage:wife;
+      name sub attribute, value string;
+      friendship sub relation,
+        relates friend;
+      marriage sub relation,
+        relates husband, relates wife;
+      """
+    Given typeql define
+      """
+      define
+
+      rule a-rule: when {
+        $x isa person; $y isa person;
+        (husband: $x, wife: $y) isa marriage;
+      } then {
+        (friend: $x, friend: $y) isa friendship;
+      };
+      """
+    When rule(a-rule) set label: marriage-is-friendship
+    Then transaction commits
+    When session opens transaction of type: read
     Then rules contain: marriage-is-friendship
     Then rules do not contain: a-rule
