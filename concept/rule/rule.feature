@@ -93,7 +93,7 @@ Feature: Concept Rule
     Then rules contain: marriage-is-friendship
     Then rules do not contain: a-rule
 
-  # TODO: re-enable when we fix it in typedb-core
+  # TODO: re-enable when we fix it in typedb-core (https://github.com/vaticle/typedb/issues/6825)
   @ignore
   Scenario: Rule can be deleted without committing
     Given typeql define
@@ -126,7 +126,7 @@ Feature: Concept Rule
     When delete rule: marriage-is-friendship
     Then rules do not contain: marriage-is-friendship
 
-  # TODO: re-enable when we fix it in typedb-core
+  # TODO: re-enable when we fix it in typedb-core (https://github.com/vaticle/typedb/issues/6825)
   @ignore
   Scenario: Rule can be renamed without committing
     Given typeql define
