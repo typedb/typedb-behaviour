@@ -2781,7 +2781,8 @@ Parker";
     Given session opens transaction of type: write
     Given typeql define
     """
-    define test_date sub attribute, value datetime;
+    define
+    test_date sub attribute, value datetime;
     """
     Given transaction commits
 
