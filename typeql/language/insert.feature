@@ -238,6 +238,8 @@ Feature: TypeQL Insert Query
       insert $x isa thing;
       """
 
+
+
   #######################
   # ATTRIBUTE OWNERSHIP #
   #######################
@@ -2770,6 +2772,7 @@ Parker";
       $x isa bird;
       $x iid V123;
       """
+
 
   Scenario: datetime object can be inserted and queried correctly (and time-zone-naively) regardless of OS timezone
     Given set time-zone is: Asia/Calcutta

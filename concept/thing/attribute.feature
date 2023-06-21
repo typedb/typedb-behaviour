@@ -173,6 +173,22 @@ Feature: Concept Attribute
     When $x = attribute(birth-date) as(datetime) get: 1990-01-01 11:22:33
     Then attribute(birth-date) get instances contain: $x
 
+  Scenario: Attribute with value type datetime can be inserted in one timezone and retrieved in another timezone with no change in the value
+    When set time-zone is: Asia/Calcutta
+    When $x = attribute(birth-date) as(datetime) put: 2001-08-23 08:30:00
+    Then attribute $x is null: false
+    Then attribute $x has type: birth-date
+    Then attribute $x has value type: datetime
+    Then attribute $x has datetime value: 2001-08-23 08:30:00
+    When transaction commits
+    When session opens transaction of type: read
+    When set time-zone is: America/Chicago
+    When $x = attribute(birth-date) as(datetime) get: 2001-08-23 08:30:00
+    Then attribute $x is null: false
+    Then attribute $x has type: birth-date
+    Then attribute $x has value type: datetime
+    Then attribute $x has datetime value: 2001-08-23 08:30:00
+
   Scenario: Attribute with value type boolean can be deleted
     When $x = attribute(is-alive) as(boolean) put: true
     When delete attribute: $x
@@ -308,19 +324,6 @@ Feature: Concept Attribute
 
   Scenario: Attribute with value type double can be owned
 
-  Scenario: Attribute with value type datetime can be inserted in one timezone and queried in another timezone with no change in the value
-    When set time-zone is: Asia/Calcutta
-    When $x = attribute(birth-date) as(datetime) put: 2001-08-23 08:30:00
-    Then attribute $x is null: false
-    Then attribute $x has type: birth-date
-    Then attribute $x has value type: datetime
-    Then attribute $x has datetime value: 2001-08-23 08:30:00
-    When transaction commits
-    When session opens transaction of type: read
-    When set time-zone is: America/Chicago
-    When $x = attribute(birth-date) as(datetime) get: 2001-08-23 08:30:00
-    Then attribute $x is null: false
-    Then attribute $x has type: birth-date
-    Then attribute $x has value type: datetime
-    Then attribute $x has datetime value: 2001-08-23 08:30:00
+  Scenario: Attribute with value type string can be owned
 
+  Scenario: Attribute with value type datetime can be owned
