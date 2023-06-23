@@ -2803,4 +2803,4 @@ Parker";
       """
     Then uniquely identify answer concepts
       | x                                  |
-      | attr:test_date:2023-05-01 00:00:00 |
+      | attr:test_date:2023-05-01T00:00:00 |
