@@ -45,6 +45,7 @@ Feature: Concept Attribute
     Given connection close all sessions
     Given connection open data session for database: typedb
     Given session opens transaction of type: write
+    Given set time-zone is: Europe/London
 
   Scenario: Attribute with value type boolean can be created
     When $x = attribute(is-alive) as(boolean) put: true

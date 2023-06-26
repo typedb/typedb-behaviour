@@ -65,7 +65,7 @@ Feature: TypeQL Insert Query
     Given connection close all sessions
     Given connection open data session for database: typedb
     Given session opens transaction of type: write
-
+    Given set time-zone is: Europe/London
 
   ####################
   # INSERTING THINGS #
