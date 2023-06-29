@@ -2794,6 +2794,7 @@ Parker";
       insert
       $time_date 2023-05-01T00:00:00 isa test_date;
       """
+
     Given set time-zone is: America/Chicago
     Given transaction commits
     Given session opens transaction of type: read
