@@ -65,7 +65,7 @@ Feature: TypeQL Insert Query
     Given connection close all sessions
     Given connection open data session for database: typedb
     Given session opens transaction of type: write
-
+    Given set time-zone is: Europe/London
 
   ####################
   # INSERTING THINGS #
@@ -1159,6 +1159,37 @@ Parker";
         $a "10.maybe";
       """
 
+  Scenario: Datetime attribute can be inserted in one timezone and retrieved in another with no change in the value
+    Given set time-zone is: Asia/Calcutta
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
+    """
+    define
+    test_date sub attribute, value datetime;
+    """
+    Given transaction commits
+
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    When session opens transaction of type: write
+    Then typeql insert
+      """
+      insert
+      $time_date 2023-05-01T00:00:00 isa test_date;
+      """
+
+    Given set time-zone is: America/Chicago
+    Given transaction commits
+    Given session opens transaction of type: read
+    When get answers of typeql match
+      """
+      match $x isa test_date;
+      """
+    Then uniquely identify answer concepts
+      | x                                  |
+      | attr:test_date:2023-05-01T00:00:00 |
 
   Scenario: inserting two attributes with the same type and value creates only one concept
     When typeql insert
@@ -2772,3 +2803,4 @@ Parker";
       $x isa bird;
       $x iid V123;
       """
+
