@@ -268,6 +268,38 @@ Feature: TypeQL Insert Query
       | attr:age:25           |
       | attr:ref:0            |
 
+  Scenario: Datetime attribute can be inserted in one timezone and retrieved in another with no change in the value
+    Given set time-zone is: Asia/Calcutta
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
+    """
+    define
+    test_date sub attribute, value datetime;
+    """
+    Given transaction commits
+
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    When session opens transaction of type: write
+    Then typeql insert
+      """
+      insert
+      $time_date 2023-05-01T00:00:00 isa test_date;
+      """
+
+    Given set time-zone is: America/Chicago
+    Given transaction commits
+    Given session opens transaction of type: read
+    When get answers of typeql match
+      """
+      match $x isa test_date;
+      """
+    Then uniquely identify answer concepts
+      | x                                  |
+      | attr:test_date:2023-05-01T00:00:00 |
+
   Scenario: when inserting a new thing that owns new attributes via a value variable, both the thing and the attributes get created
     Given get answers of typeql match
       """
@@ -2773,35 +2805,3 @@ Parker";
       $x iid V123;
       """
 
-
-  Scenario: datetime object can be inserted and queried correctly (and time-zone-naively) regardless of OS timezone
-    Given set time-zone is: Asia/Calcutta
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql define
-    """
-    define
-    test_date sub attribute, value datetime;
-    """
-    Given transaction commits
-
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    When session opens transaction of type: write
-    Then typeql insert
-      """
-      insert
-      $time_date 2023-05-01T00:00:00 isa test_date;
-      """
-
-    Given set time-zone is: America/Chicago
-    Given transaction commits
-    Given session opens transaction of type: read
-    When get answers of typeql match
-      """
-      match $x isa test_date;
-      """
-    Then uniquely identify answer concepts
-      | x                                  |
-      | attr:test_date:2023-05-01T00:00:00 |
