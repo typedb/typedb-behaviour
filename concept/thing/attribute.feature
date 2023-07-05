@@ -174,7 +174,7 @@ Feature: Concept Attribute
     When $x = attribute(birth-date) as(datetime) get: 1990-01-01 11:22:33
     Then attribute(birth-date) get instances contain: $x
 
-  Scenario: Attribute with value type datetime can be inserted in one timezone and retrieved in another timezone with no change in the value
+  Scenario: Datetime attribute can be inserted in one timezone and retrieved in another with no change in the value
     When set time-zone is: Asia/Calcutta
     When $x = attribute(birth-date) as(datetime) put: 2001-08-23 08:30:00
     Then attribute $x is null: false

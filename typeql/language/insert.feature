@@ -2705,7 +2705,7 @@ Parker";
       $x iid V123;
       """
 
-  Scenario: datetime object can be inserted and queried correctly (and time-zone-naively) regardless of OS timezone
+  Scenario: Datetime attribute can be inserted in one timezone and retrieved in another with no change in the value
     Given set time-zone is: Asia/Calcutta
     Given connection close all sessions
     Given connection open schema session for database: typedb
