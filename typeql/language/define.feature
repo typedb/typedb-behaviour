@@ -2472,6 +2472,7 @@ Feature: TypeQL Define Query
       person sub green-giant;
       """
 
+
   Scenario: two attribute types can own each other in a cycle
     Given typeql define
       """
