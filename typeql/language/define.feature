@@ -2472,24 +2472,6 @@ Feature: TypeQL Define Query
       person sub green-giant;
       """
 
-  Scenario: variable declared in when cannot be redeclared in then
-    Then typeql define; throws exception
-      """
-      define
-      person sub entity;
-      parentship sub relation, relates father, relates son;
-      person plays parentship:father;
-      person plays parentship:son;
-      rule my-rule-label:
-          when {
-              $s isa person
-              $f isa person
-              $relation(father:$f, son:$s) isa parentship; $brother isa person;
-          } then {
-          $relation(father:$f, son:$brother) isa parentship;
-          };
-      """
-
   Scenario: two attribute types can own each other in a cycle
     Given typeql define
       """
