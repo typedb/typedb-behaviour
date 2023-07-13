@@ -299,17 +299,6 @@ Feature: TypeQL Rule Validation
       };
       """
 
-  Scenario: when a rule has an undefined attribute set in its 'then' clause, an error is thrown
-    Given typeql define; throws exception
-      """
-      define
-      rule boudicca-is-1960-years-old: when {
-        $person isa person, has name "Boudicca";
-      } then {
-        $person has age 1960;
-      };
-      """
-
 
   Scenario: Relation variable in 'then' must not be explicit
     Then typeql define; throws exception
@@ -319,14 +308,26 @@ Feature: TypeQL Rule Validation
       parentship sub relation, relates father, relates son;
       person plays parentship:father;
       person plays parentship:son;
-      rule my-rule-label:
-          when {
-              $s isa person;
-              $f isa person;
-              $relation(father:$f, son:$s) isa parentship; $brother isa person;
-          } then {
-          $relation(father:$f, son:$brother) isa parentship;
-          };
+      rule my-rule-label: when {
+        $s isa person;
+        $f isa person;
+        $relation (father:$f, son:$s) isa parentship;
+        $brother isa person;
+      } then {
+        $relation (father:$f, son:$brother) isa parentship;
+      };
+      """
+
+
+  Scenario: when a rule has an undefined attribute set in its 'then' clause, an error is thrown
+    Given typeql define; throws exception
+      """
+      define
+      rule boudicca-is-1960-years-old: when {
+        $person isa person, has name "Boudicca";
+      } then {
+        $person has age 1960;
+      };
       """
 
 
