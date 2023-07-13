@@ -310,6 +310,7 @@ Feature: TypeQL Rule Validation
       };
       """
 
+
   Scenario: Relation variable in 'then' must not be explicit
     Then typeql define; throws exception
       """
