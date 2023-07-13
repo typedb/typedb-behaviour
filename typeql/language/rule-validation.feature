@@ -310,6 +310,24 @@ Feature: TypeQL Rule Validation
       };
       """
 
+  Scenario: variable declared in when cannot be redeclared in then
+    Then typeql define; throws exception
+      """
+      define
+      person sub entity;
+      parentship sub relation, relates father, relates son;
+      person plays parentship:father;
+      person plays parentship:son;
+      rule my-rule-label:
+          when {
+              $s isa person;
+              $f isa person;
+              $relation(father:$f, son:$s) isa parentship; $brother isa person;
+          } then {
+          $relation(father:$f, son:$brother) isa parentship;
+          };
+      """
+
 
   Scenario: when a rule attaches an attribute to a type that can't have that attribute, an error is thrown
     Given typeql define; throws exception
@@ -391,25 +409,6 @@ Feature: TypeQL Rule Validation
       } then {
         (criminal: $bonnie, sidekick: $clyde) isa partners-in-crime;
       };
-      """
-
-
-  Scenario: variable declared in when cannot be redeclared in then
-    Then typeql define; throws exception
-      """
-      define
-      person sub entity;
-      parentship sub relation, relates father, relates son;
-      person plays parentship:father;
-      person plays parentship:son;
-      rule my-rule-label:
-          when {
-              $s isa person
-              $f isa person
-              $relation(father:$f, son:$s) isa parentship; $brother isa person;
-          } then {
-          $relation(father:$f, son:$brother) isa parentship;
-          };
       """
 
 
