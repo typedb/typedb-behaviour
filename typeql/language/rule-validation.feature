@@ -310,7 +310,7 @@ Feature: TypeQL Rule Validation
       };
       """
 
-  Scenario: variable declared in when cannot be redeclared in then
+  Scenario: Relation variable in 'then' must not be explicit
     Then typeql define; throws exception
       """
       define
