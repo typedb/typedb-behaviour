@@ -152,7 +152,5 @@ Feature: Connection Database
       """
 
 
-  # TODO: re-enable in Cluster once fully fault-tolerant database deletion is implemented
-  @ignore-typedb-cluster
   Scenario: delete a nonexistent database throws an error
     When connection delete database; throws exception: typedb
