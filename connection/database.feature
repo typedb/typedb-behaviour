@@ -128,6 +128,15 @@ Feature: Connection Database
     Then connection does not have any database
 
 
+  Scenario: create delete and recreate a database
+    When connection create database: alice
+    Then connection has database: alice
+    When connection delete database: alice
+    Then connection does not have database: alice
+    When connection create database: alice
+    Then connection has database: alice
+
+
   # TODO: currently throws in @After; re-enable when we are able to check if sessions are alive (see client-java#225)
   @ignore
   Scenario: delete a database causes open sessions to fail
