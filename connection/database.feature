@@ -128,6 +128,15 @@ Feature: Connection Database
     Then connection does not have any database
 
 
+  Scenario: create delete and recreate a database
+    When connection create database: alice
+    Then connection has database: alice
+    When connection delete database: alice
+    Then connection does not have database: alice
+    When connection create database: alice
+    Then connection has database: alice
+
+
   # TODO: currently throws in @After; re-enable when we are able to check if sessions are alive (see client-java#225)
   @ignore
   Scenario: delete a database causes open sessions to fail
@@ -152,7 +161,5 @@ Feature: Connection Database
       """
 
 
-  # TODO: re-enable in Cluster once fully fault-tolerant database deletion is implemented
-  @ignore-typedb-cluster
   Scenario: delete a nonexistent database throws an error
     When connection delete database; throws exception: typedb
