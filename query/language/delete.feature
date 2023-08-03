@@ -86,19 +86,19 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa person;
       """
     Then uniquely identify answer concepts
       | x            |
       | key:name:Bob |
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa friendship;
       """
     Then answer size is: 0
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa name;
       """
@@ -133,7 +133,7 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa person;
       """
@@ -167,7 +167,7 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa person;
       """
@@ -201,7 +201,7 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa friendship;
       """
@@ -229,7 +229,7 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa name;
       """
@@ -261,7 +261,7 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa person;
       """
@@ -292,7 +292,7 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa person;
       """
@@ -452,7 +452,7 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: write
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match (friend: $x, friend: $y) isa friendship;
       """
@@ -487,7 +487,7 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa person;
       """
@@ -495,7 +495,7 @@ Feature: TypeQL Delete Query
       | x               |
       | key:name:Bob    |
       | key:name:Carrie |
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $r (friend: $x) isa friendship;
       """
@@ -528,7 +528,7 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $r (friend: $x) isa friendship;
       """
@@ -560,7 +560,7 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $r (friend: $x, friend: $y) isa friendship;
       """
@@ -594,7 +594,7 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $r (friend: $x, friend: $y) isa friendship;
       """
@@ -628,7 +628,7 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $r (friend: $x, friend: $y) isa friendship;
       """
@@ -790,7 +790,7 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $r isa friendship;
       """
@@ -822,7 +822,7 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $r isa friendship;
       """
@@ -955,7 +955,7 @@ Feature: TypeQL Delete Query
     Given transaction commits
 
     When session opens transaction of type: write
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $rel (chef: $p) isa ship-crew;
       """
@@ -972,7 +972,7 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $rel (chef: $p) isa ship-crew;
       """
@@ -1006,7 +1006,7 @@ Feature: TypeQL Delete Query
     Given transaction commits
 
     When session opens transaction of type: write
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x has age 18;
       """
@@ -1023,7 +1023,7 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x has age 18;
       """
@@ -1123,7 +1123,7 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa person;
       """
@@ -1173,7 +1173,7 @@ Feature: TypeQL Delete Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x has duration $d;
       """
@@ -1190,7 +1190,7 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x has duration $d;
       """
@@ -1221,7 +1221,7 @@ Feature: TypeQL Delete Query
     Given transaction commits
 
     When session opens transaction of type: write
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x has duration $d;
       """
@@ -1238,12 +1238,12 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x has duration $d;
       """
     Then answer size is: 0
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $r isa friendship;
       """
@@ -1310,7 +1310,7 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $f (friend: $x) isa friendship;
       """
@@ -1319,7 +1319,7 @@ Feature: TypeQL Delete Query
       | key:ref:2 | key:name:Alex |
       | key:ref:2 | key:name:John |
       | key:ref:3 | key:name:Alex |
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $n isa name;
       """
@@ -1327,7 +1327,7 @@ Feature: TypeQL Delete Query
       | n               |
       | attr:name:John  |
       | attr:name:Alex  |
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa person, has lastname $n;
       """
@@ -1383,7 +1383,7 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa person, has lastname $n;
       """
@@ -1430,7 +1430,7 @@ Feature: TypeQL Delete Query
     Given transaction commits
 
     When session opens transaction of type: write
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa name;
       """

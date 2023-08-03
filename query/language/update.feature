@@ -103,7 +103,7 @@ Feature: TypeQL Update Query
       """
     Then transaction commits
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa person, has name $n;
       """
@@ -213,7 +213,7 @@ Feature: TypeQL Update Query
       """
     Then transaction commits
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match
       (named: $p, name: $nc) isa naming;
@@ -228,7 +228,7 @@ Feature: TypeQL Update Query
       | key:ref:4 | attr:name:Alex     |
       | key:ref:5 | attr:name:Bob      |
 
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match
       $p isa person;

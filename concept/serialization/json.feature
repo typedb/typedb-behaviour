@@ -58,7 +58,7 @@ Feature: Concept Serialization
     Given session opens transaction of type: write
 
   Scenario: Serialized type contains its label
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x type person;
       """
@@ -74,7 +74,7 @@ Feature: Concept Serialization
       $x isa person, has ref 0;
       $y isa person, has ref 1;
       """
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa person;
       """
@@ -95,7 +95,7 @@ Feature: Concept Serialization
       $z (friend: $x) isa friendship, has ref 2;
       $w (employee: $x, employer: $y) isa employment, has ref 3;
       """
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa relation;
       """
@@ -113,7 +113,7 @@ Feature: Concept Serialization
       insert
       $x isa person, has ref 0, has name "Alan";
       """
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa attribute;
       """
@@ -131,7 +131,7 @@ Feature: Concept Serialization
       insert
       $dob 2023-03-21T12:34:56.789 isa date-of-birth;
       """
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa date-of-birth;
       """
@@ -148,7 +148,7 @@ Feature: Concept Serialization
       $b 2023-03-21T12:34 isa date-of-birth;
       $c 2023-03-21 isa date-of-birth;
       """
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa date-of-birth;
       """
@@ -167,7 +167,7 @@ Feature: Concept Serialization
       insert
       $x isa person, has ref 0, has name "Alan";
       """
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match
         ?s = "Alan";
@@ -197,7 +197,7 @@ Feature: Concept Serialization
       $y isa company, has ref 1;
       $z (employee: $x, employer: $y) isa employment, has ref 2;
       """
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x($r:$y) isa! $t, has ref $z;
       """

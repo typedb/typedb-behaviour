@@ -57,7 +57,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x type dog;
       """
@@ -74,7 +74,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub person;
       """
@@ -134,7 +134,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x plays employment:employee;
       """
@@ -155,7 +155,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x plays employment:employee;
       """
@@ -175,7 +175,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x owns name;
       """
@@ -196,7 +196,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x owns name;
       """
@@ -216,7 +216,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x owns email @key;
       """
@@ -237,7 +237,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x owns email @key;
       """
@@ -260,7 +260,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x plays home-ownership:home;
       """
@@ -279,7 +279,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x owns price;
       """
@@ -298,7 +298,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x owns address @key;
       """
@@ -376,7 +376,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x type pet-ownership;
       """
@@ -393,7 +393,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub employment;
       """
@@ -419,7 +419,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x relates employee;
       """
@@ -442,7 +442,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match
         $x relates parent;
@@ -451,7 +451,7 @@ Feature: TypeQL Define Query
     Then uniquely identify answer concepts
       | x                |
       | label:parenthood |
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match
         $x relates father;
@@ -472,7 +472,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match
       $x sub parenthood:parent; $y sub parenthood:child; get $x, $y;
@@ -493,7 +493,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x relates employee;
       """
@@ -521,7 +521,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x relates preferred-plane;
       """
@@ -564,7 +564,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x plays income:source;
       """
@@ -585,7 +585,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x plays income:source;
       """
@@ -614,7 +614,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x owns start-date;
       """
@@ -635,7 +635,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x owns start-date;
       """
@@ -655,7 +655,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x owns employment-reference-code @key;
       """
@@ -676,7 +676,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x owns employment-reference-code @key;
       """
@@ -696,7 +696,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x type connection;
       """
@@ -715,7 +715,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x relates parent; $x relates child;
       """
@@ -734,7 +734,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x relates owner;
       """
@@ -756,7 +756,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match
         $x type <label>;
@@ -797,7 +797,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub code;
       """
@@ -817,7 +817,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x type door-code, value string;
       """
@@ -844,7 +844,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x regex "^(yes|no|maybe)$";
       """
@@ -872,7 +872,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x plays car-sales-listing:available-colour;
       """
@@ -896,7 +896,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x plays phone-contact:number;
       """
@@ -919,7 +919,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x owns brightness;
       """
@@ -942,7 +942,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x owns country-calling-code;
       """
@@ -965,7 +965,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x owns hex-value @key;
       """
@@ -988,7 +988,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x owns hex-value @key;
       """
@@ -1010,7 +1010,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x owns <label>;
       """
@@ -1045,7 +1045,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x type animal; $x abstract;
       """
@@ -1064,7 +1064,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub animal;
       """
@@ -1084,7 +1084,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub animal; $x abstract;
       """
@@ -1104,7 +1104,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub exception, abstract;
       """
@@ -1121,7 +1121,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x type membership; $x abstract;
       """
@@ -1140,7 +1140,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub membership;
       """
@@ -1160,7 +1160,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub requirement; $x abstract;
       """
@@ -1180,7 +1180,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub requirement; $x abstract;
       """
@@ -1197,7 +1197,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x type number-of-limbs; $x abstract;
       """
@@ -1216,7 +1216,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub number-of-limbs;
       """
@@ -1236,7 +1236,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub number-of-limbs; $x abstract;
       """
@@ -1259,7 +1259,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
     Then session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match
       $name type super-name, abstract;
@@ -1298,7 +1298,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
     Then session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $t owns $a @key;
       """
@@ -1307,7 +1307,7 @@ Feature: TypeQL Define Query
       | label:person     | label:email                     |
       | label:child      | label:email                     |
       | label:employment | label:employment-reference-code |
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $t owns $a @unique;
       """
@@ -1340,7 +1340,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
     Then session opens transaction of type: write
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $t owns $a @unique;
       """
@@ -1358,7 +1358,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
     Then session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $t owns $a @unique;
       """
@@ -1408,7 +1408,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x type person, owns name;
       """
@@ -1446,7 +1446,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x owns name;
       """
@@ -1464,7 +1464,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x plays employment:employee;
       """
@@ -1507,7 +1507,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x owns barcode @key;
       """
@@ -1586,7 +1586,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x relates employer;
       """
@@ -1630,7 +1630,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Then session opens transaction of type: read
-    Then get answers of typeql match
+    Then get answers of typeql get
       """
       match $x regex "^A.*$";
       """
@@ -1707,7 +1707,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x owns name @key;
       """
@@ -1724,14 +1724,14 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x owns email;
       """
     Then uniquely identify answer concepts
       | x            |
       | label:person |
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x owns email @key;
       """
@@ -1812,7 +1812,7 @@ Feature: TypeQL Define Query
     Given connection close all sessions
     Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x owns $y @unique;
       """
@@ -1820,7 +1820,7 @@ Feature: TypeQL Define Query
       | x            | y              |
       | label:person | label:email    |
       | label:person | label:phone-nr |
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match person owns $y @key;
       """
@@ -1959,7 +1959,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x has name $a;
       """
@@ -1978,7 +1978,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub person; $x abstract;
       """
@@ -2001,7 +2001,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub friendship, abstract;
       """
@@ -2023,7 +2023,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub age, abstract;
       """
@@ -2125,7 +2125,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub apple-product;
       """
@@ -2169,7 +2169,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub shoe-size;
       """
@@ -2199,7 +2199,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub organism;
       """
@@ -2240,7 +2240,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub pigeon;
       """
@@ -2280,7 +2280,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub pigeon;
       """
@@ -2320,7 +2320,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub pigeon;
       """
@@ -2366,7 +2366,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x type child, plays $r;
       """
@@ -2388,7 +2388,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x type child, owns $y;
       """
@@ -2411,7 +2411,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x type child, owns $y @key;
       """
@@ -2431,7 +2431,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x type part-time-employment, relates $r;
       """
@@ -2455,7 +2455,7 @@ Feature: TypeQL Define Query
       define dog sub entity;
       """
     When session opens transaction of type: read
-    Then typeql match; throws exception
+    Then typeql get; throws exception
       """
       match $x type dog;
       """
@@ -2492,7 +2492,7 @@ Feature: TypeQL Define Query
       middlename sub attribute, value string, owns firstname;
       firstname sub attribute, value string, owns surname;
       """
-    Then get answers of typeql match
+    Then get answers of typeql get
       """
       match $a sub attribute, owns $b; $b sub attribute, owns $a;
       """
@@ -2500,7 +2500,7 @@ Feature: TypeQL Define Query
       | a              | b              |
       | label:nickname | label:surname  |
       | label:surname  | label:nickname |
-    Then get answers of typeql match
+    Then get answers of typeql get
       """
       match $a owns $b; $b owns $a;
       """
@@ -2518,7 +2518,7 @@ Feature: TypeQL Define Query
       middlename sub attribute, value string, owns firstname;
       firstname sub attribute, value string, owns surname;
       """
-    Then get answers of typeql match
+    Then get answers of typeql get
       """
       match
       $a sub attribute, owns $b;
@@ -2544,7 +2544,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x relates function; $x plays recursive-function:function;
       """
@@ -2561,7 +2561,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x owns number-of-letters;
       """

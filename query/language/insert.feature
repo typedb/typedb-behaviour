@@ -79,7 +79,7 @@ Feature: TypeQL Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa person;
       """
@@ -98,7 +98,7 @@ Feature: TypeQL Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa person;
       """
@@ -119,21 +119,21 @@ Feature: TypeQL Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x has name "Bond";
       """
     Then uniquely identify answer concepts
       | x         |
       | key:ref:0 |
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x has name "James Bond";
       """
     Then uniquely identify answer concepts
       | x         |
       | key:ref:0 |
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x has name "Bond", has name "James Bond";
       """
@@ -157,7 +157,7 @@ Feature: TypeQL Insert Query
     Given connection close all sessions
     Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $x isa dog;
       """
@@ -169,7 +169,7 @@ Feature: TypeQL Insert Query
     Then transaction commits
 
     When session opens transaction of type: write
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa dog;
       """
@@ -181,7 +181,7 @@ Feature: TypeQL Insert Query
     Then transaction commits
 
     When session opens transaction of type: write
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa dog;
       """
@@ -193,7 +193,7 @@ Feature: TypeQL Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa dog;
       """
@@ -245,7 +245,7 @@ Feature: TypeQL Insert Query
   #######################
 
   Scenario: when inserting a new thing that owns new attributes, both the thing and the attributes get created
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $x isa thing;
       """
@@ -257,7 +257,7 @@ Feature: TypeQL Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa thing;
       """
@@ -269,7 +269,7 @@ Feature: TypeQL Insert Query
       | attr:ref:0            |
 
   Scenario: when inserting a new thing that owns new attributes via a value variable, both the thing and the attributes get created
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $x isa thing;
       """
@@ -282,7 +282,7 @@ Feature: TypeQL Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa thing;
       """
@@ -302,7 +302,7 @@ Feature: TypeQL Insert Query
     Given transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x has name "John";
       """
@@ -324,7 +324,7 @@ Feature: TypeQL Insert Query
     Given transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x has name "Kyle";
       """
@@ -343,7 +343,7 @@ Feature: TypeQL Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match
       $p1 isa person, has age $a;
@@ -385,7 +385,7 @@ Feature: TypeQL Insert Query
     Given connection close all sessions
     Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $p isa dog;
       """
@@ -400,7 +400,7 @@ Feature: TypeQL Insert Query
     Then transaction commits
 
     When session opens transaction of type: write
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $p isa dog;
       """
@@ -432,7 +432,7 @@ Feature: TypeQL Insert Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $p isa person, has <attr> $x; get $x;
       """
@@ -468,7 +468,7 @@ Parker", has ref 0;
 """
     Given transaction commits
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
 """
 match $p has name "Peter
 Parker";
@@ -490,7 +490,7 @@ Parker";
     Given transaction commits
 
     Given session opens transaction of type: write
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $p has name "Spiderman";
       """
@@ -505,7 +505,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $p has name "Spiderman";
       """
@@ -523,7 +523,7 @@ Parker";
     Given transaction commits
 
     Given session opens transaction of type: write
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $p has name "Spiderman";
       """
@@ -538,7 +538,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $p has name "Spiderman";
       """
@@ -570,7 +570,7 @@ Parker";
     Given transaction commits
 
     Given session opens transaction of type: write
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $c has hex-value "#FF0000";
       """
@@ -585,7 +585,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $c has hex-value "#FF0000";
       """
@@ -617,7 +617,7 @@ Parker";
     Given transaction commits
 
     Given session opens transaction of type: write
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $c has hex-value "#FF0000";
       """
@@ -632,7 +632,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $c has hex-value "#FF0000";
       """
@@ -672,7 +672,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: write
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $td isa tenure-days;
       """
@@ -687,7 +687,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $r isa residence, has tenure-days $a; get $a;
       """
@@ -724,7 +724,7 @@ Parker";
     Given transaction commits
 
     Given session opens transaction of type: write
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $p has age 32;
       """
@@ -741,7 +741,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $p has age 32;
       """
@@ -764,7 +764,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $r (employee: $p) isa employment;
       """
@@ -805,7 +805,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $r (place: $addr) isa residence, has is-permanent $perm;
       """
@@ -826,7 +826,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match
         $r (employer: $c) isa employment;
@@ -836,7 +836,7 @@ Parker";
     Then uniquely identify answer concepts
       | cname                |
       | attr:name:Morrisons  |
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match
         $r (employee: $p) isa employment;
@@ -865,7 +865,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $r (employer: $c, employee: $p) isa employment;
       """
@@ -897,7 +897,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $r (employer: $c, employee: $p) isa employment;
       """
@@ -926,7 +926,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $r (employee: $p, employee: $p) isa employment;
       """
@@ -1017,7 +1017,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: write
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match (member: $p) isa gym-membership; get $p;
       """
@@ -1031,14 +1031,14 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match (member: $p) isa gym-membership; get $p;
       """
     Then uniquely identify answer concepts
       | p         |
       | key:ref:0 |
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $r isa gym-membership; get $r;
       """
@@ -1062,7 +1062,7 @@ Parker";
     Given connection close all sessions
     Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $x <value> isa <attr>;
       """
@@ -1074,7 +1074,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x <value> isa <attr>;
       """
@@ -1104,7 +1104,7 @@ Parker";
     Given connection close all sessions
     Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $x <value> isa <attr>;
       """
@@ -1117,7 +1117,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x <value> isa <attr>;
       """
@@ -1183,7 +1183,7 @@ Parker";
     Given set time-zone is: America/Chicago
     Given transaction commits
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa test_date;
       """
@@ -1201,7 +1201,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa age;
       """
@@ -1233,7 +1233,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa length;
       """
@@ -1273,7 +1273,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa length;
       """
@@ -1306,7 +1306,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa length;
       """
@@ -1336,7 +1336,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x <match> isa <attr>;
       """
@@ -1451,7 +1451,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa person;
       """
@@ -1590,7 +1590,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: write
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa person, has email "abc@gmail.com";
       """
@@ -1604,7 +1604,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa person, has email "mnp@gmail.com", has email "xyz@gmail.com";
       """
@@ -1766,7 +1766,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x has is-cool true;
       """
@@ -1835,7 +1835,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match
         $x has height $z;
@@ -1861,7 +1861,7 @@ Parker";
     Given connection close all sessions
     Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $p isa person;
       """
@@ -1876,7 +1876,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $r isa season-ticket-ownership;
       """
@@ -1897,7 +1897,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: write
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $x isa person;
       """
@@ -1916,7 +1916,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa person;
       """
@@ -1945,7 +1945,7 @@ Parker";
     Given transaction commits
 
     Given session opens transaction of type: write
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $r (employee: $x, employer: $c) isa employment;
       """
@@ -1964,7 +1964,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: write
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $r (employee: $x, employer: $c) isa employment;
       """
@@ -1989,7 +1989,7 @@ Parker";
     Given transaction commits
 
     Given session opens transaction of type: write
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $x isa name;
       """
@@ -2008,7 +2008,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: write
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa name;
       """
@@ -2038,7 +2038,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa person;
       """
@@ -2261,7 +2261,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: write
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa name;
       """
@@ -2278,7 +2278,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa name;
       """
@@ -2319,7 +2319,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: write
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa person, has score $score;
       """
@@ -2337,7 +2337,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa score;
       """
@@ -2345,7 +2345,7 @@ Parker";
     Then uniquely identify answer concepts
       | x                |
       | attr:score:10.0  |
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa person, has score $score;
       """
@@ -2398,7 +2398,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: write
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa name;
       """
@@ -2428,12 +2428,12 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa person;
       """
     Then answer size is: 0
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa name;
       """
@@ -2441,7 +2441,7 @@ Parker";
     Then uniquely identify answer concepts
       | x                 |
       | attr:name:Ganesh  |
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match (lettered-name: $x, initial: $y) isa name-initial;
       """
@@ -2498,7 +2498,7 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: write
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa employment;
       """
@@ -2525,13 +2525,13 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa employment;
       """
     # We deleted the rule that infers the employment, but it still exists because it was materialised on match-insert
     Then answer size is: 1
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match (contracted: $x, contract: $y) isa employment-contract;
       """
@@ -2638,7 +2638,7 @@ Parker";
     # After deleting all the links to 'c', our rules no longer infer that 'd' is reachable from 'a'. But in fact we
     # materialised this reachable link when we did our match-insert, because it played a role in our road-proposal,
     # which itself plays a role in the road-construction that we explicitly inserted:
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match
         $a isa vertex, has index "a";
@@ -2649,7 +2649,7 @@ Parker";
     # On the other hand, the fact that 'c' was reachable from 'a' was not -directly- used; although it was needed
     # in order to infer that (a,d) was reachable, it did not, itself, play a role in any relation that we materialised,
     # so it is now gone.
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match
         $a isa vertex, has index "a";
@@ -2756,12 +2756,12 @@ Parker";
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa person;
       """
     Then answer size is: 7
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa employment;
       """
@@ -2785,7 +2785,7 @@ Parker";
       """
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa person, has name "Derek";
       """
@@ -2818,7 +2818,7 @@ Parker";
       """
 
     Given session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa person, has name "Derek";
       """
@@ -2838,7 +2838,7 @@ Parker";
       """
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa person, has name "Derek";
       """

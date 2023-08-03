@@ -46,7 +46,7 @@ Feature: TypeQL Undefine Query
   ################
 
   Scenario: calling 'undefine' with 'sub entity' on a subtype of 'entity' deletes it
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $x sub entity;
       """
@@ -62,7 +62,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub entity;
       """
@@ -87,7 +87,7 @@ Feature: TypeQL Undefine Query
     Given transaction commits
 
     When session opens transaction of type: write
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $x sub person;
       """
@@ -102,7 +102,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub person;
       """
@@ -119,7 +119,7 @@ Feature: TypeQL Undefine Query
     Given transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub person;
       """
@@ -135,7 +135,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub person;
       """
@@ -173,7 +173,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x type child; $x plays employment:employee;
       """
@@ -195,7 +195,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x type child; $x owns name;
       """
@@ -217,14 +217,14 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x type child; $x owns email @key;
       """
     Then answer size is: 0
 
   Scenario: all existing instances of an entity type must be deleted in order to undefine it
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $x sub entity;
       """
@@ -274,7 +274,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub entity;
       """
@@ -289,7 +289,7 @@ Feature: TypeQL Undefine Query
   ##################
 
   Scenario: undefining a relation type removes it
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $x sub relation;
       """
@@ -304,7 +304,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub relation;
       """
@@ -324,7 +324,7 @@ Feature: TypeQL Undefine Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match contract-employment plays $x;
       """
@@ -338,7 +338,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match contract-employment plays $x;
       """
@@ -356,7 +356,7 @@ Feature: TypeQL Undefine Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $x owns start-date;
       """
@@ -371,7 +371,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x owns start-date;
       """
@@ -389,7 +389,7 @@ Feature: TypeQL Undefine Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $x owns employment-reference @key;
       """
@@ -404,7 +404,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x owns employment-reference @key;
       """
@@ -437,7 +437,7 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: all existing instances of a relation type must be deleted in order to undefine it
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $x sub relation;
       """
@@ -486,7 +486,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub relation;
       """
@@ -496,7 +496,7 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: undefining a relation type automatically detaches any possible roleplayers
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match
         $x type person;
@@ -512,7 +512,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match
         $x type person;
@@ -526,7 +526,7 @@ Feature: TypeQL Undefine Query
   #############################
 
   Scenario: a role type can be removed from its relation type
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match employment relates $x;
       """
@@ -541,7 +541,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match employment relates $x;
       """
@@ -558,7 +558,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x plays employment:employee;
       """
@@ -602,7 +602,7 @@ Feature: TypeQL Undefine Query
     When connection close all sessions
     When connection open data session for database: typedb
     When session opens transaction of type: write
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x relates employee;
       """
@@ -627,7 +627,7 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: undefining a role type automatically detaches any possible roleplayers
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match
         $x type person;
@@ -643,7 +643,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match
         $x type person;
@@ -703,7 +703,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match employment relates $x;
       """
@@ -727,7 +727,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x type part-time; $x relates $role;
       """
@@ -780,7 +780,7 @@ Feature: TypeQL Undefine Query
     When connection close all sessions
     When connection open data session for database: typedb
     When session opens transaction of type: write
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x plays employment:employee;
       """
@@ -795,7 +795,7 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: undefining a playable role that was not actually playable to begin with throws
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match person plays $x;
       """
@@ -857,7 +857,7 @@ Feature: TypeQL Undefine Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $x type <attr>;
       """
@@ -869,7 +869,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    Then typeql match; throws exception
+    Then typeql get; throws exception
       """
       match $x type <attr>;
       """
@@ -900,7 +900,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa email;
       """
@@ -918,7 +918,7 @@ Feature: TypeQL Undefine Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match first-name plays $x;
       """
@@ -932,7 +932,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match first-name plays $x;
       """
@@ -950,7 +950,7 @@ Feature: TypeQL Undefine Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $x owns locale;
       """
@@ -965,7 +965,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x owns locale;
       """
@@ -983,7 +983,7 @@ Feature: TypeQL Undefine Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $x owns name-id @key;
       """
@@ -998,7 +998,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x owns name-id @key;
       """
@@ -1023,7 +1023,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    Then typeql match; throws exception
+    Then typeql get; throws exception
       """
       match $x type name;
       """
@@ -1037,7 +1037,7 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: all existing instances of an attribute type must be deleted in order to undefine it
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $x sub attribute;
       """
@@ -1085,7 +1085,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub attribute;
       """
@@ -1100,7 +1100,7 @@ Feature: TypeQL Undefine Query
   ########################
 
   Scenario: undefining an attribute ownership removes it
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match
         $x owns name;
@@ -1116,7 +1116,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match
         $x owns name;
@@ -1154,7 +1154,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x owns email;
       """
@@ -1176,7 +1176,7 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: when a type can own an attribute, but none of its instances actually do, the ownership can be undefined
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $x owns name;
       """
@@ -1204,7 +1204,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x owns name;
       """
@@ -1301,7 +1301,7 @@ Feature: TypeQL Undefine Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match
         $x has name $n;
@@ -1320,7 +1320,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match
         $x has name $n;
@@ -1356,7 +1356,7 @@ Feature: TypeQL Undefine Query
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match
         $x has name $n;
@@ -1370,7 +1370,7 @@ Feature: TypeQL Undefine Query
       undefine rule samuel-email-rule;
       """
 
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match
         $x has name $n;
@@ -1484,7 +1484,7 @@ Feature: TypeQL Undefine Query
   ############
 
   Scenario: undefining a type as abstract converts an abstract to a concrete type, allowing creation of instances
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match
         $x type abstract-type;
@@ -1511,7 +1511,7 @@ Feature: TypeQL Undefine Query
     Given connection close all sessions
     Given connection open data session for database: typedb
     Given session opens transaction of type: write
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match
         $x type abstract-type;
@@ -1527,7 +1527,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa abstract-type;
       """
@@ -1542,7 +1542,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match
         $x type person;
@@ -1568,7 +1568,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match
         $x type abstract-type;
@@ -1598,7 +1598,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match
         $x type vehicle-registration;
@@ -1612,7 +1612,7 @@ Feature: TypeQL Undefine Query
   ###################
 
   Scenario: a type and an attribute type that it owns can be removed simultaneously
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $x sub entity;
       """
@@ -1621,7 +1621,7 @@ Feature: TypeQL Undefine Query
       | label:person        |
       | label:abstract-type |
       | label:entity        |
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $x sub attribute;
       """
@@ -1639,7 +1639,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub entity;
       """
@@ -1647,7 +1647,7 @@ Feature: TypeQL Undefine Query
       | x                   |
       | label:abstract-type |
       | label:entity        |
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub attribute;
       """
@@ -1657,7 +1657,7 @@ Feature: TypeQL Undefine Query
       | label:attribute |
 
   Scenario: a type, a relation type that it plays in and an attribute type that it owns can be removed simultaneously
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $x sub entity;
       """
@@ -1666,7 +1666,7 @@ Feature: TypeQL Undefine Query
       | label:person        |
       | label:abstract-type |
       | label:entity        |
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $x sub relation;
       """
@@ -1674,7 +1674,7 @@ Feature: TypeQL Undefine Query
       | x                |
       | label:employment |
       | label:relation   |
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $x sub attribute;
       """
@@ -1683,7 +1683,7 @@ Feature: TypeQL Undefine Query
       | label:name      |
       | label:email     |
       | label:attribute |
-    Given get answers of typeql match
+    Given get answers of typeql get
       """
       match $x sub relation:role;
       """
@@ -1702,7 +1702,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub entity;
       """
@@ -1710,14 +1710,14 @@ Feature: TypeQL Undefine Query
       | x                   |
       | label:abstract-type |
       | label:entity        |
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub relation;
       """
     Then uniquely identify answer concepts
       | x              |
       | label:relation |
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub attribute;
       """
@@ -1725,7 +1725,7 @@ Feature: TypeQL Undefine Query
       | x               |
       | label:email     |
       | label:attribute |
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x sub relation:role;
       """
