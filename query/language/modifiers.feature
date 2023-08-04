@@ -737,11 +737,6 @@ Feature: TypeQL Query Modifiers
       | dob         | datetime  | 2970-01-01   | 1970-02-01 | start-date | datetime   | 1970-01-01  | end-date  | datetime  | 3100-11-20 | last-date  | datetime   | 2000-08-03       |
 
 
-
-  # TODO: extra read query tests for
-  #  3. Fetch + Modifiers
-
-
   Scenario: Get group variable does not have to match sort variable
     Given typeql insert
       """
@@ -837,9 +832,98 @@ Feature: TypeQL Query Modifiers
 
   # ------------- write queries -------------
 
-  # TODO: write query tests for
-  #  1. Match-Insert with Modifiers
-  #  2. Match-Delete with Modifiers
-  #  3. Match-Delete-Insert with Modifiers
+  Scenario: Match insert queries can use sort, offset, limit
+    Given typeql insert
+      """
+      insert
+      $a isa person, has name "Gary", has ref 0;
+      $b isa person, has name "Jemima", has ref 1;
+      $c isa person, has name "Frederick", has ref 2;
+      $d1 isa person, has name "Brenda", has ref 3;
+      """
+    Given transaction commits
+    Given session opens transaction of type: write
+
+    When get answers of typeql insert
+      """
+      match:
+      $x isa person, has ref $r;
+      insert;
+      $x has email "dummy@gmail.com";
+      sort $r; offset 1; limit 2;
+      """
+    Then uniquely identify answer concepts
+      | x         |
+      | key:ref:1 |
+      | key:ref:2 |
 
 
+  Scenario: Match delete queries can use sort, offset, limit
+    Given typeql insert
+      """
+      insert
+      $a isa person, has name "Gary", has ref 0;
+      $b isa person, has name "Jemima", has ref 1;
+      $c isa person, has name "Frederick", has ref 2;
+      $d1 isa person, has name "Brenda", has ref 3;
+      """
+    Given transaction commits
+    Given session opens transaction of type: write
+
+    When typeql delete
+      """
+      match
+      $x isa person, has ref $r, has name $n;
+      delete
+      $x has $n;
+      sort $r; offset 1; limit 2;
+      """
+    Given transaction commits
+
+    Given session opens transaction of type: reads
+    Then get answers of typeql get
+      """
+      match
+      $x isa person, has name $n;
+      """
+    Then uniquely identify answer concepts
+      | x         | n                   |
+      | key:ref:1 | attr:name:Jemima    |
+      | key:ref:2 | attr:name:Frederick |
+
+
+
+  Scenario: Match update queries can use sort, offset, limit
+    Given typeql insert
+      """
+      insert
+      $a isa person, has name "Gary", has ref 0;
+      $b isa person, has name "Jemima", has ref 1;
+      $c isa person, has name "Frederick", has ref 2;
+      $d1 isa person, has name "Brenda", has ref 3;
+      """
+    Given transaction commits
+    Given session opens transaction of type: write
+
+    When typeql delete
+      """
+      match
+      $x isa person, has ref $r, has name $n;
+      delete
+      $x has $n;
+      insert
+      $x has email "dummy@gmail.com";
+      sort $r; offset 1; limit 2;
+      """
+    Given transaction commits
+
+    Given session opens transaction of type: reads
+    Then get answers of typeql get
+      """
+      match
+      $x isa person, has email "dummy@gmail.com";
+      """
+    Then uniquely identify answer concepts
+      | x         |
+      | key:ref:1 |
+      | key:ref:2 |

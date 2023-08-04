@@ -205,7 +205,6 @@ Feature: TypeQL Insert Query
       """
       insert $x isa! person, has name "Harry", has ref 0;
       """
-
     Then uniquely identify answer concepts
       | x         |
       | key:ref:0 |
