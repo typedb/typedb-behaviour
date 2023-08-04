@@ -17,6 +17,46 @@
 
 Feature: TypeQL Query Modifiers
 
+  Background: Open connection and create a simple extensible schema
+    Given typedb starts
+    Given connection opens with default authentication
+    Given connection has been opened
+    Given connection does not have any database
+    Given connection create database: typedb
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+
+    Given typeql define
+      """
+      define
+      person sub entity,
+        plays friendship:friend,
+        plays employment:employee,
+        owns name,
+        owns age,
+        owns ref @key,
+        owns email @unique;
+      company sub entity,
+        plays employment:employer,
+        owns name,
+        owns ref @key;
+      friendship sub relation,
+        relates friend,
+        owns ref @key;
+      employment sub relation,
+        relates employee,
+        relates employer,
+        owns ref @key;
+      name sub attribute, value string;
+      age sub attribute, value long;
+      ref sub attribute, value long;
+      email sub attribute, value string;
+      """
+    Given transaction commits
+
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
   # ------------- read queries -------------
 
   ########
@@ -699,10 +739,101 @@ Feature: TypeQL Query Modifiers
 
 
   # TODO: extra read query tests for
-  #  1. Get + Modifiers + Group
-  #  2. Get + Modifiers + Group + Aggregate
   #  3. Fetch + Modifiers
 
+
+  Scenario: Get group variable does not have to match sort variable
+    Given typeql insert
+      """
+      insert
+      $a isa person, has name "Gary", has ref 0;
+      $b isa person, has name "Jemima", has ref 1;
+      $c isa person, has name "Frederick", has ref 2;
+      $d1 isa person, has name "Brenda", has ref 3;
+      $d2 isa person, has name "Brenda", has ref 4;
+      """
+    Given transaction commits
+    Given session opens transaction of type: read
+    When get answers of typeql get
+      """
+      match $x isa person, has ref $r, has name $n;
+      get $r, $n;
+      sort $r desc;
+      group $n;
+      """
+    Then answer groups are
+      | owner               | r          |
+      | attr:name:Brenda    | attr:ref:5 |
+      | attr:name:Brenda    | attr:ref:4 |
+      | attr:name:Frederick | attr:ref:3 |
+      | attr:name:Jemima    | attr:ref:2 |
+      | attr:name:Gary      | attr:ref:1 |
+
+
+  Scenario: Get group queries can use sort, offset, limit
+    Given typeql insert
+      """
+      insert
+      $d isa person, has name "Brenda", has ref 3;
+      $c isa person, has name "Frederick", has ref 2;
+      $a isa person, has name "Gary", has ref 0;
+      $b isa person, has name "Jemima", has ref 1;
+      """
+    Given transaction commits
+    Given session opens transaction of type: read
+    When get answers of typeql get
+      """
+      match $x isa person, has name $y;
+      get $x, $y;
+      sort $y asc; offset 1; limit 2;
+      group $y;
+      """
+    Then answer groups are
+      | owner               | x         |
+      | attr:name:Frederick | key:ref:3 |
+      | attr:name:Gary      | key:ref:1 |
+
+
+  Scenario: Fetch queries can use sort, offset, limit
+    Given typeql insert
+      """
+      insert
+      $a isa person, has name "Gary", has ref 0;
+      $b isa person, has name "Jemima", has ref 1;
+      $c isa person, has name "Frederick", has name "Freddy", has email "frederick@gmail.com", has ref 2;
+      $d isa person, has name "Brenda", has email "brenda@gmail.com", has ref 3;
+      """
+    Given transaction commits
+    Given session opens transaction of type: read
+    When get answers of typeql get
+      """
+      match $x isa person, has ref $r;
+      fetch
+      $x as person: name, email;
+      $r as ref;
+      sort $r desc; offset 1; limit 2;
+      """
+    Then answers fetched are
+      """
+      [
+        {
+          person: {
+            type: "person",
+            name: [{type: "name", value: "Frederick"}, {type: "name", value: "Freddy"}],
+            email: [{type: "email", value: "frederick@gmail.com"}]
+          },
+          ref: {type: "ref", value: 2}
+        },
+        {
+          person: {
+            type: "person",
+            name: [{type: "name", value: "Jemima" }],
+            email: []
+          },
+          ref: {type: "ref", value: 1}
+        }
+      ]
+      """
 
   # ------------- write queries -------------
 
