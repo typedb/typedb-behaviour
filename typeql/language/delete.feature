@@ -361,6 +361,53 @@ Feature: TypeQL Delete Query
       """
 
 
+  Scenario: variable types can be used in deletes
+    Given typeql insert
+      """
+      insert
+      $x isa person, has name 'John';
+      (friend: $x) isa friendship, has ref 0;
+      $y isa person, has name 'Alice';
+      (friend: $y) isa friendship, has ref 1;
+      """
+    Given transaction commits
+
+    Given session opens transaction of type: write
+    Given typeql delete
+      """
+      match
+      $p isa person, has name $n0; $n0 "John";
+      $r ($p) isa! $r-type, has ref $r0; $r0 0;
+      $p-type type person;
+      delete
+      $p isa $p-type, has $n0;
+      $r ($p) isa $r-type, has $r0;
+      """
+    Given transaction commits
+
+    Given session opens transaction of type: write
+    Given typeql delete
+      """
+      match
+      $p isa person, has name $n0; $n0 "Alice";
+      $r ($role-type: $p) isa! $r-type, has ref $r0; $r0 1;
+      $p-type type person;
+      $r-type type friendship, relates $role-type;
+      delete
+      $p isa $p-type, has $n0;
+      $r ($role-type: $p) isa $r-type, has $r0;
+      """
+    Given transaction commits
+
+    When session opens transaction of type: read
+    When get answers of typeql match
+      """
+      match
+      $x isa person;
+      $r ($x) isa friendship;
+      """
+    Then answer size is: 0
+
 
   ###############
   # ROLEPLAYERS #
@@ -1320,4 +1367,3 @@ Feature: TypeQL Delete Query
       delete
         $x isa thing;
       """
-

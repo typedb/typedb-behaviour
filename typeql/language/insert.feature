@@ -1728,16 +1728,6 @@ Parker";
       | key:ref:0 | key:ref:0 |
 
 
-  Scenario: referring to a type by variable rather than by label in an insert throws
-    Then typeql insert; throws exception
-      """
-      match
-        $type type company;
-      insert
-        $x isa $type, has name "Microsoft", has ref 0;
-      """
-
-
   ################
   # MATCH-INSERT #
   ################
@@ -2157,6 +2147,45 @@ Parker";
       insert
         $x isa car;
       """
+
+
+  Scenario: variable types can be used in inserts
+    Given typeql insert
+      """
+      match
+      $p type person;
+      $r type employment;
+      insert
+      $x isa $p, has ref 0;
+      (employee: $x) isa $r, has ref 1;
+      """
+    Given transaction commits
+
+    Given session opens transaction of type: write
+    Given typeql insert
+      """
+      match
+      $p type person;
+      $r type employment;
+      $rt type employment:employee;
+      insert
+      $x isa $p, has ref 2;
+      ($rt: $x) isa $r, has ref 3;
+      """
+    Given transaction commits
+
+    When session opens transaction of type: read
+    When get answers of typeql match
+      """
+      match
+      $x isa person;
+      $r ($x) isa employment;
+      """
+    Then uniquely identify answer concepts
+      | x         | r         |
+      | key:ref:0 | key:ref:1 |
+      | key:ref:2 | key:ref:3 |
+
 
   #####################################
   # MATERIALISATION OF INFERRED FACTS #
