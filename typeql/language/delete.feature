@@ -700,6 +700,14 @@ Feature: TypeQL Delete Query
       delete
         $r (friend: $x, friend: $y);
       """
+    Given transaction commits
+    When session opens transaction of type: write
+    When get answers of typeql match
+      """
+      match $r (friend: $x, friend: $y) isa friendship;
+      """
+    Then answer size is: 0
+
     Then typeql delete
       """
       match
@@ -707,7 +715,30 @@ Feature: TypeQL Delete Query
       delete
         $x has $a, has $b;
       """
+    Given transaction commits
+    When session opens transaction of type: write
+    When get answers of typeql match
+      """
+      match $r has email $a, has email $b;
+      """
+    Then answer size is: 0
 
+    Then typeql delete
+      """
+      match
+        $x isa person;
+        $y isa person;
+      delete
+        $x isa person;
+        $y isa person;
+      """
+    Given transaction commits
+    When session opens transaction of type: write
+    When get answers of typeql match
+      """
+      match $x isa person; $y isa person;
+      """
+    Then answer size is: 0
 
   Scenario: when all instances that play roles in a relation are deleted, the relation instance gets cleaned up
     Given get answers of typeql insert
