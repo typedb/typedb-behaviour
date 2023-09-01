@@ -32,11 +32,13 @@ Feature: TypeQL Delete Query
       define
       person sub entity,
         plays friendship:friend,
-        owns name @key;
+        owns name @key,
+        owns email;
       friendship sub relation,
         relates friend,
         owns ref @key;
       name sub attribute, value string;
+      email sub attribute, value string;
       ref sub attribute, value long;
       """
     Given transaction commits
@@ -628,6 +630,7 @@ Feature: TypeQL Delete Query
       | key:ref:0 | key:name:Bob  | key:name:Alex |
       | key:ref:0 | key:name:Alex | key:name:Bob  |
 
+
   @ignore
   Scenario: deleting role players in multiple statements throws
     Given get answers of typeql insert
@@ -655,7 +658,8 @@ Feature: TypeQL Delete Query
         $r (friend: $y);
       """
 
-  Scenario: when deleting more role players than actually exist, an error is thrown
+
+  Scenario: when deleting more role players than actually exist, no an error is thrown
     Given typeql insert
       """
       insert
@@ -666,7 +670,7 @@ Feature: TypeQL Delete Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    Then typeql delete; throws exception
+    Then typeql delete
       """
       match
         $x isa person, has name "Alex";
@@ -674,6 +678,34 @@ Feature: TypeQL Delete Query
         $r (friend: $x, friend: $y) isa friendship;
       delete
         $r (friend: $x, friend: $x);
+      """
+
+
+  Scenario: when deleting overlapping answers, deletes are idempotent
+    Given typeql insert
+      """
+      insert
+      $x isa person, has name "Alex", has email "alex@email.com", has email "al@email.com", has email "a@email.com";
+      $y isa person, has name "Bob";
+      $z isa person, has name "Charlie";
+      $r (friend: $x, friend: $y, friend: $z) isa friendship, has ref 0;
+      """
+    Given transaction commits
+
+    Given session opens transaction of type: write
+    Then typeql delete
+      """
+      match
+        $r (friend: $x, friend: $y) isa friendship;
+      delete
+        $r (friend: $x, friend: $y);
+      """
+    Then typeql delete
+      """
+      match
+        $x has email $a, has email $b;
+      delete
+        $x has $a, has $b;
       """
 
 
