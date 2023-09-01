@@ -36,7 +36,7 @@ Feature: TypeQL Delete Query
         owns name @key,
         owns email;
       company sub entity,
-        plays employmen:employer;
+        plays employment:employer;
       friendship sub relation,
         relates friend,
         owns ref @key;
