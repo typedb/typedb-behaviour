@@ -32,10 +32,17 @@ Feature: TypeQL Delete Query
       define
       person sub entity,
         plays friendship:friend,
+        plays employment:employee,
         owns name @key,
         owns email;
+      company sub entity,
+        plays employmen:employer;
       friendship sub relation,
         relates friend,
+        owns ref @key;
+      employment sub relation,
+        relates employee,
+        relates employer,
         owns ref @key;
       name sub attribute, value string;
       email sub attribute, value string;
@@ -659,28 +666,6 @@ Feature: TypeQL Delete Query
       """
 
 
-  Scenario: when deleting more role players than actually exist, no an error is thrown
-    Given typeql insert
-      """
-      insert
-      $x isa person, has name "Alex";
-      $y isa person, has name "Bob";
-      $r (friend: $x, friend: $y) isa friendship, has ref 0;
-      """
-    Given transaction commits
-
-    Given session opens transaction of type: write
-    Then typeql delete
-      """
-      match
-        $x isa person, has name "Alex";
-        $y isa person, has name "Bob";
-        $r (friend: $x, friend: $y) isa friendship;
-      delete
-        $r (friend: $x, friend: $x);
-      """
-
-
   Scenario: when deleting overlapping answers, deletes are idempotent
     Given typeql insert
       """
@@ -739,6 +724,46 @@ Feature: TypeQL Delete Query
       match $x isa person; $y isa person;
       """
     Then answer size is: 0
+
+
+  Scenario: when deleting incompatible ownerships or role players, an error is thrown
+    Given typeql insert
+      """
+      insert
+      $x isa person, has name "Alex";
+      $y isa person, has name "Bob";
+      $c isa company;
+      $r (friend: $x, friend: $y) isa friendship, has ref 0;
+      $e (employee: $x, employer: $c) isa employment, has ref 1;
+      """
+    Given transaction commits
+
+    Given session opens transaction of type: write
+    Then typeql delete; throws exception
+      """
+      match
+        $x isa person;
+        $a isa ref;
+      delete
+        $x has $a;
+      """
+    Then typeql delete; throws exception
+      """
+      match
+        $x isa person;
+        $r ($x) isa friendship;
+      delete
+        $r (employee: $x);
+      """
+    Then typeql delete; throws exception
+      """
+      match
+        $x isa company;
+        $r isa friendship;
+      delete
+        $r (friend: $x);
+      """
+
 
   Scenario: when all instances that play roles in a relation are deleted, the relation instance gets cleaned up
     Given get answers of typeql insert
