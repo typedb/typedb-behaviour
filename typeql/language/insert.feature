@@ -2187,6 +2187,21 @@ Parker";
       | key:ref:2 | key:ref:3 |
 
 
+  Scenario: variable types in inserts cannot be unbound
+    Given typeql insert; throws exception
+      """
+      insert $x isa $t;
+      """
+    When session opens transaction of type: write
+    When typeql insert; throws exception
+      """
+      match
+      $x isa person;
+      insert
+      $x has $a; $a isa $t;
+      """
+
+
   #####################################
   # MATERIALISATION OF INFERRED FACTS #
   #####################################
