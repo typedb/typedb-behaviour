@@ -176,7 +176,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(employment) get role(employee) get label: employee
     Then relation(employment) get role(employer) get label: employer
 
-  Scenario: Relation and role types can be set to abstract
+  Scenario: Relation type can be set to abstract while role types remain concrete
     When put relation type: marriage
     When relation(marriage) set relates role: husband
     When relation(marriage) set relates role: wife
@@ -185,8 +185,8 @@ Feature: Concept Relation Type and Role Type
     When relation(parentship) set relates role: parent
     When relation(parentship) set relates role: child
     Then relation(marriage) is abstract: true
-    Then relation(marriage) get role(husband) is abstract: true
-    Then relation(marriage) get role(wife) is abstract: true
+    Then relation(marriage) get role(husband) is abstract: false
+    Then relation(marriage) get role(wife) is abstract: false
     When transaction commits
     When session opens transaction of type: write
     Then relation(parentship) is abstract: false
@@ -195,8 +195,8 @@ Feature: Concept Relation Type and Role Type
     When transaction commits
     When session opens transaction of type: write
     Then relation(marriage) is abstract: true
-    Then relation(marriage) get role(husband) is abstract: true
-    Then relation(marriage) get role(wife) is abstract: true
+    Then relation(marriage) get role(husband) is abstract: false
+    Then relation(marriage) get role(wife) is abstract: false
     When transaction commits
     When session opens transaction of type: write
     Then relation(parentship) is abstract: false
@@ -204,15 +204,15 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(child) is abstract: false
     Then relation(parentship) set abstract: true
     Then relation(parentship) is abstract: true
-    Then relation(parentship) get role(parent) is abstract: true
-    Then relation(parentship) get role(child) is abstract: true
+    Then relation(parentship) get role(parent) is abstract: false
+    Then relation(parentship) get role(child) is abstract: false
     When transaction commits
     When session opens transaction of type: read
     Then relation(parentship) is abstract: true
-    Then relation(parentship) get role(parent) is abstract: true
-    Then relation(parentship) get role(child) is abstract: true
+    Then relation(parentship) get role(parent) is abstract: false
+    Then relation(parentship) get role(child) is abstract: false
 
-  Scenario: relation and role types can be set to abstract when a subtype has instances
+  Scenario: relation types can be set to abstract when a subtype has instances
     When put relation type: parentship
     When relation(parentship) set relates role: parent
     When relation(parentship) set relates role: child
@@ -470,6 +470,24 @@ Feature: Concept Relation Type and Role Type
       | mothership:mother |
     Then relation(mothership) get related explicit roles do not contain:
       | parentship:child  |
+
+  Scenario: Roles can be inherited from abstract relation types
+    When put relation type: parentship
+    Then relation(parentship) set abstract: true
+    When relation(parentship) set relates role: parent
+    When relation(parentship) set relates role: child
+    When put relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When transaction commits
+    When session opens transaction of type: read
+    Then relation(fathership) get related roles contain:
+      | parentship:parent |
+      | parentship:child  |
+    Then relation(fathership) get related explicit roles do not contain:
+      | fathership:parent |
+      | fathership:child  |
+    Then relation(fathership) get role(parent) is abstract: false
+    Then relation(fathership) get role(child) is abstract: false
 
   Scenario: Relation types can override inherited related role types
     When put relation type: parentship
