@@ -471,6 +471,24 @@ Feature: Concept Relation Type and Role Type
     Then relation(mothership) get related explicit roles do not contain:
       | parentship:child  |
 
+  Scenario: Roles can be inherited from abstract relation types
+    When put relation type: parentship
+    Then relation(parentship) set abstract: true
+    When relation(parentship) set relates role: parent
+    When relation(parentship) set relates role: child
+    When put relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When transaction commits
+    When session opens transaction of type: read
+    Then relation(fathership) get related roles contain:
+      | parentship:parent |
+      | parentship:child  |
+    Then relation(fathership) get related explicit roles do not contain:
+      | fathership:parent |
+      | fathership:child  |
+    Then relation(fathership) get role(parent) is abstract: false
+    Then relation(fathership) get role(child) is abstract: false
+
   Scenario: Relation types can override inherited related role types
     When put relation type: parentship
     When relation(parentship) set relates role: parent
