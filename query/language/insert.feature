@@ -2174,7 +2174,7 @@ Parker";
     Given transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match
       $x isa person;

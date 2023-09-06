@@ -409,7 +409,7 @@ Feature: TypeQL Delete Query
     Given transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match
       $x isa person;
@@ -687,7 +687,7 @@ Feature: TypeQL Delete Query
       """
     Given transaction commits
     When session opens transaction of type: write
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $r (friend: $x, friend: $y) isa friendship;
       """
@@ -702,7 +702,7 @@ Feature: TypeQL Delete Query
       """
     Given transaction commits
     When session opens transaction of type: write
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $r has email $a, has email $b;
       """
@@ -719,7 +719,7 @@ Feature: TypeQL Delete Query
       """
     Given transaction commits
     When session opens transaction of type: write
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match $x isa person; $y isa person;
       """
