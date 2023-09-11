@@ -173,7 +173,7 @@ Feature: TypeQL Fetch Query
       """
 
 
-  Feature: a subquery can be fetched
+  Feature: a fetch subquery can be a match-fetch query
     When get answers of typeql fetch
       """
       match
@@ -216,6 +216,48 @@ Feature: TypeQL Fetch Query
          age: [ ]
        },
        employers: [ ]
+      }]
+      """
+
+
+  Feature: a fetch subquery can be a match-aggregate query
+    When get answers of typeql fetch
+      """
+      match
+      $p isa person, has person-name $n; { $n == 'Alice'; } or { $n == 'Bob'; };
+      fetch
+      $p: person-name, age;
+      employment-count: {
+        match
+        $r (employee: $p, employer: $c) isa employment;
+        get $r;
+        count;
+      };
+      sort $n;
+      """
+    Then fetch answers are
+      """
+      [{
+        p: {
+          type: 'person',
+          person-name: [
+            { type: 'person-name', value: 'Alice' }
+          ],
+          age: [
+            { type: 'age', value: 10 }
+          ]
+        },
+        employer-count: { value: 1 }
+      },
+      {
+        p: {
+         type: 'person',
+         person-name: [
+           { type: 'person-name', value: 'Bob' }
+         ],
+         age: [ ]
+       },
+       employment-count: { value: 0 }
       }]
       """
 
