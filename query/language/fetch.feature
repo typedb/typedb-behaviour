@@ -173,6 +173,28 @@ Feature: TypeQL Fetch Query
       """
 
 
+  Feature: a concept's attributes can be fetched using more general types than the concept type owns
+    When get answers of typeql fetch
+      """
+      match
+      $p isa person, has person-name 'Alice';
+      fetch
+      $p: attribute;
+      """
+    Then fetch answers are
+      """
+      [{
+        p: {
+          type: 'person',
+          attribute: [
+            { type: 'person-name', value: 'Alice' },
+            { type: 'age', value: 10 },
+            { type: 'person-name', value: 'Allie' }
+          ],
+      }]
+      """
+
+
   Feature: a fetch subquery can be a match-fetch query
     When get answers of typeql fetch
       """
@@ -282,7 +304,7 @@ Feature: TypeQL Fetch Query
     When get answers of typeql fetch
       """
       match
-      $p isa person, has person-name $n;
+      $p isa person, has person-name $n; { $n == 'Alice'; } or { $n == 'Bob'; };
       fetch
       $p: person-name as name, age;
       sort $n;
@@ -306,4 +328,82 @@ Feature: TypeQL Fetch Query
           ],
           age: [ ]
       }]
+      """
+
+
+  Feature: an attribute projection with an invalid type throws
+    When get answers of typeql fetch; throws exception
+      """
+      match
+      $p isa person, has person-name $n; { $n == 'Alice'; } or { $n == 'Bob'; };
+      fetch
+      $p: type;
+      sort $n;
+      """
+
+
+  Feature: an attribute projection with an invalid relabel throws
+    When get answers of typeql fetch; throws exception
+      """
+      match
+      $p isa person, has person-name $n; { $n == 'Alice'; } or { $n == 'Bob'; };
+      fetch
+      $p: person-name as type;
+      sort $n;
+      """
+
+
+  Feature: a fetch subquery cannot be an insert, match-get, match-group, or match-group-aggregate
+    When get answers of typeql fetch; throws exception
+    """
+      match
+      $p isa person, has person-name $n; { $n == 'Alice'; } or { $n == 'Bob'; };
+      fetch
+      $p: person-name, age;
+      inserted: {
+        insert $p has age 20;
+      };
+      sort $n;
+      """
+    When get answers of typeql fetch; throws exception
+      """
+      match
+      $p isa person, has person-name $n; { $n == 'Alice'; } or { $n == 'Bob'; };
+      fetch
+      $p: person-name, age;
+      ages: {
+        match
+        $p has age $n;
+        get $n;
+      };
+      sort $n;
+      """
+    When get answers of typeql fetch; throws exception
+      """
+      match
+      $p isa person, has person-name $n; { $n == 'Alice'; } or { $n == 'Bob'; };
+      fetch
+      $p: person-name, age;
+      groups: {
+        match
+        $p has age $a;
+        get $p, $n;
+        group $p;
+      };
+      sort $n;
+      """
+    When get answers of typeql fetch; throws exception
+      """
+      match
+      $p isa person, has person-name $n; { $n == 'Alice'; } or { $n == 'Bob'; };
+      fetch
+      $p: person-name, age;
+      group-counts: {
+        match
+        $p has age $n;
+        get $a, $n;
+        group $n;
+        count;
+      };
+      sort $n;
       """
