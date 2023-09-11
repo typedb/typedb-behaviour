@@ -62,8 +62,8 @@ Feature: TypeQL Fetch Query
       """
       insert
       $p1 isa person, has person-name "Alice", has person-name "Allie", has age 10, has ref 0;
-      $p2 isa person, has person-name "Bob", ref 1;
-      $c1 isa company, has company-name "Vaticle", has ref 2
+      $p2 isa person, has person-name "Bob", has ref 1;
+      $c1 isa company, has company-name "Vaticle", has ref 2;
       $f1 (friend: $p1, friend: $p2) isa friendship, has ref 3;
       $e1 (employee: $p1, employer: $c1) isa employment, has ref 4;
       """
@@ -72,7 +72,7 @@ Feature: TypeQL Fetch Query
     Given session opens transaction of type: read
 
 
-  Feature: a type can be fetched
+  Scenario: a type can be fetched
     When get answers of typeql fetch
       """
       match
@@ -83,12 +83,12 @@ Feature: TypeQL Fetch Query
     Then fetch answers are
       """
       [{
-        p: { label: 'person' }
+        "p": { "root": "entity", "label": "person" }
       }]
       """
 
 
-  Feature: an attribute can be fetched
+  Scenario: an attribute can be fetched
     When get answers of typeql fetch
       """
       match
@@ -100,21 +100,21 @@ Feature: TypeQL Fetch Query
     Then fetch answers are
       """
       [{
-        a: { type: 'person-name', value: 'Alice' }
+        "a": { "value":"Alice", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } }
       },
       {
-        a: { type: 'person-name', value: 'Allie' }
+        "a": { "value":"Allie", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } }
       },
       {
-        a: { type: 'person-name', value: 'Bob' }
+        "a": { "value":"Bob", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } }
       },
       {
-        a: { type: 'company-name', value: 'Vaticle' }
+        "a": { "value":"Vaticle", "value_type": "string", "type": { "root": "attribute", "label": "company-name" } }
       }]
       """
 
 
-  Feature: a value can be fetched
+  Scenario: a value can be fetched
     When get answers of typeql fetch
       """
       match
@@ -127,21 +127,21 @@ Feature: TypeQL Fetch Query
     Then fetch answers are
       """
       [{
-        v: { value: 'Alice' }
+        "v": { "value":"Alice", "value_type": "string" }
       },
       {
-        v: { value: 'Allie' }
+        "v": { "value":"Allie", "value_type": "string" }
       },
       {
-        v: { value: 'Bob' }
+        "v": { "value":"Bob", "value_type": "string" }
       },
       {
-        v: { value: 'Vaticle' }
+        "v": { "value":"Vaticle", "value_type": "string" }
       }]
       """
 
 
-  Feature: a concept's attributes can be fetched
+  Scenario: a concept's attributes can be fetched
     When get answers of typeql fetch
       """
       match
@@ -153,56 +153,61 @@ Feature: TypeQL Fetch Query
     Then fetch answers are
       """
       [{
-        p: {
-          type: 'person',
-          person-name: [
-            { type: 'person-name', value: 'Alice' },
-            { type: 'person-name', value: 'Allie' }
+        "p": {
+          "type": { "root": "entity", "label": "person" },
+          "person-name": [
+            { "value":"Alice", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } },
+            { "value":"Allie", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } }
           ],
-          age: [
-            { type: 'age', value: 10 }
+          "age": [
+            { "value": 10, "value_type": "long", "type": { "root": "attribute", "label": "age" } }
           ]
+        }
       },
-        p: {
-          type: 'person',
-          person-name: [
-            { type: 'person-name', value: 'Bob' }
+      {
+        "p": {
+          "type": { "root": "entity", "label": "person" },
+          "person-name": [
+            { "value":"Bob", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } }
           ],
-          age: [ ]
+          "age": []
+        }
       }]
       """
 
 
-  Feature: a concept's attributes can be fetched using more general types than the concept type owns
+  Scenario: a concept's attributes can be fetched using more general types than the concept type owns
     When get answers of typeql fetch
       """
       match
-      $p isa person, has person-name 'Alice';
+      $p isa person, has person-name "Alice";
       fetch
       $p: attribute;
       """
     Then fetch answers are
       """
       [{
-        p: {
-          type: 'person',
-          attribute: [
-            { type: 'person-name', value: 'Alice' },
-            { type: 'age', value: 10 },
-            { type: 'person-name', value: 'Allie' }
-          ],
+        "p": {
+          "type": { "root": "entity", "label": "person" },
+          "attribute": [
+            { "value": "Alice", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } },
+            { "value": "Allie", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } },
+            { "value": 10, "value_type": "long", "type": { "root": "attribute", "label": "age" } },
+            { "value": 0, "value_type": "long", "type": { "root": "attribute", "label": "ref" } }
+          ]
+        }
       }]
       """
 
 
-  Feature: a fetch subquery can be a match-fetch query
+  Scenario: a fetch subquery can be a match-fetch query
     When get answers of typeql fetch
       """
       match
-      $p isa person, has person-name $n; { $n == 'Alice'; } or { $n == 'Bob'; };
+      $p isa person, has person-name $n; { $n == "Alice"; } or { $n == "Bob"; };
       fetch
       $p: person-name, age;
-      employers: {
+      "employers": {
         match
         (employee: $p, employer: $c) isa employment;
         fetch
@@ -213,40 +218,45 @@ Feature: TypeQL Fetch Query
     Then fetch answers are
       """
       [{
-        p: {
-          type: 'person',
-          person-name: [
-            { type: 'person-name', value: 'Alice' }
+        "p": {
+          "type": { "root": "entity", "label": "person" },
+          "person-name": [
+            { "value":"Alice", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } },
+            { "value":"Allie", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } }
           ],
-          age: [
-            { type: 'age', value: 10 }
+          "age": [
+            { "value": 10, "value_type": "long", "type": { "root": "attribute", "label": "age" } }
           ]
         },
-        employers: [
-          c: {
-            type: 'company',
-            name: [ { type: 'company-name', value: 'Vaticle' }]
+        "employers": [
+          {
+            "c": {
+              "type": { "root": "entity", "label": "company" },
+              "name": [
+                { "value": "Vaticle", "value_type": "string", "type": { "root": "attribute", "label": "company-name" } }
+              ]
+            }
           }
         ]
       },
       {
-        p: {
-         type: 'person',
-         person-name: [
-           { type: 'person-name', value: 'Bob' }
-         ],
-         age: [ ]
-       },
-       employers: [ ]
+        "p": {
+          "type": { "root": "entity", "label": "person" },
+          "person-name": [
+            { "value":"Bob", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } }
+          ],
+          "age": [ ]
+        },
+        "employers": [ ]
       }]
       """
 
 
-  Feature: a fetch subquery can be a match-aggregate query
+  Scenario: a fetch subquery can be a match-aggregate query
     When get answers of typeql fetch
       """
       match
-      $p isa person, has person-name $n; { $n == 'Alice'; } or { $n == 'Bob'; };
+      $p isa person, has person-name $n; { $n == "Alice"; } or { $n == "Bob"; };
       fetch
       $p: person-name, age;
       employment-count: {
@@ -260,31 +270,97 @@ Feature: TypeQL Fetch Query
     Then fetch answers are
       """
       [{
-        p: {
-          type: 'person',
-          person-name: [
-            { type: 'person-name', value: 'Alice' }
+        "p": {
+          "type": { "root": "entity", "label": "person" },
+          "person-name": [
+            { "value":"Alice", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } },
+            { "value":"Allie", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } }
           ],
-          age: [
-            { type: 'age', value: 10 }
+          "age": [
+            { "value": 10, "value_type": "long", "type": { "root": "attribute", "label": "age" } }
           ]
         },
-        employer-count: { value: 1 }
+        "employment-count": { "value":1 }
       },
       {
-        p: {
-         type: 'person',
-         person-name: [
-           { type: 'person-name', value: 'Bob' }
+        "p": {
+         "type": { "root": "entity", "label": "person" },
+         "person-name": [
+            { "value":"Bob", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } }
          ],
-         age: [ ]
+         "age": [ ]
        },
-       employment-count: { value: 0 }
+       "employment-count": { "value":0 }
       }]
       """
 
 
-  Feature: a project can be relabeled
+  Scenario: fetch subqueries can be nested and use bindings from any parent
+    Given for each session, transaction closes
+    Given session opens transaction of type: write
+    Given typeql insert
+      """
+      match
+      $p2 isa person, has person-name "Bob";
+      $c1 isa company, has name "Vaticle";
+      insert
+      (employee: $p2, employer: $c1) isa employment, has ref 6;
+      """
+    Given transaction commits
+
+    Given session opens transaction of type: read
+    When get answers of typeql fetch
+      """
+      match
+      $p isa person, has person-name "Alice";
+      fetch
+      $p: age;
+      alice-employers: {
+        match
+        (employee: $p, employer: $c) isa employment;
+        fetch
+        $c as company: name;
+        alice-employment-rel: {
+          match
+          $r (employee: $p, employer: $c) isa employment;
+          fetch
+          $r: ref;
+        };
+      };
+      """
+    Then fetch answers are
+      """
+      [{
+        "p": {
+          "type": { "root": "entity", "label": "person" },
+          "age": [
+            { "value": 10, "value_type": "long", "type": { "root": "attribute", "label": "age" } }
+          ]
+        },
+        "alice-employers": [
+          {
+            "company": {
+              "type": { "root": "entity", "label": "company" },
+              "name": [
+                { "value": "Vaticle", "value_type": "string", "type": { "root": "attribute", "label": "company-name" } }
+              ]
+            },
+            "alice-employment-rel": [
+              {
+                "r": {
+                  "ref": [
+                    { "value": 4, "value_type": "long", "type": { "root": "attribute", "label": "ref" } }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }]
+      """
+
+
+  Scenario: a projection can be relabeled
     When get answers of typeql fetch
       """
       match
@@ -295,16 +371,37 @@ Feature: TypeQL Fetch Query
     Then fetch answers are
       """
       [{
-        person: { label: 'person' }
+        "person": { "root": "entity", "label": "person" }
       }]
       """
 
 
-  Feature: an attribute projection can be relabeled
+  Scenario: labels can have spaces
     When get answers of typeql fetch
       """
       match
-      $p isa person, has person-name $n; { $n == 'Alice'; } or { $n == 'Bob'; };
+      $p isa person, has person-name "Alice";
+      fetch
+      $p as "person Alice": age as "her age";
+      """
+    Then fetch answers are
+      """
+      [{
+        "person Alice": {
+          "type": { "root": "entity", "label": "person" },
+          "her age": [
+            { "value": 10, "value_type": "long", "type": { "root": "attribute", "label": "age" } }
+          ]
+        }
+      }]
+      """
+
+
+  Scenario: an attribute projection can be relabeled
+    When get answers of typeql fetch
+      """
+      match
+      $p isa person, has person-name $n; { $n == "Alice"; } or { $n == "Bob"; };
       fetch
       $p: person-name as name, age;
       sort $n;
@@ -312,52 +409,107 @@ Feature: TypeQL Fetch Query
     Then fetch answers are
       """
       [{
-        p: {
-          type: 'person',
-          name: [
-            { type: 'person-name', value: 'Alice' }
+        "p": {
+          "type": { "root": "entity", "label": "person" },
+          "name": [
+            { "value": "Alice", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } },
+            { "value": "Allie", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } }
           ],
-          age: [
-            { type: 'age', value: 10 }
+          "age": [
+            { "value": 10, "value_type": "long", "type": { "root": "attribute", "label": "age" } }
           ]
+        }
       },
-        p: {
-          type: 'person',
-          name: [
-            { type: 'person-name', value: 'Bob' }
+      {
+        "p": {
+          "type": { "root": "entity", "label": "person" },
+          "name": [
+            { "value": "Bob", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } }
           ],
-          age: [ ]
+          "age": [ ]
+        }
       }]
       """
 
 
-  Feature: an attribute projection with an invalid type throws
-    When get answers of typeql fetch; throws exception
+  Scenario: a fetch with zero projections throws
+    When typeql fetch; throws exception
       """
       match
-      $p isa person, has person-name $n; { $n == 'Alice'; } or { $n == 'Bob'; };
+      $p isa person, has person-name $n;
+      fetch;
+      """
+
+
+  Scenario: a variable projection that can contain entities or relations throws
+    When typeql fetch; throws exception
+      """
+      match
+      $x isa entity;
+      fetch
+      $x;
+      """
+
+
+  Scenario: an attribute projection with an invalid attribute type throws
+    When typeql fetch; throws exception
+      """
+      match
+      $p isa person, has person-name $n; { $n == "Alice"; } or { $n == "Bob"; };
       fetch
       $p: type;
       sort $n;
       """
-
-
-  Feature: an attribute projection with an invalid relabel throws
-    When get answers of typeql fetch; throws exception
+    When typeql fetch; throws exception
       """
       match
-      $p isa person, has person-name $n; { $n == 'Alice'; } or { $n == 'Bob'; };
+      $p isa person, has person-name $n; { $n == "Alice"; } or { $n == "Bob"; };
       fetch
-      $p: person-name as type;
+      $p: person;
       sort $n;
       """
 
 
-  Feature: a fetch subquery cannot be an insert, match-get, match-group, or match-group-aggregate
-    When get answers of typeql fetch; throws exception
+  Scenario: an attribute projection from a type throws
+    When typeql fetch; throws exception
+      """
+      match
+      $p type person;
+      fetch
+      $p: name;
+      """
+
+
+  Scenario: fetching a variable that is not present in the match throws
+    When typeql fetch; throws exception
+      """
+      match
+      $p isa person, has person-name $n;
+      fetch
+      $x: type;
+      """
+
+
+  Scenario: a subquery that is not connected to the match throws
+    When typeql fetch; throws exception
+      """
+      match
+      $p isa person, has person-name $n;
+      fetch
+      all-employments-count: {
+        match
+        $r isa employment;
+        get $r;
+        count;
+      };
+      """
+
+
+  Scenario: a fetch subquery cannot be an insert, match-get, match-group, or match-group-aggregate
+    When typeql fetch; throws exception
     """
       match
-      $p isa person, has person-name $n; { $n == 'Alice'; } or { $n == 'Bob'; };
+      $p isa person, has person-name $n; { $n == "Alice"; } or { $n == "Bob"; };
       fetch
       $p: person-name, age;
       inserted: {
@@ -365,10 +517,10 @@ Feature: TypeQL Fetch Query
       };
       sort $n;
       """
-    When get answers of typeql fetch; throws exception
+    When typeql fetch; throws exception
       """
       match
-      $p isa person, has person-name $n; { $n == 'Alice'; } or { $n == 'Bob'; };
+      $p isa person, has person-name $n; { $n == "Alice"; } or { $n == "Bob"; };
       fetch
       $p: person-name, age;
       ages: {
@@ -378,10 +530,10 @@ Feature: TypeQL Fetch Query
       };
       sort $n;
       """
-    When get answers of typeql fetch; throws exception
+    When typeql fetch; throws exception
       """
       match
-      $p isa person, has person-name $n; { $n == 'Alice'; } or { $n == 'Bob'; };
+      $p isa person, has person-name $n; { $n == "Alice"; } or { $n == "Bob"; };
       fetch
       $p: person-name, age;
       groups: {
@@ -392,10 +544,10 @@ Feature: TypeQL Fetch Query
       };
       sort $n;
       """
-    When get answers of typeql fetch; throws exception
+    When typeql fetch; throws exception
       """
       match
-      $p isa person, has person-name $n; { $n == 'Alice'; } or { $n == 'Bob'; };
+      $p isa person, has person-name $n; { $n == "Alice"; } or { $n == "Bob"; };
       fetch
       $p: person-name, age;
       group-counts: {

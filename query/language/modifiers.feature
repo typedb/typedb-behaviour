@@ -35,7 +35,7 @@ Feature: TypeQL Query Modifiers
         owns name,
         owns age,
         owns ref @key,
-        owns email @unique;
+        owns email;
       company sub entity,
         plays employment:employer,
         owns name,
@@ -57,6 +57,7 @@ Feature: TypeQL Query Modifiers
     Given connection close all sessions
     Given connection open data session for database: typedb
     Given session opens transaction of type: write
+
   # ------------- read queries -------------
 
   ########
@@ -695,7 +696,7 @@ Feature: TypeQL Query Modifiers
       """
       match $x isa $t; $t owns ref; $x <= <fourthValuePivot>;
       get $x;
-      sort $x desc;G
+      sort $x desc;
       """
     Then order of answer concepts is
       | x         |
@@ -749,7 +750,7 @@ Feature: TypeQL Query Modifiers
       """
     Given transaction commits
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql get group
       """
       match $x isa person, has ref $r, has name $n;
       get $r, $n;
@@ -758,11 +759,11 @@ Feature: TypeQL Query Modifiers
       """
     Then answer groups are
       | owner               | r          |
-      | attr:name:Brenda    | attr:ref:5 |
       | attr:name:Brenda    | attr:ref:4 |
-      | attr:name:Frederick | attr:ref:3 |
-      | attr:name:Jemima    | attr:ref:2 |
-      | attr:name:Gary      | attr:ref:1 |
+      | attr:name:Brenda    | attr:ref:3 |
+      | attr:name:Frederick | attr:ref:2 |
+      | attr:name:Jemima    | attr:ref:1 |
+      | attr:name:Gary      | attr:ref:0 |
 
 
   Scenario: Get group queries can use sort, offset, limit
@@ -776,7 +777,7 @@ Feature: TypeQL Query Modifiers
       """
     Given transaction commits
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql get group
       """
       match $x isa person, has name $y;
       get $x, $y;
@@ -785,8 +786,8 @@ Feature: TypeQL Query Modifiers
       """
     Then answer groups are
       | owner               | x         |
-      | attr:name:Frederick | key:ref:3 |
-      | attr:name:Gary      | key:ref:1 |
+      | attr:name:Frederick | key:ref:2 |
+      | attr:name:Gary      | key:ref:0 |
 
 
   Scenario: Fetch queries can use sort, offset, limit
@@ -800,7 +801,7 @@ Feature: TypeQL Query Modifiers
       """
     Given transaction commits
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql fetch
       """
       match $x isa person, has ref $r;
       fetch
@@ -808,24 +809,24 @@ Feature: TypeQL Query Modifiers
       $r as ref;
       sort $r desc; offset 1; limit 2;
       """
-    Then answers fetched are
+    Then fetch answers are
       """
       [
         {
-          person: {
-            type: "person",
-            name: [{type: "name", value: "Frederick"}, {type: "name", value: "Freddy"}],
-            email: [{type: "email", value: "frederick@gmail.com"}]
+          "person": {
+            "type": { "label": "person", "root": "entity" },
+            "name": [ { "type": { "label": "name", "root": "attribute" }, "value": "Frederick"}, { "type": { "label": "name", "root": "attribute" }, "value": "Freddy" } ],
+            "email": [ { "type": { "label": "email", "root": "attribute" }, "value": "frederick@gmail.com" } ]
           },
-          ref: {type: "ref", value: 2}
+          "ref": { "type" : { "label": "ref", "root": "attribute" }, "value": 2, "value_type": "long" }
         },
         {
-          person: {
-            type: "person",
-            name: [{type: "name", value: "Jemima" }],
-            email: []
+          "person": {
+            "type":  { "label": "person", "root": "entity" },
+            "name": [ { "type": { "label": "name", "root": "attribute" }, "value": "Jemima" } ],
+            "email": [ ]
           },
-          ref: {type: "ref", value: 1}
+          "ref": { "type" : { "label": "ref", "root": "attribute" }, "value" : 1, "value_type": "long" }
         }
       ]
       """
@@ -846,9 +847,9 @@ Feature: TypeQL Query Modifiers
 
     When get answers of typeql insert
       """
-      match:
+      match
       $x isa person, has ref $r;
-      insert;
+      insert
       $x has email "dummy@gmail.com";
       sort $r; offset 1; limit 2;
       """
@@ -880,16 +881,17 @@ Feature: TypeQL Query Modifiers
       """
     Given transaction commits
 
-    Given session opens transaction of type: reads
+    Given session opens transaction of type: read
     Then get answers of typeql get
       """
       match
       $x isa person, has name $n;
+      sort $n;
       """
     Then uniquely identify answer concepts
       | x         | n                   |
-      | key:ref:1 | attr:name:Jemima    |
-      | key:ref:2 | attr:name:Frederick |
+      | key:ref:3 | attr:name:Brenda    |
+      | key:ref:0 | attr:name:Gary      |
 
 
 
@@ -905,7 +907,7 @@ Feature: TypeQL Query Modifiers
     Given transaction commits
     Given session opens transaction of type: write
 
-    When typeql delete
+    When typeql update
       """
       match
       $x isa person, has ref $r, has name $n;
@@ -917,7 +919,7 @@ Feature: TypeQL Query Modifiers
       """
     Given transaction commits
 
-    Given session opens transaction of type: reads
+    Given session opens transaction of type: read
     Then get answers of typeql get
       """
       match
