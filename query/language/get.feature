@@ -16,7 +16,7 @@
 #
 
 #noinspection CucumberUndefinedStep
-Feature: TypeQL Get Clause
+Feature: TypeQL Get Query
 
   Background: Open connection and create a simple extensible schema
     Given typedb starts
