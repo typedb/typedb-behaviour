@@ -47,8 +47,8 @@ Feature: Connection Users
   @ignore-typedb-client-python @ignore-typedb-client-nodejs @ignore-typedb-client-rust
   Scenario: user passwords must comply with the minimum length
     Given typedb has configuration
-      |server.authentication.password-policy.complexity.min-length|5|
       |server.authentication.password-policy.complexity.enable|true|
+      |server.authentication.password-policy.complexity.min-length|5|
     Given typedb starts
     Given connection opens with authentication: admin, password
     Then users create: user, password
@@ -58,8 +58,8 @@ Feature: Connection Users
   @ignore-typedb-client-python @ignore-typedb-client-nodejs @ignore-typedb-client-rust
   Scenario: user passwords must comply with the minimum number of lowercase characters
     Given typedb has configuration
-      |server.authentication.password-policy.complexity.min-lowercase|2|
       |server.authentication.password-policy.complexity.enable|true|
+      |server.authentication.password-policy.complexity.min-lowercase|2|
     Given typedb starts
     Given connection opens with authentication: admin, password
     Then users create: user, password
@@ -69,8 +69,8 @@ Feature: Connection Users
   @ignore-typedb-client-python @ignore-typedb-client-nodejs @ignore-typedb-client-rust
   Scenario: user passwords must comply with the minimum number of uppercase characters
     Given typedb has configuration
-      |server.authentication.password-policy.complexity.min-uppercase|2|
       |server.authentication.password-policy.complexity.enable|true|
+      |server.authentication.password-policy.complexity.min-uppercase|2|
     Given typedb starts
     Given connection opens with authentication: admin, password
     Then users create: user, PASSWORD
@@ -80,8 +80,8 @@ Feature: Connection Users
   @ignore-typedb-client-python @ignore-typedb-client-nodejs @ignore-typedb-client-rust
   Scenario: user passwords must comply with the minimum number of numeric characters
     Given typedb has configuration
-      |server.authentication.password-policy.complexity.min-numerics|2|
       |server.authentication.password-policy.complexity.enable|true|
+      |server.authentication.password-policy.complexity.min-numeric|2|
     Given typedb starts
     Given connection opens with authentication: admin, password
     Then users create: user, PASSWORD789
@@ -91,8 +91,8 @@ Feature: Connection Users
   @ignore-typedb-client-python @ignore-typedb-client-nodejs @ignore-typedb-client-rust
   Scenario: user passwords must comply with the minimum number of special characters
     Given typedb has configuration
-      |server.authentication.password-policy.complexity.min-special-chars|2|
       |server.authentication.password-policy.complexity.enable|true|
+      |server.authentication.password-policy.complexity.min-special|2|
     Given typedb starts
     Given connection opens with authentication: admin, password
     Then users create: user, PASSWORD!@£
@@ -102,8 +102,8 @@ Feature: Connection Users
   @ignore-typedb-client-python @ignore-typedb-client-nodejs @ignore-typedb-client-rust
   Scenario: user passwords must comply with the minimum number of different characters
     Given typedb has configuration
-      |server.authentication.password-policy.complexity.min-different-chars|4|
       |server.authentication.password-policy.complexity.enable|true|
+      |server.authentication.password-policy.min-chars-different|4|
     Given typedb starts
     Given connection opens with authentication: admin, password
     Then users create: user, password
