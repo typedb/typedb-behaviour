@@ -137,7 +137,7 @@ Feature: Connection Database
     Then connection has database: alice
 
 
-  # TODO: currently throws in @After; re-enable when we are able to check if sessions are alive (see client-java#225)
+  # TODO: currently throws in @After; re-enable when we are able to check if sessions are alive (see driver-java#225)
   @ignore
   Scenario: delete a database causes open sessions to fail
     When connection create database: typedb
@@ -147,7 +147,7 @@ Feature: Connection Database
     Then session open transaction of type; throws exception: write
 
 
-  # TODO: currently throws in @After; re-enable when we are able to check if sessions are alive (see client-java#225)
+  # TODO: currently throws in @After; re-enable when we are able to check if sessions are alive (see driver-java#225)
   @ignore
   Scenario: delete a database causes open transactions to fail
     When connection create database: typedb

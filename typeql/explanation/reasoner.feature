@@ -27,7 +27,7 @@ Feature: TypeQL Reasoning Explanation
     Given connection open schema session for database: test_explanation
     Given transaction is initialised
 
-  @ignore-typedb-client-java
+  @ignore-typedb-driver-java
   Scenario: a rule explanation is given when a rule is applied
     Given typeql define
       """
@@ -76,7 +76,7 @@ Feature: TypeQL Reasoning Explanation
       | 0 | 1        | co, n | CO, CON     | company-has-name | { $co iid <answer.co.iid>; $co has name $n; $n iid <answer.n.iid>; }; |
       | 1 | -        | c     | CO          | lookup           | { $c isa company; $c iid <answer.c.iid>; };                           |
 
-  @ignore-typedb-client-java
+  @ignore-typedb-driver-java
   Scenario: nested rule explanations are given when multiple rules are applied
     Given typeql define
       """
@@ -141,7 +141,7 @@ Feature: TypeQL Reasoning Explanation
       | 1 | 2        | c2, name | CO, CON     | company-has-name  | { $c2 isa company; $c2 has name $name; $name == "the-company"; $c2 iid <answer.c2.iid>; $name iid <answer.name.iid>; }; |
       | 2 | -        | c1       | CO          | lookup            | { $c1 isa company; $c1 iid <answer.c1.iid>; };                                                                         |
 
-  @ignore-typedb-client-java
+  @ignore-typedb-driver-java
   Scenario: a join explanation can be given directly and inside a rule explanation
     Given typeql define
       """
@@ -219,7 +219,7 @@ Feature: TypeQL Reasoning Explanation
       | 1 | -        | k, n    | KC, KCN      | lookup      | { $k isa area; $k has name $n; $n iid <answer.n.iid>; $k iid <answer.k.iid>; };                                                                                |
       | 2 | -        | k, l    | KC, LDN      | lookup      | { (superior: $l, subordinate: $k) isa location-hierarchy; $k isa area; $k iid <answer.k.iid>; $l iid <answer.l.iid>; };                                        |
 
-  @ignore-typedb-client-java
+  @ignore-typedb-driver-java
   Scenario: an answer with a more specific type can be retrieved from the cache with correct explanations
     Given typeql define
       """
@@ -310,7 +310,7 @@ Feature: TypeQL Reasoning Explanation
       | 3 | -        | p1, na        | ALI, ALIN            | lookup               | { $p1 isa woman; $p1 has name $na; $na == "Alice"; $p1 iid <answer.p1.iid>; $na iid <answer.na.iid>; };                                                                                           |
       | 4 | -        | man           | BOB                  | lookup               | { $man isa man; $man iid <answer.man.iid>; };                                                                                                                                                    |
 
-  @ignore-typedb-client-java
+  @ignore-typedb-driver-java
   Scenario: a query with a disjunction and negated inference has disjunctive and negation explanation but no rule explanation
 
   A rule explanation is not be given since the rule was only used to infer facts that were later negated
@@ -375,7 +375,7 @@ Feature: TypeQL Reasoning Explanation
       | 1 | 2        | com, n2 | ACO, N2     | negation    | { $com isa company; $com has name $n2; $n2 == "another-company"; $com iid <answer.com.iid>; $n2 iid <answer.n2.iid>; not { { $com has is-liable $liability; }; }; };                                                                                          |
       | 2 | -        | com, n2 | ACO, N2     | lookup      | { $com isa company; $com has name $n2; $n2 == "another-company"; $com iid <answer.com.iid>; $n2 iid <answer.n2.iid>; };                                                                                                                                       |
 
-  @ignore-typedb-client-java
+  @ignore-typedb-driver-java
   Scenario: a rule containing a negation gives a rule explanation with a negation explanation inside
     Given typeql define
       """
@@ -438,7 +438,7 @@ Feature: TypeQL Reasoning Explanation
       | 1 | 2        | c2       | ACO         | negation          | { $c2 isa company; $c2 iid <answer.c2.iid>; not { { $c2 has name $n2; $n2 == "the-company"; }; }; };                |
       | 2 | -        | c2       | ACO         | lookup            | { $c2 isa company; $c2 iid <answer.c2.iid>; };                                                                     |
 
-  @ignore-typedb-client-java
+  @ignore-typedb-driver-java
   Scenario: a query containing multiple negations with inferred conjunctions inside has just one negation explanation
 
   A rule explanation is not be given since the rule was only used to infer facts that were later negated
