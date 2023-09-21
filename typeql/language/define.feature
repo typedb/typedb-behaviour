@@ -1261,7 +1261,7 @@ Feature: TypeQL Define Query
       | label:super-name | label:location-name |
 
   # TODO: Reenable this scenario after closing https://github.com/vaticle/typeql/issues/281
-  @ignore-typedb-client-rust
+  @ignore-typedb-driver-rust
   Scenario: repeating the term 'abstract' when defining a type causes an error to be thrown
     Given typeql define; throws exception
       """
@@ -2436,10 +2436,10 @@ Feature: TypeQL Define Query
   # TRANSACTIONALITY #
   ####################
 
-  # TODO: re-enable when it passes reliably in clients (see client-java#233)
-  @ignore-typedb-client-java
-  @ignore-typedb-client-nodejs
-  @ignore-typedb-client-python
+  # TODO: re-enable when it passes reliably in drivers (see driver-java#233)
+  @ignore-typedb-driver-java
+  @ignore-typedb-driver-nodejs
+  @ignore-typedb-driver-python
   Scenario: uncommitted transaction writes are not persisted
     When typeql define
       """
