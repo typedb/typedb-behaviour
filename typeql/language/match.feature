@@ -1760,7 +1760,7 @@ Feature: TypeQL Match Query
     Given typeql define
       """
       define
-      unit sub attribute, value string, owns unit, owns ref;
+      unit sub attribute, value string, owns unit, owns ref @key;
       """
     Given transaction commits
 
