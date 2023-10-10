@@ -15,8 +15,23 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-#noinspection CucumberUndefinedStep
-Feature: TypeQL Compute Query
+package(default_visibility = ["//visibility:public"])
 
-  # This file is retained as a placeholder for future functionality
-  
+load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
+
+files = [
+    "query.feature",
+]
+
+filegroup(
+    name = "features",
+    srcs = files,
+)
+
+exports_files(files)
+
+checkstyle_test(
+    name = "checkstyle",
+    include = glob(["*"]),
+    license_type = "agpl-header",
+)
