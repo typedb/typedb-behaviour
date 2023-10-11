@@ -452,3 +452,88 @@ Feature: TypeDB Driver Queries
   ###############
   # EXPRESSIONS #
   ###############
+
+  Scenario: A value variable must have exactly one assignment constraint in the same scope
+    Given connection open data session for database: typedb
+
+    Given session opens transaction of type: read
+    Then typeql match; throws exception containing "value variable '?v' is never assigned to"
+    """
+      match
+        $x isa person, has age $a, has age $h;
+        ?v == $a;
+        ?v > $h;
+      get
+        $x, ?v;
+      """
+
+    Given session opens transaction of type: read
+    Then typeql match; throws exception containing "value variable '?v' can only have one assignment in the first scope"
+    """
+      match
+        $x isa person, has age $a, has age $h;
+        ?v = $a * 2;
+        ?v = $h / 2;
+      get
+        $x, ?v;
+      """
+
+  Scenario: Test operator definitions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: read
+
+    When get answers of typeql match
+    """
+      match
+        ?a = 6.0 + 3.0;
+        ?b = 6.0 - 3.0;
+        ?c = 6.0 * 3.0;
+        ?d = 6.0 / 3.0;
+      get
+        ?a, ?b, ?c, ?d;
+      """
+    Then uniquely identify answer concepts
+      | a                 | b                 | c                  | d                  |
+      | value:double: 9.0 | value:double: 3.0 | value:double: 18.0 | value:double: 2.0  |
+
+    When get answers of typeql match
+    """
+      match
+        ?a = 6 + 3;
+        ?b = 6 - 3;
+        ?c = 6 * 3;
+        ?d = 6 / 3;
+      get
+        ?a, ?b, ?c, ?d;
+      """
+    Then uniquely identify answer concepts
+      | a             | b            | c             | d                  |
+      | value:long: 9 | value:long:3 | value:long:18 | value:double: 2.0  |
+
+    When get answers of typeql match
+    """
+      match
+        ?a = 6.0 + 3;
+        ?b = 6.0 - 3;
+        ?c = 6.0 * 3;
+        ?d = 6.0 / 3;
+      get
+        ?a, ?b, ?c, ?d;
+      """
+    Then uniquely identify answer concepts
+      | a                 | b                 | c                  | d                  |
+      | value:double: 9.0 | value:double: 3.0 | value:double: 18.0 | value:double: 2.0  |
+
+    When get answers of typeql match
+    """
+      match
+        ?a = 6 + 3.0;
+        ?b = 6 - 3.0;
+        ?c = 6 * 3.0;
+        ?d = 6 / 3.0;
+      get
+        ?a, ?b, ?c, ?d;
+      """
+    Then uniquely identify answer concepts
+      | a                 | b                 | c                  | d                  |
+      | value:double: 9.0 | value:double: 3.0 | value:double: 18.0 | value:double: 2.0  |
