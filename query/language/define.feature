@@ -597,6 +597,15 @@ Feature: TypeQL Define Query
       | label:flight-attendant-employment |
 
 
+  Scenario: inherited role types cannot be played via role type aliases
+    Given typeql define; throws exception
+      """
+      define
+      part-time-employment sub employment;
+      person plays part-time-employment:employee;
+      """
+
+
   Scenario: a newly defined relation subtype inherits attribute ownerships from its parent type
     Given typeql define
       """

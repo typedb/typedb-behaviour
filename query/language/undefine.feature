@@ -808,6 +808,22 @@ Feature: TypeQL Undefine Query
       """
 
 
+  Scenario: undefining played inherited role types using alias role types throws
+    Given typeql define
+    """
+    define
+    part-time-employment sub employment;
+    """
+    Given transaction commits
+
+    Given session opens transaction of type: write
+    Given typeql undefine
+    """
+    undefine
+    person plays part-time-employment:employee;
+    """
+
+
   Scenario: removing a playable role throws an error if it is played by existing instances
     Given connection close all sessions
     Given connection open data session for database: typedb
