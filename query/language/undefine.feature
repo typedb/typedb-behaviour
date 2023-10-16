@@ -817,7 +817,7 @@ Feature: TypeQL Undefine Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    Given typeql undefine
+    Given typeql undefine; throws exception
     """
     undefine
     person plays part-time-employment:employee;
