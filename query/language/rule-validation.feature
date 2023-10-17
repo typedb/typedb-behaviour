@@ -443,6 +443,21 @@ Feature: TypeQL Rule Validation
       """
 
 
+  Scenario: when defining a rule using an aliased role type, an error is thrown
+    Then typeql define; throws exception
+      """
+      define
+      part-time-employment sub employment;
+      rule people-are-part-time-employees:
+      when {
+        $x isa person;
+        $t type part-time-employment:employee;
+      } then {
+        ($t: $x) isa part-time-employment;
+      };
+      """
+
+
   Scenario: when defining a rule to generate new entities from existing ones, an error is thrown
     Given typeql define
       """
