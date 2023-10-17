@@ -485,6 +485,21 @@ Feature: TypeQL Match Query
       | label:person |
 
 
+  Scenario: inherited role types cannot be be matched via role type alias
+    Given typeql define
+      """
+      define
+      close-friendship sub friendship;
+      """
+    Given transaction commits
+
+    Given session opens transaction of type: read
+    When typeql match; throws exception
+      """
+      match $x plays close-friendship:friend;
+      """
+
+
   Scenario: 'plays' does not match types that only play a super-role of the specified role
     Given typeql define
       """

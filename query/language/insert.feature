@@ -2201,6 +2201,28 @@ Parker";
       $x has $a; $a isa $t;
       """
 
+  Scenario: variable types in inserts cannot use aliased role types
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
+      """
+      define
+      part-time-employment sub employment;
+      """
+    Given transaction commits
+    Given connection close all sessions
+
+    Given connection open data session for database: typedb
+    When session opens transaction of type: write
+    Then typeql insert; throws exception
+      """
+      match
+      $t type part-time-employment:employee;
+      insert
+      ($t: $x) isa part-time-employment;
+      $x isa person;
+      """
 
   #####################################
   # MATERIALISATION OF INFERRED FACTS #
