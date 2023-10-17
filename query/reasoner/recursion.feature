@@ -990,24 +990,25 @@ Feature: Recursion Resolution
 
       vertex sub entity,
         owns index @key,
-        plays reachable:coordinate;
+        plays link:coordinate,
+        plays reachable:reachable-coordinate;
 
       link sub relation, relates coordinate;
-      reachable sub link;
+      reachable sub link, relates reachable-coordinate as coordinate;
 
       index sub attribute, value string;
 
       rule a-linked-point-is-reachable: when {
         ($x, $y) isa link;
       } then {
-        (coordinate: $x, coordinate: $y) isa reachable;
+        (reachable-coordinate: $x, reachable-coordinate: $y) isa reachable;
       };
 
       rule a-point-reachable-from-a-linked-point-is-reachable: when {
         ($x, $z) isa link;
         ($z, $y) isa reachable;
       } then {
-        (coordinate: $x, coordinate: $y) isa reachable;
+        (reachable-coordinate: $x, reachable-coordinate: $y) isa reachable;
       };
       """
     Given reasoning data
