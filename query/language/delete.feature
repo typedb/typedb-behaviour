@@ -88,19 +88,19 @@ Feature: TypeQL Delete Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x isa person;
+      match $x isa person; get;
       """
     Then uniquely identify answer concepts
       | x            |
       | key:name:Bob |
     When get answers of typeql get
       """
-      match $x isa friendship;
+      match $x isa friendship; get;
       """
     Then answer size is: 0
     When get answers of typeql get
       """
-      match $x isa name;
+      match $x isa name; get;
       """
     Then uniquely identify answer concepts
       | x               |
@@ -135,7 +135,7 @@ Feature: TypeQL Delete Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x isa person;
+      match $x isa person; get;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -169,7 +169,7 @@ Feature: TypeQL Delete Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x isa person;
+      match $x isa person; get;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -203,7 +203,7 @@ Feature: TypeQL Delete Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x isa friendship;
+      match $x isa friendship; get;
       """
     Then answer size is: 0
 
@@ -231,7 +231,7 @@ Feature: TypeQL Delete Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x isa name;
+      match $x isa name; get;
       """
     Then answer size is: 0
 
@@ -263,7 +263,7 @@ Feature: TypeQL Delete Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x isa person;
+      match $x isa person; get;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -294,7 +294,7 @@ Feature: TypeQL Delete Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x isa person;
+      match $x isa person; get;
       """
     Then answer size is: 0
 
@@ -414,6 +414,7 @@ Feature: TypeQL Delete Query
       match
       $x isa person;
       $r ($x) isa friendship;
+      get;
       """
     Then answer size is: 0
 
@@ -454,7 +455,7 @@ Feature: TypeQL Delete Query
     When session opens transaction of type: write
     When get answers of typeql get
       """
-      match (friend: $x, friend: $y) isa friendship;
+      match (friend: $x, friend: $y) isa friendship; get;
       """
     Then uniquely identify answer concepts
       | x               | y               |
@@ -489,7 +490,7 @@ Feature: TypeQL Delete Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x isa person;
+      match $x isa person; get;
       """
     Then uniquely identify answer concepts
       | x               |
@@ -497,7 +498,7 @@ Feature: TypeQL Delete Query
       | key:name:Carrie |
     When get answers of typeql get
       """
-      match $r (friend: $x) isa friendship;
+      match $r (friend: $x) isa friendship; get;
       """
     Then uniquely identify answer concepts
       | r         | x               |
@@ -530,7 +531,7 @@ Feature: TypeQL Delete Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $r (friend: $x) isa friendship;
+      match $r (friend: $x) isa friendship; get;
       """
     Then uniquely identify answer concepts
       | r         | x            |
@@ -562,7 +563,7 @@ Feature: TypeQL Delete Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $r (friend: $x, friend: $y) isa friendship;
+      match $r (friend: $x, friend: $y) isa friendship; get;
       """
     Then uniquely identify answer concepts
       | r         | x             | y             |
@@ -596,7 +597,7 @@ Feature: TypeQL Delete Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $r (friend: $x, friend: $y) isa friendship;
+      match $r (friend: $x, friend: $y) isa friendship; get;
       """
     Then uniquely identify answer concepts
       | r         | x             | y             |
@@ -630,7 +631,7 @@ Feature: TypeQL Delete Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $r (friend: $x, friend: $y) isa friendship;
+      match $r (friend: $x, friend: $y) isa friendship; get;
       """
     Then uniquely identify answer concepts
       | r         | x             | y             |
@@ -689,7 +690,7 @@ Feature: TypeQL Delete Query
     When session opens transaction of type: write
     When get answers of typeql get
       """
-      match $r (friend: $x, friend: $y) isa friendship;
+      match $r (friend: $x, friend: $y) isa friendship; get;
       """
     Then answer size is: 0
 
@@ -704,7 +705,7 @@ Feature: TypeQL Delete Query
     When session opens transaction of type: write
     When get answers of typeql get
       """
-      match $r has email $a, has email $b;
+      match $r has email $a, has email $b; get;
       """
     Then answer size is: 0
 
@@ -721,7 +722,7 @@ Feature: TypeQL Delete Query
     When session opens transaction of type: write
     When get answers of typeql get
       """
-      match $x isa person; $y isa person;
+      match $x isa person; $y isa person; get;
       """
     Then answer size is: 0
 
@@ -792,7 +793,7 @@ Feature: TypeQL Delete Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $r isa friendship;
+      match $r isa friendship; get;
       """
     Then answer size is: 0
 
@@ -824,7 +825,7 @@ Feature: TypeQL Delete Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $r isa friendship;
+      match $r isa friendship; get;
       """
     Then answer size is: 0
 
@@ -957,7 +958,7 @@ Feature: TypeQL Delete Query
     When session opens transaction of type: write
     When get answers of typeql get
       """
-      match $rel (chef: $p) isa ship-crew;
+      match $rel (chef: $p) isa ship-crew; get;
       """
     Then uniquely identify answer concepts
       | rel       | p               |
@@ -974,7 +975,7 @@ Feature: TypeQL Delete Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $rel (chef: $p) isa ship-crew;
+      match $rel (chef: $p) isa ship-crew; get;
       """
     Then answer size is: 0
 
@@ -1008,7 +1009,7 @@ Feature: TypeQL Delete Query
     When session opens transaction of type: write
     When get answers of typeql get
       """
-      match $x has age 18;
+      match $x has age 18; get;
       """
     Then uniquely identify answer concepts
       | x             |
@@ -1025,7 +1026,7 @@ Feature: TypeQL Delete Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x has age 18;
+      match $x has age 18; get;
       """
     Then answer size is: 0
 
@@ -1125,7 +1126,7 @@ Feature: TypeQL Delete Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x isa person;
+      match $x isa person; get;
       """
     Then answer size is: 0
 
@@ -1175,7 +1176,7 @@ Feature: TypeQL Delete Query
     Given session opens transaction of type: write
     When get answers of typeql get
       """
-      match $x has duration $d;
+      match $x has duration $d; get;
       """
     Then uniquely identify answer concepts
       | x         | d                   |
@@ -1192,7 +1193,7 @@ Feature: TypeQL Delete Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x has duration $d;
+      match $x has duration $d; get;
       """
     Then answer size is: 0
 
@@ -1223,7 +1224,7 @@ Feature: TypeQL Delete Query
     When session opens transaction of type: write
     When get answers of typeql get
       """
-      match $x has duration $d;
+      match $x has duration $d; get;
       """
     Then uniquely identify answer concepts
       | x         | d                   |
@@ -1240,12 +1241,12 @@ Feature: TypeQL Delete Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x has duration $d;
+      match $x has duration $d; get;
       """
     Then answer size is: 0
     When get answers of typeql get
       """
-      match $r isa friendship;
+      match $r isa friendship; get;
       """
     Then answer size is: 0
 
@@ -1312,7 +1313,7 @@ Feature: TypeQL Delete Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $f (friend: $x) isa friendship;
+      match $f (friend: $x) isa friendship; get;
       """
     Then uniquely identify answer concepts
       | f         | x             |
@@ -1321,7 +1322,7 @@ Feature: TypeQL Delete Query
       | key:ref:3 | key:name:Alex |
     When get answers of typeql get
       """
-      match $n isa name;
+      match $n isa name; get;
       """
     Then uniquely identify answer concepts
       | n               |
@@ -1329,7 +1330,7 @@ Feature: TypeQL Delete Query
       | attr:name:Alex  |
     When get answers of typeql get
       """
-      match $x isa person, has lastname $n;
+      match $x isa person, has lastname $n; get;
       """
     Then uniquely identify answer concepts
       | x             | n                    |
@@ -1385,7 +1386,7 @@ Feature: TypeQL Delete Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x isa person, has lastname $n;
+      match $x isa person, has lastname $n; get;
       """
     Then answer size is: 0
 
@@ -1397,7 +1398,7 @@ Feature: TypeQL Delete Query
   Scenario: deleting a variable not in the query throws, even if there were no matches
     Then typeql delete; throws exception
       """
-      match $x isa person; delete $n isa name;
+      match $x isa person; delete $n isa name; get;
       """
 
 
@@ -1432,7 +1433,7 @@ Feature: TypeQL Delete Query
     When session opens transaction of type: write
     When get answers of typeql get
       """
-      match $x isa name;
+      match $x isa name; get;
       """
     Then uniquely identify answer concepts
       | x                  |

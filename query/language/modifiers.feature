@@ -92,6 +92,7 @@ Feature: TypeQL Query Modifiers
     When get answers of typeql get
       """
       match $x isa <attr>;
+      get;
       sort $x asc;
       """
     Then order of answer concepts is
@@ -124,6 +125,7 @@ Feature: TypeQL Query Modifiers
     When get answers of typeql get
       """
       match $x isa person, has name $y;
+      get;
       sort $y asc;
       """
     Then order of answer concepts is
@@ -135,6 +137,7 @@ Feature: TypeQL Query Modifiers
     When get answers of typeql get
       """
       match $x isa person, has name $y;
+      get;
       sort $y desc;
       """
     Then order of answer concepts is
@@ -160,6 +163,7 @@ Feature: TypeQL Query Modifiers
     When get answers of typeql get
       """
       match $x isa person, has name $y;
+      get;
       sort $y;
       """
     Then order of answer concepts is
@@ -187,6 +191,7 @@ Feature: TypeQL Query Modifiers
       match
         $x isa person, has age $a;
         ?to20 = 20 - $a;
+      get;
       sort
         ?to20 desc;
       """
@@ -213,6 +218,7 @@ Feature: TypeQL Query Modifiers
     When get answers of typeql get
       """
       match $x isa person, has name $y, has ref $r, has age $a;
+      get;
       sort $y, $a, $r asc;
       """
     Then order of answer concepts is
@@ -238,6 +244,7 @@ Feature: TypeQL Query Modifiers
     When get answers of typeql get
       """
       match $x isa person, has name $y, has ref $r, has age $a;
+      get;
       sort $y asc, $a desc, $r desc;
       """
     Then order of answer concepts is
@@ -263,6 +270,7 @@ Feature: TypeQL Query Modifiers
     When get answers of typeql get
       """
       match $x isa person, has name $y;
+      get;
       sort $y asc;
       limit 3;
       """
@@ -288,6 +296,7 @@ Feature: TypeQL Query Modifiers
     When get answers of typeql get
       """
       match $x isa person, has name $y;
+      get;
       sort $y asc;
       offset 2;
       """
@@ -312,6 +321,7 @@ Feature: TypeQL Query Modifiers
     When get answers of typeql get
       """
       match $x isa person, has name $y;
+      get;
       sort $y asc;
       offset 1;
       limit 2;
@@ -337,6 +347,7 @@ Feature: TypeQL Query Modifiers
     When get answers of typeql get
       """
       match $x isa person, has name $y;
+      get;
       sort $y asc;
       limit 0;
       """
@@ -358,6 +369,7 @@ Feature: TypeQL Query Modifiers
     When get answers of typeql get
       """
       match $x isa person, has name $y;
+      get;
       sort $y asc;
       offset 5;
       """
@@ -380,6 +392,7 @@ Feature: TypeQL Query Modifiers
     Then get answers of typeql get
       """
       match $x isa name;
+      get;
       sort $x asc;
       """
     Then order of answer concepts is
@@ -407,6 +420,7 @@ Feature: TypeQL Query Modifiers
     When get answers of typeql get
       """
       match $x isa person, has age $y;
+      get;
       sort $y asc;
       limit 2;
       """
@@ -417,6 +431,7 @@ Feature: TypeQL Query Modifiers
     When get answers of typeql get
       """
       match $x isa person, has age $y;
+      get;
       sort $y asc;
       offset 2;
       limit 2;
@@ -460,6 +475,7 @@ Feature: TypeQL Query Modifiers
       """
       match
         $x isa person, attribute $a;
+      get;
       sort $a asc;
       """
 
@@ -493,6 +509,7 @@ Feature: TypeQL Query Modifiers
     When get answers of typeql get
       """
       match $x isa <attr>; $x < <pivot>;
+      get;
       sort $x asc;
       """
     Then order of answer concepts is
@@ -502,6 +519,7 @@ Feature: TypeQL Query Modifiers
     When get answers of typeql get
       """
       match $x isa <attr>; $x <= <pivot>;
+      get;
       sort $x asc;
       """
     Then order of answer concepts is
@@ -512,6 +530,7 @@ Feature: TypeQL Query Modifiers
     When get answers of typeql get
       """
       match $x isa <attr>; $x > <pivot>;
+      get;
       sort $x asc;
       """
     Then order of answer concepts is
@@ -521,6 +540,7 @@ Feature: TypeQL Query Modifiers
     When get answers of typeql get
       """
       match $x isa <attr>; $x >= <pivot>;
+      get;
       sort $x asc;
       """
     Then order of answer concepts is
@@ -532,6 +552,7 @@ Feature: TypeQL Query Modifiers
     When get answers of typeql get
       """
       match $x isa <attr>; $x < <pivot>;
+      get;
       sort $x desc;
       """
     Then order of answer concepts is
@@ -541,6 +562,7 @@ Feature: TypeQL Query Modifiers
     When get answers of typeql get
       """
       match $x isa <attr>; $x <= <pivot>;
+      get;
       sort $x desc;
       """
     Then order of answer concepts is
@@ -551,6 +573,7 @@ Feature: TypeQL Query Modifiers
     When get answers of typeql get
       """
       match $x isa <attr>; $x > <pivot>;
+      get;
       sort $x desc;
       """
     Then order of answer concepts is
@@ -560,6 +583,7 @@ Feature: TypeQL Query Modifiers
     When get answers of typeql get
       """
       match $x isa <attr>; $x >= <pivot>;
+      get;
       sort $x desc;
       """
     Then order of answer concepts is
@@ -886,6 +910,7 @@ Feature: TypeQL Query Modifiers
       """
       match
       $x isa person, has name $n;
+      get;
       sort $n;
       """
     Then uniquely identify answer concepts
@@ -924,6 +949,7 @@ Feature: TypeQL Query Modifiers
       """
       match
       $x isa person, has email "dummy@gmail.com";
+      get;
       """
     Then uniquely identify answer concepts
       | x         |

@@ -48,7 +48,7 @@ Feature: TypeQL Reasoning Explanation
 
     Then get answers of typeql get
       """
-      match $p isa person;
+      match $p isa person; get;
       """
 
     Then uniquely identify answer concepts
@@ -95,6 +95,7 @@ Feature: TypeQL Reasoning Explanation
       match
       $k isa area, has name $n;
       (superior: $l, subordinate: $k) isa location-hierarchy;
+      get;
       """
 
     Then concept identifiers are
@@ -153,6 +154,7 @@ Feature: TypeQL Reasoning Explanation
       $k isa area, has name $n;
       (superior: $l, subordinate: $k) isa location-hierarchy;
       (superior: $u, subordinate: $l) isa location-hierarchy;
+      get;
       """
 
     Then concept identifiers are
@@ -202,7 +204,7 @@ Feature: TypeQL Reasoning Explanation
 
     Then get answers of typeql get
       """
-      match $com isa company, has name $n; not { $n "the-company"; };
+      match $com isa company, has name $n; not { $n "the-company"; }; get;
       """
 
     Then concept identifiers are
@@ -251,6 +253,7 @@ Feature: TypeQL Reasoning Explanation
       """
       match $com isa company;
       {$com has name $n1; $n1 "the-company";} or {$com has name $n2; $n2 "another-company";};
+      get;
       """
 
     Then concept identifiers are
@@ -299,6 +302,7 @@ Feature: TypeQL Reasoning Explanation
       """
       match $com isa company;
       {$com has name $n1; $n1 "the-company";} or {$com has name $n2; {$n2 "another-company";} or {$n2 "third-company";};};
+      get;
       """
 
     Then concept identifiers are

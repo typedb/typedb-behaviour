@@ -135,6 +135,7 @@ Feature: TypeQL Get Query
         $x isa person;
         $y isa name;
         $f isa friendship;
+      get;
       """
     Then answer size is: 9
     When get answer of typeql get aggregate
@@ -143,6 +144,7 @@ Feature: TypeQL Get Query
         $x isa person;
         $y isa name;
         $f isa friendship;
+      get;
       count;
       """
     Then aggregate value is: 9
@@ -152,6 +154,7 @@ Feature: TypeQL Get Query
         $x isa person;
         $y isa name;
         $f (friend: $x) isa friendship;
+      get;
       """
     Then answer size is: 6
     When get answer of typeql get aggregate
@@ -160,6 +163,7 @@ Feature: TypeQL Get Query
         $x isa person;
         $y isa name;
         $f (friend: $x) isa friendship;
+      get;
       count;
       """
     Then aggregate value is: 6
@@ -169,6 +173,7 @@ Feature: TypeQL Get Query
     When get answer of typeql get aggregate
       """
       match $x isa person, has name "Voldemort";
+      get;
       count;
       """
     Then aggregate value is: 0
@@ -202,6 +207,7 @@ Feature: TypeQL Get Query
     When get answer of typeql get aggregate
       """
       match $x isa person, has <attr> $y;
+      get;
       <agg_type> $y;
       """
     Then aggregate value is: <agg_val>
@@ -248,6 +254,7 @@ Feature: TypeQL Get Query
     When get answer of typeql get aggregate
       """
       match $x isa person, has weight $y;
+      get;
       std $y;
       """
     # Note: This is the sample standard deviation, NOT the population standard deviation
@@ -268,6 +275,7 @@ Feature: TypeQL Get Query
     When get answer of typeql get aggregate
       """
       match $x isa person, has name $y, has age $z;
+      get;
       sum $z;
       """
     Then aggregate value is: 65
@@ -293,6 +301,7 @@ Feature: TypeQL Get Query
     When get answer of typeql get aggregate
       """
       match $x isa person, has age $y;
+      get;
       <agg_type> $y;
       """
     Then aggregate value is: <agg_val>
@@ -318,6 +327,7 @@ Feature: TypeQL Get Query
     When get answer of typeql get aggregate
       """
       match $x isa person, has age $y;
+      get;
       median $y;
       """
     Then aggregate value is: 36.5
@@ -339,6 +349,7 @@ Feature: TypeQL Get Query
     When get answer of typeql get aggregate
       """
       match $x isa person, has income $y;
+      get;
       <agg_type> $y;
       """
     Then aggregate answer is not a number
@@ -357,6 +368,7 @@ Feature: TypeQL Get Query
     Then typeql get aggregate; throws exception
       """
       match $x isa person;
+      get;
       <agg_type> $y;
       """
 
@@ -381,6 +393,7 @@ Feature: TypeQL Get Query
     Then typeql get aggregate; throws exception
       """
       match $x isa person;
+      get;
       min $x;
       """
 
@@ -411,6 +424,7 @@ Feature: TypeQL Get Query
     Then typeql get aggregate; throws exception
       """
       match $x isa person, has <attr> $y;
+      get;
       <agg_type> $y;
       """
 
@@ -450,6 +464,7 @@ Feature: TypeQL Get Query
     Then typeql get aggregate; throws exception
       """
       match $x isa person, has attribute $y;
+      get;
       sum $y;
       """
 
@@ -458,6 +473,7 @@ Feature: TypeQL Get Query
     When get answer of typeql get aggregate
       """
       match $x isa person, has name $y;
+      get;
       sum $y;
       """
     Then aggregate answer is not a number
@@ -482,7 +498,7 @@ Feature: TypeQL Get Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match ($x, $y) isa friendship;
+      match ($x, $y) isa friendship; get;
       """
     Then uniquely identify answer concepts
       | x         | y         |
@@ -501,6 +517,7 @@ Feature: TypeQL Get Query
     When get answers of typeql get group
       """
       match ($x, $y) isa friendship;
+      get;
       group $x;
       """
     Then answer groups are
@@ -584,11 +601,12 @@ Feature: TypeQL Get Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x isa person;
+      match $x isa person; get;
       """
     When get answers of typeql get group aggregate
       """
       match ($x, $y) isa friendship;
+      get;
       group $x;
       count;
       """
@@ -673,6 +691,7 @@ Feature: TypeQL Get Query
         $x isa company;
         $y isa person, has age $z;
         ($x, $y) isa employment;
+      get;
       group $x;
       max $z;
       """

@@ -60,7 +60,7 @@ Feature: Concept Serialization
   Scenario: Serialized type contains its label
     When get answers of typeql get
       """
-      match $x type person;
+      match $x type person; get;
       """
     Then JSON serialization of answers matches
       """
@@ -76,7 +76,7 @@ Feature: Concept Serialization
       """
     When get answers of typeql get
       """
-      match $x isa person;
+      match $x isa person; get;
       """
     Then JSON serialization of answers matches
       """
@@ -97,7 +97,7 @@ Feature: Concept Serialization
       """
     When get answers of typeql get
       """
-      match $x isa relation;
+      match $x isa relation; get;
       """
     Then JSON serialization of answers matches
       """
@@ -115,7 +115,7 @@ Feature: Concept Serialization
       """
     When get answers of typeql get
       """
-      match $x isa attribute;
+      match $x isa attribute; get;
       """
     Then JSON serialization of answers matches
       """
@@ -133,7 +133,7 @@ Feature: Concept Serialization
       """
     When get answers of typeql get
       """
-      match $x isa date-of-birth;
+      match $x isa date-of-birth; get;
       """
     Then JSON serialization of answers matches
       """
@@ -150,7 +150,7 @@ Feature: Concept Serialization
       """
     When get answers of typeql get
       """
-      match $x isa date-of-birth;
+      match $x isa date-of-birth; get;
       """
     Then JSON serialization of answers matches
       """
@@ -199,7 +199,7 @@ Feature: Concept Serialization
       """
     When get answers of typeql get
       """
-      match $x($r:$y) isa! $t, has ref $z;
+      match $x($r:$y) isa! $t, has ref $z; get;
       """
     Then JSON serialization of answers matches
       """

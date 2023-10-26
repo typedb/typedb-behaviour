@@ -59,7 +59,7 @@ Feature: TypeQL Define Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x type dog;
+      match $x type dog; get;
       """
     Then uniquely identify answer concepts
       | x         |
@@ -76,7 +76,7 @@ Feature: TypeQL Define Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x sub person;
+      match $x sub person; get;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -136,7 +136,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x plays employment:employee;
+      match $x plays employment:employee; get;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -157,7 +157,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x plays employment:employee;
+      match $x plays employment:employee; get;
       """
     Then uniquely identify answer concepts
       | x              |
@@ -177,7 +177,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x owns name;
+      match $x owns name; get;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -198,7 +198,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x owns name;
+      match $x owns name; get;
       """
     Then uniquely identify answer concepts
       | x              |
@@ -218,7 +218,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x owns email @key;
+      match $x owns email @key; get;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -239,7 +239,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x owns email @key;
+      match $x owns email @key; get;
       """
     Then uniquely identify answer concepts
       | x              |
@@ -262,7 +262,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x plays home-ownership:home;
+      match $x plays home-ownership:home; get;
       """
     Then uniquely identify answer concepts
       | x           |
@@ -281,7 +281,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x owns price;
+      match $x owns price; get;
       """
     Then uniquely identify answer concepts
       | x           |
@@ -300,7 +300,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x owns address @key;
+      match $x owns address @key; get;
       """
     Then uniquely identify answer concepts
       | x           |
@@ -378,7 +378,7 @@ Feature: TypeQL Define Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x type pet-ownership;
+      match $x type pet-ownership; get;
       """
     Then uniquely identify answer concepts
       | x                   |
@@ -395,7 +395,7 @@ Feature: TypeQL Define Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x sub employment;
+      match $x sub employment; get;
       """
     Then uniquely identify answer concepts
       | x                    |
@@ -421,7 +421,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x relates employee;
+      match $x relates employee; get;
       """
     Then uniquely identify answer concepts
       | x                          |
@@ -447,6 +447,7 @@ Feature: TypeQL Define Query
       match
         $x relates parent;
         $x relates child;
+      get;
       """
     Then uniquely identify answer concepts
       | x                |
@@ -456,6 +457,7 @@ Feature: TypeQL Define Query
       match
         $x relates father;
         $x relates son;
+      get;
       """
     Then uniquely identify answer concepts
       | x                    |
@@ -495,7 +497,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x relates employee;
+      match $x relates employee; get;
       """
     Then uniquely identify answer concepts
       | x                |
@@ -523,7 +525,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x relates preferred-plane;
+      match $x relates preferred-plane; get;
       """
     Then uniquely identify answer concepts
       | x                      |
@@ -566,7 +568,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x plays income:source;
+      match $x plays income:source; get;
       """
     Then uniquely identify answer concepts
       | x                         |
@@ -587,7 +589,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x plays income:source;
+      match $x plays income:source; get;
       """
     Then uniquely identify answer concepts
       | x                                 |
@@ -616,7 +618,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x owns start-date;
+      match $x owns start-date; get;
       """
     Then uniquely identify answer concepts
       | x                         |
@@ -637,7 +639,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x owns start-date;
+      match $x owns start-date; get;
       """
     Then uniquely identify answer concepts
       | x                                 |
@@ -657,7 +659,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x owns employment-reference-code @key;
+      match $x owns employment-reference-code @key; get;
       """
     Then uniquely identify answer concepts
       | x                         |
@@ -678,7 +680,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x owns employment-reference-code @key;
+      match $x owns employment-reference-code @key; get;
       """
     Then uniquely identify answer concepts
       | x                                 |
@@ -698,7 +700,7 @@ Feature: TypeQL Define Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x type connection;
+      match $x type connection; get;
       """
     Then uniquely identify answer concepts
       | x                |
@@ -717,7 +719,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x relates parent; $x relates child;
+      match $x relates parent; $x relates child; get;
       """
     Then uniquely identify answer concepts
       | x                |
@@ -736,7 +738,7 @@ Feature: TypeQL Define Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x relates owner;
+      match $x relates owner; get;
       """
     Then uniquely identify answer concepts
       | x               |
@@ -761,6 +763,7 @@ Feature: TypeQL Define Query
       match
         $x type <label>;
         $x sub attribute;
+      get;
       """
     Then answer size is: 1
 
@@ -799,7 +802,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x sub code;
+      match $x sub code; get;
       """
     Then uniquely identify answer concepts
       | x               |
@@ -819,7 +822,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x type door-code, value string;
+      match $x type door-code, value string; get;
       """
     Then uniquely identify answer concepts
       | x               |
@@ -846,7 +849,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x regex "^(yes|no|maybe)$";
+      match $x regex "^(yes|no|maybe)$"; get;
       """
     Then uniquely identify answer concepts
       | x              |
@@ -874,7 +877,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x plays car-sales-listing:available-colour;
+      match $x plays car-sales-listing:available-colour; get;
       """
     Then uniquely identify answer concepts
       | x                      |
@@ -898,7 +901,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x plays phone-contact:number;
+      match $x plays phone-contact:number; get;
       """
     Then uniquely identify answer concepts
       | x                                |
@@ -921,7 +924,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x owns brightness;
+      match $x owns brightness; get;
       """
     Then uniquely identify answer concepts
       | x                      |
@@ -944,7 +947,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x owns country-calling-code;
+      match $x owns country-calling-code; get;
       """
     Then uniquely identify answer concepts
       | x                                |
@@ -967,7 +970,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x owns hex-value @key;
+      match $x owns hex-value @key; get;
       """
     Then uniquely identify answer concepts
       | x                      |
@@ -990,7 +993,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x owns hex-value @key;
+      match $x owns hex-value @key; get;
       """
     Then uniquely identify answer concepts
       | x                          |
@@ -1012,7 +1015,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x owns <label>;
+      match $x owns <label>; get;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -1047,7 +1050,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x type animal; $x abstract;
+      match $x type animal; $x abstract; get;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -1066,7 +1069,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x sub animal;
+      match $x sub animal; get;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -1086,7 +1089,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x sub animal; $x abstract;
+      match $x sub animal; $x abstract; get;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -1106,7 +1109,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x sub exception, abstract;
+      match $x sub exception, abstract; get;
       """
     Then uniquely identify answer concepts
       | x                      |
@@ -1123,7 +1126,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x type membership; $x abstract;
+      match $x type membership; $x abstract; get;
       """
     Then uniquely identify answer concepts
       | x                |
@@ -1142,7 +1145,7 @@ Feature: TypeQL Define Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x sub membership;
+      match $x sub membership; get;
       """
     Then uniquely identify answer concepts
       | x                    |
@@ -1162,7 +1165,7 @@ Feature: TypeQL Define Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x sub requirement; $x abstract;
+      match $x sub requirement; $x abstract; get;
       """
     Then uniquely identify answer concepts
       | x                      |
@@ -1182,7 +1185,7 @@ Feature: TypeQL Define Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x sub requirement; $x abstract;
+      match $x sub requirement; $x abstract; get;
       """
     Then uniquely identify answer concepts
       | x                      |
@@ -1199,7 +1202,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x type number-of-limbs; $x abstract;
+      match $x type number-of-limbs; $x abstract; get;
       """
     Then uniquely identify answer concepts
       | x                     |
@@ -1218,7 +1221,7 @@ Feature: TypeQL Define Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x sub number-of-limbs;
+      match $x sub number-of-limbs; get;
       """
     Then uniquely identify answer concepts
       | x                     |
@@ -1238,7 +1241,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x sub number-of-limbs; $x abstract;
+      match $x sub number-of-limbs; $x abstract; get;
       """
     Then uniquely identify answer concepts
       | x                                |
@@ -1264,6 +1267,7 @@ Feature: TypeQL Define Query
       match
       $name type super-name, abstract;
       $location type location-name, sub super-name;
+      get;
       """
     Then uniquely identify answer concepts
       | name             | location            |
@@ -1300,7 +1304,7 @@ Feature: TypeQL Define Query
     Then session opens transaction of type: read
     When get answers of typeql get
       """
-      match $t owns $a @key;
+      match $t owns $a @key; get;
       """
     Then uniquely identify answer concepts
       | t                | a                               |
@@ -1309,7 +1313,7 @@ Feature: TypeQL Define Query
       | label:employment | label:employment-reference-code |
     When get answers of typeql get
       """
-      match $t owns $a @unique;
+      match $t owns $a @unique; get;
       """
     Then uniquely identify answer concepts
       | t             | a               |
@@ -1342,7 +1346,7 @@ Feature: TypeQL Define Query
     Then session opens transaction of type: write
     When get answers of typeql get
       """
-      match $t owns $a @unique;
+      match $t owns $a @unique; get;
       """
     Then uniquely identify answer concepts
       | t             | a               |
@@ -1360,7 +1364,7 @@ Feature: TypeQL Define Query
     Then session opens transaction of type: read
     When get answers of typeql get
       """
-      match $t owns $a @unique;
+      match $t owns $a @unique; get;
       """
     Then uniquely identify answer concepts
       | t             | a                   |
@@ -1410,7 +1414,7 @@ Feature: TypeQL Define Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x type person, owns name;
+      match $x type person, owns name; get;
       """
     Then answer size is: 1
 
@@ -1448,7 +1452,7 @@ Feature: TypeQL Define Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x owns name;
+      match $x owns name; get;
       """
     Then uniquely identify answer concepts
       | x                |
@@ -1466,7 +1470,7 @@ Feature: TypeQL Define Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x plays employment:employee;
+      match $x plays employment:employee; get;
       """
     Then uniquely identify answer concepts
       | x                |
@@ -1509,7 +1513,7 @@ Feature: TypeQL Define Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x owns barcode @key;
+      match $x owns barcode @key; get;
       """
     Then uniquely identify answer concepts
       | x             |
@@ -1588,7 +1592,7 @@ Feature: TypeQL Define Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x relates employer;
+      match $x relates employer; get;
       """
     Then uniquely identify answer concepts
       | x                |
@@ -1632,7 +1636,7 @@ Feature: TypeQL Define Query
     Then session opens transaction of type: read
     Then get answers of typeql get
       """
-      match $x regex "^A.*$";
+      match $x regex "^A.*$"; get;
       """
     Then uniquely identify answer concepts
       | x          |
@@ -1709,7 +1713,7 @@ Feature: TypeQL Define Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x owns name @key;
+      match $x owns name @key; get;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -1726,14 +1730,14 @@ Feature: TypeQL Define Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x owns email;
+      match $x owns email; get;
       """
     Then uniquely identify answer concepts
       | x            |
       | label:person |
     When get answers of typeql get
       """
-      match $x owns email @key;
+      match $x owns email @key; get;
       """
     Then answer size is: 0
 
@@ -1814,7 +1818,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: write
     When get answers of typeql get
       """
-      match $x owns $y @unique;
+      match $x owns $y @unique; get;
       """
     Then uniquely identify answer concepts
       | x            | y              |
@@ -1822,7 +1826,7 @@ Feature: TypeQL Define Query
       | label:person | label:phone-nr |
     When get answers of typeql get
       """
-      match person owns $y @key;
+      match person owns $y @key; get;
       """
     Then answer size is: 0
     Given typeql insert; throws exception
@@ -1961,7 +1965,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x has name $a;
+      match $x has name $a; get;
       """
     Then answer size is: 1
 
@@ -1980,7 +1984,7 @@ Feature: TypeQL Define Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x sub person; $x abstract;
+      match $x sub person; $x abstract; get;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -2003,7 +2007,7 @@ Feature: TypeQL Define Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x sub friendship, abstract;
+      match $x sub friendship, abstract; get;
       """
     Then uniquely identify answer concepts
       | x                |
@@ -2025,7 +2029,7 @@ Feature: TypeQL Define Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x sub age, abstract;
+      match $x sub age, abstract; get;
       """
     Then uniquely identify answer concepts
       | x         |
@@ -2127,7 +2131,7 @@ Feature: TypeQL Define Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x sub apple-product;
+      match $x sub apple-product; get;
       """
     Then uniquely identify answer concepts
       | x                   |
@@ -2171,7 +2175,7 @@ Feature: TypeQL Define Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x sub shoe-size;
+      match $x sub shoe-size; get;
       """
     Then uniquely identify answer concepts
       | x               |
@@ -2201,7 +2205,7 @@ Feature: TypeQL Define Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x sub organism;
+      match $x sub organism; get;
       """
     Then uniquely identify answer concepts
       | x              |
@@ -2242,7 +2246,7 @@ Feature: TypeQL Define Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x sub pigeon;
+      match $x sub pigeon; get;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -2282,7 +2286,7 @@ Feature: TypeQL Define Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x sub pigeon;
+      match $x sub pigeon; get;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -2322,7 +2326,7 @@ Feature: TypeQL Define Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x sub pigeon;
+      match $x sub pigeon; get;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -2368,7 +2372,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x type child, plays $r;
+      match $x type child, plays $r; get;
       """
     Then uniquely identify answer concepts
       | x           | r                         |
@@ -2390,7 +2394,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x type child, owns $y;
+      match $x type child, owns $y; get;
       """
     Then uniquely identify answer concepts
       | x           | y                  |
@@ -2413,7 +2417,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x type child, owns $y @key;
+      match $x type child, owns $y @key; get;
       """
     Then uniquely identify answer concepts
       | x           | y                  |
@@ -2433,7 +2437,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x type part-time-employment, relates $r;
+      match $x type part-time-employment, relates $r; get;
       """
     Then uniquely identify answer concepts
       | x                          | r                         |
@@ -2457,7 +2461,7 @@ Feature: TypeQL Define Query
     When session opens transaction of type: read
     Then typeql get; throws exception
       """
-      match $x type dog;
+      match $x type dog; get;
       """
 
 
@@ -2494,7 +2498,7 @@ Feature: TypeQL Define Query
       """
     Then get answers of typeql get
       """
-      match $a sub attribute, owns $b; $b sub attribute, owns $a;
+      match $a sub attribute, owns $b; $b sub attribute, owns $a; get;
       """
     Then uniquely identify answer concepts
       | a              | b              |
@@ -2502,7 +2506,7 @@ Feature: TypeQL Define Query
       | label:surname  | label:nickname |
     Then get answers of typeql get
       """
-      match $a owns $b; $b owns $a;
+      match $a owns $b; $b owns $a; get;
       """
     Then uniquely identify answer concepts
       | a              | b              |
@@ -2525,6 +2529,7 @@ Feature: TypeQL Define Query
       $b sub attribute, owns $c;
       $c sub attribute, owns $d;
       $d sub attribute, owns $a;
+      get;
       """
     Then uniquely identify answer concepts
       | a                | b                | c                | d                |
@@ -2546,7 +2551,7 @@ Feature: TypeQL Define Query
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x relates function; $x plays recursive-function:function;
+      match $x relates function; $x plays recursive-function:function; get;
       """
     Then uniquely identify answer concepts
       | x                        |
@@ -2563,7 +2568,7 @@ Feature: TypeQL Define Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x owns number-of-letters;
+      match $x owns number-of-letters; get;
       """
     Then uniquely identify answer concepts
       | x                       |

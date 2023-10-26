@@ -105,7 +105,7 @@ Feature: TypeQL Update Query
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x isa person, has name $n;
+      match $x isa person, has name $n; get;
       """
     Then uniquely identify answer concepts
       | x         | n               |
@@ -218,6 +218,7 @@ Feature: TypeQL Update Query
       match
       (named: $p, name: $nc) isa naming;
       $nc has name $n;
+      get;
       """
     Then uniquely identify answer concepts
       | p         | n                  |
@@ -233,6 +234,7 @@ Feature: TypeQL Update Query
       match
       $p isa person;
       $p has name $n;
+      get;
       """
     Then answer size is: 0
 

@@ -55,7 +55,7 @@ Feature: TypeQL Reasoning Explanation
 
     Then get answers of typeql get
       """
-      match $co has name $n;
+      match $co has name $n; get;
       """
 
     Then concept identifiers are
@@ -117,7 +117,7 @@ Feature: TypeQL Reasoning Explanation
 
     Then get answers of typeql get
       """
-      match $co has is-liable $l;
+      match $co has is-liable $l; get;
       """
 
     Then concept identifiers are
@@ -186,6 +186,7 @@ Feature: TypeQL Reasoning Explanation
       match
       $k isa area, has name $n;
       (superior: $l, subordinate: $k) isa location-hierarchy;
+      get;
       """
 
     Then concept identifiers are
@@ -278,7 +279,7 @@ Feature: TypeQL Reasoning Explanation
 
     Then get answers of typeql get
       """
-      match ($w, $m) isa family-relation; $w isa woman;
+      match ($w, $m) isa family-relation; $w isa woman; get;
       """
 
     Then uniquely identify answer concepts
@@ -295,7 +296,7 @@ Feature: TypeQL Reasoning Explanation
 
     Then get answers of typeql get
       """
-      match (sibling: $w, sibling: $m) isa siblingship; $w isa woman;
+      match (sibling: $w, sibling: $m) isa siblingship; $w isa woman; get;
       """
 
     Then uniquely identify answer concepts
@@ -354,6 +355,7 @@ Feature: TypeQL Reasoning Explanation
       match $com isa company;
       {$com has name $n1; $n1 "the-company";} or {$com has name $n2; $n2 "another-company";};
       not {$com has is-liable $liability;};
+      get;
       """
 
     Then concept identifiers are
@@ -416,7 +418,7 @@ Feature: TypeQL Reasoning Explanation
 
     Then get answers of typeql get
       """
-      match $com isa company, has is-liable $lia; $lia true;
+      match $com isa company, has is-liable $lia; $lia true; get;
       """
 
     Then concept identifiers are
@@ -480,7 +482,7 @@ Feature: TypeQL Reasoning Explanation
 
     Then get answers of typeql get
       """
-      match $com isa company; not { $com has is-liable $lia; $lia true; }; not { $com has name $n; $n "the-company"; };
+      match $com isa company; not { $com has is-liable $lia; $lia true; }; not { $com has name $n; $n "the-company"; }; get;
       """
 
     Then concept identifiers are

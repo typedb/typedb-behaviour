@@ -194,6 +194,7 @@ Feature: TypeQL Get Query with Expressions
         ?const = -10;
         ?plus-negative = $x + -10;
         ?minus-negative = $x - -10;
+      get;
       """
     Then uniquely identify answer concepts
       | x            | const           | plus-negative  | minus-negative  |

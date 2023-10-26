@@ -73,14 +73,14 @@ Feature: Attribute Attachment Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match $x isa person, has string-attribute $y;
+      match $x isa person, has string-attribute $y; get;
       """
     Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
       """
-      match $x isa string-attribute;
+      match $x isa string-attribute; get;
       """
     Then verify answer size is: 1
     Then verify answers are sound
@@ -115,7 +115,7 @@ Feature: Attribute Attachment Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match $x has string-attribute $y;
+      match $x has string-attribute $y; get;
       """
     Then verify answer size is: 3
     Then verify answers are sound
@@ -150,21 +150,21 @@ Feature: Attribute Attachment Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match $x has retailer 'Ocado';
+      match $x has retailer 'Ocado'; get;
       """
     Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
       """
-      match $x has retailer $r;
+      match $x has retailer $r; get;
       """
     Then verify answer size is: 4
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
       """
-      match $x has retailer 'Tesco';
+      match $x has retailer 'Tesco'; get;
       """
     Then verify answer size is: 2
     Then verify answers are sound
@@ -193,7 +193,7 @@ Feature: Attribute Attachment Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match $x isa soft-drink, has retailer 'Ocado';
+      match $x isa soft-drink, has retailer 'Ocado'; get;
       """
     Then verify answer size is: 2
     Then verify answers are sound
@@ -223,7 +223,7 @@ Feature: Attribute Attachment Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match $x has retailer 'Tesco';
+      match $x has retailer 'Tesco'; get;
       """
     Then verify answer size is: 3
     Then verify answers are sound
@@ -260,7 +260,7 @@ Feature: Attribute Attachment Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match $x has retailer 'Tesco';
+      match $x has retailer 'Tesco'; get;
       """
     Then verify answer size is: 1
     Then verify answers are sound
@@ -292,21 +292,21 @@ Feature: Attribute Attachment Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match $x has age > 20;
+      match $x has age > 20; get;
       """
     Then verify answer size is: 0
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
       """
-      match $x has age > 5;
+      match $x has age > 5; get;
       """
     Then verify answer size is: 1
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
       """
-      match $x has age > 5; $x has age < 8;
+      match $x has age > 5; $x has age < 8; get;
       """
     Then verify answer size is: 0
     Then verify answers are sound
@@ -337,7 +337,7 @@ Feature: Attribute Attachment Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match $x has age-in-days $days;
+      match $x has age-in-days $days; get;
       """
     Then verify answer size is: 1
     Then verify answers are sound

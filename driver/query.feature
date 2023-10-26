@@ -99,7 +99,7 @@ Feature: TypeDB Driver Queries
 
     Given get answers of typeql get
       """
-      match $x sub entity;
+      match $x sub entity; get;
       """
     Given uniquely identify answer concepts
       | x                   |
@@ -115,7 +115,7 @@ Feature: TypeDB Driver Queries
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x sub entity;
+      match $x sub entity; get;
       """
     Then uniquely identify answer concepts
       | x                   |
@@ -164,7 +164,7 @@ Feature: TypeDB Driver Queries
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x isa person;
+      match $x isa person; get;
       """
     Then uniquely identify answer concepts
       | x         |
@@ -213,7 +213,7 @@ Feature: TypeDB Driver Queries
     When session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x isa person;
+      match $x isa person; get;
       """
     Then answer size is: 0
 
@@ -312,7 +312,7 @@ Feature: TypeDB Driver Queries
     Given session opens transaction of type: read
     Then typeql get; throws exception
       """
-      match $x isa person; get $y;
+      match $x isa person; get $y; get;
       """
 
   Scenario: Value variables can be specified in a 'get'
@@ -434,11 +434,12 @@ Feature: TypeDB Driver Queries
     Given session opens transaction of type: read
     When get answers of typeql get
       """
-      match $x isa person;
+      match $x isa person; get;
       """
     When get answers of typeql get group aggregate
       """
       match ($x, $y) isa friendship;
+      get;
       group $x;
       count;
       """

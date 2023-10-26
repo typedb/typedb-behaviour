@@ -71,7 +71,7 @@ Feature: Value Predicate Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match $x has is-old $r;
+      match $x has is-old $r; get;
       """
     Then verify answer size is: 1
     Then verify answers are sound
@@ -101,6 +101,7 @@ Feature: Value Predicate Resolution
       match
         $x isa person, has lucky-number $n;
         $n <op> 1667;
+      get;
       """
     Then verify answer size is: <answer-size>
     Then verify answers are sound
@@ -139,6 +140,7 @@ Feature: Value Predicate Resolution
         $x isa person, has name "Alice", has lucky-number $m;
         $y isa person, has name "Bob", has lucky-number $n;
         $m <op> $n;
+      get;
       """
     Then verify answer size is: <answer-size>
     Then verify answers are sound
@@ -179,6 +181,7 @@ Feature: Value Predicate Resolution
         $y isa person, has name "Bob", has lucky-number $n;
         $m <op> $n;
         $n <op> 1667;
+      get;
       """
     Then verify answer size is: <answer-size>
     Then verify answers are sound
@@ -226,6 +229,7 @@ Feature: Value Predicate Resolution
         $x has retailer $r;
         $r != $unwanted;
         $unwanted == "Ocado";
+      get;
       """
     # x     | r     |
     # Fanta | Tesco |
@@ -267,6 +271,7 @@ Feature: Value Predicate Resolution
         $x has retailer $r;
         $wanted == "Ocado";
         $r == $wanted;
+      get;
       """
     # x     | r     |
     # Fanta | Ocado |
@@ -310,6 +315,7 @@ Feature: Value Predicate Resolution
       match
         $x has retailer $rx;
         $rx contains "land";
+      get;
       """
     Then verify answer size is: 2
     Then verify answers are sound
@@ -353,6 +359,7 @@ Feature: Value Predicate Resolution
         $y has retailer $ry;
         $rx == $ry;
         $ry contains 'land';
+      get;
       """
     # x     | rx        | y     | ry        |
     # Fanta | Iceland   | Tango | Iceland   |
@@ -406,6 +413,7 @@ Feature: Value Predicate Resolution
         $y has retailer $ry;
         $rx != $ry;
         $ry contains 'land';
+      get;
       """
     # x     | rx        | y     | ry        |
     # Fanta | Iceland   | Tango | Poundland |
@@ -460,6 +468,7 @@ Feature: Value Predicate Resolution
       match
         $x has retailer $r;
         $r != "Ocado";
+      get;
       """
     # x     | r     |
     # Fanta | Tesco |
@@ -472,6 +481,7 @@ Feature: Value Predicate Resolution
       match
         $x has retailer $r;
         not { $r == "Ocado"; };
+      get;
       """
     Then verify answer size is: 2
     Then verify answers are sound
@@ -509,6 +519,7 @@ Feature: Value Predicate Resolution
       match
         $x has retailer $r;
         $r == "Ocado";
+      get;
       """
     # x     | r     |
     # Fanta | Ocado |
@@ -521,6 +532,7 @@ Feature: Value Predicate Resolution
       match
         $x has retailer $r;
         not { $r != "Ocado"; };
+      get;
       """
     Then verify answer size is: 2
     Then verify answers are sound
@@ -561,6 +573,7 @@ Feature: Value Predicate Resolution
           $r == $unwanted;
           $unwanted == "Ocado";
         };
+      get;
       """
     # x     | r     |
     # Fanta | Tesco |
@@ -603,6 +616,7 @@ Feature: Value Predicate Resolution
         $x has base-attribute $ax;
         $y has base-attribute $ay;
         not { $ax is $ay; };
+      get;
       """
     # x   | ax  | y   | ay  |
     # PER | BSA | SOF | NAM |
@@ -680,6 +694,7 @@ Feature: Value Predicate Resolution
       match
         $x "not expensive" isa price-range;
         ($x, item: $y) isa price-classification;
+      get;
       """
     Then verify answer size is: 2
     Then verify answers are sound
@@ -689,6 +704,7 @@ Feature: Value Predicate Resolution
       match
         $x "low price" isa price-range;
         ($x, item: $y) isa price-classification;
+      get;
       """
     Then verify answer size is: 1
     Then verify answers are sound
@@ -698,6 +714,7 @@ Feature: Value Predicate Resolution
       match
         $x "cheap" isa price-range;
         ($x, item: $y) isa price-classification;
+      get;
       """
     Then verify answer size is: 1
     Then verify answers are sound
@@ -707,6 +724,7 @@ Feature: Value Predicate Resolution
       match
         $x "expensive" isa price-range;
         ($x, item: $y) isa price-classification;
+      get;
       """
     Then verify answer size is: 1
     Then verify answers are sound
@@ -716,6 +734,7 @@ Feature: Value Predicate Resolution
       match
         $x isa price-range;
         ($x, item: $y) isa price-classification;
+      get;
       """
     # sum of all previous answers
     Then verify answer size is: 5
@@ -776,7 +795,7 @@ Feature: Value Predicate Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match (predecessor:$x1, successor:$x2) isa message-succession;
+      match (predecessor:$x1, successor:$x2) isa message-succession; get;
       """
     # the (n-1)th triangle number, where n is the number of replies to the first post
     Then verify answer size is: 10
