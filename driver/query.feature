@@ -301,7 +301,7 @@ Feature: TypeDB Driver Queries
       delete $x has name "Alex";
       insert $x has name "Bob";
       """
-    Then session transaction closes
+    Given session transaction closes
 
   #########
   #  GET  #

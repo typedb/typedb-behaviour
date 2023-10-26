@@ -296,7 +296,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: fetch subqueries can be nested and use bindings from any parent
-    Given for each session, transaction closes
+    Given session transaction closes
     Given session opens transaction of type: write
     Given typeql insert
       """
