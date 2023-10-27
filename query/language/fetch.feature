@@ -86,6 +86,35 @@ Feature: TypeQL Fetch Query
         "p": { "root": "entity", "label": "person" }
       }]
       """
+    When get answers of typeql fetch
+      """
+      match
+      $p type friendship:friend;
+      fetch
+      $p;
+      """
+    Then fetch answers are
+      """
+      [{
+        "p": { "root": "relation:role", "label": "friendship:friend" }
+      }]
+      """
+
+  # TODO: remove this scenario when we finish deprecating 'thing' type
+  Scenario: root thing type can be fetched
+    When get answers of typeql fetch
+      """
+      match
+      $p type thing;
+      fetch
+      $p;
+      """
+    Then fetch answers are
+      """
+      [{
+        "p": { "root": "thing", "label": "thing" }
+      }]
+      """
 
 
   Scenario: an attribute can be fetched
