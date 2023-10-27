@@ -2320,7 +2320,7 @@ Feature: TypeQL Match Query
     Then answer size is: 6
 
 
-  Scenario: variable role types can be traversed in either direction
+  Scenario: variable role types with relations playing roles
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
@@ -2347,6 +2347,8 @@ Feature: TypeQL Match Query
       """
     Given transaction commits
     Given session opens transaction of type: read
+
+    # Force traversal of role edges in each direction: See vaticle/typedb#6925
     When get answers of typeql match
       """
       match
