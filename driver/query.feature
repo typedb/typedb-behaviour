@@ -359,6 +359,7 @@ Feature: TypeDB Driver Queries
         $x isa person;
         $y isa name;
         $f isa friendship;
+      get;
       """
     Then answer size is: 9
     When get answer of typeql get aggregate
@@ -367,6 +368,7 @@ Feature: TypeDB Driver Queries
         $x isa person;
         $y isa name;
         $f isa friendship;
+      get;
       count;
       """
     Then aggregate value is: 9
@@ -376,6 +378,7 @@ Feature: TypeDB Driver Queries
         $x isa person;
         $y isa name;
         $f (friend: $x) isa friendship;
+      get;
       """
     Then answer size is: 6
     When get answer of typeql get aggregate
@@ -384,6 +387,7 @@ Feature: TypeDB Driver Queries
         $x isa person;
         $y isa name;
         $f (friend: $x) isa friendship;
+      get;
       count;
       """
     Then aggregate value is: 6
