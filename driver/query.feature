@@ -542,3 +542,83 @@ Feature: TypeDB Driver Queries
     Then uniquely identify answer concepts
       | a                 | b                 | c                  | d                  |
       | value:double: 9.0 | value:double: 3.0 | value:double: 18.0 | value:double: 2.0  |
+
+  #########
+  # FETCH #
+  #########
+
+  Scenario: an attribute projection can be relabeled
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
+      """
+      insert
+      $p1 isa person, has name "Alice", has name "Allie", has age 10, has ref 0;
+      $p2 isa person, has name "Bob", has ref 1;
+      """
+    Given transaction commits
+
+    Given session opens transaction of type: read
+
+    When get answers of typeql fetch
+      """
+      match
+      $p isa person, has name $n; { $n == "Alice"; } or { $n == "Bob"; };
+      fetch
+      $p: name as name, age;
+      sort $n;
+      """
+    Then fetch answers are
+      """
+      [{
+        "p": {
+          "type": { "root": "entity", "label": "person" },
+          "name": [
+            { "value": "Alice", "value_type": "string", "type": { "root": "attribute", "label": "name" } },
+            { "value": "Allie", "value_type": "string", "type": { "root": "attribute", "label": "name" } }
+          ],
+          "age": [
+            { "value": 10, "value_type": "long", "type": { "root": "attribute", "label": "age" } }
+          ]
+        }
+      },
+      {
+        "p": {
+          "type": { "root": "entity", "label": "person" },
+          "name": [
+            { "value": "Bob", "value_type": "string", "type": { "root": "attribute", "label": "name" } }
+          ],
+          "age": [ ]
+        }
+      }]
+      """
+
+
+  Scenario: a fetch with zero projections throws
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: read
+
+    When typeql fetch; throws exception
+      """
+      match
+      $p isa person, has name $n;
+      fetch;
+      """
+
+  Scenario: a subquery that is not connected to the match throws
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: read
+
+    When typeql fetch; throws exception
+      """
+      match
+      $p isa person, has name $n;
+      fetch
+      all-employments-count: {
+        match
+        $r isa employment;
+        get $r;
+        count;
+      };
+      """
+
