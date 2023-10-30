@@ -175,6 +175,7 @@ Feature: Concept Serialization
         ?d = 543.21;
         ?b = false;
         ?t = 2023-03-21T12:34;
+      get;
       """
     Then JSON serialization of answers matches
       """
