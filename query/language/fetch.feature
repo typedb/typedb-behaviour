@@ -309,7 +309,7 @@ Feature: TypeQL Fetch Query
             { "value": 10, "value_type": "long", "type": { "root": "attribute", "label": "age" } }
           ]
         },
-        "employment-count": { "value":1 }
+        "employment-count": { "value": 1, "value_type": "long" }
       },
       {
         "p": {
@@ -317,9 +317,9 @@ Feature: TypeQL Fetch Query
          "person-name": [
             { "value":"Bob", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } }
          ],
-         "age": [ ]
+         "age": []
        },
-       "employment-count": { "value":0 }
+       "employment-count": { "value": 0, "value_type": "long" }
       }]
       """
 
@@ -379,7 +379,8 @@ Feature: TypeQL Fetch Query
                 "r": {
                   "ref": [
                     { "value": 4, "value_type": "long", "type": { "root": "attribute", "label": "ref" } }
-                  ]
+                  ],
+                  "type": { "root": "relation", "label": "employment" }
                 }
               }
             ]
