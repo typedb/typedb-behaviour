@@ -2320,6 +2320,62 @@ Feature: TypeQL Match Query
     Then answer size is: 6
 
 
+  Scenario: variable role types with relations playing roles
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
+      """
+      define
+        parent sub relation, relates nested, owns id;
+        nested sub relation, relates id, plays parent:nested;
+        id sub attribute, value string, plays nested:id;
+      """
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
+      """
+      insert
+        $i1 "i1" isa id;
+        $i2 "i2" isa id;
+        $n1 (id: $i1) isa nested;
+        $n2 (id: $i2) isa nested;
+        $p1 (nested: $n1) isa parent, has id $i1;
+        $p2 (nested: $n2) isa parent, has id $i2;
+      """
+    Given transaction commits
+    Given session opens transaction of type: read
+
+    # Force traversal of role edges in each direction: See vaticle/typedb#6925
+    When get answers of typeql match
+      """
+      match
+        $role-nested sub! relation:role;
+        $role-id sub! relation:role;
+        $boundId1 = "i1";
+
+        $p ($role-nested: $n) isa parent, has id $boundId1;
+        $n ($role-id: $i) isa nested;
+      get $p, $n, $i;
+      """
+    Then answer size is: 1
+
+    When get answers of typeql match
+      """
+      match
+        $role-nested sub! relation:role;
+        $role-id sub! relation:role;
+        $boundId1 = "i1";
+
+        $p ($role-nested: $n) isa parent, has id $i;
+        $n ($role-id: $boundId1) isa nested;
+      get $p, $n, $i;
+      """
+    Then answer size is: 1
+
+
   #######################
   # NEGATION VALIDATION #
   #######################
