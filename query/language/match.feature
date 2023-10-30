@@ -496,9 +496,9 @@ Feature: TypeQL Match Clause
     Given transaction commits
 
     Given session opens transaction of type: read
-    When typeql match; throws exception
+    When typeql get; throws exception
       """
-      match $x plays close-friendship:friend;
+      match $x plays close-friendship:friend; get;
       """
 
 
