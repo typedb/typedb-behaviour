@@ -490,6 +490,7 @@ Feature: TypeQL Fetch Query
       $p: type;
       sort $n;
       """
+    Given session opens transaction of type: read
     When typeql fetch; throws exception
       """
       match
@@ -547,6 +548,7 @@ Feature: TypeQL Fetch Query
       };
       sort $n;
       """
+    Given session opens transaction of type: read
     When typeql fetch; throws exception
       """
       match
@@ -560,6 +562,7 @@ Feature: TypeQL Fetch Query
       };
       sort $n;
       """
+    Given session opens transaction of type: read
     When typeql fetch; throws exception
       """
       match
@@ -574,6 +577,7 @@ Feature: TypeQL Fetch Query
       };
       sort $n;
       """
+    Given session opens transaction of type: read
     When typeql fetch; throws exception
       """
       match
