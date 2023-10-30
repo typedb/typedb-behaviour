@@ -839,15 +839,18 @@ Feature: TypeQL Query Modifiers
         {
           "person": {
             "type": { "label": "person", "root": "entity" },
-            "name": [ { "type": { "label": "name", "root": "attribute" }, "value": "Frederick"}, { "type": { "label": "name", "root": "attribute" }, "value": "Freddy" } ],
-            "email": [ { "type": { "label": "email", "root": "attribute" }, "value": "frederick@gmail.com" } ]
+            "name": [
+              { "type": { "label": "name", "root": "attribute" }, "value": "Frederick", "value_type": "string" },
+              { "type": { "label": "name", "root": "attribute" }, "value": "Freddy", "value_type": "string" }
+            ],
+            "email": [ { "type": { "label": "email", "root": "attribute" }, "value": "frederick@gmail.com", "value_type": "string" } ]
           },
           "ref": { "type" : { "label": "ref", "root": "attribute" }, "value": 2, "value_type": "long" }
         },
         {
           "person": {
             "type":  { "label": "person", "root": "entity" },
-            "name": [ { "type": { "label": "name", "root": "attribute" }, "value": "Jemima" } ],
+            "name": [ { "type": { "label": "name", "root": "attribute" }, "value": "Jemima", "value_type": "string" } ],
             "email": [ ]
           },
           "ref": { "type" : { "label": "ref", "root": "attribute" }, "value" : 1, "value_type": "long" }
