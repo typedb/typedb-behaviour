@@ -471,6 +471,7 @@ Parker", has ref 0;
 """
 match $p has name "Peter
 Parker";
+get;
 """
     Then uniquely identify answer concepts
       | p         |
