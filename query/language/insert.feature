@@ -970,12 +970,28 @@ get;
       """
 
 
-  Scenario: when inserting a relation with no role players, an error is thrown
-    Then typeql insert; throws exception
+  Scenario: inserting a relation without a role player is allowed
+    Then typeql insert
       """
       insert
       $x isa employment, has ref 0;
       """
+
+
+  Scenario: an relation without a role player is deleted on transaction commit
+    Then typeql insert
+      """
+      insert
+      $x isa employment, has ref 0;
+      """
+    Then transaction commits
+    Given session opens transaction of type: read
+    Given get answers of typeql get
+      """
+      match $x isa employment, has ref 0;
+      get;
+      """
+    Then answer size is: 0
 
 
   Scenario: when inserting a relation with an unbound variable as a roleplayer, an error is thrown
