@@ -164,6 +164,7 @@ Feature: TypeQL Fetch Query
       }]
       """
 
+
   Scenario: a value can be fetched
     When get answers of typeql fetch
       """

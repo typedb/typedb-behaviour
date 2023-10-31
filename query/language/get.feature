@@ -352,7 +352,7 @@ Feature: TypeQL Get Query
       get;
       <agg_type> $y;
       """
-    Then aggregate answer is not a number
+    Then aggregate answer is empty
 
     Examples:
       | agg_type |
@@ -476,7 +476,7 @@ Feature: TypeQL Get Query
       get;
       sum $y;
       """
-    Then aggregate answer is not a number
+    Then aggregate answer is empty
 
 
   #########
@@ -726,3 +726,36 @@ Feature: TypeQL Get Query
       | owner              | value |
       | value:string:Alice |  10   |
       | value:string:Bob   |   5   |
+
+
+  Scenario: Grouped standard deviation aggregate of one value returns an empty group value
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
+      """
+      define
+      income sub attribute, value double;
+      person owns income;
+      """
+    Given transaction commits
+    Given connection close all sessions
+
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
+    """
+    insert
+    $x isa person, has income 100.0, has ref 0;
+    """
+    Given transaction commits
+
+    Given session opens transaction of type: read
+    When get answers of typeql get group aggregate
+      """
+      match $x isa person, has income $y;
+      get $x, $y;
+      group $x;
+      std $y;
+      """
+    Then group aggregate answer value is empty
