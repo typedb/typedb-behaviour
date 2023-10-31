@@ -100,6 +100,7 @@ Feature: TypeQL Fetch Query
       }]
       """
 
+
   # TODO: remove this scenario when we finish deprecating 'thing' type
   Scenario: root thing type can be fetched
     When get answers of typeql fetch
@@ -226,6 +227,16 @@ Feature: TypeQL Fetch Query
           ]
         }
       }]
+      """
+
+
+  Scenario: attributes that can never be owned by any matching type of a variable throw exceptions
+    When typeql fetch; throws exception
+      """
+      match
+      $p isa person, has person-name "Alice";
+      fetch
+      $p: company-name;
       """
 
 
