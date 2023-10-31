@@ -46,12 +46,16 @@ Feature: TypeQL Fetch Query
       employment sub relation,
         relates employee,
         relates employer,
-        owns ref @key;
+        owns ref @key,
+        owns start-date,
+        owns end-date;
       name sub attribute, abstract, value string;
       person-name sub name;
       company-name sub name;
       age sub attribute, value long;
       ref sub attribute, value long;
+      start-date sub attribute, value datetime;
+      end-date sub attribute, value datetime;
       """
     Given transaction commits
 
@@ -65,7 +69,7 @@ Feature: TypeQL Fetch Query
       $p2 isa person, has person-name "Bob", has ref 1;
       $c1 isa company, has company-name "Vaticle", has ref 2;
       $f1 (friend: $p1, friend: $p2) isa friendship, has ref 3;
-      $e1 (employee: $p1, employer: $c1) isa employment, has ref 4;
+      $e1 (employee: $p1, employer: $c1) isa employment, has ref 4, has start-date 2020-01-01T13:13:13.999, has end-date 2021-01-01;
       """
     Given transaction commits
 
@@ -142,7 +146,23 @@ Feature: TypeQL Fetch Query
         "a": { "value":"Vaticle", "value_type": "string", "type": { "root": "attribute", "label": "company-name" } }
       }]
       """
-
+    When get answers of typeql fetch
+      """
+      match
+      $a isa $t; $t value datetime;
+      fetch
+      $a;
+      sort $a;
+      """
+    Then fetch answers are
+      """
+      [{
+        "a": { "value": "2020-01-01T13:13:13.999", "value_type": "datetime", "type": { "root": "attribute", "label": "start-date" } }
+      },
+      {
+        "a": { "value": "2021-01-01T00:00:00.000", "value_type": "datetime", "type": { "root": "attribute", "label": "end-date" } }
+      }]
+      """
 
   Scenario: a value can be fetched
     When get answers of typeql fetch
