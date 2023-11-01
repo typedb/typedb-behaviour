@@ -23,11 +23,14 @@ files = [
     "define.feature",
     "delete.feature",
     "expression.feature",
+    "fetch.feature",
     "get.feature",
     "insert.feature",
     "match.feature",
+    "modifiers.feature",
     "rule-validation.feature",
     "undefine.feature",
+    "update.feature",
 ]
 
 filegroup(

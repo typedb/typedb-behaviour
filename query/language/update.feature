@@ -69,7 +69,7 @@ Feature: TypeQL Update Query
       delete $x has name "Alex";
       insert $x has name "Bob";
       """
-    Then session transaction closes
+    Given session transaction closes
     Given session opens transaction of type: write
     Then typeql update; throws exception
       """
@@ -103,9 +103,9 @@ Feature: TypeQL Update Query
       """
     Then transaction commits
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
-      match $x isa person, has name $n;
+      match $x isa person, has name $n; get;
       """
     Then uniquely identify answer concepts
       | x         | n               |
@@ -213,11 +213,12 @@ Feature: TypeQL Update Query
       """
     Then transaction commits
     When session opens transaction of type: read
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match
       (named: $p, name: $nc) isa naming;
       $nc has name $n;
+      get;
       """
     Then uniquely identify answer concepts
       | p         | n                  |
@@ -228,11 +229,12 @@ Feature: TypeQL Update Query
       | key:ref:4 | attr:name:Alex     |
       | key:ref:5 | attr:name:Bob      |
 
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match
       $p isa person;
       $p has name $n;
+      get;
       """
     Then answer size is: 0
 

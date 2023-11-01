@@ -78,7 +78,7 @@ Feature: Negation Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match $x isa person;
+      match $x isa person; get;
       """
     Then verify answer size is: 5
     Given reasoning query
@@ -88,6 +88,7 @@ Feature: Negation Resolution
         not {
           $e (employee: $x) isa employment;
         };
+      get;
       """
     Then verify answer size is: 3
 
@@ -108,7 +109,7 @@ Feature: Negation Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match $x isa person;
+      match $x isa person; get;
       """
     Then verify answer size is: 5
     Given reasoning query
@@ -118,6 +119,7 @@ Feature: Negation Resolution
         not {
           ($x) isa relation;
         };
+      get;
       """
     Then verify answer size is: 3
 
@@ -135,7 +137,7 @@ Feature: Negation Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match $x isa person;
+      match $x isa person; get;
       """
     Then verify answer size is: 5
     Given reasoning query
@@ -145,6 +147,7 @@ Feature: Negation Resolution
         not {
           $x has name $val;
         };
+      get;
       """
     Then verify answer size is: 2
 
@@ -162,7 +165,7 @@ Feature: Negation Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match $x isa person;
+      match $x isa person; get;
       """
     Then verify answer size is: 5
     Given reasoning query
@@ -172,6 +175,7 @@ Feature: Negation Resolution
         not {
           $x has name "Bob";
         };
+      get;
       """
     Then verify answer size is: 4
 
@@ -190,6 +194,7 @@ Feature: Negation Resolution
       match
         $x has age $y;
         not {$y 20;};
+      get;
       """
     Then verify answer size is: 1
     Then verify answer set is equivalent for query
@@ -197,6 +202,7 @@ Feature: Negation Resolution
       match
         $x has age $y;
         $y 10;
+      get;
       """
 
 
@@ -215,11 +221,12 @@ Feature: Negation Resolution
       match
         $x has attribute $y;
         not {$y isa name;};
+      get;
       """
     Then verify answer size is: 2
     Then verify answer set is equivalent for query
       """
-      match $x has age $y;
+      match $x has age $y; get;
       """
 
 
@@ -250,6 +257,7 @@ Feature: Negation Resolution
         (friend: $a, friend: $b) isa friendship;
         (friend: $b, friend: $c) isa friendship;
         (friend: $c, friend: $d) isa friendship;
+      get;
       """
     # abab, abcb, abcd,
     # baba, babc, bcba, bcbc, bcdc, bcdz,
@@ -264,6 +272,7 @@ Feature: Negation Resolution
         (friend: $b, friend: $c) isa friendship;
         (friend: $c, friend: $d) isa friendship;
         not {$c isa dog;};
+      get;
       """
     # Eliminates (cdzd, zdzd)
     Then verify answer size is: 22
@@ -274,6 +283,7 @@ Feature: Negation Resolution
         (friend: $b, friend: $c) isa friendship;
         (friend: $c, friend: $d) isa friendship;
         $c isa person;
+      get;
       """
 
 
@@ -303,6 +313,7 @@ Feature: Negation Resolution
       match
         (friend: $a, friend: $b) isa friendship;
         (friend: $b, friend: $c) isa friendship;
+      get;
       """
     # aba, abc
     # bab, bcb, bcd
@@ -317,6 +328,7 @@ Feature: Negation Resolution
         not {(friend: $b, friend: $z) isa friendship;};
         (friend: $b, friend: $c) isa friendship;
         $z isa dog;
+      get;
       """
     # (d,z) is a friendship so we eliminate results where $b is 'd': these are (cdc, cdz, zdc, zdz)
     Then verify answer size is: 10
@@ -327,6 +339,7 @@ Feature: Negation Resolution
         (friend: $b, friend: $c) isa friendship;
         $z isa dog;
         not {$b has name "d";};
+      get;
       """
 
 
@@ -342,7 +355,7 @@ Feature: Negation Resolution
     Given verifier is initialised
     Given reasoning query
     """
-      match ($r1: $x) isa employment;
+      match ($r1: $x) isa employment; get;
       """
     # r1       | x   |
     # role     | PER |
@@ -355,6 +368,7 @@ Feature: Negation Resolution
       match
         ($r1: $x) isa employment;
         not {$r1 type relation:role;};
+      get;
       """
     Then verify answer size is: 2
 
@@ -373,7 +387,7 @@ Feature: Negation Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match $x has attribute $r;
+      match $x has attribute $r; get;
       """
     Then verify answer size is: 8
     Given reasoning query
@@ -383,6 +397,7 @@ Feature: Negation Resolution
         not {
           $x isa person, has name "Tim", has age 55;
         };
+      get;
       """
     Then verify answer size is: 6
     Then verify answer set is equivalent for query
@@ -394,6 +409,7 @@ Feature: Negation Resolution
           $x has name "Tim";
           $x has age 55;
         };
+      get;
       """
 
 
@@ -411,7 +427,7 @@ Feature: Negation Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match $x has attribute $r;
+      match $x has attribute $r; get;
       """
     Then verify answer size is: 8
     Given reasoning query
@@ -419,6 +435,7 @@ Feature: Negation Resolution
       match
         $x has attribute $r;
         not { $x isa company; };
+      get;
       """
     Then verify answer size is: 7
     Given reasoning query
@@ -427,6 +444,7 @@ Feature: Negation Resolution
         $x has attribute $r;
         not { $x isa company; };
         not { $x has name "Tim"; };
+      get;
       """
     Then verify answer size is: 3
     Given reasoning query
@@ -436,6 +454,7 @@ Feature: Negation Resolution
         not { $x isa company; };
         not { $x has name "Tim"; };
         not { $r 55; };
+      get;
       """
     Then verify answer size is: 2
 
@@ -463,7 +482,7 @@ Feature: Negation Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match $x isa person;
+      match $x isa person; get;
       """
     Then verify answer size is: 4
     Given reasoning query
@@ -474,6 +493,7 @@ Feature: Negation Resolution
           (employee: $x, employer: $y) isa employment;
           $y isa pizza-company;
         };
+      get;
       """
     Then verify answer size is: 3
 
@@ -507,6 +527,7 @@ Feature: Negation Resolution
           (employee: $x, employer: $y) isa employment;
           $y isa company;
         };
+      get;
       """
     Then verify answer size is: 2
 
@@ -541,6 +562,7 @@ Feature: Negation Resolution
           (employee: $x, employer: $y) isa employment;
           $y isa pizza-company;
         };
+      get;
       """
     Then verify answer size is: 3
 
@@ -583,6 +605,7 @@ Feature: Negation Resolution
       match
         $continent isa continent;
         $area isa area;
+      get;
       """
     Then verify answer size is: 1
     Given reasoning query
@@ -591,6 +614,7 @@ Feature: Negation Resolution
         $continent isa continent;
         $area isa area;
         not {(superior: $continent, subordinate: $area) isa location-hierarchy;};
+      get;
       """
     Then verify answer size is: 0
     Then verify answers are sound
@@ -662,6 +686,7 @@ Feature: Negation Resolution
       match
         (from: $x, to: $y) isa indirect-link;
         $x has index "aa";
+      get;
       """
     Then verify answer size is: 2
     Then verify answer set is equivalent for query
@@ -670,6 +695,7 @@ Feature: Negation Resolution
         (from: $x, to: $y) isa reachable;
         $x has index "aa";
         not {$y has index "bb";};
+      get;
       """
 
 
@@ -700,14 +726,14 @@ Feature: Negation Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match $x has name "Not Ten", has age 20;
+      match $x has name "Not Ten", has age 20; get;
       """
     Then verify answer size is: 1
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
       """
-      match $x has name "Not Ten", has age 10;
+      match $x has name "Not Ten", has age 10; get;
       """
     Then verify answer size is: 0
     Then verify answers are sound
@@ -737,14 +763,14 @@ Feature: Negation Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match $x isa person;
+      match $x isa person; get;
       """
     Then verify answer size is: 3
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
       """
-      match $x isa person, has name "No Age";
+      match $x isa person, has name "No Age"; get;
       """
     Then verify answer size is: 1
     Then verify answers are sound
@@ -790,7 +816,7 @@ Feature: Negation Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match $x isa company;
+      match $x isa company; get;
       """
     Then verify answer size is: 4
     Given reasoning query
@@ -798,6 +824,7 @@ Feature: Negation Resolution
       match
         $x isa company;
         not { (not-in-uk: $x) isa non-uk; };
+      get;
       """
     # Should exclude both the company in France and the company with no country
     Then verify answer size is: 2
@@ -816,6 +843,7 @@ Feature: Negation Resolution
       match
         $x isa company;
         { $x has name "a"; } or { $x has name "b"; };
+      get;
       """
 
 
@@ -866,6 +894,7 @@ Feature: Negation Resolution
             $x has name "c";
           };
         };
+      get;
       """
     Then verify answer size is: 3
     Then verify answer set is equivalent for query
@@ -873,6 +902,7 @@ Feature: Negation Resolution
       match
         $x isa company;
         not { $x has name "d"; };
+      get;
       """
 
 
@@ -971,7 +1001,7 @@ Feature: Negation Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match (diagnosed-fault: $flt, parent-session: $ts) isa diagnosis;
+      match (diagnosed-fault: $flt, parent-session: $ts) isa diagnosis; get;
       """
     Then verify answer size is: 0
     Then verify answers are consistent across 5 executions
@@ -1046,7 +1076,7 @@ Feature: Negation Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match (role-3: $x, role-4: $y) isa relation-4;
+      match (role-3: $x, role-4: $y) isa relation-4; get;
       """
     Then verify answer size is: 11
     Then verify answers are consistent across 5 executions
@@ -1127,6 +1157,7 @@ Feature: Negation Resolution
       match
         (from: $x, to: $y) isa unreachable;
         $x has index "aa";
+      get;
       """
     # aa is not linked to itself. ee, ff, gg are linked to each other, but not to aa. hh is not linked to anything
     Then verify answer size is: 5
@@ -1138,6 +1169,7 @@ Feature: Negation Resolution
         $x has index "aa"; $y isa node;
         { $y has index "aa"; } or { $y has index "ee"; } or { $y has index "ff"; } or
         { $y has index "gg"; } or { $y has index "hh"; };
+      get;
       """
 
   Scenario: negated and non-negated clauses can use the same rule
@@ -1168,6 +1200,7 @@ Feature: Negation Resolution
       match
         $x has retailer $r;
         not { $r == "Ocado"; };
+      get;
       """
     Then verify answer size is: 0
     Then verify answers are sound
@@ -1198,7 +1231,7 @@ Feature: Negation Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match $p isa person; not { ($p, $f) isa enemies; };
+      match $p isa person; not { ($p, $f) isa enemies; }; get;
       """
     Then verify answer size is: 0
 #    TODO: Add a case with non-zero answers

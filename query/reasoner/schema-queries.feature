@@ -82,23 +82,23 @@ Feature: Schema Query Resolution (Variable Types)
     Given verifier is initialised
     Given reasoning query
       """
-      match $x isa entity;
+      match $x isa entity; get;
       """
     Then verify answer size is: 3
     Given reasoning query
       """
-      match $x isa relation;
+      match $x isa relation; get;
       """
     # (xx, yy, zz, xy, xz, yz)
     Then verify answer size is: 6
     Given reasoning query
       """
-      match $x isa attribute;
+      match $x isa attribute; get;
       """
     Then verify answer size is: 1
     Given reasoning query
       """
-      match $x isa $type;
+      match $x isa $type; get;
       """
     # 3 people x 3 types of person {person,entity,thing}
     # 6 friendships x 3 types of friendship {friendship, relation, thing}
@@ -131,13 +131,13 @@ Feature: Schema Query Resolution (Variable Types)
     Given verifier is initialised
     Given reasoning query
       """
-      match ($u, $v) isa relation;
+      match ($u, $v) isa relation; get;
       """
     # (xx, yy, zz, xy, xz, yz, yx, zx, zy)
     Then verify answer size is: 9
     Given reasoning query
       """
-      match ($u, $v) isa $type;
+      match ($u, $v) isa $type; get;
       """
     # 3 possible $u x 3 possible $v x 3 possible $type {friendship,relation,thing}
     Then verify answer size is: 27
@@ -189,7 +189,7 @@ Feature: Schema Query Resolution (Variable Types)
     Given verifier is initialised
     Given reasoning query
       """
-      match $x isa relation;
+      match $x isa relation; get;
       """
     Then verify answer size is: 6
     Then verify answers are sound
@@ -199,6 +199,7 @@ Feature: Schema Query Resolution (Variable Types)
       match
         $x isa $type;
         $type owns contract;
+      get;
       """
     # friendship can't have a contract... at least, not in this pristine test world
     # note: enforcing 'has contract' also eliminates 'relation' and 'thing' as possible types
@@ -234,7 +235,7 @@ Feature: Schema Query Resolution (Variable Types)
     Given verifier is initialised
     Given reasoning query
       """
-      match $x isa relation;
+      match $x isa relation; get;
       """
     # 3 friendships, 3 employments
     Then verify answer size is: 6
@@ -243,6 +244,7 @@ Feature: Schema Query Resolution (Variable Types)
       match
         $x isa $type;
         $type sub relation;
+      get;
       """
     # 3 friendships, 3 employments, 6 relations
     Then verify answer size is: 12
@@ -294,7 +296,7 @@ Feature: Schema Query Resolution (Variable Types)
     Given verifier is initialised
     Given reasoning query
       """
-      match $x isa relation;
+      match $x isa relation; get;
       """
     Then verify answer size is: 6
     Then verify answers are sound
@@ -304,6 +306,7 @@ Feature: Schema Query Resolution (Variable Types)
       match
         $x isa $type;
         $type plays legal-documentation:subject;
+      get;
       """
     # friendship can't be a documented-thing
     # note: enforcing 'plays legal-documentation:subject' also eliminates 'relation' and 'thing' as possible types
@@ -342,7 +345,7 @@ Feature: Schema Query Resolution (Variable Types)
     Given verifier is initialised
     Given reasoning query
       """
-      match (employee: $x, employer: $y) isa employment;
+      match (employee: $x, employer: $y) isa employment; get;
       """
     Then verify answer size is: 3
     Then verify answers are sound
@@ -352,6 +355,7 @@ Feature: Schema Query Resolution (Variable Types)
       match
         (employee: $x, employer: $y) isa employment;
         $x isa $type;
+      get;
       """
     # 3 colonels * 5 supertypes of colonel (colonel, military-person, person, entity, thing)
     Then verify answer size is: 15
@@ -362,6 +366,7 @@ Feature: Schema Query Resolution (Variable Types)
       match
         ($x, $y) isa employment;
         $x isa $type;
+      get;
       """
     # (3 colonels * 5 supertypes of colonel * 1 company)
     # + (1 company * 3 supertypes of company * 3 colonels)
@@ -458,6 +463,7 @@ Feature: Schema Query Resolution (Variable Types)
         $p isa person;
         ($p) isa $f;
         $f type relation;
+      get;
       """
     Then verify answer size is: 1
 
@@ -482,5 +488,6 @@ Feature: Schema Query Resolution (Variable Types)
         $p isa person;
         ($role: $p) isa friendship;
         $role type relation:role;
+      get;
       """
     Then verify answer size is: 1

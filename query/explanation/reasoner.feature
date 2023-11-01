@@ -53,9 +53,9 @@ Feature: TypeQL Reasoning Explanation
       $x isa company, has company-id 0;
       """
 
-    Then get answers of typeql match
+    Then get answers of typeql get
       """
-      match $co has name $n;
+      match $co has name $n; get;
       """
 
     Then concept identifiers are
@@ -115,9 +115,9 @@ Feature: TypeQL Reasoning Explanation
       $co isa company, has company-id 0;
       """
 
-    Then get answers of typeql match
+    Then get answers of typeql get
       """
-      match $co has is-liable $l;
+      match $co has is-liable $l; get;
       """
 
     Then concept identifiers are
@@ -181,11 +181,12 @@ Feature: TypeQL Reasoning Explanation
       (superior: $cit, subordinate: $ar) isa location-hierarchy;
       """
 
-    Then get answers of typeql match
+    Then get answers of typeql get
       """
       match
       $k isa area, has name $n;
       (superior: $l, subordinate: $k) isa location-hierarchy;
+      get;
       """
 
     Then concept identifiers are
@@ -276,9 +277,9 @@ Feature: TypeQL Reasoning Explanation
       | a-man-is-called-bob  | { $man isa man; };                                                                  | { $man has name "Bob"; };                         |
       | bobs-sister-is-alice | { $p isa man, has name $nb; $nb "Bob"; $p1 isa woman, has name $na; $na "Alice"; }; | { (sibling: $p, sibling: $p1) isa siblingship; }; |
 
-    Then get answers of typeql match
+    Then get answers of typeql get
       """
-      match ($w, $m) isa family-relation; $w isa woman;
+      match ($w, $m) isa family-relation; $w isa woman; get;
       """
 
     Then uniquely identify answer concepts
@@ -293,9 +294,9 @@ Feature: TypeQL Reasoning Explanation
       | 3 | -        | p1, na        | ALI, ALIN            | lookup               | { $p1 isa woman; $p1 has name $na; $na == "Alice"; $p1 iid <answer.p1.iid>; $na iid <answer.na.iid>; };                                                                                           |
       | 4 | -        | man           | BOB                  | lookup               | { $man isa man; $man iid <answer.man.iid>; };                                                                                                                                                    |
 
-    Then get answers of typeql match
+    Then get answers of typeql get
       """
-      match (sibling: $w, sibling: $m) isa siblingship; $w isa woman;
+      match (sibling: $w, sibling: $m) isa siblingship; $w isa woman; get;
       """
 
     Then uniquely identify answer concepts
@@ -349,11 +350,12 @@ Feature: TypeQL Reasoning Explanation
       $c2 has name $n2; $n2 "another-company";
       """
 
-    Then get answers of typeql match
+    Then get answers of typeql get
       """
       match $com isa company;
       {$com has name $n1; $n1 "the-company";} or {$com has name $n2; $n2 "another-company";};
       not {$com has is-liable $liability;};
+      get;
       """
 
     Then concept identifiers are
@@ -414,9 +416,9 @@ Feature: TypeQL Reasoning Explanation
       $c2 has name $n2; $n2 "another-company";
       """
 
-    Then get answers of typeql match
+    Then get answers of typeql get
       """
-      match $com isa company, has is-liable $lia; $lia true;
+      match $com isa company, has is-liable $lia; $lia true; get;
       """
 
     Then concept identifiers are
@@ -478,9 +480,9 @@ Feature: TypeQL Reasoning Explanation
       $c2 has name $n2; $n2 "another-company";
       """
 
-    Then get answers of typeql match
+    Then get answers of typeql get
       """
-      match $com isa company; not { $com has is-liable $lia; $lia true; }; not { $com has name $n; $n "the-company"; };
+      match $com isa company; not { $com has is-liable $lia; $lia true; }; not { $com has name $n; $n "the-company"; }; get;
       """
 
     Then concept identifiers are

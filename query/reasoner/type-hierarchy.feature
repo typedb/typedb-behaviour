@@ -75,6 +75,7 @@ Feature: Type Hierarchy Resolution
         $x isa person;
         $y isa person;
         (actor: $x, writer: $y) isa film-production;
+      get;
       """
     # Answers are (actor:$x, writer:$z) and (actor:$x, writer:$v)
     Then verify answer size is: 2
@@ -87,6 +88,7 @@ Feature: Type Hierarchy Resolution
         $y isa person;
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
+      get;
       """
     Then verify answer size is: 2
     Then verify answers are sound
@@ -97,6 +99,7 @@ Feature: Type Hierarchy Resolution
         $x isa person;
         $y isa child;
         (actor: $x, writer: $y) isa film-production;
+      get;
       """
     # Answer is (actor:$x, writer:$v) ONLY
     Then verify answer size is: 1
@@ -109,6 +112,7 @@ Feature: Type Hierarchy Resolution
         $y isa child;
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
+      get;
       """
     Then verify answer size is: 1
     Then verify answers are sound
@@ -119,6 +123,7 @@ Feature: Type Hierarchy Resolution
         $x isa child;
         $y isa person;
         (actor: $x, writer: $y) isa film-production;
+      get;
       """
     # Answers are (actor:$x, writer:$z) and (actor:$x, writer:$v)
     Then verify answer size is: 2
@@ -131,6 +136,7 @@ Feature: Type Hierarchy Resolution
         $y isa person;
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
+      get;
       """
     Then verify answer size is: 2
     Then verify answers are sound
@@ -173,13 +179,13 @@ Feature: Type Hierarchy Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match (child: $x, father: $y) isa large-family;
+      match (child: $x, father: $y) isa large-family; get;
       """
     Then verify answer size is: 0
     # Matching two siblings when only one is present
     Given reasoning query
       """
-      match (mother: $x, father: $y) isa large-family;
+      match (mother: $x, father: $y) isa large-family; get;
       """
     Then verify answer size is: 0
     Then verify answers are sound
@@ -228,7 +234,7 @@ Feature: Type Hierarchy Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match (scifi-writer:$x, scifi-actor:$y) isa film-production;
+      match (scifi-writer:$x, scifi-actor:$y) isa film-production; get;
       """
     Then verify answer size is: 1
     Then verify answers are sound
@@ -277,7 +283,7 @@ Feature: Type Hierarchy Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match (writer:$x, actor:$y) isa scifi-production;
+      match (writer:$x, actor:$y) isa scifi-production; get;
       """
     Then verify answer size is: 1
     Then verify answers are sound
@@ -326,7 +332,7 @@ Feature: Type Hierarchy Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match (writer:$x, actor:$y) isa film-production;
+      match (writer:$x, actor:$y) isa film-production; get;
       """
     Then verify answer size is: 1
     Then verify answers are sound
@@ -394,6 +400,7 @@ Feature: Type Hierarchy Resolution
         $x isa person;
         $y isa person;
         (actor: $x, writer: $y) isa film-production;
+      get;
       """
     # Answers are (actor:$x, writer:$z) and (actor:$x, writer:$v)
     Then verify answer size is: 2
@@ -406,6 +413,7 @@ Feature: Type Hierarchy Resolution
         $y isa person;
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
+      get;
       """
     Then verify answer size is: 2
     Then verify answers are sound
@@ -416,6 +424,7 @@ Feature: Type Hierarchy Resolution
         $x isa person;
         $y isa child;
         (actor: $x, writer: $y) isa film-production;
+      get;
       """
     # Answer is (actor:$x, writer:$v) ONLY
     Then verify answer size is: 1
@@ -428,6 +437,7 @@ Feature: Type Hierarchy Resolution
         $y isa child;
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
+      get;
       """
     Then verify answer size is: 1
     Then verify answers are sound
@@ -438,6 +448,7 @@ Feature: Type Hierarchy Resolution
         $x isa child;
         $y isa person;
         (actor: $x, writer: $y) isa film-production;
+      get;
       """
     # Answers are (actor:$x, writer:$z) and (actor:$x, writer:$v)
     Then verify answer size is: 2
@@ -450,6 +461,7 @@ Feature: Type Hierarchy Resolution
         $y isa person;
         (actor: $x, writer: $y) isa film-production;
         $y has name 'a';
+      get;
       """
     Then verify answer size is: 2
     Then verify answers are sound
@@ -497,7 +509,7 @@ Feature: Type Hierarchy Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match (home-owner: $x, resident: $y) isa residence;
+      match (home-owner: $x, resident: $y) isa residence; get;
       """
     Then verify answer size is: 1
     Then verify answers are sound
@@ -507,6 +519,7 @@ Feature: Type Hierarchy Resolution
       match
         (home-owner: $x, resident: $y) isa residence;
         (parent-home-owner: $x, child-resident: $y) isa family-residence;
+      get;
       """
     Then verify answer size is: 1
     Then verify answers are sound

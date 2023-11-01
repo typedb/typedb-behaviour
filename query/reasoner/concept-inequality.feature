@@ -104,14 +104,14 @@ Feature: Concept Inequality Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match (state: $s) isa holds;
+      match (state: $s) isa holds; get;
       """
     Then verify answer size is: 1
     Then verify answers are sound
     Then verify answers are complete
     Then verify answer set is equivalent for query
       """
-      match $s isa state, has name 's2';
+      match $s isa state, has name 's2'; get;
       """
 
 
@@ -119,7 +119,7 @@ Feature: Concept Inequality Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match (ball1: $x, ball2: $y) isa selection;
+      match (ball1: $x, ball2: $y) isa selection; get;
       """
     # materialised: [ab, ba, bc, cb]
     # inferred: [aa, ac, bb, ca, cc]
@@ -131,6 +131,7 @@ Feature: Concept Inequality Resolution
       match
         (ball1: $x, ball2: $y) isa selection;
         not { $x is $y; };
+      get;
       """
     # materialised: [ab, ba, bc, cb]
     # inferred: [ac, ca]
@@ -161,6 +162,7 @@ Feature: Concept Inequality Resolution
         (ball1: $x, ball2: $y) isa selection;
         not { $x is $y; };
         $y has name 'c';
+      get;
       """
     Then verify answer size is: 2
     Then verify answers are sound
@@ -173,6 +175,7 @@ Feature: Concept Inequality Resolution
         not { $x is $y; };
         $y has name 'c';
         {$x has name 'a';} or {$x has name 'b';};
+      get;
       """
     Then verify answer size is: 2
     Then verify answers are sound
@@ -197,6 +200,7 @@ Feature: Concept Inequality Resolution
         (ball1: $x, ball2: $y) isa selection;
         (ball1: $x, ball2: $z) isa selection;
         not { $y is $z; };
+      get;
       """
     # [aab, aac, aba, abc, aca, acb,
     #  bab, bac, bba, bbc, bca, bcb,
@@ -239,6 +243,7 @@ Feature: Concept Inequality Resolution
         (ball1: $x, ball2: $y) isa selection;
         (ball1: $y, ball2: $z) isa selection;
         not { $x is $z; };
+      get;
       """
     Then verify answer size is: 18
     Then verify answers are sound
@@ -283,6 +288,7 @@ Feature: Concept Inequality Resolution
         (ball1: $x, ball2: $z1) isa selection;
         (ball1: $x, ball2: $y2) isa selection;
         (ball1: $x, ball2: $z2) isa selection;
+      get;
       """
     # For each of the [3] values of $x, there are 3^4 = 81 choices for {$y1, $z1, $y2, $z2}, for a total of 243
     Then verify answer size is: 243
@@ -298,6 +304,7 @@ Feature: Concept Inequality Resolution
 
         not { $y1 is $z1; };
         not { $y2 is $z2; };
+      get;
       """
     Then verify answer size is: 108
     # Each neq predicate reduces the answer size by 1/3, cutting it to 162, then 108
@@ -344,6 +351,7 @@ Feature: Concept Inequality Resolution
         (ball1: $x, ball2: $y) isa selection;
         (ball1: $x, ball2: $z1) isa selection;
         (ball1: $y, ball2: $z2) isa selection;
+      get;
       """
     # There are 3^4 possible choices for the set {$x, $y, $z1, $z2}, for a total of 81
     Then verify answer size is: 81
@@ -358,6 +366,7 @@ Feature: Concept Inequality Resolution
 
         not { $x is $z1; };
         not { $y is $z2; };
+      get;
       """
     # Each neq predicate reduces the answer size by 1/3, cutting it to 54, then 36
     Then verify answer size is: 36
@@ -423,6 +432,7 @@ Feature: Concept Inequality Resolution
         $ax isa! $typeof_ax;
         $ay isa! $typeof_ay;
         not { $typeof_ax is $typeof_ay; };
+      get;
       """
     # x   | ax  | y   | ay  |
     # PER | STA | SOF | NAM |
