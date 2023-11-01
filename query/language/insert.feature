@@ -976,6 +976,12 @@ get;
       insert
       $x isa employment, has ref 0;
       """
+    Given get answers of typeql get
+      """
+      match $x isa employment, has ref 0;
+      get;
+      """
+    Then answer size is: 1
 
 
   Scenario: an relation without a role player is deleted on transaction commit
@@ -988,7 +994,8 @@ get;
     Given session opens transaction of type: read
     Given get answers of typeql get
       """
-      match $x isa employment, has ref 0;
+      match
+      $x isa employment, has ref 0;
       get;
       """
     Then answer size is: 0
