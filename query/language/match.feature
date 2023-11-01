@@ -2366,7 +2366,7 @@ Feature: TypeQL Match Clause
     Given session opens transaction of type: read
 
     # Force traversal of role edges in each direction: See vaticle/typedb#6925
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match
         $role-nested sub! relation:role;
@@ -2379,7 +2379,7 @@ Feature: TypeQL Match Clause
       """
     Then answer size is: 1
 
-    When get answers of typeql match
+    When get answers of typeql get
       """
       match
         $role-nested sub! relation:role;
