@@ -79,13 +79,6 @@ Feature: Concept Relation
       | wife    | $a |
       | husband | $b |
 
-  Scenario: Relation without role player cannot be created
-    When $m = relation(marriage) create new instance with key(license): m
-    Then relation(marriage) get instances contain: $m
-    Then relation $m is null: false
-    Then relation $m has type: marriage
-    Then transaction commits; throws exception
-#
   Scenario: Role players can get relations
     When $m = relation(marriage) create new instance with key(license): m
     When $a = entity(person) create new instance with key(username): alice
@@ -143,35 +136,8 @@ Feature: Concept Relation
     Then relation $m get players do not contain:
       | wife | $a |
 
-  Scenario: Relation without role players get deleted
+  Scenario: Relation without role players get deleted on commit
     When $m = relation(marriage) create new instance with key(license): m
-    When $a = entity(person) create new instance with key(username): alice
-    When relation $m add player for role(wife): $a
-    When relation $m remove player for role(wife): $a
-    Then relation $m is deleted: true
-    Then entity $a get relations do not contain: $m
-    Then relation(marriage) get instances do not contain: $m
-    When $m = relation(marriage) get instance with key(license): m
-    Then relation $m is null: true
-    Then relation(marriage) get instances is empty
-    When transaction commits
-    When session opens transaction of type: write
-    When $m = relation(marriage) get instance with key(license): m
-    Then relation $m is null: true
-    Then relation(marriage) get instances is empty
-    When $m = relation(marriage) create new instance with key(license): m
-    When $a = entity(person) get instance with key(username): alice
-    When relation $m add player for role(wife): $a
-    When transaction commits
-    When session opens transaction of type: write
-    When $m = relation(marriage) get instance with key(license): m
-    When $a = entity(person) get instance with key(username): alice
-    When relation $m remove player for role(wife): $a
-    Then relation $m is deleted: true
-    Then entity $a get relations do not contain: $m
-    When $m = relation(marriage) get instance with key(license): m
-    Then relation $m is null: true
-    Then relation(marriage) get instances is empty
     When transaction commits
     When session opens transaction of type: read
     When $m = relation(marriage) get instance with key(license): m
@@ -219,13 +185,5 @@ Feature: Concept Relation
     When $a = entity(person) create new instance with key(username): alice
     When relation $m add player for role(wife): $a
     When delete relation: $m
-    Then relation $m is deleted: true
-    When relation $m add player for role(wife): $a; throws exception
-
-  Scenario: Relation cannot have roleplayers inserted after indirect deletion
-    When $m = relation(marriage) create new instance with key(license): m
-    When $a = entity(person) create new instance with key(username): alice
-    When relation $m add player for role(wife): $a
-    When delete entity: $a
     Then relation $m is deleted: true
     When relation $m add player for role(wife): $a; throws exception
