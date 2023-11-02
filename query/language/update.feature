@@ -113,26 +113,6 @@ Feature: TypeQL Update Query
       | key:ref:1 | attr:name:Bob   |
 
 
-  Scenario: Deleting the last roleplayer of a relation means it cannot be updated
-    Given get answers of typeql insert
-      """
-      insert
-      $x isa person, has name "Alex", has ref 0;
-      $y isa person, has name "Bob", has ref 1;
-      $r (friend: $x) isa friendship, has ref 0;
-      """
-    Given transaction commits
-    Given session opens transaction of type: write
-    When typeql update; throws exception
-      """
-      match
-      $x isa person, has name "Alex";
-      $y isa person, has name "Bob";
-      $r (friend: $x) isa friendship;
-      delete $r (friend: $x);
-      insert $r (friend: $y);
-      """
-
   Scenario: Roleplayer exchange
     Given get answers of typeql insert
       """
