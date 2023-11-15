@@ -2449,10 +2449,6 @@ Feature: TypeQL Define Query
   # TRANSACTIONALITY #
   ####################
 
-  # TODO: re-enable when it passes reliably in drivers (see driver-java#233)
-  @ignore-typedb-driver-java
-  @ignore-typedb-driver-nodejs
-  @ignore-typedb-driver-python
   Scenario: uncommitted transaction writes are not persisted
     When typeql define
       """
