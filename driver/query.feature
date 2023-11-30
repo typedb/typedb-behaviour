@@ -574,11 +574,11 @@ Feature: TypeDB Driver Queries
         "p": {
           "type": { "root": "entity", "label": "person" },
           "name": [
-            { "value": "Alice", "value_type": "string", "type": { "root": "attribute", "label": "name" } },
-            { "value": "Allie", "value_type": "string", "type": { "root": "attribute", "label": "name" } }
+            { "value": "Alice", "type": { "root": "attribute", "label": "name", "value_type": "string" } },
+            { "value": "Allie", "type": { "root": "attribute", "label": "name", "value_type": "string" } }
           ],
           "age": [
-            { "value": 10, "value_type": "long", "type": { "root": "attribute", "label": "age" } }
+            { "value": 10, "type": { "root": "attribute", "label": "age", "value_type": "long" } }
           ]
         }
       },
@@ -586,7 +586,7 @@ Feature: TypeDB Driver Queries
         "p": {
           "type": { "root": "entity", "label": "person" },
           "name": [
-            { "value": "Bob", "value_type": "string", "type": { "root": "attribute", "label": "name" } }
+            { "value": "Bob", "type": { "root": "attribute", "label": "name", "value_type": "string" } }
           ],
           "age": [ ]
         }
@@ -621,4 +621,3 @@ Feature: TypeDB Driver Queries
         count;
       };
       """
-

@@ -105,6 +105,22 @@ Feature: TypeQL Fetch Query
       """
 
 
+  Scenario: a fetched attribute type contains its value type
+    When get answers of typeql fetch
+      """
+      match
+      $n type name;
+      fetch
+      $n;
+      """
+    Then fetch answers are
+      """
+      [{
+        "n": { "root": "attribute", "label": "name", "value_type": "string" }
+      }]
+      """
+
+
   # TODO: remove this scenario when we finish deprecating 'thing' type
   Scenario: root thing type can be fetched
     When get answers of typeql fetch
@@ -134,16 +150,16 @@ Feature: TypeQL Fetch Query
     Then fetch answers are
       """
       [{
-        "a": { "value":"Alice", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } }
+        "a": { "value":"Alice", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } }
       },
       {
-        "a": { "value":"Allie", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } }
+        "a": { "value":"Allie", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } }
       },
       {
-        "a": { "value":"Bob", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } }
+        "a": { "value":"Bob", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } }
       },
       {
-        "a": { "value":"Vaticle", "value_type": "string", "type": { "root": "attribute", "label": "company-name" } }
+        "a": { "value":"Vaticle", "type": { "root": "attribute", "label": "company-name", "value_type": "string" } }
       }]
       """
     When get answers of typeql fetch
@@ -157,10 +173,10 @@ Feature: TypeQL Fetch Query
     Then fetch answers are
       """
       [{
-        "a": { "value": "2020-01-01T13:13:13.999", "value_type": "datetime", "type": { "root": "attribute", "label": "start-date" } }
+        "a": { "value": "2020-01-01T13:13:13.999", "type": { "root": "attribute", "label": "start-date", "value_type": "datetime" } }
       },
       {
-        "a": { "value": "2021-01-01T00:00:00.000", "value_type": "datetime", "type": { "root": "attribute", "label": "end-date" } }
+        "a": { "value": "2021-01-01T00:00:00.000", "type": { "root": "attribute", "label": "end-date", "value_type": "datetime" } }
       }]
       """
 
@@ -207,11 +223,11 @@ Feature: TypeQL Fetch Query
         "p": {
           "type": { "root": "entity", "label": "person" },
           "person-name": [
-            { "value":"Alice", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } },
-            { "value":"Allie", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } }
+            { "value":"Alice", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } },
+            { "value":"Allie", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } }
           ],
           "age": [
-            { "value": 10, "value_type": "long", "type": { "root": "attribute", "label": "age" } }
+            { "value": 10, "type": { "root": "attribute", "label": "age", "value_type": "long" } }
           ]
         }
       },
@@ -219,7 +235,7 @@ Feature: TypeQL Fetch Query
         "p": {
           "type": { "root": "entity", "label": "person" },
           "person-name": [
-            { "value":"Bob", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } }
+            { "value":"Bob", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } }
           ],
           "age": []
         }
@@ -241,10 +257,10 @@ Feature: TypeQL Fetch Query
         "p": {
           "type": { "root": "entity", "label": "person" },
           "attribute": [
-            { "value": "Alice", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } },
-            { "value": "Allie", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } },
-            { "value": 10, "value_type": "long", "type": { "root": "attribute", "label": "age" } },
-            { "value": 0, "value_type": "long", "type": { "root": "attribute", "label": "ref" } }
+            { "value": "Alice", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } },
+            { "value": "Allie", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } },
+            { "value": 10, "type": { "root": "attribute", "label": "age", "value_type": "long" } },
+            { "value": 0, "type": { "root": "attribute", "label": "ref", "value_type": "long" } }
           ]
         }
       }]
@@ -282,11 +298,11 @@ Feature: TypeQL Fetch Query
         "p": {
           "type": { "root": "entity", "label": "person" },
           "person-name": [
-            { "value":"Alice", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } },
-            { "value":"Allie", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } }
+            { "value":"Alice", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } },
+            { "value":"Allie", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } }
           ],
           "age": [
-            { "value": 10, "value_type": "long", "type": { "root": "attribute", "label": "age" } }
+            { "value": 10, "type": { "root": "attribute", "label": "age", "value_type": "long" } }
           ]
         },
         "employers": [
@@ -294,7 +310,7 @@ Feature: TypeQL Fetch Query
             "c": {
               "type": { "root": "entity", "label": "company" },
               "name": [
-                { "value": "Vaticle", "value_type": "string", "type": { "root": "attribute", "label": "company-name" } }
+                { "value": "Vaticle", "type": { "root": "attribute", "label": "company-name", "value_type": "string" } }
               ]
             }
           }
@@ -304,7 +320,7 @@ Feature: TypeQL Fetch Query
         "p": {
           "type": { "root": "entity", "label": "person" },
           "person-name": [
-            { "value":"Bob", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } }
+            { "value":"Bob", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } }
           ],
           "age": [ ]
         },
@@ -334,11 +350,11 @@ Feature: TypeQL Fetch Query
         "p": {
           "type": { "root": "entity", "label": "person" },
           "person-name": [
-            { "value":"Alice", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } },
-            { "value":"Allie", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } }
+            { "value":"Alice", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } },
+            { "value":"Allie", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } }
           ],
           "age": [
-            { "value": 10, "value_type": "long", "type": { "root": "attribute", "label": "age" } }
+            { "value": 10, "type": { "root": "attribute", "label": "age", "value_type": "long" } }
           ]
         },
         "employment-count": { "value": 1, "value_type": "long" }
@@ -347,7 +363,7 @@ Feature: TypeQL Fetch Query
         "p": {
          "type": { "root": "entity", "label": "person" },
          "person-name": [
-            { "value":"Bob", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } }
+            { "value":"Bob", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } }
          ],
          "age": []
        },
@@ -395,7 +411,7 @@ Feature: TypeQL Fetch Query
         "p": {
           "type": { "root": "entity", "label": "person" },
           "age": [
-            { "value": 10, "value_type": "long", "type": { "root": "attribute", "label": "age" } }
+            { "value": 10, "type": { "root": "attribute", "label": "age", "value_type": "long" } }
           ]
         },
         "alice-employers": [
@@ -403,14 +419,14 @@ Feature: TypeQL Fetch Query
             "company": {
               "type": { "root": "entity", "label": "company" },
               "name": [
-                { "value": "Vaticle", "value_type": "string", "type": { "root": "attribute", "label": "company-name" } }
+                { "value": "Vaticle", "type": { "root": "attribute", "label": "company-name", "value_type": "string" } }
               ]
             },
             "alice-employment-rel": [
               {
                 "r": {
                   "ref": [
-                    { "value": 4, "value_type": "long", "type": { "root": "attribute", "label": "ref" } }
+                    { "value": 4, "type": { "root": "attribute", "label": "ref", "value_type": "long" } }
                   ],
                   "type": { "root": "relation", "label": "employment" }
                 }
@@ -452,7 +468,7 @@ Feature: TypeQL Fetch Query
         "person Alice": {
           "type": { "root": "entity", "label": "person" },
           "her age": [
-            { "value": 10, "value_type": "long", "type": { "root": "attribute", "label": "age" } }
+            { "value": 10, "type": { "root": "attribute", "label": "age", "value_type": "long" } }
           ]
         }
       }]
@@ -474,11 +490,11 @@ Feature: TypeQL Fetch Query
         "p": {
           "type": { "root": "entity", "label": "person" },
           "name": [
-            { "value": "Alice", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } },
-            { "value": "Allie", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } }
+            { "value": "Alice", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } },
+            { "value": "Allie", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } }
           ],
           "age": [
-            { "value": 10, "value_type": "long", "type": { "root": "attribute", "label": "age" } }
+            { "value": 10, "type": { "root": "attribute", "label": "age", "value_type": "long" } }
           ]
         }
       },
@@ -486,7 +502,7 @@ Feature: TypeQL Fetch Query
         "p": {
           "type": { "root": "entity", "label": "person" },
           "name": [
-            { "value": "Bob", "value_type": "string", "type": { "root": "attribute", "label": "person-name" } }
+            { "value": "Bob", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } }
           ],
           "age": [ ]
         }
