@@ -305,7 +305,28 @@ Feature: TypeQL Fetch Query
         }
       }]
       """
-
+    When get answers of typeql fetch
+      """
+      match
+      $p isa person, has age 10;
+      fetch
+      $p: attribute;
+      """
+    Then fetch answers are
+      """
+      [{
+        "p": {
+          "type": { "root": "entity", "label": "person" },
+          "attribute": [
+            { "value":10, "type": { "root": "attribute", "label": "age", "value_type": "long" } },
+            { "value":0, "type": { "root": "attribute", "label": "ref", "value_type": "long" } },
+            { "value":"Alice", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } },
+            { "value":"Allie", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } },
+            { "value":"Alicia", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } }
+          ]
+        }
+      }]
+      """
 
   Scenario: match limits do not affect attribute ownership fetch
     Given connection close all sessions
