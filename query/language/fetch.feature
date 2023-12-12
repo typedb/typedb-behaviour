@@ -267,6 +267,87 @@ Feature: TypeQL Fetch Query
       """
 
 
+  Scenario: attribute ownership fetch can trigger inferred ownerships
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
+      """
+      define
+      rule alice-as-alicia:
+      when {
+        $p isa person, has person-name "Alice";
+      } then {
+        $p has person-name "Alicia";
+      };
+      """
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: read
+    When get answers of typeql fetch
+      """
+      match
+      $p isa person, has age 10;
+      fetch
+      $p: person-name;
+      """
+    Then fetch answers are
+      """
+      [{
+        "p": {
+          "type": { "root": "entity", "label": "person" },
+          "person-name": [
+            { "value":"Alice", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } },
+            { "value":"Allie", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } },
+            { "value":"Alicia", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } }
+          ]
+        }
+      }]
+      """
+
+
+  Scenario: match limits do not affect attribute ownership fetch
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
+      """
+      define
+      rule alice-as-alicia:
+      when {
+        $p isa person, has person-name "Alice";
+      } then {
+        $p has person-name "Alicia";
+      };
+      """
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: read
+    When get answers of typeql fetch
+      """
+      match
+      $p isa person, has age 10;
+      fetch
+      $p: person-name;
+      limit 1;
+      """
+    Then fetch answers are
+      """
+      [{
+        "p": {
+          "type": { "root": "entity", "label": "person" },
+          "person-name": [
+            { "value":"Alice", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } },
+            { "value":"Allie", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } },
+            { "value":"Alicia", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } }
+          ]
+        }
+      }]
+      """
+
+
   Scenario: attributes that can never be owned by any matching type of a variable throw exceptions
     When typeql fetch; throws exception
       """
@@ -432,6 +513,113 @@ Feature: TypeQL Fetch Query
                 }
               }
             ]
+          }
+        ]
+      }]
+      """
+
+
+  Scenario: a fetch subquery is not affected by match-fetch query limits
+    When get answers of typeql fetch
+      """
+      match
+      $p isa person, has age 10;
+      fetch
+      $p: age;
+      "names": {
+        match
+        $p has person-name $pn;
+        fetch
+        $pn as "person name";
+      };
+      limit 1;
+      """
+    Then fetch answers are
+      """
+      [{
+        "p": {
+          "type": { "root": "entity", "label": "person" },
+          "age": [
+            { "value": 10, "type": { "root": "attribute", "label": "age", "value_type": "long" } }
+          ]
+        },
+        "names": [
+          {
+            "person name": {
+              "type": { "root": "attribute", "label": "person-name", "value_type": "string" },
+              "value": "Alice"
+            }
+          },
+          {
+            "person name": {
+              "type": { "root": "attribute", "label": "person-name", "value_type": "string" },
+              "value": "Allie"
+            }
+          }
+        ]
+      }]
+      """
+
+
+  Scenario: fetch subqueries can trigger reasoning
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
+      """
+      define
+      rule alice-as-alicia:
+      when {
+        $p isa person, has person-name "Alice";
+      } then {
+        $p has person-name "Alicia";
+      };
+      """
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: read
+    When get answers of typeql fetch
+      """
+      match
+      $p isa person, has age 10;
+      fetch
+      $p: age;
+      "names": {
+        match
+        $p has person-name $pn;
+        fetch
+        $pn as "person name";
+      };
+      limit 1;
+      """
+    Then fetch answers are
+      """
+      [{
+        "p": {
+          "type": { "root": "entity", "label": "person" },
+          "age": [
+            { "value": 10, "type": { "root": "attribute", "label": "age", "value_type": "long" } }
+          ]
+        },
+        "names": [
+          {
+            "person name": {
+              "type": { "root": "attribute", "label": "person-name", "value_type": "string" },
+              "value": "Alice"
+            }
+          },
+          {
+            "person name": {
+              "type": { "root": "attribute", "label": "person-name", "value_type": "string" },
+              "value": "Allie"
+            }
+          },
+          {
+            "person name": {
+              "type": { "root": "attribute", "label": "person-name", "value_type": "string" },
+              "value": "Alicia"
+            }
           }
         ]
       }]
