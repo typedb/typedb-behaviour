@@ -474,6 +474,28 @@ Feature: TypeQL Fetch Query
       """
 
 
+  Scenario: a fetch subquery can be a match-aggregate query with zero answers
+    When get answers of typeql fetch
+      """
+      match
+      $p isa person, has person-name "Bob";
+      fetch
+      ages-sum: {
+        match
+        $p has age $a;
+        get $a;
+        sum $a;
+      };
+      limit 1;
+      """
+    Then fetch answers are
+      """
+      [{
+        "ages-sum": null
+      }]
+      """
+
+
   Scenario: fetch subqueries can be nested and use bindings from any parent
     Given session transaction closes
     Given session opens transaction of type: write
