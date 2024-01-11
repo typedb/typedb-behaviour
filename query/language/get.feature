@@ -90,6 +90,7 @@ Feature: TypeQL Get Query
       match $x isa person; get $y;
       """
 
+
   Scenario: Value variables can be specified in a 'get'
     Given typeql insert
       """
@@ -112,6 +113,42 @@ Feature: TypeQL Get Query
       | z         | x              | b                |
       | key:ref:0 | attr:name:Lisa | value:long:2001  |
 
+
+  # Guards against regression of #6967
+  Scenario: A `get` filter is applied after negations
+    Given typeql insert
+      """
+      insert
+      $p1 isa person, has name "Klaus", has ref 0;
+      $p2 isa person, has name "Kristina", has ref 1;
+      """
+    Given transaction commits
+
+    Given session opens transaction of type: read
+    When get answers of typeql get
+      """
+      match
+        $p isa person, has name $n, has ref $r;
+        $n = "Klaus";
+        not { $p has name "Kristina"; };
+      get $n, $r;
+      """
+    Then uniquely identify answer concepts
+      | n               |
+      | attr:name:Klaus |
+
+    When get answers of typeql get
+      """
+      match
+        $p isa person, has name $n, has ref $r;
+        $n = "Klaus";
+        not { $p has name "Kristina"; };
+      get $n, $r;
+      sort $r; # The sort triggered the bug
+      """
+    Then uniquely identify answer concepts
+      | n               | r               |
+      | attr:name:Klaus | attr:ref:0      |
 
   #############
   # AGGREGATE #
