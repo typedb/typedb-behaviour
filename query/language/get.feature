@@ -134,8 +134,8 @@ Feature: TypeQL Get Query
       get $n, $r;
       """
     Then uniquely identify answer concepts
-      | n               |
-      | attr:name:Klaus |
+      | n               | r               |
+      | attr:name:Klaus | attr:ref:0      |
 
     When get answers of typeql get
       """
