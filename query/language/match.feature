@@ -353,11 +353,11 @@ Feature: TypeQL Match Clause
       match $x owns $a @key; get;
       """
     Then uniquely identify answer concepts
-      | x                | a            |
-      | label:person     | label:ref    |
-      | label:company    | label:ref    |
-      | label:friendship | label:ref    |
-      | label:employment | label:ref    |
+      | x                | a         |
+      | label:person     | label:ref |
+      | label:company    | label:ref |
+      | label:friendship | label:ref |
+      | label:employment | label:ref |
     When get answers of typeql get
       """
       match $x owns email @unique; get;
@@ -370,8 +370,8 @@ Feature: TypeQL Match Clause
       match $x owns $a @unique; get;
       """
     Then uniquely identify answer concepts
-      | x            | a            |
-      | label:person | label:email  |
+      | x            | a           |
+      | label:person | label:email |
 
 
   Scenario: inherited 'owns' annotations are queryable
@@ -397,12 +397,12 @@ Feature: TypeQL Match Clause
       match $x owns $a @key; get;
       """
     Then uniquely identify answer concepts
-      | x                | a            |
-      | label:person     | label:ref    |
-      | label:child      | label:ref    |
-      | label:company    | label:ref    |
-      | label:friendship | label:ref    |
-      | label:employment | label:ref    |
+      | x                | a         |
+      | label:person     | label:ref |
+      | label:child      | label:ref |
+      | label:company    | label:ref |
+      | label:friendship | label:ref |
+      | label:employment | label:ref |
     When get answers of typeql get
       """
       match $x owns email @unique; get;
@@ -416,9 +416,9 @@ Feature: TypeQL Match Clause
       match $x owns $a @unique; get;
       """
     Then uniquely identify answer concepts
-      | x            | a            |
-      | label:person | label:email  |
-      | label:child  | label:email  |
+      | x            | a           |
+      | label:person | label:email |
+      | label:child  | label:email |
 
 
   Scenario: 'owns' can be used to retrieve all instances of types that can own a given attribute type
@@ -713,19 +713,19 @@ Feature: TypeQL Match Clause
       match $x isa $y; get;
       """
     Then uniquely identify answer concepts
-      | x           | y               |
-      | key:ref:0   | label:person    |
-      | key:ref:0   | label:entity    |
-      | key:ref:0   | label:thing     |
-      | key:ref:1   | label:person    |
-      | key:ref:1   | label:entity    |
-      | key:ref:1   | label:thing     |
-      | attr:ref:0  | label:ref        |
-      | attr:ref:0  | label:attribute  |
-      | attr:ref:0  | label:thing      |
-      | attr:ref:1  | label:ref        |
-      | attr:ref:1  | label:attribute  |
-      | attr:ref:1  | label:thing      |
+      | x          | y               |
+      | key:ref:0  | label:person    |
+      | key:ref:0  | label:entity    |
+      | key:ref:0  | label:thing     |
+      | key:ref:1  | label:person    |
+      | key:ref:1  | label:entity    |
+      | key:ref:1  | label:thing     |
+      | attr:ref:0 | label:ref       |
+      | attr:ref:0 | label:attribute |
+      | attr:ref:0 | label:thing     |
+      | attr:ref:1 | label:ref       |
+      | attr:ref:1 | label:attribute |
+      | attr:ref:1 | label:thing     |
 
   Scenario: 'isa' matches things of the specified type and all its subtypes
     Given typeql define
@@ -1560,9 +1560,9 @@ Feature: TypeQL Match Clause
       match $x contains "Fun"; get;
       """
     Then uniquely identify answer concepts
-      | x                                      |
-      | attr:name:Four Weddings and a Funeral  |
-      | attr:name:Fun Facts about Space        |
+      | x                                     |
+      | attr:name:Four Weddings and a Funeral |
+      | attr:name:Fun Facts about Space       |
 
 
   Scenario: 'contains' performs a case-insensitive match
@@ -1584,9 +1584,9 @@ Feature: TypeQL Match Clause
       match $x contains "Bean"; get;
       """
     Then uniquely identify answer concepts
-      | x                                   |
-      | attr:name:Pirates of the Caribbean  |
-      | attr:name:Mr. Bean                  |
+      | x                                  |
+      | attr:name:Pirates of the Caribbean |
+      | attr:name:Mr. Bean                 |
 
 
   Scenario: 'like' matches strings that match the specified regex
@@ -1608,9 +1608,9 @@ Feature: TypeQL Match Clause
       match $x like "^[0-9]+$"; get;
       """
     Then uniquely identify answer concepts
-      | x                 |
-      | attr:name:123456  |
-      | attr:name:9       |
+      | x                |
+      | attr:name:123456 |
+      | attr:name:9      |
 
 
   # TODO we can't test like this because the IID is not a valid encoded IID -- need to rethink this test
@@ -1867,8 +1867,8 @@ Feature: TypeQL Match Clause
       """
     Then answer size is: 1
     Then uniquely identify answer concepts
-      | x         | r         | date                             |
-      | key:ref:0 | key:ref:1 | attr:graduation-date:2009-07-16  |
+      | x         | r         | date                            |
+      | key:ref:0 | key:ref:1 | attr:graduation-date:2009-07-16 |
 
 
   Scenario: 'has $attr == $x' matches owners of any instance '$y' of '$attr' where '$y' and '$x' are equal by value
@@ -2132,9 +2132,9 @@ Feature: TypeQL Match Clause
       get;
       """
     Then uniquely identify answer concepts
-      | x                 |
-      | attr:age:24       |
-      | attr:length:20.9  |
+      | x                |
+      | attr:age:24      |
+      | attr:length:20.9 |
 
 
   Scenario: when one entity exists, and we match two variables with concept inequality, an empty answer is returned
@@ -2454,3 +2454,136 @@ Feature: TypeQL Match Clause
         };
       get;
       """
+
+
+  #######################
+  #   Unicode Support   #
+  #######################
+
+  Scenario: string attribute values can be non-ascii
+    Given typeql define
+      """
+      define
+      person owns favorite-phrase;
+      favorite-phrase sub attribute, value string;
+      """
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
+      """
+      insert
+      $x isa person, has favorite-phrase "你明白了吗", has ref 0;
+      $y isa person, has favorite-phrase "בוקר טוב", has ref 1;
+      $r (friend: $x, friend: $y) isa friendship, has ref 2;
+      """
+    Given transaction commits
+
+    Given session opens transaction of type: read
+    Given get answers of typeql get
+      """
+      match $phrase isa favorite-phrase; get;
+      """
+    Then uniquely identify answer concepts
+      | phrase                        |
+      | attr:favorite-phrase:你明白了吗    |
+      | attr:favorite-phrase:בוקר טוב |
+
+    Given get answers of typeql get
+      """
+      match $x isa person, has favorite-phrase "你明白了吗"; get;
+      """
+    Then uniquely identify answer concepts
+      | x         |
+      | key:ref:0 |
+
+    Given get answers of typeql get
+      """
+      match $x isa person, has favorite-phrase "בוקר טוב"; get;
+      """
+    Then uniquely identify answer concepts
+      | x         |
+      | key:ref:1 |
+
+    Given get answers of typeql get
+      """
+      match $x isa person, has favorite-phrase "请给我一"; get;
+      """
+    Then answer size is: 0
+
+
+  Scenario: type labels can be non-ascii
+    Given typeql define
+      """
+      define
+      人 sub entity, owns name, owns ref @key; אדם sub entity, owns name, owns ref @key;
+      """
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
+      """
+      insert
+      $x isa 人, has name "Liu", has ref 0;
+      $y isa אדם, has name "Solomon", has ref 1;
+      """
+    Given transaction commits
+
+    Given session opens transaction of type: read
+    Given get answers of typeql get
+      """
+      match $x isa! $t; $x has name $_; get $t;
+      """
+    Then uniquely identify answer concepts
+      | t         |
+      | label:人   |
+      | label:אדם |
+
+    Given get answers of typeql get
+      """
+      match $x isa 人; get;
+      """
+    Then uniquely identify answer concepts
+      | x         |
+      | key:ref:0 |
+
+    Given get answers of typeql get
+      """
+      match $x isa אדם; get;
+      """
+    Then uniquely identify answer concepts
+      | x         |
+      | key:ref:1 |
+
+
+  Scenario: variables can be non-ascii
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql insert
+      """
+      insert
+      $人 isa person, has name "Liu", has ref 0;
+      $אדם isa person, has name "Solomon", has ref 1;
+      """
+    Given transaction commits
+
+    Given session opens transaction of type: read
+    Given get answers of typeql get
+      """
+      match $人 person; $人 has name "Liu"; get $人;
+      """
+    Then uniquely identify answer concepts
+      | 人         |
+      | key:ref:0 |
+
+    Given get answers of typeql get
+      """
+      match $אדם person; $אדם has name "Liu"; get $אדם;
+      """
+    Then uniquely identify answer concepts
+      | אדם       |
+      | key:ref:1 |
+
+
