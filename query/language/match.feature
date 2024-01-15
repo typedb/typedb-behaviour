@@ -2559,6 +2559,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: variables can be non-ascii
+    Given connection close all sessions
     Given connection open data session for database: typedb
     Given session opens transaction of type: write
     Given typeql insert
@@ -2580,7 +2581,7 @@ Feature: TypeQL Match Clause
 
     Given get answers of typeql get
       """
-      match $אדם isa person; $אדם has name "Liu"; get $אדם;
+      match $אדם isa person; $אדם has name "Solomon"; get $אדם;
       """
     Then uniquely identify answer concepts
       | אדם       |
