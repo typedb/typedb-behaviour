@@ -1031,7 +1031,7 @@ Feature: TypeQL Delete Query
     Then answer size is: 0
 
 
-  Scenario: attempting to delete an attribute ownership with a derived isa throws
+  Scenario: attempting to delete an attribute ownership with a redeclared isa throws
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
@@ -1069,6 +1069,26 @@ Feature: TypeQL Delete Query
       delete
         $x has lastname $n;
       """
+
+
+  Scenario: an attribute deletion using anonymous thing variables throws
+    Given typeql insert
+      """
+      insert
+      $x isa person,
+        has email "alex@abc.com",
+        has name "Alex";
+      """
+    Given transaction commits
+    When session opens transaction of type: write
+    When typeql delete; throws exception containing "Illegal anonymous delete variable"
+      """
+      match
+        $x isa person, has email "alex@abc.com";
+      delete
+        $x has name "Alex";
+      """
+
 
   Scenario: deleting an attribute ownership using 'thing' as a label throws an error
     Given connection close all sessions
