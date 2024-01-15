@@ -1071,7 +1071,7 @@ Feature: TypeQL Delete Query
       """
 
 
-  Scenario: an attribute deletion must use only named variables
+  Scenario: an attribute deletion using anonymous thing variables throws
     Given typeql insert
       """
       insert
