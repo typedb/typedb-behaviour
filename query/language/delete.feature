@@ -1031,7 +1031,7 @@ Feature: TypeQL Delete Query
     Then answer size is: 0
 
 
-  Scenario: attempting to delete an attribute ownership with a redelcared isa throws
+  Scenario: attempting to delete an attribute ownership with a redeclared isa throws
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
