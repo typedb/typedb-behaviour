@@ -2572,7 +2572,7 @@ Feature: TypeQL Match Clause
     Given session opens transaction of type: read
     Given get answers of typeql get
       """
-      match $人 person; $人 has name "Liu"; get $人;
+      match $人 isa person; $人 has name "Liu"; get $人;
       """
     Then uniquely identify answer concepts
       | 人         |
@@ -2580,7 +2580,7 @@ Feature: TypeQL Match Clause
 
     Given get answers of typeql get
       """
-      match $אדם person; $אדם has name "Liu"; get $אדם;
+      match $אדם isa person; $אדם has name "Liu"; get $אדם;
       """
     Then uniquely identify answer concepts
       | אדם       |
