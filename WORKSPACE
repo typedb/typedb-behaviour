@@ -24,10 +24,6 @@ workspace(name = "vaticle_typedb_behaviour")
 load("//dependencies/vaticle:repositories.bzl", "vaticle_dependencies")
 vaticle_dependencies()
 
-# Load //tool/checkstyle
-load("@vaticle_dependencies//tool/checkstyle:deps.bzl", checkstyle_deps = "deps")
-checkstyle_deps()
-
 # Load //builder/bazel for RBE
 load("@vaticle_dependencies//builder/bazel:deps.bzl", "bazel_toolchain")
 bazel_toolchain()
@@ -49,7 +45,13 @@ kotlin_repositories()
 load("@io_bazel_rules_kotlin//kotlin:core.bzl", "kt_register_toolchains")
 kt_register_toolchains()
 
-load("@vaticle_dependencies//tool/common:deps.bzl", vaticle_dependencies_tool_maven_artifacts = "maven_artifacts")
+# Load //tool/common
+load("@vaticle_dependencies//tool/common:deps.bzl", "vaticle_dependencies_ci_pip", vaticle_dependencies_tool_maven_artifacts = "maven_artifacts")
+vaticle_dependencies_ci_pip()
+
+# Load //tool/checkstyle
+load("@vaticle_dependencies//tool/checkstyle:deps.bzl", checkstyle_deps = "deps")
+checkstyle_deps()
 
 ############################
 # Load @maven dependencies #
