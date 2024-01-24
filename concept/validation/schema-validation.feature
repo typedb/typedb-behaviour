@@ -1,0 +1,468 @@
+#
+# Copyright (C) 2022 Vaticle
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+
+#noinspection CucumberUndefinedStep
+Feature: Schema validation
+
+  #TODO: Should we divide this into operation & commit time validation?
+  #TODO: Do we need to split scenarios per operation?
+
+  Background:
+    Given typedb starts
+    Given connection opens with default authentication
+    Given connection has been opened
+    Given connection does not have any database
+    Given connection create database: typedb
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+
+  Scenario: Attribute-types can only subtype other attribute-types
+    Given put entity type: ent0
+    Given put relation type: rel0
+    Given relation(rel0) set relates role: role0
+    Given put attribute type: attr0, with value type: string
+    Given attribute(attr0) set abstract: true
+    Given transaction commits
+
+    When session opens transaction of type: write
+    When put attribute type: attr1, with value type: string
+    Then transaction commits
+
+    When session opens transaction of type: write
+    When attribute(attr1) set supertype: attr0
+    Then transaction commits
+
+    When session opens transaction of type: write
+    Then attribute(attr1) set supertype: ent0; throws exception
+
+    When session opens transaction of type: write
+    Then attribute(attr1) set supertype: rel0; throws exception
+
+    When session opens transaction of type: write
+    Then delete attribute type: attr0; throws exception
+
+
+  Scenario: Entity-types can only subtype other entity-types
+    Given put entity type: ent0
+    Given put relation type: rel0
+    Given relation(rel0) set relates role: role0
+    Given put attribute type: attr0, with value type: string
+    Given attribute(attr0) set abstract: true
+    Given transaction commits
+
+    When session opens transaction of type: write
+    When put entity type: ent1
+    Then transaction commits
+
+    When session opens transaction of type: write
+    When entity(ent1) set supertype: ent0
+    Then transaction commits
+
+    When session opens transaction of type: write
+    Then entity(ent1) set supertype: attr0; throws exception
+
+    When session opens transaction of type: write
+    Then entity(ent1) set supertype: rel0; throws exception
+
+    When session opens transaction of type: write
+    Then delete entity type: ent0; throws exception
+
+
+  Scenario: Relation-types can only subtype other relation-types
+    Given put entity type: ent0
+    Given put relation type: rel0
+    Given relation(rel0) set relates role: role0
+    Given put attribute type: attr0, with value type: string
+    Given attribute(attr0) set abstract: true
+    Given transaction commits
+
+    When session opens transaction of type: write
+    When put relation type: rel1
+    When relation(rel1) set relates role: role1
+    Then transaction commits
+
+    When session opens transaction of type: write
+    When relation(rel1) set supertype: rel0
+    Then transaction commits
+
+    When session opens transaction of type: write
+    Then relation(rel1) set supertype: ent0; throws exception
+
+    When session opens transaction of type: write
+    Then relation(rel1) set supertype: attr0; throws exception
+
+    When session opens transaction of type: write
+    Then delete relation type: rel0; throws exception
+
+
+  Scenario: Cyclic type hierarchies are disallowed
+    Given put attribute type: attr0, with value type: string
+    Given put attribute type: attr1, with value type: string
+    Given attribute(attr0) set abstract: true
+    Given attribute(attr1) set abstract: true
+    Given attribute(attr1) set supertype: attr0
+    Given put entity type: ent0
+    Given put entity type: ent1
+    Given entity(ent1) set supertype: ent0
+    Given put relation type: rel0
+    Given relation(rel0) set relates role: role0
+    Given put relation type: rel1
+    Given relation(rel1) set relates role: role1
+    Given relation(rel1) set supertype: rel0
+    Given transaction commits
+
+    When session opens transaction of type: write
+    Then attribute(attr1) set supertype: attr1; throws exception
+
+    When session opens transaction of type: write
+    Then attribute(attr0) set supertype: attr1; throws exception
+
+    When session opens transaction of type: write
+    Then entity(ent1) set supertype: ent1; throws exception
+
+    When session opens transaction of type: write
+    Then entity(ent0) set supertype: ent1; throws exception
+
+    When session opens transaction of type: write
+    Then relation(rel1) set supertype: rel1; throws exception
+
+    When session opens transaction of type: write
+    Then relation(rel0) set supertype: rel1; throws exception
+
+  Scenario: An attribute-type must have the same value type as its ancestors
+    Given put attribute type: attr0s, with value type: string
+    Given attribute(attr0s) set abstract: true
+    Given put attribute type: attr0d, with value type: double
+    Given attribute(attr0d) set abstract: true
+    Given put attribute type: attr1, with value type: string
+    Given transaction commits
+
+    When session opens transaction of type: write
+    When attribute(attr1) set supertype: attr0s
+    Then transaction commits
+
+    When session opens transaction of type: write
+    Then attribute(attr1) set supertype: attr0d; throws exception
+
+
+  Scenario: Only abstract attributes may be subtyped
+    Given put attribute type: attr0a, with value type: string
+    Given put attribute type: attr0c, with value type: string
+    Given attribute(attr0a) set abstract: true
+    Given transaction commits
+
+    When session opens transaction of type: write
+    When put attribute type: attr1, with value type: string
+    When attribute(attr1) set supertype: attr0c; throws exception
+
+    When session opens transaction of type: write
+    When put attribute type: attr1, with value type: string
+    When attribute(attr1) set supertype: attr0a
+    Then transaction commits
+
+    When session opens transaction of type: write
+    When attribute(attr1) set supertype: attr0c; throws exception
+
+    When session opens transaction of type: write
+    When attribute(attr00) set abstract: false; throws exception
+
+
+  Scenario: Relation types must relate at least one role
+    Given put relation type: rel0a
+    Given relation(rel0a) set abstract: true
+    Given put relation type: rel0c
+    Given relation(rel0c) set relates role: role0c
+    Given transaction commits
+
+    When session opens transaction of type: write
+    When put relation type: rel1
+    Then transaction commits; throws exception
+
+    When session opens transaction of type: write
+    When put relation type: rel1
+    When relation(rel1) set supertype: rel0a
+    Then transaction commits; throws exception
+
+    When session opens transaction of type: write
+    When put relation type: rel1
+    When relation(rel1) set relates role: role1
+    When relation(rel1) set supertype: rel0a
+    Then transaction commits
+
+    When session opens transaction of type: write
+    When relation(rel1) unset related role: role1
+    Then transaction commits; throws exception
+
+    When session opens transaction of type: write
+    When relation(rel1) unset related role: role1
+    When relation(rel1) set abstract: true
+    Then transaction commits
+
+    When session opens transaction of type: write
+    When relation(rel1) set abstract: false
+    Then transaction commits; throws exception
+
+    When session opens transaction of type: write
+    When relation(rel1) set supertype: rel0c
+    Then transaction commits
+
+    When session opens transaction of type: write
+    When relation(rel1) set abstract: false
+    Then transaction commits
+
+    When session opens transaction of type: write
+    When relation(rel0c) unset related role: role0c
+    Then transaction commits; throws exception
+
+    When session opens transaction of type: write
+    When relation(rel1) set supertype: rel0a
+    Then transaction commits; throws exception
+
+
+  Scenario: Concrete types may not own abstract attributes
+    Given put attribute type: attr0, with value type: string
+    Given attribute(attr0) set abstract: true
+    Given put entity type: ent0
+    Given transaction commits
+
+    When session opens transaction of type: write
+    When entity(ent0) set owns attribute type: attr0
+    Then transaction commits; throws exception
+
+    When session opens transaction of type: write
+    When entity(ent0) set abstract: true
+    When entity(ent0) set owns attribute type: attr0
+    Then transaction commits
+
+    When session opens transaction of type: write
+    When entity(ent0) set abstract: false
+    Then transaction commits; throws exception
+
+    When session opens transaction of type: write
+    When put entity type: ent1
+    When entity(ent1) set supertype: ent0
+    Then transaction commits; throws exception
+
+
+  Scenario: Deleting a role does not leave dangling 'plays' declarations
+    Given put relation type: rel0
+    Given relation(rel0) set relates role: role0
+    Given relation(rel0) set relates role: extra_role
+    Given put entity type: ent0
+    Given entity(ent0) set plays role: rel0:role0
+    Given transaction commits
+
+    When session opens transaction of type: write
+    When entity(ent0) get playing roles contain:
+      | rel0:role0 |
+    When relation(rel0) unset related role: role0
+    Then entity(ent0) get playing roles do not contain:
+      | rel0:role0 |
+    Then transaction commits
+
+
+  Scenario: Deleting an attribute-type does not leave dangling 'owns' declarations
+    Given put attribute type: attr0, with value type: string
+    Given put entity type: ent0
+    Given entity(ent0) set owns attribute type: attr0
+    Given transaction commits
+
+    When session opens transaction of type: write
+    When entity(ent0) get owns attribute types contain:
+      | attr0 |
+    When delete attribute type: attr0
+    Then entity(ent0) get owns attribute types do not contain:
+      | attr0 |
+    Then transaction commits
+
+
+  Scenario: The schema does not contain redundant interface implementations
+    #TODO
+
+
+  Scenario: A relation-type may only override role-types it inherits
+    Given put relation type: rel00
+    Given relation(rel00) set relates role: role00
+    Given put relation type: rel01
+    Given relation(rel01) set relates role: role01
+    Given transaction commits
+
+    When session opens transaction of type: write
+    When put relation type: rel1
+    Then relation(rel1) set relates role: role1 as role00; throws exception
+
+    When session opens transaction of type: write
+    When put relation type: rel1
+    When relation(rel1) set supertype: rel00
+    Then relation(rel1) set relates role: role1 as role00
+    Then relation(rel1) get related roles contain:
+      | rel1:role1 |
+    Then relation(rel1) get related roles do not contain:
+      | rel0:role0 |
+    Then transaction commits
+
+    When session opens transaction of type: write
+    # It fails on commit. Can it fail on query? This is sensible and likely consistent with attribute behaviour
+    Then relation(rel1) set supertype: rel01
+    Then transaction commits; throws exception
+
+    When session opens transaction of type: write
+    Then relation(rel00) unset related role: role00
+    # BUG! This throws a NullPointerException
+    Then transaction commits; throws exception
+
+
+  Scenario: A type may only override an ownership it inherits
+    Given put attribute type: attr0, with value type: string
+    Given attribute(attr0) set abstract: true
+    Given put attribute type: attr1, with value type: string
+    Given attribute(attr1) set supertype: attr0
+    Given put entity type: ent00
+    Given entity(ent00) set abstract: true
+    Given entity(ent00) set owns attribute type: attr0
+    Given put entity type: ent01
+    Given entity(ent01) set abstract: true
+    Given transaction commits
+
+    When session opens transaction of type: write
+    When put entity type: ent1
+    Then entity(ent1) set owns attribute type: attr1 as attr0; throws exception
+
+    When session opens transaction of type: write
+    When put entity type: ent1
+    When entity(ent1) set supertype: ent00
+    When entity(ent1) set owns attribute type: attr1 as attr0
+    Then transaction commits
+
+    When session opens transaction of type: write
+    When entity(ent00) unset owns attribute type: attr0
+    # Bug? Doesn't throw
+    Then transaction commits; throws exception
+
+    When session opens transaction of type: write
+    When entity(ent1) set supertype: ent01
+    # BUG: Doesn't throw
+    Then transaction commits; throws exception
+
+  Scenario: A type may only override a role it plays by inheritance
+    Given put relation type: rel0
+    Given relation(rel0) set relates role: role0
+    Given put relation type: rel1
+    Given relation(rel1) set supertype: rel0
+    # Not yet as an override
+    Given relation(rel1) set relates role: role1
+    Given put entity type: ent00
+    Given entity(ent00) set plays role: rel0:role0
+    Given put entity type: ent01
+    Given transaction commits
+
+    # Roles aren't subtypes of each other
+    When session opens transaction of type: write
+    When put entity type: ent1
+    When entity(ent1) set supertype: ent00
+    Then entity(ent1) set plays role: rel1:role1 as rel0:role0; throws exception
+
+    When session opens transaction of type: write
+    When relation(rel1) set relates role: role1 as role0
+    Then transaction commits
+
+    # ent1 doesn't sub ent00
+    When session opens transaction of type: write
+    When put entity type: ent1
+    Then entity(ent1) set plays role: rel1:role1 as rel0:role0; throws exception
+
+    When session opens transaction of type: write
+    When put entity type: ent1
+    When entity(ent1) set supertype: ent00
+    When entity(ent1) get playing roles contain:
+      | rel0:role0 |
+    # First without override
+    Then entity(ent1) set plays role: rel1:role1
+    Then entity(ent1) get playing roles contain:
+      | rel0:role0 |
+      | rel1:role1 |
+    Then transaction commits
+
+    When session opens transaction of type: write
+    Then entity(ent1) set plays role: rel1:role1 as rel0:role0
+    Then entity(ent1) get playing roles contain:
+      | rel1:role1 |
+    Then entity(ent1) get playing roles do not contain:
+      | rel0:role0 |
+    Then transaction commits
+
+    When session opens transaction of type: write
+    Then entity(ent00) unset plays role: rel0:role0
+    # BUG: Doesn't throw
+    Then transaction commits; throws exception
+
+    When session opens transaction of type: write
+    Then entity(ent1) set supertype: ent01
+    # BUG: Doesn't throw
+    Then transaction commits; throws exception
+
+  Scenario: A concrete type must override any ownerships of abstract attributes it inherits.
+    Given put attribute type: attr00, with value type: string
+    Given attribute(attr00) set abstract: true
+    Given put attribute type: attr10, with value type: string
+    Given attribute(attr10) set supertype: attr00
+    Given put attribute type: attr01, with value type: string
+    Given attribute(attr01) set abstract: true
+    Given put attribute type: attr11, with value type: string
+    Given attribute(attr11) set supertype: attr01
+    Given put entity type: ent00
+    Given entity(ent00) set abstract: true
+    Given entity(ent00) set owns attribute type: attr00
+    Given put entity type: ent01
+    Given entity(ent01) set abstract: true
+    Given entity(ent01) set owns attribute type: attr01
+    When put entity type: ent1
+    Given transaction commits
+
+    When session opens transaction of type: write
+    When entity(ent1) set supertype: ent00
+    Then transaction commits; throws exception
+
+    When session opens transaction of type: write
+    When entity(ent1) set supertype: ent00
+    When entity(ent1) set owns attribute type: attr10
+    Then transaction commits; throws exception
+
+    When session opens transaction of type: write
+    When entity(ent1) set supertype: ent00
+    When entity(ent1) set owns attribute type: attr10 as attr00
+    Then transaction commits
+
+    When session opens transaction of type: write
+    When entity(ent1) set supertype: ent00
+    When entity(ent1) set owns attribute type: attr10 as attr00
+    Then transaction commits
+
+    When session opens transaction of type: write
+    When entity(ent1) set owns attribute type: attr11
+    Then transaction commits
+
+    When session opens transaction of type: write
+    When entity(ent1) set supertype: ent01
+    Then transaction commits; throws exception
+
+
+  # TODO: Scenario: Types which are referenced in rules may not be deleted
+
+
+  # TODO: Scenario: Rules made unsatisfiable by schema modifications are flagged.
+
