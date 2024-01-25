@@ -62,8 +62,7 @@ Feature: Data validation
     Given connection open schema session for database: typedb
 
     When session opens transaction of type: write
-    Then entity(ent0c) set abstract: true
-    Then transaction commits; throws exception
+    Then entity(ent0c) set abstract: true; throws exception
 
 
   Scenario: Instances of ownerships not in the schema must not exist
@@ -164,19 +163,25 @@ Feature: Data validation
     When relation $rel1 add player for role(role1): $ent00
     Then transaction commits
 
+    # With no 'plays' override, we can still play the parent role in the parent relation
     When session opens transaction of type: write
     When $ent00 = entity(ent00) create new instance
     When $rel0 = relation(rel0) create new instance
     When relation $rel0 add player for role(role0): $ent00
     Then transaction commits
 
-    # relaxing the relates override
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
 
-    When session opens transaction of type: write
-    When relation(rel1) set relates role: role1
-    Then transaction commits
+  Scenario: A relation type may not override a role if instances of that type involving that role exist
+    Given put relation type: rel0
+    Given relation(rel0) set relates role: role0
+    Given put relation type: rel1
+    Given relation(rel1) set supertype: rel0
+    # With no override
+    Given relation(rel1) set relates role: role1
+    Given put entity type: ent00
+    Given entity(ent00) set plays role: rel0:role0
+    Given entity(ent00) set plays role: rel1:role1
+    Given transaction commits
 
     Given connection close all sessions
     Given connection open data session for database: typedb
@@ -187,7 +192,6 @@ Feature: Data validation
     When relation $rel1 add player for role(role0): $ent00
     Then transaction commits
 
-    # restore the relates override with data in-place
     Given connection close all sessions
     Given connection open schema session for database: typedb
     When session opens transaction of type: write
@@ -223,11 +227,17 @@ Feature: Data validation
     When relation $rel1 add player for role(role1): $ent1
     Then transaction commits
 
-    # Relax the override
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-
-    Given session opens transaction of type: write
+  Scenario: A type may not override a role it plays through inheritance if instances of that type playing that role
+    Given put relation type: rel0
+    Given relation(rel0) set relates role: role0
+    Given put relation type: rel1
+    Given relation(rel1) set supertype: rel0
+    Given relation(rel1) set relates role: role1 as role0
+    Given put entity type: ent00
+    Given entity(ent00) set plays role: rel0:role0
+    Given put entity type: ent1
+    Given entity(ent1) set supertype: ent00
+    # Without the override
     Given entity(ent1) set plays role: rel1:role1
     Given transaction commits
 
@@ -235,9 +245,9 @@ Feature: Data validation
     Given connection open data session for database: typedb
 
     When session opens transaction of type: write
-    When $e1 = entity(ent1) create new instance
-    When $r0 = relation(rel0) create new instance
-    When relation $r0 add player for role(role0): $ent1
+    When $ent1 = entity(ent1) create new instance
+    When $rel0 = relation(rel0) create new instance
+    When relation $rel0 add player for role(role0): $ent1
     Then transaction commits
 
     Given connection close all sessions
