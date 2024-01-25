@@ -402,6 +402,21 @@ Feature: Schema validation
     When session opens transaction of type: write
     When entity(ent1) set supertype: ent01; throws exception
 
+  Scenario: A type may only override an ownership it inherits with a subtype of the inherited attribute
+    Given put attribute type: attr0, with value type: string
+    Given attribute(attr0) set abstract: true
+    Given put attribute type: attr1, with value type: string
+    # Same, but the attributes are not subtypes
+    Given put entity type: ent00
+    Given entity(ent00) set abstract: true
+    Given entity(ent00) set owns attribute type: attr0
+    Given transaction commits
+
+    When session opens transaction of type: write
+    When put entity type: ent1
+    When entity(ent1) set supertype: ent00
+    Then entity(ent1) set owns attribute type: attr1 as attr0; throws exception
+
 
   Scenario: A type may only override a role it plays by inheritance
     Given put relation type: rel0
