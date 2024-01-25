@@ -257,3 +257,33 @@ Feature: Data validation
     When session opens transaction of type: write
     # Bug?: The transaction goes through fine.
     Then entity(ent1) set plays role: rel1:role1 as rel0:role0; throws exception
+
+
+  Scenario: A type may not be moved if it has instances of it playing a role which would be hidden as a result of that move
+    Given put relation type: rel0
+    Given relation(rel0) set relates role: role0
+    Given put relation type: rel1
+    Given relation(rel1) set supertype: rel0
+    Given relation(rel1) set relates role: role1 as role0
+    Given put entity type: ent0
+    Given entity(ent0) set plays role: rel0:role0
+    Given put entity type: ent10
+    Given entity(ent10) set supertype: ent0
+    Given put entity type: ent2
+    Given entity(ent2) set supertype: ent10
+    Given put entity type: ent11
+    Given entity(ent11) set supertype: ent0
+    Given entity(ent11) set plays role: rel1:role1 as rel0:role0
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given $ent2 = entity(ent2) create new instance
+    Given $rel0 = relation(rel0) create new instance
+    Given relation $rel0 add player for role(role0): $ent2
+    Given transaction commits
+
+    When connection close all sessions
+    When connection open schema session for database: typedb
+    When session opens transaction of type: write
+    Then entity(ent2) set supertype: ent11; throws exception
