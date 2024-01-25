@@ -176,10 +176,12 @@ Feature: Schema validation
     Then transaction commits
 
     When session opens transaction of type: write
-    When attribute(attr1) set supertype: attr0c; throws exception
+    When attribute(attr1) set supertype: attr0c
+    Then transaction commits; throws exception
 
     When session opens transaction of type: write
-    When attribute(attr00) set abstract: false; throws exception
+    When attribute(attr00) set abstract: false
+    Then transaction commits; throws exception
 
 
   # Relation types must relate at least one role
@@ -306,7 +308,8 @@ Feature: Schema validation
     Given transaction commits
 
     When session opens transaction of type: write
-    Then entity(ent1) set owns attribute type: attr0; throws exception
+    Then entity(ent1) set owns attribute type: attr0
+    Then transaction commits; throws exception
 
     When entity(ent1) set supertype: ent01
     When entity(ent1) set owns attribute type: attr0
@@ -314,7 +317,8 @@ Feature: Schema validation
 
     When session opens transaction of type: write
     # Bug? Transaction commits fine. It's a redundant owns but not wrong
-    Then entity(ent1) set supertype: ent00; throws exception
+    Then entity(ent1) set supertype: ent00
+    Then transaction commits; throws exception
 
 
   Scenario: The schema does not contain redundant plays declarations
@@ -328,7 +332,8 @@ Feature: Schema validation
     Given transaction commits
 
     When session opens transaction of type: write
-    Then entity(ent1) set plays role: rel0:role0; throws exception
+    Then entity(ent1) set plays role: rel0:role0
+    Then transaction commits; throws exception
 
     When session opens transaction of type: write
     When entity(ent1) set supertype: ent01
@@ -337,7 +342,8 @@ Feature: Schema validation
 
     When session opens transaction of type: write
     # Bug? Transaction commits fine. It's a redundant owns but not wrong
-    Then entity(ent1) set supertype: ent00; throws exception
+    Then entity(ent1) set supertype: ent00
+    Then transaction commits; throws exception
 
 
   Scenario: A relation-type may only override role-types it inherits
@@ -362,14 +368,10 @@ Feature: Schema validation
     Then transaction commits
 
     When session opens transaction of type: write
-    # It fails on commit. Can it fail on query? This is sensible and likely consistent with attribute behaviour
-    Then relation(rel1) set supertype: rel01
-    Then transaction commits; throws exception
+    Then relation(rel1) set supertype: rel01; throws exception
 
     When session opens transaction of type: write
-    Then relation(rel00) unset related role: role00
-    # BUG! This throws a NullPointerException
-    Then transaction commits; throws exception
+    Then relation(rel00) unset related role: role00; throws exception
 
 
   Scenario: A type may only override an ownership it inherits
@@ -395,14 +397,11 @@ Feature: Schema validation
     Then transaction commits
 
     When session opens transaction of type: write
-    When entity(ent00) unset owns attribute type: attr0
-    # Bug? Doesn't throw
-    Then transaction commits; throws exception
+    When entity(ent00) unset owns attribute type: attr0; throws exception
 
     When session opens transaction of type: write
-    When entity(ent1) set supertype: ent01
-    # BUG: Doesn't throw
-    Then transaction commits; throws exception
+    When entity(ent1) set supertype: ent01; throws exception
+
 
   Scenario: A type may only override a role it plays by inheritance
     Given put relation type: rel0

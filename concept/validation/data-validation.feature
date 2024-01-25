@@ -27,6 +27,7 @@ Feature: Data validation
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
 
+
   Scenario: Instances of a type not in the schema must not exist
     Given put entity type: ent0
     Given transaction commits
