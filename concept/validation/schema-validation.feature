@@ -513,10 +513,12 @@ Feature: Schema validation
     When put entity type: ent1
     Given transaction commits
 
+    #  MUST_OVERRIDE: declares concrete ownership but is missing override clause
     When session opens transaction of type: write
     When entity(ent1) set supertype: ent00
     Then transaction commits; throws exception
 
+    # MISSING_OVERRIDE: declares concrete ownership but is missing override clause
     When session opens transaction of type: write
     When entity(ent1) set supertype: ent00
     When entity(ent1) set owns attribute type: attr10
@@ -541,8 +543,52 @@ Feature: Schema validation
     Then transaction commits; throws exception
 
 
-  # TODO: Scenario: Types which are referenced in rules may not be deleted
+  Scenario: Types which are referenced in rules may not be deleted
+    Given typeql define
+    """
+    define
+      rel00 sub relation, relates role00, relates extra_role;
+      rel01 sub relation, relates role01;
+      rel1 sub rel00;
+      ent0 sub entity, plays rel00:role00, plays rel01:role01;
 
+      rule make-me-illegal:
+      when {
+        (role00: $e) isa rel1;
+      } then {
+        (role01: $e) isa rel01;
+      };
+    """
+    Given transaction commits
 
-  # TODO: Scenario: Rules made unsatisfiable by schema modifications are flagged.
+    When session opens transaction of type: write
+    Then relation(rel00) unset related role: role00; throws exception
 
+    When session opens transaction of type: write
+    Then relation(rel1) set supertype: rel01; throws exception
+
+  Scenario: Rules made unsatisfiable by schema modifications are flagged at commit time
+    Given typeql define
+    """
+    define
+      rel0 sub relation, relates role00, relates role01;
+      ent00 sub entity, plays rel0:role00, plays rel0:role01;
+      ent01 sub entity;
+      ent1 sub ent00;
+
+      rule make-me-unsatisfiable:
+      when {
+        (role00: $e) isa rel0;
+      } then {
+        (role01: $e) isa rel0;
+      };
+    """
+    Given transaction commits
+
+    When session opens transaction of type: write
+    Then entity(ent00) unset plays role: rel0:role00
+    Then transaction commits; throws exception
+
+    When session opens transaction of type: write
+    Then entity(ent1) set supertype: ent01
+    Then transaction commits; throws exception

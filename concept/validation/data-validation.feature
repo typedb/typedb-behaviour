@@ -221,12 +221,12 @@ Feature: Data validation
     When $rel0 = relation(rel0) create new instance
     When relation $rel0 add player for role(role0): $ent1; throws exception
 
-
     When session opens transaction of type: write
     When $ent1 = entity(ent1) create new instance
     When $rel1 = relation(rel1) create new instance
     When relation $rel1 add player for role(role1): $ent1
     Then transaction commits
+
 
   Scenario: A type may not override a role it plays through inheritance if instances of that type playing that role
     Given put relation type: rel0
