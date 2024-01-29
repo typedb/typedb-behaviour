@@ -266,6 +266,30 @@ Feature: Schema validation
     Then transaction commits; throws exception
 
 
+  Scenario: Modifying a relation or role does not leave invalid overrides
+    Given put relation type: rel00
+    Given relation(rel00) set relates role: role00
+    Given relation(rel00) set relates role: extra_role
+    Given put relation type: rel01
+    Given relation(rel01) set relates role: role01
+    Given put relation type: rel1
+    Given relation(rel1) set supertype: rel00
+    Given put relation type: rel2
+    Given relation(rel2) set supertype: rel1
+    Given relation(rel2) set relates role: role2 as role00
+    Given transaction commits
+
+    When session opens transaction of type: write
+    Then relation(rel00) unset related role: role00; throws exception
+
+    When session opens transaction of type: write
+    Then relation(rel2) set supertype: rel01; throws exception
+    Then session transaction close
+
+    When session opens transaction of type: write
+    Then relation(rel1) set relates role: role1 as role00; throws exception
+
+
   Scenario: Deleting a role does not leave dangling 'plays' declarations
     Given put relation type: rel0
     Given relation(rel0) set relates role: role0
@@ -566,6 +590,7 @@ Feature: Schema validation
 
     When session opens transaction of type: write
     Then relation(rel1) set supertype: rel01; throws exception
+
 
   Scenario: Rules made unsatisfiable by schema modifications are flagged at commit time
     Given typeql define
