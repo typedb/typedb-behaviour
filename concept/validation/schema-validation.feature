@@ -144,6 +144,7 @@ Feature: Schema validation
     When session opens transaction of type: write
     Then relation(rel0) set supertype: rel1; throws exception
 
+
   Scenario: An attribute-type must have the same value type as its ancestors
     Given put attribute type: attr0s, with value type: string
     Given attribute(attr0s) set abstract: true
@@ -240,6 +241,7 @@ Feature: Schema validation
     When session opens transaction of type: write
     When relation(rel1) set supertype: rel01
     Then transaction commits; throws exception
+
 
   Scenario: Concrete types may not own abstract attributes
     Given put attribute type: attr0, with value type: string
@@ -421,10 +423,13 @@ Feature: Schema validation
     Then transaction commits
 
     When session opens transaction of type: write
-    When entity(ent00) unset owns attribute type: attr0; throws exception
+    When entity(ent00) unset owns attribute type: attr0
+    Then transaction commits; throws exception
 
     When session opens transaction of type: write
-    When entity(ent1) set supertype: ent01; throws exception
+    When entity(ent1) set supertype: ent01
+    Then transaction commits; throws exception
+
 
   Scenario: A type may only override an ownership it inherits with a subtype of the inherited attribute
     Given put attribute type: attr0, with value type: string
@@ -488,6 +493,7 @@ Feature: Schema validation
     Then entity(ent1) get playing roles do not contain:
       | rel0:role0 |
     Then transaction commits
+
 
   Scenario: The schema may not be modified in a way that an overridden plays role is no longer inherited by the overriding type
     Given put relation type: rel0

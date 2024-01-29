@@ -134,6 +134,7 @@ Feature: Data validation
 
 
   # If we ever introduce abstract roles, we need a scenario here
+
   Scenario: Instances of role-playing not in the schema must not exist
     Given put relation type: rel0
     Given relation(rel0) set relates role: role0
@@ -164,10 +165,15 @@ Feature: Data validation
 
     When session opens transaction of type: write
     Then entity(ent00) unset plays role: rel0:role0; throws exception
+    Given session transaction closes
 
     When session opens transaction of type: write
-    # Bug?: The transaction goes through fine
+    Then entity(ent1) set plays role: rel1:role1 as rel0:role0; throws exception
+    Given session transaction closes
+
+    When session opens transaction of type: write
     Then entity(ent1) set supertype: ent01; throws exception
+    Given session transaction closes
 
   # If we ever introduce abstract roles, we need a scenario here
 
@@ -204,34 +210,6 @@ Feature: Data validation
     When $rel0 = relation(rel0) create new instance
     When relation $rel0 add player for role(role0): $ent00
     Then transaction commits
-
-
-  Scenario: A relation type may not override a role if instances of that type involving that role exist
-    Given put relation type: rel0
-    Given relation(rel0) set relates role: role0
-    Given put relation type: rel1
-    Given relation(rel1) set supertype: rel0
-    # With no override
-    Given relation(rel1) set relates role: role1
-    Given put entity type: ent00
-    Given entity(ent00) set plays role: rel0:role0
-    Given entity(ent00) set plays role: rel1:role1
-    Given transaction commits
-
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-
-    When session opens transaction of type: write
-    When $ent00 = entity(ent00) create new instance
-    When $rel1 = relation(rel1) create new instance
-    When relation $rel1 add player for role(role0): $ent00
-    Then transaction commits
-
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    When session opens transaction of type: write
-    # Bug: The transaction goes through fine
-    Then relation(rel1) set relates role: role1 as role0; throws exception
 
 
   Scenario: Instances of role-playing hidden by a plays override must not exist
