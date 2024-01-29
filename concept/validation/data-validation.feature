@@ -100,6 +100,40 @@ Feature: Data validation
     Then entity(ent1) set supertype: ent01; throws exception
 
 
+  Scenario: Instances of roles not in the schema must not exist
+    Given put relation type: rel00
+    Given relation(rel00) set relates role: role00
+    Given put relation type: rel01
+    Given relation(rel01) set relates role: role01
+    Given put relation type: rel1
+    Given relation(rel1) set supertype: rel00
+    Given put entity type: ent0
+    Given entity(ent0) set plays role: rel00:role00
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given $ent0 = entity(ent0) create new instance
+    Given $rel1 = relation(rel1) create new instance
+    Given relation $rel1 add player for role(role00): $ent0
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+
+    When session opens transaction of type: write
+    Then relation(rel00) unset related role: role00; throws exception
+    Given session transaction close
+
+    When session opens transaction of type: write
+    Then relation(rel1) set supertype: rel01; throws exception
+    Given session transaction close
+
+    When session opens transaction of type: write
+    Then relation(rel1) set relates role: role1 as role00; throws exception
+    Given session transaction close
+
+
+  # If we ever introduce abstract roles, we need a scenario here
   Scenario: Instances of role-playing not in the schema must not exist
     Given put relation type: rel0
     Given relation(rel0) set relates role: role0
