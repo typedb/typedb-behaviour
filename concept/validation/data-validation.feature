@@ -240,7 +240,7 @@ Feature: Data validation
     Then transaction commits
 
 
-  Scenario: A type may not override a role it plays through inheritance if instances of that type playing that role
+  Scenario: A type may not override a role it plays through inheritance if instances of that type playing that role exist
     Given put relation type: rel0
     Given relation(rel0) set relates role: role0
     Given put relation type: rel1
@@ -256,18 +256,16 @@ Feature: Data validation
 
     Given connection close all sessions
     Given connection open data session for database: typedb
-
-    When session opens transaction of type: write
-    When $ent1 = entity(ent1) create new instance
-    When $rel0 = relation(rel0) create new instance
-    When relation $rel0 add player for role(role0): $ent1
-    Then transaction commits
+    Given session opens transaction of type: write
+    Given $ent1 = entity(ent1) create new instance
+    Given $rel0 = relation(rel0) create new instance
+    Given relation $rel0 add player for role(role0): $ent1
+    Given transaction commits
 
     Given connection close all sessions
     Given connection open schema session for database: typedb
 
     When session opens transaction of type: write
-    # Bug?: The transaction goes through fine.
     Then entity(ent1) set plays role: rel1:role1 as rel0:role0; throws exception
 
 

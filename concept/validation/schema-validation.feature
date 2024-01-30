@@ -128,21 +128,27 @@ Feature: Schema validation
 
     When session opens transaction of type: write
     Then attribute(attr1) set supertype: attr1; throws exception
+    Given session transaction closes
 
     When session opens transaction of type: write
     Then attribute(attr0) set supertype: attr1; throws exception
+    Given session transaction closes
 
     When session opens transaction of type: write
     Then entity(ent1) set supertype: ent1; throws exception
+    Given session transaction closes
 
     When session opens transaction of type: write
     Then entity(ent0) set supertype: ent1; throws exception
+    Given session transaction closes
 
     When session opens transaction of type: write
     Then relation(rel1) set supertype: rel1; throws exception
+    Given session transaction closes
 
     When session opens transaction of type: write
     Then relation(rel0) set supertype: rel1; throws exception
+    Given session transaction closes
 
 
   Scenario: An attribute-type must have the same value type as its ancestors
@@ -382,6 +388,7 @@ Feature: Schema validation
     When session opens transaction of type: write
     When put relation type: rel1
     Then relation(rel1) set relates role: role1 as role00; throws exception
+    Given session transaction closes
 
     When session opens transaction of type: write
     When put relation type: rel1
@@ -395,9 +402,11 @@ Feature: Schema validation
 
     When session opens transaction of type: write
     Then relation(rel1) set supertype: rel01; throws exception
+    Given session transaction closes
 
     When session opens transaction of type: write
     Then relation(rel00) unset related role: role00; throws exception
+    Given session transaction closes
 
 
   Scenario: A type may only override an ownership it inherits
@@ -592,8 +601,18 @@ Feature: Schema validation
     Given transaction commits
 
     When session opens transaction of type: write
+    Then delete relation type: rel00; throws exception
+
+    When session opens transaction of type: write
+    Then delete relation type: rel01; throws exception
+
+    When session opens transaction of type: write
     Then relation(rel00) unset related role: role00; throws exception
 
+    When session opens transaction of type: write
+    Then relation(rel01) unset related role: role01; throws exception
+
+    # TODO: Do we want to do this at operation time or commit time?
     When session opens transaction of type: write
     Then relation(rel1) set supertype: rel01; throws exception
 
@@ -603,12 +622,13 @@ Feature: Schema validation
     """
     define
       rel0 sub relation, relates role00, relates role01;
-      ent00 sub entity, plays rel0:role00, plays rel0:role01;
-      ent01 sub entity;
+      ent00 sub entity, abstract, plays rel0:role00, plays rel0:role01;
+      ent01 sub entity, abstract;
       ent1 sub ent00;
 
       rule make-me-unsatisfiable:
       when {
+        $e isa ent1;
         (role00: $e) isa rel0;
       } then {
         (role01: $e) isa rel0;
