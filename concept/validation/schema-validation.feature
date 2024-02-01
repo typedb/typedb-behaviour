@@ -289,6 +289,7 @@ Feature: Schema validation
 
     When session opens transaction of type: write
     Then relation(rel00) unset related role: role00; throws exception
+    Then session transaction close
 
     When session opens transaction of type: write
     Then relation(rel2) set supertype: rel01; throws exception
@@ -373,7 +374,6 @@ Feature: Schema validation
     Then transaction commits
 
     When session opens transaction of type: write
-    # Bug? Transaction commits fine. It's a redundant owns but not wrong
     Then entity(ent1) set supertype: ent00
     Then transaction commits; throws exception
 
@@ -525,14 +525,43 @@ Feature: Schema validation
 
     When session opens transaction of type: write
     Then entity(ent00) unset plays role: rel0:role0
-    # BUG: Doesn't throw
     Then transaction commits; throws exception
 
     When session opens transaction of type: write
     Then entity(ent1) set supertype: ent01
-    # BUG: Doesn't throw
     Then transaction commits; throws exception
 
+
+  # TODO: Add case where we're moving under a type that overrides the plays
+  Scenario: A thing-type may not be moved in a way that its plays declarations are hidden by an override
+    Given typeql define
+    """
+      define
+        rel0 sub relation, relates role0;
+        rel10 sub rel0, relates role10 as role0;
+        rel11 sub rel0, relates role11 as role0;
+
+        ent0 sub entity, plays rel0:role0;
+        ent1 sub ent0, plays rel10:role10 as role0;
+        ent20 sub entity, plays rel0:role0;               # plays will be hidden under ent1
+        ent21 sub ent0, plays rel11:role11 as role0;      # Overridden will be hidden under ent1
+        # TODO: Is this a redundant declaration or a bad override now? If i add the override, it looks like an override
+        ent22 sub ent0, plays rel10:role10; # as role0;   # Will be redundant under ent1 - Attempt to move to redundancy test
+    """
+    Given transaction commits
+
+    When session opens transaction of type: write
+    Then entity(ent20) set supertype: ent1; throws exception
+    Then session transaction closes
+
+    When session opens transaction of type: write
+    #    When entity(ent21) set supertype: ent1; throws exception
+    When entity(ent21) set supertype: ent1
+    Then transaction commits; throws exception
+
+    When session opens transaction of type: write
+    When entity(ent22) set supertype: ent1
+    Then transaction commits; throws exception
 
   Scenario: A concrete type must override any ownerships of abstract attributes it inherits.
     Given put attribute type: attr00, with value type: string
