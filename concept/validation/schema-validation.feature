@@ -167,7 +167,7 @@ Feature: Schema validation
     Then attribute(attr1) set supertype: attr0d; throws exception
 
 
-  Scenario: Only abstract attributes may be subtyped
+  Scenario: Only abstract attributes may have subtypes
     Given put attribute type: attr0a, with value type: string
     Given put attribute type: attr0c, with value type: string
     Given attribute(attr0a) set abstract: true
@@ -175,7 +175,8 @@ Feature: Schema validation
 
     When session opens transaction of type: write
     When put attribute type: attr1, with value type: string
-    When attribute(attr1) set supertype: attr0c; throws exception
+    When attribute(attr1) set supertype: attr0c
+    Then transaction commits; throws exception
 
     When session opens transaction of type: write
     When put attribute type: attr1, with value type: string
@@ -183,13 +184,16 @@ Feature: Schema validation
     Then transaction commits
 
     When session opens transaction of type: write
+    When attribute(attr0a) set abstract: false; throws exception
+
+    When session opens transaction of type: write
     When attribute(attr1) set supertype: attr0c
     Then transaction commits; throws exception
 
     When session opens transaction of type: write
-    When attribute(attr00) set abstract: false
-    Then transaction commits; throws exception
-
+    When attribute(attr1) set supertype: attr0c
+    When attribute(attr0c) set abstract: true
+    Then transaction commits
 
   # Relation types must relate at least one role
   Scenario: Concrete relation types must relate at least one role - basic
@@ -344,6 +348,7 @@ Feature: Schema validation
     Then entity(ent1) set owns attribute type: attr0
     Then transaction commits; throws exception
 
+    When session opens transaction of type: write
     When entity(ent1) set supertype: ent01
     When entity(ent1) set owns attribute type: attr0
     Then transaction commits
@@ -608,6 +613,29 @@ Feature: Schema validation
 
     When session opens transaction of type: write
     When entity(ent1) set supertype: ent01
+    Then transaction commits; throws exception
+
+
+  # TODO: We probably want to be able to rename them
+  Scenario: Types which are referenced in rules may not be renamed
+    Given typeql define
+    """
+    define
+      rel00 sub relation, relates role00;
+      rel01 sub relation, relates role01;
+      ent0 sub entity, plays rel00:role00, plays rel01:role01;
+
+      rule make-me-illegal:
+      when {
+        (role00: $e) isa rel00;
+      } then {
+        (role01: $e) isa rel01;
+      };
+    """
+    Given transaction commits
+
+    When session opens transaction of type: write
+    Then relation(rel00) set label: renamed-rel00
     Then transaction commits; throws exception
 
 

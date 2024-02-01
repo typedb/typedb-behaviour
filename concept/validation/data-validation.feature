@@ -297,3 +297,52 @@ Feature: Data validation
     When connection open schema session for database: typedb
     When session opens transaction of type: write
     Then entity(ent2) set supertype: ent11; throws exception
+
+
+
+  #############################
+  # Migration scenarios       #
+  # TODO: Move to own feature #
+  #############################
+  Scenario: An ownership can be moved down one type, with data in place at the lower levels
+    Given put attribute type: attr0, with value type: string
+    Given put entity type: ent00
+    Given entity(ent00) set owns attribute type: attr0, with annotations: key
+    Given put entity type: ent1
+    Given entity(ent1) set supertype: ent00
+    Given transaction commits
+
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given $ent1 = entity(ent1) create new instance
+    Given $attr0 = attribute(attr0) as(string) put: "attr0"
+    Given entity $ent1 set has: $attr0
+    Given transaction commits
+
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+
+    # Should break
+    When session opens transaction of type: write
+    Then entity(ent1) set owns attribute type: attr0, with annotations: unique; throws exception
+    Given session transaction close
+
+    When session opens transaction of type: write
+    When entity(ent1) set owns attribute type: attr0, with annotations: key
+    # Can't commit yet, because of the redundant declarations
+    Then transaction commits; throws exception
+
+    When session opens transaction of type: write
+    When entity(ent1) set owns attribute type: attr0, with annotations: key
+    When entity(ent1) unset owns attribute type: attr0
+    Then transaction commits
+
+  Scenario: A played role can be moved down one type, with data in place at the lower levels
+    #TODO
+
+
+  Scenario: A type moved with data in-place by re-declaring ownerships & played roles
+    #TODO
+
+

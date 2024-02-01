@@ -26,6 +26,3 @@ Feature: Data validation
     Given connection create database: typedb
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-
-  Scenario: A redundant ownership can be declared allowing a type to be relocated along with its ownerships
-    # TODO
