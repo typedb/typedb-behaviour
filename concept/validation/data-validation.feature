@@ -297,6 +297,8 @@ Feature: Data validation
     When session opens transaction of type: write
     Then entity(ent2) set supertype: ent11; throws exception
 
+  Scenario: When annotations on an ownership change, data is revalidated
+    #TODO
 
 
   #############################
