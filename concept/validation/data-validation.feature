@@ -96,7 +96,6 @@ Feature: Data validation
     Then entity(ent00) unset owns attribute type: attr00; throws exception
 
     When session opens transaction of type: write
-    # BUG?: The transaction goes through fine
     Then entity(ent1) set supertype: ent01; throws exception
 
 
@@ -344,5 +343,4 @@ Feature: Data validation
 
   Scenario: A type moved with data in-place by re-declaring ownerships & played roles
     #TODO
-
 

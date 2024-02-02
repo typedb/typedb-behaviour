@@ -445,6 +445,53 @@ Feature: Schema validation
     Then transaction commits; throws exception
 
 
+  Scenario: A type may not declare ownership of an attribute that has been overridden by an inherited ownership
+    Given put attribute type: attr0, with value type: string
+    Given attribute(attr0) set abstract: true
+    Given put attribute type: attr1, with value type: string
+    Given attribute(attr1) set abstract: true
+    Given attribute(attr1) set supertype: attr0
+    Given put attribute type: attr2, with value type: string
+    Given attribute(attr2) set supertype: attr1
+    Given attribute(attr2) set abstract: true
+    Given put entity type: ent0
+    Given entity(ent0) set abstract: true
+    Given entity(ent0) set owns attribute type: attr0
+    Given put entity type: ent1
+    Given entity(ent1) set supertype: ent0
+    Given entity(ent1) set abstract: true
+    Given entity(ent1) set owns attribute type: attr1 as attr0
+    Given transaction commits
+
+    When session opens transaction of type: write
+    When put entity type: ent2
+    When entity(ent2) set supertype: ent1
+    When entity(ent2) set abstract: true
+    Then entity(ent2) set owns attribute type: attr2 as attr0; throws exception
+
+
+    When session opens transaction of type: write
+    When put entity type: ent2
+    When entity(ent2) set supertype: ent1
+    When entity(ent2) set abstract: true
+    When entity(ent1) unset owns attribute type: attr1
+    Then entity(ent2) set owns attribute type: attr2 as attr0
+    Then transaction commits
+
+    When session opens transaction of type: write
+    When entity(ent1) set owns attribute type: attr1 as attr0
+    Then transaction commits; throws exception
+
+    # Move
+    When session opens transaction of type: write
+    When put entity type: ent3
+    When entity(ent3) set abstract: true
+    When entity(ent3) set owns attribute type: attr0
+    Then transaction commits
+    When session opens transaction of type: write
+    When entity(ent3) set supertype: ent2; throws exception
+
+
   Scenario: A type may only override an ownership it inherits with a subtype of the inherited attribute
     Given put attribute type: attr0, with value type: string
     Given attribute(attr0) set abstract: true
@@ -509,6 +556,7 @@ Feature: Schema validation
     Then transaction commits
 
 
+    # TODO: Rename scenario since it's relaxed to commit time.
   Scenario: The schema may not be modified in a way that an overridden plays role is no longer inherited by the overriding type
     Given put relation type: rel0
     Given relation(rel0) set relates role: role0
@@ -567,6 +615,7 @@ Feature: Schema validation
     When session opens transaction of type: write
     When entity(ent22) set supertype: ent1
     Then transaction commits; throws exception
+
 
   Scenario: A concrete type must override any ownerships of abstract attributes it inherits.
     Given put attribute type: attr00, with value type: string
@@ -669,9 +718,10 @@ Feature: Schema validation
     When session opens transaction of type: write
     Then relation(rel01) unset related role: role01; throws exception
 
-    # TODO: Do we want to do this at operation time or commit time?
+    # TODO: We currently can't do this at operation time, so we check at commit-time
     When session opens transaction of type: write
-    Then relation(rel1) set supertype: rel01; throws exception
+    Then relation(rel1) set supertype: rel01
+    Then transaction commits; throws exception
 
 
   Scenario: Rules made unsatisfiable by schema modifications are flagged at commit time
@@ -700,3 +750,12 @@ Feature: Schema validation
     When session opens transaction of type: write
     Then entity(ent1) set supertype: ent01
     Then transaction commits; throws exception
+
+
+  Scenario: Annotations on ownership overrides must be atleast as strict as the overridden ownerships
+    # TODO
+
+
+  Scenario: Annotations on ownership overrides must be stricter as the overridden ownerships or will be flagged as redundant on commit.
+    # TODO
+
