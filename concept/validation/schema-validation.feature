@@ -753,9 +753,40 @@ Feature: Schema validation
 
 
   Scenario: Annotations on ownership overrides must be atleast as strict as the overridden ownerships
-    # TODO
+    Given put attribute type: attr0, with value type: string
+    Given attribute(attr0) set abstract: true
+    Given put attribute type: attr1, with value type: string
+    Given attribute(attr1) set supertype: attr0
+    Given put entity type: ent0n
+    Given entity(ent0n) set abstract: true
+    Given entity(ent0n) set owns attribute type: attr0
+    Given put entity type: ent0k
+    Given entity(ent0k) set abstract: true
+    Given entity(ent0k) set owns attribute type: attr0, with annotations: key
+    Given put entity type: ent0u
+    Given entity(ent0u) set abstract: true
+    Given entity(ent0u) set owns attribute type: attr0, with annotations: unique
+    Given transaction commits
 
+    When session opens transaction of type: write
+    When put entity type: ent1u
+    When entity(ent1u) set supertype: ent0k
+    When entity(ent1u) set owns attribute type: attr1 as attr0, with annotations: unique; throws exception
 
-  Scenario: Annotations on ownership overrides must be stricter as the overridden ownerships or will be flagged as redundant on commit.
+    When session opens transaction of type: write
+    When put entity type: ent1u
+    When entity(ent1u) set supertype: ent0u
+    When entity(ent1u) set owns attribute type: attr1 as attr0, with annotations: unique
+    Then transaction commits
+
+    When session opens transaction of type: write
+    Then entity(ent1u) set supertype: ent0k; throws exception
+    Given session transaction closes
+
+    When session opens transaction of type: write
+    Then entity(ent0u) set owns attribute type: attr0, with annotations: key; throws exception
+    Given session transaction closes
+
+  Scenario: Annotations on ownership redeclarations must be stricter than the previous declaration or will be flagged as redundant on commit.
     # TODO
 
