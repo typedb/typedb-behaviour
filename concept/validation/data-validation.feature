@@ -94,9 +94,11 @@ Feature: Data validation
 
     When session opens transaction of type: write
     Then entity(ent00) unset owns attribute type: attr00; throws exception
+    Then session transaction closes
 
     When session opens transaction of type: write
     Then entity(ent1) set supertype: ent01; throws exception
+    Then session transaction closes
 
 
   Scenario: Instances of roles not in the schema must not exist
@@ -298,7 +300,54 @@ Feature: Data validation
     Then entity(ent2) set supertype: ent11; throws exception
 
   Scenario: When annotations on an ownership change, data is revalidated
-    #TODO
+    Given put attribute type: attr0, with value type: string
+    Given put entity type: ent0n
+    Given put entity type: ent0u
+    Given entity(ent0n) set owns attribute type: attr0
+    Given entity(ent0u) set owns attribute type: attr0, with annotations: unique
+    Given put attribute type: ref, with value type: string
+    Given entity(ent0n) set owns attribute type: ref, with annotations: key
+    Given entity(ent0u) set owns attribute type: ref, with annotations: key
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given $ent0n0 = entity(ent0n) create new instance with key(ref): ent0n0
+    Given $ent0n1 = entity(ent0n) create new instance with key(ref): ent0n1
+    Given $ent0u = entity(ent0u) create new instance with key(ref): ent0u
+    Given $attr0 = attribute(attr0) as(string) put: "attr0"
+    Given $attr1 = attribute(attr0) as(string) put: "attr1"
+    Given entity $ent0n0 set has: $attr1
+    Given entity $ent0n1 set has: $attr1
+    Given entity $ent0u set has: $attr0
+    Given entity $ent0u set has: $attr1
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+
+    When session opens transaction of type: write
+    Then entity(ent0n) set owns attribute type: attr0, with annotations: unique; throws exception
+    Given session transaction closes
+    When session opens transaction of type: write
+    Then entity(ent0u) set owns attribute type: attr0, with annotations: key; throws exception
+    Given session transaction closes
+
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    When session opens transaction of type: write
+    When $ent0n1 = entity(ent0n) get instance with key(ref): ent0n1
+    When $ent0u = entity(ent0u) get instance with key(ref): ent0u
+    When $attr1 = attribute(attr0) as(string) get: "attr1"
+    When entity $ent0n1 unset has: $attr1
+    When entity $ent0u unset has: $attr1
+    Then transaction commits
+
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    When session opens transaction of type: write
+    Then entity(ent0n) set owns attribute type: attr0, with annotations: unique
+    Then entity(ent0u) set owns attribute type: attr0, with annotations: key
+    Then transaction commits
 
 
   #############################
@@ -307,10 +356,10 @@ Feature: Data validation
   #############################
   Scenario: An ownership can be moved down one type, with data in place at the lower levels
     Given put attribute type: attr0, with value type: string
-    Given put entity type: ent00
-    Given entity(ent00) set owns attribute type: attr0, with annotations: key
+    Given put entity type: ent0
+    Given entity(ent0) set owns attribute type: attr0, with annotations: key
     Given put entity type: ent1
-    Given entity(ent1) set supertype: ent00
+    Given entity(ent1) set supertype: ent0
     Given transaction commits
 
     Given connection close all sessions
@@ -330,19 +379,105 @@ Feature: Data validation
     Given session transaction close
 
     When session opens transaction of type: write
+    Then entity(ent0) unset owns attribute type: attr0; throws exception
+    Given session transaction close
+
+    When session opens transaction of type: write
     When entity(ent1) set owns attribute type: attr0, with annotations: key
     # Can't commit yet, because of the redundant declarations
     Then transaction commits; throws exception
 
     When session opens transaction of type: write
     When entity(ent1) set owns attribute type: attr0, with annotations: key
-    When entity(ent1) unset owns attribute type: attr0
+    When entity(ent0) unset owns attribute type: attr0
     Then transaction commits
 
   Scenario: A played role can be moved down one type, with data in place at the lower levels
-    #TODO
+    Given put relation type: rel0
+    Given relation(rel0) set relates role: role0
+    Given put entity type: ent0
+    Given entity(ent0) set plays role: rel0:role0
+    Given put entity type: ent1
+    Given entity(ent1) set supertype: ent0
+    Given transaction commits
+
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given $ent1 = entity(ent1) create new instance
+    Given $rel0 = relation(rel0) create new instance
+    Given relation $rel0 add player for role(role0): $ent1
+    Given transaction commits
+
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+
+    When session opens transaction of type: write
+    Then entity(ent0) unset plays role: rel0:role0; throws exception
+    Given session transaction closes
+
+    When session opens transaction of type: write
+    Then entity(ent1) set plays role: rel0:role0
+    Then entity(ent0) unset plays role: rel0:role0
+    Then transaction commits
 
 
-  Scenario: A type moved with data in-place by re-declaring ownerships & played roles
-    #TODO
+  Scenario: A type moved with ownership instances in-place by re-declaring ownerships
+    Given put attribute type: attr0, with value type: string
+    Given put entity type: ent0
+    Given entity(ent0) set owns attribute type: attr0, with annotations: key
+    Given put entity type: ent1
+    Given entity(ent1) set supertype: ent0
+    Given transaction commits
+
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given $ent1 = entity(ent1) create new instance
+    Given $attr0 = attribute(attr0) as(string) put: "attr0"
+    Given entity $ent1 set has: $attr0
+    Given transaction commits
+
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+
+    # Should break
+    When session opens transaction of type: write
+    Then entity(ent1) set supertype: entity; throws exception
+    Given session transaction close
+
+    When session opens transaction of type: write
+    Then entity(ent1) set owns attribute type: attr0, with annotations: key
+    Then entity(ent1) set supertype: entity
+    Then transaction commits
+
+
+  Scenario: A type moved with plays instances in-place by re-declaring played roles
+    Given put relation type: rel0
+    Given relation(rel0) set relates role: role0
+    Given put entity type: ent0
+    Given entity(ent0) set plays role: rel0:role0
+    Given put entity type: ent1
+    Given entity(ent1) set supertype: ent0
+    Given transaction commits
+
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given $ent1 = entity(ent1) create new instance
+    Given $rel0 = relation(rel0) create new instance
+    Given relation $rel0 add player for role(role0): $ent1
+    Given transaction commits
+
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+
+    When session opens transaction of type: write
+    Then entity(ent1) set supertype: entity; throws exception
+    Given session transaction closes
+
+    When session opens transaction of type: write
+    Then entity(ent1) set plays role: rel0:role0
+    Then entity(ent1) set supertype: entity
+    Then transaction commits
 
