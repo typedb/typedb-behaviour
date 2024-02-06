@@ -933,7 +933,8 @@ Feature: Concept Entity Type
     When entity(person) set owns attribute type: name
     When put entity type: customer
     When entity(customer) set supertype: person
-    Then entity(customer) set owns attribute type: name; throws exception
+    Then entity(customer) set owns attribute type: name
+    Then transaction commits; throws exception
 
   Scenario: Entity types cannot redeclare inherited keys as keys or attributes
     When put attribute type: email, with value type: string
@@ -944,9 +945,12 @@ Feature: Concept Entity Type
     When entity(customer) set supertype: person
     When transaction commits
     When session opens transaction of type: write
-    Then entity(customer) set owns attribute type: email, with annotations: key; throws exception
+    Then entity(customer) set owns attribute type: email
+    Then transaction commits; throws exception
+    Then session transaction closes
     When session opens transaction of type: write
-    Then entity(customer) set owns attribute type: email; throws exception
+    Then entity(customer) set owns attribute type: email, with annotations: key
+    Then transaction commits; throws exception
 
   Scenario: Entity types cannot redeclare inherited key attribute types
     When put attribute type: email, with value type: string
@@ -961,7 +965,8 @@ Feature: Concept Entity Type
     When entity(customer) set owns attribute type: customer-email, with annotations: key
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
-    Then entity(subscriber) set owns attribute type: email, with annotations: key; throws exception
+    Then entity(subscriber) set owns attribute type: email, with annotations: key
+    Then transaction commits; throws exception
 
   Scenario: Entity types cannot redeclare overridden key attribute types
     When put attribute type: email, with value type: string
@@ -976,7 +981,8 @@ Feature: Concept Entity Type
     When entity(customer) set owns attribute type: customer-email, with annotations: key
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
-    Then entity(subscriber) set owns attribute type: customer-email, with annotations: key; throws exception
+    Then entity(subscriber) set owns attribute type: customer-email, with annotations: key
+    Then transaction commits; throws exception
 
   Scenario: Entity types cannot redeclare inherited owns attribute types
     When put attribute type: name, with value type: string
@@ -991,7 +997,8 @@ Feature: Concept Entity Type
     When entity(customer) set owns attribute type: customer-name
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
-    Then entity(subscriber) set owns attribute type: name; throws exception
+    Then entity(subscriber) set owns attribute type: name
+    Then transaction commits; throws exception
 
   Scenario: Entity types cannot redeclare overridden owns attribute types
     When put attribute type: name, with value type: string
@@ -1006,7 +1013,8 @@ Feature: Concept Entity Type
     When entity(customer) set owns attribute type: customer-name
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
-    Then entity(subscriber) set owns attribute type: customer-name; throws exception
+    Then entity(subscriber) set owns attribute type: customer-name
+    Then transaction commits; throws exception
 
   Scenario: Entity types cannot override declared keys and attributes
     When put attribute type: username, with value type: string
@@ -1397,7 +1405,8 @@ Feature: Concept Entity Type
     When session opens transaction of type: write
     Then entity(boy) set plays role: parentship:parent; throws exception
     When session opens transaction of type: write
-    Then entity(boy) set plays role: fathership:father; throws exception
+    Then entity(boy) set plays role: fathership:father
+    Then transaction commits; throws exception
 
   Scenario: Entity types cannot override declared playing role types
     When put relation type: parentship

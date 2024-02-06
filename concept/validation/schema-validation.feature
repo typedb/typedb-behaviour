@@ -571,6 +571,19 @@ Feature: Schema validation
     Given put entity type: ent01
     Given transaction commits
 
+#    When session opens transaction of type: write
+    # Remove the relates override of role1 on role0
+#    Then relation(rel1) set relates role: role1; throws exception
+#    Given session transaction closes
+
+#    When session opens transaction of type: write
+#    Then entity(ent00) unset plays role: rel0:role0; throws exception
+#    Given session transaction closes
+
+#    When session opens transaction of type: write
+#    Then entity(ent1) set supertype: ent01; throws exception
+#    Given session transaction closes
+
     When session opens transaction of type: write
     # Remove the relates override of role1 on role0
     Then relation(rel1) set relates role: role1
@@ -608,9 +621,10 @@ Feature: Schema validation
     Then session transaction closes
 
     When session opens transaction of type: write
-    #    When entity(ent21) set supertype: ent1; throws exception
-    When entity(ent21) set supertype: ent1
-    Then transaction commits; throws exception
+    Then entity(ent21) set supertype: ent1; throws exception
+    Given session transaction closes
+#    When entity(ent21) set supertype: ent1
+#    Then transaction commits; throws exception
 
     When session opens transaction of type: write
     When entity(ent22) set supertype: ent1
