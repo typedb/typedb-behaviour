@@ -620,11 +620,12 @@ Feature: Schema validation
     Then entity(ent20) set supertype: ent1; throws exception
     Then session transaction closes
 
+#    When session opens transaction of type: write
+#    When entity(ent21) set supertype: ent1
+#    Then transaction commits; throws exception
     When session opens transaction of type: write
     Then entity(ent21) set supertype: ent1; throws exception
     Given session transaction closes
-#    When entity(ent21) set supertype: ent1
-#    Then transaction commits; throws exception
 
     When session opens transaction of type: write
     When entity(ent22) set supertype: ent1
@@ -797,6 +798,7 @@ Feature: Schema validation
     When session opens transaction of type: write
     Then entity(ent0u) set owns attribute type: attr0, with annotations: key; throws exception
     Given session transaction closes
+
 
   Scenario: Annotations on ownership redeclarations must be stricter than the previous declaration or will be flagged as redundant on commit.
     Given put attribute type: attr0, with value type: string
