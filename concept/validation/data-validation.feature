@@ -299,6 +299,7 @@ Feature: Data validation
     When session opens transaction of type: write
     Then entity(ent2) set supertype: ent11; throws exception
 
+
   Scenario: When annotations on an ownership change, data is revalidated
     Given put attribute type: attr0, with value type: string
     Given put entity type: ent0n

@@ -155,4 +155,3 @@ Feature: Data validation
     Then entity(ent1) set plays role: rel0:role0
     Then entity(ent1) set supertype: entity
     Then transaction commits
-

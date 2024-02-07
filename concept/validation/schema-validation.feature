@@ -620,12 +620,12 @@ Feature: Schema validation
     Then entity(ent20) set supertype: ent1; throws exception
     Then session transaction closes
 
-#    When session opens transaction of type: write
-#    When entity(ent21) set supertype: ent1
-#    Then transaction commits; throws exception
     When session opens transaction of type: write
-    Then entity(ent21) set supertype: ent1; throws exception
-    Given session transaction closes
+    When entity(ent21) set supertype: ent1
+    Then transaction commits; throws exception
+#    When session opens transaction of type: write
+#    Then entity(ent21) set supertype: ent1; throws exception
+#    Given session transaction closes
 
     When session opens transaction of type: write
     When entity(ent22) set supertype: ent1
@@ -788,7 +788,7 @@ Feature: Schema validation
     When session opens transaction of type: write
     When put entity type: ent1u
     When entity(ent1u) set supertype: ent0u
-    When entity(ent1u) set owns attribute type: attr1 as attr0, with annotations: unique
+    When entity(ent1u) set owns attribute type: attr1 as attr0
     Then transaction commits
 
     When session opens transaction of type: write
