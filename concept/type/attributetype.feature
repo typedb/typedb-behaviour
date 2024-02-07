@@ -292,11 +292,9 @@ Feature: Concept Attribute Type
     When put attribute type: last-name, with value type: string
     When transaction commits
     When session opens transaction of type: write
-    Then attribute(first-name) set supertype: name
-    Then transaction commits; throws exception
+    Then attribute(first-name) set supertype: name; throws exception
     When session opens transaction of type: write
-    Then attribute(last-name) set supertype: name
-    Then transaction commits; throws exception
+    Then attribute(last-name) set supertype: name; throws exception
 
   Scenario: Attribute types cannot subtype another attribute type of different value class
     When put attribute type: is-open, with value type: boolean

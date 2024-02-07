@@ -18,9 +18,6 @@
 #noinspection CucumberUndefinedStep
 Feature: Schema validation
 
-  #TODO: Should we divide this into operation & commit time validation?
-  #TODO: Do we need to split scenarios per operation?
-
   Background:
     Given typedb starts
     Given connection opens with default authentication
@@ -29,85 +26,6 @@ Feature: Schema validation
     Given connection create database: typedb
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-
-
-  # Not a meaningful test. The step throws an exception before the server is hit.
-  @ignore
-  Scenario: Attribute-types can only subtype other attribute-types
-    Given put entity type: ent0
-    Given put relation type: rel0
-    Given relation(rel0) set relates role: role0
-    Given put attribute type: attr0, with value type: string
-    Given attribute(attr0) set abstract: true
-    Given transaction commits
-
-    When session opens transaction of type: write
-    When put attribute type: attr1, with value type: string
-    Then transaction commits
-
-    When session opens transaction of type: write
-    When attribute(attr1) set supertype: attr0
-    Then transaction commits
-
-    When session opens transaction of type: write
-    Then attribute(attr1) set supertype: ent0; throws exception
-    When session opens transaction of type: write
-    Then attribute(attr1) set supertype: rel0; throws exception
-    When session opens transaction of type: write
-    Then delete attribute type: attr0; throws exception
-
-
-  # Not a meaningful test. The step throws an exception before the server is hit.
-  @ignore
-  Scenario: Entity-types can only subtype other entity-types
-    Given put entity type: ent0
-    Given put relation type: rel0
-    Given relation(rel0) set relates role: role0
-    Given put attribute type: attr0, with value type: string
-    Given attribute(attr0) set abstract: true
-    Given transaction commits
-
-    When session opens transaction of type: write
-    When put entity type: ent1
-    Then transaction commits
-
-    When session opens transaction of type: write
-    When entity(ent1) set supertype: ent0
-    Then transaction commits
-
-    When session opens transaction of type: write
-    Then entity(ent1) set supertype: attr0; throws exception
-    When session opens transaction of type: write
-    Then entity(ent1) set supertype: rel0; throws exception
-    When session opens transaction of type: write
-    Then delete entity type: ent0; throws exception
-
-
-  # Not a meaningful test. The step throws an exception before the server is hit.
-  @ignore
-  Scenario: Relation-types can only subtype other relation-types
-    Given put entity type: ent0
-    Given put relation type: rel0
-    Given relation(rel0) set relates role: role0
-    Given put attribute type: attr0, with value type: string
-    Given attribute(attr0) set abstract: true
-    Given transaction commits
-
-    When session opens transaction of type: write
-    When put relation type: rel1
-    When relation(rel1) set relates role: role1
-    Then transaction commits
-
-    When session opens transaction of type: write
-    When relation(rel1) set supertype: rel0
-    Then transaction commits
-
-    When session opens transaction of type: write
-    Then relation(rel1) set supertype: ent0; throws exception
-    When session opens transaction of type: write
-    Then relation(rel1) set supertype: attr0; throws exception
-    When session opens transaction of type: write
-    Then delete relation type: rel0; throws exception
 
 
   Scenario: Cyclic type hierarchies are disallowed
@@ -128,27 +46,21 @@ Feature: Schema validation
 
     When session opens transaction of type: write
     Then attribute(attr1) set supertype: attr1; throws exception
-    Given session transaction closes
 
     When session opens transaction of type: write
     Then attribute(attr0) set supertype: attr1; throws exception
-    Given session transaction closes
 
     When session opens transaction of type: write
     Then entity(ent1) set supertype: ent1; throws exception
-    Given session transaction closes
 
     When session opens transaction of type: write
     Then entity(ent0) set supertype: ent1; throws exception
-    Given session transaction closes
 
     When session opens transaction of type: write
     Then relation(rel1) set supertype: rel1; throws exception
-    Given session transaction closes
 
     When session opens transaction of type: write
     Then relation(rel0) set supertype: rel1; throws exception
-    Given session transaction closes
 
 
   Scenario: An attribute-type must have the same value type as its ancestors
@@ -175,8 +87,7 @@ Feature: Schema validation
 
     When session opens transaction of type: write
     When put attribute type: attr1, with value type: string
-    When attribute(attr1) set supertype: attr0c
-    Then transaction commits; throws exception
+    When attribute(attr1) set supertype: attr0c; throws exception
 
     When session opens transaction of type: write
     When put attribute type: attr1, with value type: string
@@ -187,12 +98,12 @@ Feature: Schema validation
     When attribute(attr0a) set abstract: false; throws exception
 
     When session opens transaction of type: write
-    When attribute(attr1) set supertype: attr0c
-    Then transaction commits; throws exception
+    When attribute(attr1) set supertype: attr0c; throws exception
+
 
     When session opens transaction of type: write
-    When attribute(attr1) set supertype: attr0c
     When attribute(attr0c) set abstract: true
+    When attribute(attr1) set supertype: attr0c
     Then transaction commits
 
   # Relation types must relate at least one role
@@ -200,13 +111,11 @@ Feature: Schema validation
     When put relation type: rel0c
     Then transaction commits; throws exception
 
-    # ADD_TYPE
     When session opens transaction of type: write
     When put relation type: rel0c
     When relation(rel0c) set relates role: role0c
     Then transaction commits
 
-    # DEL_ITF
     When session opens transaction of type: write
     When relation(rel0c) unset related role: role0c
     Then transaction commits; throws exception
@@ -216,7 +125,6 @@ Feature: Schema validation
     When relation(rel0a) set abstract: true
     Then transaction commits
 
-    # DEL_ABS
     When session opens transaction of type: write
     When put relation type: rel0a
     When relation(rel0a) set abstract: false
@@ -231,7 +139,6 @@ Feature: Schema validation
     Given relation(rel01) set abstract: true
     Given transaction commits
 
-    # ADD_TYPE
     When session opens transaction of type: write
     When put relation type: rel1
     When relation(rel1) set supertype: rel01
@@ -242,12 +149,10 @@ Feature: Schema validation
     When relation(rel1) set supertype: rel00
     Then transaction commits
 
-    # DEL_ITF
     When session opens transaction of type: write
     When relation(rel00) unset related role: role00
     Then transaction commits; throws exception
 
-    # MOVE_TYPE
     When session opens transaction of type: write
     When relation(rel1) set supertype: rel01
     Then transaction commits; throws exception
@@ -293,11 +198,9 @@ Feature: Schema validation
 
     When session opens transaction of type: write
     Then relation(rel00) unset related role: role00; throws exception
-    Then session transaction close
 
     When session opens transaction of type: write
     Then relation(rel2) set supertype: rel01; throws exception
-    Then session transaction close
 
     When session opens transaction of type: write
     Then relation(rel1) set relates role: role1 as role00; throws exception
@@ -354,7 +257,6 @@ Feature: Schema validation
     Then transaction commits
 
     When session opens transaction of type: write
-    # Bug? Transaction commits fine. It's a redundant owns but not wrong
     Then entity(ent1) set supertype: ent00
     Then transaction commits; throws exception
 
@@ -393,7 +295,6 @@ Feature: Schema validation
     When session opens transaction of type: write
     When put relation type: rel1
     Then relation(rel1) set relates role: role1 as role00; throws exception
-    Given session transaction closes
 
     When session opens transaction of type: write
     When put relation type: rel1
@@ -407,11 +308,9 @@ Feature: Schema validation
 
     When session opens transaction of type: write
     Then relation(rel1) set supertype: rel01; throws exception
-    Given session transaction closes
 
     When session opens transaction of type: write
     Then relation(rel00) unset related role: role00; throws exception
-    Given session transaction closes
 
 
   Scenario: A type may only override an ownership it inherits
@@ -482,7 +381,6 @@ Feature: Schema validation
     When entity(ent1) set owns attribute type: attr1 as attr0
     Then transaction commits; throws exception
 
-    # Move
     When session opens transaction of type: write
     When put entity type: ent3
     When entity(ent3) set abstract: true
@@ -571,19 +469,6 @@ Feature: Schema validation
     Given put entity type: ent01
     Given transaction commits
 
-#    When session opens transaction of type: write
-    # Remove the relates override of role1 on role0
-#    Then relation(rel1) set relates role: role1; throws exception
-#    Given session transaction closes
-
-#    When session opens transaction of type: write
-#    Then entity(ent00) unset plays role: rel0:role0; throws exception
-#    Given session transaction closes
-
-#    When session opens transaction of type: write
-#    Then entity(ent1) set supertype: ent01; throws exception
-#    Given session transaction closes
-
     When session opens transaction of type: write
     # Remove the relates override of role1 on role0
     Then relation(rel1) set relates role: role1
@@ -598,7 +483,25 @@ Feature: Schema validation
     Then transaction commits; throws exception
 
 
-  # TODO: Add case where we're moving under a type that overrides the plays
+  Scenario: A thing-type may not redeclare the ability to play a RoleType which is hidden by an override
+    Given put relation type: rel0
+    Given relation(rel0) set relates role: role0
+    Given put relation type: rel1
+    Given relation(rel1) set supertype: rel0
+    Given relation(rel1) set relates role: role1 as role0
+    Given put entity type: ent0
+    Given entity(ent0) set plays role: rel0:role0
+    Given put entity type: ent1
+    Given entity(ent1) set supertype: ent0
+    Given put entity type: ent2
+    Given entity(ent2) set supertype: ent1
+    Given transaction commits
+
+    When session opens transaction of type: write
+    When entity(ent2) set plays role: rel0:role0
+    When entity(ent1) set plays role: rel1:role1 as rel0:role0; throws exception
+
+
   Scenario: A thing-type may not be moved in a way that its plays declarations are hidden by an override
     Given typeql define
     """
@@ -611,21 +514,16 @@ Feature: Schema validation
         ent1 sub ent0, plays rel10:role10 as role0;
         ent20 sub entity, plays rel0:role0;               # plays will be hidden under ent1
         ent21 sub ent0, plays rel11:role11 as role0;      # Overridden will be hidden under ent1
-        # TODO: Is this a redundant declaration or a bad override now? If i add the override, it looks like an override
-        ent22 sub ent0, plays rel10:role10; # as role0;   # Will be redundant under ent1 - Attempt to move to redundancy test
+        ent22 sub ent0, plays rel10:role10; # as role0;   # Will be redundant under ent1
     """
     Given transaction commits
 
     When session opens transaction of type: write
     Then entity(ent20) set supertype: ent1; throws exception
-    Then session transaction closes
 
     When session opens transaction of type: write
     When entity(ent21) set supertype: ent1
     Then transaction commits; throws exception
-#    When session opens transaction of type: write
-#    Then entity(ent21) set supertype: ent1; throws exception
-#    Given session transaction closes
 
     When session opens transaction of type: write
     When entity(ent22) set supertype: ent1
@@ -650,12 +548,12 @@ Feature: Schema validation
     When put entity type: ent1
     Given transaction commits
 
-    #  MUST_OVERRIDE: declares concrete ownership but is missing override clause
+    # inherits abstract ownership but does not override
     When session opens transaction of type: write
     When entity(ent1) set supertype: ent00
     Then transaction commits; throws exception
 
-    # MISSING_OVERRIDE: declares concrete ownership but is missing override clause
+    # declares concrete ownership with a subtype but is missing override clause
     When session opens transaction of type: write
     When entity(ent1) set supertype: ent00
     When entity(ent1) set owns attribute type: attr10
@@ -733,7 +631,7 @@ Feature: Schema validation
     When session opens transaction of type: write
     Then relation(rel01) unset related role: role01; throws exception
 
-    # TODO: We currently can't do this at operation time, so we check at commit-time
+    # We currently can't do this at operation time, so we check at commit-time
     When session opens transaction of type: write
     Then relation(rel1) set supertype: rel01
     Then transaction commits; throws exception
@@ -793,11 +691,9 @@ Feature: Schema validation
 
     When session opens transaction of type: write
     Then entity(ent1u) set supertype: ent0k; throws exception
-    Given session transaction closes
 
     When session opens transaction of type: write
     Then entity(ent0u) set owns attribute type: attr0, with annotations: key; throws exception
-    Given session transaction closes
 
 
   Scenario: Annotations on ownership redeclarations must be stricter than the previous declaration or will be flagged as redundant on commit.
@@ -833,9 +729,7 @@ Feature: Schema validation
 
     When session opens transaction of type: write
     Then entity(ent1u) set supertype: ent0k; throws exception
-    Given session transaction closes
 
     When session opens transaction of type: write
     Then entity(ent0n) set owns attribute type: attr0, with annotations: key; throws exception
-    Given session transaction closes
 

@@ -94,11 +94,9 @@ Feature: Data validation
 
     When session opens transaction of type: write
     Then entity(ent00) unset owns attribute type: attr00; throws exception
-    Then session transaction closes
 
     When session opens transaction of type: write
     Then entity(ent1) set supertype: ent01; throws exception
-    Then session transaction closes
 
 
   Scenario: Instances of roles not in the schema must not exist
@@ -123,15 +121,12 @@ Feature: Data validation
 
     When session opens transaction of type: write
     Then relation(rel00) unset related role: role00; throws exception
-    Given session transaction close
 
     When session opens transaction of type: write
     Then relation(rel1) set supertype: rel01; throws exception
-    Given session transaction close
 
     When session opens transaction of type: write
     Then relation(rel1) set relates role: role1 as role00; throws exception
-    Given session transaction close
 
 
   # If we ever introduce abstract roles, we need a scenario here
@@ -166,18 +161,15 @@ Feature: Data validation
 
     When session opens transaction of type: write
     Then entity(ent00) unset plays role: rel0:role0; throws exception
-    Given session transaction closes
 
     When session opens transaction of type: write
     Then entity(ent1) set plays role: rel1:role1 as rel0:role0; throws exception
-    Given session transaction closes
 
     When session opens transaction of type: write
     Then entity(ent1) set supertype: ent01; throws exception
-    Given session transaction closes
+
 
   # If we ever introduce abstract roles, we need a scenario here
-
 
   Scenario: Instances of role-playing hidden by a relates override must not exist
     Given put relation type: rel0
@@ -328,10 +320,9 @@ Feature: Data validation
 
     When session opens transaction of type: write
     Then entity(ent0n) set owns attribute type: attr0, with annotations: unique; throws exception
-    Given session transaction closes
+
     When session opens transaction of type: write
     Then entity(ent0u) set owns attribute type: attr0, with annotations: key; throws exception
-    Given session transaction closes
 
     Given connection close all sessions
     Given connection open data session for database: typedb

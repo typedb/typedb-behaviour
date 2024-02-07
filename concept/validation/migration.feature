@@ -50,11 +50,9 @@ Feature: Data validation
     # Should break
     When session opens transaction of type: write
     Then entity(ent1) set owns attribute type: attr0, with annotations: unique; throws exception
-    Given session transaction close
 
     When session opens transaction of type: write
     Then entity(ent0) unset owns attribute type: attr0; throws exception
-    Given session transaction close
 
     When session opens transaction of type: write
     When entity(ent1) set owns attribute type: attr0, with annotations: key
@@ -89,7 +87,6 @@ Feature: Data validation
 
     When session opens transaction of type: write
     Then entity(ent0) unset plays role: rel0:role0; throws exception
-    Given session transaction closes
 
     When session opens transaction of type: write
     Then entity(ent1) set plays role: rel0:role0
@@ -149,7 +146,6 @@ Feature: Data validation
 
     When session opens transaction of type: write
     Then entity(ent1) set supertype: entity; throws exception
-    Given session transaction closes
 
     When session opens transaction of type: write
     Then entity(ent1) set plays role: rel0:role0

@@ -133,7 +133,6 @@ Feature: Concept Relation Type and Role Type
     When connection open schema session for database: typedb
     When session opens transaction of type: write
     Then relation(marriage) unset related role: wife; throws exception
-    Given session transaction closes
     When session opens transaction of type: write
     Then relation(marriage) unset related role: husband
     Then transaction commits
