@@ -454,7 +454,6 @@ Feature: Schema validation
     Then transaction commits
 
 
-    # TODO: Rename scenario since it's relaxed to commit time.
   Scenario: The schema may not be modified in a way that an overridden plays role is no longer inherited by the overriding type
     Given put relation type: rel0
     Given relation(rel0) set relates role: role0
@@ -578,7 +577,6 @@ Feature: Schema validation
     Then transaction commits; throws exception
 
 
-  # TODO: We probably want to be able to rename them
   Scenario: Types which are referenced in rules may not be renamed
     Given typeql define
     """
