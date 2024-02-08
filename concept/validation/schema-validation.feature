@@ -617,21 +617,19 @@ Feature: Schema validation
     """
     Given transaction commits
 
-    When session opens transaction of type: write
-    Then delete relation type: rel00; throws exception
 
     When session opens transaction of type: write
     Then delete relation type: rel01; throws exception
 
     When session opens transaction of type: write
-    Then relation(rel00) unset related role: role00; throws exception
+    Then delete relation type: rel1; throws exception
 
     When session opens transaction of type: write
     Then relation(rel01) unset related role: role01; throws exception
 
     # We currently can't do this at operation time, so we check at commit-time
     When session opens transaction of type: write
-    Then relation(rel1) set supertype: rel01
+    Then relation(rel00) unset related role: role00
     Then transaction commits; throws exception
 
 
@@ -639,23 +637,30 @@ Feature: Schema validation
     Given typeql define
     """
     define
-      rel0 sub relation, relates role00, relates role01;
-      ent00 sub entity, abstract, plays rel0:role00, plays rel0:role01;
+      rel00 sub relation, relates role00, relates extra_role;
+      rel01 sub relation, relates role01;
+      rel1 sub rel00;
+
+      ent00 sub entity, abstract, plays rel00:role00, plays rel01:role01;
       ent01 sub entity, abstract;
       ent1 sub ent00;
 
       rule make-me-unsatisfiable:
       when {
         $e isa ent1;
-        (role00: $e) isa rel0;
+        (role00: $e) isa rel1;
       } then {
-        (role01: $e) isa rel0;
+        (role01: $e) isa rel01;
       };
     """
     Given transaction commits
 
     When session opens transaction of type: write
-    Then entity(ent00) unset plays role: rel0:role00
+    Then relation(rel1) set supertype: rel01
+    Then transaction commits; throws exception
+
+    When session opens transaction of type: write
+    Then entity(ent00) unset plays role: rel00:role00
     Then transaction commits; throws exception
 
     When session opens transaction of type: write
