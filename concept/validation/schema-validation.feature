@@ -696,9 +696,9 @@ Feature: Schema validation
     Given put entity type: ent0k
     Given entity(ent0k) set abstract: true
     Given entity(ent0k) set owns attribute type: attr0, with annotations: key
-    Given put entity type: ent0u
-    Given entity(ent0u) set abstract: true
-    Given entity(ent0u) set owns attribute type: attr0, with annotations: unique
+    Given put entity type: ent0n
+    Given entity(ent0n) set abstract: true
+    Given entity(ent0n) set owns attribute type: attr0
     Given transaction commits
 
     When session opens transaction of type: write
@@ -708,15 +708,15 @@ Feature: Schema validation
 
     When session opens transaction of type: write
     When put entity type: ent1u
-    When entity(ent1u) set supertype: ent0u
-    When entity(ent1u) set owns attribute type: attr1 as attr0
+    When entity(ent1u) set supertype: ent0n
+    When entity(ent1u) set owns attribute type: attr1 as attr0, with annotations: unique
     Then transaction commits
 
     When session opens transaction of type: write
     Then entity(ent1u) set supertype: ent0k; throws exception
 
     When session opens transaction of type: write
-    Then entity(ent0u) set owns attribute type: attr0, with annotations: key; throws exception
+    Then entity(ent0n) set owns attribute type: attr0, with annotations: key; throws exception
 
 
   Scenario: Annotations on ownership redeclarations must be stricter than the previous declaration or will be flagged as redundant on commit.

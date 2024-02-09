@@ -341,3 +341,32 @@ Feature: Data validation
     Then entity(ent0u) set owns attribute type: attr0, with annotations: key
     Then transaction commits
 
+  Scenario: When the super-type of a type is changed, the data is consistent with the annotations on ownerships
+    Given put attribute type: attr0, with value type: string
+    Given put entity type: ent0k
+    Given put entity type: ent0n
+    Given put entity type: ent1n
+    Given entity(ent1n) set supertype: ent0n
+    Given entity(ent0n) set owns attribute type: attr0
+    Given entity(ent0k) set owns attribute type: attr0, with annotations: key
+    Given put attribute type: ref, with value type: string
+    Given entity(ent0n) set owns attribute type: ref, with annotations: key
+    Given entity(ent0k) set owns attribute type: ref, with annotations: key
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Given $attr0 = attribute(attr0) as(string) put: "attr0"
+    Given $attr1 = attribute(attr0) as(string) put: "attr1"
+    Given $ent1n = entity(ent1n) create new instance with key(ref): ent1n
+    Given entity $ent1n set has: $attr0
+    Given entity $ent1n set has: $attr1
+    Given $ent0k = entity(ent0k) create new instance with key(ref): ent0k
+    Given entity $ent0k set has: $attr0
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+
+    When session opens transaction of type: write
+    Then entity(ent1n) set supertype: ent0k; throws exception
+
