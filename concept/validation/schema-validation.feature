@@ -107,7 +107,7 @@ Feature: Schema validation
     Then transaction commits
 
   # Relation types must relate at least one role
-  Scenario: Concrete relation types must relate at least one role - basic
+  Scenario: Concrete relation types must relate at least one role
     When put relation type: rel0c
     Then transaction commits; throws exception
 
@@ -156,6 +156,26 @@ Feature: Schema validation
     When session opens transaction of type: write
     When relation(rel1) set supertype: rel01
     Then transaction commits; throws exception
+
+
+  Scenario: Relation types may not declare a role with the same name as one declared by its ancestors
+    When put relation type: rel00
+    When relation(rel00) set relates role: role00
+    When put relation type: rel01
+    When relation(rel01) set relates role: role01
+    When put relation type: rel1
+    When relation(rel1) set supertype: rel00
+    When relation(rel1) set relates role: role01
+    Then transaction commits
+
+    When session opens transaction of type: write
+    When relation(rel1) set relates role: role00; throws exception
+
+    When session opens transaction of type: write
+    When relation(rel00) set relates role: role01; throws exception
+
+    When session opens transaction of type: write
+    When relation(rel1) set supertype: rel01; throws exception
 
 
   Scenario: Concrete types may not own abstract attributes
