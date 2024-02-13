@@ -22,6 +22,7 @@ load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 exports_files([
     "schema-validation.feature",
     "data-validation.feature",
+    "migration.feature"
 ])
 
 checkstyle_test(
