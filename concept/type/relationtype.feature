@@ -522,6 +522,20 @@ Feature: Concept Relation Type and Role Type
     When relation(parentship) set relates role: parent
     Then relation(parentship) set relates role: father as parent; throws exception
 
+  Scenario: Relation types can update existing roles override a newly defined role it inherits
+    When put relation type: parentship
+    When relation(parentship) set relates role: other-role
+    When put relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) set relates role: father
+    When transaction commits
+    When session opens transaction of type: write
+    When relation(parentship) set relates role: parent
+    When relation(fathership) set relates role: father as parent
+    When transaction commits
+    When session opens transaction of type: read
+    Then relation(fathership) get overridden role(father) get label: parent
+
   Scenario: Relation types can have keys
     When put attribute type: license, with value type: string
     When put relation type: marriage
