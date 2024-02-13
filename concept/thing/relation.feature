@@ -144,6 +144,33 @@ Feature: Concept Relation
     Then relation $m is null: true
     Then relation(marriage) get instances is empty
 
+  Scenario: Relation chain with no other role players gets deleted on commit
+    Then for each session, transaction closes
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given relation(marriage) set relates role: dependent-marriage
+    Given relation(marriage) set plays role: marriage:dependent-marriage
+    Given transaction commits
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+
+    When $m = relation(marriage) create new instance with key(license): m
+    When $n = relation(marriage) create new instance with key(license): n
+    When $o = relation(marriage) create new instance with key(license): o
+    When $p = relation(marriage) create new instance with key(license): p
+    When $q = relation(marriage) create new instance with key(license): q
+    When $r = relation(marriage) create new instance with key(license): r
+    When relation $m add player for role(dependent-marriage): $n
+    When relation $n add player for role(dependent-marriage): $o
+    When relation $o add player for role(dependent-marriage): $p
+    When relation $p add player for role(dependent-marriage): $q
+    When relation $q add player for role(dependent-marriage): $r
+    When transaction commits
+    When session opens transaction of type: read
+    Then relation(marriage) get instances is empty
+
   Scenario: Relation with role players can be deleted
     When $m = relation(marriage) create new instance with key(license): m
     When $a = entity(person) create new instance with key(username): alice
