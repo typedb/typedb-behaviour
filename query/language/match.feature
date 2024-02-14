@@ -2588,3 +2588,42 @@ Feature: TypeQL Match Clause
       | key:ref:1 |
 
 
+  Scenario: labels and variables have different identifier formats
+    Given typeql define; throws exception
+      """
+      define
+      0_leading_digit_fails sub entity;
+      """
+    Given get answers of typeql get
+      """
+      match
+      $0_leading_digit_allowed sub entity;
+      ?0_leading_digit_allowed_val = 0;
+      get;
+      """
+
+    Given typeql define; throws exception
+      """
+      define
+      _leading_connector_disallowed sub entity;
+      """
+    Given typeql get; throws exception
+      """
+      match
+      $_leading_connector_disallowed sub entity;
+      ?_leading_connector_disallowed_val = 0;
+      get;
+      """
+
+    Given typeql define
+      """
+      define
+      following_connectors-and-digits-1-2-3-allowed sub entity;
+      """
+    Given get answers of typeql get
+      """
+      match
+      $following_connectors-and-digits-1-2-3-allowed sub entity;
+      ?following_connectors-and-digits-1-2-3-allowed_val = 0;
+      get;
+      """
