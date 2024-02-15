@@ -2594,6 +2594,7 @@ Feature: TypeQL Match Clause
       define
       0_leading_digit_fails sub entity;
       """
+    Given session opens transaction of type: write
     Given get answers of typeql get
       """
       match
@@ -2607,6 +2608,7 @@ Feature: TypeQL Match Clause
       define
       _leading_connector_disallowed sub entity;
       """
+    Given session opens transaction of type: read
     Given typeql get; throws exception
       """
       match
@@ -2615,6 +2617,7 @@ Feature: TypeQL Match Clause
       get;
       """
 
+    Given session opens transaction of type: write
     Given typeql define
       """
       define
