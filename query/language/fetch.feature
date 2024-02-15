@@ -35,6 +35,7 @@ Feature: TypeQL Fetch Query
         plays employment:employee,
         owns person-name,
         owns age,
+        owns karma,
         owns ref @key;
       company sub entity,
         plays employment:employer,
@@ -53,6 +54,7 @@ Feature: TypeQL Fetch Query
       person-name sub name;
       company-name sub name;
       age sub attribute, value long;
+      karma sub attribute, value double;
       ref sub attribute, value long;
       start-date sub attribute, value datetime;
       end-date sub attribute, value datetime;
@@ -65,7 +67,7 @@ Feature: TypeQL Fetch Query
     Given typeql insert
       """
       insert
-      $p1 isa person, has person-name "Alice", has person-name "Allie", has age 10, has ref 0;
+      $p1 isa person, has person-name "Alice", has person-name "Allie", has age 10, has karma 123.4567891, has ref 0;
       $p2 isa person, has person-name "Bob", has ref 1;
       $c1 isa company, has company-name "Vaticle", has ref 2;
       $f1 (friend: $p1, friend: $p2) isa friendship, has ref 3;
@@ -260,6 +262,7 @@ Feature: TypeQL Fetch Query
             { "value": "Alice", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } },
             { "value": "Allie", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } },
             { "value": 10, "type": { "root": "attribute", "label": "age", "value_type": "long" } },
+            { "value": 123.4567891, "type": { "root": "attribute", "label": "karma", "value_type": "double" } },
             { "value": 0, "type": { "root": "attribute", "label": "ref", "value_type": "long" } }
           ]
         }
@@ -319,6 +322,7 @@ Feature: TypeQL Fetch Query
           "type": { "root": "entity", "label": "person" },
           "attribute": [
             { "value":10, "type": { "root": "attribute", "label": "age", "value_type": "long" } },
+            { "value": 123.4567891, "type": { "root": "attribute", "label": "karma", "value_type": "double" } },
             { "value":0, "type": { "root": "attribute", "label": "ref", "value_type": "long" } },
             { "value":"Alice", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } },
             { "value":"Allie", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } },
