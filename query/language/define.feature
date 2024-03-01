@@ -1322,15 +1322,17 @@ Feature: TypeQL Define Query
 
 
   Scenario: redefining inherited annotations throws
-    Then typeql define; throws exception
+    Then typeql define
       """
       define child sub person, owns email @key;
       """
+    Then transaction commits; throws exception
     Then session opens transaction of type: write
-    Then typeql define; throws exception
+    Then typeql define
       """
       define child sub person, owns phone-nr @unique;
       """
+    Then transaction commits; throws exception
 
 
   Scenario: annotations are inherited through overrides
@@ -1384,10 +1386,11 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
     Given session opens transaction of type: write
-    Then typeql define; throws exception
+    Then typeql define
       """
       define child owns mobile as phone-nr @unique;
       """
+    Then transaction commits; throws exception
 
 
   Scenario: defining a less strict annotation on an inherited ownership throws
