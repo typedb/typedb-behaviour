@@ -825,7 +825,7 @@ Feature: TypeQL Match Clause
       """
 
 
-  Scenario: 'iid' for a variable of a different type throws
+  Scenario: 'iid' for a variable of a different type finds no answers
     Given typeql define
       """
       define
@@ -851,10 +851,11 @@ Feature: TypeQL Match Clause
       """
       match $x isa! shop; get;
       """
-    Then templated typeql get; throws exception
+    Then get answers of templated typeql get
       """
       match $x iid <answer.x.iid>; $x isa grocery, has address "123 street"; get;
       """
+    Then answer size is: 0
 
 
   Scenario: match returns an empty answer if there are no matches
