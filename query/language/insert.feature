@@ -931,27 +931,6 @@ get;
       """
     Then transaction commits
 
-  Scenario: when inserting a roleplayer that can play more than one role, and error is thrown
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql define
-      """
-      define
-      person plays employment:employer;
-      """
-    Given transaction commits
-
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Then typeql insert; throws exception
-      """
-      insert
-      $r ($p) isa employment, has ref 0;
-      $p isa person, has ref 1;
-      """
-
   Scenario: a roleplayer can be inserted without explicitly specifying a role when the role is inherited
     Given connection close all sessions
     Given connection open schema session for database: typedb
@@ -973,6 +952,27 @@ get;
       $p isa person, has ref 1;
       """
     Then transaction commits
+
+  Scenario: when inserting a roleplayer that can play more than one role, an error is thrown
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
+      """
+      define
+      person plays employment:employer;
+      """
+    Given transaction commits
+
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Then typeql insert; throws exception
+      """
+      insert
+      $r ($p) isa employment, has ref 0;
+      $p isa person, has ref 1;
+      """
 
   Scenario: when inserting a roleplayer that can't play the role, an error is thrown
     Then typeql insert; throws exception
