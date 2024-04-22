@@ -922,6 +922,81 @@ get;
       | key:ref:0 | key:ref:1 |
 
 
+  Scenario: a role player can be inserted without explicitly specifying a role
+    Given typeql insert
+      """
+      insert
+      $r ($p) isa employment, has ref 0;
+      $p isa person, has ref 1;
+      """
+    Then transaction commits
+
+  Scenario: a role can only be implicit if there is no ambiguity
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
+      """
+      define
+      person plays employment:employer;
+      """
+    Given transaction commits
+
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Then typeql insert; throws exception
+      """
+      insert
+      $r ($p) isa employment, has ref 0;
+      $p isa person, has ref 1;
+      """
+
+  Scenario: an inherited role can be implicit
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
+      """
+      define
+      part-time-employment sub employment;
+      """
+    Given transaction commits
+
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Then typeql insert
+      """
+      insert
+      $r ($p) isa part-time-employment, has ref 0;
+      $p isa person, has ref 1;
+      """
+    Then transaction commits
+
+  Scenario: an inherited role can be implicit unambiguously when the player is declared to play both the overridden role and its supertype
+    Given connection close all sessions
+    Given connection open schema session for database: typedb
+    Given session opens transaction of type: write
+    Given typeql define
+      """
+      define
+      part-time-employment sub employment, relates part-time-employee as employee;
+      person plays part-time-employment:part-time-employee;
+      """
+    Given transaction commits
+
+    Given connection close all sessions
+    Given connection open data session for database: typedb
+    Given session opens transaction of type: write
+    Then typeql insert
+      """
+      insert
+      $r ($p) isa part-time-employment, has ref 0;
+      $p isa person, has ref 1;
+      """
+    Then transaction commits
+
   Scenario: when inserting a roleplayer that can't play the role, an error is thrown
     Then typeql insert; throws exception
       """
