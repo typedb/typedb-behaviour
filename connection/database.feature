@@ -32,7 +32,6 @@ Feature: Connection Database
       | eve     |
       | frank   |
 
-
   Scenario: create many databases in parallel
     When  connection create databases in parallel:
       | alice   |
@@ -49,7 +48,6 @@ Feature: Connection Database
       | dylan   |
       | eve     |
       | frank   |
-
 
   Scenario: delete one database
       # This step should be rewritten once we can create keypsaces without opening sessions
@@ -112,7 +110,6 @@ Feature: Connection Database
 
     Then connection does not have any database
 
-
   Scenario: create delete and recreate a database
     When connection create database: alice
     Then connection has database: alice
@@ -121,10 +118,8 @@ Feature: Connection Database
     When connection create database: alice
     Then connection has database: alice
 
-
   Scenario: delete a nonexistent database throws an error
     When connection delete database; throws exception: typedb
-
 
   # TODO: Verify the TODO is still relevant
   # # TODO: currently throws in @After; re-enable when we are able to check if sessions are alive (see driver-java#225)
