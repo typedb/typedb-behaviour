@@ -11,8 +11,7 @@ Feature: Concept Entity Type
     Given connection has been opened
     Given connection does not have any database
     Given connection create database: typedb
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
 
   Scenario: Root entity type cannot be deleted
     Then delete entity type: entity; throws exception
@@ -22,7 +21,7 @@ Feature: Concept Entity Type
     Then entity(person) is null: false
     Then entity(person) get supertype: entity
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then entity(person) is null: false
     Then entity(person) get supertype: entity
 
@@ -36,7 +35,7 @@ Feature: Concept Entity Type
     Then entity(entity) get subtypes do not contain:
       | company |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then entity(person) is null: false
     Then entity(company) is null: true
     Then entity(entity) get subtypes do not contain:
@@ -47,7 +46,7 @@ Feature: Concept Entity Type
       | person  |
       | company |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then entity(person) is null: true
     Then entity(company) is null: true
     Then entity(entity) get subtypes do not contain:
@@ -57,14 +56,10 @@ Feature: Concept Entity Type
   Scenario: Entity types that have instances cannot be deleted
     When put entity type: person
     When transaction commits
-    When connection close all sessions
-    When connection open data session for database: typedb
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When $x = entity(person) create new instance
     When transaction commits
-    When connection close all sessions
-    When connection open schema session for database: typedb
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then delete entity type: person; throws exception
 
   Scenario: Entity types can change labels
@@ -75,14 +70,14 @@ Feature: Concept Entity Type
     Then entity(horse) is null: false
     Then entity(horse) get label: horse
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then entity(horse) get label: horse
     When entity(horse) set label: animal
     Then entity(horse) is null: true
     Then entity(animal) is null: false
     Then entity(animal) get label: animal
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then entity(animal) is null: false
     Then entity(animal) get label: animal
 
@@ -92,20 +87,20 @@ Feature: Concept Entity Type
     When put entity type: company
     Then entity(person) is abstract: true
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     Then entity(person) create new instance; throws exception
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     Then entity(company) is abstract: false
     Then entity(person) is abstract: true
     Then entity(person) create new instance; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then entity(company) is abstract: false
     When entity(company) set abstract: true
     Then entity(company) is abstract: true
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     Then entity(company) create new instance; throws exception
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     Then entity(company) is abstract: true
     Then entity(company) create new instance; throws exception
 
@@ -165,7 +160,7 @@ Feature: Concept Entity Type
       | man    |
       | woman  |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then entity(man) get supertype: person
     Then entity(woman) get supertype: person
     Then entity(person) get supertype: animal
@@ -215,9 +210,9 @@ Feature: Concept Entity Type
   Scenario: Entity types cannot subtype itself
     When put entity type: person
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then entity(person) set supertype: person; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then entity(person) set supertype: person; throws exception
 
   Scenario: Entity types can have keys
@@ -230,7 +225,7 @@ Feature: Concept Entity Type
       | email    |
       | username |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then entity(person) get owns attribute types, with annotations: key; contain:
       | email    |
       | username |
@@ -241,22 +236,16 @@ Feature: Concept Entity Type
     When put entity type: person
     When entity(person) set owns attribute type: username, with annotations: key
     Then transaction commits
-    When connection close all sessions
-    When connection open data session for database: typedb
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When $a = entity(person) create new instance with key(username): alice
     When $b = entity(person) create new instance with key(username): bob
     Then transaction commits
-    When connection close all sessions
-    When connection open schema session for database: typedb
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     When entity(person) set owns attribute type: email, with annotations: key; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     When entity(person) set owns attribute type: email
     Then transaction commits
-    When connection close all sessions
-    When connection open data session for database: typedb
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
     When $alice = attribute(email) as(string) put: alice@vaticle.com
     When entity $a set has: $alice
@@ -264,15 +253,13 @@ Feature: Concept Entity Type
     When $bob = attribute(email) as(string) put: bob@vaticle.com
     When entity $b set has: $bob
     Then transaction commits
-    When connection close all sessions
-    When connection open schema session for database: typedb
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     When entity(person) set owns attribute type: email, with annotations: key
     Then entity(person) get owns attribute types, with annotations: key; contain:
       | email    |
       | username |
     Then transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then entity(person) get owns attribute types, with annotations: key; contain:
       | email    |
       | username |
@@ -287,7 +274,7 @@ Feature: Concept Entity Type
     Then entity(person) get owns attribute types, with annotations: key; do not contain:
       | email |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     When entity(person) unset owns attribute type: username
     Then entity(person) get owns attribute types, with annotations: key; do not contain:
       | email    |
@@ -305,7 +292,7 @@ Feature: Concept Entity Type
     When entity(person) set owns attribute type: timestamp, with annotations: key
     Then entity(person) set owns attribute type: is-open, with annotations: key
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then entity(person) set owns attribute type: rating, with annotations: key; throws exception
 
   Scenario: Entity types can have attributes
@@ -318,7 +305,7 @@ Feature: Concept Entity Type
       | name |
       | age  |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then entity(person) get owns attribute types contain:
       | name |
       | age  |
@@ -333,7 +320,7 @@ Feature: Concept Entity Type
     Then entity(person) get owns attribute types do not contain:
       | age |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     When entity(person) unset owns attribute type: name
     Then entity(person) get owns attribute types do not contain:
       | name |
@@ -344,16 +331,12 @@ Feature: Concept Entity Type
     When put entity type: person
     When entity(person) set owns attribute type: name
     Then transaction commits
-    When connection close all sessions
-    When connection open data session for database: typedb
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When $a = entity(person) create new instance
     When $alice = attribute(name) as(string) put: alice
     When entity $a set has: $alice
     Then transaction commits
-    When connection close all sessions
-    When connection open schema session for database: typedb
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then entity(person) unset owns attribute type: name; throws exception
 
   Scenario: Entity types can have keys and attributes
@@ -375,7 +358,7 @@ Feature: Concept Entity Type
       | name     |
       | age      |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then entity(person) get owns attribute types, with annotations: key; contain:
       | email    |
       | username |
@@ -416,7 +399,7 @@ Feature: Concept Entity Type
       | email     |
       | name      |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then entity(customer) get owns attribute types, with annotations: key; contain:
       | email     |
       | reference |
@@ -442,7 +425,7 @@ Feature: Concept Entity Type
     When entity(subscriber) set owns attribute type: license, with annotations: key
     When entity(subscriber) set owns attribute type: points
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then entity(customer) get owns attribute types, with annotations: key; contain:
       | email     |
       | reference |
@@ -525,7 +508,7 @@ Feature: Concept Entity Type
       | username  |
       | score     |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then entity(customer) get owns attribute types, with annotations: key; contain:
       | username  |
       | reference |
@@ -554,7 +537,7 @@ Feature: Concept Entity Type
     When entity(subscriber) set owns attribute type: license, with annotations: key
     When entity(subscriber) set owns attribute type: points
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then entity(customer) get owns attribute types, with annotations: key; contain:
       | username  |
       | reference |
@@ -661,7 +644,7 @@ Feature: Concept Entity Type
       | email      |
       | name       |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then entity(customer) get owns overridden attribute(work-email) get label: email
     Then entity(customer) get owns overridden attribute(nick-name) get label: name
     Then entity(customer) get owns attribute types, with annotations: key; contain:
@@ -705,7 +688,7 @@ Feature: Concept Entity Type
     When entity(subscriber) set owns attribute type: license as reference
     When entity(subscriber) set owns attribute type: points as rating
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then entity(customer) get owns attribute types, with annotations: key; contain:
       | username   |
       | reference  |
@@ -800,7 +783,7 @@ Feature: Concept Entity Type
     Then entity(customer) get owns attribute types do not contain:
       | name |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then entity(customer) get owns overridden attribute(username) get label: name
     Then entity(customer) get owns attribute types, with annotations: key; contain:
       | username |
@@ -819,7 +802,7 @@ Feature: Concept Entity Type
     When entity(person) set owns attribute type: email, with annotations: key
     Then entity(person) set owns attribute type: name, with annotations: key
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then entity(person) set owns attribute type: email, with annotations: key
 
   Scenario: Entity types can redeclare attributes as attributes
@@ -830,7 +813,7 @@ Feature: Concept Entity Type
     When entity(person) set owns attribute type: email
     Then entity(person) set owns attribute type: name
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then entity(person) set owns attribute type: email
 
   Scenario: Entity types can re-override keys
@@ -847,7 +830,7 @@ Feature: Concept Entity Type
     When entity(customer) set owns attribute type: work-email as email
     Then entity(customer) get owns overridden attribute(work-email) get label: email
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     When entity(customer) set owns attribute type: work-email as email
     Then entity(customer) get owns overridden attribute(work-email) get label: email
 
@@ -865,7 +848,7 @@ Feature: Concept Entity Type
     When entity(customer) set owns attribute type: nick-name as name
     Then entity(customer) get owns overridden attribute(nick-name) get label: name
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     When entity(customer) set owns attribute type: nick-name as name
     Then entity(customer) get owns overridden attribute(nick-name) get label: name
 
@@ -877,7 +860,7 @@ Feature: Concept Entity Type
     When entity(person) set owns attribute type: email, with annotations: key
     Then entity(person) set owns attribute type: name
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then entity(person) set owns attribute type: email
 
   Scenario: Entity types can redeclare attributes as keys
@@ -888,7 +871,7 @@ Feature: Concept Entity Type
     When entity(person) set owns attribute type: email
     Then entity(person) set owns attribute type: name, with annotations: key
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then entity(person) set owns attribute type: email, with annotations: key
 
   Scenario: Entity types can redeclare inherited attributes as keys (which will override)
@@ -904,7 +887,7 @@ Feature: Concept Entity Type
     Then entity(customer) get owns attribute types, with annotations: key; contain:
       | email |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then entity(customer) get owns attribute types, with annotations: key; contain:
       | email |
     When put entity type: subscriber
@@ -931,11 +914,11 @@ Feature: Concept Entity Type
     When put entity type: customer
     When entity(customer) set supertype: person
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then entity(customer) set owns attribute type: email
     Then transaction commits; throws exception
     Then session transaction closes
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then entity(customer) set owns attribute type: email, with annotations: key
     Then transaction commits; throws exception
 
@@ -1017,9 +1000,9 @@ Feature: Concept Entity Type
     When entity(person) set owns attribute type: username, with annotations: key
     When entity(person) set owns attribute type: name
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then entity(person) set owns attribute type: email as username, with annotations: key; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then entity(person) set owns attribute type: first-name as name; throws exception
 
   Scenario: Entity types cannot override inherited keys and attributes other than with their subtypes
@@ -1033,9 +1016,9 @@ Feature: Concept Entity Type
     When put entity type: customer
     When entity(customer) set supertype: person
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then entity(customer) set owns attribute type: reference as username, with annotations: key; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then entity(customer) set owns attribute type: rating as name; throws exception
 
   Scenario: Entity types can play role types
@@ -1048,7 +1031,7 @@ Feature: Concept Entity Type
     Then relation(marriage) get role(husband) get players contain:
       | person |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     When relation(marriage) set relates role: wife
     When entity(person) set plays role: marriage:wife
     Then entity(person) get playing roles contain:
@@ -1059,7 +1042,7 @@ Feature: Concept Entity Type
     Then relation(marriage) get role(wife) get players contain:
       | person |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then entity(person) get playing roles contain:
       | marriage:husband |
       | marriage:wife    |
@@ -1081,7 +1064,7 @@ Feature: Concept Entity Type
     Then relation(marriage) get role(husband) get players do not contain:
       | person |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then entity(person) unset plays role: marriage:wife
     Then entity(person) get playing roles do not contain:
       | marriage:husband |
@@ -1091,7 +1074,7 @@ Feature: Concept Entity Type
     Then relation(marriage) get role(wife) get players do not contain:
       | person |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then entity(person) get playing roles do not contain:
       | marriage:husband |
       | marriage:wife    |
@@ -1117,16 +1100,12 @@ Feature: Concept Entity Type
     When put entity type: person
     When entity(person) set plays role: marriage:wife
     Then transaction commits
-    When connection close all sessions
-    When connection open data session for database: typedb
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When $m = relation(marriage) create new instance
     When $a = entity(person) create new instance
     When relation $m add player for role(wife): $a
     Then transaction commits
-    When connection close all sessions
-    When connection open schema session for database: typedb
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then entity(person) unset plays role: marriage:wife; throws exception
 
   Scenario: Entity types can inherit playing role types
@@ -1155,7 +1134,7 @@ Feature: Concept Entity Type
       | parentship:parent |
       | parentship:child  |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then entity(person) get playing roles contain:
       | parentship:parent |
       | parentship:child  |
@@ -1186,7 +1165,7 @@ Feature: Concept Entity Type
       | marriage:husband  |
       | marriage:wife     |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then entity(animal) get playing roles contain:
       | parentship:parent |
       | parentship:child  |
@@ -1225,7 +1204,7 @@ Feature: Concept Entity Type
       | parentship:parent |
       | parentship:child  |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then entity(man) get playing roles contain:
       | parentship:parent |
       | fathership:father |
@@ -1251,7 +1230,7 @@ Feature: Concept Entity Type
       | parentship:parent |
       | parentship:child  |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then entity(person) get playing roles contain:
       | parentship:parent |
       | parentship:child  |
@@ -1298,7 +1277,7 @@ Feature: Concept Entity Type
       | parentship:child  |
       | parentship:parent |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then entity(man) get playing roles contain:
       | fathership:father |
       | parentship:child  |
@@ -1326,7 +1305,7 @@ Feature: Concept Entity Type
       | parentship:child  |
       | parentship:parent |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then entity(person) get playing roles contain:
       | parentship:parent |
       | parentship:child  |
@@ -1357,7 +1336,7 @@ Feature: Concept Entity Type
     When put entity type: person
     When entity(person) set plays role: parentship:parent
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     When entity(person) set plays role: parentship:parent
 
   Scenario: Entity types can re-override inherited playing role types
@@ -1372,7 +1351,7 @@ Feature: Concept Entity Type
     When entity(man) set supertype: person
     When entity(man) set plays role: fathership:father as parentship:parent
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     When entity(man) set plays role: fathership:father as parentship:parent
 
   Scenario: Entity types cannot redeclare inherited/overridden playing role types
@@ -1389,9 +1368,9 @@ Feature: Concept Entity Type
     When put entity type: boy
     When entity(boy) set supertype: man
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then entity(boy) set plays role: parentship:parent; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then entity(boy) set plays role: fathership:father
     Then transaction commits; throws exception
 
