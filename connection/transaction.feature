@@ -11,50 +11,36 @@ Feature: Connection Transaction
     Given connection has been opened
     Given connection does not have any database
 
-  Scenario: one database, one session, one transaction to read
+  Scenario: one database, one transaction to read
     When connection create database: typedb
-    Given connection open session for database: typedb
-    When session opens transaction of type: read
-    Then session transaction is null: false
-    Then session transaction is open: true
-    Then session transaction has type: read
+    Given connection opens read transaction for database: typedb
+    Then transaction is open: true
+    Then transaction has type: read
 
-  Scenario: one database, one session, one transaction to write
+  Scenario: one database, one transaction to write
     When connection create database: typedb
-    Given connection open session for database: typedb
-    When session opens transaction of type: write
-    Then session transaction is null: false
-    Then session transaction is open: true
-    Then session transaction has type: write
+    Given connection opens write transaction for database: typedb
+    Then transaction is open: true
+    Then transaction has type: write
 
-  Scenario: one database, one session, one committed write transaction is closed
+  Scenario: one database, one committed write transaction is closed
     When connection create database: typedb
-    Given connection open session for database: typedb
-    When session opens transaction of type: write
-    Then session transaction commits
-    Then session transaction commits; throws exception
+    Given connection opens write transaction for database: typedb
+    Then transaction commits
+    Then transaction commits; throws exception
 
-  Scenario: one database, one session, re-committing transaction throws
+  Scenario: one database, transaction close is idempotent
     When connection create database: typedb
-    Given connection open session for database: typedb
-    When for each session, open transaction of type: write
-    Then for each session, transaction commits
-    Then for each session, transaction commits; throws exception
-
-  Scenario: one database, one session, transaction close is idempotent
-    When connection create database: typedb
-    Given connection open session for database: typedb
-    When for each session, open transaction of type: write
-    Then for each session, transaction closes
-    Then for each session, transaction is open: false
-    Then for each session, transaction closes
-    Then for each session, transaction is open: false
+    Given connection open write transaction for database: typedb
+    Then transaction closes
+    Then transaction is open: false
+    Then transaction closes
+    Then transaction is open: false
 
   @ignore-typedb
-  Scenario: one database, one session, many transactions to read
+  Scenario: one database, many transactions to read
     When connection create database: typedb
-    Given connection open session for database: typedb
-    When for each session, open transactions of type:
+    When open transactions of type:
       | read |
       | read |
       | read |
@@ -67,9 +53,9 @@ Feature: Connection Transaction
       | read |
       | read |
       | read |
-    Then for each session, transactions are null: false
-    Then for each session, transactions are open: true
-    Then for each session, transactions have type:
+    Then transactions are null: false
+    Then transactions are open: true
+    Then transactions have type:
       | read |
       | read |
       | read |
@@ -84,10 +70,9 @@ Feature: Connection Transaction
       | read |
 
   @ignore-typedb
-  Scenario: one database, one session, many transactions to write
+  Scenario: one database, many transactions to write
     When connection create database: typedb
-    Given connection open session for database: typedb
-    When for each session, open transactions of type:
+    When open transactions of type:
       | write |
       | write |
       | write |
@@ -100,9 +85,9 @@ Feature: Connection Transaction
       | write |
       | write |
       | write |
-    Then for each session, transactions are null: false
-    Then for each session, transactions are open: true
-    Then for each session, transactions have type:
+    Then transactions are null: false
+    Then transactions are open: true
+    Then transactions have type:
       | write |
       | write |
       | write |
@@ -117,10 +102,9 @@ Feature: Connection Transaction
       | write |
 
   @ignore-typedb
-  Scenario: one database, one session, many transactions to read and write
+  Scenario: one database, many transactions to read and write
     When connection create database: typedb
-    Given connection open session for database: typedb
-    When for each session, open transactions of type:
+    When open transactions of type:
       | read  |
       | write |
       | read  |
@@ -133,9 +117,9 @@ Feature: Connection Transaction
       | write |
       | read  |
       | write |
-    Then for each session, transactions are null: false
-    Then for each session, transactions are open: true
-    Then for each session, transactions have type:
+    Then transactions are null: false
+    Then transactions are open: true
+    Then transactions have type:
       | read  |
       | write |
       | read  |
@@ -149,10 +133,9 @@ Feature: Connection Transaction
       | read  |
       | write |
 
-  Scenario: one database, one session, many transactions in parallel to read
+  Scenario: one database, many transactions in parallel to read
     When connection create database: typedb
-    Given connection open session for database: typedb
-    When for each session, open transactions in parallel of type:
+    When open transactions in parallel of type:
       | read |
       | read |
       | read |
@@ -165,9 +148,9 @@ Feature: Connection Transaction
       | read |
       | read |
       | read |
-    Then for each session, transactions in parallel are null: false
-    Then for each session, transactions in parallel are open: true
-    Then for each session, transactions in parallel have type:
+    Then transactions in parallel are null: false
+    Then transactions in parallel are open: true
+    Then transactions in parallel have type:
       | read |
       | read |
       | read |
@@ -181,10 +164,9 @@ Feature: Connection Transaction
       | read |
       | read |
 
-  Scenario: one database, one session, many transactions in parallel to write
+  Scenario: one database, many transactions in parallel to write
     When connection create database: typedb
-    Given connection open session for database: typedb
-    When for each session, open transactions in parallel of type:
+    When open transactions in parallel of type:
       | write |
       | write |
       | write |
@@ -197,9 +179,9 @@ Feature: Connection Transaction
       | write |
       | write |
       | write |
-    Then for each session, transactions in parallel are null: false
-    Then for each session, transactions in parallel are open: true
-    Then for each session, transactions in parallel have type:
+    Then transactions in parallel are null: false
+    Then transactions in parallel are open: true
+    Then transactions in parallel have type:
       | write |
       | write |
       | write |
@@ -213,10 +195,9 @@ Feature: Connection Transaction
       | write |
       | write |
 
-  Scenario: one database, one session, many transactions in parallel to read and write
+  Scenario: one database, many transactions in parallel to read and write
     When connection create database: typedb
-    Given connection open session for database: typedb
-    When for each session, open transactions in parallel of type:
+    When open transactions in parallel of type:
       | read  |
       | write |
       | read  |
@@ -229,9 +210,9 @@ Feature: Connection Transaction
       | write |
       | read  |
       | write |
-    Then for each session, transactions in parallel are null: false
-    Then for each session, transactions in parallel are open: true
-    Then for each session, transactions in parallel have type:
+    Then transactions in parallel are null: false
+    Then transactions in parallel are open: true
+    Then transactions in parallel have type:
       | read  |
       | write |
       | read  |
@@ -244,342 +225,48 @@ Feature: Connection Transaction
       | write |
       | read  |
       | write |
-
-  Scenario: one database, many sessions, one transaction to read
-    When connection create database: typedb
-    Given connection open sessions for database:
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-    When for each session, open transaction of type: read
-    Then for each session, transaction is null: false
-    Then for each session, transaction is open: true
-    Then for each session, transaction has type: read
-
-  Scenario: one database, many sessions, one transaction to write
-    When connection create database: typedb
-    Given connection open sessions for database:
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-    When for each session, open transaction of type: write
-    Then for each session, transaction is null: false
-    Then for each session, transaction is open: true
-    Then for each session, transaction has type: write
-
-  @ignore-typedb
-  Scenario: one database, many sessions, many transactions to read
-    When connection create database: typedb
-    Given connection open sessions for database:
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-    When for each session, open transactions of type:
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-    Then for each session, transactions are null: false
-    Then for each session, transactions are open: true
-    Then for each session, transactions have type:
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-
-  @ignore-typedb
-  Scenario: one database, many sessions, many transactions to write
-    When connection create database: typedb
-    Given connection open sessions for database:
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-    When for each session, open transactions of type:
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-    Then for each session, transactions are null: false
-    Then for each session, transactions are open: true
-    Then for each session, transactions have type:
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-
-  @ignore-typedb
-  Scenario: one database, many sessions, many transactions to read and write
-    When connection create database: typedb
-    Given connection open sessions for database:
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-    When for each session, open transactions of type:
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-    Then for each session, transactions are null: false
-    Then for each session, transactions are open: true
-    Then for each session, transactions have type:
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-
-  Scenario: one database, many sessions, many transactions in parallel to read
-    When connection create database: typedb
-    Given connection open sessions for database:
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-    When for each session, open transactions in parallel of type:
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-    Then for each session, transactions in parallel are null: false
-    Then for each session, transactions in parallel are open: true
-    Then for each session, transactions in parallel have type:
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-
-  Scenario: one database, many sessions, many transactions in parallel to write
-    When connection create database: typedb
-    Given connection open sessions for database:
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-    When for each session, open transactions in parallel of type:
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-    Then for each session, transactions in parallel are null: false
-    Then for each session, transactions in parallel are open: true
-    Then for each session, transactions in parallel have type:
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-
-  Scenario: one database, many sessions, many transactions in parallel to read and write
-    When connection create database: typedb
-    Given connection open sessions for database:
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-      | typedb |
-    When for each session, open transactions in parallel of type:
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-    Then for each session, transactions in parallel are null: false
-    Then for each session, transactions in parallel are open: true
-    Then for each session, transactions in parallel have type:
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-
-#  Scenario: one database, many sessions in parallel, one transactions to read
-#
-#  Scenario: one database, many sessions in parallel, one transactions to write
-#
-#  Scenario: one database, many sessions in parallel, many transactions to read
-#
-#  Scenario: one database, many sessions in parallel, many transactions to write
-#
-#  Scenario: one database, many sessions in parallel, many transactions in parallel to read
-#
-#  Scenario: one database, many sessions in parallel, many transactions in parallel to write
-
 
   Scenario: write in a read transaction throws
     When connection create database: typedb
-    Given connection open schema session for database: typedb
-    When session opens transaction of type: read
-    Then typeql define; throws exception containing "schema writes when transaction type does not allow"
+    Given connection open schema transaction for database: typedb
+    Given typeql define
       """
       define person sub entity;
+      """
+    Given transaction commits
+    Given connection open read transaction for database: typedb
+     # TODO: Message update for 3.0
+    Given typeql insert; throws exception containing "transaction type does not allow"
+      """
+      insert $person isa entity;
       """
 
   Scenario: commit in a read transaction throws
     When connection create database: typedb
-    Given connection open schema session for database: typedb
-    When session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     Then transaction commits; throws exception
 
+  Scenario: schema modification in a write transaction throws
+    When connection create database: typedb
+    Given connection open write transaction for database: typedb
+    # TODO: Message update for 3.0
+    Then typeql define; throws exception containing "transaction type does not allow"
+      """
+      define person sub entity;
+      """
+
+  Scenario: write data in a schema transaction throws
+    When connection create database: typedb
+    Given connection open schema transaction for database: typedb
+    Then typeql define
+      """
+      define person sub entity;
+      """
+    # TODO: Message update for 3.0
+    Then typeql insert; throws exception containing "transaction type does not allow"
+      """
+      insert $x isa person;
+      """
 
   @ignore-typedb
   Scenario: transaction timeouts are configurable
@@ -598,6 +285,3 @@ Feature: Connection Transaction
       """
       define person sub entity;
       """
-
-
-

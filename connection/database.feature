@@ -59,8 +59,7 @@ Feature: Connection Database
     Then connection does not have any database
 
   Scenario: connection can delete many databases
-      # This step should be rewritten once we can create keypsaces without opening sessions
-    Given connection create databases:
+      Given connection create databases:
       | alice   |
       | bob     |
       | charlie |
@@ -87,8 +86,7 @@ Feature: Connection Database
     Then connection does not have any database
 
   Scenario: delete many databases in parallel
-      # This step should be rewritten once we can create keypsaces without opening sessions
-    Given connection create databases in parallel:
+      Given connection create databases in parallel:
       | alice   |
       | bob     |
       | charlie |
@@ -124,22 +122,16 @@ Feature: Connection Database
     Then connection has database: alice
 
 
-  # TODO: currently throws in @After; re-enable when we are able to check if sessions are alive (see driver-java#225)
-  @ignore
-  Scenario: delete a database causes open sessions to fail
-    When connection create database: typedb
-    When connection open session for database: typedb
-    When connection delete database: typedb
-    Then connection does not have database: typedb
-    Then session open transaction of type; throws exception: write
+  Scenario: delete a nonexistent database throws an error
+    When connection delete database; throws exception: typedb
 
 
-  # TODO: currently throws in @After; re-enable when we are able to check if sessions are alive (see driver-java#225)
+  # TODO: Verify the TODO is still relevant
+  # # TODO: currently throws in @After; re-enable when we are able to check if sessions are alive (see driver-java#225)
   @ignore
   Scenario: delete a database causes open transactions to fail
     When connection create database: typedb
-    When connection open session for database: typedb
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When connection delete database: typedb
     Then connection does not have database: typedb
     Then typeql define; throws exception containing "transaction has been closed"
@@ -147,6 +139,3 @@ Feature: Connection Database
       define person sub entity;
       """
 
-
-  Scenario: delete a nonexistent database throws an error
-    When connection delete database; throws exception: typedb
