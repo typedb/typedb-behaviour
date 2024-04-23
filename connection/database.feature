@@ -121,7 +121,7 @@ Feature: Connection Database
   Scenario: delete a nonexistent database throws an error
     When connection delete database; throws exception: typedb
 
-  # TODO: Verify the TODO is still relevant
+  # TODO: 3.0: Verify the TODO is still relevant
   # # TODO: currently throws in @After; re-enable when we are able to check if sessions are alive (see driver-java#225)
   @ignore
   Scenario: delete a database causes open transactions to fail

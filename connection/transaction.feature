@@ -235,7 +235,7 @@ Feature: Connection Transaction
       """
     Given transaction commits
     Given connection open read transaction for database: typedb
-     # TODO: Message update for 3.0
+     # TODO: 3.0: Message update for 3.0
     Given typeql insert; throws exception containing "transaction type does not allow"
       """
       insert $person isa entity;
@@ -249,7 +249,7 @@ Feature: Connection Transaction
   Scenario: schema modification in a write transaction throws
     When connection create database: typedb
     Given connection open write transaction for database: typedb
-    # TODO: Message update for 3.0
+    # TODO: 3.0: Message update for 3.0
     Then typeql define; throws exception containing "transaction type does not allow"
       """
       define person sub entity;
