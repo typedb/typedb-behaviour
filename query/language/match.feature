@@ -2239,6 +2239,7 @@ Feature: TypeQL Match Clause
       | x               |
       | label:attribute |
 
+
   Scenario: pattern variable without named variable is invalid
     Given connection close all sessions
     Given connection open data session for database: typedb
@@ -2248,6 +2249,64 @@ Feature: TypeQL Match Clause
       match $x isa person, has name $a; "bob" isa name; get;
       """
 
+
+  Scenario: Bounds applied to match queries are recursively applied
+    When get answers of typeql fetch
+      """
+      match
+        $entity type person, plays $role;
+        $rel type employment, relates $role;
+      fetch
+        "other-employment-roles": {
+          match
+            $rel relates $other-role;
+            not { $other-role is $role; };
+          fetch
+            $other-role;
+        };
+      """
+    Then fetch answers are
+      """
+      [{
+        "other-employment-roles": [
+          {
+            "other-role": {
+              "root": "relation:role", "label": "employment:employer"
+            }
+          }
+        ]
+      }]
+      """
+    When get answers of typeql fetch
+      """
+      match
+        $entity type person, plays $role;
+        $rel type employment, relates $role;
+      fetch
+        $role;
+        "other-employment-roles": {
+          match
+            $rel relates $other-role;
+            not { $other-role is $role; };
+          fetch
+            $other-role;
+        };
+      """
+    Then fetch answers are
+      """
+      [{
+        "role": {
+          "root": "relation:role", "label": "employment:employee"
+        },
+        "other-employment-roles": [
+          {
+            "other-role": {
+              "root": "relation:role", "label": "employment:employer"
+            }
+          }
+        ]
+      }]
+      """
 
   ##################
   # VARIABLE TYPES #
