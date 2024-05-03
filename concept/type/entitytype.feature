@@ -14,41 +14,41 @@ Feature: Concept Entity Type
     Given connection opens schema transaction for database: typedb
 
   Scenario: Root entity type cannot be deleted
-    Then delete entity type: entity; throws exception
+    Then delete entity type: entity; fails
 
   Scenario: Entity types can be created
     When put entity type: person
-    Then entity(person) is null: false
+    Then entity(person) exists: true
     Then entity(person) get supertype: entity
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then entity(person) is null: false
+    Then entity(person) exists: true
     Then entity(person) get supertype: entity
 
   Scenario: Entity types can be deleted
     When put entity type: person
-    Then entity(person) is null: false
+    Then entity(person) exists: true
     When put entity type: company
-    Then entity(company) is null: false
+    Then entity(company) exists: true
     When delete entity type: company
-    Then entity(company) is null: true
+    Then entity(company) exists: false
     Then entity(entity) get subtypes do not contain:
       | company |
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then entity(person) is null: false
-    Then entity(company) is null: true
+    Then entity(person) exists: true
+    Then entity(company) exists: false
     Then entity(entity) get subtypes do not contain:
       | company |
     When delete entity type: person
-    Then entity(person) is null: true
+    Then entity(person) exists: false
     Then entity(entity) get subtypes do not contain:
       | person  |
       | company |
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then entity(person) is null: true
-    Then entity(company) is null: true
+    Then entity(person) exists: false
+    Then entity(company) exists: false
     Then entity(entity) get subtypes do not contain:
       | person  |
       | company |
@@ -60,49 +60,49 @@ Feature: Concept Entity Type
     When $x = entity(person) create new instance
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then delete entity type: person; throws exception
+    Then delete entity type: person; fails
 
   Scenario: Entity types can change labels
     When put entity type: person
     Then entity(person) get label: person
     When entity(person) set label: horse
-    Then entity(person) is null: true
-    Then entity(horse) is null: false
+    Then entity(person) exists: false
+    Then entity(horse) exists: true
     Then entity(horse) get label: horse
     When transaction commits
     When connection opens schema transaction for database: typedb
     Then entity(horse) get label: horse
     When entity(horse) set label: animal
-    Then entity(horse) is null: true
-    Then entity(animal) is null: false
+    Then entity(horse) exists: false
+    Then entity(animal) exists: true
     Then entity(animal) get label: animal
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then entity(animal) is null: false
+    Then entity(animal) exists: true
     Then entity(animal) get label: animal
 
   Scenario: Entity types can be set to abstract
     When put entity type: person
-    When entity(person) set abstract: true
+    When entity(person) set annotation: @abstract
     When put entity type: company
-    Then entity(person) is abstract: true
+    Then entity(person) get annotations contain: @abstract
     When transaction commits
     When connection opens write transaction for database: typedb
-    Then entity(person) create new instance; throws exception
+    Then entity(person) create new instance; fails
     When connection opens write transaction for database: typedb
-    Then entity(company) is abstract: false
-    Then entity(person) is abstract: true
-    Then entity(person) create new instance; throws exception
+    Then entity(company) get annotations do not contain: @abstract
+    Then entity(person) get annotations contain: @abstract
+    Then entity(person) create new instance; fails
     When connection opens schema transaction for database: typedb
-    Then entity(company) is abstract: false
-    When entity(company) set abstract: true
-    Then entity(company) is abstract: true
+    Then entity(company) get annotations do not contain: @abstract
+    When entity(company) set annotation: @abstract
+    Then entity(company) get annotations contain: @abstract
     When transaction commits
     When connection opens write transaction for database: typedb
-    Then entity(company) create new instance; throws exception
+    Then entity(company) create new instance; fails
     When connection opens write transaction for database: typedb
-    Then entity(company) is abstract: true
-    Then entity(company) create new instance; throws exception
+    Then entity(company) get annotations contain: @abstract
+    Then entity(company) create new instance; fails
 
   Scenario: Entity types can be subtypes of other entity types
     When put entity type: man
@@ -211,9 +211,9 @@ Feature: Concept Entity Type
     When put entity type: person
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then entity(person) set supertype: person; throws exception
+    Then entity(person) set supertype: person; fails
     When connection opens schema transaction for database: typedb
-    Then entity(person) set supertype: person; throws exception
+    Then entity(person) set supertype: person; fails
 
   Scenario: Entity types can have keys
     When put attribute type: email, with value type: string
@@ -241,7 +241,7 @@ Feature: Concept Entity Type
     When $b = entity(person) create new instance with key(username): bob
     Then transaction commits
     When connection opens schema transaction for database: typedb
-    When entity(person) set owns attribute type: email, with annotations: key; throws exception
+    When entity(person) set owns attribute type: email, with annotations: key; fails
     When connection opens schema transaction for database: typedb
     When entity(person) set owns attribute type: email
     Then transaction commits
@@ -293,7 +293,7 @@ Feature: Concept Entity Type
     Then entity(person) set owns attribute type: is-open, with annotations: key
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then entity(person) set owns attribute type: rating, with annotations: key; throws exception
+    Then entity(person) set owns attribute type: rating, with annotations: key; fails
 
   Scenario: Entity types can have attributes
     When put attribute type: name, with value type: string
@@ -337,7 +337,7 @@ Feature: Concept Entity Type
     When entity $a set has: $alice
     Then transaction commits
     When connection opens schema transaction for database: typedb
-    Then entity(person) unset owns attribute type: name; throws exception
+    Then entity(person) unset owns attribute type: name; fails
 
   Scenario: Entity types can have keys and attributes
     When put attribute type: email, with value type: string
@@ -471,21 +471,21 @@ Feature: Concept Entity Type
 
   Scenario: Entity types can inherit keys and attributes that are subtypes of each other
     When put attribute type: username, with value type: string
-    When attribute(username) set abstract: true
+    When attribute(username) set annotation: @abstract
     When put attribute type: score, with value type: double
-    When attribute(score) set abstract: true
+    When attribute(score) set annotation: @abstract
     When put attribute type: reference, with value type: string
-    When attribute(reference) set abstract: true
+    When attribute(reference) set annotation: @abstract
     When attribute(reference) set supertype: username
     When put attribute type: rating, with value type: double
-    When attribute(rating) set abstract: true
+    When attribute(rating) set annotation: @abstract
     When attribute(rating) set supertype: score
     When put entity type: person
-    When entity(person) set abstract: true
+    When entity(person) set annotation: @abstract
     When entity(person) set owns attribute type: username, with annotations: key
     When entity(person) set owns attribute type: score
     When put entity type: customer
-    When entity(customer) set abstract: true
+    When entity(customer) set annotation: @abstract
     When entity(customer) set supertype: person
     When entity(customer) set owns attribute type: reference, with annotations: key
     When entity(customer) set owns attribute type: rating
@@ -532,7 +532,7 @@ Feature: Concept Entity Type
     When put attribute type: points, with value type: double
     When attribute(points) set supertype: rating
     When put entity type: subscriber
-    When entity(subscriber) set abstract: true
+    When entity(subscriber) set annotation: @abstract
     When entity(subscriber) set supertype: customer
     When entity(subscriber) set owns attribute type: license, with annotations: key
     When entity(subscriber) set owns attribute type: points
@@ -584,26 +584,26 @@ Feature: Concept Entity Type
   Scenario: Entity types can override inherited keys and attributes
     When put attribute type: username, with value type: string
     When put attribute type: email, with value type: string
-    When attribute(email) set abstract: true
+    When attribute(email) set annotation: @abstract
     When put attribute type: name, with value type: string
-    When attribute(name) set abstract: true
+    When attribute(name) set annotation: @abstract
     When put attribute type: age, with value type: long
     When put attribute type: reference, with value type: string
-    When attribute(reference) set abstract: true
+    When attribute(reference) set annotation: @abstract
     When put attribute type: work-email, with value type: string
     When attribute(work-email) set supertype: email
     When put attribute type: nick-name, with value type: string
     When attribute(nick-name) set supertype: name
     When put attribute type: rating, with value type: double
-    When attribute(rating) set abstract: true
+    When attribute(rating) set annotation: @abstract
     When put entity type: person
-    When entity(person) set abstract: true
+    When entity(person) set annotation: @abstract
     When entity(person) set owns attribute type: username, with annotations: key
     When entity(person) set owns attribute type: email, with annotations: key
     When entity(person) set owns attribute type: name
     When entity(person) set owns attribute type: age
     When put entity type: customer
-    When entity(customer) set abstract: true
+    When entity(customer) set annotation: @abstract
     When entity(customer) set supertype: person
     When entity(customer) set owns attribute type: reference, with annotations: key
     When entity(customer) set owns attribute type: work-email as email
@@ -764,11 +764,11 @@ Feature: Concept Entity Type
 
   Scenario: Entity types can override inherited attributes as keys
     When put attribute type: name, with value type: string
-    When attribute(name) set abstract: true
+    When attribute(name) set annotation: @abstract
     When put attribute type: username, with value type: string
     When attribute(username) set supertype: name
     When put entity type: person
-    When entity(person) set abstract: true
+    When entity(person) set annotation: @abstract
     When entity(person) set owns attribute type: name
     When put entity type: customer
     When entity(customer) set supertype: person
@@ -818,14 +818,14 @@ Feature: Concept Entity Type
 
   Scenario: Entity types can re-override keys
     When put attribute type: email, with value type: string
-    When attribute(email) set abstract: true
+    When attribute(email) set annotation: @abstract
     When put attribute type: work-email, with value type: string
     When attribute(work-email) set supertype: email
     When put entity type: person
-    When entity(person) set abstract: true
+    When entity(person) set annotation: @abstract
     When entity(person) set owns attribute type: email, with annotations: key
     When put entity type: customer
-    When entity(customer) set abstract: true
+    When entity(customer) set annotation: @abstract
     When entity(customer) set supertype: person
     When entity(customer) set owns attribute type: work-email as email
     Then entity(customer) get owns overridden attribute(work-email) get label: email
@@ -836,14 +836,14 @@ Feature: Concept Entity Type
 
   Scenario: Entity types can re-override attributes as attributes
     When put attribute type: name, with value type: string
-    When attribute(name) set abstract: true
+    When attribute(name) set annotation: @abstract
     When put attribute type: nick-name, with value type: string
     When attribute(nick-name) set supertype: name
     When put entity type: person
-    When entity(person) set abstract: true
+    When entity(person) set annotation: @abstract
     When entity(person) set owns attribute type: name
     When put entity type: customer
-    When entity(customer) set abstract: true
+    When entity(customer) set annotation: @abstract
     When entity(customer) set supertype: person
     When entity(customer) set owns attribute type: nick-name as name
     Then entity(customer) get owns overridden attribute(nick-name) get label: name
@@ -878,11 +878,11 @@ Feature: Concept Entity Type
     When put attribute type: email, with value type: string
     When put entity type: person
     When entity(person) set owns attribute type: email
-    Then entity(person) get owns overridden attribute(email) is null: true
+    Then entity(person) get owns overridden attribute(email) exists: false
     When put entity type: customer
     When entity(customer) set supertype: person
     Then entity(customer) set owns attribute type: email, with annotations: key
-    Then entity(customer) get owns overridden attribute(email) is null: false
+    Then entity(customer) get owns overridden attribute(email) exists: true
     Then entity(customer) get owns overridden attribute(email) get label: email
     Then entity(customer) get owns attribute types, with annotations: key; contain:
       | email |
@@ -904,7 +904,7 @@ Feature: Concept Entity Type
     When put entity type: customer
     When entity(customer) set supertype: person
     Then entity(customer) set owns attribute type: name
-    Then transaction commits; throws exception
+    Then transaction commits; fails
 
   Scenario: Entity types cannot redeclare inherited keys as keys or attributes
     When put attribute type: email, with value type: string
@@ -916,19 +916,19 @@ Feature: Concept Entity Type
     When transaction commits
     When connection opens schema transaction for database: typedb
     Then entity(customer) set owns attribute type: email
-    Then transaction commits; throws exception
+    Then transaction commits; fails
     Then transaction closes
     When connection opens schema transaction for database: typedb
     Then entity(customer) set owns attribute type: email, with annotations: key
-    Then transaction commits; throws exception
+    Then transaction commits; fails
 
   Scenario: Entity types cannot redeclare inherited key attribute types
     When put attribute type: email, with value type: string
-    When attribute(email) set abstract: true
+    When attribute(email) set annotation: @abstract
     When put attribute type: customer-email, with value type: string
     When attribute(customer-email) set supertype: email
     When put entity type: person
-    When entity(person) set abstract: true
+    When entity(person) set annotation: @abstract
     When entity(person) set owns attribute type: email, with annotations: key
     When put entity type: customer
     When entity(customer) set supertype: person
@@ -936,15 +936,15 @@ Feature: Concept Entity Type
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
     Then entity(subscriber) set owns attribute type: email, with annotations: key
-    Then transaction commits; throws exception
+    Then transaction commits; fails
 
   Scenario: Entity types cannot redeclare overridden key attribute types
     When put attribute type: email, with value type: string
-    When attribute(email) set abstract: true
+    When attribute(email) set annotation: @abstract
     When put attribute type: customer-email, with value type: string
     When attribute(customer-email) set supertype: email
     When put entity type: person
-    When entity(person) set abstract: true
+    When entity(person) set annotation: @abstract
     When entity(person) set owns attribute type: email, with annotations: key
     When put entity type: customer
     When entity(customer) set supertype: person
@@ -952,15 +952,15 @@ Feature: Concept Entity Type
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
     Then entity(subscriber) set owns attribute type: customer-email, with annotations: key
-    Then transaction commits; throws exception
+    Then transaction commits; fails
 
   Scenario: Entity types cannot redeclare inherited owns attribute types
     When put attribute type: name, with value type: string
-    When attribute(name) set abstract: true
+    When attribute(name) set annotation: @abstract
     When put attribute type: customer-name, with value type: string
     When attribute(customer-name) set supertype: name
     When put entity type: person
-    When entity(person) set abstract: true
+    When entity(person) set annotation: @abstract
     When entity(person) set owns attribute type: name
     When put entity type: customer
     When entity(customer) set supertype: person
@@ -968,15 +968,15 @@ Feature: Concept Entity Type
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
     Then entity(subscriber) set owns attribute type: name
-    Then transaction commits; throws exception
+    Then transaction commits; fails
 
   Scenario: Entity types cannot redeclare overridden owns attribute types
     When put attribute type: name, with value type: string
-    When attribute(name) set abstract: true
+    When attribute(name) set annotation: @abstract
     When put attribute type: customer-name, with value type: string
     When attribute(customer-name) set supertype: name
     When put entity type: person
-    When entity(person) set abstract: true
+    When entity(person) set annotation: @abstract
     When entity(person) set owns attribute type: name
     When put entity type: customer
     When entity(customer) set supertype: person
@@ -984,26 +984,26 @@ Feature: Concept Entity Type
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
     Then entity(subscriber) set owns attribute type: customer-name
-    Then transaction commits; throws exception
+    Then transaction commits; fails
 
   Scenario: Entity types cannot override declared keys and attributes
     When put attribute type: username, with value type: string
-    When attribute(username) set abstract: true
+    When attribute(username) set annotation: @abstract
     When put attribute type: email, with value type: string
     When attribute(email) set supertype: username
     When put attribute type: name, with value type: string
-    When attribute(name) set abstract: true
+    When attribute(name) set annotation: @abstract
     When put attribute type: first-name, with value type: string
     When attribute(first-name) set supertype: name
     When put entity type: person
-    When entity(person) set abstract: true
+    When entity(person) set annotation: @abstract
     When entity(person) set owns attribute type: username, with annotations: key
     When entity(person) set owns attribute type: name
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then entity(person) set owns attribute type: email as username, with annotations: key; throws exception
+    Then entity(person) set owns attribute type: email as username, with annotations: key; fails
     When connection opens schema transaction for database: typedb
-    Then entity(person) set owns attribute type: first-name as name; throws exception
+    Then entity(person) set owns attribute type: first-name as name; fails
 
   Scenario: Entity types cannot override inherited keys and attributes other than with their subtypes
     When put attribute type: username, with value type: string
@@ -1017,9 +1017,9 @@ Feature: Concept Entity Type
     When entity(customer) set supertype: person
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then entity(customer) set owns attribute type: reference as username, with annotations: key; throws exception
+    Then entity(customer) set owns attribute type: reference as username, with annotations: key; fails
     When connection opens schema transaction for database: typedb
-    Then entity(customer) set owns attribute type: rating as name; throws exception
+    Then entity(customer) set owns attribute type: rating as name; fails
 
   Scenario: Entity types can play role types
     When put relation type: marriage
@@ -1091,7 +1091,7 @@ Feature: Concept Entity Type
     When entity(person) set plays role: marriage:wife
     Then entity(person) get playing roles do not contain:
       | marriage:husband |
-    Then entity(person) unset plays role: marriage:husband; throws exception
+    Then entity(person) unset plays role: marriage:husband; fails
 
   Scenario: Entity types cannot unset playing role types that are currently played by existing instances
     When put relation type: marriage
@@ -1106,7 +1106,7 @@ Feature: Concept Entity Type
     When relation $m add player for role(wife): $a
     Then transaction commits
     When connection opens schema transaction for database: typedb
-    Then entity(person) unset plays role: marriage:wife; throws exception
+    Then entity(person) unset plays role: marriage:wife; fails
 
   Scenario: Entity types can inherit playing role types
     When put relation type: parentship
@@ -1369,10 +1369,10 @@ Feature: Concept Entity Type
     When entity(boy) set supertype: man
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then entity(boy) set plays role: parentship:parent; throws exception
+    Then entity(boy) set plays role: parentship:parent; fails
     When connection opens schema transaction for database: typedb
     Then entity(boy) set plays role: fathership:father
-    Then transaction commits; throws exception
+    Then transaction commits; fails
 
   Scenario: Entity types cannot override declared playing role types
     When put relation type: parentship
@@ -1382,7 +1382,7 @@ Feature: Concept Entity Type
     When relation(fathership) set relates role: father as parent
     When put entity type: person
     When entity(person) set plays role: parentship:parent
-    Then entity(person) set plays role: fathership:father as parentship:parent; throws exception
+    Then entity(person) set plays role: fathership:father as parentship:parent; fails
 
   Scenario: Entity types cannot override inherited playing role types other than with their subtypes
     When put relation type: parentship
@@ -1395,4 +1395,4 @@ Feature: Concept Entity Type
     When entity(person) set plays role: parentship:child
     When put entity type: man
     When entity(man) set supertype: person
-    Then entity(man) set plays role: fathership:father as parentship:parent; throws exception
+    Then entity(man) set plays role: fathership:father as parentship:parent; fails
