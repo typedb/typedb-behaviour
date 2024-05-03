@@ -1147,18 +1147,18 @@ Feature: Concept Entity Type
 
   Scenario: Entity types can play role types
     When put relation type: marriage
-    When relation(marriage) set relates role: husband
+    When relation(marriage) create role: husband
     When put entity type: person
     When entity(person) set plays role: marriage:husband
-    Then entity(person) get playing roles contain:
+    Then entity(person) get plays roles contain:
       | marriage:husband |
     Then relation(marriage) get role(husband) get players contain:
       | person |
     When transaction commits
     When connection opens schema transaction for database: typedb
-    When relation(marriage) set relates role: wife
+    When relation(marriage) create role: wife
     When entity(person) set plays role: marriage:wife
-    Then entity(person) get playing roles contain:
+    Then entity(person) get plays roles contain:
       | marriage:husband |
       | marriage:wife    |
     Then relation(marriage) get role(husband) get players contain:
@@ -1167,7 +1167,7 @@ Feature: Concept Entity Type
       | person |
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then entity(person) get playing roles contain:
+    Then entity(person) get plays roles contain:
       | marriage:husband |
       | marriage:wife    |
     Then relation(marriage) get role(husband) get players contain:
@@ -1177,20 +1177,20 @@ Feature: Concept Entity Type
 
   Scenario: Entity types can unset playing role types
     When put relation type: marriage
-    When relation(marriage) set relates role: husband
-    When relation(marriage) set relates role: wife
+    When relation(marriage) create role: husband
+    When relation(marriage) create role: wife
     When put entity type: person
     When entity(person) set plays role: marriage:husband
     When entity(person) set plays role: marriage:wife
     Then entity(person) unset plays role: marriage:husband
-    Then entity(person) get playing roles do not contain:
+    Then entity(person) get plays roles do not contain:
       | marriage:husband |
     Then relation(marriage) get role(husband) get players do not contain:
       | person |
     When transaction commits
     When connection opens schema transaction for database: typedb
     Then entity(person) unset plays role: marriage:wife
-    Then entity(person) get playing roles do not contain:
+    Then entity(person) get plays roles do not contain:
       | marriage:husband |
       | marriage:wife    |
     Then relation(marriage) get role(husband) get players do not contain:
@@ -1199,7 +1199,7 @@ Feature: Concept Entity Type
       | person |
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then entity(person) get playing roles do not contain:
+    Then entity(person) get plays roles do not contain:
       | marriage:husband |
       | marriage:wife    |
     Then relation(marriage) get role(husband) get players do not contain:
@@ -1209,18 +1209,18 @@ Feature: Concept Entity Type
 
   Scenario: Attempting to unset playing a role type that an entity type cannot actually play throws
     When put relation type: marriage
-    When relation(marriage) set relates role: husband
-    When relation(marriage) set relates role: wife
+    When relation(marriage) create role: husband
+    When relation(marriage) create role: wife
     When put entity type: person
     When entity(person) set plays role: marriage:wife
-    Then entity(person) get playing roles do not contain:
+    Then entity(person) get plays roles do not contain:
       | marriage:husband |
     Then entity(person) unset plays role: marriage:husband; fails
 
   Scenario: Entity types cannot unset playing role types that are currently played by existing instances
     When put relation type: marriage
-    When relation(marriage) set relates role: husband
-    When relation(marriage) set relates role: wife
+    When relation(marriage) create role: husband
+    When relation(marriage) create role: wife
     When put entity type: person
     When entity(person) set plays role: marriage:wife
     Then transaction commits
@@ -1234,11 +1234,11 @@ Feature: Concept Entity Type
 
   Scenario: Entity types can inherit playing role types
     When put relation type: parentship
-    When relation(parentship) set relates role: parent
-    When relation(parentship) set relates role: child
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: child
     When put relation type: marriage
-    When relation(marriage) set relates role: husband
-    When relation(marriage) set relates role: wife
+    When relation(marriage) create role: husband
+    When relation(marriage) create role: wife
     When put entity type: animal
     When entity(animal) set plays role: parentship:parent
     When entity(animal) set plays role: parentship:child
@@ -1246,59 +1246,59 @@ Feature: Concept Entity Type
     When entity(person) set supertype: animal
     When entity(person) set plays role: marriage:husband
     When entity(person) set plays role: marriage:wife
-    Then entity(person) get playing roles contain:
+    Then entity(person) get plays roles contain:
       | parentship:parent |
       | parentship:child  |
       | marriage:husband  |
       | marriage:wife     |
-    Then entity(person) get playing roles explicit contain:
+    Then entity(person) get plays roles explicit contain:
       | marriage:husband  |
       | marriage:wife     |
-    Then entity(person) get playing roles explicit do not contain:
+    Then entity(person) get plays roles explicit do not contain:
       | parentship:parent |
       | parentship:child  |
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then entity(person) get playing roles contain:
+    Then entity(person) get plays roles contain:
       | parentship:parent |
       | parentship:child  |
       | marriage:husband  |
       | marriage:wife     |
-    Then entity(person) get playing roles explicit contain:
+    Then entity(person) get plays roles explicit contain:
       | marriage:husband  |
       | marriage:wife     |
-    Then entity(person) get playing roles explicit do not contain:
+    Then entity(person) get plays roles explicit do not contain:
       | parentship:parent |
       | parentship:child  |
     When put relation type: sales
-    When relation(sales) set relates role: buyer
+    When relation(sales) create role: buyer
     When put entity type: customer
     When entity(customer) set supertype: person
     When entity(customer) set plays role: sales:buyer
-    Then entity(customer) get playing roles contain:
+    Then entity(customer) get plays roles contain:
       | parentship:parent |
       | parentship:child  |
       | marriage:husband  |
       | marriage:wife     |
       | sales:buyer       |
-    Then entity(customer) get playing roles explicit contain:
+    Then entity(customer) get plays roles explicit contain:
       | sales:buyer       |
-    Then entity(customer) get playing roles explicit do not contain:
+    Then entity(customer) get plays roles explicit do not contain:
       | parentship:parent |
       | parentship:child  |
       | marriage:husband  |
       | marriage:wife     |
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then entity(animal) get playing roles contain:
+    Then entity(animal) get plays roles contain:
       | parentship:parent |
       | parentship:child  |
-    Then entity(person) get playing roles contain:
+    Then entity(person) get plays roles contain:
       | parentship:parent |
       | parentship:child  |
       | marriage:husband  |
       | marriage:wife     |
-    Then entity(customer) get playing roles contain:
+    Then entity(customer) get plays roles contain:
       | parentship:parent |
       | parentship:child  |
       | marriage:husband  |
@@ -1307,156 +1307,156 @@ Feature: Concept Entity Type
 
   Scenario: Entity types can inherit playing role types that are subtypes of each other
     When put relation type: parentship
-    When relation(parentship) set relates role: parent
-    When relation(parentship) set relates role: child
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: child
     When put relation type: fathership
     When relation(fathership) set supertype: parentship
-    When relation(fathership) set relates role: father as parent
+    When relation(fathership) create role: father as parent
     When put entity type: person
     When entity(person) set plays role: parentship:parent
     When entity(person) set plays role: parentship:child
     When put entity type: man
     When entity(man) set supertype: person
     When entity(man) set plays role: fathership:father
-    Then entity(man) get playing roles contain:
+    Then entity(man) get plays roles contain:
       | parentship:parent |
       | fathership:father |
       | parentship:child  |
-    Then entity(man) get playing roles explicit contain:
+    Then entity(man) get plays roles explicit contain:
       | fathership:father |
-    Then entity(man) get playing roles explicit do not contain:
+    Then entity(man) get plays roles explicit do not contain:
       | parentship:parent |
       | parentship:child  |
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then entity(man) get playing roles contain:
+    Then entity(man) get plays roles contain:
       | parentship:parent |
       | fathership:father |
       | parentship:child  |
-    Then entity(man) get playing roles explicit contain:
+    Then entity(man) get plays roles explicit contain:
       | fathership:father |
-    Then entity(man) get playing roles explicit do not contain:
+    Then entity(man) get plays roles explicit do not contain:
       | parentship:parent |
       | parentship:child  |
     When put relation type: mothership
     When relation(mothership) set supertype: parentship
-    When relation(mothership) set relates role: mother as parent
+    When relation(mothership) create role: mother as parent
     When put entity type: woman
     When entity(woman) set supertype: person
     When entity(woman) set plays role: mothership:mother
-    Then entity(woman) get playing roles contain:
+    Then entity(woman) get plays roles contain:
       | parentship:parent |
       | mothership:mother |
       | parentship:child  |
-    Then entity(woman) get playing roles explicit contain:
+    Then entity(woman) get plays roles explicit contain:
       | mothership:mother |
-    Then entity(woman) get playing roles explicit do not contain:
+    Then entity(woman) get plays roles explicit do not contain:
       | parentship:parent |
       | parentship:child  |
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then entity(person) get playing roles contain:
+    Then entity(person) get plays roles contain:
       | parentship:parent |
       | parentship:child  |
-    Then entity(man) get playing roles contain:
+    Then entity(man) get plays roles contain:
       | parentship:parent |
       | fathership:father |
       | parentship:child  |
-    Then entity(man) get playing roles explicit contain:
+    Then entity(man) get plays roles explicit contain:
       | fathership:father |
-    Then entity(man) get playing roles explicit do not contain:
+    Then entity(man) get plays roles explicit do not contain:
       | parentship:parent |
       | parentship:child  |
-    Then entity(woman) get playing roles contain:
+    Then entity(woman) get plays roles contain:
       | parentship:parent |
       | mothership:mother |
       | parentship:child  |
-    Then entity(woman) get playing roles explicit contain:
+    Then entity(woman) get plays roles explicit contain:
       | mothership:mother |
-    Then entity(woman) get playing roles explicit do not contain:
+    Then entity(woman) get plays roles explicit do not contain:
       | parentship:parent |
       | parentship:child  |
 
   Scenario: Entity types can override inherited playing role types
     When put relation type: parentship
-    When relation(parentship) set relates role: parent
-    When relation(parentship) set relates role: child
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: child
     When put relation type: fathership
     When relation(fathership) set supertype: parentship
-    When relation(fathership) set relates role: father as parent
+    When relation(fathership) create role: father as parent
     When put entity type: person
     When entity(person) set plays role: parentship:parent
     When entity(person) set plays role: parentship:child
     When put entity type: man
     When entity(man) set supertype: person
     When entity(man) set plays role: fathership:father as parentship:parent
-    Then entity(man) get playing roles contain:
+    Then entity(man) get plays roles contain:
       | fathership:father |
       | parentship:child  |
-    Then entity(man) get playing roles do not contain:
+    Then entity(man) get plays roles do not contain:
       | parentship:parent |
-    Then entity(man) get playing roles explicit contain:
+    Then entity(man) get plays roles explicit contain:
       | fathership:father |
-    Then entity(man) get playing roles explicit do not contain:
+    Then entity(man) get plays roles explicit do not contain:
       | parentship:child  |
       | parentship:parent |
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then entity(man) get playing roles contain:
+    Then entity(man) get plays roles contain:
       | fathership:father |
       | parentship:child  |
-    Then entity(man) get playing roles do not contain:
+    Then entity(man) get plays roles do not contain:
       | parentship:parent |
-    Then entity(man) get playing roles explicit contain:
+    Then entity(man) get plays roles explicit contain:
       | fathership:father |
-    Then entity(man) get playing roles explicit do not contain:
+    Then entity(man) get plays roles explicit do not contain:
       | parentship:child  |
       | parentship:parent |
     When put relation type: mothership
     When relation(mothership) set supertype: parentship
-    When relation(mothership) set relates role: mother as parent
+    When relation(mothership) create role: mother as parent
     When put entity type: woman
     When entity(woman) set supertype: person
     When entity(woman) set plays role: mothership:mother as parentship:parent
-    Then entity(woman) get playing roles contain:
+    Then entity(woman) get plays roles contain:
       | mothership:mother |
       | parentship:child  |
-    Then entity(woman) get playing roles do not contain:
+    Then entity(woman) get plays roles do not contain:
       | parentship:parent |
-    Then entity(woman) get playing roles explicit contain:
+    Then entity(woman) get plays roles explicit contain:
       | mothership:mother |
-    Then entity(woman) get playing roles explicit do not contain:
+    Then entity(woman) get plays roles explicit do not contain:
       | parentship:child  |
       | parentship:parent |
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then entity(person) get playing roles contain:
+    Then entity(person) get plays roles contain:
       | parentship:parent |
       | parentship:child  |
-    Then entity(man) get playing roles contain:
+    Then entity(man) get plays roles contain:
       | fathership:father |
       | parentship:child  |
-    Then entity(man) get playing roles do not contain:
+    Then entity(man) get plays roles do not contain:
       | parentship:parent |
-    Then entity(man) get playing roles explicit contain:
+    Then entity(man) get plays roles explicit contain:
       | fathership:father |
-    Then entity(man) get playing roles explicit do not contain:
+    Then entity(man) get plays roles explicit do not contain:
       | parentship:child  |
       | parentship:parent |
-    Then entity(woman) get playing roles contain:
+    Then entity(woman) get plays roles contain:
       | mothership:mother |
       | parentship:child  |
-    Then entity(woman) get playing roles do not contain:
+    Then entity(woman) get plays roles do not contain:
       | parentship:parent |
-    Then entity(woman) get playing roles explicit contain:
+    Then entity(woman) get plays roles explicit contain:
       | mothership:mother |
-    Then entity(woman) get playing roles explicit do not contain:
+    Then entity(woman) get plays roles explicit do not contain:
       | parentship:child  |
       | parentship:parent |
 
   Scenario: Entity types can redeclare playing role types
     When put relation type: parentship
-    When relation(parentship) set relates role: parent
+    When relation(parentship) create role: parent
     When put entity type: person
     When entity(person) set plays role: parentship:parent
     When transaction commits
@@ -1465,10 +1465,10 @@ Feature: Concept Entity Type
 
   Scenario: Entity types can re-override inherited playing role types
     When put relation type: parentship
-    When relation(parentship) set relates role: parent
+    When relation(parentship) create role: parent
     When put relation type: fathership
     When relation(fathership) set supertype: parentship
-    When relation(fathership) set relates role: father as parent
+    When relation(fathership) create role: father as parent
     When put entity type: person
     When entity(person) set plays role: parentship:parent
     When put entity type: man
@@ -1480,10 +1480,10 @@ Feature: Concept Entity Type
 
   Scenario: Entity types cannot redeclare inherited/overridden playing role types
     When put relation type: parentship
-    When relation(parentship) set relates role: parent
+    When relation(parentship) create role: parent
     When put relation type: fathership
     When relation(fathership) set supertype: parentship
-    When relation(fathership) set relates role: father as parent
+    When relation(fathership) create role: father as parent
     When put entity type: person
     When entity(person) set plays role: parentship:parent
     When put entity type: man
@@ -1500,20 +1500,20 @@ Feature: Concept Entity Type
 
   Scenario: Entity types cannot override declared playing role types
     When put relation type: parentship
-    When relation(parentship) set relates role: parent
+    When relation(parentship) create role: parent
     When put relation type: fathership
     When relation(fathership) set supertype: parentship
-    When relation(fathership) set relates role: father as parent
+    When relation(fathership) create role: father as parent
     When put entity type: person
     When entity(person) set plays role: parentship:parent
     Then entity(person) set plays role: fathership:father as parentship:parent; fails
 
   Scenario: Entity types cannot override inherited playing role types other than with their subtypes
     When put relation type: parentship
-    When relation(parentship) set relates role: parent
-    When relation(parentship) set relates role: child
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: child
     When put relation type: fathership
-    When relation(fathership) set relates role: father
+    When relation(fathership) create role: father
     When put entity type: person
     When entity(person) set plays role: parentship:parent
     When entity(person) set plays role: parentship:child
