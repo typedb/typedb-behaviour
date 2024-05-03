@@ -1321,7 +1321,8 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set plays role: locates:located
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    When relation(contractor-employment) set plays role: contractor-locates:contractor-located as locates:located
+    When relation(contractor-employment) set plays role: contractor-locates:contractor-located
+    When relation(contractor-employment) get plays role: contractor-locates:contractor-located; set override: locates:located
     Then relation(contractor-employment) get plays roles do not contain:
       | locates:located |
     When transaction commits
@@ -1336,7 +1337,8 @@ Feature: Concept Relation Type and Role Type
     When relation(parttime-employment) set supertype: contractor-employment
     When relation(parttime-employment) create role: parttime-employer
     When relation(parttime-employment) create role: parttime-employee
-    When relation(parttime-employment) set plays role: parttime-locates:parttime-located as contractor-locates:contractor-located
+    When relation(parttime-employment) set plays role: parttime-locates:parttime-located
+    When relation(parttime-employment) get plays role: parttime-locates:parttime-located; set override: contractor-locates:contractor-located
     Then relation(parttime-employment) get plays roles do not contain:
       | locates:located                       |
       | contractor-locates:contractor-located |
@@ -1360,7 +1362,8 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set plays role: locates:located
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    When relation(contractor-employment) set plays role: contractor-locates:contractor-located as locates:located
+    When relation(contractor-employment) set plays role: contractor-locates:contractor-located
+    When relation(contractor-employment) get plays role: contractor-locates:contractor-located; set override: locates:located
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
     When transaction commits
@@ -1384,7 +1387,8 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) create role: employer
     When relation(employment) create role: employee
     When relation(employment) set plays role: locates:located
-    Then relation(employment) set plays role: employment-locates:employment-located as locates:located; fails
+    Then relation(employment) set plays role: employment-locates:employment-located
+    Then relation(employment) get plays role: employment-locates:employment-located; set override: locates:located; fails
 
   Scenario: Relation types cannot override inherited playing role types other than with their subtypes
     When put relation type: locates
@@ -1399,4 +1403,5 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set plays role: locates:located
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    Then relation(contractor-employment) set plays role: contractor-locates:contractor-located as locates:located; fails
+    Then relation(contractor-employment) set plays role: contractor-locates:contractor-located
+    Then relation(contractor-employment) get plays role: contractor-locates:contractor-located; set override: locates:located; fails
