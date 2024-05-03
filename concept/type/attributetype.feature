@@ -503,12 +503,13 @@ Feature: Concept Attribute Type
     When attribute(country-code) set value-type: string
     When put attribute type: country-name
     When attribute(country-name) set value-type: string
-    When attribute(country-name) set owns attribute type: country-code, with annotations: key
-    Then attribute(country-name) get owns attribute types, with annotations: key; contain:
+    When attribute(country-name) set owns: country-code
+    When attribute(country-name) get owns: country-code, set annotation: key
+    Then attribute(country-name) get owns, with annotations (DEPRECATED): key; contain:
       | country-code |
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then attribute(country-name) get owns attribute types, with annotations: key; contain:
+    Then attribute(country-name) get owns, with annotations (DEPRECATED): key; contain:
       | country-code |
 
   # TODO: Fix test
@@ -519,15 +520,17 @@ Feature: Concept Attribute Type
     When attribute(country-code-2) set value-type: string
     When put attribute type: country-name
     When attribute(country-name) set value-type: string
-    When attribute(country-name) set owns attribute type: country-code-1, with annotations: key
-    When attribute(country-name) set owns attribute type: country-code-2, with annotations: key
-    When attribute(country-name) unset owns attribute type: country-code-1
-    Then attribute(country-name) get owns attribute types, with annotations: key; do not contain:
+    When attribute(country-name) set owns: country-code-1
+    When attribute(country-name) get owns: country-code-1, set annotation: key
+    When attribute(country-name) set owns: country-code-2
+    When attribute(country-name) get owns: country-code-2, set annotation: key
+    When attribute(country-name) unset owns: country-code-1
+    Then attribute(country-name) get owns, with annotations (DEPRECATED): key; do not contain:
       | country-code-1 |
     When transaction commits
     When connection opens write transaction for database: typedb
-    When attribute(country-name) unset owns attribute type: country-code-2
-    Then attribute(country-name) get owns attribute types, with annotations: key; do not contain:
+    When attribute(country-name) unset owns: country-code-2
+    Then attribute(country-name) get owns, with annotations (DEPRECATED): key; do not contain:
       | country-code-1 |
       | country-code-2 |
 
@@ -540,14 +543,14 @@ Feature: Concept Attribute Type
     When attribute(utc-zone-hour) set value-type: double
     When put attribute type: timestamp
     When attribute(timestamp) set value-type: datetime
-    When attribute(timestamp) set owns attribute type: utc-zone-code
-    When attribute(timestamp) set owns attribute type: utc-zone-hour
-    Then attribute(timestamp) get owns attribute types contain:
+    When attribute(timestamp) set owns: utc-zone-code
+    When attribute(timestamp) set owns: utc-zone-hour
+    Then attribute(timestamp) get owns contain:
       | utc-zone-code |
       | utc-zone-hour |
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then attribute(timestamp) get owns attribute types contain:
+    Then attribute(timestamp) get owns contain:
       | utc-zone-code |
       | utc-zone-hour |
 
@@ -559,15 +562,15 @@ Feature: Concept Attribute Type
     When attribute(utc-zone-hour) set value-type: double
     When put attribute type: timestamp
     When attribute(timestamp) set value-type: datetime
-    When attribute(timestamp) set owns attribute type: utc-zone-code
-    When attribute(timestamp) set owns attribute type: utc-zone-hour
-    When attribute(timestamp) unset owns attribute type: utc-zone-hour
-    Then attribute(timestamp) get owns attribute types do not contain:
+    When attribute(timestamp) set owns: utc-zone-code
+    When attribute(timestamp) set owns: utc-zone-hour
+    When attribute(timestamp) unset owns: utc-zone-hour
+    Then attribute(timestamp) get owns do not contain:
       | utc-zone-hour |
     When transaction commits
     When connection opens write transaction for database: typedb
-    When attribute(timestamp) unset owns attribute type: utc-zone-code
-    Then attribute(timestamp) get owns attribute types do not contain:
+    When attribute(timestamp) unset owns: utc-zone-code
+    Then attribute(timestamp) get owns do not contain:
       | utc-zone-code |
       | utc-zone-hour |
 
@@ -579,18 +582,19 @@ Feature: Concept Attribute Type
     When attribute(country-abbreviation) set value-type: string
     When put attribute type: country-name
     When attribute(country-name) set value-type: string
-    When attribute(country-name) set owns attribute type: country-code, with annotations: key
-    When attribute(country-name) set owns attribute type: country-abbreviation
-    Then attribute(country-name) get owns attribute types, with annotations: key; contain:
+    When attribute(country-name) set owns: country-code
+    When attribute(country-name) get owns: country-code, set annotation: key
+    When attribute(country-name) set owns: country-abbreviation
+    Then attribute(country-name) get owns, with annotations (DEPRECATED): key; contain:
       | country-code |
-    Then attribute(country-name) get owns attribute types contain:
+    Then attribute(country-name) get owns contain:
       | country-code         |
       | country-abbreviation |
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then attribute(country-name) get owns attribute types, with annotations: key; contain:
+    Then attribute(country-name) get owns, with annotations (DEPRECATED): key; contain:
       | country-code |
-    Then attribute(country-name) get owns attribute types contain:
+    Then attribute(country-name) get owns contain:
       | country-code         |
       | country-abbreviation |
 
@@ -603,22 +607,23 @@ Feature: Concept Attribute Type
     When put attribute type: name
     When attribute(name) set value-type: string
     When attribute(name) set annotation: @abstract
-    When attribute(name) set owns attribute type: hash, with annotations: key
-    When attribute(name) set owns attribute type: abbreviation
+    When attribute(name) set owns: hash
+    When attribute(name) get owns: hash, set annotation: key
+    When attribute(name) set owns: abbreviation
     When put attribute type: real-name
     When attribute(real-name) set value-type: string
     When attribute(real-name) set annotation: @abstract
     When attribute(real-name) set supertype: name
-    Then attribute(real-name) get owns attribute types, with annotations: key; contain:
+    Then attribute(real-name) get owns, with annotations (DEPRECATED): key; contain:
       | hash |
-    Then attribute(real-name) get owns attribute types contain:
+    Then attribute(real-name) get owns contain:
       | hash         |
       | abbreviation |
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then attribute(real-name) get owns attribute types, with annotations: key; contain:
+    Then attribute(real-name) get owns, with annotations (DEPRECATED): key; contain:
       | hash |
-    Then attribute(real-name) get owns attribute types contain:
+    Then attribute(real-name) get owns contain:
       | hash         |
       | abbreviation |
     When put attribute type: last-name
@@ -626,14 +631,14 @@ Feature: Concept Attribute Type
     When attribute(last-name) set supertype: real-name
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then attribute(real-name) get owns attribute types, with annotations: key; contain:
+    Then attribute(real-name) get owns, with annotations (DEPRECATED): key; contain:
       | hash |
-    Then attribute(real-name) get owns attribute types contain:
+    Then attribute(real-name) get owns contain:
       | hash         |
       | abbreviation |
-    Then attribute(last-name) get owns attribute types, with annotations: key; contain:
+    Then attribute(last-name) get owns, with annotations (DEPRECATED): key; contain:
       | hash |
-    Then attribute(last-name) get owns attribute types contain:
+    Then attribute(last-name) get owns contain:
       | hash         |
       | abbreviation |
 
@@ -652,14 +657,14 @@ Feature: Concept Attribute Type
     When attribute(girl-name) set supertype: name
     When put entity type: person
     When entity(person) set annotation: @abstract
-    When entity(person) set owns attribute type: name
-    When entity(person) set owns attribute type: age
+    When entity(person) set owns: name
+    When entity(person) set owns: age
     When put entity type: boy
     When entity(boy) set supertype: person
-    When entity(boy) set owns attribute type: boy-name as name
+    When entity(boy) set owns: boy-name as name
     When put entity type: girl
     When entity(girl) set supertype: person
-    When entity(girl) set owns attribute type: girl-name as name
+    When entity(girl) set owns: girl-name as name
     Then attribute(age) get owners contain:
       | person |
       | boy    |
@@ -706,9 +711,10 @@ Feature: Concept Attribute Type
     When put attribute type: email
     When attribute(email) set value-type: string
     When put entity type: company
-    When entity(company) set owns attribute type: email
+    When entity(company) set owns: email
     When put entity type: person
-    When entity(person) set owns attribute type: email, with annotations: key
+    When entity(person) set owns: email
+    When entity(person) get owns: email, set annotation: key
     Then attribute(email) get owners contain:
       | company |
       | person  |
