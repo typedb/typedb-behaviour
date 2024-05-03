@@ -423,19 +423,19 @@ Feature: Concept Entity Type
     Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
       | email     |
       | reference |
-    Then entity(customer) get owns explicit attribute types, with annotations: key; contain:
+    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; contain:
       | reference |
-    Then entity(customer) get owns explicit attribute types, with annotations: key; do not contain:
+    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; do not contain:
       | email     |
     Then entity(customer) get owns contain:
       | email     |
       | reference |
       | name      |
       | rating    |
-    Then entity(customer) get owns explicit attribute types contain:
+    Then entity(customer) get declared owns contain:
       | reference |
       | rating    |
-    Then entity(customer) get owns explicit attribute types do not contain:
+    Then entity(customer) get declared owns do not contain:
       | email     |
       | name      |
     When transaction commits
@@ -443,19 +443,19 @@ Feature: Concept Entity Type
     Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
       | email     |
       | reference |
-    Then entity(customer) get owns explicit attribute types, with annotations: key; contain:
+    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; contain:
       | reference |
-    Then entity(customer) get owns explicit attribute types, with annotations: key; do not contain:
+    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; do not contain:
       | email     |
     Then entity(customer) get owns contain:
       | email     |
       | reference |
       | name      |
       | rating    |
-    Then entity(customer) get owns explicit attribute types contain:
+    Then entity(customer) get declared owns contain:
       | reference |
       | rating    |
-    Then entity(customer) get owns explicit attribute types do not contain:
+    Then entity(customer) get declared owns do not contain:
       | email     |
       | name      |
     When put attribute type: license
@@ -472,28 +472,28 @@ Feature: Concept Entity Type
     Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
       | email     |
       | reference |
-    Then entity(customer) get owns explicit attribute types, with annotations: key; contain:
+    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; contain:
       | reference |
-    Then entity(customer) get owns explicit attribute types, with annotations: key; do not contain:
+    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; do not contain:
       | email     |
     Then entity(customer) get owns contain:
       | email     |
       | reference |
       | name      |
       | rating    |
-    Then entity(customer) get owns explicit attribute types contain:
+    Then entity(customer) get declared owns contain:
       | reference |
       | rating    |
-    Then entity(customer) get owns explicit attribute types do not contain:
+    Then entity(customer) get declared owns do not contain:
       | email     |
       | name      |
     Then entity(subscriber) get owns, with annotations (DEPRECATED): key; contain:
       | email     |
       | reference |
       | license   |
-    Then entity(subscriber) get owns explicit attribute types, with annotations: key; contain:
+    Then entity(subscriber) get declared owns, with annotations (DEPRECATED): key; contain:
       | license   |
-    Then entity(subscriber) get owns explicit attribute types, with annotations: key; do not contain:
+    Then entity(subscriber) get declared owns, with annotations (DEPRECATED): key; do not contain:
       | email     |
       | reference |
     Then entity(subscriber) get owns contain:
@@ -503,10 +503,10 @@ Feature: Concept Entity Type
       | name      |
       | rating    |
       | points    |
-    Then entity(subscriber) get owns explicit attribute types contain:
+    Then entity(subscriber) get declared owns contain:
       | license   |
       | points    |
-    Then entity(subscriber) get owns explicit attribute types do not contain:
+    Then entity(subscriber) get declared owns do not contain:
       | email     |
       | reference |
       | name      |
@@ -541,19 +541,19 @@ Feature: Concept Entity Type
     Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
       | username  |
       | reference |
-    Then entity(customer) get owns explicit attribute types, with annotations: key; contain:
+    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; contain:
       | reference |
-    Then entity(customer) get owns explicit attribute types, with annotations: key; do not contain:
+    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; do not contain:
       | username  |
     Then entity(customer) get owns contain:
       | username  |
       | reference |
       | score     |
       | rating    |
-    Then entity(customer) get owns explicit attribute types contain:
+    Then entity(customer) get declared owns contain:
       | reference |
       | rating    |
-    Then entity(customer) get owns explicit attribute types do not contain:
+    Then entity(customer) get declared owns do not contain:
       | username  |
       | score     |
     When transaction commits
@@ -561,19 +561,19 @@ Feature: Concept Entity Type
     Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
       | username  |
       | reference |
-    Then entity(customer) get owns explicit attribute types, with annotations: key; contain:
+    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; contain:
       | reference |
-    Then entity(customer) get owns explicit attribute types, with annotations: key; do not contain:
+    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; do not contain:
       | username  |
     Then entity(customer) get owns contain:
       | username  |
       | reference |
       | score     |
       | rating    |
-    Then entity(customer) get owns explicit attribute types contain:
+    Then entity(customer) get declared owns contain:
       | reference |
       | rating    |
-    Then entity(customer) get owns explicit attribute types do not contain:
+    Then entity(customer) get declared owns do not contain:
       | username  |
       | score     |
     When put attribute type: license
@@ -593,28 +593,28 @@ Feature: Concept Entity Type
     Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
       | username  |
       | reference |
-    Then entity(customer) get owns explicit attribute types, with annotations: key; contain:
+    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; contain:
       | reference |
-    Then entity(customer) get owns explicit attribute types, with annotations: key; do not contain:
+    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; do not contain:
       | username  |
     Then entity(customer) get owns contain:
       | username  |
       | reference |
       | score     |
       | rating    |
-    Then entity(customer) get owns explicit attribute types contain:
+    Then entity(customer) get declared owns contain:
       | reference |
       | rating    |
-    Then entity(customer) get owns explicit attribute types do not contain:
+    Then entity(customer) get declared owns do not contain:
       | username  |
       | score     |
     Then entity(subscriber) get owns, with annotations (DEPRECATED): key; contain:
       | username  |
       | reference |
       | license   |
-    Then entity(subscriber) get owns explicit attribute types, with annotations: key; contain:
+    Then entity(subscriber) get declared owns, with annotations (DEPRECATED): key; contain:
       | license   |
-    Then entity(subscriber) get owns explicit attribute types, with annotations: key; do not contain:
+    Then entity(subscriber) get declared owns, with annotations (DEPRECATED): key; do not contain:
       | username  |
       | reference |
     Then entity(subscriber) get owns contain:
@@ -624,10 +624,10 @@ Feature: Concept Entity Type
       | score     |
       | rating    |
       | points    |
-    Then entity(subscriber) get owns explicit attribute types contain:
+    Then entity(subscriber) get declared owns contain:
       | license   |
       | points    |
-    Then entity(subscriber) get owns explicit attribute types do not contain:
+    Then entity(subscriber) get declared owns do not contain:
       | username  |
       | reference |
       | score     |
@@ -680,10 +680,10 @@ Feature: Concept Entity Type
       | work-email |
     Then entity(customer) get owns, with annotations (DEPRECATED): key; do not contain:
       | email |
-    Then entity(customer) get owns explicit attribute types, with annotations: key; contain:
+    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; contain:
       | reference  |
       | work-email |
-    Then entity(customer) get owns explicit attribute types, with annotations: key; do not contain:
+    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; do not contain:
       | username   |
       | email      |
     Then entity(customer) get owns contain:
@@ -696,12 +696,12 @@ Feature: Concept Entity Type
     Then entity(customer) get owns do not contain:
       | email |
       | name  |
-    Then entity(customer) get owns explicit attribute types contain:
+    Then entity(customer) get declared owns contain:
       | reference  |
       | work-email |
       | rating     |
       | nick-name  |
-    Then entity(customer) get owns explicit attribute types do not contain:
+    Then entity(customer) get declared owns do not contain:
       | username   |
       | age        |
       | email      |
@@ -716,10 +716,10 @@ Feature: Concept Entity Type
       | work-email |
     Then entity(customer) get owns, with annotations (DEPRECATED): key; do not contain:
       | email |
-    Then entity(customer) get owns explicit attribute types, with annotations: key; contain:
+    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; contain:
       | reference  |
       | work-email |
-    Then entity(customer) get owns explicit attribute types, with annotations: key; do not contain:
+    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; do not contain:
       | username   |
       | email      |
     Then entity(customer) get owns contain:
@@ -732,12 +732,12 @@ Feature: Concept Entity Type
     Then entity(customer) get owns do not contain:
       | email |
       | name  |
-    Then entity(customer) get owns explicit attribute types contain:
+    Then entity(customer) get declared owns contain:
       | reference  |
       | work-email |
       | rating     |
       | nick-name  |
-    Then entity(customer) get owns explicit attribute types do not contain:
+    Then entity(customer) get declared owns do not contain:
       | username   |
       | age        |
       | email      |
@@ -760,10 +760,10 @@ Feature: Concept Entity Type
       | work-email |
     Then entity(customer) get owns, with annotations (DEPRECATED): key; do not contain:
       | email |
-    Then entity(customer) get owns explicit attribute types, with annotations: key; contain:
+    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; contain:
       | reference  |
       | work-email |
-    Then entity(customer) get owns explicit attribute types, with annotations: key; do not contain:
+    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; do not contain:
       | username   |
       | email      |
     Then entity(customer) get owns contain:
@@ -776,12 +776,12 @@ Feature: Concept Entity Type
     Then entity(customer) get owns do not contain:
       | email |
       | name  |
-    Then entity(customer) get owns explicit attribute types contain:
+    Then entity(customer) get declared owns contain:
       | reference  |
       | work-email |
       | rating     |
       | nick-name  |
-    Then entity(customer) get owns explicit attribute types do not contain:
+    Then entity(customer) get declared owns do not contain:
       | username   |
       | age        |
       | email      |
@@ -795,9 +795,9 @@ Feature: Concept Entity Type
     Then entity(subscriber) get owns, with annotations (DEPRECATED): key; do not contain:
       | email     |
       | reference |
-    Then entity(subscriber) get owns explicit attribute types, with annotations: key; contain:
+    Then entity(subscriber) get declared owns, with annotations (DEPRECATED): key; contain:
       | license    |
-    Then entity(subscriber) get owns explicit attribute types, with annotations: key; do not contain:
+    Then entity(subscriber) get declared owns, with annotations (DEPRECATED): key; do not contain:
       | username   |
       | work-email |
       | email     |
@@ -814,10 +814,10 @@ Feature: Concept Entity Type
       | references |
       | name       |
       | rating     |
-    Then entity(subscriber) get owns explicit attribute types contain:
+    Then entity(subscriber) get declared owns contain:
       | license    |
       | points     |
-    Then entity(subscriber) get owns explicit attribute types do not contain:
+    Then entity(subscriber) get declared owns do not contain:
       | username   |
       | work-email |
       | age        |
