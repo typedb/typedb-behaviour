@@ -581,11 +581,13 @@ Feature: Concept Relation Type and Role Type
     When put attribute type: is-permanent
     When attribute(is-permanent) set value-type: boolean
     When put relation type: employment
-    Then relation(employment) set owns: is-permanent, with annotations: key
+    Then relation(employment) set owns: is-permanent
+    Then relation(employment) get owns: is-permanent, set annotation: key
     When put attribute type: salary
     When attribute(salary) set value-type: double
     When put relation type: employment
-    Then relation(employment) set owns: salary, with annotations: key; fails
+    Then relation(employment) set owns: salary
+    Then relation(employment) get owns: salary, set annotation: key; fails
 
   Scenario: Relation types can have attributes
     When put attribute type: date
@@ -987,7 +989,8 @@ Feature: Concept Relation Type and Role Type
     When relation(marriage) create role: spouse
     When relation(marriage) set owns: date
     When relation(marriage) set owns: license
-    Then relation(marriage) set owns: date, with annotations: key
+    Then relation(marriage) set owns: date
+    Then relation(marriage) get owns: date, set annotation: key
     When transaction commits
     When connection opens schema transaction for database: typedb
     When relation(marriage) set owns: license
@@ -1008,7 +1011,8 @@ Feature: Concept Relation Type and Role Type
     When relation(contractor-employment) set supertype: employment
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then relation(contractor-employment) set owns: employment-reference, with annotations: key
+    Then relation(contractor-employment) set owns: employment-reference
+    Then relation(contractor-employment) get owns: employment-reference, set annotation: key
     Then transaction commits; fails
     When connection opens schema transaction for database: typedb
     Then relation(contractor-employment) set owns: employment-hours
@@ -1027,7 +1031,8 @@ Feature: Concept Relation Type and Role Type
     When relation(contractor-employment) set supertype: employment
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
-    Then relation(parttime-employment) set owns: employment-reference, with annotations: key
+    Then relation(parttime-employment) set owns: employment-reference
+    Then relation(parttime-employment) get owns: employment-reference, set annotation: key
     Then transaction commits; fails
 
   Scenario: Relation types cannot redeclare overridden key attribute types
@@ -1047,7 +1052,8 @@ Feature: Concept Relation Type and Role Type
     When relation(contractor-employment) set owns: contractor-reference as (DEPRECATED) employment-reference
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
-    Then relation(parttime-employment) set owns: contractor-reference, with annotations: key
+    Then relation(parttime-employment) set owns: contractor-reference
+    Then relation(parttime-employment) get owns: contractor-reference, set annotation: key
     Then transaction commits; fails
 
   Scenario: Relation types cannot redeclare inherited owns
@@ -1106,7 +1112,8 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set owns: hours
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then relation(employment) set owns: social-security-number as (DEPRECATED) reference, with annotations: key; fails
+    Then relation(employment) set owns: social-security-number as (DEPRECATED) reference
+    Then relation(employment) get owns: social-security-number as (DEPRECATED) reference, set annotation: key; fails
     When connection opens schema transaction for database: typedb
     Then relation(employment) set owns: max-hours as (DEPRECATED) hours; fails
 
@@ -1129,7 +1136,8 @@ Feature: Concept Relation Type and Role Type
     When relation(contractor-employment) set supertype: employment
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then relation(contractor-employment) set owns: contractor-reference as (DEPRECATED) employment-reference, with annotations: key; fails
+    Then relation(contractor-employment) set owns: contractor-reference as (DEPRECATED) employment-reference
+    Then relation(contractor-employment) get owns: contractor-reference as (DEPRECATED) employment-reference, set annotation: key; fails
     When connection opens schema transaction for database: typedb
     Then relation(contractor-employment) set owns: contractor-hours as (DEPRECATED) employment-hours; fails
 

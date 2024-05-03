@@ -387,11 +387,16 @@ Feature: Concept Attribute Type
 #  # Scenario: Attribute types can be retrieved by value type
 #  #   Then attribute(???)  get subtypes do not contain:
 #  Scenario: Attribute type root can get attribute types of a specific value type
-#    When put attribute type: is-open, with value type: boolean
-#    When put attribute type: age, with value type: long
-#    When put attribute type: rating, with value type: double
-#    When put attribute type: name, with value type: string
-#    When put attribute type: timestamp, with value type: datetime
+#    When put attribute type: is-open
+#    When attribute(is-open) set value-type: boolean
+#    When put attribute type: age
+#    When attribute(age) set value-type: long
+#    When put attribute type: rating
+#    When attribute(rating) set value-type: double
+#    When put attribute type: name
+#    When attribute(name) set value-type: string
+#    When put attribute type: timestamp
+#    When attribute(timestamp) set value-type: datetime
 #    Then attribute(attribute) as(boolean) get subtypes contain:
 #      | attribute |
 #      | is-open   |
@@ -476,11 +481,16 @@ Feature: Concept Attribute Type
 #      | name    |
 
 #  Scenario: Attribute type root can get attribute types of any value type
-#    When put attribute type: is-open, with value type: boolean
-#    When put attribute type: age, with value type: long
-#    When put attribute type: rating, with value type: double
-#    When put attribute type: name, with value type: string
-#    When put attribute type: timestamp, with value type: datetime
+#    When put attribute type: is-open
+#    When attribute(is-open) set value-type: boolean
+#    When put attribute type: age
+#    When attribute(age) set value-type: long
+#    When put attribute type: rating
+#    When attribute(rating) set value-type: double
+#    When put attribute type: name
+#    When attribute(name) set value-type: string
+#    When put attribute type: timestamp
+#    When attribute(timestamp) set value-type: datetime
 #    Then attribute(attribute) get subtypes contain:
 #      | attribute |
 #      | is-open   |
@@ -749,12 +759,12 @@ Feature: Concept Attribute Type
   Scenario: Attribute types with value type string can unset their regular expression
     When put attribute type: email
     When attribute(email) set value-type: string
-    When attribute(email) as(string) set regex: \S+@\S+\.\S+
-    Then attribute(email) as(string) get regex: \S+@\S+\.\S+
+    When attribute(email) set annotation: @regex("\S+@\S+\.\S+")
+    Then attribute(email) get annotations contain: @regex("\S+@\S+\.\S+")
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then attribute(email) as(string) unset regex
-    Then attribute(email) as(string) does not have any regex
+    Then attribute(email) unset annotation: @regex("\S+@\S+\.\S+")
+    Then attribute(email) get annotations do not contain: @regex("\S+@\S+\.\S+")
     Then transaction commits
     When connection opens read transaction for database: typedb
-    Then attribute(email) as(string) does not have any regex
+    Then attribute(email) get annotations do not contain: @regex("\S+@\S+\.\S+")

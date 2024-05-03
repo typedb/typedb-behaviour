@@ -311,10 +311,12 @@ Feature: Concept Entity Type
     When entity(person) get owns: name, set annotation: key
     When entity(person) set owns: timestamp
     When entity(person) get owns: timestamp, set annotation: key
-    Then entity(person) set owns: is-open, with annotations: key
+    Then entity(person) set owns: is-open
+    Then entity(person) get owns: is-open, set annotation: key
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then entity(person) set owns: rating, with annotations: key; fails
+    Then entity(person) set owns: rating
+    Then entity(person) get owns: rating, set annotation: key; fails
 
   Scenario: Entity types can have attributes
     When put attribute type: name
@@ -870,10 +872,12 @@ Feature: Concept Entity Type
     When entity(person) get owns: name, set annotation: key
     When entity(person) set owns: email
     When entity(person) get owns: email, set annotation: key
-    Then entity(person) set owns: name, with annotations: key
+    Then entity(person) set owns: name
+    Then entity(person) get owns: name, set annotation: key
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then entity(person) set owns: email, with annotations: key
+    Then entity(person) set owns: email
+    Then entity(person) get owns: email, set annotation: key
 
   Scenario: Entity types can redeclare attributes as attributes
     When put attribute type: name
@@ -952,10 +956,12 @@ Feature: Concept Entity Type
     When put entity type: person
     When entity(person) set owns: name
     When entity(person) set owns: email
-    Then entity(person) set owns: name, with annotations: key
+    Then entity(person) set owns: name
+    Then entity(person) get owns: name, set annotation: key
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then entity(person) set owns: email, with annotations: key
+    Then entity(person) set owns: email
+    Then entity(person) get owns: email, set annotation: key
 
   Scenario: Entity types can redeclare inherited attributes as keys (which will override)
     When put attribute type: email
@@ -965,7 +971,8 @@ Feature: Concept Entity Type
     Then entity(person) get owns overridden attribute(email) exists: false
     When put entity type: customer
     When entity(customer) set supertype: person
-    Then entity(customer) set owns: email, with annotations: key
+    Then entity(customer) set owns: email
+    Then entity(customer) get owns: email, set annotation: key
     Then entity(customer) get owns overridden attribute(email) exists: true
     Then entity(customer) get owns overridden attribute(email) get label: email
     Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
@@ -976,7 +983,8 @@ Feature: Concept Entity Type
       | email |
     When put entity type: subscriber
     When entity(subscriber) set supertype: person
-    Then entity(subscriber) set owns: email, with annotations: key
+    Then entity(subscriber) set owns: email
+    Then entity(subscriber) get owns: email, set annotation: key
     Then entity(subscriber) get owns, with annotations (DEPRECATED): key; contain:
       | email |
 
@@ -1008,7 +1016,8 @@ Feature: Concept Entity Type
     Then transaction commits; fails
     Then transaction closes
     When connection opens schema transaction for database: typedb
-    Then entity(customer) set owns: email, with annotations: key
+    Then entity(customer) set owns: email
+    Then entity(customer) get owns: email, set annotation: key
     Then transaction commits; fails
 
   Scenario: Entity types cannot redeclare inherited key attribute types
@@ -1028,7 +1037,8 @@ Feature: Concept Entity Type
     When entity(customer) get owns: customer-email, set annotation: key
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
-    Then entity(subscriber) set owns: email, with annotations: key
+    Then entity(subscriber) set owns: email
+    Then entity(subscriber) get owns: email, set annotation: key
     Then transaction commits; fails
 
   Scenario: Entity types cannot redeclare overridden key attribute types
@@ -1048,7 +1058,8 @@ Feature: Concept Entity Type
     When entity(customer) get owns: customer-email, set annotation: key
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
-    Then entity(subscriber) set owns: customer-email, with annotations: key
+    Then entity(subscriber) set owns: customer-email
+    Then entity(subscriber) get owns: customer-email, set annotation: key
     Then transaction commits; fails
 
   Scenario: Entity types cannot redeclare inherited owns attribute types
@@ -1107,7 +1118,8 @@ Feature: Concept Entity Type
     When entity(person) set owns: name
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then entity(person) set owns: email as username, with annotations: key; fails
+    Then entity(person) set owns: email as username
+    Then entity(person) get owns: email as username, set annotation: key; fails
     When connection opens schema transaction for database: typedb
     Then entity(person) set owns: first-name as name; fails
 
@@ -1128,7 +1140,8 @@ Feature: Concept Entity Type
     When entity(customer) set supertype: person
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then entity(customer) set owns: reference as username, with annotations: key; fails
+    Then entity(customer) set owns: reference as username
+    Then entity(customer) get owns: reference as username, set annotation: key; fails
     When connection opens schema transaction for database: typedb
     Then entity(customer) set owns: rating as name; fails
 
