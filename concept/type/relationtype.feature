@@ -961,7 +961,7 @@ Feature: Concept Relation Type and Role Type
     When relation(contractor-employment) get role(contractor-employee); set override: employee
     When relation(contractor-employment) set owns: contractor-reference
     When relation(contractor-employment) get owns(contractor-reference); set override: employment-reference
-    When relation(contractor-employment) get owns: contractor-reference as (DEPRECATED) employment-reference, set annotation: key
+    When relation(contractor-employment) get owns: contractor-reference, set annotation: key
     Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; contain:
       | contractor-reference |
     Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; do not contain:
@@ -1134,7 +1134,7 @@ Feature: Concept Relation Type and Role Type
     When connection opens schema transaction for database: typedb
     Then relation(employment) set owns: social-security-number
     Then relation(employment) get owns(social-security-number); set override: reference
-    Then relation(employment) get owns: social-security-number as (DEPRECATED) reference, set annotation: key; fails
+    Then relation(employment) get owns: social-security-number, set annotation: key; fails
     When connection opens schema transaction for database: typedb
     Then relation(employment) set owns: max-hours
     Then relation(employment) get owns(max-hours); set override: hours; fails
@@ -1160,7 +1160,7 @@ Feature: Concept Relation Type and Role Type
     When connection opens schema transaction for database: typedb
     Then relation(contractor-employment) set owns: contractor-reference
     Then relation(contractor-employment) get owns(contractor-reference); set override: employment-reference
-    Then relation(contractor-employment) get owns: contractor-reference as (DEPRECATED) employment-reference, set annotation: key; fails
+    Then relation(contractor-employment) get owns: contractor-reference, set annotation: key; fails
     When connection opens schema transaction for database: typedb
     Then relation(contractor-employment) set owns: contractor-hours
     Then relation(contractor-employment) get owns(contractor-hours); set override: employment-hours; fails
@@ -1321,7 +1321,7 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set plays role: locates:located
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    When relation(contractor-employment) set plays role: contractor-locates:contractor-located as (DEPRECATED) locates:located
+    When relation(contractor-employment) set plays role: contractor-locates:contractor-located as locates:located
     Then relation(contractor-employment) get plays roles do not contain:
       | locates:located |
     When transaction commits
@@ -1336,7 +1336,7 @@ Feature: Concept Relation Type and Role Type
     When relation(parttime-employment) set supertype: contractor-employment
     When relation(parttime-employment) create role: parttime-employer
     When relation(parttime-employment) create role: parttime-employee
-    When relation(parttime-employment) set plays role: parttime-locates:parttime-located as (DEPRECATED) contractor-locates:contractor-located
+    When relation(parttime-employment) set plays role: parttime-locates:parttime-located as contractor-locates:contractor-located
     Then relation(parttime-employment) get plays roles do not contain:
       | locates:located                       |
       | contractor-locates:contractor-located |
@@ -1360,7 +1360,7 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set plays role: locates:located
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    When relation(contractor-employment) set plays role: contractor-locates:contractor-located as (DEPRECATED) locates:located
+    When relation(contractor-employment) set plays role: contractor-locates:contractor-located as locates:located
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
     When transaction commits
@@ -1384,7 +1384,7 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) create role: employer
     When relation(employment) create role: employee
     When relation(employment) set plays role: locates:located
-    Then relation(employment) set plays role: employment-locates:employment-located as (DEPRECATED) locates:located; fails
+    Then relation(employment) set plays role: employment-locates:employment-located as locates:located; fails
 
   Scenario: Relation types cannot override inherited playing role types other than with their subtypes
     When put relation type: locates
@@ -1399,4 +1399,4 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set plays role: locates:located
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
-    Then relation(contractor-employment) set plays role: contractor-locates:contractor-located as (DEPRECATED) locates:located; fails
+    Then relation(contractor-employment) set plays role: contractor-locates:contractor-located as locates:located; fails

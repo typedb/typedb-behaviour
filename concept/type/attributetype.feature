@@ -671,10 +671,12 @@ Feature: Concept Attribute Type
     When entity(person) set owns: age
     When put entity type: boy
     When entity(boy) set supertype: person
-    When entity(boy) set owns: boy-name as name
+    When entity(boy) set owns: boy-name
+    When entity(boy) get owns: boy-name; set override: name
     When put entity type: girl
     When entity(girl) set supertype: person
-    When entity(girl) set owns: girl-name as name
+    When entity(girl) set owns: girl-name
+    When entity(girl) get owns: girl-name; set override: name
     Then attribute(age) get owners contain:
       | person |
       | boy    |
