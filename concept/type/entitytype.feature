@@ -11,7 +11,7 @@ Feature: Concept Entity Type
     Given connection has been opened
     Given connection does not have any database
     Given connection create database: typedb
-    Given connection open schema transaction for database: typedb
+    Given connection opens schema transaction for database: typedb
 
   Scenario: Root entity type cannot be deleted
     Then delete entity type: entity; throws exception
@@ -917,7 +917,7 @@ Feature: Concept Entity Type
     When connection opens schema transaction for database: typedb
     Then entity(customer) set owns attribute type: email
     Then transaction commits; throws exception
-    Then session transaction closes
+    Then transaction closes
     When connection opens schema transaction for database: typedb
     Then entity(customer) set owns attribute type: email, with annotations: key
     Then transaction commits; throws exception
