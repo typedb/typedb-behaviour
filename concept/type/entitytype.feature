@@ -845,7 +845,7 @@ Feature: Concept Entity Type
     When entity(customer) set supertype: person
     When entity(customer) set owns: username
     When entity(customer) get owns: username; set override: name
-    When entity(customer) get owns: username as name, set annotation: key
+    When entity(customer) get owns: username, set annotation: key
     Then entity(customer) get owns overridden attribute(username) get label: name
     Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
       | username |
@@ -1129,7 +1129,7 @@ Feature: Concept Entity Type
     When connection opens schema transaction for database: typedb
     Then entity(person) set owns: email
     Then entity(person) get owns: email; set override: username
-    Then entity(person) get owns: email as username, set annotation: key; fails
+    Then entity(person) get owns: email, set annotation: key; fails
     When connection opens schema transaction for database: typedb
     Then entity(person) set owns: first-name
     Then entity(person) get owns: first-name; set override: name
@@ -1153,7 +1153,7 @@ Feature: Concept Entity Type
     When connection opens schema transaction for database: typedb
     Then entity(customer) set owns: reference
     Then entity(customer) get owns: reference; set override: username
-    Then entity(customer) get owns: reference as username, set annotation: key; fails
+    Then entity(customer) get owns: reference, set annotation: key; fails
     When connection opens schema transaction for database: typedb
     Then entity(customer) set owns: rating
     Then entity(customer) get owns: rating; set override: name
