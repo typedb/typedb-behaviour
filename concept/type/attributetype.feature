@@ -17,7 +17,8 @@ Feature: Concept Attribute Type
     Then delete attribute type: attribute; fails
 
   Scenario: Attribute types can be created
-    When put attribute type: name, with value type: string
+    When put attribute type: name
+    When attribute(name) set value-type: string
     Then attribute(name) exists: true
     Then attribute(name) get supertype: attribute
     When transaction commits
@@ -26,35 +27,40 @@ Feature: Concept Attribute Type
     Then attribute(name) get supertype: attribute
 
   Scenario: Attribute types can be created with value type boolean
-    When put attribute type: is-open, with value type: boolean
+    When put attribute type: is-open
+    When attribute(is-open) set value-type: boolean
     Then attribute(is-open) get value type: boolean
     When transaction commits
     When connection opens read transaction for database: typedb
     Then attribute(is-open) get value type: boolean
 
   Scenario: Attribute types can be created with value type long
-    When put attribute type: age, with value type: long
+    When put attribute type: age
+    When attribute(age) set value-type: long
     Then attribute(age) get value type: long
     When transaction commits
     When connection opens read transaction for database: typedb
     Then attribute(age) get value type: long
 
   Scenario: Attribute types can be created with value type double
-    When put attribute type: rating, with value type: double
+    When put attribute type: rating
+    When attribute(rating) set value-type: double
     Then attribute(rating) get value type: double
     When transaction commits
     When connection opens read transaction for database: typedb
     Then attribute(rating) get value type: double
 
   Scenario: Attribute types can be created with value type string
-    When put attribute type: name, with value type: string
+    When put attribute type: name
+    When attribute(name) set value-type: string
     Then attribute(name) get value type: string
     When transaction commits
     When connection opens read transaction for database: typedb
     Then attribute(name) get value type: string
 
   Scenario: Attribute types with value type string and regular expression can be created
-    When put attribute type: email, with value type: string
+    When put attribute type: email
+    When attribute(email) set value-type: string
     When attribute(email) set annotation: @regex("\S+@\S+\.\S+")
     Then attribute(email) get annotations contain: @regex("\S+@\S+\.\S+")
     When transaction commits
@@ -62,16 +68,19 @@ Feature: Concept Attribute Type
     Then attribute(email) get annotations contain: @regex("\S+@\S+\.\S+")
 
   Scenario: Attribute types can be created with value type datetime
-    When put attribute type: timestamp, with value type: datetime
+    When put attribute type: timestamp
+    When attribute(timestamp) set value-type: datetime
     Then attribute(timestamp) get value type: datetime
     When transaction commits
     When connection opens read transaction for database: typedb
     Then attribute(timestamp) get value type: datetime
 
   Scenario: Attribute types can be deleted
-    When put attribute type: name, with value type: string
+    When put attribute type: name
+    When attribute(name) set value-type: string
     Then attribute(name) exists: true
-    When put attribute type: age, with value type: long
+    When put attribute type: age
+    When attribute(age) set value-type: long
     Then attribute(age) exists: true
     When delete attribute type: age
     Then attribute(age) exists: false
@@ -97,7 +106,8 @@ Feature: Concept Attribute Type
       | age  |
 
   Scenario: Attribute types that have instances cannot be deleted
-    When put attribute type: name, with value type: string
+    When put attribute type: name
+    When attribute(name) set value-type: string
     When transaction commits
     When connection opens write transaction for database: typedb
     When $x = attribute(name) put: alice
@@ -106,7 +116,8 @@ Feature: Concept Attribute Type
     Then delete attribute type: name; fails
 
   Scenario: Attribute types can change labels
-    When put attribute type: name, with value type: string
+    When put attribute type: name
+    When attribute(name) set value-type: string
     Then attribute(name) get label: name
     When attribute(name) set label: username
     Then attribute(name) exists: false
@@ -125,12 +136,14 @@ Feature: Concept Attribute Type
     Then attribute(email) get label: email
 
   Scenario: Attribute types can be set to abstract
-    When put attribute type: name, with value type: string
+    When put attribute type: name
+    When attribute(name) set value-type: string
     When attribute(name) set annotation: @abstract
     Then attribute(name) get annotations contain: @abstract
     When transaction commits
     When connection opens schema transaction for database: typedb
-    When put attribute type: email, with value type: string
+    When put attribute type: email
+    When attribute(email) set value-type: string
     Then attribute(email) get annotations do not contain: @abstract
     When transaction commits
     When connection opens read transaction for database: typedb
@@ -141,16 +154,22 @@ Feature: Concept Attribute Type
     Then attribute(email) get annotations contain: @abstract
     When transaction commits
     When connection opens schema transaction for database: typedb
-    When put attribute type: company-email, with value type: string
+    When put attribute type: company-email
+    When attribute(company-email) set value-type: string
     When attribute(company-email) set supertype: email
     Then attribute(email) unset annotation: @abstract; fails
 
   Scenario: Attribute types can be subtypes of other attribute types
-    When put attribute type: first-name, with value type: string
-    When put attribute type: last-name, with value type: string
-    When put attribute type: real-name, with value type: string
-    When put attribute type: username, with value type: string
-    When put attribute type: name, with value type: string
+    When put attribute type: first-name
+    When attribute(first-name) set value-type: string
+    When put attribute type: last-name
+    When attribute(last-name) set value-type: string
+    When put attribute type: real-name
+    When attribute(real-name) set value-type: string
+    When put attribute type: username
+    When attribute(username) set value-type: string
+    When put attribute type: name
+    When attribute(name) set value-type: string
     When attribute(real-name) set annotation: @abstract
     When attribute(name) set annotation: @abstract
     When attribute(first-name) set supertype: real-name
@@ -251,11 +270,16 @@ Feature: Concept Attribute Type
       | last-name  |
 
   Scenario: Attribute types cannot subtype itself
-    When put attribute type: is-open, with value type: boolean
-    When put attribute type: age, with value type: long
-    When put attribute type: rating, with value type: double
-    When put attribute type: name, with value type: string
-    When put attribute type: timestamp, with value type: datetime
+    When put attribute type: is-open
+    When attribute(is-open) set value-type: boolean
+    When put attribute type: age
+    When attribute(age) set value-type: long
+    When put attribute type: rating
+    When attribute(rating) set value-type: double
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    When put attribute type: timestamp
+    When attribute(timestamp) set value-type: datetime
     When transaction commits
     When connection opens schema transaction for database: typedb
     Then attribute(is-open) set supertype: is-open; fails
@@ -269,9 +293,12 @@ Feature: Concept Attribute Type
     Then attribute(timestamp) set supertype: timestamp; fails
 
   Scenario: Attribute types cannot subtype non abstract attribute types
-    When put attribute type: name, with value type: string
-    When put attribute type: first-name, with value type: string
-    When put attribute type: last-name, with value type: string
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    When put attribute type: first-name
+    When attribute(first-name) set value-type: string
+    When put attribute type: last-name
+    When attribute(last-name) set value-type: string
     When transaction commits
     When connection opens schema transaction for database: typedb
     Then attribute(first-name) set supertype: name; fails
@@ -279,11 +306,16 @@ Feature: Concept Attribute Type
     Then attribute(last-name) set supertype: name; fails
 
   Scenario: Attribute types cannot subtype another attribute type of different value type
-    When put attribute type: is-open, with value type: boolean
-    When put attribute type: age, with value type: long
-    When put attribute type: rating, with value type: double
-    When put attribute type: name, with value type: string
-    When put attribute type: timestamp, with value type: datetime
+    When put attribute type: is-open
+    When attribute(is-open) set value-type: boolean
+    When put attribute type: age
+    When attribute(age) set value-type: long
+    When put attribute type: rating
+    When attribute(rating) set value-type: double
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    When put attribute type: timestamp
+    When attribute(timestamp) set value-type: datetime
     When transaction commits
     When connection opens schema transaction for database: typedb
     Then attribute(is-open) set supertype: age; fails
@@ -327,11 +359,16 @@ Feature: Concept Attribute Type
     Then attribute(timestamp) set supertype: name; fails
 
   Scenario: Attribute types can get the root type
-    When put attribute type: is-open, with value type: boolean
-    When put attribute type: age, with value type: long
-    When put attribute type: rating, with value type: double
-    When put attribute type: name, with value type: string
-    When put attribute type: timestamp, with value type: datetime
+    When put attribute type: is-open
+    When attribute(is-open) set value-type: boolean
+    When put attribute type: age
+    When attribute(age) set value-type: long
+    When put attribute type: rating
+    When attribute(rating) set value-type: double
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    When put attribute type: timestamp
+    When attribute(timestamp) set value-type: datetime
     Then attribute(is-open) get supertype: attribute
     Then attribute(age) get supertype: attribute
     Then attribute(rating) get supertype: attribute
@@ -462,8 +499,10 @@ Feature: Concept Attribute Type
 #      | timestamp |
 
   Scenario: Attribute types can have keys
-    When put attribute type: country-code, with value type: string
-    When put attribute type: country-name, with value type: string
+    When put attribute type: country-code
+    When attribute(country-code) set value-type: string
+    When put attribute type: country-name
+    When attribute(country-name) set value-type: string
     When attribute(country-name) set owns attribute type: country-code, with annotations: key
     Then attribute(country-name) get owns attribute types, with annotations: key; contain:
       | country-code |
@@ -474,9 +513,12 @@ Feature: Concept Attribute Type
 
   # TODO: Fix test
   Scenario: Attribute types can unset keys
-    When put attribute type: country-code-1, with value type: string
-    When put attribute type: country-code-2, with value type: string
-    When put attribute type: country-name, with value type: string
+    When put attribute type: country-code-1
+    When attribute(country-code-1) set value-type: string
+    When put attribute type: country-code-2
+    When attribute(country-code-2) set value-type: string
+    When put attribute type: country-name
+    When attribute(country-name) set value-type: string
     When attribute(country-name) set owns attribute type: country-code-1, with annotations: key
     When attribute(country-name) set owns attribute type: country-code-2, with annotations: key
     When attribute(country-name) unset owns attribute type: country-code-1
@@ -492,9 +534,12 @@ Feature: Concept Attribute Type
 
   # TODO: DELETE. Attributes cannot own attributes
   Scenario: Attribute types can have attributes
-    When put attribute type: utc-zone-code, with value type: string
-    When put attribute type: utc-zone-hour, with value type: double
-    When put attribute type: timestamp, with value type: datetime
+    When put attribute type: utc-zone-code
+    When attribute(utc-zone-code) set value-type: string
+    When put attribute type: utc-zone-hour
+    When attribute(utc-zone-hour) set value-type: double
+    When put attribute type: timestamp
+    When attribute(timestamp) set value-type: datetime
     When attribute(timestamp) set owns attribute type: utc-zone-code
     When attribute(timestamp) set owns attribute type: utc-zone-hour
     Then attribute(timestamp) get owns attribute types contain:
@@ -508,9 +553,12 @@ Feature: Concept Attribute Type
 
   # TODO: DELETE. Attributes cannot own attributes
   Scenario: Attribute types can unset attributes
-    When put attribute type: utc-zone-code, with value type: string
-    When put attribute type: utc-zone-hour, with value type: double
-    When put attribute type: timestamp, with value type: datetime
+    When put attribute type: utc-zone-code
+    When attribute(utc-zone-code) set value-type: string
+    When put attribute type: utc-zone-hour
+    When attribute(utc-zone-hour) set value-type: double
+    When put attribute type: timestamp
+    When attribute(timestamp) set value-type: datetime
     When attribute(timestamp) set owns attribute type: utc-zone-code
     When attribute(timestamp) set owns attribute type: utc-zone-hour
     When attribute(timestamp) unset owns attribute type: utc-zone-hour
@@ -525,9 +573,12 @@ Feature: Concept Attribute Type
 
   # TODO: DELETE. Attributes cannot own attributes
   Scenario: Attribute types can have keys and attributes
-    When put attribute type: country-code, with value type: string
-    When put attribute type: country-abbreviation, with value type: string
-    When put attribute type: country-name, with value type: string
+    When put attribute type: country-code
+    When attribute(country-code) set value-type: string
+    When put attribute type: country-abbreviation
+    When attribute(country-abbreviation) set value-type: string
+    When put attribute type: country-name
+    When attribute(country-name) set value-type: string
     When attribute(country-name) set owns attribute type: country-code, with annotations: key
     When attribute(country-name) set owns attribute type: country-abbreviation
     Then attribute(country-name) get owns attribute types, with annotations: key; contain:
@@ -545,13 +596,17 @@ Feature: Concept Attribute Type
 
   # TODO: DELETE. Attributes cannot own attributes
   Scenario: Attribute types can inherit keys and attributes
-    When put attribute type: hash, with value type: string
-    When put attribute type: abbreviation, with value type: string
-    When put attribute type: name, with value type: string
+    When put attribute type: hash
+    When attribute(hash) set value-type: string
+    When put attribute type: abbreviation
+    When attribute(abbreviation) set value-type: string
+    When put attribute type: name
+    When attribute(name) set value-type: string
     When attribute(name) set annotation: @abstract
     When attribute(name) set owns attribute type: hash, with annotations: key
     When attribute(name) set owns attribute type: abbreviation
-    When put attribute type: real-name, with value type: string
+    When put attribute type: real-name
+    When attribute(real-name) set value-type: string
     When attribute(real-name) set annotation: @abstract
     When attribute(real-name) set supertype: name
     Then attribute(real-name) get owns attribute types, with annotations: key; contain:
@@ -566,7 +621,8 @@ Feature: Concept Attribute Type
     Then attribute(real-name) get owns attribute types contain:
       | hash         |
       | abbreviation |
-    When put attribute type: last-name, with value type: string
+    When put attribute type: last-name
+    When attribute(last-name) set value-type: string
     When attribute(last-name) set supertype: real-name
     When transaction commits
     When connection opens read transaction for database: typedb
@@ -583,12 +639,16 @@ Feature: Concept Attribute Type
 
   # TODO: DELETE. Attributes cannot own attributes
   Scenario: Attribute types can be owned as attributes
-    When put attribute type: age, with value type: long
-    When put attribute type: name, with value type: string
+    When put attribute type: age
+    When attribute(age) set value-type: long
+    When put attribute type: name
+    When attribute(name) set value-type: string
     When attribute(name) set annotation: @abstract
-    When put attribute type: boy-name, with value type: string
+    When put attribute type: boy-name
+    When attribute(boy-name) set value-type: string
     When attribute(boy-name) set supertype: name
-    When put attribute type: girl-name, with value type: string
+    When put attribute type: girl-name
+    When attribute(girl-name) set value-type: string
     When attribute(girl-name) set supertype: name
     When put entity type: person
     When entity(person) set annotation: @abstract
@@ -643,7 +703,8 @@ Feature: Concept Attribute Type
 
   # TODO: DELETE. Attributes cannot own attributes
   Scenario: Attribute types can be owned as keys
-    When put attribute type: email, with value type: string
+    When put attribute type: email
+    When attribute(email) set value-type: string
     When put entity type: company
     When entity(company) set owns attribute type: email
     When put entity type: person
@@ -680,7 +741,8 @@ Feature: Concept Attribute Type
       | company |
 
   Scenario: Attribute types with value type string can unset their regular expression
-    When put attribute type: email, with value type: string
+    When put attribute type: email
+    When attribute(email) set value-type: string
     When attribute(email) as(string) set regex: \S+@\S+\.\S+
     Then attribute(email) as(string) get regex: \S+@\S+\.\S+
     When transaction commits

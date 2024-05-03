@@ -216,8 +216,10 @@ Feature: Concept Entity Type
     Then entity(person) set supertype: person; fails
 
   Scenario: Entity types can have keys
-    When put attribute type: email, with value type: string
-    When put attribute type: username, with value type: string
+    When put attribute type: email
+    When attribute(email) set value-type: string
+    When put attribute type: username
+    When attribute(username) set value-type: string
     When put entity type: person
     When entity(person) set owns attribute type: email, with annotations: key
     When entity(person) set owns attribute type: username, with annotations: key
@@ -231,8 +233,10 @@ Feature: Concept Entity Type
       | username |
 
   Scenario: Entity types can only commit keys if every instance owns a distinct key
-    When put attribute type: email, with value type: string
-    When put attribute type: username, with value type: string
+    When put attribute type: email
+    When attribute(email) set value-type: string
+    When put attribute type: username
+    When attribute(username) set value-type: string
     When put entity type: person
     When entity(person) set owns attribute type: username, with annotations: key
     Then transaction commits
@@ -265,8 +269,10 @@ Feature: Concept Entity Type
       | username |
 
   Scenario: Entity types can unset keys
-    When put attribute type: email, with value type: string
-    When put attribute type: username, with value type: string
+    When put attribute type: email
+    When attribute(email) set value-type: string
+    When put attribute type: username
+    When attribute(username) set value-type: string
     When put entity type: person
     When entity(person) set owns attribute type: email, with annotations: key
     When entity(person) set owns attribute type: username, with annotations: key
@@ -281,11 +287,16 @@ Feature: Concept Entity Type
       | username |
 
   Scenario: Entity types cannot have keys of attributes that are not keyable
-    When put attribute type: is-open, with value type: boolean
-    When put attribute type: age, with value type: long
-    When put attribute type: rating, with value type: double
-    When put attribute type: name, with value type: string
-    When put attribute type: timestamp, with value type: datetime
+    When put attribute type: is-open
+    When attribute(is-open) set value-type: boolean
+    When put attribute type: age
+    When attribute(age) set value-type: long
+    When put attribute type: rating
+    When attribute(rating) set value-type: double
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    When put attribute type: timestamp
+    When attribute(timestamp) set value-type: datetime
     When put entity type: person
     When entity(person) set owns attribute type: age, with annotations: key
     When entity(person) set owns attribute type: name, with annotations: key
@@ -296,8 +307,10 @@ Feature: Concept Entity Type
     Then entity(person) set owns attribute type: rating, with annotations: key; fails
 
   Scenario: Entity types can have attributes
-    When put attribute type: name, with value type: string
-    When put attribute type: age, with value type: long
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    When put attribute type: age
+    When attribute(age) set value-type: long
     When put entity type: person
     When entity(person) set owns attribute type: name
     When entity(person) set owns attribute type: age
@@ -311,8 +324,10 @@ Feature: Concept Entity Type
       | age  |
 
   Scenario: Entity types can unset owning attributes
-    When put attribute type: name, with value type: string
-    When put attribute type: age, with value type: long
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    When put attribute type: age
+    When attribute(age) set value-type: long
     When put entity type: person
     When entity(person) set owns attribute type: name
     When entity(person) set owns attribute type: age
@@ -327,7 +342,8 @@ Feature: Concept Entity Type
       | age  |
 
   Scenario: Entity types cannot unset owning attributes that are owned by existing instances
-    When put attribute type: name, with value type: string
+    When put attribute type: name
+    When attribute(name) set value-type: string
     When put entity type: person
     When entity(person) set owns attribute type: name
     Then transaction commits
@@ -340,10 +356,14 @@ Feature: Concept Entity Type
     Then entity(person) unset owns attribute type: name; fails
 
   Scenario: Entity types can have keys and attributes
-    When put attribute type: email, with value type: string
-    When put attribute type: username, with value type: string
-    When put attribute type: name, with value type: string
-    When put attribute type: age, with value type: long
+    When put attribute type: email
+    When attribute(email) set value-type: string
+    When put attribute type: username
+    When attribute(username) set value-type: string
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    When put attribute type: age
+    When attribute(age) set value-type: long
     When put entity type: person
     When entity(person) set owns attribute type: email, with annotations: key
     When entity(person) set owns attribute type: username, with annotations: key
@@ -369,10 +389,14 @@ Feature: Concept Entity Type
       | age      |
 
   Scenario: Entity types can inherit keys and attributes
-    When put attribute type: email, with value type: string
-    When put attribute type: name, with value type: string
-    When put attribute type: reference, with value type: string
-    When put attribute type: rating, with value type: double
+    When put attribute type: email
+    When attribute(email) set value-type: string
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    When put attribute type: reference
+    When attribute(reference) set value-type: string
+    When put attribute type: rating
+    When attribute(rating) set value-type: double
     When put entity type: person
     When entity(person) set owns attribute type: email, with annotations: key
     When entity(person) set owns attribute type: name
@@ -418,8 +442,10 @@ Feature: Concept Entity Type
     Then entity(customer) get owns explicit attribute types do not contain:
       | email     |
       | name      |
-    When put attribute type: license, with value type: string
-    When put attribute type: points, with value type: double
+    When put attribute type: license
+    When attribute(license) set value-type: string
+    When put attribute type: points
+    When attribute(points) set value-type: double
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
     When entity(subscriber) set owns attribute type: license, with annotations: key
@@ -470,14 +496,18 @@ Feature: Concept Entity Type
       | rating    |
 
   Scenario: Entity types can inherit keys and attributes that are subtypes of each other
-    When put attribute type: username, with value type: string
+    When put attribute type: username
+    When attribute(username) set value-type: string
     When attribute(username) set annotation: @abstract
-    When put attribute type: score, with value type: double
+    When put attribute type: score
+    When attribute(score) set value-type: double
     When attribute(score) set annotation: @abstract
-    When put attribute type: reference, with value type: string
+    When put attribute type: reference
+    When attribute(reference) set value-type: string
     When attribute(reference) set annotation: @abstract
     When attribute(reference) set supertype: username
-    When put attribute type: rating, with value type: double
+    When put attribute type: rating
+    When attribute(rating) set value-type: double
     When attribute(rating) set annotation: @abstract
     When attribute(rating) set supertype: score
     When put entity type: person
@@ -527,9 +557,11 @@ Feature: Concept Entity Type
     Then entity(customer) get owns explicit attribute types do not contain:
       | username  |
       | score     |
-    When put attribute type: license, with value type: string
+    When put attribute type: license
+    When attribute(license) set value-type: string
     When attribute(license) set supertype: reference
-    When put attribute type: points, with value type: double
+    When put attribute type: points
+    When attribute(points) set value-type: double
     When attribute(points) set supertype: rating
     When put entity type: subscriber
     When entity(subscriber) set annotation: @abstract
@@ -582,19 +614,27 @@ Feature: Concept Entity Type
       | rating    |
 
   Scenario: Entity types can override inherited keys and attributes
-    When put attribute type: username, with value type: string
-    When put attribute type: email, with value type: string
+    When put attribute type: username
+    When attribute(username) set value-type: string
+    When put attribute type: email
+    When attribute(email) set value-type: string
     When attribute(email) set annotation: @abstract
-    When put attribute type: name, with value type: string
+    When put attribute type: name
+    When attribute(name) set value-type: string
     When attribute(name) set annotation: @abstract
-    When put attribute type: age, with value type: long
-    When put attribute type: reference, with value type: string
+    When put attribute type: age
+    When attribute(age) set value-type: long
+    When put attribute type: reference
+    When attribute(reference) set value-type: string
     When attribute(reference) set annotation: @abstract
-    When put attribute type: work-email, with value type: string
+    When put attribute type: work-email
+    When attribute(work-email) set value-type: string
     When attribute(work-email) set supertype: email
-    When put attribute type: nick-name, with value type: string
+    When put attribute type: nick-name
+    When attribute(nick-name) set value-type: string
     When attribute(nick-name) set supertype: name
-    When put attribute type: rating, with value type: double
+    When put attribute type: rating
+    When attribute(rating) set value-type: double
     When attribute(rating) set annotation: @abstract
     When put entity type: person
     When entity(person) set annotation: @abstract
@@ -679,9 +719,11 @@ Feature: Concept Entity Type
       | age        |
       | email      |
       | name       |
-    When put attribute type: license, with value type: string
+    When put attribute type: license
+    When attribute(license) set value-type: string
     When attribute(license) set supertype: reference
-    When put attribute type: points, with value type: double
+    When put attribute type: points
+    When attribute(points) set value-type: double
     When attribute(points) set supertype: rating
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
@@ -763,9 +805,11 @@ Feature: Concept Entity Type
       | rating     |
 
   Scenario: Entity types can override inherited attributes as keys
-    When put attribute type: name, with value type: string
+    When put attribute type: name
+    When attribute(name) set value-type: string
     When attribute(name) set annotation: @abstract
-    When put attribute type: username, with value type: string
+    When put attribute type: username
+    When attribute(username) set value-type: string
     When attribute(username) set supertype: name
     When put entity type: person
     When entity(person) set annotation: @abstract
@@ -795,8 +839,10 @@ Feature: Concept Entity Type
       | name |
 
   Scenario: Entity types can redeclare keys as keys
-    When put attribute type: name, with value type: string
-    When put attribute type: email, with value type: string
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    When put attribute type: email
+    When attribute(email) set value-type: string
     When put entity type: person
     When entity(person) set owns attribute type: name, with annotations: key
     When entity(person) set owns attribute type: email, with annotations: key
@@ -806,8 +852,10 @@ Feature: Concept Entity Type
     Then entity(person) set owns attribute type: email, with annotations: key
 
   Scenario: Entity types can redeclare attributes as attributes
-    When put attribute type: name, with value type: string
-    When put attribute type: email, with value type: string
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    When put attribute type: email
+    When attribute(email) set value-type: string
     When put entity type: person
     When entity(person) set owns attribute type: name
     When entity(person) set owns attribute type: email
@@ -817,9 +865,11 @@ Feature: Concept Entity Type
     Then entity(person) set owns attribute type: email
 
   Scenario: Entity types can re-override keys
-    When put attribute type: email, with value type: string
+    When put attribute type: email
+    When attribute(email) set value-type: string
     When attribute(email) set annotation: @abstract
-    When put attribute type: work-email, with value type: string
+    When put attribute type: work-email
+    When attribute(work-email) set value-type: string
     When attribute(work-email) set supertype: email
     When put entity type: person
     When entity(person) set annotation: @abstract
@@ -835,9 +885,11 @@ Feature: Concept Entity Type
     Then entity(customer) get owns overridden attribute(work-email) get label: email
 
   Scenario: Entity types can re-override attributes as attributes
-    When put attribute type: name, with value type: string
+    When put attribute type: name
+    When attribute(name) set value-type: string
     When attribute(name) set annotation: @abstract
-    When put attribute type: nick-name, with value type: string
+    When put attribute type: nick-name
+    When attribute(nick-name) set value-type: string
     When attribute(nick-name) set supertype: name
     When put entity type: person
     When entity(person) set annotation: @abstract
@@ -853,8 +905,10 @@ Feature: Concept Entity Type
     Then entity(customer) get owns overridden attribute(nick-name) get label: name
 
   Scenario: Entity types can redeclare keys as attributes
-    When put attribute type: name, with value type: string
-    When put attribute type: email, with value type: string
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    When put attribute type: email
+    When attribute(email) set value-type: string
     When put entity type: person
     When entity(person) set owns attribute type: name, with annotations: key
     When entity(person) set owns attribute type: email, with annotations: key
@@ -864,8 +918,10 @@ Feature: Concept Entity Type
     Then entity(person) set owns attribute type: email
 
   Scenario: Entity types can redeclare attributes as keys
-    When put attribute type: name, with value type: string
-    When put attribute type: email, with value type: string
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    When put attribute type: email
+    When attribute(email) set value-type: string
     When put entity type: person
     When entity(person) set owns attribute type: name
     When entity(person) set owns attribute type: email
@@ -875,7 +931,8 @@ Feature: Concept Entity Type
     Then entity(person) set owns attribute type: email, with annotations: key
 
   Scenario: Entity types can redeclare inherited attributes as keys (which will override)
-    When put attribute type: email, with value type: string
+    When put attribute type: email
+    When attribute(email) set value-type: string
     When put entity type: person
     When entity(person) set owns attribute type: email
     Then entity(person) get owns overridden attribute(email) exists: false
@@ -897,8 +954,10 @@ Feature: Concept Entity Type
       | email |
 
   Scenario: Entity types cannot redeclare inherited attributes as attributes
-    When put attribute type: email, with value type: string
-    When put attribute type: name, with value type: string
+    When put attribute type: email
+    When attribute(email) set value-type: string
+    When put attribute type: name
+    When attribute(name) set value-type: string
     When put entity type: person
     When entity(person) set owns attribute type: name
     When put entity type: customer
@@ -907,8 +966,10 @@ Feature: Concept Entity Type
     Then transaction commits; fails
 
   Scenario: Entity types cannot redeclare inherited keys as keys or attributes
-    When put attribute type: email, with value type: string
-    When put attribute type: name, with value type: string
+    When put attribute type: email
+    When attribute(email) set value-type: string
+    When put attribute type: name
+    When attribute(name) set value-type: string
     When put entity type: person
     When entity(person) set owns attribute type: email, with annotations: key
     When put entity type: customer
@@ -923,9 +984,11 @@ Feature: Concept Entity Type
     Then transaction commits; fails
 
   Scenario: Entity types cannot redeclare inherited key attribute types
-    When put attribute type: email, with value type: string
+    When put attribute type: email
+    When attribute(email) set value-type: string
     When attribute(email) set annotation: @abstract
-    When put attribute type: customer-email, with value type: string
+    When put attribute type: customer-email
+    When attribute(customer-email) set value-type: string
     When attribute(customer-email) set supertype: email
     When put entity type: person
     When entity(person) set annotation: @abstract
@@ -939,9 +1002,11 @@ Feature: Concept Entity Type
     Then transaction commits; fails
 
   Scenario: Entity types cannot redeclare overridden key attribute types
-    When put attribute type: email, with value type: string
+    When put attribute type: email
+    When attribute(email) set value-type: string
     When attribute(email) set annotation: @abstract
-    When put attribute type: customer-email, with value type: string
+    When put attribute type: customer-email
+    When attribute(customer-email) set value-type: string
     When attribute(customer-email) set supertype: email
     When put entity type: person
     When entity(person) set annotation: @abstract
@@ -955,9 +1020,11 @@ Feature: Concept Entity Type
     Then transaction commits; fails
 
   Scenario: Entity types cannot redeclare inherited owns attribute types
-    When put attribute type: name, with value type: string
+    When put attribute type: name
+    When attribute(name) set value-type: string
     When attribute(name) set annotation: @abstract
-    When put attribute type: customer-name, with value type: string
+    When put attribute type: customer-name
+    When attribute(customer-name) set value-type: string
     When attribute(customer-name) set supertype: name
     When put entity type: person
     When entity(person) set annotation: @abstract
@@ -971,9 +1038,11 @@ Feature: Concept Entity Type
     Then transaction commits; fails
 
   Scenario: Entity types cannot redeclare overridden owns attribute types
-    When put attribute type: name, with value type: string
+    When put attribute type: name
+    When attribute(name) set value-type: string
     When attribute(name) set annotation: @abstract
-    When put attribute type: customer-name, with value type: string
+    When put attribute type: customer-name
+    When attribute(customer-name) set value-type: string
     When attribute(customer-name) set supertype: name
     When put entity type: person
     When entity(person) set annotation: @abstract
@@ -987,13 +1056,17 @@ Feature: Concept Entity Type
     Then transaction commits; fails
 
   Scenario: Entity types cannot override declared keys and attributes
-    When put attribute type: username, with value type: string
+    When put attribute type: username
+    When attribute(username) set value-type: string
     When attribute(username) set annotation: @abstract
-    When put attribute type: email, with value type: string
+    When put attribute type: email
+    When attribute(email) set value-type: string
     When attribute(email) set supertype: username
-    When put attribute type: name, with value type: string
+    When put attribute type: name
+    When attribute(name) set value-type: string
     When attribute(name) set annotation: @abstract
-    When put attribute type: first-name, with value type: string
+    When put attribute type: first-name
+    When attribute(first-name) set value-type: string
     When attribute(first-name) set supertype: name
     When put entity type: person
     When entity(person) set annotation: @abstract
@@ -1006,10 +1079,14 @@ Feature: Concept Entity Type
     Then entity(person) set owns attribute type: first-name as name; fails
 
   Scenario: Entity types cannot override inherited keys and attributes other than with their subtypes
-    When put attribute type: username, with value type: string
-    When put attribute type: name, with value type: string
-    When put attribute type: reference, with value type: string
-    When put attribute type: rating, with value type: double
+    When put attribute type: username
+    When attribute(username) set value-type: string
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    When put attribute type: reference
+    When attribute(reference) set value-type: string
+    When put attribute type: rating
+    When attribute(rating) set value-type: double
     When put entity type: person
     When entity(person) set owns attribute type: username, with annotations: key
     When entity(person) set owns attribute type: name
