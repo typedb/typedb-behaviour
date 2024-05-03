@@ -1311,7 +1311,8 @@ Feature: Concept Entity Type
     When relation(parentship) create role: child
     When put relation type: fathership
     When relation(fathership) set supertype: parentship
-    When relation(fathership) create role: father as parent
+    When relation(fathership) create role: father
+    When relation(fathership) get role(father); set override: parent
     When put entity type: person
     When entity(person) set plays role: parentship:parent
     When entity(person) set plays role: parentship:child
@@ -1340,7 +1341,8 @@ Feature: Concept Entity Type
       | parentship:child  |
     When put relation type: mothership
     When relation(mothership) set supertype: parentship
-    When relation(mothership) create role: mother as parent
+    When relation(mothership) create role: mother
+    When relation(mothership) get role(mother); set override: parent
     When put entity type: woman
     When entity(woman) set supertype: person
     When entity(woman) set plays role: mothership:mother
@@ -1383,7 +1385,8 @@ Feature: Concept Entity Type
     When relation(parentship) create role: child
     When put relation type: fathership
     When relation(fathership) set supertype: parentship
-    When relation(fathership) create role: father as parent
+    When relation(fathership) create role: father
+    When relation(fathership) get role(father); set override: parent
     When put entity type: person
     When entity(person) set plays role: parentship:parent
     When entity(person) set plays role: parentship:child
@@ -1414,7 +1417,8 @@ Feature: Concept Entity Type
       | parentship:parent |
     When put relation type: mothership
     When relation(mothership) set supertype: parentship
-    When relation(mothership) create role: mother as parent
+    When relation(mothership) create role: mother
+    When relation(mothership) get role(mother); set override: parent
     When put entity type: woman
     When entity(woman) set supertype: person
     When entity(woman) set plays role: mothership:mother as parentship:parent
@@ -1468,7 +1472,8 @@ Feature: Concept Entity Type
     When relation(parentship) create role: parent
     When put relation type: fathership
     When relation(fathership) set supertype: parentship
-    When relation(fathership) create role: father as parent
+    When relation(fathership) create role: father
+    When relation(fathership) get role(father); set override: parent
     When put entity type: person
     When entity(person) set plays role: parentship:parent
     When put entity type: man
@@ -1483,7 +1488,8 @@ Feature: Concept Entity Type
     When relation(parentship) create role: parent
     When put relation type: fathership
     When relation(fathership) set supertype: parentship
-    When relation(fathership) create role: father as parent
+    When relation(fathership) create role: father
+    When relation(fathership) get role(father); set override: parent
     When put entity type: person
     When entity(person) set plays role: parentship:parent
     When put entity type: man
@@ -1503,7 +1509,8 @@ Feature: Concept Entity Type
     When relation(parentship) create role: parent
     When put relation type: fathership
     When relation(fathership) set supertype: parentship
-    When relation(fathership) create role: father as parent
+    When relation(fathership) create role: father
+    When relation(fathership) get role(father); set override: parent
     When put entity type: person
     When entity(person) set plays role: parentship:parent
     Then entity(person) set plays role: fathership:father as parentship:parent; fails
