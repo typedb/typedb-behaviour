@@ -12,7 +12,7 @@ Feature: Concept Relation Type and Role Type
     Given connection does not have any database
     Given connection create database: typedb
     Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection opens schema transaction for database: typedb
 
   Scenario: Root relation type cannot be deleted
     Then delete relation type: relation; fails
@@ -31,7 +31,7 @@ Feature: Concept Relation Type and Role Type
       | marriage:husband |
       | marriage:wife    |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then relation(marriage) exists: true
     Then relation(marriage) get supertype: relation
     Then relation(marriage) get role(husband) exists: true
@@ -54,7 +54,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(relation) get role(role) get subtypes do not contain:
       | parentship:parent |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     When delete relation type: parentship
     Then relation(parentship) exists: false
     Then relation(relation) get role(role) get subtypes do not contain:
@@ -66,7 +66,7 @@ Feature: Concept Relation Type and Role Type
     When relation(marriage) create role: husband
     When relation(marriage) create role: wife
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     When delete relation type: marriage
     Then relation(marriage) exists: false
     Then relation(relation) get role(role) get subtypes do not contain:
@@ -75,7 +75,7 @@ Feature: Concept Relation Type and Role Type
       | marriage:husband  |
       | marriage:wife     |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then relation(parentship) exists: false
     Then relation(marriage) exists: false
     Then relation(relation) get role(role) get subtypes do not contain:
@@ -92,14 +92,14 @@ Feature: Concept Relation Type and Role Type
     When transaction commits
     When connection close all sessions
     When connection open data session for database: typedb
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When $m = relation(marriage) create new instance
     When $a = entity(person) create new instance
     When relation $m add player for role(wife): $a
     When transaction commits
     When connection close all sessions
     When connection open schema session for database: typedb
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then delete relation type: marriage; fails
 
   Scenario: Role types that have instances cannot be deleted
@@ -111,16 +111,16 @@ Feature: Concept Relation Type and Role Type
     When transaction commits
     When connection close all sessions
     When connection open data session for database: typedb
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When $m = relation(marriage) create new instance
     When $a = entity(person) create new instance
     When relation $m add player for role(wife): $a
     When transaction commits
     When connection close all sessions
     When connection open schema session for database: typedb
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then relation(marriage) delete role: wife; fails
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then relation(marriage) delete role: husband
     Then transaction commits
 
@@ -142,7 +142,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) get role(husband) get label: husband
     Then relation(marriage) get role(wife) get label: wife
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then relation(marriage) get label: marriage
     Then relation(marriage) get role(husband) get label: husband
     Then relation(marriage) get role(wife) get label: wife
@@ -157,7 +157,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(employment) get role(employee) get label: employee
     Then relation(employment) get role(employer) get label: employer
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then relation(employment) exists: true
     Then relation(employment) get label: employment
     Then relation(employment) get role(employee) get label: employee
@@ -175,17 +175,17 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) get role(husband) get annotations do not contain: @abstract
     Then relation(marriage) get role(wife) get annotations do not contain: @abstract
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then relation(parentship) get annotations do not contain: @abstract
     Then relation(parentship) get role(parent) get annotations do not contain: @abstract
     Then relation(parentship) get role(child) get annotations do not contain: @abstract
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then relation(marriage) get annotations contain: @abstract
     Then relation(marriage) get role(husband) get annotations do not contain: @abstract
     Then relation(marriage) get role(wife) get annotations do not contain: @abstract
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then relation(parentship) get annotations do not contain: @abstract
     Then relation(parentship) get role(parent) get annotations do not contain: @abstract
     Then relation(parentship) get role(child) get annotations do not contain: @abstract
@@ -194,7 +194,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(parent) get annotations do not contain: @abstract
     Then relation(parentship) get role(child) get annotations do not contain: @abstract
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then relation(parentship) get annotations contain: @abstract
     Then relation(parentship) get role(parent) get annotations do not contain: @abstract
     Then relation(parentship) get role(child) get annotations do not contain: @abstract
@@ -212,23 +212,23 @@ Feature: Concept Relation Type and Role Type
     Then transaction commits
     When connection close all sessions
     When connection open data session for database: typedb
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     Then $m = relation(fathership) create new instance
     When $a = entity(person) create new instance
     When relation $m add player for role(father): $a
     Then transaction commits
     When connection close all sessions
     When connection open schema session for database: typedb
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then relation(parentship) set annotation: @abstract
     Then transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then relation(parentship) get annotations contain: @abstract
 
   Scenario: Relation types must have at least one role in order to commit, unless they are abstract
     When put relation type: connection
     Then transaction commits; fails
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     When put relation type: connection
     When relation(connection) set annotation: @abstract
     Then transaction commits
@@ -272,7 +272,7 @@ Feature: Concept Relation Type and Role Type
       | parentship:child  |
       | fathership:father |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then relation(fathership) get supertype: parentship
     Then relation(fathership) get role(father) get supertype: parentship:parent
     Then relation(fathership) get role(child) get supertype: relation:role
@@ -348,7 +348,7 @@ Feature: Concept Relation Type and Role Type
       | fathership:father |
       | father-son:son    |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then relation(father-son) get supertype: fathership
     Then relation(father-son) get role(father) get supertype: parentship:parent
     Then relation(father-son) get role(son) get supertype: parentship:child
@@ -407,7 +407,7 @@ Feature: Concept Relation Type and Role Type
     When put relation type: marriage
     When relation(marriage) create role: wife
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then relation(marriage) set supertype: marriage; fails
 
   Scenario: Relation types can inherit related role types
@@ -425,7 +425,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get declared roles do not contain:
       | parentship:child  |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     When put relation type: mothership
     When relation(mothership) set supertype: parentship
     When relation(mothership) create role: mother as (DEPRECATED) parent
@@ -437,7 +437,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(mothership) get declared roles do not contain:
       | parentship:child  |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then relation(fathership) get roles contain:
       | fathership:father |
       | parentship:child  |
@@ -461,7 +461,7 @@ Feature: Concept Relation Type and Role Type
     When put relation type: fathership
     When relation(fathership) set supertype: parentship
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then relation(fathership) get roles contain:
       | parentship:parent |
       | parentship:child  |
@@ -483,14 +483,14 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get roles do not contain:
       | parentship:parent |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     When put relation type: mothership
     When relation(mothership) set supertype: parentship
     When relation(mothership) create role: mother as (DEPRECATED) parent
     Then relation(mothership) get roles do not contain:
       | parentship:parent |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then relation(fathership) get roles do not contain:
       | parentship:parent |
     Then relation(mothership) get roles do not contain:
@@ -516,11 +516,11 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: father
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     When relation(parentship) create role: parent
     When relation(fathership) create role: father as (DEPRECATED) parent
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then relation(fathership) get overridden role(father) get label: parent
 
   Scenario: Relation types can have keys
@@ -531,7 +531,7 @@ Feature: Concept Relation Type and Role Type
     When relation(marriage) get owns: license; set annotation: @key
     Then relation(marriage) get owns: license; get annotations contain: @key
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then relation(marriage) get owns: license; get annotations contain: @key
 
 --- STARTED SKIPPING ---
@@ -549,7 +549,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) get owns, with annotations (DEPRECATED): key; do not contain:
       | license |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     When relation(marriage) unset owns: certificate
     Then relation(marriage) get owns, with annotations (DEPRECATED): key; do not contain:
       | license     |
@@ -585,7 +585,7 @@ Feature: Concept Relation Type and Role Type
       | date     |
       | religion |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then relation(marriage) get owns contain:
       | date     |
       | religion |
@@ -601,7 +601,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) get owns do not contain:
       | religion |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     When relation(marriage) unset owns: date
     Then relation(marriage) get owns do not contain:
       | date     |
@@ -627,7 +627,7 @@ Feature: Concept Relation Type and Role Type
       | date        |
       | religion    |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then relation(marriage) get owns, with annotations (DEPRECATED): key; contain:
       | license     |
       | certificate |
@@ -660,7 +660,7 @@ Feature: Concept Relation Type and Role Type
       | employment-hours     |
       | contractor-hours     |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; contain:
       | employment-reference |
       | contractor-reference |
@@ -687,7 +687,7 @@ Feature: Concept Relation Type and Role Type
       | contractor-hours     |
       | parttime-hours       |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; contain:
       | employment-reference |
       | contractor-reference |
@@ -739,7 +739,7 @@ Feature: Concept Relation Type and Role Type
       | employment-hours     |
       | contractor-hours     |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; contain:
       | employment-reference |
       | contractor-reference |
@@ -769,7 +769,7 @@ Feature: Concept Relation Type and Role Type
       | contractor-hours     |
       | parttime-hours       |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; contain:
       | employment-reference |
       | contractor-reference |
@@ -824,7 +824,7 @@ Feature: Concept Relation Type and Role Type
       | employment-reference |
       | employment-hours     |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; contain:
       | contractor-reference |
     Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; do not contain:
@@ -851,7 +851,7 @@ Feature: Concept Relation Type and Role Type
       | parttime-reference |
       | parttime-hours     |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; contain:
       | contractor-reference |
     Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; do not contain:
@@ -900,7 +900,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(contractor-employment) get owns do not contain:
       | employment-reference |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; contain:
       | contractor-reference |
     Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; do not contain:
@@ -920,7 +920,7 @@ Feature: Concept Relation Type and Role Type
     When relation(marriage) set owns: license, with annotations: key
     When relation(marriage) set owns: date
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then relation(marriage) set owns: license
 
   Scenario: Relation types can redeclare attributes as (DEPRECATED) keys
@@ -932,7 +932,7 @@ Feature: Concept Relation Type and Role Type
     When relation(marriage) set owns: license
     Then relation(marriage) set owns: date, with annotations: key
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     When relation(marriage) set owns: license, with annotations: key
 
   Scenario: Relation types cannot redeclare inherited keys and attributes
@@ -946,10 +946,10 @@ Feature: Concept Relation Type and Role Type
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then relation(contractor-employment) set owns: employment-reference, with annotations: key
     Then transaction commits; fails
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then relation(contractor-employment) set owns: employment-hours
     Then transaction commits; fails
 
@@ -1031,9 +1031,9 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set owns: reference, with annotations: key
     When relation(employment) set owns: hours
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then relation(employment) set owns: social-security-number as (DEPRECATED) reference, with annotations: key; fails
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then relation(employment) set owns: max-hours as (DEPRECATED) hours; fails
 
   Scenario: Relation types cannot override inherited keys and attributes other than with their subtypes
@@ -1049,9 +1049,9 @@ Feature: Concept Relation Type and Role Type
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then relation(contractor-employment) set owns: contractor-reference as (DEPRECATED) employment-reference, with annotations: key; fails
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then relation(contractor-employment) set owns: contractor-hours as (DEPRECATED) employment-hours; fails
 
   Scenario: Relation types can play role types
@@ -1065,7 +1065,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) get plays roles contain:
       | locates:located |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     When put relation type: organises
     When relation(organises) create role: organiser
     When relation(organises) create role: organised
@@ -1074,7 +1074,7 @@ Feature: Concept Relation Type and Role Type
       | locates:located     |
       | organises:organised |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then relation(marriage) get plays roles contain:
       | locates:located     |
       | organises:organised |
@@ -1095,13 +1095,13 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) get plays roles do not contain:
       | locates:located |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     When relation(marriage) unset plays role: organises:organised
     Then relation(marriage) get plays roles do not contain:
       | locates:located     |
       | organises:organised |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then relation(marriage) get plays roles do not contain:
       | locates:located     |
       | organises:organised |
@@ -1124,7 +1124,7 @@ Feature: Concept Relation Type and Role Type
       | locates:located                       |
       | contractor-locates:contractor-located |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     When put relation type: parttime-locates
     When relation(parttime-locates) create role: parttime-locating
     When relation(parttime-locates) create role: parttime-located
@@ -1138,7 +1138,7 @@ Feature: Concept Relation Type and Role Type
       | contractor-locates:contractor-located |
       | parttime-locates:parttime-located     |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then relation(contractor-employment) get plays roles contain:
       | locates:located                       |
       | contractor-locates:contractor-located |
@@ -1166,7 +1166,7 @@ Feature: Concept Relation Type and Role Type
       | locates:located                       |
       | contractor-locates:contractor-located |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     When put relation type: parttime-locates
     When relation(parttime-locates) set supertype: contractor-locates
     When relation(parttime-locates) create role: parttime-locating as (DEPRECATED) contractor-locating
@@ -1181,7 +1181,7 @@ Feature: Concept Relation Type and Role Type
       | contractor-locates:contractor-located |
       | parttime-locates:parttime-located     |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then relation(contractor-employment) get plays roles contain:
       | locates:located                       |
       | contractor-locates:contractor-located |
@@ -1208,7 +1208,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(contractor-employment) get plays roles do not contain:
       | locates:located |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     When put relation type: parttime-locates
     When relation(parttime-locates) set supertype: contractor-locates
     When relation(parttime-locates) create role: parttime-locating as (DEPRECATED) contractor-locating
@@ -1222,7 +1222,7 @@ Feature: Concept Relation Type and Role Type
       | locates:located                       |
       | contractor-locates:contractor-located |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then relation(contractor-employment) get plays roles do not contain:
       | locates:located |
     Then relation(parttime-employment) get plays roles do not contain:
@@ -1244,9 +1244,9 @@ Feature: Concept Relation Type and Role Type
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then relation(parttime-employment) set plays role: locates:located; fails
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then relation(parttime-employment) set plays role: contractor-locates:contractor-located
     Then transaction commits; fails
 

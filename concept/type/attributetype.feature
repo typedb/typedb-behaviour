@@ -483,7 +483,7 @@ Feature: Concept Attribute Type
     Then attribute(country-name) get owns attribute types, with annotations: key; do not contain:
       | country-code-1 |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When attribute(country-name) unset owns attribute type: country-code-2
     Then attribute(country-name) get owns attribute types, with annotations: key; do not contain:
       | country-code-1 |
@@ -517,7 +517,7 @@ Feature: Concept Attribute Type
     Then attribute(timestamp) get owns attribute types do not contain:
       | utc-zone-hour |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When attribute(timestamp) unset owns attribute type: utc-zone-code
     Then attribute(timestamp) get owns attribute types do not contain:
       | utc-zone-code |
