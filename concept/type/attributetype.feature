@@ -11,8 +11,7 @@ Feature: Concept Attribute Type
     Given connection has been opened
     Given connection does not have any database
     Given connection create database: typedb
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection opens schema transaction for database: typedb
 
   Scenario: Root attribute type cannot be deleted
     Then delete attribute type: attribute; throws exception
@@ -22,51 +21,51 @@ Feature: Concept Attribute Type
     Then attribute(name) is null: false
     Then attribute(name) get supertype: attribute
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then attribute(name) is null: false
     Then attribute(name) get supertype: attribute
 
-  Scenario: Attribute types can be created with value class boolean
+  Scenario: Attribute types can be created with value type boolean
     When put attribute type: is-open, with value type: boolean
     Then attribute(is-open) get value type: boolean
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then attribute(is-open) get value type: boolean
 
-  Scenario: Attribute types can be created with value class long
+  Scenario: Attribute types can be created with value type long
     When put attribute type: age, with value type: long
     Then attribute(age) get value type: long
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then attribute(age) get value type: long
 
-  Scenario: Attribute types can be created with value class double
+  Scenario: Attribute types can be created with value type double
     When put attribute type: rating, with value type: double
     Then attribute(rating) get value type: double
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then attribute(rating) get value type: double
 
-  Scenario: Attribute types can be created with value class string
+  Scenario: Attribute types can be created with value type string
     When put attribute type: name, with value type: string
     Then attribute(name) get value type: string
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then attribute(name) get value type: string
 
   Scenario: Attribute types with value type string and regular expression can be created
     When put attribute type: email, with value type: string
-    When attribute(email) as(string) set regex: \S+@\S+\.\S+
-    Then attribute(email) as(string) get regex: \S+@\S+\.\S+
+    When attribute(email) set annotation: @regex("\S+@\S+\.\S+")
+    Then attribute(email) get annotations contain: @regex("\S+@\S+\.\S+")
     When transaction commits
-    When session opens transaction of type: read
-    Then attribute(email) as(string) get regex: \S+@\S+\.\S+
+    When connection opens read transaction for database: typedb
+    Then attribute(email) get annotations contain: @regex("\S+@\S+\.\S+")
 
-  Scenario: Attribute types can be created with value class datetime
+  Scenario: Attribute types can be created with value type datetime
     When put attribute type: timestamp, with value type: datetime
     Then attribute(timestamp) get value type: datetime
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then attribute(timestamp) get value type: datetime
 
   Scenario: Attribute types can be deleted
@@ -79,7 +78,7 @@ Feature: Concept Attribute Type
     Then attribute(attribute) get subtypes do not contain:
       | age |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(name) is null: false
     Then attribute(age) is null: true
     Then attribute(attribute) get subtypes do not contain:
@@ -90,7 +89,7 @@ Feature: Concept Attribute Type
       | name |
       | age  |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then attribute(name) is null: true
     Then attribute(age) is null: true
     Then attribute(attribute) get subtypes do not contain:
@@ -100,14 +99,10 @@ Feature: Concept Attribute Type
   Scenario: Attribute types that have instances cannot be deleted
     When put attribute type: name, with value type: string
     When transaction commits
-    When connection close all sessions
-    When connection open data session for database: typedb
-    When session opens transaction of type: write
-    When $x = attribute(name) as(string) put: alice
+    When connection opens write transaction for database: typedb
+    When $x = attribute(name) put: alice
     When transaction commits
-    When connection close all sessions
-    When connection open schema session for database: typedb
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then delete attribute type: name; throws exception
 
   Scenario: Attribute types can change labels
@@ -118,14 +113,14 @@ Feature: Concept Attribute Type
     Then attribute(username) is null: false
     Then attribute(username) get label: username
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(username) get label: username
     When attribute(username) set label: email
     Then attribute(username) is null: true
     Then attribute(email) is null: false
     Then attribute(email) get label: email
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then attribute(email) is null: false
     Then attribute(email) get label: email
 
@@ -134,18 +129,18 @@ Feature: Concept Attribute Type
     When attribute(name) set abstract: true
     Then attribute(name) is abstract: true
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     When put attribute type: email, with value type: string
     Then attribute(email) is abstract: false
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then attribute(name) is abstract: true
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(email) is abstract: false
     When attribute(email) set abstract: true
     Then attribute(email) is abstract: true
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     When put attribute type: company-email, with value type: string
     When attribute(company-email) set supertype: email
     Then attribute(email) set abstract: false; throws exception
@@ -208,7 +203,7 @@ Feature: Concept Attribute Type
       | first-name |
       | last-name  |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then attribute(first-name) get supertype: real-name
     Then attribute(last-name) get supertype: real-name
     Then attribute(real-name) get supertype: name
@@ -262,15 +257,15 @@ Feature: Concept Attribute Type
     When put attribute type: name, with value type: string
     When put attribute type: timestamp, with value type: datetime
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(is-open) set supertype: is-open; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(age) set supertype: age; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(rating) set supertype: rating; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(name) set supertype: name; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(timestamp) set supertype: timestamp; throws exception
 
   Scenario: Attribute types cannot subtype non abstract attribute types
@@ -278,57 +273,57 @@ Feature: Concept Attribute Type
     When put attribute type: first-name, with value type: string
     When put attribute type: last-name, with value type: string
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(first-name) set supertype: name; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(last-name) set supertype: name; throws exception
 
-  Scenario: Attribute types cannot subtype another attribute type of different value class
+  Scenario: Attribute types cannot subtype another attribute type of different value type
     When put attribute type: is-open, with value type: boolean
     When put attribute type: age, with value type: long
     When put attribute type: rating, with value type: double
     When put attribute type: name, with value type: string
     When put attribute type: timestamp, with value type: datetime
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(is-open) set supertype: age; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(is-open) set supertype: rating; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(is-open) set supertype: name; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(is-open) set supertype: timestamp; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(age) set supertype: is-open; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(age) set supertype: rating; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(age) set supertype: name; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(age) set supertype: timestamp; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(rating) set supertype: is-open; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(rating) set supertype: age; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(rating) set supertype: name; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(rating) set supertype: timestamp; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(name) set supertype: is-open; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(name) set supertype: age; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(name) set supertype: rating; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(name) set supertype: timestamp; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(timestamp) set supertype: is-open; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(timestamp) set supertype: age; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(timestamp) set supertype: rating; throws exception
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(timestamp) set supertype: name; throws exception
 
   Scenario: Attribute types can get the root type
@@ -343,124 +338,128 @@ Feature: Concept Attribute Type
     Then attribute(name) get supertype: attribute
     Then attribute(timestamp) get supertype: attribute
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then attribute(is-open) get supertype: attribute
     Then attribute(age) get supertype: attribute
     Then attribute(rating) get supertype: attribute
     Then attribute(name) get supertype: attribute
     Then attribute(timestamp) get supertype: attribute
 
-  Scenario: Attribute type root can get attribute types of a specific value class
-    When put attribute type: is-open, with value type: boolean
-    When put attribute type: age, with value type: long
-    When put attribute type: rating, with value type: double
-    When put attribute type: name, with value type: string
-    When put attribute type: timestamp, with value type: datetime
-    Then attribute(attribute) as(boolean) get subtypes contain:
-      | attribute |
-      | is-open   |
-    Then attribute(attribute) as(boolean) get subtypes do not contain:
-      | age       |
-      | rating    |
-      | name      |
-      | timestamp |
-    Then attribute(attribute) as(long) get subtypes contain:
-      | attribute |
-      | age       |
-    Then attribute(attribute) as(long) get subtypes do not contain:
-      | is-open   |
-      | rating    |
-      | name      |
-      | timestamp |
-    Then attribute(attribute) as(double) get subtypes contain:
-      | attribute |
-      | rating    |
-    Then attribute(attribute) as(double) get subtypes do not contain:
-      | is-open   |
-      | age       |
-      | name      |
-      | timestamp |
-    Then attribute(attribute) as(string) get subtypes contain:
-      | attribute |
-      | name      |
-    Then attribute(attribute) as(string) get subtypes do not contain:
-      | is-open   |
-      | age       |
-      | rating    |
-      | timestamp |
-    Then attribute(attribute) as(datetime) get subtypes contain:
-      | attribute |
-      | timestamp |
-    Then attribute(attribute) as(datetime) get subtypes do not contain:
-      | is-open |
-      | age     |
-      | rating  |
-      | name    |
-    When transaction commits
-    When session opens transaction of type: read
-    Then attribute(attribute) as(boolean) get subtypes contain:
-      | attribute |
-      | is-open   |
-    Then attribute(attribute) as(boolean) get subtypes do not contain:
-      | age       |
-      | rating    |
-      | name      |
-      | timestamp |
-    Then attribute(attribute) as(long) get subtypes contain:
-      | attribute |
-      | age       |
-    Then attribute(attribute) as(long) get subtypes do not contain:
-      | is-open   |
-      | rating    |
-      | name      |
-      | timestamp |
-    Then attribute(attribute) as(double) get subtypes contain:
-      | attribute |
-      | rating    |
-    Then attribute(attribute) as(double) get subtypes do not contain:
-      | is-open   |
-      | age       |
-      | name      |
-      | timestamp |
-    Then attribute(attribute) as(string) get subtypes contain:
-      | attribute |
-      | name      |
-    Then attribute(attribute) as(string) get subtypes do not contain:
-      | is-open   |
-      | age       |
-      | rating    |
-      | timestamp |
-    Then attribute(attribute) as(datetime) get subtypes contain:
-      | attribute |
-      | timestamp |
-    Then attribute(attribute) as(datetime) get subtypes do not contain:
-      | is-open |
-      | age     |
-      | rating  |
-      | name    |
+  # Revisit if this is still valid
+#  # TODO: Doesn't need to be tied to the root since we can have abstract non-valued attribute types.
+#  # Scenario: Attribute types can be retrieved by value type
+#  #   Then attribute(???)  get subtypes do not contain:
+#  Scenario: Attribute type root can get attribute types of a specific value type
+#    When put attribute type: is-open, with value type: boolean
+#    When put attribute type: age, with value type: long
+#    When put attribute type: rating, with value type: double
+#    When put attribute type: name, with value type: string
+#    When put attribute type: timestamp, with value type: datetime
+#    Then attribute(attribute) as(boolean) get subtypes contain:
+#      | attribute |
+#      | is-open   |
+#    Then attribute(attribute) as(boolean) get subtypes do not contain:
+#      | age       |
+#      | rating    |
+#      | name      |
+#      | timestamp |
+#    Then attribute(attribute) as(long) get subtypes contain:
+#      | attribute |
+#      | age       |
+#    Then attribute(attribute) as(long) get subtypes do not contain:
+#      | is-open   |
+#      | rating    |
+#      | name      |
+#      | timestamp |
+#    Then attribute(attribute) as(double) get subtypes contain:
+#      | attribute |
+#      | rating    |
+#    Then attribute(attribute) as(double) get subtypes do not contain:
+#      | is-open   |
+#      | age       |
+#      | name      |
+#      | timestamp |
+#    Then attribute(attribute) as(string) get subtypes contain:
+#      | attribute |
+#      | name      |
+#    Then attribute(attribute) as(string) get subtypes do not contain:
+#      | is-open   |
+#      | age       |
+#      | rating    |
+#      | timestamp |
+#    Then attribute(attribute) as(datetime) get subtypes contain:
+#      | attribute |
+#      | timestamp |
+#    Then attribute(attribute) as(datetime) get subtypes do not contain:
+#      | is-open |
+#      | age     |
+#      | rating  |
+#      | name    |
+#    When transaction commits
+#    When connection opens read transaction for database: typedb
+#    Then attribute(attribute) as(boolean) get subtypes contain:
+#      | attribute |
+#      | is-open   |
+#    Then attribute(attribute) as(boolean) get subtypes do not contain:
+#      | age       |
+#      | rating    |
+#      | name      |
+#      | timestamp |
+#    Then attribute(attribute) as(long) get subtypes contain:
+#      | attribute |
+#      | age       |
+#    Then attribute(attribute) as(long) get subtypes do not contain:
+#      | is-open   |
+#      | rating    |
+#      | name      |
+#      | timestamp |
+#    Then attribute(attribute) as(double) get subtypes contain:
+#      | attribute |
+#      | rating    |
+#    Then attribute(attribute) as(double) get subtypes do not contain:
+#      | is-open   |
+#      | age       |
+#      | name      |
+#      | timestamp |
+#    Then attribute(attribute) as(string) get subtypes contain:
+#      | attribute |
+#      | name      |
+#    Then attribute(attribute) as(string) get subtypes do not contain:
+#      | is-open   |
+#      | age       |
+#      | rating    |
+#      | timestamp |
+#    Then attribute(attribute) as(datetime) get subtypes contain:
+#      | attribute |
+#      | timestamp |
+#    Then attribute(attribute) as(datetime) get subtypes do not contain:
+#      | is-open |
+#      | age     |
+#      | rating  |
+#      | name    |
 
-  Scenario: Attribute type root can get attribute types of any value class
-    When put attribute type: is-open, with value type: boolean
-    When put attribute type: age, with value type: long
-    When put attribute type: rating, with value type: double
-    When put attribute type: name, with value type: string
-    When put attribute type: timestamp, with value type: datetime
-    Then attribute(attribute) get subtypes contain:
-      | attribute |
-      | is-open   |
-      | age       |
-      | rating    |
-      | name      |
-      | timestamp |
-    When transaction commits
-    When session opens transaction of type: read
-    Then attribute(attribute) get subtypes contain:
-      | attribute |
-      | is-open   |
-      | age       |
-      | rating    |
-      | name      |
-      | timestamp |
+#  Scenario: Attribute type root can get attribute types of any value type
+#    When put attribute type: is-open, with value type: boolean
+#    When put attribute type: age, with value type: long
+#    When put attribute type: rating, with value type: double
+#    When put attribute type: name, with value type: string
+#    When put attribute type: timestamp, with value type: datetime
+#    Then attribute(attribute) get subtypes contain:
+#      | attribute |
+#      | is-open   |
+#      | age       |
+#      | rating    |
+#      | name      |
+#      | timestamp |
+#    When transaction commits
+#    When connection opens read transaction for database: typedb
+#    Then attribute(attribute) get subtypes contain:
+#      | attribute |
+#      | is-open   |
+#      | age       |
+#      | rating    |
+#      | name      |
+#      | timestamp |
 
   Scenario: Attribute types can have keys
     When put attribute type: country-code, with value type: string
@@ -469,10 +468,11 @@ Feature: Concept Attribute Type
     Then attribute(country-name) get owns attribute types, with annotations: key; contain:
       | country-code |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then attribute(country-name) get owns attribute types, with annotations: key; contain:
       | country-code |
 
+  # TODO: Fix test
   Scenario: Attribute types can unset keys
     When put attribute type: country-code-1, with value type: string
     When put attribute type: country-code-2, with value type: string
@@ -489,6 +489,8 @@ Feature: Concept Attribute Type
       | country-code-1 |
       | country-code-2 |
 
+
+  # TODO: DELETE. Attributes cannot own attributes
   Scenario: Attribute types can have attributes
     When put attribute type: utc-zone-code, with value type: string
     When put attribute type: utc-zone-hour, with value type: double
@@ -499,11 +501,12 @@ Feature: Concept Attribute Type
       | utc-zone-code |
       | utc-zone-hour |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then attribute(timestamp) get owns attribute types contain:
       | utc-zone-code |
       | utc-zone-hour |
 
+  # TODO: DELETE. Attributes cannot own attributes
   Scenario: Attribute types can unset attributes
     When put attribute type: utc-zone-code, with value type: string
     When put attribute type: utc-zone-hour, with value type: double
@@ -520,6 +523,7 @@ Feature: Concept Attribute Type
       | utc-zone-code |
       | utc-zone-hour |
 
+  # TODO: DELETE. Attributes cannot own attributes
   Scenario: Attribute types can have keys and attributes
     When put attribute type: country-code, with value type: string
     When put attribute type: country-abbreviation, with value type: string
@@ -532,13 +536,14 @@ Feature: Concept Attribute Type
       | country-code         |
       | country-abbreviation |
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then attribute(country-name) get owns attribute types, with annotations: key; contain:
       | country-code |
     Then attribute(country-name) get owns attribute types contain:
       | country-code         |
       | country-abbreviation |
 
+  # TODO: DELETE. Attributes cannot own attributes
   Scenario: Attribute types can inherit keys and attributes
     When put attribute type: hash, with value type: string
     When put attribute type: abbreviation, with value type: string
@@ -555,7 +560,7 @@ Feature: Concept Attribute Type
       | hash         |
       | abbreviation |
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(real-name) get owns attribute types, with annotations: key; contain:
       | hash |
     Then attribute(real-name) get owns attribute types contain:
@@ -564,7 +569,7 @@ Feature: Concept Attribute Type
     When put attribute type: last-name, with value type: string
     When attribute(last-name) set supertype: real-name
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then attribute(real-name) get owns attribute types, with annotations: key; contain:
       | hash |
     Then attribute(real-name) get owns attribute types contain:
@@ -576,6 +581,7 @@ Feature: Concept Attribute Type
       | hash         |
       | abbreviation |
 
+  # TODO: DELETE. Attributes cannot own attributes
   Scenario: Attribute types can be owned as attributes
     When put attribute type: age, with value type: long
     When put attribute type: name, with value type: string
@@ -614,7 +620,7 @@ Feature: Concept Attribute Type
       | boy  |
       | girl |
     Then transaction commits
-    When session opens transaction of type: write
+    When connection opens read transaction for database: typedb
     Then attribute(age) get owners contain:
       | person |
       | boy    |
@@ -635,6 +641,7 @@ Feature: Concept Attribute Type
       | boy  |
       | girl |
 
+  # TODO: DELETE. Attributes cannot own attributes
   Scenario: Attribute types can be owned as keys
     When put attribute type: email, with value type: string
     When put entity type: company
@@ -656,7 +663,7 @@ Feature: Concept Attribute Type
     Then attribute(email) get owners explicit, with annotations: key; do not contain:
       | company |
     Then transaction commits
-    When session opens transaction of type: write
+    When connection opens read transaction for database: typedb
     Then attribute(email) get owners contain:
       | company |
       | person  |
@@ -677,9 +684,9 @@ Feature: Concept Attribute Type
     When attribute(email) as(string) set regex: \S+@\S+\.\S+
     Then attribute(email) as(string) get regex: \S+@\S+\.\S+
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens schema transaction for database: typedb
     Then attribute(email) as(string) unset regex
     Then attribute(email) as(string) does not have any regex
     Then transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then attribute(email) as(string) does not have any regex
