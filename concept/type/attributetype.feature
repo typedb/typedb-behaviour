@@ -514,7 +514,7 @@ Feature: Concept Attribute Type
     When put attribute type: country-name
     When attribute(country-name) set value-type: string
     When attribute(country-name) set owns: country-code
-    When attribute(country-name) get owns: country-code, set annotation: key
+    When attribute(country-name) get owns: country-code, set annotation: @key
     Then attribute(country-name) get owns, with annotations (DEPRECATED): key; contain:
       | country-code |
     When transaction commits
@@ -531,9 +531,9 @@ Feature: Concept Attribute Type
     When put attribute type: country-name
     When attribute(country-name) set value-type: string
     When attribute(country-name) set owns: country-code-1
-    When attribute(country-name) get owns: country-code-1, set annotation: key
+    When attribute(country-name) get owns: country-code-1, set annotation: @key
     When attribute(country-name) set owns: country-code-2
-    When attribute(country-name) get owns: country-code-2, set annotation: key
+    When attribute(country-name) get owns: country-code-2, set annotation: @key
     When attribute(country-name) unset owns: country-code-1
     Then attribute(country-name) get owns, with annotations (DEPRECATED): key; do not contain:
       | country-code-1 |
@@ -593,7 +593,7 @@ Feature: Concept Attribute Type
     When put attribute type: country-name
     When attribute(country-name) set value-type: string
     When attribute(country-name) set owns: country-code
-    When attribute(country-name) get owns: country-code, set annotation: key
+    When attribute(country-name) get owns: country-code, set annotation: @key
     When attribute(country-name) set owns: country-abbreviation
     Then attribute(country-name) get owns, with annotations (DEPRECATED): key; contain:
       | country-code |
@@ -618,7 +618,7 @@ Feature: Concept Attribute Type
     When attribute(name) set value-type: string
     When attribute(name) set annotation: @abstract
     When attribute(name) set owns: hash
-    When attribute(name) get owns: hash, set annotation: key
+    When attribute(name) get owns: hash, set annotation: @key
     When attribute(name) set owns: abbreviation
     When put attribute type: real-name
     When attribute(real-name) set value-type: string
@@ -726,7 +726,7 @@ Feature: Concept Attribute Type
     When entity(company) set owns: email
     When put entity type: person
     When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: key
+    When entity(person) get owns: email, set annotation: @key
     Then attribute(email) get owners contain:
       | company |
       | person  |

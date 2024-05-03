@@ -222,9 +222,9 @@ Feature: Concept Entity Type
     When attribute(username) set value-type: string
     When put entity type: person
     When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: key
+    When entity(person) get owns: email, set annotation: @key
     When entity(person) set owns: username
-    When entity(person) get owns: username, set annotation: key
+    When entity(person) get owns: username, set annotation: @key
     Then entity(person) get owns, with annotations (DEPRECATED): key; contain:
       | email    |
       | username |
@@ -241,7 +241,7 @@ Feature: Concept Entity Type
     When attribute(username) set value-type: string
     When put entity type: person
     When entity(person) set owns: username
-    When entity(person) get owns: username, set annotation: key
+    When entity(person) get owns: username, set annotation: @key
     Then transaction commits
     When connection opens write transaction for database: typedb
     When $a = entity(person) create new instance with key(username): alice
@@ -249,7 +249,7 @@ Feature: Concept Entity Type
     Then transaction commits
     When connection opens schema transaction for database: typedb
     When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: key; fails
+    When entity(person) get owns: email, set annotation: @key; fails
     When connection opens schema transaction for database: typedb
     When entity(person) set owns: email
     Then transaction commits
@@ -263,7 +263,7 @@ Feature: Concept Entity Type
     Then transaction commits
     When connection opens schema transaction for database: typedb
     When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: key
+    When entity(person) get owns: email, set annotation: @key
     Then entity(person) get owns, with annotations (DEPRECATED): key; contain:
       | email    |
       | username |
@@ -280,9 +280,9 @@ Feature: Concept Entity Type
     When attribute(username) set value-type: string
     When put entity type: person
     When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: key
+    When entity(person) get owns: email, set annotation: @key
     When entity(person) set owns: username
-    When entity(person) get owns: username, set annotation: key
+    When entity(person) get owns: username, set annotation: @key
     When entity(person) unset owns: email
     Then entity(person) get owns, with annotations (DEPRECATED): key; do not contain:
       | email |
@@ -306,17 +306,17 @@ Feature: Concept Entity Type
     When attribute(timestamp) set value-type: datetime
     When put entity type: person
     When entity(person) set owns: age
-    When entity(person) get owns: age, set annotation: key
+    When entity(person) get owns: age, set annotation: @key
     When entity(person) set owns: name
-    When entity(person) get owns: name, set annotation: key
+    When entity(person) get owns: name, set annotation: @key
     When entity(person) set owns: timestamp
-    When entity(person) get owns: timestamp, set annotation: key
+    When entity(person) get owns: timestamp, set annotation: @key
     Then entity(person) set owns: is-open
-    Then entity(person) get owns: is-open, set annotation: key
+    Then entity(person) get owns: is-open, set annotation: @key
     When transaction commits
     When connection opens schema transaction for database: typedb
     Then entity(person) set owns: rating
-    Then entity(person) get owns: rating, set annotation: key; fails
+    Then entity(person) get owns: rating, set annotation: @key; fails
 
   Scenario: Entity types can have attributes
     When put attribute type: name
@@ -378,9 +378,9 @@ Feature: Concept Entity Type
     When attribute(age) set value-type: long
     When put entity type: person
     When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: key
+    When entity(person) get owns: email, set annotation: @key
     When entity(person) set owns: username
-    When entity(person) get owns: username, set annotation: key
+    When entity(person) get owns: username, set annotation: @key
     When entity(person) set owns: name
     When entity(person) set owns: age
     Then entity(person) get owns, with annotations (DEPRECATED): key; contain:
@@ -413,12 +413,12 @@ Feature: Concept Entity Type
     When attribute(rating) set value-type: double
     When put entity type: person
     When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: key
+    When entity(person) get owns: email, set annotation: @key
     When entity(person) set owns: name
     When put entity type: customer
     When entity(customer) set supertype: person
     When entity(customer) set owns: reference
-    When entity(customer) get owns: reference, set annotation: key
+    When entity(customer) get owns: reference, set annotation: @key
     When entity(customer) set owns: rating
     Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
       | email     |
@@ -465,7 +465,7 @@ Feature: Concept Entity Type
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
     When entity(subscriber) set owns: license
-    When entity(subscriber) get owns: license, set annotation: key
+    When entity(subscriber) get owns: license, set annotation: @key
     When entity(subscriber) set owns: points
     When transaction commits
     When connection opens read transaction for database: typedb
@@ -530,13 +530,13 @@ Feature: Concept Entity Type
     When put entity type: person
     When entity(person) set annotation: @abstract
     When entity(person) set owns: username
-    When entity(person) get owns: username, set annotation: key
+    When entity(person) get owns: username, set annotation: @key
     When entity(person) set owns: score
     When put entity type: customer
     When entity(customer) set annotation: @abstract
     When entity(customer) set supertype: person
     When entity(customer) set owns: reference
-    When entity(customer) get owns: reference, set annotation: key
+    When entity(customer) get owns: reference, set annotation: @key
     When entity(customer) set owns: rating
     Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
       | username  |
@@ -586,7 +586,7 @@ Feature: Concept Entity Type
     When entity(subscriber) set annotation: @abstract
     When entity(subscriber) set supertype: customer
     When entity(subscriber) set owns: license
-    When entity(subscriber) get owns: license, set annotation: key
+    When entity(subscriber) get owns: license, set annotation: @key
     When entity(subscriber) set owns: points
     When transaction commits
     When connection opens read transaction for database: typedb
@@ -659,16 +659,16 @@ Feature: Concept Entity Type
     When put entity type: person
     When entity(person) set annotation: @abstract
     When entity(person) set owns: username
-    When entity(person) get owns: username, set annotation: key
+    When entity(person) get owns: username, set annotation: @key
     When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: key
+    When entity(person) get owns: email, set annotation: @key
     When entity(person) set owns: name
     When entity(person) set owns: age
     When put entity type: customer
     When entity(customer) set annotation: @abstract
     When entity(customer) set supertype: person
     When entity(customer) set owns: reference
-    When entity(customer) get owns: reference, set annotation: key
+    When entity(customer) get owns: reference, set annotation: @key
     When entity(customer) set owns: work-email
     When entity(customer) get owns: work-email; set override: email
     When entity(customer) set owns: rating
@@ -845,7 +845,7 @@ Feature: Concept Entity Type
     When entity(customer) set supertype: person
     When entity(customer) set owns: username
     When entity(customer) get owns: username; set override: name
-    When entity(customer) get owns: username, set annotation: key
+    When entity(customer) get owns: username, set annotation: @key
     Then entity(customer) get owns overridden attribute(username) get label: name
     Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
       | username |
@@ -874,15 +874,15 @@ Feature: Concept Entity Type
     When attribute(email) set value-type: string
     When put entity type: person
     When entity(person) set owns: name
-    When entity(person) get owns: name, set annotation: key
+    When entity(person) get owns: name, set annotation: @key
     When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: key
+    When entity(person) get owns: email, set annotation: @key
     Then entity(person) set owns: name
-    Then entity(person) get owns: name, set annotation: key
+    Then entity(person) get owns: name, set annotation: @key
     When transaction commits
     When connection opens schema transaction for database: typedb
     Then entity(person) set owns: email
-    Then entity(person) get owns: email, set annotation: key
+    Then entity(person) get owns: email, set annotation: @key
 
   Scenario: Entity types can redeclare attributes as attributes
     When put attribute type: name
@@ -907,7 +907,7 @@ Feature: Concept Entity Type
     When put entity type: person
     When entity(person) set annotation: @abstract
     When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: key
+    When entity(person) get owns: email, set annotation: @key
     When put entity type: customer
     When entity(customer) set annotation: @abstract
     When entity(customer) set supertype: person
@@ -949,9 +949,9 @@ Feature: Concept Entity Type
     When attribute(email) set value-type: string
     When put entity type: person
     When entity(person) set owns: name
-    When entity(person) get owns: name, set annotation: key
+    When entity(person) get owns: name, set annotation: @key
     When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: key
+    When entity(person) get owns: email, set annotation: @key
     Then entity(person) set owns: name
     When transaction commits
     When connection opens schema transaction for database: typedb
@@ -966,11 +966,11 @@ Feature: Concept Entity Type
     When entity(person) set owns: name
     When entity(person) set owns: email
     Then entity(person) set owns: name
-    Then entity(person) get owns: name, set annotation: key
+    Then entity(person) get owns: name, set annotation: @key
     When transaction commits
     When connection opens schema transaction for database: typedb
     Then entity(person) set owns: email
-    Then entity(person) get owns: email, set annotation: key
+    Then entity(person) get owns: email, set annotation: @key
 
   Scenario: Entity types can redeclare inherited attributes as keys (which will override)
     When put attribute type: email
@@ -981,7 +981,7 @@ Feature: Concept Entity Type
     When put entity type: customer
     When entity(customer) set supertype: person
     Then entity(customer) set owns: email
-    Then entity(customer) get owns: email, set annotation: key
+    Then entity(customer) get owns: email, set annotation: @key
     Then entity(customer) get owns overridden attribute(email) exists: true
     Then entity(customer) get owns overridden attribute(email) get label: email
     Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
@@ -993,7 +993,7 @@ Feature: Concept Entity Type
     When put entity type: subscriber
     When entity(subscriber) set supertype: person
     Then entity(subscriber) set owns: email
-    Then entity(subscriber) get owns: email, set annotation: key
+    Then entity(subscriber) get owns: email, set annotation: @key
     Then entity(subscriber) get owns, with annotations (DEPRECATED): key; contain:
       | email |
 
@@ -1016,7 +1016,7 @@ Feature: Concept Entity Type
     When attribute(name) set value-type: string
     When put entity type: person
     When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: key
+    When entity(person) get owns: email, set annotation: @key
     When put entity type: customer
     When entity(customer) set supertype: person
     When transaction commits
@@ -1026,7 +1026,7 @@ Feature: Concept Entity Type
     Then transaction closes
     When connection opens schema transaction for database: typedb
     Then entity(customer) set owns: email
-    Then entity(customer) get owns: email, set annotation: key
+    Then entity(customer) get owns: email, set annotation: @key
     Then transaction commits; fails
 
   Scenario: Entity types cannot redeclare inherited key attribute types
@@ -1039,15 +1039,15 @@ Feature: Concept Entity Type
     When put entity type: person
     When entity(person) set annotation: @abstract
     When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: key
+    When entity(person) get owns: email, set annotation: @key
     When put entity type: customer
     When entity(customer) set supertype: person
     When entity(customer) set owns: customer-email
-    When entity(customer) get owns: customer-email, set annotation: key
+    When entity(customer) get owns: customer-email, set annotation: @key
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
     Then entity(subscriber) set owns: email
-    Then entity(subscriber) get owns: email, set annotation: key
+    Then entity(subscriber) get owns: email, set annotation: @key
     Then transaction commits; fails
 
   Scenario: Entity types cannot redeclare overridden key attribute types
@@ -1060,15 +1060,15 @@ Feature: Concept Entity Type
     When put entity type: person
     When entity(person) set annotation: @abstract
     When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: key
+    When entity(person) get owns: email, set annotation: @key
     When put entity type: customer
     When entity(customer) set supertype: person
     When entity(customer) set owns: customer-email
-    When entity(customer) get owns: customer-email, set annotation: key
+    When entity(customer) get owns: customer-email, set annotation: @key
     When put entity type: subscriber
     When entity(subscriber) set supertype: customer
     Then entity(subscriber) set owns: customer-email
-    Then entity(subscriber) get owns: customer-email, set annotation: key
+    Then entity(subscriber) get owns: customer-email, set annotation: @key
     Then transaction commits; fails
 
   Scenario: Entity types cannot redeclare inherited owns attribute types
@@ -1123,13 +1123,13 @@ Feature: Concept Entity Type
     When put entity type: person
     When entity(person) set annotation: @abstract
     When entity(person) set owns: username
-    When entity(person) get owns: username, set annotation: key
+    When entity(person) get owns: username, set annotation: @key
     When entity(person) set owns: name
     When transaction commits
     When connection opens schema transaction for database: typedb
     Then entity(person) set owns: email
     Then entity(person) get owns: email; set override: username
-    Then entity(person) get owns: email, set annotation: key; fails
+    Then entity(person) get owns: email, set annotation: @key; fails
     When connection opens schema transaction for database: typedb
     Then entity(person) set owns: first-name
     Then entity(person) get owns: first-name; set override: name
@@ -1145,7 +1145,7 @@ Feature: Concept Entity Type
     When attribute(rating) set value-type: double
     When put entity type: person
     When entity(person) set owns: username
-    When entity(person) get owns: username, set annotation: key
+    When entity(person) get owns: username, set annotation: @key
     When entity(person) set owns: name
     When put entity type: customer
     When entity(customer) set supertype: person
@@ -1153,7 +1153,7 @@ Feature: Concept Entity Type
     When connection opens schema transaction for database: typedb
     Then entity(customer) set owns: reference
     Then entity(customer) get owns: reference; set override: username
-    Then entity(customer) get owns: reference, set annotation: key; fails
+    Then entity(customer) get owns: reference, set annotation: @key; fails
     When connection opens schema transaction for database: typedb
     Then entity(customer) set owns: rating
     Then entity(customer) get owns: rating; set override: name

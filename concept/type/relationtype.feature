@@ -555,9 +555,9 @@ Feature: Concept Relation Type and Role Type
     When put relation type: marriage
     When relation(marriage) create role: spouse
     When relation(marriage) set owns: license
-    When relation(marriage) get owns: license, set annotation: key
+    When relation(marriage) get owns: license, set annotation: @key
     When relation(marriage) set owns: certificate
-    When relation(marriage) get owns: certificate, set annotation: key
+    When relation(marriage) get owns: certificate, set annotation: @key
     When relation(marriage) unset owns: license
     Then relation(marriage) get owns, with annotations (DEPRECATED): key; do not contain:
       | license |
@@ -581,23 +581,23 @@ Feature: Concept Relation Type and Role Type
     When attribute(start-date) set value-type: datetime
     When put relation type: employment
     When relation(employment) set owns: contract-years
-    When relation(employment) get owns: contract-years, set annotation: key
+    When relation(employment) get owns: contract-years, set annotation: @key
     When relation(employment) set owns: reference
-    When relation(employment) get owns: reference, set annotation: key
+    When relation(employment) get owns: reference, set annotation: @key
     When relation(employment) set owns: start-date
-    When relation(employment) get owns: start-date, set annotation: key
+    When relation(employment) get owns: start-date, set annotation: @key
 
   Scenario: Relation types cannot have keys of attributes that are not keyable
     When put attribute type: is-permanent
     When attribute(is-permanent) set value-type: boolean
     When put relation type: employment
     Then relation(employment) set owns: is-permanent
-    Then relation(employment) get owns: is-permanent, set annotation: key
+    Then relation(employment) get owns: is-permanent, set annotation: @key
     When put attribute type: salary
     When attribute(salary) set value-type: double
     When put relation type: employment
     Then relation(employment) set owns: salary
-    Then relation(employment) get owns: salary, set annotation: key; fails
+    Then relation(employment) get owns: salary, set annotation: @key; fails
 
   Scenario: Relation types can have attributes
     When put attribute type: date
@@ -648,9 +648,9 @@ Feature: Concept Relation Type and Role Type
     When put relation type: marriage
     When relation(marriage) create role: wife
     When relation(marriage) set owns: license
-    When relation(marriage) get owns: license, set annotation: key
+    When relation(marriage) get owns: license, set annotation: @key
     When relation(marriage) set owns: certificate
-    When relation(marriage) get owns: certificate, set annotation: key
+    When relation(marriage) get owns: certificate, set annotation: @key
     When relation(marriage) set owns: date
     When relation(marriage) set owns: religion
     Then relation(marriage) get owns, with annotations (DEPRECATED): key; contain:
@@ -685,12 +685,12 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) create role: employee
     When relation(employment) create role: employer
     When relation(employment) set owns: employment-reference
-    When relation(employment) get owns: employment-reference, set annotation: key
+    When relation(employment) get owns: employment-reference, set annotation: @key
     When relation(employment) set owns: employment-hours
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
     When relation(contractor-employment) set owns: contractor-reference
-    When relation(contractor-employment) get owns: contractor-reference, set annotation: key
+    When relation(contractor-employment) get owns: contractor-reference, set annotation: @key
     When relation(contractor-employment) set owns: contractor-hours
     Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; contain:
       | employment-reference |
@@ -717,7 +717,7 @@ Feature: Concept Relation Type and Role Type
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
     When relation(parttime-employment) set owns: parttime-reference
-    When relation(parttime-employment) get owns: parttime-reference, set annotation: key
+    When relation(parttime-employment) get owns: parttime-reference, set annotation: @key
     When relation(parttime-employment) set owns: parttime-hours
     Then relation(parttime-employment) get owns, with annotations (DEPRECATED): key; contain:
       | employment-reference |
@@ -772,13 +772,13 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) create role: employee
     When relation(employment) create role: employer
     When relation(employment) set owns: employment-reference
-    When relation(employment) get owns: employment-reference, set annotation: key
+    When relation(employment) get owns: employment-reference, set annotation: @key
     When relation(employment) set owns: employment-hours
     When put relation type: contractor-employment
     When relation(contractor-employment) set annotation: @abstract
     When relation(contractor-employment) set supertype: employment
     When relation(contractor-employment) set owns: contractor-reference
-    When relation(contractor-employment) get owns: contractor-reference, set annotation: key
+    When relation(contractor-employment) get owns: contractor-reference, set annotation: @key
     When relation(contractor-employment) set owns: contractor-hours
     Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; contain:
       | employment-reference |
@@ -808,7 +808,7 @@ Feature: Concept Relation Type and Role Type
     When relation(parttime-employment) set annotation: @abstract
     When relation(parttime-employment) set supertype: contractor-employment
     When relation(parttime-employment) set owns: parttime-reference
-    When relation(parttime-employment) get owns: parttime-reference, set annotation: key
+    When relation(parttime-employment) get owns: parttime-reference, set annotation: @key
     When relation(parttime-employment) set owns: parttime-hours
     Then relation(parttime-employment) get owns, with annotations (DEPRECATED): key; contain:
       | employment-reference |
@@ -863,7 +863,7 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) create role: employee
     When relation(employment) create role: employer
     When relation(employment) set owns: employment-reference
-    When relation(employment) get owns: employment-reference, set annotation: key
+    When relation(employment) get owns: employment-reference, set annotation: @key
     When relation(employment) set owns: employment-hours
     When put relation type: contractor-employment
     When relation(contractor-employment) set annotation: @abstract
@@ -961,7 +961,7 @@ Feature: Concept Relation Type and Role Type
     When relation(contractor-employment) get role(contractor-employee); set override: employee
     When relation(contractor-employment) set owns: contractor-reference
     When relation(contractor-employment) get owns(contractor-reference); set override: employment-reference
-    When relation(contractor-employment) get owns: contractor-reference, set annotation: key
+    When relation(contractor-employment) get owns: contractor-reference, set annotation: @key
     Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; contain:
       | contractor-reference |
     Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; do not contain:
@@ -990,9 +990,9 @@ Feature: Concept Relation Type and Role Type
     When put relation type: marriage
     When relation(marriage) create role: spouse
     When relation(marriage) set owns: date
-    When relation(marriage) get owns: date, set annotation: key
+    When relation(marriage) get owns: date, set annotation: @key
     When relation(marriage) set owns: license
-    When relation(marriage) get owns: license, set annotation: key
+    When relation(marriage) get owns: license, set annotation: @key
     When relation(marriage) set owns: date
     When transaction commits
     When connection opens schema transaction for database: typedb
@@ -1008,11 +1008,11 @@ Feature: Concept Relation Type and Role Type
     When relation(marriage) set owns: date
     When relation(marriage) set owns: license
     Then relation(marriage) set owns: date
-    Then relation(marriage) get owns: date, set annotation: key
+    Then relation(marriage) get owns: date, set annotation: @key
     When transaction commits
     When connection opens schema transaction for database: typedb
     When relation(marriage) set owns: license
-    When relation(marriage) get owns: license, set annotation: key
+    When relation(marriage) get owns: license, set annotation: @key
 
   Scenario: Relation types cannot redeclare inherited keys and attributes
     When put attribute type: employment-reference
@@ -1023,14 +1023,14 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) create role: employee
     When relation(employment) create role: employer
     When relation(employment) set owns: employment-reference
-    When relation(employment) get owns: employment-reference, set annotation: key
+    When relation(employment) get owns: employment-reference, set annotation: @key
     When relation(employment) set owns: employment-hours
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
     When transaction commits
     When connection opens schema transaction for database: typedb
     Then relation(contractor-employment) set owns: employment-reference
-    Then relation(contractor-employment) get owns: employment-reference, set annotation: key
+    Then relation(contractor-employment) get owns: employment-reference, set annotation: @key
     Then transaction commits; fails
     When connection opens schema transaction for database: typedb
     Then relation(contractor-employment) set owns: employment-hours
@@ -1044,13 +1044,13 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set annotation: @abstract
     When relation(employment) create role: employee
     When relation(employment) set owns: employment-reference
-    When relation(employment) get owns: employment-reference, set annotation: key
+    When relation(employment) get owns: employment-reference, set annotation: @key
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
     Then relation(parttime-employment) set owns: employment-reference
-    Then relation(parttime-employment) get owns: employment-reference, set annotation: key
+    Then relation(parttime-employment) get owns: employment-reference, set annotation: @key
     Then transaction commits; fails
 
   Scenario: Relation types cannot redeclare overridden key attribute types
@@ -1064,7 +1064,7 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) set annotation: @abstract
     When relation(employment) create role: employee
     When relation(employment) set owns: employment-reference
-    When relation(employment) get owns: employment-reference, set annotation: key
+    When relation(employment) get owns: employment-reference, set annotation: @key
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
     When relation(contractor-employment) set owns: contractor-reference
@@ -1072,7 +1072,7 @@ Feature: Concept Relation Type and Role Type
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
     Then relation(parttime-employment) set owns: contractor-reference
-    Then relation(parttime-employment) get owns: contractor-reference, set annotation: key
+    Then relation(parttime-employment) get owns: contractor-reference, set annotation: @key
     Then transaction commits; fails
 
   Scenario: Relation types cannot redeclare inherited owns
@@ -1128,13 +1128,13 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) create role: employee
     When relation(employment) create role: employer
     When relation(employment) set owns: reference
-    When relation(employment) get owns: reference, set annotation: key
+    When relation(employment) get owns: reference, set annotation: @key
     When relation(employment) set owns: hours
     When transaction commits
     When connection opens schema transaction for database: typedb
     Then relation(employment) set owns: social-security-number
     Then relation(employment) get owns(social-security-number); set override: reference
-    Then relation(employment) get owns: social-security-number, set annotation: key; fails
+    Then relation(employment) get owns: social-security-number, set annotation: @key; fails
     When connection opens schema transaction for database: typedb
     Then relation(employment) set owns: max-hours
     Then relation(employment) get owns(max-hours); set override: hours; fails
@@ -1152,7 +1152,7 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) create role: employee
     When relation(employment) create role: employer
     When relation(employment) set owns: employment-reference
-    When relation(employment) get owns: employment-reference, set annotation: key
+    When relation(employment) get owns: employment-reference, set annotation: @key
     When relation(employment) set owns: employment-hours
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
@@ -1160,7 +1160,7 @@ Feature: Concept Relation Type and Role Type
     When connection opens schema transaction for database: typedb
     Then relation(contractor-employment) set owns: contractor-reference
     Then relation(contractor-employment) get owns(contractor-reference); set override: employment-reference
-    Then relation(contractor-employment) get owns: contractor-reference, set annotation: key; fails
+    Then relation(contractor-employment) get owns: contractor-reference, set annotation: @key; fails
     When connection opens schema transaction for database: typedb
     Then relation(contractor-employment) set owns: contractor-hours
     Then relation(contractor-employment) get owns(contractor-hours); set override: employment-hours; fails
