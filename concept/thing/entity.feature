@@ -11,8 +11,7 @@ Feature: Concept Entity
     Given connection has been opened
     Given connection does not have any database
     Given connection create database: typedb
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection opens schema transaction for database: typedb
     # Write schema for the test scenarios
     Given put attribute type: username, with value type: string
     Given put attribute type: email, with value type: string
@@ -21,8 +20,7 @@ Feature: Concept Entity
     Given entity(person) set owns attribute type: email
     Given transaction commits
     Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection opens write transaction for database: typedb
 
   Scenario: Entity can be created
     When $a = entity(person) create new instance with key(username): alice
@@ -30,7 +28,7 @@ Feature: Concept Entity
     Then entity $a has type: person
     Then entity(person) get instances contain: $a
     Then transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
     Then entity(person) get instances contain: $a
 
@@ -39,7 +37,7 @@ Feature: Concept Entity
     Then entity $a exists
     Then entity $a has type: person
     Then entity(person) get instances contain: $a
-    Then transaction commits; throws exception
+    Then transaction commits; fails
 
   Scenario: Entity can be deleted
     When $a = entity(person) create new instance with key(username): alice
@@ -47,17 +45,17 @@ Feature: Concept Entity
     Then entity $a is deleted: true
     Then entity(person) get instances is empty
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     Then entity(person) get instances is empty
     When $a = entity(person) create new instance with key(username): alice
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
     When delete entity: $a
     Then entity $a is deleted: true
     Then entity(person) get instances is empty
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     Then entity(person) get instances is empty
 
   Scenario: Entity can have keys
@@ -68,7 +66,7 @@ Feature: Concept Entity
     Then entity $a get keys contain: $alice
     Then attribute $alice get owners contain: $a
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
     When $alice = attribute(username) as(string) get: alice
     Then entity $a get attributes(username) as(string) contain: $alice
@@ -85,7 +83,7 @@ Feature: Concept Entity
     Then attribute $alice get owners do not contain: $a
     When entity $a set has: $alice
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
     When $alice = attribute(username) as(string) get: alice
     Then entity $a get attributes(username) as(string) contain: $alice
@@ -93,51 +91,51 @@ Feature: Concept Entity
     Then entity $a get attributes(username) as(string) do not contain: $alice
     Then entity $a get keys do not contain: $alice
     Then attribute $alice get owners do not contain: $a
-    Then transaction commits; throws exception
+    Then transaction commits; fails
 
   Scenario: Entity that has its key unset cannot be committed
     When $a = entity(person) create new instance
     When $alice = attribute(username) as(string) put: alice
     When entity $a set has: $alice
     When entity $a unset has: $alice
-    Then transaction commits; throws exception
-    When session opens transaction of type: write
+    Then transaction commits; fails
+    When connection opens write transaction for database: typedb
     When $a = entity(person) create new instance
     When $alice = attribute(username) as(string) put: alice
     When entity $a set has: $alice
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
     When $alice = attribute(username) as(string) get: alice
     When entity $a unset has: $alice
-    Then transaction commits; throws exception
+    Then transaction commits; fails
 
   Scenario: Entity cannot have more than one key for a given key type
     When $a = entity(person) create new instance
     When $alice = attribute(username) as(string) put: alice
     When $bob = attribute(username) as(string) put: bob
     When entity $a set has: $alice
-    Then entity $a set has: $bob; throws exception
-    When session opens transaction of type: write
+    Then entity $a set has: $bob; fails
+    When connection opens write transaction for database: typedb
     When $a = entity(person) create new instance
     When $alice = attribute(username) as(string) put: alice
     When $bob = attribute(username) as(string) put: bob
     When entity $a set has: $alice
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
     When $bob = attribute(username) as(string) get: bob
-    Then entity $a set has: $bob; throws exception
+    Then entity $a set has: $bob; fails
 
   Scenario: Entity cannot have a key that has been taken
     When $a = entity(person) create new instance
     When $alice = attribute(username) as(string) put: alice
     When entity $a set has: $alice
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When $b = entity(person) create new instance
     When $alice = attribute(username) as(string) get: alice
-    Then entity $b set has: $alice; throws exception
+    Then entity $b set has: $alice; fails
 
   Scenario: Entity can have attribute
     When $a = entity(person) create new instance with key(username): alice
@@ -147,7 +145,7 @@ Feature: Concept Entity
     Then entity $a get attributes contain: $email
     Then attribute $email get owners contain: $a
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
     When $email = attribute(email) as(string) get: alice@email.com
     Then entity $a get attributes(email) as(string) contain: $email
@@ -163,7 +161,7 @@ Feature: Concept Entity
     Then entity $a get attributes do not contain: $email
     Then attribute $email get owners do not contain: $a
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
     When $email = attribute(email) as(string) get: alice@email.com
     Then entity $a get attributes(email) as(string) do not contain: $email
@@ -171,7 +169,7 @@ Feature: Concept Entity
     Then attribute $email get owners do not contain: $a
     When entity $a set has: $email
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
     When $email = attribute(email) as(string) get: alice@email.com
     Then entity $a get attributes(email) as(string) contain: $email
@@ -182,14 +180,14 @@ Feature: Concept Entity
     Then entity $a get attributes do not contain: $email
     Then attribute $email get owners do not contain: $a
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
     When $email = attribute(email) as(string) get: alice@email.com
     Then entity $a get attributes(email) as(string) do not contain: $email
     Then attribute $email get owners do not contain: $a
     When entity $a set has: $email
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
     When $email = attribute(email) as(string) get: alice@email.com
     When entity $a set has: $email
@@ -198,7 +196,7 @@ Feature: Concept Entity
     Then entity $a get attributes do not contain: $email
     Then attribute $email get owners do not contain: $a
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
     When $email = attribute(email) as(string) get: alice@email.com
     Then entity $a get attributes(email) as(string) do not contain: $email
@@ -209,7 +207,7 @@ Feature: Concept Entity
     When $email = attribute(email) as(string) put: alice@email.com
     When delete entity: $a
     Then entity $a is deleted: true
-    When entity $a set has: $email; throws exception
+    When entity $a set has: $email; fails
 
   Scenario: Entity can play a role in a relation
 

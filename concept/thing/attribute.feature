@@ -11,8 +11,7 @@ Feature: Concept Attribute
     Given connection has been opened
     Given connection does not have any database
     Given connection create database: typedb
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection opens schema transaction for database: typedb
     # Write schema for the test scenarios
     Given put attribute type: is-alive, with value type: boolean
     Given put attribute type: age, with value type: long
@@ -23,8 +22,7 @@ Feature: Concept Attribute
     Given attribute(email) set regex: \S+@\S+\.\S+
     Given transaction commits
     Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection opens write transaction for database: typedb
     Given set time-zone is: Europe/London
 
   Scenario: Attribute with value type boolean can be created
@@ -34,7 +32,7 @@ Feature: Concept Attribute
     Then attribute $x has value type: boolean
     Then attribute $x has value: true
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     When $x = attribute(is-alive) get instance with value: true
     Then attribute $x exists
     Then attribute $x has type: is-alive
@@ -48,7 +46,7 @@ Feature: Concept Attribute
     Then attribute $x has value type: long
     Then attribute $x has value: 21
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     When $x = attribute(age) get instance with value: 21
     Then attribute $x exists
     Then attribute $x has type: age
@@ -62,7 +60,7 @@ Feature: Concept Attribute
     Then attribute $x has value type: double
     Then attribute $x has value: 123.456
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     When $x = attribute(score) get instance with value: 123.456
     Then attribute $x exists
     Then attribute $x has type: score
@@ -76,7 +74,7 @@ Feature: Concept Attribute
     Then attribute $x has value type: string
     Then attribute $x has value: alice
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     When $x = attribute(name) get instance with value: alice
     Then attribute $x exists
     Then attribute $x has type: name
@@ -90,7 +88,7 @@ Feature: Concept Attribute
     Then attribute $x has value type: string
     Then attribute $x has value: alice@email.com
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     When $x = attribute(email) get instance with value: alice@email.com
     Then attribute $x exists
     Then attribute $x has type: email
@@ -98,7 +96,7 @@ Feature: Concept Attribute
     Then attribute $x has value: alice@email.com
 
   Scenario: Attribute with value type string but does not satisfy a regular expression cannot be created
-    When attribute(email) put: alice-email-com; throws exception
+    When attribute(email) put: alice-email-com; fails
 
   Scenario: Attribute with value type datetime can be created
     When $x = attribute(birth-date) put instance with value: 1990-01-01 11:22:33
@@ -107,7 +105,7 @@ Feature: Concept Attribute
     Then attribute $x has value type: datetime
     Then attribute $x has value: 1990-01-01 11:22:33
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     When $x = attribute(birth-date) get instance with value: 1990-01-01 11:22:33
     Then attribute $x exists
     Then attribute $x has type: birth-date
@@ -119,7 +117,7 @@ Feature: Concept Attribute
     When $x = attribute(is-alive) put instance with value: true
     Then attribute(is-alive) get instances contain: $x
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     When $x = attribute(is-alive) get instance with value: true
     Then attribute(is-alive) get instances contain: $x
 
@@ -127,7 +125,7 @@ Feature: Concept Attribute
     When $x = attribute(age) put instance with value: 21
     Then attribute(age) get instances contain: $x
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     When $x = attribute(age) get instance with value: 21
     Then attribute(age) get instances contain: $x
 
@@ -135,7 +133,7 @@ Feature: Concept Attribute
     When $x = attribute(score) put instance with value: 123.456
     Then attribute(score) get instances contain: $x
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     When $x = attribute(score) get instance with value: 123.456
     Then attribute(score) get instances contain: $x
 
@@ -143,7 +141,7 @@ Feature: Concept Attribute
     When $x = attribute(name) put instance with value: alice
     Then attribute(name) get instances contain: $x
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     When $x = attribute(name) get instance with value: alice
     Then attribute(name) get instances contain: $x
 
@@ -151,7 +149,7 @@ Feature: Concept Attribute
     When $x = attribute(birth-date) put instance with value: 1990-01-01 11:22:33
     Then attribute(birth-date) get instances contain: $x
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     When $x = attribute(birth-date) get instance with value: 1990-01-01 11:22:33
     Then attribute(birth-date) get instances contain: $x
 
@@ -163,7 +161,7 @@ Feature: Concept Attribute
     Then attribute $x has value type: datetime
     Then attribute $x has value: 2001-08-23 08:30:00
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     When set time-zone: America/Chicago
     When $x = attribute(birth-date) get instance with value: 2001-08-23 08:30:00
     Then attribute $x exists
@@ -178,19 +176,19 @@ Feature: Concept Attribute
     When $x = attribute(is-alive) get instance with value: true
     Then attribute $x does not exist
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When $x = attribute(is-alive) get instance with value: true
     Then attribute $x does not exist
     When $x = attribute(is-alive) put instance with value: true
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When $x = attribute(is-alive) get instance with value: true
     When delete attribute: $x
     Then attribute $x is deleted: true
     When $x = attribute(is-alive) get instance with value: true
     Then attribute $x does not exist
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     When $x = attribute(is-alive) get instance with value: true
     Then attribute $x does not exist
 
@@ -201,19 +199,19 @@ Feature: Concept Attribute
     When $x = attribute(age) get instance with value: 21
     Then attribute $x does not exist
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When $x = attribute(age) get instance with value: 21
     Then attribute $x does not exist
     When $x = attribute(age) put instance with value: 21
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When $x = attribute(age) get instance with value: 21
     When delete attribute: $x
     Then attribute $x is deleted: true
     When $x = attribute(age) get instance with value: 21
     Then attribute $x does not exist
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     When $x = attribute(age) get instance with value: 21
     Then attribute $x does not exist
 
@@ -224,19 +222,19 @@ Feature: Concept Attribute
     When $x = attribute(score) get instance with value: 123.456
     Then attribute $x does not exist
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When $x = attribute(score) get instance with value: 123.456
     Then attribute $x does not exist
     When $x = attribute(score) put instance with value: 123.456
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When $x = attribute(score) get instance with value: 123.456
     When delete attribute: $x
     Then attribute $x is deleted: true
     When $x = attribute(score) get instance with value: 123.456
     Then attribute $x does not exist
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     When $x = attribute(score) get instance with value: 123.456
     Then attribute $x does not exist
 
@@ -247,19 +245,19 @@ Feature: Concept Attribute
     When $x = attribute(name) get instance with value: alice
     Then attribute $x does not exist
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When $x = attribute(name) get instance with value: alice
     Then attribute $x does not exist
     When $x = attribute(name) put instance with value: alice
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When $x = attribute(name) get instance with value: alice
     When delete attribute: $x
     Then attribute $x is deleted: true
     When $x = attribute(name) get instance with value: alice
     Then attribute $x does not exist
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     When $x = attribute(name) get instance with value: alice
     Then attribute $x does not exist
 
@@ -270,19 +268,19 @@ Feature: Concept Attribute
     When $x = attribute(birth-date) get instance with value: 1990-01-01 11:22:33
     Then attribute $x does not exist
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When $x = attribute(birth-date) get instance with value: 1990-01-01 11:22:33
     Then attribute $x does not exist
     When $x = attribute(birth-date) put instance with value: 1990-01-01 11:22:33
     When transaction commits
-    When session opens transaction of type: write
+    When connection opens write transaction for database: typedb
     When $x = attribute(birth-date) get instance with value: 1990-01-01 11:22:33
     When delete attribute: $x
     Then attribute $x is deleted: true
     When $x = attribute(birth-date) get instance with value: 1990-01-01 11:22:33
     Then attribute $x does not exist
     When transaction commits
-    When session opens transaction of type: read
+    When connection opens read transaction for database: typedb
     When $x = attribute(birth-date) get instance with value: 1990-01-01 11:22:33
     Then attribute $x does not exist
 
