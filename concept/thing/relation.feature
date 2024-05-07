@@ -13,9 +13,12 @@ Feature: Concept Relation
     Given connection create database: typedb
     Given connection opens schema transaction for database: typedb
     # Write schema for the test scenarios
-    Given put attribute type: username, with value type: string
-    Given put attribute type: license, with value type: string
-    Given put attribute type: date, with value type: datetime
+    Given put attribute type: username
+    Given attribute(username) set value-type: string
+    Given put attribute type: license
+    Given attribute(license) set value-type: string
+    Given put attribute type: date
+    Given attribute(date) set value-type: datetime
     Given put relation type: marriage
     Given relation(marriage) set relates role: wife
     Given relation(marriage) set relates role: husband

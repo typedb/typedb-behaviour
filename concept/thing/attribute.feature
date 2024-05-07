@@ -13,12 +13,18 @@ Feature: Concept Attribute
     Given connection create database: typedb
     Given connection opens schema transaction for database: typedb
     # Write schema for the test scenarios
-    Given put attribute type: is-alive, with value type: boolean
-    Given put attribute type: age, with value type: long
-    Given put attribute type: score, with value type: double
-    Given put attribute type: birth-date, with value type: datetime
-    Given put attribute type: name, with value type: string
-    Given put attribute type: email, with value type: string
+    Given put attribute type: is-alive
+    Given attribute(is-alive) set value-type: boolean
+    Given put attribute type: age
+    Given attribute(age) set value-type: long
+    Given put attribute type: score
+    Given attribute(score) set value-type: double
+    Given put attribute type: birth-date
+    Given attribute(birth-date) set value-type: datetime
+    Given put attribute type: name
+    Given attribute(name) set value-type: string
+    Given put attribute type: email
+    Given attribute(email) set value-type: string
     Given attribute(email) set regex: \S+@\S+\.\S+
     Given transaction commits
     Given connection close all sessions
