@@ -25,7 +25,7 @@ Feature: Concept Attribute
     Given attribute(name) set value-type: string
     Given put attribute type: email
     Given attribute(email) set value-type: string
-    Given attribute(email) set regex: \S+@\S+\.\S+
+    Given attribute(email) set annotation: @regex("\S+@\S+\.\S+")
     Given transaction commits
     Given connection close all sessions
     Given connection opens write transaction for database: typedb
