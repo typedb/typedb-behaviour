@@ -29,7 +29,6 @@ Feature: Concept Relation
     Given entity(person) set plays role: marriage:wife
     Given entity(person) set plays role: marriage:husband
     Given transaction commits
-    Given connection close all sessions
     Given connection opens write transaction for database: typedb
 
   Scenario: Relation with role players can be created and role players can be retrieved
@@ -133,13 +132,11 @@ Feature: Concept Relation
     Then relation(marriage) get instances is empty
 
   Scenario: Relation chain with no other role players gets deleted on commit
-    Then for each session, transaction closes
-    Given connection close all sessions
+    Then transaction commits
     Given connection opens schema transaction for database: typedb
     Given relation(marriage) set relates role: dependent-marriage
     Given relation(marriage) set plays role: marriage:dependent-marriage
     Given transaction commits
-    Given connection close all sessions
     Given connection opens write transaction for database: typedb
 
     When $m = relation(marriage) create new instance with key(license): m

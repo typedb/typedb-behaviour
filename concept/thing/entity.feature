@@ -21,7 +21,6 @@ Feature: Concept Entity
     Given entity(person) set owns attribute type: username, with annotations: key
     Given entity(person) set owns attribute type: email
     Given transaction commits
-    Given connection close all sessions
     Given connection opens write transaction for database: typedb
 
   Scenario: Entity can be created
