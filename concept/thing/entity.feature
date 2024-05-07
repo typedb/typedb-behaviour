@@ -26,7 +26,7 @@ Feature: Concept Entity
 
   Scenario: Entity can be created
     When $a = entity(person) create new instance with key(username): alice
-    Then entity $a is null: false
+    Then entity $a exists
     Then entity $a has type: person
     Then entity(person) get instances contain: $a
     Then transaction commits
@@ -36,7 +36,7 @@ Feature: Concept Entity
 
   Scenario: Entity cannot be created when it misses a key
     When $a = entity(person) create new instance
-    Then entity $a is null: false
+    Then entity $a exists
     Then entity $a has type: person
     Then entity(person) get instances contain: $a
     Then transaction commits; throws exception

@@ -33,14 +33,14 @@ Feature: Concept Relation
 
   Scenario: Relation with role players can be created and role players can be retrieved
     When $m = relation(marriage) create new instance with key(license): m
-    Then relation $m is null: false
+    Then relation $m exists
     Then relation $m has type: marriage
     Then relation(marriage) get instances contain: $m
     When $a = entity(person) create new instance with key(username): alice
     When $b = entity(person) create new instance with key(username): bob
     When relation $m add player for role(wife): $a
     When relation $m add player for role(husband): $b
-    Then relation $m is null: false
+    Then relation $m exists
     Then relation $m has type: marriage
     Then relation(marriage) get instances contain: $m
     Then relation $m get players for role(wife) contain: $a
@@ -53,7 +53,7 @@ Feature: Concept Relation
     When transaction commits
     When session opens transaction of type: read
     When $m = relation(marriage) get instance with key(license): m
-    Then relation $m is null: false
+    Then relation $m exists
     Then relation $m has type: marriage
     Then relation(marriage) get instances contain: $m
     When $a = entity(person) get instance with key(username): alice
@@ -70,20 +70,20 @@ Feature: Concept Relation
     When $m = relation(marriage) create new instance with key(license): m
     When $a = entity(person) create new instance with key(username): alice
     When $b = entity(person) create new instance with key(username): bob
-    Then entity $a get relations(marriage:wife) do not contain: $m
-    Then entity $b get relations(marriage:husband) do not contain: $m
+    Then entity $a get relations(marriage) with role(wife) do not contain: $m
+    Then entity $b get relations(marriage) with role(husband) do not contain: $m
     When relation $m add player for role(wife): $a
     When relation $m add player for role(husband): $b
-    Then entity $a get relations(marriage:wife) contain: $m
-    Then entity $b get relations(marriage:husband) contain: $m
+    Then entity $a get relations(marriage) with role(wife) contain: $m
+    Then entity $b get relations(marriage) with role(husband) contain: $m
     When transaction commits
     When session opens transaction of type: read
     When $m = relation(marriage) get instance with key(license): m
     Then relation(marriage) get instances contain: $m
     When $a = entity(person) get instance with key(username): alice
     When $b = entity(person) get instance with key(username): bob
-    Then entity $a get relations(marriage:wife) contain: $m
-    Then entity $b get relations(marriage:husband) contain: $m
+    Then entity $a get relations(marriage) with role(wife) contain: $m
+    Then entity $b get relations(marriage) with role(husband) contain: $m
 
   Scenario: Role player can be unassigned from relation
     When $m = relation(marriage) create new instance with key(license): m
@@ -92,7 +92,7 @@ Feature: Concept Relation
     When relation $m add player for role(wife): $a
     When relation $m add player for role(husband): $b
     When relation $m remove player for role(wife): $a
-    Then entity $a get relations(marriage:wife) do not contain: $m
+    Then entity $a get relations(marriage) with role(wife) do not contain: $m
     Then relation $m get players for role(wife) do not contain: $a
     Then relation $m get players do not contain:
       | wife | $a |
@@ -100,7 +100,7 @@ Feature: Concept Relation
     When session opens transaction of type: write
     When $m = relation(marriage) get instance with key(license): m
     When $a = entity(person) get instance with key(username): alice
-    Then entity $a get relations(marriage:wife) do not contain: $m
+    Then entity $a get relations(marriage) with role(wife) do not contain: $m
     Then relation $m get players for role(wife) do not contain: $a
     Then relation $m get players do not contain:
       | wife | $a |
@@ -110,7 +110,7 @@ Feature: Concept Relation
     When $m = relation(marriage) get instance with key(license): m
     When $a = entity(person) get instance with key(username): alice
     When relation $m remove player for role(wife): $a
-    Then entity $a get relations(marriage:wife) do not contain: $m
+    Then entity $a get relations(marriage) with role(wife) do not contain: $m
     Then relation $m get players for role(wife) do not contain: $a
     Then relation $m get players do not contain:
       | wife | $a |
@@ -118,7 +118,7 @@ Feature: Concept Relation
     When session opens transaction of type: read
     When $m = relation(marriage) get instance with key(license): m
     When $a = entity(person) get instance with key(username): alice
-    Then entity $a get relations(marriage:wife) do not contain: $m
+    Then entity $a get relations(marriage) with role(wife) do not contain: $m
     Then relation $m get players for role(wife) do not contain: $a
     Then relation $m get players do not contain:
       | wife | $a |
@@ -128,7 +128,7 @@ Feature: Concept Relation
     When transaction commits
     When session opens transaction of type: read
     When $m = relation(marriage) get instance with key(license): m
-    Then relation $m is null: true
+    Then relation $m does not exist
     Then relation(marriage) get instances is empty
 
   Scenario: Relation chain with no other role players gets deleted on commit
@@ -191,7 +191,7 @@ Feature: Concept Relation
     When transaction commits
     When session opens transaction of type: read
     When $m = relation(marriage) get instance with key(license): m
-    Then relation $m is null: true
+    Then relation $m does not exist
     Then relation(marriage) get instances is empty
 
   Scenario: Relation cannot have roleplayers inserted after deletion
