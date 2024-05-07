@@ -20,10 +20,10 @@ Feature: Concept Relation Type and Role Type
     When put relation type: marriage
     When relation(marriage) create role: husband
     When relation(marriage) create role: wife
-    Then relation(marriage) exists: true
+    Then relation(marriage) exists
     Then relation(marriage) get supertype: relation
-    Then relation(marriage) get role(husband) exists: true
-    Then relation(marriage) get role(wife) exists: true
+    Then relation(marriage) get role(husband) exists
+    Then relation(marriage) get role(wife) exists
     Then relation(marriage) get role(husband) get supertype: relation:role
     Then relation(marriage) get role(wife) get supertype: relation:role
     Then relation(marriage) get roles contain:
@@ -31,10 +31,10 @@ Feature: Concept Relation Type and Role Type
       | marriage:wife    |
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then relation(marriage) exists: true
+    Then relation(marriage) exists
     Then relation(marriage) get supertype: relation
-    Then relation(marriage) get role(husband) exists: true
-    Then relation(marriage) get role(wife) exists: true
+    Then relation(marriage) get role(husband) exists
+    Then relation(marriage) get role(wife) exists
     Then relation(marriage) get role(husband) get supertype: relation:role
     Then relation(marriage) get role(wife) get supertype: relation:role
     Then relation(marriage) get roles contain:
@@ -55,7 +55,7 @@ Feature: Concept Relation Type and Role Type
     When transaction commits
     When connection opens schema transaction for database: typedb
     When delete relation type: parentship
-    Then relation(parentship) exists: false
+    Then relation(parentship) does not exist
     Then relation(relation) get role(role) get subtypes do not contain:
       | parentship:parent |
       | parentship:child  |
@@ -67,7 +67,7 @@ Feature: Concept Relation Type and Role Type
     When transaction commits
     When connection opens schema transaction for database: typedb
     When delete relation type: marriage
-    Then relation(marriage) exists: false
+    Then relation(marriage) does not exist
     Then relation(relation) get role(role) get subtypes do not contain:
       | parentship:parent |
       | parentship:child  |
@@ -75,8 +75,8 @@ Feature: Concept Relation Type and Role Type
       | marriage:wife     |
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then relation(parentship) exists: false
-    Then relation(marriage) exists: false
+    Then relation(parentship) does not exist
+    Then relation(marriage) does not exist
     Then relation(relation) get role(role) get subtypes do not contain:
       | parentship:parent |
       | parentship:child  |
@@ -123,12 +123,12 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(parent) get label: parent
     Then relation(parentship) get role(child) get label: child
     When relation(parentship) set label: marriage
-    Then relation(parentship) exists: false
-    Then relation(marriage) exists: true
+    Then relation(parentship) does not exist
+    Then relation(marriage) exists
     When relation(marriage) get role(parent) set name: husband
     When relation(marriage) get role(child) set name: wife
-    Then relation(marriage) get role(parent) exists: false
-    Then relation(marriage) get role(child) exists: false
+    Then relation(marriage) get role(parent) does not exist
+    Then relation(marriage) get role(child) does not exist
     Then relation(marriage) get label: marriage
     Then relation(marriage) get role(husband) get label: husband
     Then relation(marriage) get role(wife) get label: wife
@@ -138,18 +138,18 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) get role(husband) get label: husband
     Then relation(marriage) get role(wife) get label: wife
     When relation(marriage) set label: employment
-    Then relation(marriage) exists: false
-    Then relation(employment) exists: true
+    Then relation(marriage) does not exist
+    Then relation(employment) exists
     When relation(employment) get role(husband) set name: employee
     When relation(employment) get role(wife) set name: employer
-    Then relation(employment) get role(husband) exists: false
-    Then relation(employment) get role(wife) exists: false
+    Then relation(employment) get role(husband) does not exist
+    Then relation(employment) get role(wife) does not exist
     Then relation(employment) get label: employment
     Then relation(employment) get role(employee) get label: employee
     Then relation(employment) get role(employer) get label: employer
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then relation(employment) exists: true
+    Then relation(employment) exists
     Then relation(employment) get label: employment
     Then relation(employment) get role(employee) get label: employee
     Then relation(employment) get role(employer) get label: employer
@@ -472,7 +472,7 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: father
     When relation(fathership) get role(father); set override: parent
-    Then relation(fathership) get overridden role(father) exists: true
+    Then relation(fathership) get overridden role(father) exists
     Then relation(fathership) get overridden role(father) get label: parent
     Then relation(fathership) get roles do not contain:
       | parentship:parent |

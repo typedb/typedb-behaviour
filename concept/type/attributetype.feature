@@ -19,11 +19,11 @@ Feature: Concept Attribute Type
   Scenario: Attribute types can be created
     When put attribute type: name
     When attribute(name) set value-type: string
-    Then attribute(name) exists: true
+    Then attribute(name) exists
     Then attribute(name) get supertype: attribute
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then attribute(name) exists: true
+    Then attribute(name) exists
     Then attribute(name) get supertype: attribute
 
   Scenario: Attribute types can be created with value type boolean
@@ -78,29 +78,29 @@ Feature: Concept Attribute Type
   Scenario: Attribute types can be deleted
     When put attribute type: name
     When attribute(name) set value-type: string
-    Then attribute(name) exists: true
+    Then attribute(name) exists
     When put attribute type: age
     When attribute(age) set value-type: long
-    Then attribute(age) exists: true
+    Then attribute(age) exists
     When delete attribute type: age
-    Then attribute(age) exists: false
+    Then attribute(age) does not exist
     Then attribute(attribute) get subtypes do not contain:
       | age |
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then attribute(name) exists: true
-    Then attribute(age) exists: false
+    Then attribute(name) exists
+    Then attribute(age) does not exist
     Then attribute(attribute) get subtypes do not contain:
       | age |
     When delete attribute type: name
-    Then attribute(name) exists: false
+    Then attribute(name) does not exist
     Then attribute(attribute) get subtypes do not contain:
       | name |
       | age  |
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then attribute(name) exists: false
-    Then attribute(age) exists: false
+    Then attribute(name) does not exist
+    Then attribute(age) does not exist
     Then attribute(attribute) get subtypes do not contain:
       | name |
       | age  |
@@ -120,19 +120,19 @@ Feature: Concept Attribute Type
     When attribute(name) set value-type: string
     Then attribute(name) get label: name
     When attribute(name) set label: username
-    Then attribute(name) exists: false
-    Then attribute(username) exists: true
+    Then attribute(name) does not exist
+    Then attribute(username) exists
     Then attribute(username) get label: username
     When transaction commits
     When connection opens schema transaction for database: typedb
     Then attribute(username) get label: username
     When attribute(username) set label: email
-    Then attribute(username) exists: false
-    Then attribute(email) exists: true
+    Then attribute(username) does not exist
+    Then attribute(email) exists
     Then attribute(email) get label: email
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then attribute(email) exists: true
+    Then attribute(email) exists
     Then attribute(email) get label: email
 
   Scenario: Attribute types can be set to abstract

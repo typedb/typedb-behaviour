@@ -18,37 +18,37 @@ Feature: Concept Entity Type
 
   Scenario: Entity types can be created
     When put entity type: person
-    Then entity(person) exists: true
+    Then entity(person) exists
     Then entity(person) get supertype: entity
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then entity(person) exists: true
+    Then entity(person) exists
     Then entity(person) get supertype: entity
 
   Scenario: Entity types can be deleted
     When put entity type: person
-    Then entity(person) exists: true
+    Then entity(person) exists
     When put entity type: company
-    Then entity(company) exists: true
+    Then entity(company) exists
     When delete entity type: company
-    Then entity(company) exists: false
+    Then entity(company) does not exist
     Then entity(entity) get subtypes do not contain:
       | company |
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then entity(person) exists: true
-    Then entity(company) exists: false
+    Then entity(person) exists
+    Then entity(company) does not exist
     Then entity(entity) get subtypes do not contain:
       | company |
     When delete entity type: person
-    Then entity(person) exists: false
+    Then entity(person) does not exist
     Then entity(entity) get subtypes do not contain:
       | person  |
       | company |
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then entity(person) exists: false
-    Then entity(company) exists: false
+    Then entity(person) does not exist
+    Then entity(company) does not exist
     Then entity(entity) get subtypes do not contain:
       | person  |
       | company |
@@ -66,19 +66,19 @@ Feature: Concept Entity Type
     When put entity type: person
     Then entity(person) get label: person
     When entity(person) set label: horse
-    Then entity(person) exists: false
-    Then entity(horse) exists: true
+    Then entity(person) does not exist
+    Then entity(horse) exists
     Then entity(horse) get label: horse
     When transaction commits
     When connection opens schema transaction for database: typedb
     Then entity(horse) get label: horse
     When entity(horse) set label: animal
-    Then entity(horse) exists: false
-    Then entity(animal) exists: true
+    Then entity(horse) does not exist
+    Then entity(animal) exists
     Then entity(animal) get label: animal
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then entity(animal) exists: true
+    Then entity(animal) exists
     Then entity(animal) get label: animal
 
   Scenario: Entity types can be set to abstract
@@ -977,13 +977,13 @@ Feature: Concept Entity Type
     When attribute(email) set value-type: string
     When put entity type: person
     When entity(person) set owns: email
-    Then entity(person) get owns overridden(email) exists: false
+    Then entity(person) get owns overridden attribute(email) does not exist
     When put entity type: customer
     When entity(customer) set supertype: person
     Then entity(customer) set owns: email
     Then entity(customer) get owns: email, set annotation: @key
-    Then entity(customer) get owns overridden(email) exists: true
-    Then entity(customer) get owns overridden(email) get label: email
+    Then entity(customer) get owns overridden attribute(email) exists
+    Then entity(customer) get owns overridden attribute(email) get label: email
     Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
       | email |
     When transaction commits
