@@ -92,7 +92,7 @@ Feature: Concept Attribute
     Then attribute $x has value type: string
     Then attribute $x has value: alice
 
-  Scenario: Attribute with value type string and satisfies a regular expression can be created
+  Scenario: Attribute with value type string that satisfies the regular expression can be created
     When $x = attribute(email) put instance with value: alice@email.com
     Then attribute $x exists
     Then attribute $x has type: email
@@ -106,8 +106,8 @@ Feature: Concept Attribute
     Then attribute $x has value type: string
     Then attribute $x has value: alice@email.com
 
-  Scenario: Attribute with value type string but does not satisfy a regular expression cannot be created
-    When attribute(email) put: alice-email-com; fails
+  Scenario: Attribute with value type string that does not satisfy the regular expression cannot be created
+    When attribute(email) put instance with value: alice-email-com; fails
 
   Scenario: Attribute with value type datetime can be created
     When $x = attribute(birth-date) put instance with value: 1990-01-01 11:22:33
@@ -123,8 +123,7 @@ Feature: Concept Attribute
     Then attribute $x has value type: datetime
     Then attribute $x has value: 1990-01-01 11:22:33
 
-    # TODO update scenario titles
-  Scenario: Attribute with value type boolean can be retrieved from its type
+  Scenario: Attribute with value type boolean can be retrieved by its value
     When $x = attribute(is-alive) put instance with value: true
     Then attribute(is-alive) get instances contain: $x
     When transaction commits
@@ -132,7 +131,7 @@ Feature: Concept Attribute
     When $x = attribute(is-alive) get instance with value: true
     Then attribute(is-alive) get instances contain: $x
 
-  Scenario: Attribute with value type long can be retrieved from its type
+  Scenario: Attribute with value type long can be retrieved by its value
     When $x = attribute(age) put instance with value: 21
     Then attribute(age) get instances contain: $x
     When transaction commits
@@ -140,7 +139,7 @@ Feature: Concept Attribute
     When $x = attribute(age) get instance with value: 21
     Then attribute(age) get instances contain: $x
 
-  Scenario: Attribute with value type double can be retrieved from its type
+  Scenario: Attribute with value type double can be retrieved by its value
     When $x = attribute(score) put instance with value: 123.456
     Then attribute(score) get instances contain: $x
     When transaction commits
@@ -148,7 +147,7 @@ Feature: Concept Attribute
     When $x = attribute(score) get instance with value: 123.456
     Then attribute(score) get instances contain: $x
 
-  Scenario: Attribute with value type string can be retrieved from its type
+  Scenario: Attribute with value type string can be retrieved by its value
     When $x = attribute(name) put instance with value: alice
     Then attribute(name) get instances contain: $x
     When transaction commits
@@ -156,7 +155,7 @@ Feature: Concept Attribute
     When $x = attribute(name) get instance with value: alice
     Then attribute(name) get instances contain: $x
 
-  Scenario: Attribute with value type datetime can be retrieved from its type
+  Scenario: Attribute with value type datetime can be retrieved by its value
     When $x = attribute(birth-date) put instance with value: 1990-01-01 11:22:33
     Then attribute(birth-date) get instances contain: $x
     When transaction commits
