@@ -294,12 +294,29 @@ Feature: Concept Attribute
     When $x = attribute(birth-date) get instance with value: 1990-01-01 11:22:33
     Then attribute $x does not exist
 
-  Scenario: Attribute with value type boolean can be owned
+  Scenario: Dependent attribute is not inserted
+    Given transaction commits
 
-  Scenario: Attribute with value type long can be owned
+    When connection opens schema transaction for database: typedb
+    When put attribute type: ephemeral
+    When attribute(ephemeral) set value-type: long
+    When transaction commits
 
-  Scenario: Attribute with value type double can be owned
+    When connection opens write transaction for database: typedb
+    When $x = attribute(ephemeral) put instance with value: 1337
+    Then transaction commits
 
-  Scenario: Attribute with value type string can be owned
+    When connection opens read transaction for database: typedb
+    When $x = attribute(ephemeral) get instance with value: 1337
+    Then attribute $x does not exist
+    # FIXME: read transactions shouldn't commit
+    When transaction commits
 
-  Scenario: Attribute with value type datetime can be owned
+    When connection opens schema transaction for database: typedb
+    When attribute(ephemeral) set annotation: @independent
+    When transaction commits
+
+    When connection opens read transaction for database: typedb
+    When $x = attribute(ephemeral) get instance with value: 1337
+    Then attribute $x does not exist
+
