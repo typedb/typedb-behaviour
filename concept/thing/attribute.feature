@@ -34,7 +34,7 @@ Feature: Concept Attribute
     Given attribute(email) set annotation: @regex("\S+@\S+\.\S+")
     Given transaction commits
     Given connection opens write transaction for database: typedb
-    Given set time-zone is: Europe/London
+    Given set time zone: Europe/London
 
   Scenario: Attribute with value type boolean can be created
     When $x = attribute(is-alive) put instance with value: true
@@ -165,7 +165,7 @@ Feature: Concept Attribute
     Then attribute(birth-date) get instances contain: $x
 
   Scenario: Datetime attribute can be inserted in one timezone and retrieved in another with no change in the value
-    When set time-zone: Asia/Calcutta
+    When set time zone: Asia/Calcutta
     When $x = attribute(birth-date) put instance with value: 2001-08-23 08:30:00
     Then attribute $x exists
     Then attribute $x has type: birth-date
@@ -173,7 +173,7 @@ Feature: Concept Attribute
     Then attribute $x has value: 2001-08-23 08:30:00
     When transaction commits
     When connection opens read transaction for database: typedb
-    When set time-zone: America/Chicago
+    When set time zone: America/Chicago
     When $x = attribute(birth-date) get instance with value: 2001-08-23 08:30:00
     Then attribute $x exists
     Then attribute $x has type: birth-date
