@@ -15,16 +15,22 @@ Feature: Concept Attribute
     # Write schema for the test scenarios
     Given put attribute type: is-alive
     Given attribute(is-alive) set value-type: boolean
+    Given attribute(is-alive) set annotation: @independent
     Given put attribute type: age
     Given attribute(age) set value-type: long
+    Given attribute(age) set annotation: @independent
     Given put attribute type: score
     Given attribute(score) set value-type: double
+    Given attribute(score) set annotation: @independent
     Given put attribute type: birth-date
     Given attribute(birth-date) set value-type: datetime
+    Given attribute(birth-date) set annotation: @independent
     Given put attribute type: name
     Given attribute(name) set value-type: string
+    Given attribute(name) set annotation: @independent
     Given put attribute type: email
     Given attribute(email) set value-type: string
+    Given attribute(email) set annotation: @independent
     Given attribute(email) set annotation: @regex("\S+@\S+\.\S+")
     Given transaction commits
     Given connection opens write transaction for database: typedb
