@@ -18,8 +18,9 @@ Feature: Concept Entity
     Given put attribute type: email
     Given attribute(email) set value-type: string
     Given put entity type: person
-    Given entity(person) set owns attribute type: username, with annotations: key
-    Given entity(person) set owns attribute type: email
+    Given entity(person) set owns: username
+    Given entity(person) get owns: username, set annotation: @key
+    Given entity(person) set owns: email
     Given transaction commits
     Given connection opens write transaction for database: typedb
 
@@ -61,158 +62,147 @@ Feature: Concept Entity
 
   Scenario: Entity can have keys
     When $a = entity(person) create new instance
-    When $alice = attribute(username) as(string) put: alice
+    When $alice = attribute(username) put instance with value: alice
     When entity $a set has: $alice
-    Then entity $a get attributes(username) as(string) contain: $alice
-    Then entity $a get keys contain: $alice
+    Then entity $a get has(username) contain: $alice
+    Then entity $a get has with annotations: @key; contain: $alice
     Then attribute $alice get owners contain: $a
     When transaction commits
     When connection opens read transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
-    When $alice = attribute(username) as(string) get: alice
-    Then entity $a get attributes(username) as(string) contain: $alice
-    Then entity $a get keys contain: $alice
+    When $alice = attribute(username) get instance with value: alice
+    Then entity $a get has(username) contain: $alice
+    Then entity $a get has with annotations: @key; contain: $alice
     Then attribute $alice get owners contain: $a
 
   Scenario: Entity can unset keys
     When $a = entity(person) create new instance
-    When $alice = attribute(username) as(string) put: alice
+    When $alice = attribute(username) put instance with value: alice
     When entity $a set has: $alice
     When entity $a unset has: $alice
-    Then entity $a get attributes(username) as(string) do not contain: $alice
-    Then entity $a get keys do not contain: $alice
+    Then entity $a get has(username) do not contain: $alice
+    Then entity $a get has with annotations: @key; do not contain: $alice
     Then attribute $alice get owners do not contain: $a
     When entity $a set has: $alice
     When transaction commits
     When connection opens write transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
-    When $alice = attribute(username) as(string) get: alice
-    Then entity $a get attributes(username) as(string) contain: $alice
+    When $alice = attribute(username) get instance with value: alice
+    Then entity $a get has(username) contain: $alice
     When entity $a unset has: $alice
-    Then entity $a get attributes(username) as(string) do not contain: $alice
-    Then entity $a get keys do not contain: $alice
+    Then entity $a get has(username) do not contain: $alice
+    Then entity $a get has with annotations: @key; do not contain: $alice
     Then attribute $alice get owners do not contain: $a
     Then transaction commits; fails
 
   Scenario: Entity that has its key unset cannot be committed
     When $a = entity(person) create new instance
-    When $alice = attribute(username) as(string) put: alice
+    When $alice = attribute(username) put instance with value: alice
     When entity $a set has: $alice
     When entity $a unset has: $alice
     Then transaction commits; fails
     When connection opens write transaction for database: typedb
     When $a = entity(person) create new instance
-    When $alice = attribute(username) as(string) put: alice
+    When $alice = attribute(username) put instance with value: alice
     When entity $a set has: $alice
     When transaction commits
     When connection opens write transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
-    When $alice = attribute(username) as(string) get: alice
+    When $alice = attribute(username) get instance with value: alice
     When entity $a unset has: $alice
     Then transaction commits; fails
 
   Scenario: Entity cannot have more than one key for a given key type
     When $a = entity(person) create new instance
-    When $alice = attribute(username) as(string) put: alice
-    When $bob = attribute(username) as(string) put: bob
+    When $alice = attribute(username) put instance with value: alice
+    When $bob = attribute(username) put instance with value: bob
     When entity $a set has: $alice
     Then entity $a set has: $bob; fails
     When connection opens write transaction for database: typedb
     When $a = entity(person) create new instance
-    When $alice = attribute(username) as(string) put: alice
-    When $bob = attribute(username) as(string) put: bob
+    When $alice = attribute(username) put instance with value: alice
+    When $bob = attribute(username) put instance with value: bob
     When entity $a set has: $alice
     When transaction commits
     When connection opens write transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
-    When $bob = attribute(username) as(string) get: bob
+    When $bob = attribute(username) get instance with value: bob
     Then entity $a set has: $bob; fails
 
   Scenario: Entity cannot have a key that has been taken
     When $a = entity(person) create new instance
-    When $alice = attribute(username) as(string) put: alice
+    When $alice = attribute(username) put instance with value: alice
     When entity $a set has: $alice
     When transaction commits
     When connection opens write transaction for database: typedb
     When $b = entity(person) create new instance
-    When $alice = attribute(username) as(string) get: alice
+    When $alice = attribute(username) get instance with value: alice
     Then entity $b set has: $alice; fails
 
   Scenario: Entity can have attribute
     When $a = entity(person) create new instance with key(username): alice
-    When $email = attribute(email) as(string) put: alice@email.com
+    When $email = attribute(email) put instance with value: alice@email.com
     When entity $a set has: $email
-    Then entity $a get attributes(email) as(string) contain: $email
-    Then entity $a get attributes contain: $email
+    Then entity $a get has(email) contain: $email
+    Then entity $a get has contain: $email
     Then attribute $email get owners contain: $a
     When transaction commits
     When connection opens read transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
-    When $email = attribute(email) as(string) get: alice@email.com
-    Then entity $a get attributes(email) as(string) contain: $email
-    Then entity $a get attributes contain: $email
+    When $email = attribute(email) get instance with value: alice@email.com
+    Then entity $a get has(email) contain: $email
+    Then entity $a get has contain: $email
     Then attribute $email get owners contain: $a
 
   Scenario: Entity can unset attribute
     When $a = entity(person) create new instance with key(username): alice
-    When $email = attribute(email) as(string) put: alice@email.com
+    When $email = attribute(email) put instance with value: alice@email.com
     When entity $a set has: $email
     When entity $a unset has: $email
-    Then entity $a get attributes(email) as(string) do not contain: $email
-    Then entity $a get attributes do not contain: $email
+    Then entity $a get has(email) do not contain: $email
+    Then entity $a get has do not contain: $email
     Then attribute $email get owners do not contain: $a
     When transaction commits
     When connection opens write transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
-    When $email = attribute(email) as(string) get: alice@email.com
-    Then entity $a get attributes(email) as(string) do not contain: $email
-    Then entity $a get attributes do not contain: $email
+    Then entity $a get has(email) do not contain: $email
+    Then entity $a get has do not contain: $email
     Then attribute $email get owners do not contain: $a
     When entity $a set has: $email
     When transaction commits
     When connection opens write transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
-    When $email = attribute(email) as(string) get: alice@email.com
-    Then entity $a get attributes(email) as(string) contain: $email
-    Then entity $a get attributes contain: $email
+    Then entity $a get has(email) contain: $email
+    Then entity $a get has contain: $email
     Then attribute $email get owners contain: $a
     When entity $a unset has: $email
-    Then entity $a get attributes(email) as(string) do not contain: $email
-    Then entity $a get attributes do not contain: $email
+    Then entity $a get has(email) do not contain: $email
+    Then entity $a get has do not contain: $email
     Then attribute $email get owners do not contain: $a
     When transaction commits
     When connection opens write transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
-    When $email = attribute(email) as(string) get: alice@email.com
-    Then entity $a get attributes(email) as(string) do not contain: $email
+    Then entity $a get has(email) do not contain: $email
     Then attribute $email get owners do not contain: $a
     When entity $a set has: $email
     When transaction commits
     When connection opens write transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
-    When $email = attribute(email) as(string) get: alice@email.com
     When entity $a set has: $email
     When entity $a unset has: $email
-    Then entity $a get attributes(email) as(string) do not contain: $email
-    Then entity $a get attributes do not contain: $email
+    Then entity $a get has(email) do not contain: $email
+    Then entity $a get has do not contain: $email
     Then attribute $email get owners do not contain: $a
     When transaction commits
     When connection opens write transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
-    When $email = attribute(email) as(string) get: alice@email.com
-    Then entity $a get attributes(email) as(string) do not contain: $email
+    Then entity $a get has(email) do not contain: $email
     Then attribute $email get owners do not contain: $a
 
   Scenario: Entity cannot be given an attribute after deletion
     When $a = entity(person) create new instance with key(username): alice
-    When $email = attribute(email) as(string) put: alice@email.com
+    When $email = attribute(email) put instance with value: alice@email.com
     When delete entity: $a
     Then entity $a is deleted: true
     When entity $a set has: $email; fails
-
-  Scenario: Entity can play a role in a relation
-
-  Scenario: Entity can retrieve relations where it plays a role in
-
-  Scenario: Entity can retrieve role types it plays
 
