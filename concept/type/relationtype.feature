@@ -11,7 +11,6 @@ Feature: Concept Relation Type and Role Type
     Given connection has been opened
     Given connection does not have any database
     Given connection create database: typedb
-    Given connection open schema session for database: typedb
     Given connection opens schema transaction for database: typedb
 
   Scenario: Root relation type cannot be deleted
@@ -90,15 +89,11 @@ Feature: Concept Relation Type and Role Type
     When put entity type: person
     When entity(person) set plays role: marriage:wife
     When transaction commits
-    When connection close all sessions
-    When connection open data session for database: typedb
     When connection opens write transaction for database: typedb
     When $m = relation(marriage) create new instance
     When $a = entity(person) create new instance
     When relation $m add player for role(wife): $a
     When transaction commits
-    When connection close all sessions
-    When connection open schema session for database: typedb
     When connection opens schema transaction for database: typedb
     Then delete relation type: marriage; fails
 
@@ -109,15 +104,11 @@ Feature: Concept Relation Type and Role Type
     When put entity type: person
     When entity(person) set plays role: marriage:wife
     When transaction commits
-    When connection close all sessions
-    When connection open data session for database: typedb
     When connection opens write transaction for database: typedb
     When $m = relation(marriage) create new instance
     When $a = entity(person) create new instance
     When relation $m add player for role(wife): $a
     When transaction commits
-    When connection close all sessions
-    When connection open schema session for database: typedb
     When connection opens schema transaction for database: typedb
     Then relation(marriage) delete role: wife; fails
     When connection opens schema transaction for database: typedb
@@ -212,15 +203,11 @@ Feature: Concept Relation Type and Role Type
     When put entity type: person
     When entity(person) set plays role: fathership:father
     Then transaction commits
-    When connection close all sessions
-    When connection open data session for database: typedb
     When connection opens write transaction for database: typedb
     Then $m = relation(fathership) create new instance
     When $a = entity(person) create new instance
     When relation $m add player for role(father): $a
     Then transaction commits
-    When connection close all sessions
-    When connection open schema session for database: typedb
     When connection opens schema transaction for database: typedb
     Then relation(parentship) set annotation: @abstract
     Then transaction commits
@@ -545,7 +532,7 @@ Feature: Concept Relation Type and Role Type
     When connection opens read transaction for database: typedb
     Then relation(marriage) get owns: license; get annotations contain: @key
 
---- STARTED SKIPPING ---
+# TODO: REMOVE THIS COMMENT --- STARTED SKIPPING ---
 
   Scenario: Relation types can unset keys
     When put attribute type: license
@@ -871,7 +858,7 @@ Feature: Concept Relation Type and Role Type
     When relation(contractor-employment) set owns: contractor-reference
     When relation(contractor-employment) get owns: contractor-reference; set override: employment-reference
     When relation(contractor-employment) set owns: contractor-hours
-    When relation(contractor-employment) get owns(contractor-hours); set override: employment-hours
+    When relation(contractor-employment) get owns: contractor-hours; set override: employment-hours
     Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; contain:
       | contractor-reference |
     Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; do not contain:
@@ -907,9 +894,9 @@ Feature: Concept Relation Type and Role Type
     When relation(parttime-employment) create role: parttime-employee
     When relation(parttime-employment) get role(parttime-employee); set override: employee
     When relation(parttime-employment) set owns: parttime-reference
-    When relation(parttime-employment) get owns(parttime-reference); set override: contractor-reference
+    When relation(parttime-employment) get owns: parttime-reference; set override: contractor-reference
     When relation(parttime-employment) set owns: parttime-hours
-    When relation(parttime-employment) get owns(parttime-hours); set override: contractor-hours
+    When relation(parttime-employment) get owns: parttime-hours; set override: contractor-hours
     Then relation(parttime-employment) get owns, with annotations (DEPRECATED): key; contain:
       | parttime-reference |
     Then relation(parttime-employment) get owns contain:
@@ -960,7 +947,7 @@ Feature: Concept Relation Type and Role Type
     When relation(contractor-employment) create role: contractor-employee
     When relation(contractor-employment) get role(contractor-employee); set override: employee
     When relation(contractor-employment) set owns: contractor-reference
-    When relation(contractor-employment) get owns(contractor-reference); set override: employment-reference
+    When relation(contractor-employment) get owns: contractor-reference; set override: employment-reference
     When relation(contractor-employment) get owns: contractor-reference, set annotation: @key
     Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; contain:
       | contractor-reference |
@@ -1068,7 +1055,7 @@ Feature: Concept Relation Type and Role Type
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
     When relation(contractor-employment) set owns: contractor-reference
-    When relation(contractor-employment) get owns(contractor-reference); set override: employment-reference
+    When relation(contractor-employment) get owns: contractor-reference; set override: employment-reference
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
     Then relation(parttime-employment) set owns: contractor-reference
@@ -1104,7 +1091,7 @@ Feature: Concept Relation Type and Role Type
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
     When relation(contractor-employment) set owns: contractor-hours
-    When relation(contractor-employment) get owns(contractor-hours); set override: employment-hours
+    When relation(contractor-employment) get owns: contractor-hours; set override: employment-hours
     When put relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
     Then relation(parttime-employment) set owns: contractor-hours
@@ -1133,11 +1120,11 @@ Feature: Concept Relation Type and Role Type
     When transaction commits
     When connection opens schema transaction for database: typedb
     Then relation(employment) set owns: social-security-number
-    Then relation(employment) get owns(social-security-number); set override: reference
+    Then relation(employment) get owns: social-security-number; set override: reference
     Then relation(employment) get owns: social-security-number, set annotation: @key; fails
     When connection opens schema transaction for database: typedb
     Then relation(employment) set owns: max-hours
-    Then relation(employment) get owns(max-hours); set override: hours; fails
+    Then relation(employment) get owns: max-hours; set override: hours; fails
 
   Scenario: Relation types cannot override inherited keys and attributes other than with their subtypes
     When put attribute type: employment-reference
@@ -1159,11 +1146,11 @@ Feature: Concept Relation Type and Role Type
     When transaction commits
     When connection opens schema transaction for database: typedb
     Then relation(contractor-employment) set owns: contractor-reference
-    Then relation(contractor-employment) get owns(contractor-reference); set override: employment-reference
+    Then relation(contractor-employment) get owns: contractor-reference; set override: employment-reference
     Then relation(contractor-employment) get owns: contractor-reference, set annotation: @key; fails
     When connection opens schema transaction for database: typedb
     Then relation(contractor-employment) set owns: contractor-hours
-    Then relation(contractor-employment) get owns(contractor-hours); set override: employment-hours; fails
+    Then relation(contractor-employment) get owns: contractor-hours; set override: employment-hours; fails
 
   Scenario: Relation types can play role types
     When put relation type: locates
