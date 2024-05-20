@@ -236,28 +236,20 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get supertypes contain:
       | relation   |
       | parentship |
-      | fathership |
     Then relation(fathership) get role(father) get supertypes contain:
       | relation:role     |
       | parentship:parent |
-      | fathership:father |
     Then relation(fathership) get role(child) get supertypes contain:
       | relation:role    |
-      | parentship:child |
     Then relation(parentship) get subtypes contain:
-      | parentship |
       | fathership |
     Then relation(parentship) get role(parent) get subtypes contain:
-      | parentship:parent |
       | fathership:father |
-    Then relation(parentship) get role(child) get subtypes contain:
-      | parentship:child |
+    Then relation(parentship) get role(child) get subtypes is empty
     Then relation(relation) get subtypes contain:
-      | relation   |
       | parentship |
       | fathership |
     Then relation(relation) get role(role) get subtypes contain:
-      | relation:role     |
       | parentship:parent |
       | parentship:child  |
       | fathership:father |
@@ -269,28 +261,20 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get supertypes contain:
       | relation   |
       | parentship |
-      | fathership |
     Then relation(fathership) get role(father) get supertypes contain:
       | relation:role     |
       | parentship:parent |
-      | fathership:father |
     Then relation(fathership) get role(child) get supertypes contain:
       | relation:role    |
-      | parentship:child |
     Then relation(parentship) get subtypes contain:
-      | parentship |
       | fathership |
     Then relation(parentship) get role(parent) get subtypes contain:
-      | parentship:parent |
       | fathership:father |
-    Then relation(parentship) get role(child) get subtypes contain:
-      | parentship:child |
+    Then relation(parentship) get role(child) get subtypes is empty
     Then relation(relation) get subtypes contain:
-      | relation   |
       | parentship |
       | fathership |
     Then relation(relation) get role(role) get subtypes contain:
-      | relation:role     |
       | parentship:parent |
       | parentship:child  |
       | fathership:father |
@@ -305,35 +289,25 @@ Feature: Concept Relation Type and Role Type
       | relation   |
       | parentship |
       | fathership |
-      | father-son |
     Then relation(father-son) get role(father) get supertypes contain:
       | relation:role     |
       | parentship:parent |
-      | fathership:father |
     Then relation(father-son) get role(son) get supertypes contain:
       | relation:role    |
       | parentship:child |
-      | father-son:son   |
     Then relation(fathership) get subtypes contain:
-      | fathership |
       | father-son |
-    Then relation(fathership) get role(father) get subtypes contain:
-      | fathership:father |
+    Then relation(fathership) get role(father) get subtypes is empty
     Then relation(fathership) get role(child) get subtypes contain:
-      | parentship:child |
       | father-son:son   |
     Then relation(parentship) get role(parent) get subtypes contain:
-      | parentship:parent |
       | fathership:father |
     Then relation(parentship) get role(child) get subtypes contain:
-      | parentship:child |
       | father-son:son   |
     Then relation(relation) get subtypes contain:
-      | relation   |
       | parentship |
       | fathership |
     Then relation(relation) get role(role) get subtypes contain:
-      | relation:role     |
       | parentship:parent |
       | parentship:child  |
       | fathership:father |
@@ -347,48 +321,36 @@ Feature: Concept Relation Type and Role Type
       | relation   |
       | parentship |
       | fathership |
-      | father-son |
     Then relation(father-son) get role(father) get supertypes contain:
       | relation:role     |
       | parentship:parent |
-      | fathership:father |
     Then relation(father-son) get role(son) get supertypes contain:
       | relation:role    |
       | parentship:child |
-      | father-son:son   |
     Then relation(fathership) get supertype: parentship
     Then relation(fathership) get role(father) get supertype: parentship:parent
     Then relation(fathership) get role(child) get supertype: relation:role
     Then relation(fathership) get supertypes contain:
       | relation   |
       | parentship |
-      | fathership |
     Then relation(fathership) get role(father) get supertypes contain:
       | relation:role     |
       | parentship:parent |
-      | fathership:father |
     Then relation(fathership) get role(child) get supertypes contain:
       | relation:role    |
-      | parentship:child |
     Then relation(fathership) get subtypes contain:
-      | fathership |
       | father-son |
-    Then relation(fathership) get role(father) get subtypes contain:
-      | fathership:father |
+    Then relation(fathership) get role(father) get subtypes is empty
     Then relation(fathership) get role(child) get subtypes contain:
-      | parentship:child |
+      | father-son:son   |
     Then relation(parentship) get role(parent) get subtypes contain:
-      | parentship:parent |
       | fathership:father |
     Then relation(parentship) get role(child) get subtypes contain:
-      | parentship:child |
       | father-son:son   |
     Then relation(relation) get subtypes contain:
-      | relation   |
       | parentship |
       | fathership |
     Then relation(relation) get role(role) get subtypes contain:
-      | relation:role     |
       | parentship:parent |
       | parentship:child  |
       | fathership:father |

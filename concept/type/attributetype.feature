@@ -182,40 +182,30 @@ Feature: Concept Attribute Type
     Then attribute(username) get supertype: name
     Then attribute(first-name) get supertypes contain:
       | attribute  |
-      | first-name |
       | real-name  |
       | name       |
     Then attribute(last-name) get supertypes contain:
       | attribute |
-      | last-name |
       | real-name |
       | name      |
     Then attribute(real-name) get supertypes contain:
       | attribute |
-      | real-name |
       | name      |
     Then attribute(username) get supertypes contain:
       | attribute |
-      | username  |
       | name      |
-    Then attribute(first-name) get subtypes contain:
-      | first-name |
-    Then attribute(last-name) get subtypes contain:
-      | last-name |
+    Then attribute(first-name) get subtypes is empty
+    Then attribute(last-name) get subtypes is empty
     Then attribute(real-name) get subtypes contain:
-      | real-name  |
       | first-name |
       | last-name  |
-    Then attribute(username) get subtypes contain:
-      | username |
+    Then attribute(username) get subtypes is empty
     Then attribute(name) get subtypes contain:
-      | name       |
       | username   |
       | real-name  |
       | first-name |
       | last-name  |
     Then attribute(attribute) get subtypes contain:
-      | attribute  |
       | name       |
       | username   |
       | real-name  |
@@ -229,40 +219,30 @@ Feature: Concept Attribute Type
     Then attribute(username) get supertype: name
     Then attribute(first-name) get supertypes contain:
       | attribute  |
-      | first-name |
       | real-name  |
       | name       |
     Then attribute(last-name) get supertypes contain:
       | attribute |
-      | last-name |
       | real-name |
       | name      |
     Then attribute(real-name) get supertypes contain:
       | attribute |
-      | real-name |
       | name      |
     Then attribute(username) get supertypes contain:
       | attribute |
-      | username  |
       | name      |
-    Then attribute(first-name) get subtypes contain:
-      | first-name |
-    Then attribute(last-name) get subtypes contain:
-      | last-name |
+    Then attribute(first-name) get subtypes is empty
+    Then attribute(last-name) get subtypes is empty
     Then attribute(real-name) get subtypes contain:
-      | real-name  |
       | first-name |
       | last-name  |
-    Then attribute(username) get subtypes contain:
-      | username |
+    Then attribute(username) get subtypes is empty
     Then attribute(name) get subtypes contain:
-      | name       |
       | username   |
       | real-name  |
       | first-name |
       | last-name  |
     Then attribute(attribute) get subtypes contain:
-      | attribute  |
       | name       |
       | username   |
       | real-name  |
@@ -398,7 +378,6 @@ Feature: Concept Attribute Type
 #    When put attribute type: timestamp
 #    When attribute(timestamp) set value-type: datetime
 #    Then attribute(attribute) as(boolean) get subtypes contain:
-#      | attribute |
 #      | is-open   |
 #    Then attribute(attribute) as(boolean) get subtypes do not contain:
 #      | age       |
@@ -406,7 +385,6 @@ Feature: Concept Attribute Type
 #      | name      |
 #      | timestamp |
 #    Then attribute(attribute) as(long) get subtypes contain:
-#      | attribute |
 #      | age       |
 #    Then attribute(attribute) as(long) get subtypes do not contain:
 #      | is-open   |
@@ -414,7 +392,6 @@ Feature: Concept Attribute Type
 #      | name      |
 #      | timestamp |
 #    Then attribute(attribute) as(double) get subtypes contain:
-#      | attribute |
 #      | rating    |
 #    Then attribute(attribute) as(double) get subtypes do not contain:
 #      | is-open   |
@@ -422,7 +399,6 @@ Feature: Concept Attribute Type
 #      | name      |
 #      | timestamp |
 #    Then attribute(attribute) as(string) get subtypes contain:
-#      | attribute |
 #      | name      |
 #    Then attribute(attribute) as(string) get subtypes do not contain:
 #      | is-open   |
@@ -430,7 +406,6 @@ Feature: Concept Attribute Type
 #      | rating    |
 #      | timestamp |
 #    Then attribute(attribute) as(datetime) get subtypes contain:
-#      | attribute |
 #      | timestamp |
 #    Then attribute(attribute) as(datetime) get subtypes do not contain:
 #      | is-open |
@@ -440,7 +415,6 @@ Feature: Concept Attribute Type
 #    When transaction commits
 #    When connection opens read transaction for database: typedb
 #    Then attribute(attribute) as(boolean) get subtypes contain:
-#      | attribute |
 #      | is-open   |
 #    Then attribute(attribute) as(boolean) get subtypes do not contain:
 #      | age       |
@@ -448,7 +422,6 @@ Feature: Concept Attribute Type
 #      | name      |
 #      | timestamp |
 #    Then attribute(attribute) as(long) get subtypes contain:
-#      | attribute |
 #      | age       |
 #    Then attribute(attribute) as(long) get subtypes do not contain:
 #      | is-open   |
@@ -456,7 +429,6 @@ Feature: Concept Attribute Type
 #      | name      |
 #      | timestamp |
 #    Then attribute(attribute) as(double) get subtypes contain:
-#      | attribute |
 #      | rating    |
 #    Then attribute(attribute) as(double) get subtypes do not contain:
 #      | is-open   |
@@ -464,7 +436,6 @@ Feature: Concept Attribute Type
 #      | name      |
 #      | timestamp |
 #    Then attribute(attribute) as(string) get subtypes contain:
-#      | attribute |
 #      | name      |
 #    Then attribute(attribute) as(string) get subtypes do not contain:
 #      | is-open   |
@@ -472,7 +443,6 @@ Feature: Concept Attribute Type
 #      | rating    |
 #      | timestamp |
 #    Then attribute(attribute) as(datetime) get subtypes contain:
-#      | attribute |
 #      | timestamp |
 #    Then attribute(attribute) as(datetime) get subtypes do not contain:
 #      | is-open |

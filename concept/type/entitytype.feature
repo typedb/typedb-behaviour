@@ -120,40 +120,30 @@ Feature: Concept Entity Type
     Then entity(cat) get supertype: animal
     Then entity(man) get supertypes contain:
       | entity |
-      | man    |
       | person |
       | animal |
     Then entity(woman) get supertypes contain:
       | entity |
-      | woman  |
       | person |
       | animal |
     Then entity(person) get supertypes contain:
       | entity |
-      | person |
       | animal |
     Then entity(cat) get supertypes contain:
       | entity |
-      | cat    |
       | animal |
-    Then entity(man) get subtypes contain:
-      | man |
-    Then entity(woman) get subtypes contain:
-      | woman |
+    Then entity(man) get subtypes is empty
+    Then entity(woman) get subtypes is empty
     Then entity(person) get subtypes contain:
-      | person |
       | man    |
       | woman  |
-    Then entity(cat) get subtypes contain:
-      | cat |
+    Then entity(cat) get subtypes is empty
     Then entity(animal) get subtypes contain:
-      | animal |
       | cat    |
       | person |
       | man    |
       | woman  |
     Then entity(entity) get subtypes contain:
-      | entity |
       | animal |
       | cat    |
       | person |
@@ -167,40 +157,30 @@ Feature: Concept Entity Type
     Then entity(cat) get supertype: animal
     Then entity(man) get supertypes contain:
       | entity |
-      | man    |
       | person |
       | animal |
     Then entity(woman) get supertypes contain:
       | entity |
-      | woman  |
       | person |
       | animal |
     Then entity(person) get supertypes contain:
       | entity |
-      | person |
       | animal |
     Then entity(cat) get supertypes contain:
       | entity |
-      | cat    |
       | animal |
-    Then entity(man) get subtypes contain:
-      | man |
-    Then entity(woman) get subtypes contain:
-      | woman |
+    Then entity(man) get subtypes is empty
+    Then entity(woman) get subtypes is empty
     Then entity(person) get subtypes contain:
-      | person |
       | man    |
       | woman  |
-    Then entity(cat) get subtypes contain:
-      | cat |
+    Then entity(cat) get subtypes is empty
     Then entity(animal) get subtypes contain:
-      | animal |
       | cat    |
       | person |
       | man    |
       | woman  |
     Then entity(entity) get subtypes contain:
-      | entity |
       | animal |
       | cat    |
       | person |
