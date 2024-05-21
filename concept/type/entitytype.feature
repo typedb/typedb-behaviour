@@ -957,13 +957,13 @@ Feature: Concept Entity Type
     When attribute(email) set value-type: string
     When put entity type: person
     When entity(person) set owns: email
-    Then entity(person) get owns overridden attribute(email) does not exist
+    Then entity(person) get owns overridden(email) does not exist
     When put entity type: customer
     When entity(customer) set supertype: person
     Then entity(customer) set owns: email
     Then entity(customer) get owns: email, set annotation: @key
-    Then entity(customer) get owns overridden attribute(email) exists
-    Then entity(customer) get owns overridden attribute(email) get label: email
+    Then entity(customer) get owns overridden(email) exists
+    Then entity(customer) get owns overridden(email) get label: email
     Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
       | email |
     When transaction commits
