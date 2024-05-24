@@ -20,12 +20,14 @@ Feature: Concept Relation
     Given put attribute type: date
     Given attribute(date) set value-type: datetime
     Given put relation type: marriage
-    Given relation(marriage) set relates role: wife
-    Given relation(marriage) set relates role: husband
-    Given relation(marriage) set owns attribute type: license, with annotations: key
-    Given relation(marriage) set owns attribute type: date
+    Given relation(marriage) create role: wife
+    Given relation(marriage) create role: husband
+    Given relation(marriage) set owns: license
+    Given relation(marriage) get owns: license, set annotation: @key
+    Given relation(marriage) set owns: date
     Given put entity type: person
-    Given entity(person) set owns attribute type: username, with annotations: key
+    Given entity(person) set owns: username
+    Given entity(person) get owns: username, set annotation: @key
     Given entity(person) set plays role: marriage:wife
     Given entity(person) set plays role: marriage:husband
     Given transaction commits
@@ -134,7 +136,7 @@ Feature: Concept Relation
   Scenario: Relation chain with no other role players gets deleted on commit
     Then transaction commits
     Given connection opens schema transaction for database: typedb
-    Given relation(marriage) set relates role: dependent-marriage
+    Given relation(marriage) create role: dependent-marriage
     Given relation(marriage) set plays role: marriage:dependent-marriage
     Given transaction commits
     Given connection opens write transaction for database: typedb
