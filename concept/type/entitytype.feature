@@ -1132,8 +1132,8 @@ Feature: Concept Entity Type
     When transaction commits
     When connection opens schema transaction for database: typedb
     Then entity(customer) set owns: reference
-    Then entity(customer) get owns: reference; set override: username
-    Then entity(customer) get owns: reference, set annotation: @key; fails
+    Then entity(customer) get owns: reference, set annotation: @key
+    Then entity(customer) get owns: reference; set override: username; fails
     When connection opens schema transaction for database: typedb
     Then entity(customer) set owns: rating
     Then entity(customer) get owns: rating; set override: name
