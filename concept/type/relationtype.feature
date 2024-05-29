@@ -498,9 +498,9 @@ Feature: Concept Relation Type and Role Type
 
   Scenario: Relation types can unset keys
     When put attribute type: license
-    When attribute(license) set value type: string
+    When attribute(license) set value-type: string
     When put attribute type: certificate
-    When attribute(certificate) set value type: string
+    When attribute(certificate) set value-type: string
     When put relation type: marriage
     When relation(marriage) create role: spouse
     When relation(marriage) set owns: license
@@ -508,12 +508,12 @@ Feature: Concept Relation Type and Role Type
     When relation(marriage) set owns: certificate
     When relation(marriage) get owns: certificate, set annotation: @key
     When relation(marriage) unset owns: license
-    Then relation(marriage) get owns, with annotations (DEPRECATED): key; do not contain:
+    Then relation(marriage) get owns do not contain:
       | license |
     When transaction commits
     When connection opens schema transaction for database: typedb
     When relation(marriage) unset owns: certificate
-    Then relation(marriage) get owns, with annotations (DEPRECATED): key; do not contain:
+    Then relation(marriage) get owns do not contain:
       | license     |
       | certificate |
 
@@ -602,9 +602,10 @@ Feature: Concept Relation Type and Role Type
     When relation(marriage) get owns: certificate, set annotation: @key
     When relation(marriage) set owns: date
     When relation(marriage) set owns: religion
-    Then relation(marriage) get owns, with annotations (DEPRECATED): key; contain:
-      | license     |
-      | certificate |
+    Then relation(marriage) get owns: license; get annotations contain: @key
+    Then relation(marriage) get owns: certificate; get annotations contain: @key
+    Then relation(marriage) get owns: date; get annotations do not contain: @key
+    Then relation(marriage) get owns: religion; get annotations do not contain: @key
     Then relation(marriage) get owns contain:
       | license     |
       | certificate |
@@ -612,9 +613,10 @@ Feature: Concept Relation Type and Role Type
       | religion    |
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then relation(marriage) get owns, with annotations (DEPRECATED): key; contain:
-      | license     |
-      | certificate |
+    Then relation(marriage) get owns: license; get annotations contain: @key
+    Then relation(marriage) get owns: certificate; get annotations contain: @key
+    Then relation(marriage) get owns: date; get annotations do not contain: @key
+    Then relation(marriage) get owns: religion; get annotations do not contain: @key
     Then relation(marriage) get owns contain:
       | license     |
       | certificate |
@@ -641,9 +643,10 @@ Feature: Concept Relation Type and Role Type
     When relation(contractor-employment) set owns: contractor-reference
     When relation(contractor-employment) get owns: contractor-reference, set annotation: @key
     When relation(contractor-employment) set owns: contractor-hours
-    Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; contain:
-      | employment-reference |
-      | contractor-reference |
+    Then relation(contractor-employment) get owns: employment-reference; get annotations contain: @key
+    Then relation(contractor-employment) get owns: contractor-reference; get annotations contain: @key
+    Then relation(contractor-employment) get owns: employment-hours; get annotations do not contain: @key
+    Then relation(contractor-employment) get owns: contractor-hours; get annotations do not contain: @key
     Then relation(contractor-employment) get owns contain:
       | employment-reference |
       | contractor-reference |
@@ -651,9 +654,10 @@ Feature: Concept Relation Type and Role Type
       | contractor-hours     |
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; contain:
-      | employment-reference |
-      | contractor-reference |
+    Then relation(contractor-employment) get owns: employment-reference; get annotations contain: @key
+    Then relation(contractor-employment) get owns: contractor-reference; get annotations contain: @key
+    Then relation(contractor-employment) get owns: employment-hours; get annotations do not contain: @key
+    Then relation(contractor-employment) get owns: contractor-hours; get annotations do not contain: @key
     Then relation(contractor-employment) get owns contain:
       | employment-reference |
       | contractor-reference |
@@ -668,10 +672,6 @@ Feature: Concept Relation Type and Role Type
     When relation(parttime-employment) set owns: parttime-reference
     When relation(parttime-employment) get owns: parttime-reference, set annotation: @key
     When relation(parttime-employment) set owns: parttime-hours
-    Then relation(parttime-employment) get owns, with annotations (DEPRECATED): key; contain:
-      | employment-reference |
-      | contractor-reference |
-      | parttime-reference   |
     Then relation(parttime-employment) get owns contain:
       | employment-reference |
       | contractor-reference |
@@ -679,20 +679,23 @@ Feature: Concept Relation Type and Role Type
       | employment-hours     |
       | contractor-hours     |
       | parttime-hours       |
+    Then relation(parttime-employment) get owns: employment-reference; get annotations contain: @key
+    Then relation(parttime-employment) get owns: contractor-reference; get annotations contain: @key
+    Then relation(parttime-employment) get owns: parttime-reference; get annotations contain: @key
+    Then relation(parttime-employment) get owns: employment-hours; get annotations do not contain: @key
+    Then relation(parttime-employment) get owns: contractor-hours; get annotations do not contain: @key
+    Then relation(parttime-employment) get owns: parttime-hours; get annotations do not contain: @key
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; contain:
-      | employment-reference |
-      | contractor-reference |
     Then relation(contractor-employment) get owns contain:
       | employment-reference |
       | contractor-reference |
       | employment-hours     |
       | contractor-hours     |
-    Then relation(parttime-employment) get owns, with annotations (DEPRECATED): key; contain:
-      | employment-reference |
-      | contractor-reference |
-      | parttime-reference   |
+    Then relation(contractor-employment) get owns: employment-reference; get annotations contain: @key
+    Then relation(contractor-employment) get owns: contractor-reference; get annotations contain: @key
+    Then relation(contractor-employment) get owns: employment-hours; get annotations do not contain: @key
+    Then relation(contractor-employment) get owns: contractor-hours; get annotations do not contain: @key
     Then relation(parttime-employment) get owns contain:
       | employment-reference |
       | contractor-reference |
@@ -700,6 +703,12 @@ Feature: Concept Relation Type and Role Type
       | employment-hours     |
       | contractor-hours     |
       | parttime-hours       |
+    Then relation(parttime-employment) get owns: employment-reference; get annotations contain: @key
+    Then relation(parttime-employment) get owns: contractor-reference; get annotations contain: @key
+    Then relation(parttime-employment) get owns: parttime-reference; get annotations contain: @key
+    Then relation(parttime-employment) get owns: employment-hours; get annotations do not contain: @key
+    Then relation(parttime-employment) get owns: contractor-hours; get annotations do not contain: @key
+    Then relation(parttime-employment) get owns: parttime-hours; get annotations do not contain: @key
 
   Scenario: Relation types can inherit keys and attributes that are subtypes of each other
     When put attribute type: employment-reference
@@ -729,24 +738,26 @@ Feature: Concept Relation Type and Role Type
     When relation(contractor-employment) set owns: contractor-reference
     When relation(contractor-employment) get owns: contractor-reference, set annotation: @key
     When relation(contractor-employment) set owns: contractor-hours
-    Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; contain:
-      | employment-reference |
-      | contractor-reference |
     Then relation(contractor-employment) get owns contain:
       | employment-reference |
       | contractor-reference |
       | employment-hours     |
       | contractor-hours     |
+    Then relation(contractor-employment) get owns: employment-reference; get annotations contain: @key
+    Then relation(contractor-employment) get owns: contractor-reference; get annotations contain: @key
+    Then relation(contractor-employment) get owns: employment-hours; get annotations do not contain: @key
+    Then relation(contractor-employment) get owns: contractor-hours; get annotations do not contain: @key
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; contain:
-      | employment-reference |
-      | contractor-reference |
     Then relation(contractor-employment) get owns contain:
       | employment-reference |
       | contractor-reference |
       | employment-hours     |
       | contractor-hours     |
+    Then relation(contractor-employment) get owns: employment-reference; get annotations contain: @key
+    Then relation(contractor-employment) get owns: contractor-reference; get annotations contain: @key
+    Then relation(contractor-employment) get owns: employment-hours; get annotations do not contain: @key
+    Then relation(contractor-employment) get owns: contractor-hours; get annotations do not contain: @key
     When put attribute type: parttime-reference
     When attribute(parttime-reference) set value-type: string
     When attribute(parttime-reference) set supertype: contractor-reference
@@ -759,10 +770,6 @@ Feature: Concept Relation Type and Role Type
     When relation(parttime-employment) set owns: parttime-reference
     When relation(parttime-employment) get owns: parttime-reference, set annotation: @key
     When relation(parttime-employment) set owns: parttime-hours
-    Then relation(parttime-employment) get owns, with annotations (DEPRECATED): key; contain:
-      | employment-reference |
-      | contractor-reference |
-      | parttime-reference   |
     Then relation(parttime-employment) get owns contain:
       | employment-reference |
       | contractor-reference |
@@ -770,20 +777,23 @@ Feature: Concept Relation Type and Role Type
       | employment-hours     |
       | contractor-hours     |
       | parttime-hours       |
+    Then relation(parttime-employment) get owns: employment-reference; get annotations contain: @key
+    Then relation(parttime-employment) get owns: contractor-reference; get annotations contain: @key
+    Then relation(parttime-employment) get owns: parttime-reference; get annotations contain: @key
+    Then relation(parttime-employment) get owns: employment-hours; get annotations do not contain: @key
+    Then relation(parttime-employment) get owns: contractor-hours; get annotations do not contain: @key
+    Then relation(parttime-employment) get owns: parttime-hours; get annotations do not contain: @key
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; contain:
-      | employment-reference |
-      | contractor-reference |
     Then relation(contractor-employment) get owns contain:
       | employment-reference |
       | contractor-reference |
       | employment-hours     |
       | contractor-hours     |
-    Then relation(parttime-employment) get owns, with annotations (DEPRECATED): key; contain:
-      | employment-reference |
-      | contractor-reference |
-      | parttime-reference   |
+    Then relation(contractor-employment) get owns: employment-reference; get annotations contain: @key
+    Then relation(contractor-employment) get owns: contractor-reference; get annotations contain: @key
+    Then relation(contractor-employment) get owns: employment-hours; get annotations do not contain: @key
+    Then relation(contractor-employment) get owns: contractor-hours; get annotations do not contain: @key
     Then relation(parttime-employment) get owns contain:
       | employment-reference |
       | contractor-reference |
@@ -791,6 +801,12 @@ Feature: Concept Relation Type and Role Type
       | employment-hours     |
       | contractor-hours     |
       | parttime-hours       |
+    Then relation(parttime-employment) get owns: employment-reference; get annotations contain: @key
+    Then relation(parttime-employment) get owns: contractor-reference; get annotations contain: @key
+    Then relation(parttime-employment) get owns: parttime-reference; get annotations contain: @key
+    Then relation(parttime-employment) get owns: employment-hours; get annotations do not contain: @key
+    Then relation(parttime-employment) get owns: contractor-hours; get annotations do not contain: @key
+    Then relation(parttime-employment) get owns: parttime-hours; get annotations do not contain: @key
 
   Scenario: Relation types can override inherited keys and attributes
     When put attribute type: employment-reference
@@ -821,28 +837,24 @@ Feature: Concept Relation Type and Role Type
     When relation(contractor-employment) get owns: contractor-reference; set override: employment-reference
     When relation(contractor-employment) set owns: contractor-hours
     When relation(contractor-employment) get owns: contractor-hours; set override: employment-hours
-    Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; contain:
-      | contractor-reference |
-    Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; do not contain:
-      | employment-reference |
     Then relation(contractor-employment) get owns contain:
       | contractor-reference |
       | contractor-hours     |
     Then relation(contractor-employment) get owns do not contain:
       | employment-reference |
       | employment-hours     |
+    Then relation(contractor-employment) get owns: contractor-reference; get annotations contain: @key
+    Then relation(contractor-employment) get owns: contractor-hours; get annotations do not contain: @key
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; contain:
-      | contractor-reference |
-    Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; do not contain:
-      | employment-reference |
     Then relation(contractor-employment) get owns contain:
       | contractor-reference |
       | contractor-hours     |
     Then relation(contractor-employment) get owns do not contain:
       | employment-reference |
       | employment-hours     |
+    Then relation(contractor-employment) get owns: contractor-reference; get annotations contain: @key
+    Then relation(contractor-employment) get owns: contractor-hours; get annotations do not contain: @key
     When put attribute type: parttime-reference
     When attribute(parttime-reference) set value-type: string
     When attribute(parttime-reference) set supertype: contractor-reference
@@ -859,38 +871,36 @@ Feature: Concept Relation Type and Role Type
     When relation(parttime-employment) get owns: parttime-reference; set override: contractor-reference
     When relation(parttime-employment) set owns: parttime-hours
     When relation(parttime-employment) get owns: parttime-hours; set override: contractor-hours
-    Then relation(parttime-employment) get owns, with annotations (DEPRECATED): key; contain:
-      | parttime-reference |
     Then relation(parttime-employment) get owns contain:
       | parttime-reference |
       | parttime-hours     |
+    Then relation(parttime-employment) get owns do not contain:
+      | contractor-reference |
+      | contractor-hours     |
+    Then relation(parttime-employment) get owns: parttime-reference; get annotations contain: @key
+    Then relation(parttime-employment) get owns: parttime-hours; get annotations do not contain: @key
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; contain:
-      | contractor-reference |
-    Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; do not contain:
-      | employment-reference |
     Then relation(contractor-employment) get owns contain:
       | contractor-reference |
       | contractor-hours     |
     Then relation(contractor-employment) get owns do not contain:
       | employment-reference |
       | employment-hours     |
-    Then relation(parttime-employment) get owns, with annotations (DEPRECATED): key; contain:
-      | parttime-reference |
-    Then relation(parttime-employment) get owns, with annotations (DEPRECATED): key; do not contain:
-      | employment-reference |
-      | contractor-reference |
+    Then relation(contractor-employment) get owns: contractor-reference; get annotations contain: @key
+    Then relation(contractor-employment) get owns: contractor-hours; get annotations do not contain: @key
     Then relation(parttime-employment) get owns contain:
       | parttime-reference |
       | parttime-hours     |
-    Then relation(parttime-employment) get owns, with annotations (DEPRECATED): key; do not contain:
+    Then relation(parttime-employment) get owns do not contain:
       | employment-reference |
       | contractor-reference |
       | employment-hours     |
       | contractor-hours     |
+    Then relation(parttime-employment) get owns: parttime-reference; get annotations contain: @key
+    Then relation(parttime-employment) get owns: parttime-hours; get annotations do not contain: @key
 
-  Scenario: Relation types can override inherited attributes as (DEPRECATED) keys
+  Scenario: Relation types can override inherited attributes as keys
     When put attribute type: employment-reference
     When attribute(employment-reference) set value-type: string
     When attribute(employment-reference) set annotation: @abstract
@@ -911,27 +921,21 @@ Feature: Concept Relation Type and Role Type
     When relation(contractor-employment) set owns: contractor-reference
     When relation(contractor-employment) get owns: contractor-reference; set override: employment-reference
     When relation(contractor-employment) get owns: contractor-reference, set annotation: @key
-    Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; contain:
-      | contractor-reference |
-    Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; do not contain:
-      | employment-reference |
     Then relation(contractor-employment) get owns contain:
       | contractor-reference |
     Then relation(contractor-employment) get owns do not contain:
       | employment-reference |
+    Then relation(contractor-employment) get owns: contractor-reference; get annotations contain: @key
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; contain:
-      | contractor-reference |
-    Then relation(contractor-employment) get owns, with annotations (DEPRECATED): key; do not contain:
-      | employment-reference |
     Then relation(contractor-employment) get owns contain:
       | contractor-reference |
     Then relation(contractor-employment) get owns do not contain:
       | employment-reference |
+    Then relation(contractor-employment) get owns: contractor-reference; get annotations contain: @key
 
    # TODO: Invalid scenario because we set annotations independently. Check if Unset annotation scenario exists
-  Scenario: Relation types can redeclare keys as (DEPRECATED) attributes
+  Scenario: Relation types can redeclare keys as attributes
     When put attribute type: date
     When attribute(date) set value-type: datetime
     When put attribute type: license
@@ -947,7 +951,7 @@ Feature: Concept Relation Type and Role Type
     When connection opens schema transaction for database: typedb
     Then relation(marriage) set owns: license
 
-  Scenario: Relation types can redeclare attributes as (DEPRECATED) keys
+  Scenario: Relation types can redeclare attributes as keys
     When put attribute type: date
     When attribute(date) set value-type: datetime
     When put attribute type: license
@@ -1082,8 +1086,8 @@ Feature: Concept Relation Type and Role Type
     When transaction commits
     When connection opens schema transaction for database: typedb
     Then relation(employment) set owns: social-security-number
-    Then relation(employment) get owns: social-security-number; set override: reference
-    Then relation(employment) get owns: social-security-number, set annotation: @key; fails
+    Then relation(employment) get owns: social-security-number, set annotation: @key
+    Then relation(employment) get owns: social-security-number; set override: reference; fails
     When connection opens schema transaction for database: typedb
     Then relation(employment) set owns: max-hours
     Then relation(employment) get owns: max-hours; set override: hours; fails
