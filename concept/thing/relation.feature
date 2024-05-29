@@ -12,6 +12,7 @@ Feature: Concept Relation
     Given connection does not have any database
     Given connection create database: typedb
     Given connection opens schema transaction for database: typedb
+
     # Write schema for the test scenarios
     Given put attribute type: username
     Given attribute(username) set value-type: string
@@ -19,18 +20,25 @@ Feature: Concept Relation
     Given attribute(license) set value-type: string
     Given put attribute type: date
     Given attribute(date) set value-type: datetime
+
     Given put relation type: marriage
-    Given relation(marriage) create role: wife
-    Given relation(marriage) create role: husband
     Given relation(marriage) set owns: license
     Given relation(marriage) get owns: license, set annotation: @key
     Given relation(marriage) set owns: date
+
+    Given relation(marriage) create role: wife
+    Given relation(marriage) get role(wife) set annotation: @card(0, 1)
+    Given relation(marriage) create role: husband
+    Given relation(marriage) get role(husband) set annotation: @card(0, 1)
+
     Given put entity type: person
     Given entity(person) set owns: username
     Given entity(person) get owns: username, set annotation: @key
     Given entity(person) set plays role: marriage:wife
     Given entity(person) set plays role: marriage:husband
+
     Given transaction commits
+
     Given connection opens write transaction for database: typedb
 
   Scenario: Relation with role players can be created and role players can be retrieved
