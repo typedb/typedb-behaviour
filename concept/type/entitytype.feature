@@ -205,14 +205,12 @@ Feature: Concept Entity Type
     When entity(person) get owns: email, set annotation: @key
     When entity(person) set owns: username
     When entity(person) get owns: username, set annotation: @key
-    Then entity(person) get owns, with annotations (DEPRECATED): key; contain:
-      | email    |
-      | username |
+    Then entity(person) get owns: email; get annotations contain: @key
+    Then entity(person) get owns: username; get annotations contain: @key
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then entity(person) get owns, with annotations (DEPRECATED): key; contain:
-      | email    |
-      | username |
+    Then entity(person) get owns: email; get annotations contain: @key
+    Then entity(person) get owns: username; get annotations contain: @key
 
   Scenario: Entity types can only commit keys if every instance owns a distinct key
     When put attribute type: email
@@ -244,14 +242,12 @@ Feature: Concept Entity Type
     When connection opens schema transaction for database: typedb
     When entity(person) set owns: email
     When entity(person) get owns: email, set annotation: @key
-    Then entity(person) get owns, with annotations (DEPRECATED): key; contain:
-      | email    |
-      | username |
+    Then entity(person) get owns: email; get annotations contain: @key
+    Then entity(person) get owns: username; get annotations contain: @key
     Then transaction commits
     When connection opens read transaction for database: typedb
-    Then entity(person) get owns, with annotations (DEPRECATED): key; contain:
-      | email    |
-      | username |
+    Then entity(person) get owns: email; get annotations contain: @key
+    Then entity(person) get owns: username; get annotations contain: @key
 
   Scenario: Entity types can unset keys
     When put attribute type: email
@@ -264,12 +260,12 @@ Feature: Concept Entity Type
     When entity(person) set owns: username
     When entity(person) get owns: username, set annotation: @key
     When entity(person) unset owns: email
-    Then entity(person) get owns, with annotations (DEPRECATED): key; do not contain:
+    Then entity(person) get owns do not contain:
       | email |
     When transaction commits
     When connection opens schema transaction for database: typedb
     When entity(person) unset owns: username
-    Then entity(person) get owns, with annotations (DEPRECATED): key; do not contain:
+    Then entity(person) get owns do not contain:
       | email    |
       | username |
 
@@ -363,9 +359,8 @@ Feature: Concept Entity Type
     When entity(person) get owns: username, set annotation: @key
     When entity(person) set owns: name
     When entity(person) set owns: age
-    Then entity(person) get owns, with annotations (DEPRECATED): key; contain:
-      | email    |
-      | username |
+    Then entity(person) get owns: email; get annotations contain: @key
+    Then entity(person) get owns: username; get annotations contain: @key
     Then entity(person) get owns contain:
       | email    |
       | username |
@@ -373,9 +368,8 @@ Feature: Concept Entity Type
       | age      |
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then entity(person) get owns, with annotations (DEPRECATED): key; contain:
-      | email    |
-      | username |
+    Then entity(person) get owns: email; get annotations contain: @key
+    Then entity(person) get owns: username; get annotations contain: @key
     Then entity(person) get owns contain:
       | email    |
       | username |
@@ -400,13 +394,10 @@ Feature: Concept Entity Type
     When entity(customer) set owns: reference
     When entity(customer) get owns: reference, set annotation: @key
     When entity(customer) set owns: rating
-    Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
-      | email     |
-      | reference |
-    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; contain:
-      | reference |
-    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; do not contain:
-      | email     |
+    Then entity(customer) get owns: email; get annotations contain: @key
+    Then entity(customer) get owns: reference; get annotations contain: @key
+    Then entity(customer) get declared owns: reference; get annotations contain: @key
+    Then entity(customer) get declared owns: email; get annotations do not contain: @key
     Then entity(customer) get owns contain:
       | email     |
       | reference |
@@ -420,9 +411,8 @@ Feature: Concept Entity Type
       | name      |
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
-      | email     |
-      | reference |
+    Then entity(customer) get owns: email; get annotations contain: @key
+    Then entity(customer) get owns: reference; get annotations contain: @key
     Then entity(customer) get declared owns, with annotations (DEPRECATED): key; contain:
       | reference |
     Then entity(customer) get declared owns, with annotations (DEPRECATED): key; do not contain:
