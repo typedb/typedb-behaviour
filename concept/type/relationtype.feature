@@ -488,7 +488,7 @@ Feature: Concept Relation Type and Role Type
     When put relation type: marriage
     When relation(marriage) create role: spouse
     When relation(marriage) set owns: license
-    When relation(marriage) get owns: license; set annotation: @key
+    When relation(marriage) get owns: license, set annotation: @key
     Then relation(marriage) get owns: license; get annotations contain: @key
     When transaction commits
     When connection opens read transaction for database: typedb
