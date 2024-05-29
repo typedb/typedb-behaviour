@@ -394,10 +394,6 @@ Feature: Concept Entity Type
     When entity(customer) set owns: reference
     When entity(customer) get owns: reference, set annotation: @key
     When entity(customer) set owns: rating
-    Then entity(customer) get owns: email; get annotations contain: @key
-    Then entity(customer) get owns: reference; get annotations contain: @key
-    Then entity(customer) get declared owns: reference; get annotations contain: @key
-    Then entity(customer) get declared owns: email; get annotations do not contain: @key
     Then entity(customer) get owns contain:
       | email     |
       | reference |
@@ -409,14 +405,10 @@ Feature: Concept Entity Type
     Then entity(customer) get declared owns do not contain:
       | email     |
       | name      |
+    Then entity(customer) get owns: email; get annotations contain: @key
+    Then entity(customer) get owns: reference; get annotations contain: @key
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then entity(customer) get owns: email; get annotations contain: @key
-    Then entity(customer) get owns: reference; get annotations contain: @key
-    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; contain:
-      | reference |
-    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; do not contain:
-      | email     |
     Then entity(customer) get owns contain:
       | email     |
       | reference |
@@ -428,6 +420,8 @@ Feature: Concept Entity Type
     Then entity(customer) get declared owns do not contain:
       | email     |
       | name      |
+    Then entity(customer) get owns: email; get annotations contain: @key
+    Then entity(customer) get owns: reference; get annotations contain: @key
     When put attribute type: license
     When attribute(license) set value-type: string
     When put attribute type: points
@@ -439,13 +433,6 @@ Feature: Concept Entity Type
     When entity(subscriber) set owns: points
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
-      | email     |
-      | reference |
-    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; contain:
-      | reference |
-    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; do not contain:
-      | email     |
     Then entity(customer) get owns contain:
       | email     |
       | reference |
@@ -457,15 +444,11 @@ Feature: Concept Entity Type
     Then entity(customer) get declared owns do not contain:
       | email     |
       | name      |
-    Then entity(subscriber) get owns, with annotations (DEPRECATED): key; contain:
-      | email     |
-      | reference |
-      | license   |
-    Then entity(subscriber) get declared owns, with annotations (DEPRECATED): key; contain:
-      | license   |
-    Then entity(subscriber) get declared owns, with annotations (DEPRECATED): key; do not contain:
-      | email     |
-      | reference |
+    Then entity(customer) get owns: email; get annotations contain: @key
+    Then entity(customer) get owns: reference; get annotations contain: @key
+    Then entity(subscriber) get owns: email; get annotations contain: @key
+    Then entity(subscriber) get owns: reference; get annotations contain: @key
+    Then entity(subscriber) get owns: license; get annotations contain: @key
     Then entity(subscriber) get owns contain:
       | email     |
       | reference |
@@ -508,13 +491,6 @@ Feature: Concept Entity Type
     When entity(customer) set owns: reference
     When entity(customer) get owns: reference, set annotation: @key
     When entity(customer) set owns: rating
-    Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
-      | username  |
-      | reference |
-    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; contain:
-      | reference |
-    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; do not contain:
-      | username  |
     Then entity(customer) get owns contain:
       | username  |
       | reference |
@@ -526,15 +502,10 @@ Feature: Concept Entity Type
     Then entity(customer) get declared owns do not contain:
       | username  |
       | score     |
+    Then entity(customer) get owns: username; get annotations contain: @key
+    Then entity(customer) get owns: reference; get annotations contain: @key
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
-      | username  |
-      | reference |
-    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; contain:
-      | reference |
-    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; do not contain:
-      | username  |
     Then entity(customer) get owns contain:
       | username  |
       | reference |
@@ -546,6 +517,8 @@ Feature: Concept Entity Type
     Then entity(customer) get declared owns do not contain:
       | username  |
       | score     |
+    Then entity(customer) get owns: username; get annotations contain: @key
+    Then entity(customer) get owns: reference; get annotations contain: @key
     When put attribute type: license
     When attribute(license) set value-type: string
     When attribute(license) set supertype: reference
@@ -560,13 +533,6 @@ Feature: Concept Entity Type
     When entity(subscriber) set owns: points
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
-      | username  |
-      | reference |
-    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; contain:
-      | reference |
-    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; do not contain:
-      | username  |
     Then entity(customer) get owns contain:
       | username  |
       | reference |
@@ -578,15 +544,8 @@ Feature: Concept Entity Type
     Then entity(customer) get declared owns do not contain:
       | username  |
       | score     |
-    Then entity(subscriber) get owns, with annotations (DEPRECATED): key; contain:
-      | username  |
-      | reference |
-      | license   |
-    Then entity(subscriber) get declared owns, with annotations (DEPRECATED): key; contain:
-      | license   |
-    Then entity(subscriber) get declared owns, with annotations (DEPRECATED): key; do not contain:
-      | username  |
-      | reference |
+    Then entity(customer) get owns: username; get annotations contain: @key
+    Then entity(customer) get owns: reference; get annotations contain: @key
     Then entity(subscriber) get owns contain:
       | username  |
       | reference |
@@ -602,6 +561,9 @@ Feature: Concept Entity Type
       | reference |
       | score     |
       | rating    |
+    Then entity(subscriber) get owns: username; get annotations contain: @key
+    Then entity(subscriber) get owns: reference; get annotations contain: @key
+    Then entity(subscriber) get owns: license; get annotations contain: @key
 
   Scenario: Entity types can override inherited keys and attributes
     When put attribute type: username
@@ -646,18 +608,6 @@ Feature: Concept Entity Type
     When entity(customer) get owns: nick-name; set override: name
     Then entity(customer) get owns overridden(work-email) get label: email
     Then entity(customer) get owns overridden(nick-name) get label: name
-    Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
-      | username   |
-      | reference  |
-      | work-email |
-    Then entity(customer) get owns, with annotations (DEPRECATED): key; do not contain:
-      | email |
-    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; contain:
-      | reference  |
-      | work-email |
-    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; do not contain:
-      | username   |
-      | email      |
     Then entity(customer) get owns contain:
       | username   |
       | reference  |
@@ -678,22 +628,13 @@ Feature: Concept Entity Type
       | age        |
       | email      |
       | name       |
+    Then entity(customer) get owns: username; get annotations contain: @key
+    Then entity(customer) get owns: reference; get annotations contain: @key
+    Then entity(customer) get owns: work-email; get annotations contain: @key
     When transaction commits
     When connection opens schema transaction for database: typedb
     Then entity(customer) get owns overridden(work-email) get label: email
     Then entity(customer) get owns overridden(nick-name) get label: name
-    Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
-      | username   |
-      | reference  |
-      | work-email |
-    Then entity(customer) get owns, with annotations (DEPRECATED): key; do not contain:
-      | email |
-    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; contain:
-      | reference  |
-      | work-email |
-    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; do not contain:
-      | username   |
-      | email      |
     Then entity(customer) get owns contain:
       | username   |
       | reference  |
@@ -714,6 +655,9 @@ Feature: Concept Entity Type
       | age        |
       | email      |
       | name       |
+    Then entity(customer) get owns: username; get annotations contain: @key
+    Then entity(customer) get owns: reference; get annotations contain: @key
+    Then entity(customer) get owns: work-email; get annotations contain: @key
     When put attribute type: license
     When attribute(license) set value-type: string
     When attribute(license) set supertype: reference
@@ -728,18 +672,6 @@ Feature: Concept Entity Type
     When entity(subscriber) get owns: points; set override: rating
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
-      | username   |
-      | reference  |
-      | work-email |
-    Then entity(customer) get owns, with annotations (DEPRECATED): key; do not contain:
-      | email |
-    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; contain:
-      | reference  |
-      | work-email |
-    Then entity(customer) get declared owns, with annotations (DEPRECATED): key; do not contain:
-      | username   |
-      | email      |
     Then entity(customer) get owns contain:
       | username   |
       | reference  |
@@ -760,22 +692,11 @@ Feature: Concept Entity Type
       | age        |
       | email      |
       | name       |
+    Then entity(customer) get owns: username; get annotations contain: @key
+    Then entity(customer) get owns: reference; get annotations contain: @key
+    Then entity(customer) get owns: work-email; get annotations contain: @key
     Then entity(subscriber) get owns overridden(license) get label: reference
     Then entity(subscriber) get owns overridden(points) get label: rating
-    Then entity(subscriber) get owns, with annotations (DEPRECATED): key; contain:
-      | username   |
-      | license    |
-      | work-email |
-    Then entity(subscriber) get owns, with annotations (DEPRECATED): key; do not contain:
-      | email     |
-      | reference |
-    Then entity(subscriber) get declared owns, with annotations (DEPRECATED): key; contain:
-      | license    |
-    Then entity(subscriber) get declared owns, with annotations (DEPRECATED): key; do not contain:
-      | username   |
-      | work-email |
-      | email     |
-      | reference |
     Then entity(subscriber) get owns contain:
       | username   |
       | license    |
@@ -785,7 +706,7 @@ Feature: Concept Entity Type
       | nick-name  |
     Then entity(subscriber) get owns do not contain:
       | email      |
-      | references |
+      | reference  |
       | name       |
       | rating     |
     Then entity(subscriber) get declared owns contain:
@@ -797,9 +718,12 @@ Feature: Concept Entity Type
       | age        |
       | nick-name  |
       | email      |
-      | references |
+      | reference  |
       | name       |
       | rating     |
+    Then entity(subscriber) get owns: username; get annotations contain: @key
+    Then entity(subscriber) get owns: license; get annotations contain: @key
+    Then entity(subscriber) get owns: work-email; get annotations contain: @key
 
   Scenario: Entity types can override inherited attributes as keys
     When put attribute type: name
