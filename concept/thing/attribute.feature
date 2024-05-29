@@ -25,6 +25,9 @@ Feature: Concept Attribute
     Given put attribute type: birth-date
     Given attribute(birth-date) set value-type: datetime
     Given attribute(birth-date) set annotation: @independent
+    Given put attribute type: schedule-interval
+    Given attribute(schedule-interval) set value-type: duration
+    Given attribute(schedule-interval) set annotation: @independent
     Given put attribute type: name
     Given attribute(name) set value-type: string
     Given attribute(name) set annotation: @independent
@@ -123,6 +126,20 @@ Feature: Concept Attribute
     Then attribute $x has value type: datetime
     Then attribute $x has value: 1990-01-01 11:22:33
 
+  Scenario: Attribute with value type duration can be created
+    When $x = attribute(schedule-interval) put instance with value: P1Y2M3DT4H5M6.789S
+    Then attribute $x exists
+    Then attribute $x has type: schedule-interval
+    Then attribute $x has value type: duration
+    Then attribute $x has value: P1Y2M3DT4H5M6.789S
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    When $x = attribute(schedule-interval) get instance with value: P1Y2M3DT4H5M6.789S
+    Then attribute $x exists
+    Then attribute $x has type: schedule-interval
+    Then attribute $x has value type: duration
+    Then attribute $x has value: P1Y2M3DT4H5M6.789S
+
   Scenario: Attribute with value type boolean can be retrieved by its value
     When $x = attribute(is-alive) put instance with value: true
     Then attribute(is-alive) get instances contain: $x
@@ -162,6 +179,14 @@ Feature: Concept Attribute
     When connection opens read transaction for database: typedb
     When $x = attribute(birth-date) get instance with value: 1990-01-01 11:22:33
     Then attribute(birth-date) get instances contain: $x
+
+  Scenario: Attribute with value type duration can be retrieved by its value
+    When $x = attribute(schedule-interval) put instance with value: P1Y2M3DT4H5M6.789S
+    Then attribute(schedule-interval) get instances contain: $x
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    When $x = attribute(schedule-interval) get instance with value: P1Y2M3DT4H5M6.789S
+    Then attribute(schedule-interval) get instances contain: $x
 
   Scenario: Datetime attribute can be inserted in one timezone and retrieved in another with no change in the value
     When set time zone: Asia/Calcutta
@@ -292,6 +317,29 @@ Feature: Concept Attribute
     When transaction commits
     When connection opens read transaction for database: typedb
     When $x = attribute(birth-date) get instance with value: 1990-01-01 11:22:33
+    Then attribute $x does not exist
+
+  Scenario: Attribute with value type duration can be deleted
+    When $x = attribute(schedule-interval) put instance with value: P1Y2M3DT4H5M6.789S
+    When delete attribute: $x
+    Then attribute $x is deleted: true
+    When $x = attribute(schedule-interval) get instance with value: P1Y2M3DT4H5M6.789S
+    Then attribute $x does not exist
+    When transaction commits
+    When connection opens write transaction for database: typedb
+    When $x = attribute(schedule-interval) get instance with value: P1Y2M3DT4H5M6.789S
+    Then attribute $x does not exist
+    When $x = attribute(schedule-interval) put instance with value: P1Y2M3DT4H5M6.789S
+    When transaction commits
+    When connection opens write transaction for database: typedb
+    When $x = attribute(schedule-interval) get instance with value: P1Y2M3DT4H5M6.789S
+    When delete attribute: $x
+    Then attribute $x is deleted: true
+    When $x = attribute(schedule-interval) get instance with value: P1Y2M3DT4H5M6.789S
+    Then attribute $x does not exist
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    When $x = attribute(schedule-interval) get instance with value: P1Y2M3DT4H5M6.789S
     Then attribute $x does not exist
 
   Scenario: Dependent attribute is not inserted
