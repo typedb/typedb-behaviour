@@ -25,6 +25,9 @@ Feature: Concept Attribute
     Given put attribute type: birth-date
     Given attribute(birth-date) set value-type: datetime
     Given attribute(birth-date) set annotation: @independent
+    Given put attribute type: event-date
+    Given attribute(event-date) set value-type: datetimetz
+    Given attribute(event-date) set annotation: @independent
     Given put attribute type: schedule-interval
     Given attribute(schedule-interval) set value-type: duration
     Given attribute(schedule-interval) set annotation: @independent
@@ -53,13 +56,14 @@ Feature: Concept Attribute
     Then attribute $x has value type: <type>
     Then attribute $x has value: <value>
     Examples:
-      | attr              | type     | value               |
-      | is-alive          | boolean  | true                |
-      | age               | long     | 21                  |
-      | score             | double   | 123.456             |
-      | name              | string   | alice               |
-      | birth-date        | datetime | 1990-01-01 11:22:33 |
-      | schedule-interval | duration | P1Y2M3DT4H5M6.789S  |
+      | attr              | type       | value                              |
+      | is-alive          | boolean    | true                               |
+      | age               | long       | 21                                 |
+      | score             | double     | 123.456                            |
+      | name              | string     | alice                              |
+      | birth-date        | datetime   | 1990-01-01 11:22:33                |
+      | event-date        | datetimetz | 1990-01-01 11:22:33 Asia/Kathmandu |
+      | schedule-interval | duration   | P1Y2M3DT4H5M6.789S                 |
 
   Scenario Outline: Attribute with value type <type> can be retrieved by its value
     When $x = attribute(<attr>) put instance with value: <value>
@@ -69,13 +73,14 @@ Feature: Concept Attribute
     When $x = attribute(<attr>) get instance with value: <value>
     Then attribute(<attr>) get instances contain: $x
     Examples:
-      | attr              | type     | value               |
-      | is-alive          | boolean  | true                |
-      | age               | long     | 21                  |
-      | score             | double   | 123.456             |
-      | name              | string   | alice               |
-      | birth-date        | datetime | 1990-01-01 11:22:33 |
-      | schedule-interval | duration | P1Y2M3DT4H5M6.789S  |
+      | attr              | type       | value                              |
+      | is-alive          | boolean    | true                               |
+      | age               | long       | 21                                 |
+      | score             | double     | 123.456                            |
+      | name              | string     | alice                              |
+      | birth-date        | datetime   | 1990-01-01 11:22:33                |
+      | event-date        | datetimetz | 1990-01-01 11:22:33 Asia/Kathmandu |
+      | schedule-interval | duration   | P1Y2M3DT4H5M6.789S                 |
 
   Scenario Outline: Attribute with value type <type> can be deleted
     When $x = attribute(<attr>) put instance with value: <value>
@@ -100,13 +105,14 @@ Feature: Concept Attribute
     When $x = attribute(<attr>) get instance with value: <value>
     Then attribute $x does not exist
     Examples:
-      | attr              | type     | value               |
-      | is-alive          | boolean  | true                |
-      | age               | long     | 21                  |
-      | score             | double   | 123.456             |
-      | name              | string   | alice               |
-      | birth-date        | datetime | 1990-01-01 11:22:33 |
-      | schedule-interval | duration | P1Y2M3DT4H5M6.789S  |
+      | attr              | type       | value                              |
+      | is-alive          | boolean    | true                               |
+      | age               | long       | 21                                 |
+      | score             | double     | 123.456                            |
+      | name              | string     | alice                              |
+      | birth-date        | datetime   | 1990-01-01 11:22:33                |
+      | event-date        | datetimetz | 1990-01-01 11:22:33 Asia/Kathmandu |
+      | schedule-interval | duration   | P1Y2M3DT4H5M6.789S                 |
 
   Scenario: Attribute with value type string that satisfies the regular expression can be created
     When $x = attribute(email) put instance with value: alice@email.com
