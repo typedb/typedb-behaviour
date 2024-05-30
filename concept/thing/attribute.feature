@@ -39,61 +39,74 @@ Feature: Concept Attribute
     Given connection opens write transaction for database: typedb
     Given set time zone: Europe/London
 
-  Scenario: Attribute with value type boolean can be created
-    When $x = attribute(is-alive) put instance with value: true
+  Scenario Outline: Attribute with value type <type> can be created
+    When $x = attribute(<attr>) put instance with value: <value>
     Then attribute $x exists
-    Then attribute $x has type: is-alive
-    Then attribute $x has value type: boolean
-    Then attribute $x has value: true
+    Then attribute $x has type: <attr>
+    Then attribute $x has value type: <type>
+    Then attribute $x has value: <value>
     When transaction commits
     When connection opens read transaction for database: typedb
-    When $x = attribute(is-alive) get instance with value: true
+    When $x = attribute(<attr>) get instance with value: <value>
     Then attribute $x exists
-    Then attribute $x has type: is-alive
-    Then attribute $x has value type: boolean
-    Then attribute $x has value: true
+    Then attribute $x has type: <attr>
+    Then attribute $x has value type: <type>
+    Then attribute $x has value: <value>
+    Examples:
+      | attr              | type     | value               |
+      | is-alive          | boolean  | true                |
+      | age               | long     | 21                  |
+      | score             | double   | 123.456             |
+      | name              | string   | alice               |
+      | birth-date        | datetime | 1990-01-01 11:22:33 |
+      | schedule-interval | duration | P1Y2M3DT4H5M6.789S  |
 
-  Scenario: Attribute with value type long can be created
-    When $x = attribute(age) put instance with value: 21
-    Then attribute $x exists
-    Then attribute $x has type: age
-    Then attribute $x has value type: long
-    Then attribute $x has value: 21
+  Scenario Outline: Attribute with value type <type> can be retrieved by its value
+    When $x = attribute(<attr>) put instance with value: <value>
+    Then attribute(<attr>) get instances contain: $x
     When transaction commits
     When connection opens read transaction for database: typedb
-    When $x = attribute(age) get instance with value: 21
-    Then attribute $x exists
-    Then attribute $x has type: age
-    Then attribute $x has value type: long
-    Then attribute $x has value: 21
+    When $x = attribute(<attr>) get instance with value: <value>
+    Then attribute(<attr>) get instances contain: $x
+    Examples:
+      | attr              | type     | value               |
+      | is-alive          | boolean  | true                |
+      | age               | long     | 21                  |
+      | score             | double   | 123.456             |
+      | name              | string   | alice               |
+      | birth-date        | datetime | 1990-01-01 11:22:33 |
+      | schedule-interval | duration | P1Y2M3DT4H5M6.789S  |
 
-  Scenario: Attribute with value type double can be created
-    When $x = attribute(score) put instance with value: 123.456
-    Then attribute $x exists
-    Then attribute $x has type: score
-    Then attribute $x has value type: double
-    Then attribute $x has value: 123.456
+  Scenario Outline: Attribute with value type <type> can be deleted
+    When $x = attribute(<attr>) put instance with value: <value>
+    When delete attribute: $x
+    Then attribute $x is deleted: true
+    When $x = attribute(<attr>) get instance with value: <value>
+    Then attribute $x does not exist
+    When transaction commits
+    When connection opens write transaction for database: typedb
+    When $x = attribute(<attr>) get instance with value: <value>
+    Then attribute $x does not exist
+    When $x = attribute(<attr>) put instance with value: <value>
+    When transaction commits
+    When connection opens write transaction for database: typedb
+    When $x = attribute(<attr>) get instance with value: <value>
+    When delete attribute: $x
+    Then attribute $x is deleted: true
+    When $x = attribute(<attr>) get instance with value: <value>
+    Then attribute $x does not exist
     When transaction commits
     When connection opens read transaction for database: typedb
-    When $x = attribute(score) get instance with value: 123.456
-    Then attribute $x exists
-    Then attribute $x has type: score
-    Then attribute $x has value type: double
-    Then attribute $x has value: 123.456
-
-  Scenario: Attribute with value type string can be created
-    When $x = attribute(name) put instance with value: alice
-    Then attribute $x exists
-    Then attribute $x has type: name
-    Then attribute $x has value type: string
-    Then attribute $x has value: alice
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    When $x = attribute(name) get instance with value: alice
-    Then attribute $x exists
-    Then attribute $x has type: name
-    Then attribute $x has value type: string
-    Then attribute $x has value: alice
+    When $x = attribute(<attr>) get instance with value: <value>
+    Then attribute $x does not exist
+    Examples:
+      | attr              | type     | value               |
+      | is-alive          | boolean  | true                |
+      | age               | long     | 21                  |
+      | score             | double   | 123.456             |
+      | name              | string   | alice               |
+      | birth-date        | datetime | 1990-01-01 11:22:33 |
+      | schedule-interval | duration | P1Y2M3DT4H5M6.789S  |
 
   Scenario: Attribute with value type string that satisfies the regular expression can be created
     When $x = attribute(email) put instance with value: alice@email.com
@@ -112,82 +125,6 @@ Feature: Concept Attribute
   Scenario: Attribute with value type string that does not satisfy the regular expression cannot be created
     When attribute(email) put instance with value: alice-email-com; fails
 
-  Scenario: Attribute with value type datetime can be created
-    When $x = attribute(birth-date) put instance with value: 1990-01-01 11:22:33
-    Then attribute $x exists
-    Then attribute $x has type: birth-date
-    Then attribute $x has value type: datetime
-    Then attribute $x has value: 1990-01-01 11:22:33
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    When $x = attribute(birth-date) get instance with value: 1990-01-01 11:22:33
-    Then attribute $x exists
-    Then attribute $x has type: birth-date
-    Then attribute $x has value type: datetime
-    Then attribute $x has value: 1990-01-01 11:22:33
-
-  Scenario: Attribute with value type duration can be created
-    When $x = attribute(schedule-interval) put instance with value: P1Y2M3DT4H5M6.789S
-    Then attribute $x exists
-    Then attribute $x has type: schedule-interval
-    Then attribute $x has value type: duration
-    Then attribute $x has value: P1Y2M3DT4H5M6.789S
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    When $x = attribute(schedule-interval) get instance with value: P1Y2M3DT4H5M6.789S
-    Then attribute $x exists
-    Then attribute $x has type: schedule-interval
-    Then attribute $x has value type: duration
-    Then attribute $x has value: P1Y2M3DT4H5M6.789S
-
-  Scenario: Attribute with value type boolean can be retrieved by its value
-    When $x = attribute(is-alive) put instance with value: true
-    Then attribute(is-alive) get instances contain: $x
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    When $x = attribute(is-alive) get instance with value: true
-    Then attribute(is-alive) get instances contain: $x
-
-  Scenario: Attribute with value type long can be retrieved by its value
-    When $x = attribute(age) put instance with value: 21
-    Then attribute(age) get instances contain: $x
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    When $x = attribute(age) get instance with value: 21
-    Then attribute(age) get instances contain: $x
-
-  Scenario: Attribute with value type double can be retrieved by its value
-    When $x = attribute(score) put instance with value: 123.456
-    Then attribute(score) get instances contain: $x
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    When $x = attribute(score) get instance with value: 123.456
-    Then attribute(score) get instances contain: $x
-
-  Scenario: Attribute with value type string can be retrieved by its value
-    When $x = attribute(name) put instance with value: alice
-    Then attribute(name) get instances contain: $x
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    When $x = attribute(name) get instance with value: alice
-    Then attribute(name) get instances contain: $x
-
-  Scenario: Attribute with value type datetime can be retrieved by its value
-    When $x = attribute(birth-date) put instance with value: 1990-01-01 11:22:33
-    Then attribute(birth-date) get instances contain: $x
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    When $x = attribute(birth-date) get instance with value: 1990-01-01 11:22:33
-    Then attribute(birth-date) get instances contain: $x
-
-  Scenario: Attribute with value type duration can be retrieved by its value
-    When $x = attribute(schedule-interval) put instance with value: P1Y2M3DT4H5M6.789S
-    Then attribute(schedule-interval) get instances contain: $x
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    When $x = attribute(schedule-interval) get instance with value: P1Y2M3DT4H5M6.789S
-    Then attribute(schedule-interval) get instances contain: $x
-
   Scenario: Datetime attribute can be inserted in one timezone and retrieved in another with no change in the value
     When set time zone: Asia/Calcutta
     When $x = attribute(birth-date) put instance with value: 2001-08-23 08:30:00
@@ -203,144 +140,6 @@ Feature: Concept Attribute
     Then attribute $x has type: birth-date
     Then attribute $x has value type: datetime
     Then attribute $x has value: 2001-08-23 08:30:00
-
-  Scenario: Attribute with value type boolean can be deleted
-    When $x = attribute(is-alive) put instance with value: true
-    When delete attribute: $x
-    Then attribute $x is deleted: true
-    When $x = attribute(is-alive) get instance with value: true
-    Then attribute $x does not exist
-    When transaction commits
-    When connection opens write transaction for database: typedb
-    When $x = attribute(is-alive) get instance with value: true
-    Then attribute $x does not exist
-    When $x = attribute(is-alive) put instance with value: true
-    When transaction commits
-    When connection opens write transaction for database: typedb
-    When $x = attribute(is-alive) get instance with value: true
-    When delete attribute: $x
-    Then attribute $x is deleted: true
-    When $x = attribute(is-alive) get instance with value: true
-    Then attribute $x does not exist
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    When $x = attribute(is-alive) get instance with value: true
-    Then attribute $x does not exist
-
-  Scenario: Attribute with value type long can be deleted
-    When $x = attribute(age) put instance with value: 21
-    When delete attribute: $x
-    Then attribute $x is deleted: true
-    When $x = attribute(age) get instance with value: 21
-    Then attribute $x does not exist
-    When transaction commits
-    When connection opens write transaction for database: typedb
-    When $x = attribute(age) get instance with value: 21
-    Then attribute $x does not exist
-    When $x = attribute(age) put instance with value: 21
-    When transaction commits
-    When connection opens write transaction for database: typedb
-    When $x = attribute(age) get instance with value: 21
-    When delete attribute: $x
-    Then attribute $x is deleted: true
-    When $x = attribute(age) get instance with value: 21
-    Then attribute $x does not exist
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    When $x = attribute(age) get instance with value: 21
-    Then attribute $x does not exist
-
-  Scenario: Attribute with value type double can be deleted
-    When $x = attribute(score) put instance with value: 123.456
-    When delete attribute: $x
-    Then attribute $x is deleted: true
-    When $x = attribute(score) get instance with value: 123.456
-    Then attribute $x does not exist
-    When transaction commits
-    When connection opens write transaction for database: typedb
-    When $x = attribute(score) get instance with value: 123.456
-    Then attribute $x does not exist
-    When $x = attribute(score) put instance with value: 123.456
-    When transaction commits
-    When connection opens write transaction for database: typedb
-    When $x = attribute(score) get instance with value: 123.456
-    When delete attribute: $x
-    Then attribute $x is deleted: true
-    When $x = attribute(score) get instance with value: 123.456
-    Then attribute $x does not exist
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    When $x = attribute(score) get instance with value: 123.456
-    Then attribute $x does not exist
-
-  Scenario: Attribute with value type string can be deleted
-    When $x = attribute(name) put instance with value: alice
-    When delete attribute: $x
-    Then attribute $x is deleted: true
-    When $x = attribute(name) get instance with value: alice
-    Then attribute $x does not exist
-    When transaction commits
-    When connection opens write transaction for database: typedb
-    When $x = attribute(name) get instance with value: alice
-    Then attribute $x does not exist
-    When $x = attribute(name) put instance with value: alice
-    When transaction commits
-    When connection opens write transaction for database: typedb
-    When $x = attribute(name) get instance with value: alice
-    When delete attribute: $x
-    Then attribute $x is deleted: true
-    When $x = attribute(name) get instance with value: alice
-    Then attribute $x does not exist
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    When $x = attribute(name) get instance with value: alice
-    Then attribute $x does not exist
-
-  Scenario: Attribute with value type datetime can be deleted
-    When $x = attribute(birth-date) put instance with value: 1990-01-01 11:22:33
-    When delete attribute: $x
-    Then attribute $x is deleted: true
-    When $x = attribute(birth-date) get instance with value: 1990-01-01 11:22:33
-    Then attribute $x does not exist
-    When transaction commits
-    When connection opens write transaction for database: typedb
-    When $x = attribute(birth-date) get instance with value: 1990-01-01 11:22:33
-    Then attribute $x does not exist
-    When $x = attribute(birth-date) put instance with value: 1990-01-01 11:22:33
-    When transaction commits
-    When connection opens write transaction for database: typedb
-    When $x = attribute(birth-date) get instance with value: 1990-01-01 11:22:33
-    When delete attribute: $x
-    Then attribute $x is deleted: true
-    When $x = attribute(birth-date) get instance with value: 1990-01-01 11:22:33
-    Then attribute $x does not exist
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    When $x = attribute(birth-date) get instance with value: 1990-01-01 11:22:33
-    Then attribute $x does not exist
-
-  Scenario: Attribute with value type duration can be deleted
-    When $x = attribute(schedule-interval) put instance with value: P1Y2M3DT4H5M6.789S
-    When delete attribute: $x
-    Then attribute $x is deleted: true
-    When $x = attribute(schedule-interval) get instance with value: P1Y2M3DT4H5M6.789S
-    Then attribute $x does not exist
-    When transaction commits
-    When connection opens write transaction for database: typedb
-    When $x = attribute(schedule-interval) get instance with value: P1Y2M3DT4H5M6.789S
-    Then attribute $x does not exist
-    When $x = attribute(schedule-interval) put instance with value: P1Y2M3DT4H5M6.789S
-    When transaction commits
-    When connection opens write transaction for database: typedb
-    When $x = attribute(schedule-interval) get instance with value: P1Y2M3DT4H5M6.789S
-    When delete attribute: $x
-    Then attribute $x is deleted: true
-    When $x = attribute(schedule-interval) get instance with value: P1Y2M3DT4H5M6.789S
-    Then attribute $x does not exist
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    When $x = attribute(schedule-interval) get instance with value: P1Y2M3DT4H5M6.789S
-    Then attribute $x does not exist
 
   Scenario: Dependent attribute is not inserted
     Given transaction commits
