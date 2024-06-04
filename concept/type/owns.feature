@@ -16,20 +16,56 @@ Feature: Concept Owns
     # TODO: "open" or "opens"?
     Given connection opens schema transaction for database: typedb
 
-    # Permutations: (entity, attribute, relation) owns (entity, attribute, relation)
-  Scenario: Entity types can own attributes
+  Scenario Outline: Entity types can own attributes of scalar value types
     When put attribute type: username
-    When attribute(username) set value-type: string
+    When attribute(username) set value-type: <value-type>
     When put entity type: person
     When entity(person) set owns: username
     Then entity(person) get owns contain: username
     When transaction commits
     When connection opens read transaction for database: typedb
     Then entity(person) get owns contain: username
+    Examples:
+      | value-type |
+      | long       |
+      | double     |
+      | string     |
+      | boolean    |
+      | datetime   |
+      # TODO: Add new value types
 
-  Scenario: Relation types can own attributes
+  Scenario: Entity types can own attributes of struct value types
+    # TODO: Create structs in concept api
+    When put struct type: passport-document(first-name: string, surname: string, birthday: datetime)
+    When put attribute type: passport
+    When attribute(passport) set value-type: passport-document
+    When put entity type: person
+    When entity(person) set owns: passport
+    Then entity(person) get owns contain: passport
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then entity(person) get owns contain: passport
+
+  Scenario: Entity types can not own entities, relations, roles, and structs
+    When put entity type: car
+    When put relation type: credit
+    When relation(marriage) create role: creditor
+    # TODO: Create structs in concept api
+    When put struct type: passport(first-name: string, surname: string, birthday: datetime)
+    When put entity type: person
+    When entity(person) set owns: car; fails
+    When entity(person) set owns: credit; fails
+    When entity(person) set owns: creditor; fails
+    When entity(person) set owns: passport; fails
+    # TODO: Struct component? // Then entity(person) set owns: birthday; fails
+    Then entity(person) get owns is empty
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then entity(person) get owns is empty
+
+  Scenario Outline: Relation types can own attributes of scalar value types
     When put attribute type: license
-    When attribute(license) set value-type: string
+    When attribute(license) set value-type: <value-type>
     When put relation type: marriage
     When relation(marriage) create role: spouse
     When relation(marriage) set owns: license; fails
@@ -37,84 +73,86 @@ Feature: Concept Owns
     When transaction commits
     When connection opens read transaction for database: typedb
     Then relation(marriage) get owns contain: license
+    Examples:
+      | value-type |
+      | long       |
+      | double     |
+      | string     |
+      | boolean    |
+      | datetime   |
 
-  Scenario: Attribute types can not own attributes
-    When put attribute type: country-code
-    When attribute(country-code) set value-type: string
-    When put attribute type: country-name
-    When attribute(country-name) set value-type: string
-    Then attribute(country-name) set owns: country-code; fails
-    Then attribute(country-name) get owns is empty
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    Then attribute(country-name) get owns is empty
-
-  Scenario: Entity types can not own entities
-    When put entity type: car
-    When put entity type: person
-    When entity(person) set owns: car; fails
-    Then entity(person) get owns is empty
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    Then entity(person) get owns is empty
-
-  Scenario: Relation types can not own entities
-    When put entity type: person
+  Scenario: Relation types can own attributes of struct value types
+    # TODO: Create structs in concept api
+    When put struct type: passport-document(first-name: string, surname: string, birthday: datetime)
+    When put attribute type: passport
+    When attribute(passport) set value-type: passport-document
     When put relation type: marriage
     When relation(marriage) create role: spouse
-    When relation(marriage) set owns: person; fails
-    Then relation(marriage) get owns is empty
+    When relation(marriage) set owns: passport
+    Then relation(marriage) get owns contain: passport
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then relation(marriage) get owns is empty
+    Then relation(marriage) get owns contain: passport
 
-  Scenario: Attribute types can not own entities
-    When put entity type: country
-    When put attribute type: country-name
-    When attribute(country-name) set value-type: string
-    Then attribute(country-name) set owns: country; fails
-    Then attribute(country-name) get owns is empty
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    Then attribute(country-name) get owns is empty
-
-  Scenario: Entity types can not own relations and roles
-    When put relation type: marriage
-    When relation(marriage) create role: spouse
+  Scenario: Relation types can not own entities, relations, roles, and structs
     When put entity type: person
-    When entity(person) set owns: marriage; fails
-    When entity(person) set owns: spouse; fails
-    Then entity(person) get owns is empty
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    Then entity(person) get owns is empty
-
-  Scenario: Relation types can not own relations and roles
     When put relation type: credit
     When relation(marriage) create role: creditor
     When put relation type: marriage
     When relation(marriage) create role: spouse
+    # TODO: Create structs in concept api
+    When put struct type: passport(first-name: string, surname: string, birthday: datetime)
+    When relation(marriage) set owns: person; fails
     When relation(marriage) set owns: credit; fails
     When relation(marriage) set owns: creditor; fails
+    When relation(marriage) set owns: passport; fails
+    # TODO: Struct component? // Then relation(marriage) set owns: birthday; fails
     Then relation(marriage) get owns is empty
     When transaction commits
     When connection opens read transaction for database: typedb
     Then relation(marriage) get owns is empty
 
-    # TODO: Do we want to test all the existing things (roles, structs) this way?
-    # TODO: Could we refactor it to have less "real" examples regarding namings, but write a Scenario Outline with
-    # multiple types  (entity, relation, attribute) with the same names (like entity(marriage), relation(marriage), attribute(marriage))
-  Scenario: Attribute types can not own relations and roles
+  Scenario: Attribute types can not own entities, attributes, relations, roles, and structs
+    When put entity type: person
+    When put attribute type: surname
     When put relation type: marriage
     When relation(marriage) create role: spouse
-    When put attribute type: country-name
-    When attribute(country-name) set value-type: string
-    Then attribute(country-name) set owns: marriage; fails
-    Then attribute(country-name) set owns: spouse; fails
-    Then attribute(country-name) get owns is empty
+    When attribute(surname) set value-type: string
+    # TODO: Create structs in concept api
+    When put struct type: passport(first-name: string, surname: string, birthday: datetime)
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    Then attribute(name) set owns: person; fails
+    Then attribute(name) set owns: surname; fails
+    Then attribute(name) set owns: marriage; fails
+    Then attribute(name) set owns: spouse; fails
+    Then attribute(name) set owns: passport; fails
+    # TODO: Struct component? // Then attribute(name) set owns: birthday; fails
+    Then attribute(name) get owns is empty
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then attribute(country-name) get owns is empty
+    Then attribute(name) get owns is empty
+
+  Scenario: Struct types can not own entities, attributes, relations, roles, and structs
+    When put entity type: person
+    When put attribute type: name
+    When put relation type: marriage
+    When relation(marriage) create role: spouse
+    When attribute(surname) set value-type: string
+    # TODO: Create structs in concept api
+    When put struct type: passport(first-name: string, surname: string, birthday: datetime)
+    # TODO: Create structs in concept api
+    When put struct type: wallet(currency: string, value: double)
+    Then struct(wallet) set owns: person; fails
+    Then struct(wallet) set owns: name; fails
+    Then struct(wallet) set owns: marriage; fails
+    Then struct(wallet) set owns: spouse; fails
+    Then struct(wallet) set owns: passport; fails
+    # TODO: Struct component? // Then struct(wallet) set owns: birthday; fails
+    Then struct(wallet) get owns is empty
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then struct(wallet) get owns is empty
 
     # @values
   # TODO: Do we need tests for "plays", etc. to test that @values can not be applied there?
@@ -128,16 +166,16 @@ Feature: Concept Owns
     When transaction commits
     When connection opens read transaction for database: typedb
     Then entity(player) get owns: rank; get annotations contain: @values(<args>)
-      # TODO: Will the args in `get @values(<args>)` be ordered?
+      # TODO: Will the args in `get @values(<args>)` be ordered? Maybe we need to check it through "contains" and change the `Concept API` to get args from annotations?..
     Examples:
-      | args                                                    |
-      | 0                                                       |
-      | 1                                                       |
-      | -1                                                      |
-      | 1, 2                                                    |
-      | -9223372036854775808, 9223372036854775807               |
-      | 2, 1, 3, 4, 5, 6, 7, 9, 10, 11, 55, -1, -654321, 123456 |
-      # TODO: Do we have args numbers limit? Do we want to test it?
+      | args                                                                                                                                                                                                                                                                                                                                                                                                 |
+      | 0                                                                                                                                                                                                                                                                                                                                                                                                    |
+      | 1                                                                                                                                                                                                                                                                                                                                                                                                    |
+      | -1                                                                                                                                                                                                                                                                                                                                                                                                   |
+      | 1, 2                                                                                                                                                                                                                                                                                                                                                                                                 |
+      | -9223372036854775808, 9223372036854775807                                                                                                                                                                                                                                                                                                                                                            |
+      | 2, 1, 3, 4, 5, 6, 7, 9, 10, 11, 55, -1, -654321, 123456                                                                                                                                                                                                                                                                                                                                              |
+      | 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99 |
 
   Scenario Outline: Owns can have @values annotation for string value type
     When put entity type: player
@@ -150,14 +188,14 @@ Feature: Concept Owns
     When connection opens read transaction for database: typedb
     Then entity(player) get owns: rank; get annotations contain: @values(<args>)
     Examples:
-      | args                                                                   |
-      | ""                                                                     |
-      | "1"                                                                    |
-      | "s"                                                                    |
-      | "This rank contains a sufficiently detailed description of its nature" |
-      | "Scout", "Stone Guard", "Stone Guard", "High Warlord"                  |
+      | args                                                                                                                                        |
+      | ""                                                                                                                                          |
+      | "1"                                                                                                                                         |
+      | "s", "S"                                                                                                                                    |
+      | "This rank contains a sufficiently detailed description of its nature"                                                                      |
+      | "Scout", "Stone Guard", "Stone Guard", "High Warlord"                                                                                       |
+      | "Rank with optional space", "Rank with optional space ", " Rank with optional space", "Rankwithoptionalspace", "Rank with optional space  " |
 
-    # TODO: Maybe it should be restricted!
   Scenario Outline: Owns can have @values annotation for boolean value type
     When put entity type: player
     When put attribute type: verified
@@ -174,7 +212,6 @@ Feature: Concept Owns
       | false       |
       | false, true |
 
-    # TODO: Maybe it should be restricted!
   Scenario Outline: Owns can have @values annotation for double value type
     When put entity type: player
     When put attribute type: balance
@@ -186,7 +223,6 @@ Feature: Concept Owns
     When connection opens read transaction for database: typedb
     Then entity(player) get owns: balance; get annotations contain: @values(<args>)
     Examples:
-    # TODO: What to do with doubles written as longs (without `.`)?
       | args                                                                                  |
       | 0.0                                                                                   |
       | 0                                                                                     |
@@ -265,3 +301,28 @@ Feature: Concept Owns
       | datetime   | 123        |
       | datetime   | "string"   |
       | datetime   | true       |
+
+  Scenario Outline: Owns can not have @values annotation with duplicated args
+    When put entity type: person
+    When put attribute type: custom-field
+    When attribute(custom-field) set value-type: <value-type>
+    When entity(player) set owns: custom-field
+    When entity(player) get owns: custom-field, set annotation: @values(<arg0>, <arg1>, <arg2>); fails
+    Then entity(player) get owns: custom-field; get annotations is empty
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then entity(player) get owns: custom-field; get get annotations is empty
+    Examples:
+      | value-type | arg0                        | arg1                         | arg2                         |
+      | long       | 1                           | 1                            | 1                            |
+      | long       | 1                           | 1                            | 2                            |
+      | long       | 1                           | 2                            | 1                            |
+      | long       | 1                           | 2                            | 2                            |
+      | double     | 0.1                         | 0.0001                       | 0.0001                       |
+      | string     | "stringwithoutdifferences"  | "stringwithoutdifferences"   | "stringWITHdifferences"      |
+      | string     | "stringwithoutdifferences " | "stringwithoutdifferences  " | "stringwithoutdifferences  " |
+      | boolean    | true                        | true                         | false                        |
+      | datetime   | 2024-06-04T16:35:02.101     | 2024-06-04T16:35:02.101      | 2024-06-04                   |
+      | datetime   | 2020-06-04T16:35:02.10      | 2025-06-05T16:35             | 2025-06-05T16:35             |
+
+    # TODO: Add owns of attributes with structs and this annotation
