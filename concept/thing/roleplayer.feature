@@ -3,7 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 #noinspection CucumberUndefinedStep
-Feature: Concept Role Players
+Feature: Concept Ordered Role Players
 
   Background:
     Given typedb starts
@@ -41,14 +41,72 @@ Feature: Concept Role Players
 
     Given connection opens write transaction for database: typedb
 
-  # TODO move all other role player steps here
-
   Scenario: Role players can be ordered
-    When $a = entity(person) create new instance with key(name): alice
-    When $b = entity(person) create new instance with key(name): bob
-    When $c = entity(company) create new instance with key(company-name): acme
-    When $e = relation(employment) create new instance
-    When relation $e add players for role(employee[]): [$a, $b]
-    When relation $e add player for role(employer): $c
+    When $alice = entity(person) create new instance with key(name): alice
+    When $bob = entity(person) create new instance with key(name): bob
+    When $company = entity(company) create new instance with key(company-name): acme
+    When $employment = relation(employment) create new instance
+    When relation $employment set players for role(employee[]): [$alice, $bob]
+    When relation $employment add player for role(employer): $company
     Then transaction commits
+
+  Scenario: Ordered roleplayers can be retrieved and indexed
+    When $alice = entity(person) create new instance with key(name): alice
+    When $bob = entity(person) create new instance with key(name): bob
+    When $company = entity(company) create new instance with key(company-name): acme
+    When $employment = relation(employment) create new instance
+    When relation $employment set players for role(employee[]): [$alice, $bob]
+    When relation $employment add player for role(employer): $company
+    Then transaction commits
+    When connection opens read transaction for database: typedb
+    Then $employees = relation $employment get players for role(employee[])
+    Then roleplayer $employees[0] is $alice
+    Then roleplayer $employees[1] is $bob
+
+  Scenario: Ordered roleplayers can be retrieved as unordered
+    When $alice = entity(person) create new instance with key(name): alice
+    When $bob = entity(person) create new instance with key(name): bob
+    When $company = entity(company) create new instance with key(company-name): acme
+    When $employment = relation(employment) create new instance
+    When relation $employment set players for role(employee[]): [$alice, $bob]
+    When relation $employment add player for role(employer): $company
+    Then transaction commits
+    When connection opens read transaction for database: typedb
+    Then relation $employment get players for role(employee) contain: $alice
+    Then relation $employment get players for role(employee) contain: $bob
+
+  Scenario: Ordered roleplayers can be overwritten
+    When $alice = entity(person) create new instance with key(name): alice
+    When $bob = entity(person) create new instance with key(name): bob
+    When $company = entity(company) create new instance with key(company-name): acme
+    When $employment = relation(employment) create new instance
+    When relation $employment set players for role(employee[]): [$alice, $bob]
+    When relation $employment add player for role(employer): $company
+    Then transaction commits
+    When connection opens write transaction for database: typedb
+    Then $employees = relation $employment get players for role(employee[])
+    Then roleplayer $employees[0] is $alice
+    Then roleplayer $employees[1] is $bob
+    When relation $employment set players for role(employee[]): [$bob, $alice]
+    Then transaction commits
+    When connection opens read transaction for database: typedb
+    Then $employees = relation $employment get players for role(employee[])
+    Then roleplayer $employees[0] is $bob
+    Then roleplayer $employees[1] is $alice
+
+  Scenario: Ordered roleplayers can contain the same player multiple times
+    When $alice = entity(person) create new instance with key(name): alice
+    When $bob = entity(person) create new instance with key(name): bob
+    When $company = entity(company) create new instance with key(company-name): acme
+    When $employment = relation(employment) create new instance
+    When relation $employment set players for role(employee[]): [$alice, $bob, $alice, $alice, $bob]
+    When relation $employment add player for role(employer): $company
+    Then transaction commits
+    When connection opens read transaction for database: typedb
+    Then $employees = relation $employment get players for role(employee[])
+    Then roleplayer $employees[0] is $alice
+    Then roleplayer $employees[1] is $bob
+    Then roleplayer $employees[2] is $alice
+    Then roleplayer $employees[3] is $alice
+    Then roleplayer $employees[4] is $bob
 

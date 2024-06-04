@@ -3,7 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 #noinspection CucumberUndefinedStep
-Feature: Concept Ownership
+Feature: Concept Ordered Ownership
 
   Background:
     Given typedb starts
@@ -23,8 +23,6 @@ Feature: Concept Ownership
     Given entity(person) set owns: email[]
     Given transaction commits
     Given connection opens write transaction for database: typedb
-
-  # TODO move all other ownership steps here
 
   Scenario: Entity can have an ordered collection of attributes
     When $a = entity(person) create new instance with key(username): alice
