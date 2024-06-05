@@ -61,8 +61,9 @@ Feature: Concept Attribute
       | age               | long       | 21                                 |
       | score             | double     | 123.456                            |
       | name              | string     | alice                              |
-      | birth-date        | datetime   | 1990-01-01 11:22:33                |
-      | event-date        | datetimetz | 1990-01-01 11:22:33 Asia/Kathmandu |
+      | birth-date        | datetime   | 1990-01-01T11:22:33                |
+      | event-date        | datetimetz | 1990-01-01T11:22:33 Asia/Kathmandu |
+      | event-date        | datetimetz | 1990-01-01T11:22:33-0700           |
       | schedule-interval | duration   | P1Y2M3DT4H5M6.789S                 |
 
   Scenario Outline: Attribute with value type <type> can be retrieved by its value
@@ -80,6 +81,7 @@ Feature: Concept Attribute
       | name              | string     | alice                              |
       | birth-date        | datetime   | 1990-01-01 11:22:33                |
       | event-date        | datetimetz | 1990-01-01 11:22:33 Asia/Kathmandu |
+      | event-date        | datetimetz | 1990-01-01T11:22:33-0700           |
       | schedule-interval | duration   | P1Y2M3DT4H5M6.789S                 |
 
   Scenario Outline: Attribute with value type <type> can be deleted
@@ -112,6 +114,7 @@ Feature: Concept Attribute
       | name              | string     | alice                              |
       | birth-date        | datetime   | 1990-01-01 11:22:33                |
       | event-date        | datetimetz | 1990-01-01 11:22:33 Asia/Kathmandu |
+      | event-date        | datetimetz | 1990-01-01T11:22:33-0700           |
       | schedule-interval | duration   | P1Y2M3DT4H5M6.789S                 |
 
   Scenario: Attribute with value type string that satisfies the regular expression can be created
