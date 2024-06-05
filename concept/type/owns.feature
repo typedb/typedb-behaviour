@@ -37,14 +37,14 @@ Feature: Concept Owns
       | duration   |
 
   Scenario: Entity types can own attributes of struct value types
-    # TODO: Create structs in concept api (components or members or ... ?)
+    # TODO: Create structs in concept api
     When put struct type: passport-document
-    When struct(passport-document) create component: first-name
-    When struct(passport-document) get component(first-name); set value-type: string
-    When struct(passport-document) create component: surname
-    When struct(passport-document) get component(surname); set value-type: string
-    When struct(passport-document) create component: birthday
-    When struct(passport-document) get component(birthday); set value-type: datetime
+    When struct(passport-document) create field: first-name
+    When struct(passport-document) get field(first-name); set value-type: string
+    When struct(passport-document) create field: surname
+    When struct(passport-document) get field(surname); set value-type: string
+    When struct(passport-document) create field: birthday
+    When struct(passport-document) get field(birthday); set value-type: datetime
     When put attribute type: passport
     When attribute(passport) set value-type: passport-document
     When put entity type: person
@@ -54,18 +54,18 @@ Feature: Concept Owns
     When connection opens read transaction for database: typedb
     Then entity(person) get owns contain: passport
 
-  Scenario: Entity types can not own entities, relations, roles, structs, and structs components
+  Scenario: Entity types can not own entities, relations, roles, structs, and structs fields
     When put entity type: car
     When put relation type: credit
     When relation(marriage) create role: creditor
-    # TODO: Create structs in concept api (components or members or ... ?)
+    # TODO: Create structs in concept api
     When put struct type: passport
-    When struct(passport) create component: first-name
-    When struct(passport) get component(first-name); set value-type: string
-    When struct(passport) create component: surname
-    When struct(passport) get component(surname); set value-type: string
-    When struct(passport) create component: birthday
-    When struct(passport) get component(birthday); set value-type: datetime
+    When struct(passport) create field: first-name
+    When struct(passport) get field(first-name); set value-type: string
+    When struct(passport) create field: surname
+    When struct(passport) get field(surname); set value-type: string
+    When struct(passport) create field: birthday
+    When struct(passport) get field(birthday); set value-type: datetime
     When put entity type: person
     Then entity(person) set owns: car; fails
     Then entity(person) set owns: credit; fails
@@ -99,14 +99,14 @@ Feature: Concept Owns
       | duration   |
 
   Scenario: Relation types can own attributes of struct value types
-    # TODO: Create structs in concept api (components or members or ... ?)
+    # TODO: Create structs in concept api
     When put struct type: passport-document
-    When struct(passport-document) create component: first-name
-    When struct(passport-document) get component(first-name); set value-type: string
-    When struct(passport-document) create component: surname
-    When struct(passport-document) get component(surname); set value-type: string
-    When struct(passport-document) create component: birthday
-    When struct(passport-document) get component(birthday); set value-type: datetime
+    When struct(passport-document) create field: first-name
+    When struct(passport-document) get field(first-name); set value-type: string
+    When struct(passport-document) create field: surname
+    When struct(passport-document) get field(surname); set value-type: string
+    When struct(passport-document) create field: birthday
+    When struct(passport-document) get field(birthday); set value-type: datetime
     When put attribute type: passport
     When attribute(passport) set value-type: passport-document
     When put relation type: marriage
@@ -117,20 +117,20 @@ Feature: Concept Owns
     When connection opens read transaction for database: typedb
     Then relation(marriage) get owns contain: passport
 
-  Scenario: Relation types can not own entities, relations, roles, structs, and structs components
+  Scenario: Relation types can not own entities, relations, roles, structs, and structs fields
     When put entity type: person
     When put relation type: credit
     When relation(marriage) create role: creditor
     When put relation type: marriage
     When relation(marriage) create role: spouse
-    # TODO: Create structs in concept api (components or members or ... ?)
+    # TODO: Create structs in concept api
     When put struct type: passport-document
-    When struct(passport-document) create component: first-name
-    When struct(passport-document) get component(first-name); set value-type: string
-    When struct(passport-document) create component: surname
-    When struct(passport-document) get component(surname); set value-type: string
-    When struct(passport-document) create component: birthday
-    When struct(passport-document) get component(birthday); set value-type: datetime
+    When struct(passport-document) create field: first-name
+    When struct(passport-document) get field(first-name); set value-type: string
+    When struct(passport-document) create field: surname
+    When struct(passport-document) get field(surname); set value-type: string
+    When struct(passport-document) create field: birthday
+    When struct(passport-document) get field(birthday); set value-type: datetime
     Then relation(marriage) set owns: person; fails
     Then relation(marriage) set owns: credit; fails
     Then relation(marriage) set owns: marriage:creditor; fails
@@ -142,20 +142,20 @@ Feature: Concept Owns
     When connection opens read transaction for database: typedb
     Then relation(marriage) get owns is empty
 
-  Scenario: Attribute types can not own entities, attributes, relations, roles, structs, and structs components
+  Scenario: Attribute types can not own entities, attributes, relations, roles, structs, and structs fields
     When put entity type: person
     When put attribute type: surname
     When put relation type: marriage
     When relation(marriage) create role: spouse
     When attribute(surname) set value-type: string
-    # TODO: Create structs in concept api (components or members or ... ?)
+    # TODO: Create structs in concept api
     When put struct type: passport
-    When struct(passport) create component: first-name
-    When struct(passport) get component(first-name); set value-type: string
-    When struct(passport) create component: surname
-    When struct(passport) get component(surname); set value-type: string
-    When struct(passport) create component: birthday
-    When struct(passport) get component(birthday); set value-type: datetime
+    When struct(passport) create field: first-name
+    When struct(passport) get field(first-name); set value-type: string
+    When struct(passport) create field: surname
+    When struct(passport) get field(surname); set value-type: string
+    When struct(passport) create field: birthday
+    When struct(passport) get field(birthday); set value-type: datetime
     When put attribute type: name
     When attribute(name) set value-type: string
     Then attribute(name) set owns: person; fails
@@ -169,26 +169,26 @@ Feature: Concept Owns
     When connection opens read transaction for database: typedb
     Then attribute(name) get owns is empty
 
-  Scenario: Struct types can not own entities, attributes, relations, roles, structs, and structs components
+  Scenario: Struct types can not own entities, attributes, relations, roles, structs, and structs fields
     When put entity type: person
     When put attribute type: name
     When put relation type: marriage
     When relation(marriage) create role: spouse
     When attribute(surname) set value-type: string
-    # TODO: Create structs in concept api (components or members or ... ?)
+    # TODO: Create structs in concept api
     When put struct type: passport
-    When struct(passport) create component: first-name
-    When struct(passport) get component(first-name); set value-type: string
-    When struct(passport) create component: surname
-    When struct(passport) get component(surname); set value-type: string
-    When struct(passport) create component: birthday
-    When struct(passport) get component(birthday); set value-type: datetime
-    # TODO: Create structs in concept api (components or members or ... ?)
+    When struct(passport) create field: first-name
+    When struct(passport) get field(first-name); set value-type: string
+    When struct(passport) create field: surname
+    When struct(passport) get field(surname); set value-type: string
+    When struct(passport) create field: birthday
+    When struct(passport) get field(birthday); set value-type: datetime
+    # TODO: Create structs in concept api
     When put struct type: wallet
-    When struct(wallet) create component: currency
-    When struct(wallet) get component(currency); set value-type: string
-    When struct(wallet) create component: value
-    When struct(wallet) get component(value); set value-type: double
+    When struct(wallet) create field: currency
+    When struct(wallet) get field(currency); set value-type: string
+    When struct(wallet) create field: value
+    When struct(wallet) get field(value); set value-type: double
     Then struct(wallet) set owns: person; fails
     Then struct(wallet) set owns: name; fails
     Then struct(wallet) set owns: marriage; fails
@@ -790,3 +790,303 @@ Feature: Concept Owns
       | datetime   | 2024-06-04, 2024-06-05           | 2023-06-04, 2024-06-04T12:00:00           |
       | datetimetz | 2024-06-04+0010, 2024-06-05+0010 | 2024-06-04+0010, 2024-06-05T01:00:00+0010 |
       | duration   | P6M, P1Y                         | P8M, P1Y1D                                |
+
+
+#################
+# @card
+#################
+
+  Scenario Outline: Owns can have @card annotation for <value-type> value type with args in correct order
+    When put struct type: custom-struct
+    When struct(custom-struct) create field: custom-field
+    When struct(custom-struct) get field(custom-field); set value-type: string
+    When put entity type: person
+    When put attribute type: custom-field
+    When attribute(custom-field) set value-type: <value-type>
+    When entity(person) set owns: custom-field
+    Then entity(player) get owns: custom-field, set annotation: @card(<arg1>, <arg0>); fails
+    Then entity(person) get owns: custom-field; get annotations is empty
+    When entity(person) get owns: custom-field, set annotation: @card(<arg0>, <arg1>)
+    Then entity(person) get owns: custom-field; get annotations contain: @card(<arg0>, <arg1>)
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then entity(person) get owns: custom-field; get annotations contain: @card(<arg0>, <arg1>)
+    Examples:
+      | value-type    | arg0 | arg1                |
+      | long          | 0    | 1                   |
+      | long          | 0    | 10                  |
+      | long          | 0    | 9223372036854775807 |
+      | long          | 1    | 10                  |
+      | long          | 0    | *                   |
+      | long          | 1    | *                   |
+      | long          | *    | 10                  |
+      | string        | 0    | 1                   |
+      | string        | 0    | 10                  |
+      | string        | 0    | 9223372036854775807 |
+      | string        | 1    | 10                  |
+      | string        | 0    | *                   |
+      | string        | 1    | *                   |
+      | string        | *    | 10                  |
+      | boolean       | 0    | 1                   |
+      | boolean       | 0    | 10                  |
+      | boolean       | 0    | 9223372036854775807 |
+      | boolean       | 1    | 10                  |
+      | boolean       | 0    | *                   |
+      | boolean       | 1    | *                   |
+      | boolean       | *    | 10                  |
+      | double        | 0    | 1                   |
+      | double        | 0    | 10                  |
+      | double        | 0    | 9223372036854775807 |
+      | double        | 1    | 10                  |
+      | double        | 0    | *                   |
+      | double        | 1    | *                   |
+      | double        | *    | 10                  |
+      | decimal       | 0    | 1                   |
+      | decimal       | 0    | 10                  |
+      | decimal       | 0    | 9223372036854775807 |
+      | decimal       | 1    | 10                  |
+      | decimal       | 0    | *                   |
+      | decimal       | 1    | *                   |
+      | decimal       | *    | 10                  |
+      | datetime      | 0    | 1                   |
+      | datetime      | 0    | 10                  |
+      | datetime      | 0    | 9223372036854775807 |
+      | datetime      | 1    | 10                  |
+      | datetime      | 0    | *                   |
+      | datetime      | 1    | *                   |
+      | datetime      | *    | 10                  |
+      | datetimetz    | 0    | 1                   |
+      | datetimetz    | 0    | 10                  |
+      | datetimetz    | 0    | 9223372036854775807 |
+      | datetimetz    | 1    | 10                  |
+      | datetimetz    | 0    | *                   |
+      | datetimetz    | 1    | *                   |
+      | datetimetz    | *    | 10                  |
+      | duration      | 0    | 1                   |
+      | duration      | 0    | 10                  |
+      | duration      | 0    | 9223372036854775807 |
+      | duration      | 1    | 10                  |
+      | duration      | 0    | *                   |
+      | duration      | 1    | *                   |
+      | duration      | *    | 10                  |
+      | custom-struct | 0    | 1                   |
+      | custom-struct | 0    | 10                  |
+      | custom-struct | 0    | 9223372036854775807 |
+      | custom-struct | 1    | 10                  |
+      | custom-struct | 0    | *                   |
+      | custom-struct | 1    | *                   |
+      | custom-struct | *    | 10                  |
+
+  Scenario Outline: Owns can have @card annotation for <value-type> value type with duplicate args (exactly N ownerships)
+    When put struct type: custom-struct
+    When struct(custom-struct) create field: custom-field
+    When struct(custom-struct) get field(custom-field); set value-type: string
+    When put entity type: person
+    When put attribute type: custom-field
+    When attribute(custom-field) set value-type: <value-type>
+    When entity(person) set owns: custom-field
+    Then entity(person) get owns: custom-field; get annotations is empty
+    When entity(person) get owns: custom-field, set annotation: @card(<arg>, <arg>)
+    Then entity(person) get owns: custom-field; get annotations contain: @card(<arg>, <arg>)
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then entity(person) get owns: custom-field; get annotations contain: @card(<arg>, <arg>)
+    Examples:
+      | value-type    | arg  |
+      | long          | 1    |
+      | long          | 9999 |
+      | string        | 1    |
+      | string        | 8888 |
+      | boolean       | 1    |
+      | boolean       | 7777 |
+      | double        | 1    |
+      | double        | 666  |
+      | decimal       | 1    |
+      | decimal       | 555  |
+      | datetime      | 1    |
+      | datetime      | 444  |
+      | datetimetz    | 1    |
+      | datetimetz    | 33   |
+      | duration      | 1    |
+      | duration      | 22   |
+      | custom-struct | 1    |
+      | custom-struct | 11   |
+
+  Scenario Outline: Owns can not have @card annotation for <value-type> value type with less than two args
+    When put entity type: person
+    When put attribute type: custom-field
+    When attribute(custom-field) set value-type: <value-type>
+    When entity(person) set owns: custom-field
+    Then entity(person) get owns: custom-field, set annotation: @card(); fails
+    Then entity(person) get owns: custom-field, set annotation: @card(1); fails
+    Then entity(person) get owns: custom-field, set annotation: @card(*); fails
+    Then entity(person) get owns: custom-field; get annotations is empty
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then entity(person) get owns: custom-field; get get annotations is empty
+    Examples:
+      | value-type |
+      | long       |
+      | double     |
+      | decimal    |
+      | string     |
+      | boolean    |
+      | datetime   |
+      | datetimetz |
+      | duration   |
+
+  Scenario Outline: Owns can not have @card annotation for <value-type> value type with invalid args or args number
+    When put entity type: person
+    When put attribute type: custom-field
+    When attribute(custom-field) set value-type: <value-type>
+    When entity(player) set owns: custom-field
+    Then entity(player) get owns: custom-field, set annotation: @card(-1, 1); fails
+    Then entity(player) get owns: custom-field, set annotation: @card(0, 0.1); fails
+    Then entity(player) get owns: custom-field, set annotation: @card(0, 1.5); fails
+    Then entity(player) get owns: custom-field, set annotation: @card(*, *); fails
+    Then entity(player) get owns: custom-field, set annotation: @card(0, **); fails
+    Then entity(player) get owns: custom-field, set annotation: @card(1, 2, 3); fails
+    Then entity(player) get owns: custom-field, set annotation: @card(1, "2"); fails
+    Then entity(player) get owns: custom-field, set annotation: @card("1", 2); fails
+    Then entity(player) get owns: custom-field; get annotations is empty
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then entity(player) get owns: custom-field; get get annotations is empty
+    Examples:
+      | value-type |
+      | long       |
+      | double     |
+      | decimal    |
+      | string     |
+      | boolean    |
+      | datetime   |
+      | datetimetz |
+      | duration   |
+
+  Scenario Outline: Owns-related @card annotation for <value-type> value type can be inherited and overridden by a subset of args
+    When put entity type: person
+    When put relation type: contract
+    When relation(contract) create role: participant
+    When put attribute type: custom-field
+    When attribute(custom-field) set value-type: <value-type>
+    When put attribute type: second-custom-field
+    When attribute(second-custom-field) set value-type: <value-type>
+    When entity(person) set owns: custom-field
+    When relation(contract) set owns: custom-field
+    When entity(person) set owns: second-custom-field
+    When relation(contract) set owns: second-custom-field
+    When entity(person) get owns: custom-field, set annotation: @card(<args>)
+    When relation(contract) get owns: custom-field, set annotation: @card(<args>)
+    Then entity(person) get owns: custom-field; get annotations contain: @card(<args>)
+    Then relation(contract) get owns: custom-field; get annotations contain: @card(<args>)
+    When entity(person) get owns: second-custom-field, set annotation: @card(<args>)
+    When relation(contract) get owns: second-custom-field, set annotation: @card(<args>)
+    Then entity(person) get owns: second-custom-field; get annotations contain: @card(<args>)
+    Then relation(contract) get owns: second-custom-field; get annotations contain: @card(<args>)
+    When put entity type: player
+    When put relation type: marriage
+    When entity(player) set supertype: person
+    When relation(marriage) set supertype: contract
+    Then entity(player) get owns contain: custom-field
+    Then relation(marriage) get owns contain: custom-field
+    Then entity(player) get owns: custom-field, get annotations contain: @card(<args>)
+    Then relation(marriage) get owns: custom-field, get annotations contain: @card(<args>)
+    Then entity(player) get owns contain: second-custom-field
+    Then relation(marriage) get owns contain: second-custom-field
+    # TODO: Overrides? Remove second-custom-field from test if we remove overrides!
+    When entity(player) get owns: second-custom-field; set override: overridden-custom-field
+    When relation(marriage) get owns: second-custom-field; set override: overridden-custom-field
+    Then entity(player) get owns do not contain: second-custom-field
+    Then relation(marriage) get owns do not contain: second-custom-field
+    Then entity(player) get owns contain: overridden-custom-field
+    Then relation(marriage) get owns contain: overridden-custom-field
+    Then entity(player) get owns: overridden-custom-field, get annotations contain: @card(<args>)
+    Then relation(marriage) get owns: overridden-custom-field, get annotations contain: @card(<args>)
+    When transaction commits
+    When connection opens schema transaction for database: typedb
+    Then entity(player) get owns: custom-field, get annotations contain: @card(<args>)
+    Then relation(marriage) get owns: custom-field, get annotations contain: @card(<args>)
+    Then entity(player) get owns: overridden-custom-field, get annotations contain: @card(<args>)
+    Then relation(marriage) get owns: overridden-custom-field, get annotations contain: @card(<args>)
+    When entity(player) get owns: custom-field, set annotation: @card(<args-override>)
+    When relation(marriage) get owns: custom-field, set annotation: @card(<args-override>)
+    Then entity(player) get owns: custom-field, get annotations contain: @card(<args-override>)
+    Then relation(marriage) get owns: custom-field, get annotations contain: @card(<args-override>)
+    When entity(player) get owns: overridden-custom-field, set annotation: @card(<args-override>)
+    When relation(marriage) get owns: overridden-custom-field, set annotation: @card(<args-override>)
+    Then entity(player) get owns: overridden-custom-field, get annotations contain: @card(<args-override>)
+    Then relation(marriage) get owns: overridden-custom-field, get annotations contain: @card(<args-override>)
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then entity(player) get owns: custom-field, get annotations contain: @card(<args-override>)
+    Then relation(marriage) get owns: custom-field, get annotations contain: @card(<args-override>)
+    Then entity(player) get owns: overridden-custom-field, get annotations contain: @card(<args-override>)
+    Then relation(marriage) get owns: overridden-custom-field, get annotations contain: @card(<args-override>)
+    Examples:
+      | value-type | args       | args-override |
+      | long       | 0, *       | 0, 10000      |
+      | double     | 0, 10      | 0, 1          |
+      | decimal    | 0, 2       | 1, 2          |
+      | string     | 1, *       | 1, 2          |
+      | datetime   | 1, 5       | 3, 4          |
+      | datetimetz | 38, 111    | 39, 111       |
+      | duration   | 1000, 1100 | 1000, 1099    |
+
+  Scenario Outline: Inherited @card annotation on owns for <value-type> value type can not be overridden by the @card of same args or not a subset of args
+    When put entity type: person
+    When put relation type: contract
+    When relation(contract) create role: participant
+    When put attribute type: custom-field
+    When attribute(custom-field) set value-type: <value-type>
+    When put attribute type: second-custom-field
+    When attribute(second-custom-field) set value-type: <value-type>
+    When entity(person) set owns: custom-field
+    When relation(contract) set owns: custom-field
+    When entity(person) set owns: second-custom-field
+    When relation(contract) set owns: second-custom-field
+    When entity(person) get owns: custom-field, set annotation: @card(<args>)
+    When relation(contract) get owns: custom-field, set annotation: @card(<args>)
+    Then entity(person) get owns: custom-field; get annotations contain: @card(<args>)
+    Then relation(contract) get owns: custom-field; get annotations contain: @card(<args>)
+    When entity(person) get owns: second-custom-field, set annotation: @card(<args>)
+    When relation(contract) get owns: second-custom-field, set annotation: @card(<args>)
+    Then entity(person) get owns: second-custom-field; get annotations contain: @card(<args>)
+    Then relation(contract) get owns: second-custom-field; get annotations contain: @card(<args>)
+    When put entity type: player
+    When put relation type: marriage
+    When entity(player) set supertype: person
+    When relation(marriage) set supertype: contract
+    Then entity(player) get owns: custom-field, get annotations contain: @card(<args>)
+    Then relation(marriage) get owns: custom-field, get annotations contain: @card(<args>)
+    # TODO: Overrides? Remove second-custom-field from test if we remove overrides!
+    When entity(player) get owns: second-custom-field; set override: overridden-custom-field
+    When relation(marriage) get owns: second-custom-field; set override: overridden-custom-field
+    Then entity(player) get owns: overridden-custom-field, get annotations contain: @card(<args>)
+    Then relation(marriage) get owns: overridden-custom-field, get annotations contain: @card(<args>)
+    Then entity(player) get owns: custom-field, set annotation: @card(<args>); fails
+    Then relation(marriage) get owns: custom-field, set annotation: @card(<args>); fails
+    Then entity(player) get owns: overridden-custom-field, set annotation: @card(<args>); fails
+    Then relation(marriage) get owns: overridden-custom-field, set annotation: @card(<args>); fails
+    Then entity(player) get owns: custom-field, set annotation: @card(<args-override>); fails
+    Then relation(marriage) get owns: custom-field, set annotation: @card(<args-override>); fails
+    Then entity(player) get owns: overridden-custom-field, set annotation: @card(<args-override>); fails
+    Then relation(marriage) get owns: overridden-custom-field, set annotation: @card(<args-override>); fails
+    Then entity(player) get owns: custom-field, get annotations contain: @card(<args>)
+    Then relation(marriage) get owns: custom-field, get annotations contain: @card(<args>)
+    Then entity(player) get owns: overridden-custom-field, get annotations contain: @card(<args>)
+    Then relation(marriage) get owns: overridden-custom-field, get annotations contain: @card(<args>)
+    When transaction commits
+    When connection opens schema transaction for database: typedb
+    Then entity(player) get owns: custom-field, get annotations contain: @card(<args>)
+    Then relation(marriage) get owns: custom-field, get annotations contain: @card(<args>)
+    Then entity(player) get owns: overridden-custom-field, get annotations contain: @card(<args>)
+    Then relation(marriage) get owns: overridden-custom-field, get annotations contain: @card(<args>)
+    Examples:
+      | value-type | args       | args-override |
+      | long       | 0, 10000   | 0, 10001      |
+      | double     | 0, 10      | 1, 11         |
+      | decimal    | 0, 2       | 2, 4          |
+      | string     | 1, *       | 0, 2          |
+      | datetime   | 1, 5       | 6, 10         |
+      | datetimetz | 38, 111    | 37, 111       |
+      | duration   | 1000, 1100 | 1000, 1199    |
