@@ -54,7 +54,7 @@ Feature: Concept Owns
     When connection opens read transaction for database: typedb
     Then entity(person) get owns contain: passport
 
-  Scenario: Entity types can not own entities, relations, roles, and structs
+  Scenario: Entity types can not own entities, relations, roles, structs, and structs components
     When put entity type: car
     When put relation type: credit
     When relation(marriage) create role: creditor
@@ -67,11 +67,11 @@ Feature: Concept Owns
     When struct(passport) create component: birthday
     When struct(passport) get component(birthday); set value-type: datetime
     When put entity type: person
-    When entity(person) set owns: car; fails
-    When entity(person) set owns: credit; fails
-    When entity(person) set owns: creditor; fails
-    When entity(person) set owns: passport; fails
-    # TODO: Struct component? // Then entity(person) set owns: birthday; fails
+    Then entity(person) set owns: car; fails
+    Then entity(person) set owns: credit; fails
+    Then entity(person) set owns: marriage:creditor; fails
+    Then entity(person) set owns: passport; fails
+    Then entity(person) set owns: passport:birthday; fails
     Then entity(person) get owns is empty
     When transaction commits
     When connection opens read transaction for database: typedb
@@ -82,7 +82,7 @@ Feature: Concept Owns
     When attribute(license) set value-type: <value-type>
     When put relation type: marriage
     When relation(marriage) create role: spouse
-    When relation(marriage) set owns: license; fails
+    Then relation(marriage) set owns: license; fails
     Then relation(marriage) get owns contain: license
     When transaction commits
     When connection opens read transaction for database: typedb
@@ -117,7 +117,7 @@ Feature: Concept Owns
     When connection opens read transaction for database: typedb
     Then relation(marriage) get owns contain: passport
 
-  Scenario: Relation types can not own entities, relations, roles, and structs
+  Scenario: Relation types can not own entities, relations, roles, structs, and structs components
     When put entity type: person
     When put relation type: credit
     When relation(marriage) create role: creditor
@@ -131,17 +131,18 @@ Feature: Concept Owns
     When struct(passport-document) get component(surname); set value-type: string
     When struct(passport-document) create component: birthday
     When struct(passport-document) get component(birthday); set value-type: datetime
-    When relation(marriage) set owns: person; fails
-    When relation(marriage) set owns: credit; fails
-    When relation(marriage) set owns: creditor; fails
-    When relation(marriage) set owns: passport; fails
-    # TODO: Struct component? // Then relation(marriage) set owns: birthday; fails
+    Then relation(marriage) set owns: person; fails
+    Then relation(marriage) set owns: credit; fails
+    Then relation(marriage) set owns: marriage:creditor; fails
+    Then relation(marriage) set owns: passport; fails
+    Then relation(marriage) set owns: passport:birthday; fails
+    Then relation(marriage) set owns: marriage:spouse; fails
     Then relation(marriage) get owns is empty
     When transaction commits
     When connection opens read transaction for database: typedb
     Then relation(marriage) get owns is empty
 
-  Scenario: Attribute types can not own entities, attributes, relations, roles, and structs
+  Scenario: Attribute types can not own entities, attributes, relations, roles, structs, and structs components
     When put entity type: person
     When put attribute type: surname
     When put relation type: marriage
@@ -160,15 +161,15 @@ Feature: Concept Owns
     Then attribute(name) set owns: person; fails
     Then attribute(name) set owns: surname; fails
     Then attribute(name) set owns: marriage; fails
-    Then attribute(name) set owns: spouse; fails
+    Then attribute(name) set owns: marriage:spouse; fails
     Then attribute(name) set owns: passport; fails
-    # TODO: Struct component? // Then attribute(name) set owns: birthday; fails
+    Then attribute(name) set owns: passport:birthday; fails
     Then attribute(name) get owns is empty
     When transaction commits
     When connection opens read transaction for database: typedb
     Then attribute(name) get owns is empty
 
-  Scenario: Struct types can not own entities, attributes, relations, roles, and structs
+  Scenario: Struct types can not own entities, attributes, relations, roles, structs, and structs components
     When put entity type: person
     When put attribute type: name
     When put relation type: marriage
@@ -191,15 +192,19 @@ Feature: Concept Owns
     Then struct(wallet) set owns: person; fails
     Then struct(wallet) set owns: name; fails
     Then struct(wallet) set owns: marriage; fails
-    Then struct(wallet) set owns: spouse; fails
+    Then struct(wallet) set owns: marriage:spouse; fails
     Then struct(wallet) set owns: passport; fails
-    # TODO: Struct component? // Then struct(wallet) set owns: birthday; fails
+    Then struct(wallet) set owns: passport:birthday; fails
+    Then struct(wallet) set owns: wallet:currency; fails
     Then struct(wallet) get owns is empty
     When transaction commits
     When connection opens read transaction for database: typedb
     Then struct(wallet) get owns is empty
 
-    # @values
+#################
+# @values
+#################
+
   # TODO: Do we need tests for "plays", etc. to test that @values can not be applied there?
   Scenario Outline: Owns can have @values annotation for long value type
     When put entity type: player
@@ -328,15 +333,16 @@ Feature: Concept Owns
     When connection opens read transaction for database: typedb
     Then entity(player) get owns: registration-datetime; get annotations contain: @values(<args>)
     Examples:
-      | args                                                                                                                                                                                                                        |
-      | 2024-06-04+0000                                                                                                                                                                                                             |
-      | 2024-06-04+0100                                                                                                                                                                                                             |
-      | 2024-06-04T16:35+0100                                                                                                                                                                                                       |
-      | 2024-06-04T16:35:02+0100                                                                                                                                                                                                    |
-      | 2024-06-04T16:35:02.1+0100                                                                                                                                                                                                  |
-      | 2024-06-04T16:35:02.10+0100                                                                                                                                                                                                 |
-      | 2024-06-04T16:35:02.103+0100                                                                                                                                                                                                |
-      | 2024-06-04+0001, 2024-06-04+0002, 2024-06-04+0010, 2024-06-04+0100, 2024-06-04-0100, 2024-06-04T16:35-0100, 2024-06-04T16:35:02+0200, 2024-06-04T16:35:02.1-0300, 2024-06-04T16:35:02.10+1000, 2024-06-04T16:35:02.103+0011 |
+      | args                                                                                                                                                                                                                                                   |
+      | 2024-06-04+0000                                                                                                                                                                                                                                        |
+      | 2024-06-04 Asia/Kathmandu                                                                                                                                                                                                                              |
+      | 2024-06-04+0100                                                                                                                                                                                                                                        |
+      | 2024-06-04T16:35+0100                                                                                                                                                                                                                                  |
+      | 2024-06-04T16:35:02+0100                                                                                                                                                                                                                               |
+      | 2024-06-04T16:35:02.1+0100                                                                                                                                                                                                                             |
+      | 2024-06-04T16:35:02.10+0100                                                                                                                                                                                                                            |
+      | 2024-06-04T16:35:02.103+0100                                                                                                                                                                                                                           |
+      | 2024-06-04+0001, 2024-06-04 Asia/Kathmandu, 2024-06-04+0002, 2024-06-04+0010, 2024-06-04+0100, 2024-06-04-0100, 2024-06-04T16:35-0100, 2024-06-04T16:35:02+0200, 2024-06-04T16:35:02.1-0300, 2024-06-04T16:35:02.10+1000, 2024-06-04T16:35:02.103+0011 |
 
   Scenario Outline: Owns can have @values annotation for duration value type
     When put entity type: player
@@ -351,6 +357,7 @@ Feature: Concept Owns
     Examples:
       | args                                                                                                                        |
       | P1Y                                                                                                                         |
+      | P2M                                                                                                                         |
       | P1Y2M                                                                                                                       |
       | P1Y2M3D                                                                                                                     |
       | P1Y2M3DT4H                                                                                                                  |
@@ -367,7 +374,7 @@ Feature: Concept Owns
     When put attribute type: custom-field
     When attribute(custom-field) set value-type: <value-type>
     When entity(person) set owns: custom-field
-    When entity(person) get owns: custom-field, set annotation: @values(); fails
+    Then entity(person) get owns: custom-field, set annotation: @values(); fails
     Then entity(person) get owns: custom-field; get annotations is empty
     When transaction commits
     When connection opens read transaction for database: typedb
@@ -388,7 +395,7 @@ Feature: Concept Owns
     When put attribute type: custom-field
     When attribute(custom-field) set value-type: <value-type>
     When entity(player) set owns: custom-field
-    When entity(player) get owns: custom-field, set annotation: @values(<args>); fails
+    Then entity(player) get owns: custom-field, set annotation: @values(<args>); fails
     Then entity(player) get owns: custom-field; get annotations is empty
     When transaction commits
     When connection opens read transaction for database: typedb
@@ -435,7 +442,7 @@ Feature: Concept Owns
     When put attribute type: custom-field
     When attribute(custom-field) set value-type: <value-type>
     When entity(player) set owns: custom-field
-    When entity(player) get owns: custom-field, set annotation: @values(<arg0>, <arg1>, <arg2>); fails
+    Then entity(player) get owns: custom-field, set annotation: @values(<arg0>, <arg1>, <arg2>); fails
     Then entity(player) get owns: custom-field; get annotations is empty
     When transaction commits
     When connection opens read transaction for database: typedb
@@ -456,4 +463,133 @@ Feature: Concept Owns
       | datetimetz | 2020-06-04T16:35:02.10+0100 | 2020-06-04T16:35:02.10+0000  | 2020-06-04T16:35:02.10+0100  |
       | duration   | P1Y1M                       | P1Y1M                        | P1Y2M                        |
 
-    # TODO: Inheritance and narrowing
+  Scenario Outline: Owns-related @values annotation can be inherited and overridden by a subset of args
+    When put entity type: person
+    When put relation type: contract
+    When relation(contract) create role: participant
+    When put attribute type: custom-field
+    When attribute(custom-field) set value-type: <value-type>
+    When put attribute type: second-custom-field
+    When attribute(second-custom-field) set value-type: <value-type>
+    When entity(person) set owns: custom-field
+    When relation(contract) set owns: custom-field
+    When entity(person) set owns: second-custom-field
+    When relation(contract) set owns: second-custom-field
+    When entity(person) get owns: custom-field, set annotation: @values(<args>)
+    When relation(contract) get owns: custom-field, set annotation: @values(<args>)
+    Then entity(person) get owns: custom-field; get annotations contain: @values(<args>)
+    Then relation(contract) get owns: custom-field; get annotations contain: @values(<args>)
+    When entity(person) get owns: second-custom-field, set annotation: @values(<args>)
+    When relation(contract) get owns: second-custom-field, set annotation: @values(<args>)
+    Then entity(person) get owns: second-custom-field; get annotations contain: @values(<args>)
+    Then relation(contract) get owns: second-custom-field; get annotations contain: @values(<args>)
+    When put entity type: player
+    When put relation type: marriage
+    When entity(player) set supertype: person
+    When relation(marriage) set supertype: contract
+    Then entity(player) get owns contain: custom-field
+    Then relation(marriage) get owns contain: custom-field
+    Then entity(player) get owns: custom-field, get annotations contain: @values(<args>)
+    Then relation(marriage) get owns: custom-field, get annotations contain: @values(<args>)
+    Then entity(player) get owns contain: second-custom-field
+    Then relation(marriage) get owns contain: second-custom-field
+    # TODO: Overrides? Remove second-custom-field from test if we remove overrides!
+    When entity(player) get owns: second-custom-field; set override: overridden-custom-field
+    When relation(marriage) get owns: second-custom-field; set override: overridden-custom-field
+    Then entity(player) get owns do not contain: second-custom-field
+    Then relation(marriage) get owns do not contain: second-custom-field
+    Then entity(player) get owns contain: overridden-custom-field
+    Then relation(marriage) get owns contain: overridden-custom-field
+    Then entity(player) get owns: overridden-custom-field, get annotations contain: @values(<args>)
+    Then relation(marriage) get owns: overridden-custom-field, get annotations contain: @values(<args>)
+    When transaction commits
+    When connection opens schema transaction for database: typedb
+    Then entity(player) get owns: custom-field, get annotations contain: @values(<args>)
+    Then relation(marriage) get owns: custom-field, get annotations contain: @values(<args>)
+    Then entity(player) get owns: overridden-custom-field, get annotations contain: @values(<args>)
+    Then relation(marriage) get owns: overridden-custom-field, get annotations contain: @values(<args>)
+    When entity(player) get owns: custom-field, set annotation: @values(<args-override>)
+    When relation(marriage) get owns: custom-field, set annotation: @values(<args-override>)
+    Then entity(player) get owns: custom-field, get annotations contain: @values(<args-override>)
+    Then relation(marriage) get owns: custom-field, get annotations contain: @values(<args-override>)
+    When entity(player) get owns: overridden-custom-field, set annotation: @values(<args-override>)
+    When relation(marriage) get owns: overridden-custom-field, set annotation: @values(<args-override>)
+    Then entity(player) get owns: overridden-custom-field, get annotations contain: @values(<args-override>)
+    Then relation(marriage) get owns: overridden-custom-field, get annotations contain: @values(<args-override>)
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then entity(player) get owns: custom-field, get annotations contain: @values(<args-override>)
+    Then relation(marriage) get owns: custom-field, get annotations contain: @values(<args-override>)
+    Then entity(player) get owns: overridden-custom-field, get annotations contain: @values(<args-override>)
+    Then relation(marriage) get owns: overridden-custom-field, get annotations contain: @values(<args-override>)
+    Examples:
+      | value-type | args                                                                         | args-override                              |
+      | long       | 1, 10, 20, 30                                                                | 10, 30                                     |
+      | double     | 1.0, 2.0, 3.0, 4.5                                                           | 2.0                                        |
+      | decimal    | 0.0, 1.0                                                                     | 0.0                                        |
+      | string     | "john", "John", "Johnny", "johnny"                                           | "John", "Johnny"                           |
+      | boolean    | true, false                                                                  | true                                       |
+      | datetime   | 2024-06-04, 2024-06-05, 2024-06-06                                           | 2024-06-04, 2024-06-06                     |
+      | datetimetz | 2024-06-04+0010, 2024-06-04 Asia/Kathmandu, 2024-06-05+0010, 2024-06-05+0100 | 2024-06-04 Asia/Kathmandu, 2024-06-05+0010 |
+      | duration   | P6M, P1Y, P1Y1M, P1Y2M, P1Y3M, P1Y4M, P1Y6M                                  | P6M, P1Y3M, P1Y4M, P1Y6M                   |
+
+  Scenario Outline: Inherited @values annotation on owns can not be overridden by the @values of same args or not a subset of args
+    When put entity type: person
+    When put relation type: contract
+    When relation(contract) create role: participant
+    When put attribute type: custom-field
+    When attribute(custom-field) set value-type: <value-type>
+    When put attribute type: second-custom-field
+    When attribute(second-custom-field) set value-type: <value-type>
+    When entity(person) set owns: custom-field
+    When relation(contract) set owns: custom-field
+    When entity(person) set owns: second-custom-field
+    When relation(contract) set owns: second-custom-field
+    When entity(person) get owns: custom-field, set annotation: @values(<args>)
+    When relation(contract) get owns: custom-field, set annotation: @values(<args>)
+    Then entity(person) get owns: custom-field; get annotations contain: @values(<args>)
+    Then relation(contract) get owns: custom-field; get annotations contain: @values(<args>)
+    When entity(person) get owns: second-custom-field, set annotation: @values(<args>)
+    When relation(contract) get owns: second-custom-field, set annotation: @values(<args>)
+    Then entity(person) get owns: second-custom-field; get annotations contain: @values(<args>)
+    Then relation(contract) get owns: second-custom-field; get annotations contain: @values(<args>)
+    When put entity type: player
+    When put relation type: marriage
+    When entity(player) set supertype: person
+    When relation(marriage) set supertype: contract
+    Then entity(player) get owns: custom-field, get annotations contain: @values(<args>)
+    Then relation(marriage) get owns: custom-field, get annotations contain: @values(<args>)
+    # TODO: Overrides? Remove second-custom-field from test if we remove overrides!
+    When entity(player) get owns: second-custom-field; set override: overridden-custom-field
+    When relation(marriage) get owns: second-custom-field; set override: overridden-custom-field
+    Then entity(player) get owns: overridden-custom-field, get annotations contain: @values(<args>)
+    Then relation(marriage) get owns: overridden-custom-field, get annotations contain: @values(<args>)
+    Then entity(player) get owns: custom-field, set annotation: @values(<args>); fails
+    Then relation(marriage) get owns: custom-field, set annotation: @values(<args>); fails
+    Then entity(player) get owns: overridden-custom-field, set annotation: @values(<args>); fails
+    Then relation(marriage) get owns: overridden-custom-field, set annotation: @values(<args>); fails
+    Then entity(player) get owns: custom-field, set annotation: @values(<args-override>); fails
+    Then relation(marriage) get owns: custom-field, set annotation: @values(<args-override>); fails
+    Then entity(player) get owns: overridden-custom-field, set annotation: @values(<args-override>); fails
+    Then relation(marriage) get owns: overridden-custom-field, set annotation: @values(<args-override>); fails
+    Then entity(player) get owns: custom-field, get annotations contain: @values(<args>)
+    Then relation(marriage) get owns: custom-field, get annotations contain: @values(<args>)
+    Then entity(player) get owns: overridden-custom-field, get annotations contain: @values(<args>)
+    Then relation(marriage) get owns: overridden-custom-field, get annotations contain: @values(<args>)
+    When transaction commits
+    When connection opens schema transaction for database: typedb
+    Then entity(player) get owns: custom-field, get annotations contain: @values(<args>)
+    Then relation(marriage) get owns: custom-field, get annotations contain: @values(<args>)
+    Then entity(player) get owns: overridden-custom-field, get annotations contain: @values(<args>)
+    Then relation(marriage) get owns: overridden-custom-field, get annotations contain: @values(<args>)
+    Examples:
+      | value-type | args                                                                         | args-override            |
+      | long       | 1, 10, 20, 30                                                                | 10, 31                   |
+      | double     | 1.0, 2.0, 3.0, 4.5                                                           | 2.001                    |
+      | decimal    | 0.0, 1.0                                                                     | 0.01                     |
+      | string     | "john", "John", "Johnny", "johnny"                                           | "Jonathan"               |
+      | boolean    | false                                                                        | true                     |
+      | datetime   | 2024-06-04, 2024-06-05, 2024-06-06                                           | 2020-06-04, 2020-06-06   |
+      | datetimetz | 2024-06-04+0010, 2024-06-04 Asia/Kathmandu, 2024-06-05+0010, 2024-06-05+0100 | 2024-06-04 Europe/London |
+      | duration   | P6M, P1Y, P1Y1M, P1Y2M, P1Y3M, P1Y4M, P1Y6M                                  | P3M, P1Y3M, P1Y4M, P1Y6M |
+
