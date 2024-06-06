@@ -5,6 +5,7 @@
 #noinspection CucumberUndefinedStep
 Feature: Concept Owns
 
+  # TODO: Refactor "DEPRECATED"!
   Background:
     Given typedb starts
     # TODO: "open" or "opens"?
@@ -419,8 +420,160 @@ Feature: Concept Owns
       | relation  | description    | registration | profile        | double     |
 
 ########################
-# @annotations common
+# @annotations common: contains common tests for annotations suitable for **scalar** attributes:
+# @key, @unique, @subkey, @values, @range, @card, @regex
+# DOES NOT test:
+# @distinct
 ########################
+
+  Scenario Outline: <root-type> types can have owns with @<annotation> alongside pure owns
+    When put attribute type: email
+    When attribute(email) set value-type: string
+    When put attribute type: username
+    When attribute(username) set value-type: string
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    When put attribute type: age
+    When attribute(age) set value-type: long
+    When <root-type>(<type-name>) set owns: email
+    When <root-type>(<type-name>) get owns: email, set annotation: @<annotation>
+    When <root-type>(<type-name>) set owns: username
+    When <root-type>(<type-name>) get owns: username, set annotation: @<annotation>
+    When <root-type>(<type-name>) set owns: name
+    When <root-type>(<type-name>) set owns: age
+    Then <root-type>(<type-name>) get owns: email; get annotations contain: @<annotation>
+    Then <root-type>(<type-name>) get owns: username; get annotations contain: @<annotation>
+    Then <root-type>(<type-name>) get owns contain:
+      | email    |
+      | username |
+      | name     |
+      | age      |
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then <root-type>(<type-name>) get owns: email; get annotations contain: @<annotation>
+    Then <root-type>(<type-name>) get owns: username; get annotations contain: @<annotation>
+    Then <root-type>(<type-name>) get owns contain:
+      | email    |
+      | username |
+      | name     |
+      | age      |
+    Examples:
+      | root-type | type-name   | annotation       |
+      | entity    | person      | key              |
+      | entity    | person      | unique           |
+      | entity    | person      | subkey(LABEL)    |
+      | entity    | person      | values("1", "2") |
+      | entity    | person      | range("1", "2")  |
+      | entity    | person      | card(1, 2)       |
+      | entity    | person      | regex("\S+")     |
+      | relation  | description | key              |
+      | relation  | description | unique           |
+      | relation  | description | subkey(LABEL)    |
+      | relation  | description | values("1", "2") |
+      | relation  | description | range("1", "2")  |
+      | relation  | description | card(1, 2)       |
+      | relation  | description | regex("\S+")     |
+
+  Scenario Outline: <root-type> types can inherit owns with @<annotation>s alongside pure owns
+    When put attribute type: email
+    When attribute(email) set value-type: string
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    When put attribute type: reference
+    When attribute(reference) set value-type: string
+    When put attribute type: rating
+    When attribute(rating) set value-type: double
+    When <root-type>(<supertype-name>) set owns: email
+    When <root-type>(<supertype-name>) get owns: email, set annotation: @<annotation>
+    When <root-type>(<supertype-name>) set owns: name
+    When <root-type>(<subtype-name>) set owns: reference
+    When <root-type>(<subtype-name>) get owns: reference, set annotation: @<annotation>
+    When <root-type>(<subtype-name>) set owns: rating
+    Then <root-type>(<subtype-name>) get owns contain:
+      | email     |
+      | reference |
+      | name      |
+      | rating    |
+    Then <root-type>(<subtype-name>) get declared owns contain:
+      | reference |
+      | rating    |
+    Then <root-type>(<subtype-name>) get declared owns do not contain:
+      | email |
+      | name  |
+    Then <root-type>(<subtype-name>) get owns: email; get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns: reference; get annotations contain: @<annotation>
+    When transaction commits
+    When connection opens schema transaction for database: typedb
+    Then <root-type>(<subtype-name>) get owns contain:
+      | email     |
+      | reference |
+      | name      |
+      | rating    |
+    Then <root-type>(<subtype-name>) get declared owns contain:
+      | reference |
+      | rating    |
+    Then <root-type>(<subtype-name>) get declared owns do not contain:
+      | email |
+      | name  |
+    Then <root-type>(<subtype-name>) get owns: email; get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns: reference; get annotations contain: @<annotation>
+    When put attribute type: license
+    When attribute(license) set value-type: string
+    When put attribute type: points
+    When attribute(points) set value-type: double
+    When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
+    When <root-type>(<subtype-name-2>) set owns: license
+    When <root-type>(<subtype-name-2>) get owns: license, set annotation: @<annotation>
+    When <root-type>(<subtype-name-2>) set owns: points
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then <root-type>(<subtype-name>) get owns contain:
+      | email     |
+      | reference |
+      | name      |
+      | rating    |
+    Then <root-type>(<subtype-name>) get declared owns contain:
+      | reference |
+      | rating    |
+    Then <root-type>(<subtype-name>) get declared owns do not contain:
+      | email |
+      | name  |
+    Then <root-type>(<subtype-name>) get owns: email; get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns: reference; get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns: email; get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns: reference; get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns: license; get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns contain:
+      | email     |
+      | reference |
+      | license   |
+      | name      |
+      | rating    |
+      | points    |
+    Then <root-type>(<subtype-name-2>) get declared owns contain:
+      | license |
+      | points  |
+    Then <root-type>(<subtype-name-2>) get declared owns do not contain:
+      | email     |
+      | reference |
+      | name      |
+      | rating    |
+    Examples:
+      | root-type | supertype-name | subtype-name | subtype-name-2 | annotation       |
+      | entity    | person         | customer     | subscriber     | key              |
+      | entity    | person         | customer     | subscriber     | unique           |
+      | entity    | person         | customer     | subscriber     | subkey(LABEL)    |
+      | entity    | person         | customer     | subscriber     | values("1", "2") |
+      | entity    | person         | customer     | subscriber     | range("1", "2")  |
+      | entity    | person         | customer     | subscriber     | card(1, 2)       |
+      | entity    | person         | customer     | subscriber     | regex("\S+")     |
+      | relation  | description    | registration | profile        | key              |
+      | relation  | description    | registration | profile        | unique           |
+      | relation  | description    | registration | profile        | subkey(LABEL)    |
+      | relation  | description    | registration | profile        | values("1", "2") |
+      | relation  | description    | registration | profile        | range("1", "2")  |
+      | relation  | description    | registration | profile        | card(1, 2)       |
+      | relation  | description    | registration | profile        | regex("\S+")     |
 
   Scenario Outline: <root-type> types can redeclare @<annotation>s as @<annotation>s
     When put attribute type: name
@@ -451,7 +604,6 @@ Feature: Concept Owns
       | entity    | person      | range("1", "2")  | string     |
       | entity    | person      | card(1, 2)       | string     |
       | entity    | person      | regex("\S+")     | string     |
-      | entity    | person      | distinct         | string     |
       | relation  | description | key              | string     |
       | relation  | description | unique           | string     |
       | relation  | description | subkey(LABEL)    | string     |
@@ -459,7 +611,6 @@ Feature: Concept Owns
       | relation  | description | range("1", "2")  | string     |
       | relation  | description | card(1, 2)       | string     |
       | relation  | description | regex("\S+")     | string     |
-      | relation  | description | distinct         | string     |
 
   Scenario Outline: <root-type> types can redeclare owns as owns with @<annotation>
     When put attribute type: name
@@ -492,7 +643,6 @@ Feature: Concept Owns
       | entity    | person      | range("1", "2")  | string     |
       | entity    | person      | card(1, 2)       | string     |
       | entity    | person      | regex("\S+")     | string     |
-      | entity    | person      | distinct         | string     |
       | relation  | description | key              | string     |
       | relation  | description | unique           | string     |
       | relation  | description | subkey(LABEL)    | string     |
@@ -500,7 +650,6 @@ Feature: Concept Owns
       | relation  | description | range("1", "2")  | string     |
       | relation  | description | card(1, 2)       | string     |
       | relation  | description | regex("\S+")     | string     |
-      | relation  | description | distinct         | string     |
 
   Scenario Outline: <root-type> types can redeclare owns with @<annotation> as owns without @<annotation>
     When put attribute type: name
@@ -529,7 +678,6 @@ Feature: Concept Owns
       | entity    | person      | range("1", "2")  | string     |
       | entity    | person      | card(1, 2)       | string     |
       | entity    | person      | regex("\S+")     | string     |
-      | entity    | person      | distinct         | string     |
       | relation  | description | key              | string     |
       | relation  | description | unique           | string     |
       | relation  | description | subkey(LABEL)    | string     |
@@ -537,7 +685,6 @@ Feature: Concept Owns
       | relation  | description | range("1", "2")  | string     |
       | relation  | description | card(1, 2)       | string     |
       | relation  | description | regex("\S+")     | string     |
-      | relation  | description | distinct         | string     |
 
   Scenario Outline: <root-type> types can override inherited attributes as @<annotation>s
     When put attribute type: name
@@ -580,7 +727,6 @@ Feature: Concept Owns
       | entity    | person         | customer     | range("1", "2")  | string     |
       | entity    | person         | customer     | card(1, 2)       | string     |
       | entity    | person         | customer     | regex("\S+")     | string     |
-      | entity    | person         | customer     | distinct         | string     |
       | relation  | description    | registration | key              | string     |
       | relation  | description    | registration | unique           | string     |
       | relation  | description    | registration | subkey(LABEL)    | string     |
@@ -588,7 +734,6 @@ Feature: Concept Owns
       | relation  | description    | registration | range("1", "2")  | string     |
       | relation  | description    | registration | card(1, 2)       | string     |
       | relation  | description    | registration | regex("\S+")     | string     |
-      | relation  | description    | registration | distinct         | string     |
 
     # TODO: Maybe it should be rejected?
   Scenario Outline: <root-type> types can re-override owns with <annotation>s
@@ -607,7 +752,7 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get owns: email; get annotations contain: @<annotation>
     When <root-type>(<subtype-name>) set owns: work-email
     When <root-type>(<subtype-name>) get owns: work-email; set override: email
-    # TODO: These commas, semicolons, and colons are a mess and different for different subcases. Need to refactor it!
+    # TODO: These commas, semicolons, and colons are a mess and are different for different subcases. Need to refactor it!
     Then <root-type>(<subtype-name>) get owns overridden(work-email) get label: email
     Then <root-type>(<subtype-name>) get owns overridden(work-email); get annotations contain: @<annotation>
     When transaction commits
@@ -625,7 +770,6 @@ Feature: Concept Owns
       | entity    | person         | customer     | range("1", "2")  | string     |
       | entity    | person         | customer     | card(1, 2)       | string     |
       | entity    | person         | customer     | regex("\S+")     | string     |
-      | entity    | person         | customer     | distinct         | string     |
       | relation  | description    | registration | key              | string     |
       | relation  | description    | registration | unique           | string     |
       | relation  | description    | registration | subkey(LABEL)    | string     |
@@ -633,7 +777,6 @@ Feature: Concept Owns
       | relation  | description    | registration | range("1", "2")  | string     |
       | relation  | description    | registration | card(1, 2)       | string     |
       | relation  | description    | registration | regex("\S+")     | string     |
-      | relation  | description    | registration | distinct         | string     |
 
   Scenario Outline: <root-type> types can redeclare inherited attributes as keys (which will override)
     When put attribute type: email
@@ -648,7 +791,6 @@ Feature: Concept Owns
     When transaction commits
     When connection opens schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get owns, with annotations (DEPRECATED): <annotation>; contain: email
-
     Then <root-type>(<subtype-name-2>) set owns: email
     Then <root-type>(<subtype-name-2>) get owns: email, set annotation: @<annotation>
     Then <root-type>(<subtype-name-2>) get owns, with annotations (DEPRECATED): <annotation>; contain: email
@@ -661,7 +803,6 @@ Feature: Concept Owns
       | entity    | person         | customer     | subscriber     | range("1", "2")  | string     |
       | entity    | person         | customer     | subscriber     | card(1, 2)       | string     |
       | entity    | person         | customer     | subscriber     | regex("\S+")     | string     |
-      | entity    | person         | customer     | subscriber     | distinct         | string     |
       | relation  | description    | registration | profile        | key              | string     |
       | relation  | description    | registration | profile        | unique           | string     |
       | relation  | description    | registration | profile        | subkey(LABEL)    | string     |
@@ -669,7 +810,6 @@ Feature: Concept Owns
       | relation  | description    | registration | profile        | range("1", "2")  | string     |
       | relation  | description    | registration | profile        | card(1, 2)       | string     |
       | relation  | description    | registration | profile        | regex("\S+")     | string     |
-      | relation  | description    | registration | profile        | distinct         | string     |
 
   Scenario Outline: <root-type> types cannot redeclare inherited owns with @<annotation> as pure owns or owns with @<annotation>
     When put attribute type: email
@@ -696,7 +836,6 @@ Feature: Concept Owns
       | entity    | person         | customer     | range("1", "2")  | string     |
       | entity    | person         | customer     | card(1, 2)       | string     |
       | entity    | person         | customer     | regex("\S+")     | string     |
-      | entity    | person         | customer     | distinct         | string     |
       | relation  | description    | registration | key              | string     |
       | relation  | description    | registration | unique           | string     |
       | relation  | description    | registration | subkey(LABEL)    | string     |
@@ -704,9 +843,8 @@ Feature: Concept Owns
       | relation  | description    | registration | range("1", "2")  | string     |
       | relation  | description    | registration | card(1, 2)       | string     |
       | relation  | description    | registration | regex("\S+")     | string     |
-      | relation  | description    | registration | distinct         | string     |
 
-  Scenario Outline: <root-type> types cannot redeclare inherited key attribute types
+  Scenario Outline: <root-type> types cannot redeclare inherited owns with @<annotation>
     When put attribute type: email
     When attribute(email) set value-type: <value-type>
     When attribute(email) set annotation: @abstract
@@ -731,7 +869,6 @@ Feature: Concept Owns
       | entity    | person         | customer     | subscriber     | range("1", "2")  | string     |
       | entity    | person         | customer     | subscriber     | card(1, 2)       | string     |
       | entity    | person         | customer     | subscriber     | regex("\S+")     | string     |
-      | entity    | person         | customer     | subscriber     | distinct         | string     |
       | relation  | description    | registration | profile        | key              | string     |
       | relation  | description    | registration | profile        | unique           | string     |
       | relation  | description    | registration | profile        | subkey(LABEL)    | string     |
@@ -739,9 +876,8 @@ Feature: Concept Owns
       | relation  | description    | registration | profile        | range("1", "2")  | string     |
       | relation  | description    | registration | profile        | card(1, 2)       | string     |
       | relation  | description    | registration | profile        | regex("\S+")     | string     |
-      | relation  | description    | registration | profile        | distinct         | string     |
 
-  Scenario Outline: <root-type> types cannot redeclare overridden owns with <annotation>s
+  Scenario Outline: <root-type> types cannot redeclare overridden owns with @<annotation>s
     When put attribute type: email
     When attribute(email) set value-type: <value-type>
     When attribute(email) set annotation: @abstract
@@ -766,7 +902,6 @@ Feature: Concept Owns
       | entity    | person         | customer     | subscriber     | range("1", "2")  | string     |
       | entity    | person         | customer     | subscriber     | card(1, 2)       | string     |
       | entity    | person         | customer     | subscriber     | regex("\S+")     | string     |
-      | entity    | person         | customer     | subscriber     | distinct         | string     |
       | relation  | description    | registration | profile        | key              | string     |
       | relation  | description    | registration | profile        | unique           | string     |
       | relation  | description    | registration | profile        | subkey(LABEL)    | string     |
@@ -774,9 +909,8 @@ Feature: Concept Owns
       | relation  | description    | registration | profile        | range("1", "2")  | string     |
       | relation  | description    | registration | profile        | card(1, 2)       | string     |
       | relation  | description    | registration | profile        | regex("\S+")     | string     |
-      | relation  | description    | registration | profile        | distinct         | string     |
 
-  Scenario Outline: <root-type> types cannot override declared owns with <annotations> keys and attributes
+  Scenario Outline: <root-type> types cannot override declared owns with @<annotations> keys and attributes
     When put attribute type: username
     When attribute(username) set value-type: <value-type>
     When attribute(username) set annotation: @abstract
@@ -811,7 +945,6 @@ Feature: Concept Owns
       | entity    | person         | range("1", "2")  | string     |
       | entity    | person         | card(1, 2)       | string     |
       | entity    | person         | regex("\S+")     | string     |
-      | entity    | person         | distinct         | string     |
       | relation  | description    | key              | string     |
       | relation  | description    | unique           | string     |
       | relation  | description    | subkey(LABEL)    | string     |
@@ -819,9 +952,8 @@ Feature: Concept Owns
       | relation  | description    | range("1", "2")  | string     |
       | relation  | description    | card(1, 2)       | string     |
       | relation  | description    | regex("\S+")     | string     |
-      | relation  | description    | distinct         | string     |
 
-  Scenario Outline: <root-type> types cannot override inherited owns with <annotation>s and attributes other than with their subtypes
+  Scenario Outline: <root-type> types cannot override inherited owns with @<annotation>s and attributes other than with their subtypes
     When put attribute type: username
     When attribute(username) set value-type: <value-type>
     When put attribute type: name
@@ -853,7 +985,6 @@ Feature: Concept Owns
       | entity    | person         | customer     | range("1", "2")  | string     |
       | entity    | person         | customer     | card(1, 2)       | string     |
       | entity    | person         | customer     | regex("\S+")     | string     |
-      | entity    | person         | customer     | distinct         | string     |
       | relation  | description    | registration | key              | string     |
       | relation  | description    | registration | unique           | string     |
       | relation  | description    | registration | subkey(LABEL)    | string     |
@@ -861,7 +992,6 @@ Feature: Concept Owns
       | relation  | description    | registration | range("1", "2")  | string     |
       | relation  | description    | registration | card(1, 2)       | string     |
       | relation  | description    | registration | regex("\S+")     | string     |
-      | relation  | description    | registration | distinct         | string     |
 
   Scenario Outline: <root-type> subtypes can redeclare @<annotation>s after it is unset from supertype
     When put attribute type: name
@@ -897,7 +1027,6 @@ Feature: Concept Owns
       | entity    | person      | range("1", "2")  | string     |
       | entity    | person      | card(1, 2)       | string     |
       | entity    | person      | regex("\S+")     | string     |
-      | entity    | person      | distinct         | string     |
       | relation  | description | key              | string     |
       | relation  | description | unique           | string     |
       | relation  | description | subkey(LABEL)    | string     |
@@ -905,14 +1034,295 @@ Feature: Concept Owns
       | relation  | description | range("1", "2")  | string     |
       | relation  | description | card(1, 2)       | string     |
       | relation  | description | regex("\S+")     | string     |
-      | relation  | description | distinct         | string     |
+
+  Scenario Outline: <root-type> types can inherit owns with @<annotation>s and pure owns that are subtypes of each other
+    When put attribute type: username
+    When attribute(username) set value-type: string
+    When attribute(username) set annotation: @abstract
+    When put attribute type: score
+    When attribute(score) set value-type: double
+    When attribute(score) set annotation: @abstract
+    When put attribute type: reference
+    When attribute(reference) set value-type: string
+    When attribute(reference) set annotation: @abstract
+    When attribute(reference) set supertype: username
+    When put attribute type: rating
+    When attribute(rating) set value-type: double
+    When attribute(rating) set annotation: @abstract
+    When attribute(rating) set supertype: score
+    When <root-type>(<supertype-name>) set annotation: @abstract
+    When <root-type>(<supertype-name>) set owns: username
+    When <root-type>(<supertype-name>) get owns: username, set annotation: @<annotation>
+    When <root-type>(<supertype-name>) set owns: score
+    When <root-type>(<subtype-name>) set annotation: @abstract
+    When <root-type>(<subtype-name>) set owns: reference
+    When <root-type>(<subtype-name>) get owns: reference, set annotation: @<annotation>
+    When <root-type>(<subtype-name>) set owns: rating
+    Then <root-type>(<subtype-name>) get owns contain:
+      | username  |
+      | reference |
+      | score     |
+      | rating    |
+    Then <root-type>(<subtype-name>) get declared owns contain:
+      | reference |
+      | rating    |
+    Then <root-type>(<subtype-name>) get declared owns do not contain:
+      | username |
+      | score    |
+    Then <root-type>(<subtype-name>) get owns: username; get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns: reference; get annotations contain: @<annotation>
+    When transaction commits
+    When connection opens schema transaction for database: typedb
+    Then <root-type>(<subtype-name>) get owns contain:
+      | username  |
+      | reference |
+      | score     |
+      | rating    |
+    Then <root-type>(<subtype-name>) get declared owns contain:
+      | reference |
+      | rating    |
+    Then <root-type>(<subtype-name>) get declared owns do not contain:
+      | username |
+      | score    |
+    Then <root-type>(<subtype-name>) get owns: username; get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns: reference; get annotations contain: @<annotation>
+    When put attribute type: license
+    When attribute(license) set value-type: string
+    When attribute(license) set supertype: reference
+    When put attribute type: points
+    When attribute(points) set value-type: double
+    When attribute(points) set supertype: rating
+    When <root-type>(<subtype-name-2>) set annotation: @abstract
+    When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
+    When <root-type>(<subtype-name-2>) set owns: license
+    When <root-type>(<subtype-name-2>) get owns: license, set annotation: @<annotation>
+    When <root-type>(<subtype-name-2>) set owns: points
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then <root-type>(<subtype-name>) get owns contain:
+      | username  |
+      | reference |
+      | score     |
+      | rating    |
+    Then <root-type>(<subtype-name>) get declared owns contain:
+      | reference |
+      | rating    |
+    Then <root-type>(<subtype-name>) get declared owns do not contain:
+      | username |
+      | score    |
+    Then <root-type>(<subtype-name>) get owns: username; get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns: reference; get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns contain:
+      | username  |
+      | reference |
+      | license   |
+      | score     |
+      | rating    |
+      | points    |
+    Then <root-type>(<subtype-name-2>) get declared owns contain:
+      | license |
+      | points  |
+    Then <root-type>(<subtype-name-2>) get declared owns do not contain:
+      | username  |
+      | reference |
+      | score     |
+      | rating    |
+    Then <root-type>(<subtype-name-2>) get owns: username; get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns: reference; get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns: license; get annotations contain: @<annotation>
+    Examples:
+      | root-type | supertype-name | subtype-name | subtype-name-2 | annotation       |
+      | entity    | person         | customer     | subscriber     | key              |
+      | entity    | person         | customer     | subscriber     | unique           |
+      | entity    | person         | customer     | subscriber     | subkey(LABEL)    |
+      | entity    | person         | customer     | subscriber     | values("1", "2") |
+      | entity    | person         | customer     | subscriber     | range("1", "2")  |
+      | entity    | person         | customer     | subscriber     | card(1, 2)       |
+      | entity    | person         | customer     | subscriber     | regex("\S+")     |
+      | relation  | description    | registration | profile        | key              |
+      | relation  | description    | registration | profile        | unique           |
+      | relation  | description    | registration | profile        | subkey(LABEL)    |
+      | relation  | description    | registration | profile        | values("1", "2") |
+      | relation  | description    | registration | profile        | range("1", "2")  |
+      | relation  | description    | registration | profile        | card(1, 2)       |
+      | relation  | description    | registration | profile        | regex("\S+")     |
+
+  Scenario Outline: <root-type> types can override inherited owns with @<annotation>s and pure owns
+    When put attribute type: username
+    When attribute(username) set value-type: string
+    When put attribute type: email
+    When attribute(email) set value-type: string
+    When attribute(email) set annotation: @abstract
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    When attribute(name) set annotation: @abstract
+    When put attribute type: age
+    When attribute(age) set value-type: long
+    When put attribute type: reference
+    When attribute(reference) set value-type: string
+    When attribute(reference) set annotation: @abstract
+    When put attribute type: work-email
+    When attribute(work-email) set value-type: string
+    When attribute(work-email) set supertype: email
+    When put attribute type: nick-name
+    When attribute(nick-name) set value-type: string
+    When attribute(nick-name) set supertype: name
+    When put attribute type: rating
+    When attribute(rating) set value-type: double
+    When attribute(rating) set annotation: @abstract
+    When <root-type>(<supertype-name>) set annotation: @abstract
+    When <root-type>(<supertype-name>) set owns: username
+    When <root-type>(<supertype-name>) get owns: username, set annotation: @<annotation>
+    When <root-type>(<supertype-name>) set owns: email
+    When <root-type>(<supertype-name>) get owns: email, set annotation: @<annotation>
+    When <root-type>(<supertype-name>) set owns: name
+    When <root-type>(<supertype-name>) set owns: age
+    When <root-type>(<subtype-name>) set annotation: @abstract
+    When <root-type>(<subtype-name>) set owns: reference
+    When <root-type>(<subtype-name>) get owns: reference, set annotation: @<annotation>
+    When <root-type>(<subtype-name>) set owns: work-email
+    When <root-type>(<subtype-name>) get owns: work-email; set override: email
+    When <root-type>(<subtype-name>) set owns: rating
+    When <root-type>(<subtype-name>) set owns: nick-name
+    When <root-type>(<subtype-name>) get owns: nick-name; set override: name
+    Then <root-type>(<subtype-name>) get owns overridden(work-email) get label: email
+    Then <root-type>(<subtype-name>) get owns overridden(nick-name) get label: name
+    Then <root-type>(<subtype-name>) get owns contain:
+      | username   |
+      | reference  |
+      | work-email |
+      | age        |
+      | rating     |
+      | nick-name  |
+    Then <root-type>(<subtype-name>) get owns do not contain:
+      | email |
+      | name  |
+    Then <root-type>(<subtype-name>) get declared owns contain:
+      | reference  |
+      | work-email |
+      | rating     |
+      | nick-name  |
+    Then <root-type>(<subtype-name>) get declared owns do not contain:
+      | username |
+      | age      |
+      | email    |
+      | name     |
+    Then <root-type>(<subtype-name>) get owns: username; get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns: reference; get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns: work-email; get annotations contain: @<annotation>
+    When transaction commits
+    When connection opens schema transaction for database: typedb
+    Then <root-type>(<subtype-name>) get owns overridden(work-email) get label: email
+    Then <root-type>(<subtype-name>) get owns overridden(nick-name) get label: name
+    Then <root-type>(<subtype-name>) get owns contain:
+      | username   |
+      | reference  |
+      | work-email |
+      | age        |
+      | rating     |
+      | nick-name  |
+    Then <root-type>(<subtype-name>) get owns do not contain:
+      | email |
+      | name  |
+    Then <root-type>(<subtype-name>) get declared owns contain:
+      | reference  |
+      | work-email |
+      | rating     |
+      | nick-name  |
+    Then <root-type>(<subtype-name>) get declared owns do not contain:
+      | username |
+      | age      |
+      | email    |
+      | name     |
+    Then <root-type>(<subtype-name>) get owns: username; get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns: reference; get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns: work-email; get annotations contain: @<annotation>
+    When put attribute type: license
+    When attribute(license) set value-type: string
+    When attribute(license) set supertype: reference
+    When put attribute type: points
+    When attribute(points) set value-type: double
+    When attribute(points) set supertype: rating
+    When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
+    When <root-type>(<subtype-name-2>) set owns: license
+    When <root-type>(<subtype-name-2>) get owns: license; set override: reference
+    When <root-type>(<subtype-name-2>) set owns: points
+    When <root-type>(<subtype-name-2>) get owns: points; set override: rating
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then <root-type>(<subtype-name>) get owns contain:
+      | username   |
+      | reference  |
+      | work-email |
+      | age        |
+      | rating     |
+      | nick-name  |
+    Then <root-type>(<subtype-name>) get owns do not contain:
+      | email |
+      | name  |
+    Then <root-type>(<subtype-name>) get declared owns contain:
+      | reference  |
+      | work-email |
+      | rating     |
+      | nick-name  |
+    Then <root-type>(<subtype-name>) get declared owns do not contain:
+      | username |
+      | age      |
+      | email    |
+      | name     |
+    Then <root-type>(<subtype-name>) get owns: username; get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns: reference; get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns: work-email; get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns overridden(license) get label: reference
+    Then <root-type>(<subtype-name-2>) get owns overridden(points) get label: rating
+    Then <root-type>(<subtype-name-2>) get owns contain:
+      | username   |
+      | license    |
+      | work-email |
+      | age        |
+      | points     |
+      | nick-name  |
+    Then <root-type>(<subtype-name-2>) get owns do not contain:
+      | email     |
+      | reference |
+      | name      |
+      | rating    |
+    Then <root-type>(<subtype-name-2>) get declared owns contain:
+      | license |
+      | points  |
+    Then <root-type>(<subtype-name-2>) get declared owns do not contain:
+      | username   |
+      | work-email |
+      | age        |
+      | nick-name  |
+      | email      |
+      | reference  |
+      | name       |
+      | rating     |
+    Then <root-type>(<subtype-name-2>) get owns: username; get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns: license; get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns: work-email; get annotations contain: @<annotation>
+    Examples:
+      | root-type | supertype-name | subtype-name | subtype-name-2 | annotation       |
+      | entity    | person         | customer     | subscriber     | key              |
+      | entity    | person         | customer     | subscriber     | unique           |
+      | entity    | person         | customer     | subscriber     | subkey(LABEL)    |
+      | entity    | person         | customer     | subscriber     | values("1", "2") |
+      | entity    | person         | customer     | subscriber     | range("1", "2")  |
+      | entity    | person         | customer     | subscriber     | card(1, 2)       |
+      | entity    | person         | customer     | subscriber     | regex("\S+")     |
+      | relation  | description    | registration | profile        | key              |
+      | relation  | description    | registration | profile        | unique           |
+      | relation  | description    | registration | profile        | subkey(LABEL)    |
+      | relation  | description    | registration | profile        | values("1", "2") |
+      | relation  | description    | registration | profile        | range("1", "2")  |
+      | relation  | description    | registration | profile        | card(1, 2)       |
+      | relation  | description    | registration | profile        | regex("\S+")     |
 
 ########################
 # @key
 ########################
-# TODO: Keys and lists?
 
-  # TODO: Make it for all annotations and for entity/relation!!!!!
   Scenario Outline: Owns can set @key annotation for <value-type> value type and unset it
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
@@ -966,417 +1376,7 @@ Feature: Concept Owns
       | decimal       |
       | custom-struct |
 
-  Scenario: Entity types can have keys and attributes
-    When put attribute type: email
-    When attribute(email) set value-type: string
-    When put attribute type: username
-    When attribute(username) set value-type: string
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When put attribute type: age
-    When attribute(age) set value-type: long
-    When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: @key
-    When entity(person) set owns: username
-    When entity(person) get owns: username, set annotation: @key
-    When entity(person) set owns: name
-    When entity(person) set owns: age
-    Then entity(person) get owns: email; get annotations contain: @key
-    Then entity(person) get owns: username; get annotations contain: @key
-    Then entity(person) get owns contain:
-      | email    |
-      | username |
-      | name     |
-      | age      |
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    Then entity(person) get owns: email; get annotations contain: @key
-    Then entity(person) get owns: username; get annotations contain: @key
-    Then entity(person) get owns contain:
-      | email    |
-      | username |
-      | name     |
-      | age      |
-
-  Scenario: Entity types can inherit keys and attributes
-    When put attribute type: email
-    When attribute(email) set value-type: string
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When put attribute type: reference
-    When attribute(reference) set value-type: string
-    When put attribute type: rating
-    When attribute(rating) set value-type: double
-    When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: @key
-    When entity(person) set owns: name
-    When entity(customer) set owns: reference
-    When entity(customer) get owns: reference, set annotation: @key
-    When entity(customer) set owns: rating
-    Then entity(customer) get owns contain:
-      | email     |
-      | reference |
-      | name      |
-      | rating    |
-    Then entity(customer) get declared owns contain:
-      | reference |
-      | rating    |
-    Then entity(customer) get declared owns do not contain:
-      | email |
-      | name  |
-    Then entity(customer) get owns: email; get annotations contain: @key
-    Then entity(customer) get owns: reference; get annotations contain: @key
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    Then entity(customer) get owns contain:
-      | email     |
-      | reference |
-      | name      |
-      | rating    |
-    Then entity(customer) get declared owns contain:
-      | reference |
-      | rating    |
-    Then entity(customer) get declared owns do not contain:
-      | email |
-      | name  |
-    Then entity(customer) get owns: email; get annotations contain: @key
-    Then entity(customer) get owns: reference; get annotations contain: @key
-    When put attribute type: license
-    When attribute(license) set value-type: string
-    When put attribute type: points
-    When attribute(points) set value-type: double
-    When put entity type: subscriber
-    When entity(subscriber) set supertype: customer
-    When entity(subscriber) set owns: license
-    When entity(subscriber) get owns: license, set annotation: @key
-    When entity(subscriber) set owns: points
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    Then entity(customer) get owns contain:
-      | email     |
-      | reference |
-      | name      |
-      | rating    |
-    Then entity(customer) get declared owns contain:
-      | reference |
-      | rating    |
-    Then entity(customer) get declared owns do not contain:
-      | email |
-      | name  |
-    Then entity(customer) get owns: email; get annotations contain: @key
-    Then entity(customer) get owns: reference; get annotations contain: @key
-    Then entity(subscriber) get owns: email; get annotations contain: @key
-    Then entity(subscriber) get owns: reference; get annotations contain: @key
-    Then entity(subscriber) get owns: license; get annotations contain: @key
-    Then entity(subscriber) get owns contain:
-      | email     |
-      | reference |
-      | license   |
-      | name      |
-      | rating    |
-      | points    |
-    Then entity(subscriber) get declared owns contain:
-      | license |
-      | points  |
-    Then entity(subscriber) get declared owns do not contain:
-      | email     |
-      | reference |
-      | name      |
-      | rating    |
-
-  Scenario: Entity types can inherit keys and attributes that are subtypes of each other
-    When put attribute type: username
-    When attribute(username) set value-type: string
-    When attribute(username) set annotation: @abstract
-    When put attribute type: score
-    When attribute(score) set value-type: double
-    When attribute(score) set annotation: @abstract
-    When put attribute type: reference
-    When attribute(reference) set value-type: string
-    When attribute(reference) set annotation: @abstract
-    When attribute(reference) set supertype: username
-    When put attribute type: rating
-    When attribute(rating) set value-type: double
-    When attribute(rating) set annotation: @abstract
-    When attribute(rating) set supertype: score
-    When entity(person) set annotation: @abstract
-    When entity(person) set owns: username
-    When entity(person) get owns: username, set annotation: @key
-    When entity(person) set owns: score
-    When entity(customer) set annotation: @abstract
-    When entity(customer) set owns: reference
-    When entity(customer) get owns: reference, set annotation: @key
-    When entity(customer) set owns: rating
-    Then entity(customer) get owns contain:
-      | username  |
-      | reference |
-      | score     |
-      | rating    |
-    Then entity(customer) get declared owns contain:
-      | reference |
-      | rating    |
-    Then entity(customer) get declared owns do not contain:
-      | username |
-      | score    |
-    Then entity(customer) get owns: username; get annotations contain: @key
-    Then entity(customer) get owns: reference; get annotations contain: @key
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    Then entity(customer) get owns contain:
-      | username  |
-      | reference |
-      | score     |
-      | rating    |
-    Then entity(customer) get declared owns contain:
-      | reference |
-      | rating    |
-    Then entity(customer) get declared owns do not contain:
-      | username |
-      | score    |
-    Then entity(customer) get owns: username; get annotations contain: @key
-    Then entity(customer) get owns: reference; get annotations contain: @key
-    When put attribute type: license
-    When attribute(license) set value-type: string
-    When attribute(license) set supertype: reference
-    When put attribute type: points
-    When attribute(points) set value-type: double
-    When attribute(points) set supertype: rating
-    When put entity type: subscriber
-    When entity(subscriber) set annotation: @abstract
-    When entity(subscriber) set supertype: customer
-    When entity(subscriber) set owns: license
-    When entity(subscriber) get owns: license, set annotation: @key
-    When entity(subscriber) set owns: points
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    Then entity(customer) get owns contain:
-      | username  |
-      | reference |
-      | score     |
-      | rating    |
-    Then entity(customer) get declared owns contain:
-      | reference |
-      | rating    |
-    Then entity(customer) get declared owns do not contain:
-      | username |
-      | score    |
-    Then entity(customer) get owns: username; get annotations contain: @key
-    Then entity(customer) get owns: reference; get annotations contain: @key
-    Then entity(subscriber) get owns contain:
-      | username  |
-      | reference |
-      | license   |
-      | score     |
-      | rating    |
-      | points    |
-    Then entity(subscriber) get declared owns contain:
-      | license |
-      | points  |
-    Then entity(subscriber) get declared owns do not contain:
-      | username  |
-      | reference |
-      | score     |
-      | rating    |
-    Then entity(subscriber) get owns: username; get annotations contain: @key
-    Then entity(subscriber) get owns: reference; get annotations contain: @key
-    Then entity(subscriber) get owns: license; get annotations contain: @key
-
-  Scenario: Entity types can override inherited keys and attributes
-    When put attribute type: username
-    When attribute(username) set value-type: string
-    When put attribute type: email
-    When attribute(email) set value-type: string
-    When attribute(email) set annotation: @abstract
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When attribute(name) set annotation: @abstract
-    When put attribute type: age
-    When attribute(age) set value-type: long
-    When put attribute type: reference
-    When attribute(reference) set value-type: string
-    When attribute(reference) set annotation: @abstract
-    When put attribute type: work-email
-    When attribute(work-email) set value-type: string
-    When attribute(work-email) set supertype: email
-    When put attribute type: nick-name
-    When attribute(nick-name) set value-type: string
-    When attribute(nick-name) set supertype: name
-    When put attribute type: rating
-    When attribute(rating) set value-type: double
-    When attribute(rating) set annotation: @abstract
-    When entity(person) set annotation: @abstract
-    When entity(person) set owns: username
-    When entity(person) get owns: username, set annotation: @key
-    When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: @key
-    When entity(person) set owns: name
-    When entity(person) set owns: age
-    When entity(customer) set annotation: @abstract
-    When entity(customer) set owns: reference
-    When entity(customer) get owns: reference, set annotation: @key
-    When entity(customer) set owns: work-email
-    When entity(customer) get owns: work-email; set override: email
-    When entity(customer) set owns: rating
-    When entity(customer) set owns: nick-name
-    When entity(customer) get owns: nick-name; set override: name
-    Then entity(customer) get owns overridden(work-email) get label: email
-    Then entity(customer) get owns overridden(nick-name) get label: name
-    Then entity(customer) get owns contain:
-      | username   |
-      | reference  |
-      | work-email |
-      | age        |
-      | rating     |
-      | nick-name  |
-    Then entity(customer) get owns do not contain:
-      | email |
-      | name  |
-    Then entity(customer) get declared owns contain:
-      | reference  |
-      | work-email |
-      | rating     |
-      | nick-name  |
-    Then entity(customer) get declared owns do not contain:
-      | username |
-      | age      |
-      | email    |
-      | name     |
-    Then entity(customer) get owns: username; get annotations contain: @key
-    Then entity(customer) get owns: reference; get annotations contain: @key
-    Then entity(customer) get owns: work-email; get annotations contain: @key
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    Then entity(customer) get owns overridden(work-email) get label: email
-    Then entity(customer) get owns overridden(nick-name) get label: name
-    Then entity(customer) get owns contain:
-      | username   |
-      | reference  |
-      | work-email |
-      | age        |
-      | rating     |
-      | nick-name  |
-    Then entity(customer) get owns do not contain:
-      | email |
-      | name  |
-    Then entity(customer) get declared owns contain:
-      | reference  |
-      | work-email |
-      | rating     |
-      | nick-name  |
-    Then entity(customer) get declared owns do not contain:
-      | username |
-      | age      |
-      | email    |
-      | name     |
-    Then entity(customer) get owns: username; get annotations contain: @key
-    Then entity(customer) get owns: reference; get annotations contain: @key
-    Then entity(customer) get owns: work-email; get annotations contain: @key
-    When put attribute type: license
-    When attribute(license) set value-type: string
-    When attribute(license) set supertype: reference
-    When put attribute type: points
-    When attribute(points) set value-type: double
-    When attribute(points) set supertype: rating
-    When put entity type: subscriber
-    When entity(subscriber) set supertype: customer
-    When entity(subscriber) set owns: license
-    When entity(subscriber) get owns: license; set override: reference
-    When entity(subscriber) set owns: points
-    When entity(subscriber) get owns: points; set override: rating
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    Then entity(customer) get owns contain:
-      | username   |
-      | reference  |
-      | work-email |
-      | age        |
-      | rating     |
-      | nick-name  |
-    Then entity(customer) get owns do not contain:
-      | email |
-      | name  |
-    Then entity(customer) get declared owns contain:
-      | reference  |
-      | work-email |
-      | rating     |
-      | nick-name  |
-    Then entity(customer) get declared owns do not contain:
-      | username |
-      | age      |
-      | email    |
-      | name     |
-    Then entity(customer) get owns: username; get annotations contain: @key
-    Then entity(customer) get owns: reference; get annotations contain: @key
-    Then entity(customer) get owns: work-email; get annotations contain: @key
-    Then entity(subscriber) get owns overridden(license) get label: reference
-    Then entity(subscriber) get owns overridden(points) get label: rating
-    Then entity(subscriber) get owns contain:
-      | username   |
-      | license    |
-      | work-email |
-      | age        |
-      | points     |
-      | nick-name  |
-    Then entity(subscriber) get owns do not contain:
-      | email     |
-      | reference |
-      | name      |
-      | rating    |
-    Then entity(subscriber) get declared owns contain:
-      | license |
-      | points  |
-    Then entity(subscriber) get declared owns do not contain:
-      | username   |
-      | work-email |
-      | age        |
-      | nick-name  |
-      | email      |
-      | reference  |
-      | name       |
-      | rating     |
-    Then entity(subscriber) get owns: username; get annotations contain: @key
-    Then entity(subscriber) get owns: license; get annotations contain: @key
-    Then entity(subscriber) get owns: work-email; get annotations contain: @key
-
-  # TODO: Move to thing?
-  Scenario: Entity types can only commit keys if every instance owns a distinct key
-    When put attribute type: email
-    When attribute(email) set value-type: string
-    When put attribute type: username
-    When attribute(username) set value-type: string
-    When entity(person) set owns: username
-    When entity(person) get owns: username, set annotation: @key
-    Then transaction commits
-    When connection opens write transaction for database: typedb
-    When $a = entity(person) create new instance with key(username): alice
-    When $b = entity(person) create new instance with key(username): bob
-    Then transaction commits
-    When connection opens schema transaction for database: typedb
-    When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: @key; fails
-    When connection opens schema transaction for database: typedb
-    When entity(person) set owns: email
-    Then transaction commits
-    When connection opens write transaction for database: typedb
-    When $a = entity(person) get instance with key(username): alice
-    When $alice = attribute(email) as(string) put: alice@vaticle.com
-    When entity $a set has: $alice
-    When $b = entity(person) get instance with key(username): bob
-    When $bob = attribute(email) as(string) put: bob@vaticle.com
-    When entity $b set has: $bob
-    Then transaction commits
-    When connection opens schema transaction for database: typedb
-    When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: @key
-    Then entity(person) get owns: email; get annotations contain: @key
-    Then entity(person) get owns: username; get annotations contain: @key
-    Then transaction commits
-    When connection opens read transaction for database: typedb
-    Then entity(person) get owns: email; get annotations contain: @key
-    Then entity(person) get owns: username; get annotations contain: @key
-
-
-  # TODO
+  # TODO Add tests for lists for all the types!
 
 
 ########################
@@ -1503,6 +1503,7 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
+    Then entity(person) get owns: custom-attribute, set annotation: @values; fails
     Then entity(person) get owns: custom-attribute, set annotation: @values(); fails
     Then entity(person) get owns: custom-attribute; get annotations is empty
     When transaction commits
@@ -1548,6 +1549,7 @@ Feature: Concept Owns
       | string     | 2024-06-04                      |
       | string     | 2024-06-04+0010                 |
       | string     | 'notstring'                     |
+      | string     | ""                              |
       | boolean    | 123                             |
       | boolean    | "string"                        |
       | boolean    | 2024-06-04                      |
@@ -1785,6 +1787,7 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
+    Then entity(person) get owns: custom-attribute, set annotation: @range; fails
     Then entity(person) get owns: custom-attribute, set annotation: @range(); fails
     Then entity(person) get owns: custom-attribute, set annotation: @range(<arg0>); fails
     Then entity(person) get owns: custom-attribute; get annotations is empty
@@ -1845,6 +1848,7 @@ Feature: Concept Owns
       | string     | 2024-06-04                      | "str"                                              |
       | string     | 2024-06-04+0010                 | "str"                                              |
       | string     | 'notstring'                     | "str"                                              |
+      | string     | ""                              | "str"                                              |
       | boolean    | false                           | false                                              |
       | boolean    | true                            | true                                               |
       | boolean    | true                            | 123                                                |
@@ -2135,6 +2139,7 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
+    Then entity(person) get owns: custom-attribute, set annotation: @card; fails
     Then entity(person) get owns: custom-attribute, set annotation: @card(); fails
     Then entity(person) get owns: custom-attribute, set annotation: @card(1); fails
     Then entity(person) get owns: custom-attribute, set annotation: @card(*); fails
@@ -2310,30 +2315,92 @@ Feature: Concept Owns
 # @distinct
 ########################
 
-  Scenario Outline: Owns can set @distinct annotation for <value-type> value type list and unset it
+  Scenario Outline: Owns for <root-type> can set @distinct annotation for <value-type> value type list and unset it
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
-    When entity(person) set owns: custom-attribute[]
-    When entity(person) get owns: custom-attribute[], set annotation: @distinct
-    Then entity(person) get owns: custom-attribute[]; get annotations contain: @distinct
+    When <root-type>(<type-name>) set owns: custom-attribute[]
+    When <root-type>(<type-name>) get owns: custom-attribute[], set annotation: @distinct
+    Then <root-type>(<type-name>) get owns: custom-attribute[]; get annotations contain: @distinct
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then entity(person) get owns: custom-attribute[]; get annotations contain: @distinct
-    When entity(person) get owns: custom-attribute[], unset annotation: @distinct
-    Then entity(person) get owns: custom-attribute[]; get annotations is empty
+    Then <root-type>(<type-name>) get owns: custom-attribute[]; get annotations contain: @distinct
+    When <root-type>(<type-name>) get owns: custom-attribute[], unset annotation: @distinct
+    Then <root-type>(<type-name>) get owns: custom-attribute[]; get annotations is empty
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then entity(person) get owns: custom-attribute[]; get annotations is empty
-    When entity(person) get owns: custom-attribute[], set annotation: @distinct
-    Then entity(person) get owns: custom-attribute[]; get annotations contain: @distinct
+    Then <root-type>(<type-name>) get owns: custom-attribute[]; get annotations is empty
+    When <root-type>(<type-name>) get owns: custom-attribute[], set annotation: @distinct
+    Then <root-type>(<type-name>) get owns: custom-attribute[]; get annotations contain: @distinct
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then entity(person) get owns: custom-attribute[]; get annotations contain: @distinct
-    When entity(person) unset owns: custom-attribute[]
-    Then entity(person) get owns is empty
+    Then <root-type>(<type-name>) get owns: custom-attribute[]; get annotations contain: @distinct
+    When <root-type>(<type-name>) unset owns: custom-attribute[]
+    Then <root-type>(<type-name>) get owns is empty
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then entity(person) get owns is empty
+    Then <root-type>(<type-name>) get owns is empty
+    Examples:
+      | root-type | type-name   | value-type    |
+      | entity    | person      | long          |
+      | entity    | person      | string        |
+      | entity    | person      | boolean       |
+      | entity    | person      | double        |
+      | entity    | person      | decimal       |
+      | entity    | person      | datetime      |
+      | entity    | person      | datetimetz    |
+      | entity    | person      | duration      |
+      | entity    | person      | custom-struct |
+      | relation  | description | long          |
+      | relation  | description | string        |
+      | relation  | description | boolean       |
+      | relation  | description | double        |
+      | relation  | description | decimal       |
+      | relation  | description | datetime      |
+      | relation  | description | datetimetz    |
+      | relation  | description | duration      |
+      | relation  | description | custom-struct |
+
+  Scenario Outline: Owns for <root-type> cannot have @distinct annotation for <value-type> non-list value type
+    When put attribute type: custom-attribute
+    When attribute(custom-attribute) set value-type: <value-type>
+    When <root-type>(<type-name>) set owns: custom-attribute
+    Then <root-type>(<type-name>) get owns: custom-attribute, set annotation: @distinct; fails
+    Then <root-type>(<type-name>) get owns: custom-attribute; get annotations is empty
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then <root-type>(<type-name>) get owns: custom-attribute; get annotations is empty
+    Examples:
+      | root-type | type-name   | value-type    |
+      | entity    | person      | long          |
+      | entity    | person      | string        |
+      | entity    | person      | boolean       |
+      | entity    | person      | double        |
+      | entity    | person      | decimal       |
+      | entity    | person      | datetime      |
+      | entity    | person      | datetimetz    |
+      | entity    | person      | duration      |
+      | entity    | person      | custom-struct |
+      | relation  | description | long          |
+      | relation  | description | string        |
+      | relation  | description | boolean       |
+      | relation  | description | double        |
+      | relation  | description | decimal       |
+      | relation  | description | datetime      |
+      | relation  | description | datetimetz    |
+      | relation  | description | duration      |
+      | relation  | description | custom-struct |
+
+  Scenario Outline: Owns cannot have @distinct annotation for <value-type> with args
+    When put attribute type: custom-attribute
+    When attribute(custom-attribute) set value-type: <value-type>
+    When entity(person) set owns: custom-attribute
+    Then entity(person) get owns: custom-attribute, set annotation: @distinct(); fails
+    Then entity(person) get owns: custom-attribute, set annotation: @distinct(1); fails
+    Then entity(person) get owns: custom-attribute, set annotation: @distinct("1"); fails
+    Then entity(person) get owns: custom-attribute; get annotations is empty
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then entity(person) get owns: custom-attribute; get annotations is empty
     Examples:
       | value-type    |
       | long          |
@@ -2346,26 +2413,44 @@ Feature: Concept Owns
       | duration      |
       | custom-struct |
 
-  Scenario Outline: Owns cannot have @distinct annotation for <value-type> non-list value type
-    When put attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
-    When entity(person) set owns: custom-attribute
-    Then entity(person) get owns: custom-attribute, set annotation: @distinct; fails
-    Then entity(person) get owns: custom-attribute; get annotations is empty
+  Scenario Outline: <root-type> types can redeclare owns as owns with @distinct
+    When put attribute type: name
+    When attribute(name) set value-type: <value-type>
+    When put attribute type: email
+    When attribute(email) set value-type: <value-type>
+    When put attribute type: address
+    When attribute(address) set value-type: <value-type>
+    When <root-type>(<type-name>) set owns: name[]
+    When <root-type>(<type-name>) set owns: email[]
+    When <root-type>(<type-name>) set owns: address[]
+    Then <root-type>(<type-name>) set owns: name[]
+    Then <root-type>(<type-name>) get owns: name[], set annotation: @distinct
+    Then <root-type>(<type-name>) get owns: name[], get annotations contain: @distinct
     When transaction commits
-    When connection opens read transaction for database: typedb
-    Then entity(person) get owns: custom-attribute; get annotations is empty
+    When connection opens schema transaction for database: typedb
+    Then <root-type>(<type-name>) set owns: email[]
+    Then <root-type>(<type-name>) get owns: email[], get annotations is empty
+    When <root-type>(<type-name>) get owns: email[], set annotation: @distinct
+    Then <root-type>(<type-name>) get owns: email[], get annotations contain: @distinct
+    Then <root-type>(<type-name>) get owns: address[], get annotations is empty
+    When <root-type>(<type-name>) get owns: address[], set annotation: @distinct
+    Then <root-type>(<type-name>) get owns: address[], get annotations contain: @distinct
     Examples:
-      | value-type    |
-      | long          |
-      | string        |
-      | boolean       |
-      | double        |
-      | decimal       |
-      | datetime      |
-      | datetimetz    |
-      | duration      |
-      | custom-struct |
+      | root-type | type-name   | value-type |
+      | entity    | person      | string     |
+      | entity    | person      | string     |
+      | entity    | person      | string     |
+      | entity    | person      | string     |
+      | entity    | person      | string     |
+      | entity    | person      | string     |
+      | entity    | person      | string     |
+      | relation  | description | string     |
+      | relation  | description | string     |
+      | relation  | description | string     |
+      | relation  | description | string     |
+      | relation  | description | string     |
+      | relation  | description | string     |
+      | relation  | description | string     |
 
 ########################
 # @regex
@@ -2396,14 +2481,22 @@ Feature: Concept Owns
     When connection opens read transaction for database: typedb
     Then entity(person) get owns is empty
     Examples:
-      | value-type | arg            |
-      | string     | "\S+@\S+\.\S+" |
+      | value-type | arg                  |
+      | string     | "value"              |
+      | string     | "123.456"            |
+      | string     | "\S+"                |
+      | string     | "\S+@\S+\.\S+"       |
+      | string     | "^starts"            |
+      | string     | "ends$"              |
+      | string     | "^starts and ends$"  |
+      | string     | "^(one \| another)$" |
+      | string     | "2024-06-04+0100"    |
 
   Scenario Outline: Owns cannot have @regex annotation for <value-type> value type
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
-    Then entity(person) get owns: custom-attribute, set annotation: @regex; fails
+    Then entity(person) get owns: custom-attribute, set annotation: @regex("\S+"); fails
     Then entity(person) get owns: custom-attribute; get annotations is empty
     When transaction commits
     When connection opens read transaction for database: typedb
@@ -2419,9 +2512,32 @@ Feature: Concept Owns
       | duration      |
       | custom-struct |
 
+  Scenario Outline: Owns cannot have @regex annotation of invalid args
+    When put attribute type: custom-attribute
+    When attribute(custom-attribute) set value-type: <value-type>
+    When entity(person) set owns: custom-attribute
+    Then entity(person) get owns: custom-attribute, set annotation: @regex; fails
+    Then entity(person) get owns: custom-attribute, set annotation: @regex(); fails
+    Then entity(person) get owns: custom-attribute, set annotation: @regex(<args>); fails
+    Then entity(person) get owns: custom-attribute; get annotations is empty
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then entity(person) get owns: custom-attribute; get annotations is empty
+    Examples:
+      | args                  |
+      | ""                    |
+      | "\S+", "\S+"          |
+      | "one", "two", "three" |
+      | 123                   |
+      | 2024-06-04+0100       |
+      | 2024-06-04            |
+      | true                  |
+      | 123.54543             |
+      | value                 |
+      | P1Y                   |
 
 ########################
-# @annotations not compatible to owns: @abstract, @cascade, @independent, @replace
+# not compatible @annotations: @abstract, @cascade, @independent, @replace
 ########################
 
   Scenario Outline: Owns cannot have @abstract, @cascade, @independent, and @replace annotations for <value-type> value type

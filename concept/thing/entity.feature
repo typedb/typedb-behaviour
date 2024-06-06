@@ -205,3 +205,39 @@ Feature: Concept Entity
     Then entity $a is deleted: true
     When entity $a set has: $email; fails
 
+  # TODO: Refactor for already existing "Given"
+  Scenario: Entity types can only commit keys if every instance owns a distinct key
+    When put attribute type: email
+    When attribute(email) set value-type: string
+    When put attribute type: username
+    When attribute(username) set value-type: string
+    When entity(person) set owns: username
+    When entity(person) get owns: username, set annotation: @key
+    Then transaction commits
+    When connection opens write transaction for database: typedb
+    When $a = entity(person) create new instance with key(username): alice
+    When $b = entity(person) create new instance with key(username): bob
+    Then transaction commits
+    When connection opens schema transaction for database: typedb
+    When entity(person) set owns: email
+    When entity(person) get owns: email, set annotation: @key; fails
+    When connection opens schema transaction for database: typedb
+    When entity(person) set owns: email
+    Then transaction commits
+    When connection opens write transaction for database: typedb
+    When $a = entity(person) get instance with key(username): alice
+    When $alice = attribute(email) as(string) put: alice@vaticle.com
+    When entity $a set has: $alice
+    When $b = entity(person) get instance with key(username): bob
+    When $bob = attribute(email) as(string) put: bob@vaticle.com
+    When entity $b set has: $bob
+    Then transaction commits
+    When connection opens schema transaction for database: typedb
+    When entity(person) set owns: email
+    When entity(person) get owns: email, set annotation: @key
+    Then entity(person) get owns: email; get annotations contain: @key
+    Then entity(person) get owns: username; get annotations contain: @key
+    Then transaction commits
+    When connection opens read transaction for database: typedb
+    Then entity(person) get owns: email; get annotations contain: @key
+    Then entity(person) get owns: username; get annotations contain: @key
