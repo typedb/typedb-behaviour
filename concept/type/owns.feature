@@ -1360,31 +1360,206 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
-    When entity(person) get owns: custom-attribute, set annotation: @key
-    Then entity(person) get owns: custom-attribute; get annotations contain: @key
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    Then entity(person) get owns: custom-attribute; get annotations contain: @key
-    When entity(person) unset owns: custom-attribute
-    Then entity(person) get owns is empty
+    Then entity(person) get owns: custom-attribute, set annotation: @key; fails
+    Then entity(person) get owns: custom-attribute; get annotations is empty
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then entity(person) get owns is empty
+    Then entity(person) get owns: custom-attribute; get annotations is empty
     Examples:
       | value-type    |
       | double        |
       | decimal       |
       | custom-struct |
 
-  # TODO Add tests for lists for all the types!
-
+  Scenario Outline: Owns cannot set @key annotation for lists
+    When put attribute type: custom-attribute
+    When attribute(custom-attribute) set value-type: <value-type>
+    When entity(person) set owns: custom-attribute[]
+    Then entity(person) get owns: custom-attribute[], set annotation: @key; fails
+    Then entity(person) get owns: custom-attribute[]; get annotations is empty
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then entity(person) get owns: custom-attribute[]; get annotations is empty
+    Examples:
+      | value-type    |
+      | long          |
+      | string        |
+      | boolean       |
+      | double        |
+      | decimal       |
+      | datetime      |
+      | datetimetz    |
+      | duration      |
+      | custom-struct |
 
 ########################
 # @subkey
 ########################
-  # TODO
 
+  Scenario Outline: Owns can set @subkey annotation for <value-type> value type and unset it
+    When put attribute type: custom-attribute
+    When attribute(custom-attribute) set value-type: <value-type>
+    When entity(person) set owns: custom-attribute
+    When entity(person) get owns: custom-attribute, set annotation: @subkey(<arg>)
+    Then entity(person) get owns: custom-attribute; get annotations contain: @subkey(<arg>)
+    When transaction commits
+    When connection opens schema transaction for database: typedb
+    Then entity(person) get owns: custom-attribute; get annotations contain: @subkey(<arg>)
+    When entity(person) get owns: custom-attribute, unset annotation: @subkey(<arg>)
+    Then entity(person) get owns: custom-attribute; get annotations is empty
+    When transaction commits
+    When connection opens schema transaction for database: typedb
+    Then entity(person) get owns: custom-attribute; get annotations is empty
+    When entity(person) get owns: custom-attribute, set annotation: @subkey(<arg>)
+    Then entity(person) get owns: custom-attribute; get annotations contain: @subkey(<arg>)
+    When transaction commits
+    When connection opens schema transaction for database: typedb
+    Then entity(person) get owns: custom-attribute; get annotations contain: @subkey(<arg>)
+    When entity(person) unset owns: custom-attribute
+    Then entity(person) get owns is empty
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then entity(person) get owns is empty
+    Examples:
+      | value-type | arg                   |
+      | long       | LABEL                 |
+      | string     | label                 |
+      | boolean    | lAbEl_Of_FoRmaT       |
+      | datetime   | l                     |
+      | datetimetz | l2                    |
+      | duration   | trydigits2723andafter |
 
+  Scenario Outline: Owns can set @subkey annotation for multiple attributes of <root-type> type
+    When put attribute type: first-name
+    When attribute(first-name) set value-type: string
+    When put attribute type: second-name
+    When attribute(second-name) set value-type: string
+    When put attribute type: third-name
+    When attribute(third-name) set value-type: string
+    When put attribute type: birthday
+    When attribute(birthday) set value-type: datetime
+    When put attribute type: balance
+    When attribute(balance) set value-type: decimal
+    When put attribute type: progress
+    When attribute(progress) set value-type: double
+    When put attribute type: age
+    When attribute(age) set value-type: long
+    When <root-type>(<type-name>) set owns: first-name
+    When <root-type>(<type-name>) get owns: first-name, set annotation: @subkey(primary)
+    Then <root-type>(<type-name>) get owns: first-name; get annotations contain: @subkey(primary)
+    When <root-type>(<type-name>) set owns: second-name
+    When <root-type>(<type-name>) get owns: second-name, set annotation: @subkey(primary)
+    Then <root-type>(<type-name>) get owns: second-name; get annotations contain: @subkey(primary)
+    When <root-type>(<type-name>) set owns: third-name
+    When <root-type>(<type-name>) get owns: third-name, set annotation: @subkey(optional)
+    Then <root-type>(<type-name>) get owns: third-name; get annotations contain: @subkey(optional)
+    When <root-type>(<type-name>) set owns: birthday
+    When <root-type>(<type-name>) get owns: birthday, set annotation: @subkey(primary)
+    Then <root-type>(<type-name>) get owns: birthday; get annotations contain: @subkey(primary)
+    When <root-type>(<type-name>) set owns: balance
+    When <root-type>(<type-name>) get owns: balance, set annotation: @subkey(single)
+    Then <root-type>(<type-name>) get owns: balance; get annotations contain: @subkey(single)
+    When <root-type>(<type-name>) set owns: progress
+    When <root-type>(<type-name>) get owns: progress, set annotation: @subkey(optional)
+    Then <root-type>(<type-name>) get owns: progress; get annotations contain: @subkey(optional)
+    When <root-type>(<type-name>) set owns: age
+    When <root-type>(<type-name>) get owns: age, set annotation: @subkey(primary)
+    Then <root-type>(<type-name>) get owns: age; get annotations contain: @subkey(primary)
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then <root-type>(<type-name>) get owns: first-name; get annotations contain: @subkey(primary)
+    Then <root-type>(<type-name>) get owns: second-name; get annotations contain: @subkey(primary)
+    Then <root-type>(<type-name>) get owns: third-name; get annotations contain: @subkey(optional)
+    Then <root-type>(<type-name>) get owns: birthday; get annotations contain: @subkey(primary)
+    Then <root-type>(<type-name>) get owns: balance; get annotations contain: @subkey(single)
+    Then <root-type>(<type-name>) get owns: progress; get annotations contain: @subkey(optional)
+    Then <root-type>(<type-name>) get owns: age; get annotations contain: @subkey(primary)
+    Examples:
+      | root-type | type-name   |
+      | entity    | person      |
+      | relation  | description |
+
+  Scenario: Owns can set multiple @subkey annotations with different args
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    When put attribute type: surname
+    When attribute(surname) set value-type: string
+    When put attribute type: age
+    When attribute(age) set value-type: long
+    When entity(person) set owns: name
+    When entity(person) get owns: name, set annotation: @subkey(NAME-AGE)
+    When entity(person) get owns: name, set annotation: @subkey(FULL-NAME)
+    Then entity(person) get owns: name; get annotations contain:
+      | @subkey(NAME-AGE)  |
+      | @subkey(FULL-NAME) |
+    When entity(person) set owns: surname
+    When entity(person) get owns: surname, set annotation: @subkey(FULL-NAME)
+    Then entity(person) get owns: surname; get annotations contain: @subkey(FULL-NAME)
+    When entity(person) set owns: age
+    When entity(person) get owns: age, set annotation: @subkey(NAME-AGE)
+    Then entity(person) get owns: age; get annotations contain: @subkey(NAME-AGE)
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then entity(person) get owns: name; get annotations contain:
+      | @subkey(NAME-AGE)  |
+      | @subkey(FULL-NAME) |
+    Then entity(person) get owns: surname; get annotations contain: @subkey(FULL-NAME)
+    Then entity(person) get owns: age; get annotations contain: @subkey(NAME-AGE)
+
+  Scenario Outline: Owns cannot set @subkey annotation for <value-type> as it is not keyable
+    When put attribute type: custom-attribute
+    When attribute(custom-attribute) set value-type: <value-type>
+    When entity(person) set owns: custom-attribute
+    Then entity(person) get owns: custom-attribute, set annotation: @subkey(LABEL); fails
+    Then entity(person) get owns: custom-attribute; get annotations is empty
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then entity(person) get owns: custom-attribute; get annotations is empty
+    Examples:
+      | value-type    |
+      | double        |
+      | decimal       |
+      | custom-struct |
+
+  Scenario: Owns cannot set @subkey annotation for incorrect arguments
+    When put attribute type: custom-attribute
+    When attribute(custom-attribute) set value-type: long
+    When entity(person) set owns: custom-attribute
+    # TODO: Move the case to successful cases if it should work!
+    Then entity(person) get owns: custom-attribute, set annotation: @subkey; fails
+    Then entity(person) get owns: custom-attribute, set annotation: @subkey(); fails
+    Then entity(person) get owns: custom-attribute, set annotation: @subkey("LABEL"); fails
+    Then entity(person) get owns: custom-attribute, set annotation: @subkey(福); fails
+    Then entity(person) get owns: custom-attribute, set annotation: @subkey(d./';;p480909!208923r09zlmk*((*£*()(@£Q**&$@)); fails
+    Then entity(person) get owns: custom-attribute, set annotation: @subkey(49j93848); fails
+    Then entity(person) get owns: custom-attribute, set annotation: @subkey(LABEL, LABEL); fails
+    Then entity(person) get owns: custom-attribute, set annotation: @subkey(LABEL, LABEL2); fails
+    Then entity(person) get owns: custom-attribute, set annotation: @subkey(LABEL, LABEL2, LABEL3); fails
+    Then entity(person) get owns: custom-attribute; get annotations is empty
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then entity(person) get owns: custom-attribute; get annotations is empty
+
+  Scenario Outline: Owns cannot set @subkey annotation for lists
+    When put attribute type: custom-attribute
+    When attribute(custom-attribute) set value-type: <value-type>
+    When entity(person) set owns: custom-attribute[]
+    Then entity(person) get owns: custom-attribute[], set annotation: @subkey(LABEL); fails
+    Then entity(person) get owns: custom-attribute[]; get annotations is empty
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then entity(person) get owns: custom-attribute[]; get annotations is empty
+    Examples:
+      | value-type    |
+      | long          |
+      | string        |
+      | boolean       |
+      | double        |
+      | decimal       |
+      | datetime      |
+      | datetimetz    |
+      | duration      |
+      | custom-struct |
 
 ########################
 # @unique
@@ -1418,21 +1593,49 @@ Feature: Concept Owns
 
   # TODO
 
+  # TODO: Change the test if owns can set @unique annotation for lists!
+  Scenario Outline: Owns cannot set @unique annotation for lists
+    When put attribute type: custom-attribute
+    When attribute(custom-attribute) set value-type: <value-type>
+    When entity(person) set owns: custom-attribute[]
+    Then entity(person) get owns: custom-attribute[], set annotation: @unique; fails
+    Then entity(person) get owns: custom-attribute[]; get annotations is empty
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then entity(person) get owns: custom-attribute[]; get annotations is empty
+    Examples:
+      | value-type    |
+      | long          |
+      | string        |
+      | boolean       |
+      | double        |
+      | decimal       |
+      | datetime      |
+      | datetimetz    |
+      | duration      |
+      | custom-struct |
 
 ########################
 # @values
 ########################
 
-  Scenario Outline: Owns can set @values annotation for <value-type> value type and unset it
+  Scenario Outline: Owns can set @values annotation for <value-type> value type and lists and unset it
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
+    When put attribute type: custom-attribute-2
+    When attribute(custom-attribute-2) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
     When entity(person) get owns: custom-attribute, set annotation: @values(<args>)
     Then entity(person) get owns: custom-attribute; get annotations contain: @values(<args>)
+    When entity(person) set owns: custom-attribute-2[]
+    When entity(person) get owns: custom-attribute-2[], set annotation: @values(<args>)
+    Then entity(person) get owns: custom-attribute-2[]; get annotations contain: @values(<args>)
     When transaction commits
     When connection opens schema transaction for database: typedb
     Then entity(person) get owns: custom-attribute; get annotations contain: @values(<args>)
+    Then entity(person) get owns: custom-attribute-2[]; get annotations contain: @values(<args>)
     When entity(person) unset owns: custom-attribute
+    When entity(person) unset owns: custom-attribute-2[]
     Then entity(person) get owns is empty
     When transaction commits
     When connection opens read transaction for database: typedb
@@ -1597,6 +1800,19 @@ Feature: Concept Owns
       | datetimetz | 2020-06-04T16:35:02.10+0100 | 2020-06-04T16:35:02.10+0000  | 2020-06-04T16:35:02.10+0100  |
       | duration   | P1Y1M                       | P1Y1M                        | P1Y2M                        |
 
+  Scenario: Owns cannot set multiple @values annotations with different args
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    When entity(person) set owns: name
+    When entity(person) get owns: name, set annotation: @values("hi", "HI")
+    Then entity(person) get owns: name, set annotation: @values("Hi"); fails
+    Then entity(person) get owns: name; get annotations contain: @values("hi", "HI")
+    Then entity(person) get owns: name; get annotations do not contain: @values("Hi")
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then entity(person) get owns: name; get annotations contain: @values("hi", "HI")
+    Then entity(person) get owns: name; get annotations do not contain: @values("Hi")
+
   Scenario Outline: Owns-related @values annotation for <value-type> value type can be inherited and overridden by a subset of args
     When put relation type: contract
     When relation(contract) create role: participant
@@ -1729,18 +1945,27 @@ Feature: Concept Owns
 # @range
 ########################
 
-  Scenario Outline: Owns can set @range annotation for <value-type> value type in correct order and unset it
+  Scenario Outline: Owns can set @range annotation for <value-type> value type and lists in correct order and unset it
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
+    When put attribute type: custom-attribute-2
+    When attribute(custom-attribute-2) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
     Then entity(player) get owns: custom-attribute, set annotation: @range(<arg1>, <arg0>); fails
     Then entity(person) get owns: custom-attribute; get annotations is empty
     When entity(person) get owns: custom-attribute, set annotation: @range(<arg0>, <arg1>)
     Then entity(person) get owns: custom-attribute; get annotations contain: @range(<arg0>, <arg1>)
+    When entity(person) set owns: custom-attribute-2[]
+    Then entity(player) get owns: custom-attribute-2[], set annotation: @range(<arg1>, <arg0>); fails
+    Then entity(person) get owns: custom-attribute-2[]; get annotations is empty
+    When entity(person) get owns: custom-attribute-2[], set annotation: @range(<arg0>, <arg1>)
+    Then entity(person) get owns: custom-attribute-2[]; get annotations contain: @range(<arg0>, <arg1>)
     When transaction commits
     When connection opens schema transaction for database: typedb
     Then entity(person) get owns: custom-attribute; get annotations contain: @range(<arg0>, <arg1>)
+    Then entity(person) get owns: custom-attribute-2[]; get annotations contain: @range(<arg0>, <arg1>)
     When entity(person) unset owns: custom-attribute
+    When entity(person) unset owns: custom-attribute-2[]
     Then entity(person) get owns is empty
     When transaction commits
     When connection opens read transaction for database: typedb
@@ -1882,6 +2107,35 @@ Feature: Concept Owns
       | duration   | 2024-06-04+0100                 | P1Y                                                |
       | duration   | 1Y                              | P1Y                                                |
       | duration   | year                            | P1Y                                                |
+
+  Scenario Outline: Owns cannot set multiple @range annotations with different args
+    When put attribute type: name
+    When attribute(name) set value-type: long
+    When entity(person) set owns: name
+    When entity(person) get owns: name, set annotation: @range(2, 5)
+    Then entity(person) get owns: name, set annotation: @range(<fail-args>); fails
+    Then entity(person) get owns: name, set annotation: @range(<fail-args>); fails
+    Then entity(person) get owns: name; get annotations contain: @range(2, 5)
+    Then entity(person) get owns: name; get annotations do not contain: @range(<fail-args>)
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then entity(person) get owns: name; get annotations contain: @range(2, 5)
+    Then entity(person) get owns: name; get annotations do not contain: @range(<fail-args>)
+    Examples:
+      | fail-args |
+      | 0, 1      |
+      | 0, 2      |
+      | 0, 3      |
+      | 0, 5      |
+      | 0, 6      |
+      | 2, 3      |
+      | 2, 5      |
+      | 2, 6      |
+      | 3, 4      |
+      | 3, 5      |
+      | 3, 6      |
+      | 5, 6      |
+      | 6, 10     |
 
   Scenario Outline: Owns-related @range annotation for <value-type> value type can be inherited and overridden by a subset of args
     When put relation type: contract
@@ -2185,6 +2439,35 @@ Feature: Concept Owns
       | datetimetz |
       | duration   |
 
+  Scenario Outline: Owns cannot set multiple @card annotations with different args
+    When put attribute type: name
+    When attribute(name) set value-type: long
+    When entity(person) set owns: name
+    When entity(person) get owns: name, set annotation: @card(2, 5)
+    Then entity(person) get owns: name, set annotation: @card(<fail-args>); fails
+    Then entity(person) get owns: name, set annotation: @card(<fail-args>); fails
+    Then entity(person) get owns: name; get annotations contain: @card(2, 5)
+    Then entity(person) get owns: name; get annotations do not contain: @card(<fail-args>)
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then entity(person) get owns: name; get annotations contain: @card(2, 5)
+    Then entity(person) get owns: name; get annotations do not contain: @card(<fail-args>)
+    Examples:
+      | fail-args |
+      | 0, 1      |
+      | 0, 2      |
+      | 0, 3      |
+      | 0, 5      |
+      | 0, *      |
+      | 2, 3      |
+      | 2, 5      |
+      | 2, *      |
+      | 3, 4      |
+      | 3, 5      |
+      | 3, *      |
+      | 5, *      |
+      | 6, *      |
+
   Scenario Outline: Owns-related @card annotation for <value-type> value type can be inherited and overridden by a subset of args
     When put relation type: contract
     When relation(contract) create role: participant
@@ -2459,23 +2742,36 @@ Feature: Concept Owns
   Scenario Outline: Owns can set @regex annotation for <value-type> value type and unset it
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
+    When put attribute type: custom-attribute-2
+    When attribute(custom-attribute-2) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
     When entity(person) get owns: custom-attribute, set annotation: @regex(<arg>)
     Then entity(person) get owns: custom-attribute; get annotations contain: @regex(<arg>)
+    When entity(person) set owns: custom-attribute-2[]
+    When entity(person) get owns: custom-attribute-2[], set annotation: @regex(<arg>)
+    Then entity(person) get owns: custom-attribute-2[]; get annotations contain: @regex(<arg>)
     When transaction commits
     When connection opens schema transaction for database: typedb
     Then entity(person) get owns: custom-attribute; get annotations contain: @regex(<arg>)
     When entity(person) get owns: custom-attribute, unset annotation: @regex(<arg>)
     Then entity(person) get owns: custom-attribute; get annotations is empty
+    Then entity(person) get owns: custom-attribute-2[]; get annotations contain: @regex(<arg>)
+    When entity(person) get owns: custom-attribute-2[], unset annotation: @regex(<arg>)
+    Then entity(person) get owns: custom-attribute-2[]; get annotations is empty
     When transaction commits
     When connection opens schema transaction for database: typedb
     Then entity(person) get owns: custom-attribute; get annotations is empty
     When entity(person) get owns: custom-attribute, set annotation: @regex(<arg>)
     Then entity(person) get owns: custom-attribute; get annotations contain: @regex(<arg>)
+    Then entity(person) get owns: custom-attribute-2[]; get annotations is empty
+    When entity(person) get owns: custom-attribute-2[], set annotation: @regex(<arg>)
+    Then entity(person) get owns: custom-attribute-2[]; get annotations contain: @regex(<arg>)
     When transaction commits
     When connection opens schema transaction for database: typedb
     Then entity(person) get owns: custom-attribute; get annotations contain: @regex(<arg>)
+    Then entity(person) get owns: custom-attribute-2[]; get annotations contain: @regex(<arg>)
     When entity(person) unset owns: custom-attribute
+    When entity(person) unset owns: custom-attribute-2[]
     Then entity(person) get owns is empty
     When transaction commits
     When connection opens read transaction for database: typedb
