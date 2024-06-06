@@ -15,12 +15,27 @@ Feature: Concept Owns
     Given connection create database: typedb
     # TODO: "open" or "opens"?
     Given connection opens schema transaction for database: typedb
+    Given put entity type: person
+    Given put entity type: customer
+    Given put entity type: subscriber
+    Given entity(customer) set supertype: person
+    Given entity(subscriber) set supertype: person
+    Given put relation type: description
+    Given relation(description) create role: object
+    Given put relation type: registration
+    Given put relation type: profile
+    Given relation(registration) set supertype: description
+    Given relation(profile) set supertype: description
     # TODO: Create structs in concept api
     Given put struct type: custom-struct
     Given struct(custom-struct) create field: custom-field
     Given struct(custom-struct) get field(custom-field); set value-type: string
     Given transaction commits
     Given connection opens schema transaction for database: typedb
+
+########################
+# owns common
+########################
 
   Scenario Outline: Entity types can own and unset attributes
     When put attribute type: name
@@ -29,7 +44,6 @@ Feature: Concept Owns
     When attribute(surname) set value-type: <value-type>
     When put attribute type: birthday
     When attribute(birthday) set value-type: <value-type-2>
-    When put entity type: person
     When entity(person) set owns: name
     When entity(person) set owns: birthday
     When entity(person) set owns: surname
@@ -82,7 +96,6 @@ Feature: Concept Owns
     When attribute(name) set value-type: <value-type>
     When put attribute type: email
     When attribute(email) set value-type: <value-type>
-    When put entity type: person
     When entity(person) set owns: name
     When entity(person) set owns: email
     Then entity(person) set owns: name
@@ -104,7 +117,6 @@ Feature: Concept Owns
   Scenario Outline: Entity types cannot unset owning attributes that are owned by existing instances
     When put attribute type: name
     When attribute(name) set value-type: <value-type>
-    When put entity type: person
     When entity(person) set owns: name
     Then transaction commits
     When connection opens write transaction for database: typedb
@@ -127,7 +139,7 @@ Feature: Concept Owns
       | duration      |
       | custom-struct |
 
-  Scenario: Entity types can not own entities, relations, roles, structs, and structs fields
+  Scenario: Entity types cannot own entities, relations, roles, structs, and structs fields
     When put entity type: car
     When put relation type: credit
     When relation(marriage) create role: creditor
@@ -139,7 +151,6 @@ Feature: Concept Owns
     When struct(passport) get field(surname); set value-type: string
     When struct(passport) create field: birthday
     When struct(passport) get field(birthday); set value-type: datetime
-    When put entity type: person
     Then entity(person) set owns: car; fails
     Then entity(person) set owns: credit; fails
     Then entity(person) set owns: marriage:creditor; fails
@@ -231,8 +242,7 @@ Feature: Concept Owns
       | duration      |
       | custom-struct |
 
-  Scenario: Relation types can not own entities, relations, roles, structs, and structs fields
-    When put entity type: person
+  Scenario: Relation types cannot own entities, relations, roles, structs, and structs fields
     When put relation type: credit
     When relation(marriage) create role: creditor
     When put relation type: marriage
@@ -256,8 +266,7 @@ Feature: Concept Owns
     When connection opens read transaction for database: typedb
     Then relation(marriage) get owns is empty
 
-  Scenario: Attribute types can not own entities, attributes, relations, roles, structs, and structs fields
-    When put entity type: person
+  Scenario: Attribute types cannot own entities, attributes, relations, roles, structs, and structs fields
     When put attribute type: surname
     When put relation type: marriage
     When relation(marriage) create role: spouse
@@ -283,8 +292,7 @@ Feature: Concept Owns
     When connection opens read transaction for database: typedb
     Then attribute(name) get owns is empty
 
-  Scenario: Struct types can not own entities, attributes, relations, roles, structs, and structs fields
-    When put entity type: person
+  Scenario: Struct types cannot own entities, attributes, relations, roles, structs, and structs fields
     When put attribute type: name
     When put relation type: marriage
     When relation(marriage) create role: spouse
@@ -315,335 +323,610 @@ Feature: Concept Owns
     When connection opens read transaction for database: typedb
     Then struct(wallet) get owns is empty
 
-#################
-# Entity owns
-#################
+  Scenario Outline: <root-type> types can re-override owns
+    When put attribute type: email
+    When attribute(email) set value-type: <value-type>
+    When attribute(email) set annotation: @abstract
+    When put attribute type: work-email
+    When attribute(work-email) set value-type: <value-type>
+    When attribute(work-email) set supertype: email
+    When <root-type>(<supertype-name>) set annotation: @abstract
+    When <root-type>(<supertype-name>) set owns: email
+    When <root-type>(<sub-name>) set annotation: @abstract
+    When <root-type>(<subtype-name>) set supertype: person
+    When <root-type>(<subtype-name>) set owns: work-email
+    When <root-type>(<subtype-name>) get owns: work-email; set override: email
+    Then <root-type>(<subtype-name>) get owns overridden(work-email) get label: email
+    When transaction commits
+    When connection opens schema transaction for database: typedb
+    When <root-type>(<subtype-name>) set owns: work-email
+    When <root-type>(<subtype-name>) get owns: work-email; set override: email
+    Then <root-type>(<subtype-name>) get owns overridden(work-email) get label: email
+    Examples:
+      | root-type | supertype-name | subtype-name | value-type    |
+      | entity    | person         | customer     | long          |
+      | entity    | person         | customer     | double        |
+      | entity    | person         | customer     | decimal       |
+      | entity    | person         | customer     | string        |
+      | entity    | person         | customer     | boolean       |
+      | entity    | person         | customer     | datetime      |
+      | entity    | person         | customer     | datetimetz    |
+      | entity    | person         | customer     | duration      |
+      | entity    | person         | customer     | custom-struct |
+      | relation  | description    | registration | long          |
+      | relation  | description    | registration | double        |
+      | relation  | description    | registration | decimal       |
+      | relation  | description    | registration | string        |
+      | relation  | description    | registration | boolean       |
+      | relation  | description    | registration | datetime      |
+      | relation  | description    | registration | datetimetz    |
+      | relation  | description    | registration | duration      |
+      | relation  | description    | registration | custom-struct |
 
-  # TODO: Maybe adapt to all annotations
-  Scenario: Entity types can override inherited attributes as keys
+  Scenario Outline: <root-type> types cannot redeclare inherited owns as owns
+    When put attribute type: email
+    When attribute(email) set value-type: <value-type>
     When put attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value-type: <value-type>
+    When <root-type>(<supertype-name>) set owns: name
+    Then <root-type>(<subtype-name>) set owns: name
+    Then transaction commits; fails
+    Examples:
+      | root-type | supertype-name | subtype-name | value-type |
+      | entity    | person         | customer     | string     |
+      | entity    | person         | customer     | long       |
+      | relation  | description    | registration | string     |
+      | relation  | description    | registration | datetime   |
+
+  Scenario Outline: <root-type> types cannot redeclare inherited owns attribute types
+    When put attribute type: name
+    When attribute(name) set value-type: <value-type>
+    When attribute(name) set annotation: @abstract
+    When put attribute type: customer-name
+    When attribute(customer-name) set value-type: <value-type>
+    When attribute(customer-name) set supertype: name
+    When <root-type>(<supertype-name>) set annotation: @abstract
+    When <root-type>(<supertype-name>) set owns: name
+    When <root-type>(<subtype-name>) set owns: customer-name
+    When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
+    Then <root-type>(<subtype-name-2>) set owns: name
+    Then transaction commits; fails
+    Examples:
+      | root-type | supertype-name | subtype-name | subtype-name-2 | value-type    |
+      | entity    | person         | customer     | subscriber     | datetimetz    |
+      | entity    | person         | customer     | subscriber     | custom-struct |
+      | relation  | description    | registration | profile        | decimal       |
+      | relation  | description    | registration | profile        | string        |
+
+  Scenario Outline: <root-type> types cannot redeclare overridden owns
+    When put attribute type: name
+    When attribute(name) set value-type: <value-type>
+    When attribute(name) set annotation: @abstract
+    When put attribute type: customer-name
+    When attribute(customer-name) set value-type: <value-type>
+    When attribute(customer-name) set supertype: name
+    When <root-type>(<supertype-name>) set annotation: @abstract
+    When <root-type>(<supertype-name>) set owns: name
+    When <root-type>(<subtype-name>) set owns: customer-name
+    When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
+    Then <root-type>(<subtype-name-2>) set owns: customer-name
+    Then transaction commits; fails
+    Examples:
+      | root-type | supertype-name | subtype-name | subtype-name-2 | value-type |
+      | entity    | person         | customer     | subscriber     | boolean    |
+      | entity    | person         | customer     | subscriber     | long       |
+      | relation  | description    | registration | profile        | duration   |
+      | relation  | description    | registration | profile        | double     |
+
+########################
+# @annotations common
+########################
+
+  Scenario Outline: <root-type> types can redeclare @<annotation>s as @<annotation>s
+    When put attribute type: name
+    When attribute(name) set value-type: <value-type>
+    When put attribute type: email
+    When attribute(email) set value-type: <value-type>
+    When <root-type>(<type-name>) set owns: name
+    When <root-type>(<type-name>) get owns: name, set annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns: name, get annotation contain: @<annotation>
+    When <root-type>(<type-name>) set owns: email
+    When <root-type>(<type-name>) get owns: email, set annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns: email, get annotation contain: @<annotation>
+    Then <root-type>(<type-name>) set owns: name
+    Then <root-type>(<type-name>) get owns: name, set annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns: name, get annotation contain: @<annotation>
+    When transaction commits
+    When connection opens schema transaction for database: typedb
+    Then <root-type>(<type-name>) get owns: name, get annotation contain: @<annotation>
+    Then <root-type>(<type-name>) set owns: email
+    Then <root-type>(<type-name>) get owns: email, set annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns: email, get annotation contain: @<annotation>
+    Examples:
+      | root-type | type-name   | annotation       | value-type |
+      | entity    | person      | key              | string     |
+      | entity    | person      | unique           | string     |
+      | entity    | person      | subkey(LABEL)    | string     |
+      | entity    | person      | values("1", "2") | string     |
+      | entity    | person      | range("1", "2")  | string     |
+      | entity    | person      | card(1, 2)       | string     |
+      | entity    | person      | regex("\S+")     | string     |
+      | entity    | person      | distinct         | string     |
+      | relation  | description | key              | string     |
+      | relation  | description | unique           | string     |
+      | relation  | description | subkey(LABEL)    | string     |
+      | relation  | description | values("1", "2") | string     |
+      | relation  | description | range("1", "2")  | string     |
+      | relation  | description | card(1, 2)       | string     |
+      | relation  | description | regex("\S+")     | string     |
+      | relation  | description | distinct         | string     |
+
+  Scenario Outline: <root-type> types can redeclare owns as owns with @<annotation>
+    When put attribute type: name
+    When attribute(name) set value-type: <value-type>
+    When put attribute type: email
+    When attribute(email) set value-type: <value-type>
+    When put attribute type: address
+    When attribute(address) set value-type: <value-type>
+    When <root-type>(<type-name>) set owns: name
+    When <root-type>(<type-name>) set owns: email
+    When <root-type>(<type-name>) set owns: address
+    Then <root-type>(<type-name>) set owns: name
+    Then <root-type>(<type-name>) get owns: name, set annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns: name, get annotations contain: @<annotation>
+    When transaction commits
+    When connection opens schema transaction for database: typedb
+    Then <root-type>(<type-name>) set owns: email
+    Then <root-type>(<type-name>) get owns: email, get annotations is empty
+    When <root-type>(<type-name>) get owns: email, set annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns: email, get annotations contain: @<annotation>
+    Then <root-type>(<type-name>) get owns: address, get annotations is empty
+    When <root-type>(<type-name>) get owns: address, set annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns: address, get annotations contain: @<annotation>
+    Examples:
+      | root-type | type-name   | annotation       | value-type |
+      | entity    | person      | key              | string     |
+      | entity    | person      | unique           | string     |
+      | entity    | person      | subkey(LABEL)    | string     |
+      | entity    | person      | values("1", "2") | string     |
+      | entity    | person      | range("1", "2")  | string     |
+      | entity    | person      | card(1, 2)       | string     |
+      | entity    | person      | regex("\S+")     | string     |
+      | entity    | person      | distinct         | string     |
+      | relation  | description | key              | string     |
+      | relation  | description | unique           | string     |
+      | relation  | description | subkey(LABEL)    | string     |
+      | relation  | description | values("1", "2") | string     |
+      | relation  | description | range("1", "2")  | string     |
+      | relation  | description | card(1, 2)       | string     |
+      | relation  | description | regex("\S+")     | string     |
+      | relation  | description | distinct         | string     |
+
+  Scenario Outline: <root-type> types can redeclare owns with @<annotation> as owns without @<annotation>
+    When put attribute type: name
+    When attribute(name) set value-type: <value-type>
+    When put attribute type: email
+    When attribute(email) set value-type: <value-type>
+    When <root-type>(<type-name>) set owns: name
+    When <root-type>(<type-name>) get owns: name, set annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns: name, get annotations contain: @<annotation>
+    When <root-type>(<type-name>) set owns: email
+    When <root-type>(<type-name>) get owns: email, set annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns: email, get annotations contain: @<annotation>
+    Then <root-type>(<type-name>) set owns: name
+    Then <root-type>(<type-name>) get owns: name, get annotations is empty
+    When transaction commits
+    When connection opens schema transaction for database: typedb
+    Then <root-type>(<type-name>) get owns: email, get annotations contain: @<annotation>
+    When <root-type>(<type-name>) set owns: email
+    Then <root-type>(<type-name>) get owns: email, get annotations is empty
+    Examples:
+      | root-type | type-name   | annotation       | value-type |
+      | entity    | person      | key              | string     |
+      | entity    | person      | unique           | string     |
+      | entity    | person      | subkey(LABEL)    | string     |
+      | entity    | person      | values("1", "2") | string     |
+      | entity    | person      | range("1", "2")  | string     |
+      | entity    | person      | card(1, 2)       | string     |
+      | entity    | person      | regex("\S+")     | string     |
+      | entity    | person      | distinct         | string     |
+      | relation  | description | key              | string     |
+      | relation  | description | unique           | string     |
+      | relation  | description | subkey(LABEL)    | string     |
+      | relation  | description | values("1", "2") | string     |
+      | relation  | description | range("1", "2")  | string     |
+      | relation  | description | card(1, 2)       | string     |
+      | relation  | description | regex("\S+")     | string     |
+      | relation  | description | distinct         | string     |
+
+  Scenario Outline: <root-type> types can override inherited attributes as @<annotation>s
+    When put attribute type: name
+    When attribute(name) set value-type: <value-type>
     When attribute(name) set annotation: @abstract
     When put attribute type: username
-    When attribute(username) set value-type: string
+    When attribute(username) set value-type: <value-type>
     When attribute(username) set supertype: name
-    When put entity type: person
-    When entity(person) set annotation: @abstract
-    When entity(person) set owns: name
-    When put entity type: customer
-    When entity(customer) set supertype: person
-    When entity(customer) set owns: username
-    When entity(customer) get owns: username; set override: name
-    When entity(customer) get owns: username, set annotation: @key
-    Then entity(customer) get owns overridden(username) get label: name
-    Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
+    When <root-type>(<supertype-name>) set annotation: @abstract
+    When <root-type>(<supertype-name>) set owns: name
+    When <root-type>(<subtype-name>) set owns: username
+    When <root-type>(<subtype-name>) get owns: username; set override: name
+    When <root-type>(<subtype-name>) get owns: username, set annotation: @<annotation>
+    Then <root-type>(<subtype-name>) get owns overridden(username) get label: name
+    Then <root-type>(<subtype-name>) get owns, with annotations (DEPRECATED): <annotation>; contain:
       | username |
-    Then entity(customer) get owns, with annotations (DEPRECATED): key; do not contain:
+    Then <root-type>(<subtype-name>) get owns, with annotations (DEPRECATED): <annotation>; do not contain:
       | name |
-    Then entity(customer) get owns contain:
+    Then <root-type>(<subtype-name>) get owns contain:
       | username |
-    Then entity(customer) get owns do not contain:
+    Then <root-type>(<subtype-name>) get owns do not contain:
       | name |
     When transaction commits
     When connection opens read transaction for database: typedb
-    Then entity(customer) get owns overridden(username) get label: name
-    Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
+    Then <root-type>(<subtype-name>) get owns overridden(username) get label: name
+    Then <root-type>(<subtype-name>) get owns, with annotations (DEPRECATED): <annotation>; contain:
       | username |
-    Then entity(customer) get owns, with annotations (DEPRECATED): key; do not contain:
+    Then <root-type>(<subtype-name>) get owns, with annotations (DEPRECATED): <annotation>; do not contain:
       | name |
-    Then entity(customer) get owns contain:
+    Then <root-type>(<subtype-name>) get owns contain:
       | username |
-    Then entity(customer) get owns do not contain:
+    Then <root-type>(<subtype-name>) get owns do not contain:
       | name |
+    Examples:
+      | root-type | supertype-name | subtype-name | annotation       | value-type |
+      | entity    | person         | customer     | key              | string     |
+      | entity    | person         | customer     | unique           | string     |
+      | entity    | person         | customer     | subkey(LABEL)    | string     |
+      | entity    | person         | customer     | values("1", "2") | string     |
+      | entity    | person         | customer     | range("1", "2")  | string     |
+      | entity    | person         | customer     | card(1, 2)       | string     |
+      | entity    | person         | customer     | regex("\S+")     | string     |
+      | entity    | person         | customer     | distinct         | string     |
+      | relation  | description    | registration | key              | string     |
+      | relation  | description    | registration | unique           | string     |
+      | relation  | description    | registration | subkey(LABEL)    | string     |
+      | relation  | description    | registration | values("1", "2") | string     |
+      | relation  | description    | registration | range("1", "2")  | string     |
+      | relation  | description    | registration | card(1, 2)       | string     |
+      | relation  | description    | registration | regex("\S+")     | string     |
+      | relation  | description    | registration | distinct         | string     |
 
-    # TODO: Can set twice? Add tests for all the annotations!
-  Scenario: Entity types can redeclare keys as keys
-    When put attribute type: name
-    When attribute(name) set value-type: string
+    # TODO: Maybe it should be rejected?
+  Scenario Outline: <root-type> types can re-override owns with <annotation>s
     When put attribute type: email
-    When attribute(email) set value-type: string
-    When put entity type: person
-    When entity(person) set owns: name
-    When entity(person) get owns: name, set annotation: @key
-    When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: @key
-    Then entity(person) set owns: name
-    Then entity(person) get owns: name, set annotation: @key
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    Then entity(person) set owns: email
-    Then entity(person) get owns: email, set annotation: @key
-
-  Scenario: Entity types can re-override keys
-    When put attribute type: email
-    When attribute(email) set value-type: string
+    When attribute(email) set value-type: <value-type>
     When attribute(email) set annotation: @abstract
     When put attribute type: work-email
-    When attribute(work-email) set value-type: string
+    When attribute(work-email) set value-type: <value-type>
     When attribute(work-email) set supertype: email
-    When put entity type: person
-    When entity(person) set annotation: @abstract
-    When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: @key
-    When put entity type: customer
-    When entity(customer) set annotation: @abstract
-    When entity(customer) set supertype: person
-    When entity(customer) set owns: work-email
-    When entity(customer) get owns: work-email; set override: email
-    Then entity(customer) get owns overridden(work-email) get label: email
+    When <root-type>(<supertype-name>) set annotation: @abstract
+    When <root-type>(<supertype-name>) set owns: email
+    When <root-type>(<supertype-name>) get owns: email, set annotation: @<annotation>
+    When <root-type>(<subtype-name>) set annotation: @abstract
+    When <root-type>(<subtype-name>) set supertype: person
+    Then <root-type>(<subtype-name>) get owns contain: email
+    Then <root-type>(<subtype-name>) get owns: email; get annotations contain: @<annotation>
+    When <root-type>(<subtype-name>) set owns: work-email
+    When <root-type>(<subtype-name>) get owns: work-email; set override: email
+    # TODO: These commas, semicolons, and colons are a mess and different for different subcases. Need to refactor it!
+    Then <root-type>(<subtype-name>) get owns overridden(work-email) get label: email
+    Then <root-type>(<subtype-name>) get owns overridden(work-email); get annotations contain: @<annotation>
     When transaction commits
     When connection opens schema transaction for database: typedb
-    When entity(customer) set owns: work-email
-    When entity(customer) get owns: work-email; set override: email
-    Then entity(customer) get owns overridden(work-email) get label: email
+    When <root-type>(<subtype-name>) set owns: work-email
+    When <root-type>(<subtype-name>) get owns: work-email; set override: email
+    Then <root-type>(<subtype-name>) get owns overridden(work-email) get label: email
+    Then <root-type>(<subtype-name>) get owns overridden(work-email); get annotations contain: @<annotation>
+    Examples:
+      | root-type | supertype-name | subtype-name | annotation       | value-type |
+      | entity    | person         | customer     | key              | string     |
+      | entity    | person         | customer     | unique           | string     |
+      | entity    | person         | customer     | subkey(LABEL)    | string     |
+      | entity    | person         | customer     | values("1", "2") | string     |
+      | entity    | person         | customer     | range("1", "2")  | string     |
+      | entity    | person         | customer     | card(1, 2)       | string     |
+      | entity    | person         | customer     | regex("\S+")     | string     |
+      | entity    | person         | customer     | distinct         | string     |
+      | relation  | description    | registration | key              | string     |
+      | relation  | description    | registration | unique           | string     |
+      | relation  | description    | registration | subkey(LABEL)    | string     |
+      | relation  | description    | registration | values("1", "2") | string     |
+      | relation  | description    | registration | range("1", "2")  | string     |
+      | relation  | description    | registration | card(1, 2)       | string     |
+      | relation  | description    | registration | regex("\S+")     | string     |
+      | relation  | description    | registration | distinct         | string     |
 
-  Scenario: Entity types can re-override attributes as attributes
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When attribute(name) set annotation: @abstract
-    When put attribute type: nick-name
-    When attribute(nick-name) set value-type: string
-    When attribute(nick-name) set supertype: name
-    When put entity type: person
-    When entity(person) set annotation: @abstract
-    When entity(person) set owns: name
-    When put entity type: customer
-    When entity(customer) set annotation: @abstract
-    When entity(customer) set supertype: person
-    When entity(customer) set owns: nick-name
-    When entity(customer) get owns: nick-name; set override: name
-    Then entity(customer) get owns overridden(nick-name) get label: name
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    When entity(customer) set owns: nick-name
-    When entity(customer) get owns: nick-name; set override: name
-    Then entity(customer) get owns overridden(nick-name) get label: name
-
-  Scenario: Entity types can redeclare keys as attributes
-    When put attribute type: name
-    When attribute(name) set value-type: string
+  Scenario Outline: <root-type> types can redeclare inherited attributes as keys (which will override)
     When put attribute type: email
-    When attribute(email) set value-type: string
-    When put entity type: person
-    When entity(person) set owns: name
-    When entity(person) get owns: name, set annotation: @key
-    When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: @key
-    Then entity(person) set owns: name
+    When attribute(email) set value-type: <value-type>
+    When <root-type>(<supertype-name>) set owns: email
+    Then <root-type>(<supertype-name>) get owns overridden(email) does not exist
+    Then <root-type>(<subtype-name>) set owns: email
+    Then <root-type>(<subtype-name>) get owns: email, set annotation: @<annotation>
+    Then <root-type>(<subtype-name>) get owns overridden(email) exists
+    Then <root-type>(<subtype-name>) get owns overridden(email) get label: email
+    Then <root-type>(<subtype-name>) get owns, with annotations (DEPRECATED): <annotation>; contain: email
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then entity(person) set owns: email
+    Then <root-type>(<subtype-name>) get owns, with annotations (DEPRECATED): <annotation>; contain: email
 
-  Scenario: Entity types can redeclare attributes as keys
+    Then <root-type>(<subtype-name-2>) set owns: email
+    Then <root-type>(<subtype-name-2>) get owns: email, set annotation: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns, with annotations (DEPRECATED): <annotation>; contain: email
+    Examples:
+      | root-type | supertype-name | subtype-name | subtype-name-2 | annotation       | value-type |
+      | entity    | person         | customer     | subscriber     | key              | string     |
+      | entity    | person         | customer     | subscriber     | unique           | string     |
+      | entity    | person         | customer     | subscriber     | subkey(LABEL)    | string     |
+      | entity    | person         | customer     | subscriber     | values("1", "2") | string     |
+      | entity    | person         | customer     | subscriber     | range("1", "2")  | string     |
+      | entity    | person         | customer     | subscriber     | card(1, 2)       | string     |
+      | entity    | person         | customer     | subscriber     | regex("\S+")     | string     |
+      | entity    | person         | customer     | subscriber     | distinct         | string     |
+      | relation  | description    | registration | profile        | key              | string     |
+      | relation  | description    | registration | profile        | unique           | string     |
+      | relation  | description    | registration | profile        | subkey(LABEL)    | string     |
+      | relation  | description    | registration | profile        | values("1", "2") | string     |
+      | relation  | description    | registration | profile        | range("1", "2")  | string     |
+      | relation  | description    | registration | profile        | card(1, 2)       | string     |
+      | relation  | description    | registration | profile        | regex("\S+")     | string     |
+      | relation  | description    | registration | profile        | distinct         | string     |
+
+  Scenario Outline: <root-type> types cannot redeclare inherited owns with @<annotation> as pure owns or owns with @<annotation>
+    When put attribute type: email
+    When attribute(email) set value-type: <value-type>
     When put attribute type: name
-    When attribute(name) set value-type: string
-    When put attribute type: email
-    When attribute(email) set value-type: string
-    When put entity type: person
-    When entity(person) set owns: name
-    When entity(person) set owns: email
-    Then entity(person) set owns: name
-    Then entity(person) get owns: name, set annotation: @key
+    When attribute(name) set value-type: <value-type>
+    When <root-type>(<supertype-name>) set owns: email
+    When <root-type>(<supertype-name>) get owns: email, set annotation: @<annotation>
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then entity(person) set owns: email
-    Then entity(person) get owns: email, set annotation: @key
-
-  Scenario: Entity types can redeclare inherited attributes as keys (which will override)
-    When put attribute type: email
-    When attribute(email) set value-type: string
-    When put entity type: person
-    When entity(person) set owns: email
-    Then entity(person) get owns overridden(email) does not exist
-    When put entity type: customer
-    When entity(customer) set supertype: person
-    Then entity(customer) set owns: email
-    Then entity(customer) get owns: email, set annotation: @key
-    Then entity(customer) get owns overridden(email) exists
-    Then entity(customer) get owns overridden(email) get label: email
-    Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
-      | email |
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
-      | email |
-    When put entity type: subscriber
-    When entity(subscriber) set supertype: person
-    Then entity(subscriber) set owns: email
-    Then entity(subscriber) get owns: email, set annotation: @key
-    Then entity(subscriber) get owns, with annotations (DEPRECATED): key; contain:
-      | email |
-
-  Scenario: Entity types cannot redeclare inherited attributes as attributes
-    When put attribute type: email
-    When attribute(email) set value-type: string
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When put entity type: person
-    When entity(person) set owns: name
-    When put entity type: customer
-    When entity(customer) set supertype: person
-    Then entity(customer) set owns: name
-    Then transaction commits; fails
-
-  Scenario: Entity types cannot redeclare inherited keys as keys or attributes
-    When put attribute type: email
-    When attribute(email) set value-type: string
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When put entity type: person
-    When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: @key
-    When put entity type: customer
-    When entity(customer) set supertype: person
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    Then entity(customer) set owns: email
+    Then <root-type>(<subtype-name>) set owns: email
     Then transaction commits; fails
     Then transaction closes
     When connection opens schema transaction for database: typedb
-    Then entity(customer) set owns: email
-    Then entity(customer) get owns: email, set annotation: @key
+    Then <root-type>(<subtype-name>) set owns: email
+    Then <root-type>(<subtype-name>) get owns: email, set annotation: @<annotation>
     Then transaction commits; fails
+    Examples:
+      | root-type | supertype-name | subtype-name | annotation       | value-type |
+      | entity    | person         | customer     | key              | string     |
+      | entity    | person         | customer     | unique           | string     |
+      | entity    | person         | customer     | subkey(LABEL)    | string     |
+      | entity    | person         | customer     | values("1", "2") | string     |
+      | entity    | person         | customer     | range("1", "2")  | string     |
+      | entity    | person         | customer     | card(1, 2)       | string     |
+      | entity    | person         | customer     | regex("\S+")     | string     |
+      | entity    | person         | customer     | distinct         | string     |
+      | relation  | description    | registration | key              | string     |
+      | relation  | description    | registration | unique           | string     |
+      | relation  | description    | registration | subkey(LABEL)    | string     |
+      | relation  | description    | registration | values("1", "2") | string     |
+      | relation  | description    | registration | range("1", "2")  | string     |
+      | relation  | description    | registration | card(1, 2)       | string     |
+      | relation  | description    | registration | regex("\S+")     | string     |
+      | relation  | description    | registration | distinct         | string     |
 
-  Scenario: Entity types cannot redeclare inherited key attribute types
+  Scenario Outline: <root-type> types cannot redeclare inherited key attribute types
     When put attribute type: email
-    When attribute(email) set value-type: string
+    When attribute(email) set value-type: <value-type>
     When attribute(email) set annotation: @abstract
     When put attribute type: customer-email
-    When attribute(customer-email) set value-type: string
+    When attribute(customer-email) set value-type: <value-type>
     When attribute(customer-email) set supertype: email
-    When put entity type: person
-    When entity(person) set annotation: @abstract
-    When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: @key
-    When put entity type: customer
-    When entity(customer) set supertype: person
-    When entity(customer) set owns: customer-email
-    When entity(customer) get owns: customer-email, set annotation: @key
-    When put entity type: subscriber
-    When entity(subscriber) set supertype: customer
-    Then entity(subscriber) set owns: email
-    Then entity(subscriber) get owns: email, set annotation: @key
+    When <root-type>(<supertype-name>) set annotation: @abstract
+    When <root-type>(<supertype-name>) set owns: email
+    When <root-type>(<supertype-name>) get owns: email, set annotation: @<annotation>
+    When <root-type>(<subtype-name>) set owns: customer-email
+    When <root-type>(<subtype-name>) get owns: customer-email, set annotation: @<annotation>
+    When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
+    Then <root-type>(<subtype-name-2>) set owns: email
+    Then <root-type>(<subtype-name-2>) get owns: email, set annotation: @<annotation>
     Then transaction commits; fails
+    Examples:
+      | root-type | supertype-name | subtype-name | subtype-name-2 | annotation       | value-type |
+      | entity    | person         | customer     | subscriber     | key              | string     |
+      | entity    | person         | customer     | subscriber     | unique           | string     |
+      | entity    | person         | customer     | subscriber     | subkey(LABEL)    | string     |
+      | entity    | person         | customer     | subscriber     | values("1", "2") | string     |
+      | entity    | person         | customer     | subscriber     | range("1", "2")  | string     |
+      | entity    | person         | customer     | subscriber     | card(1, 2)       | string     |
+      | entity    | person         | customer     | subscriber     | regex("\S+")     | string     |
+      | entity    | person         | customer     | subscriber     | distinct         | string     |
+      | relation  | description    | registration | profile        | key              | string     |
+      | relation  | description    | registration | profile        | unique           | string     |
+      | relation  | description    | registration | profile        | subkey(LABEL)    | string     |
+      | relation  | description    | registration | profile        | values("1", "2") | string     |
+      | relation  | description    | registration | profile        | range("1", "2")  | string     |
+      | relation  | description    | registration | profile        | card(1, 2)       | string     |
+      | relation  | description    | registration | profile        | regex("\S+")     | string     |
+      | relation  | description    | registration | profile        | distinct         | string     |
 
-  Scenario: Entity types cannot redeclare overridden key attribute types
+  Scenario Outline: <root-type> types cannot redeclare overridden owns with <annotation>s
     When put attribute type: email
-    When attribute(email) set value-type: string
+    When attribute(email) set value-type: <value-type>
     When attribute(email) set annotation: @abstract
     When put attribute type: customer-email
-    When attribute(customer-email) set value-type: string
+    When attribute(customer-email) set value-type: <value-type>
     When attribute(customer-email) set supertype: email
-    When put entity type: person
-    When entity(person) set annotation: @abstract
-    When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: @key
-    When put entity type: customer
-    When entity(customer) set supertype: person
-    When entity(customer) set owns: customer-email
-    When entity(customer) get owns: customer-email, set annotation: @key
-    When put entity type: subscriber
-    When entity(subscriber) set supertype: customer
-    Then entity(subscriber) set owns: customer-email
-    Then entity(subscriber) get owns: customer-email, set annotation: @key
+    When <root-type>(<supertype-name>) set annotation: @abstract
+    When <root-type>(<supertype-name>) set owns: email
+    When <root-type>(<supertype-name>) get owns: email, set annotation: @<annotation>
+    When <root-type>(<subtype-name>) set owns: customer-email
+    When <root-type>(<subtype-name>) get owns: customer-email, set annotation: @<annotation>
+    When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
+    Then <root-type>(<subtype-name-2>) set owns: customer-email
+    Then <root-type>(<subtype-name-2>) get owns: customer-email, set annotation: @<annotation>
     Then transaction commits; fails
+    Examples:
+      | root-type | supertype-name | subtype-name | subtype-name-2 | annotation       | value-type |
+      | entity    | person         | customer     | subscriber     | key              | string     |
+      | entity    | person         | customer     | subscriber     | unique           | string     |
+      | entity    | person         | customer     | subscriber     | subkey(LABEL)    | string     |
+      | entity    | person         | customer     | subscriber     | values("1", "2") | string     |
+      | entity    | person         | customer     | subscriber     | range("1", "2")  | string     |
+      | entity    | person         | customer     | subscriber     | card(1, 2)       | string     |
+      | entity    | person         | customer     | subscriber     | regex("\S+")     | string     |
+      | entity    | person         | customer     | subscriber     | distinct         | string     |
+      | relation  | description    | registration | profile        | key              | string     |
+      | relation  | description    | registration | profile        | unique           | string     |
+      | relation  | description    | registration | profile        | subkey(LABEL)    | string     |
+      | relation  | description    | registration | profile        | values("1", "2") | string     |
+      | relation  | description    | registration | profile        | range("1", "2")  | string     |
+      | relation  | description    | registration | profile        | card(1, 2)       | string     |
+      | relation  | description    | registration | profile        | regex("\S+")     | string     |
+      | relation  | description    | registration | profile        | distinct         | string     |
 
-  Scenario: Entity types cannot redeclare inherited owns attribute types
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When attribute(name) set annotation: @abstract
-    When put attribute type: customer-name
-    When attribute(customer-name) set value-type: string
-    When attribute(customer-name) set supertype: name
-    When put entity type: person
-    When entity(person) set annotation: @abstract
-    When entity(person) set owns: name
-    When put entity type: customer
-    When entity(customer) set supertype: person
-    When entity(customer) set owns: customer-name
-    When put entity type: subscriber
-    When entity(subscriber) set supertype: customer
-    Then entity(subscriber) set owns: name
-    Then transaction commits; fails
-
-  Scenario: Entity types cannot redeclare overridden owns attribute types
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When attribute(name) set annotation: @abstract
-    When put attribute type: customer-name
-    When attribute(customer-name) set value-type: string
-    When attribute(customer-name) set supertype: name
-    When put entity type: person
-    When entity(person) set annotation: @abstract
-    When entity(person) set owns: name
-    When put entity type: customer
-    When entity(customer) set supertype: person
-    When entity(customer) set owns: customer-name
-    When put entity type: subscriber
-    When entity(subscriber) set supertype: customer
-    Then entity(subscriber) set owns: customer-name
-    Then transaction commits; fails
-
-  Scenario: Entity types cannot override declared keys and attributes
+  Scenario Outline: <root-type> types cannot override declared owns with <annotations> keys and attributes
     When put attribute type: username
-    When attribute(username) set value-type: string
+    When attribute(username) set value-type: <value-type>
     When attribute(username) set annotation: @abstract
     When put attribute type: email
-    When attribute(email) set value-type: string
+    When attribute(email) set value-type: <value-type>
     When attribute(email) set supertype: username
     When put attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value-type: <value-type>
     When attribute(name) set annotation: @abstract
     When put attribute type: first-name
-    When attribute(first-name) set value-type: string
+    When attribute(first-name) set value-type: <value-type>
     When attribute(first-name) set supertype: name
-    When put entity type: person
-    When entity(person) set annotation: @abstract
-    When entity(person) set owns: username
-    When entity(person) get owns: username, set annotation: @key
-    When entity(person) set owns: name
+    When <root-type>(<supertype-name>) set annotation: @abstract
+    When <root-type>(<supertype-name>) set owns: username
+    When <root-type>(<supertype-name>) get owns: username, set annotation: @<annotation>
+    Then <root-type>(<supertype-name>) get owns: username, get annotation contain: @<annotation>
+    When <root-type>(<supertype-name>) set owns: name
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then entity(person) set owns: email
-    Then entity(person) get owns: email; set override: username
-    Then entity(person) get owns: email, set annotation: @key; fails
+    Then <root-type>(<supertype-name>) set owns: email
+    Then <root-type>(<supertype-name>) get owns: email; set override: username
+    Then <root-type>(<supertype-name>) get owns: email, set annotation: @<annotation>; fails
     When connection opens schema transaction for database: typedb
-    Then entity(person) set owns: first-name
-    Then entity(person) get owns: first-name; set override: name
+    Then <root-type>(<supertype-name>) set owns: first-name
+    Then <root-type>(<supertype-name>) get owns: first-name; set override: name
+    Examples:
+      | root-type | supertype-name | annotation       | value-type |
+      | entity    | person         | key              | string     |
+      | entity    | person         | unique           | string     |
+      | entity    | person         | subkey(LABEL)    | string     |
+      | entity    | person         | values("1", "2") | string     |
+      | entity    | person         | range("1", "2")  | string     |
+      | entity    | person         | card(1, 2)       | string     |
+      | entity    | person         | regex("\S+")     | string     |
+      | entity    | person         | distinct         | string     |
+      | relation  | description    | key              | string     |
+      | relation  | description    | unique           | string     |
+      | relation  | description    | subkey(LABEL)    | string     |
+      | relation  | description    | values("1", "2") | string     |
+      | relation  | description    | range("1", "2")  | string     |
+      | relation  | description    | card(1, 2)       | string     |
+      | relation  | description    | regex("\S+")     | string     |
+      | relation  | description    | distinct         | string     |
 
-  Scenario: Entity types cannot override inherited keys and attributes other than with their subtypes
+  Scenario Outline: <root-type> types cannot override inherited owns with <annotation>s and attributes other than with their subtypes
     When put attribute type: username
-    When attribute(username) set value-type: string
+    When attribute(username) set value-type: <value-type>
     When put attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value-type: <value-type>
     When put attribute type: reference
-    When attribute(reference) set value-type: string
+    When attribute(reference) set value-type: <value-type>
     When put attribute type: rating
     When attribute(rating) set value-type: double
-    When put entity type: person
-    When entity(person) set owns: username
-    When entity(person) get owns: username, set annotation: @key
-    When entity(person) set owns: name
-    When put entity type: customer
-    When entity(customer) set supertype: person
+    When <root-type>(<supertype-name>) set owns: username
+    When <root-type>(<supertype-name>) get owns: username, set annotation: @<annotation>
+    Then <root-type>(<supertype-name>) get owns: username, get annotation contain: @<annotation>
+    When <root-type>(<supertype-name>) set owns: name
     When transaction commits
     When connection opens schema transaction for database: typedb
-    Then entity(customer) set owns: reference
-    Then entity(customer) get owns: reference, set annotation: @key
-    Then entity(customer) get owns: reference; set override: username; fails
+    Then <root-type>(<subtype-name>) set owns: reference
+    Then <root-type>(<subtype-name>) get owns: reference, get annotation contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns: reference, set annotation: @<annotation>
+    Then <root-type>(<subtype-name>) get owns: reference, get annotation contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns: reference; set override: username; fails
     When connection opens schema transaction for database: typedb
-    Then entity(customer) set owns: rating
-    Then entity(customer) get owns: rating; set override: name
+    Then <root-type>(<subtype-name>) set owns: rating
+    Then <root-type>(<subtype-name>) get owns: rating; set override: name
+    Examples:
+      | root-type | supertype-name | subtype-name | annotation       | value-type |
+      | entity    | person         | customer     | key              | string     |
+      | entity    | person         | customer     | unique           | string     |
+      | entity    | person         | customer     | subkey(LABEL)    | string     |
+      | entity    | person         | customer     | values("1", "2") | string     |
+      | entity    | person         | customer     | range("1", "2")  | string     |
+      | entity    | person         | customer     | card(1, 2)       | string     |
+      | entity    | person         | customer     | regex("\S+")     | string     |
+      | entity    | person         | customer     | distinct         | string     |
+      | relation  | description    | registration | key              | string     |
+      | relation  | description    | registration | unique           | string     |
+      | relation  | description    | registration | subkey(LABEL)    | string     |
+      | relation  | description    | registration | values("1", "2") | string     |
+      | relation  | description    | registration | range("1", "2")  | string     |
+      | relation  | description    | registration | card(1, 2)       | string     |
+      | relation  | description    | registration | regex("\S+")     | string     |
+      | relation  | description    | registration | distinct         | string     |
 
-#################
+  Scenario Outline: <root-type> subtypes can redeclare @<annotation>s after it is unset from supertype
+    When put attribute type: name
+    When attribute(name) set value-type: <value-type>
+    When put attribute type: surname
+    When attribute(surname) set supertype: name
+    When <root-type>(<type-name>) set owns: name
+    When <root-type>(<type-name>) get owns: name, set annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns: name, get annotation contain: @<annotation>
+    When <root-type>(<type-name>) set owns: surname
+    Then <root-type>(<type-name>) get owns: surname, get annotation contain: @<annotation>
+    When transaction commits
+    When connection opens schema transaction for database: typedb
+    Then <root-type>(<type-name>) get owns: name, get annotation contain: @<annotation>
+    Then <root-type>(<type-name>) get owns: surname, get annotation contain: @<annotation>
+    Then <root-type>(<type-name>) get owns: surname, set annotation: @<annotation>; fails
+    When <root-type>(<type-name>) get owns: name, unset annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns: name, get annotation is empty
+    Then <root-type>(<type-name>) get owns: surname, get annotation is empty
+    Then <root-type>(<type-name>) get owns: surname, set annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns: name, get annotation is empty
+    Then <root-type>(<type-name>) get owns: surname, get annotation contains: @<annotation>
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then <root-type>(<type-name>) get owns: name, get annotation is empty
+    Then <root-type>(<type-name>) get owns: surname, get annotation contains: @<annotation>
+    Examples:
+      | root-type | type-name   | annotation       | value-type |
+      | entity    | person      | key              | string     |
+      | entity    | person      | unique           | string     |
+      | entity    | person      | subkey(LABEL)    | string     |
+      | entity    | person      | values("1", "2") | string     |
+      | entity    | person      | range("1", "2")  | string     |
+      | entity    | person      | card(1, 2)       | string     |
+      | entity    | person      | regex("\S+")     | string     |
+      | entity    | person      | distinct         | string     |
+      | relation  | description | key              | string     |
+      | relation  | description | unique           | string     |
+      | relation  | description | subkey(LABEL)    | string     |
+      | relation  | description | values("1", "2") | string     |
+      | relation  | description | range("1", "2")  | string     |
+      | relation  | description | card(1, 2)       | string     |
+      | relation  | description | regex("\S+")     | string     |
+      | relation  | description | distinct         | string     |
+
+########################
 # @key
-#################
+########################
+# TODO: Keys and lists?
 
+  # TODO: Make it for all annotations and for entity/relation!!!!!
   Scenario Outline: Owns can set @key annotation for <value-type> value type and unset it
-    When put entity type: person
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
+    When entity(person) get owns: custom-attribute, set annotation: @key
+    Then entity(person) get owns: custom-attribute; get annotations contain: @key
+    When transaction commits
+    When connection opens schema transaction for database: typedb
+    Then entity(person) get owns: custom-attribute; get annotations contain: @key
+    When entity(person) get owns: custom-attribute, unset annotation: @key
+    Then entity(person) get owns: custom-attribute; get annotations is empty
+    When transaction commits
+    When connection opens schema transaction for database: typedb
+    Then entity(person) get owns: custom-attribute; get annotations is empty
     When entity(person) get owns: custom-attribute, set annotation: @key
     Then entity(person) get owns: custom-attribute; get annotations contain: @key
     When transaction commits
@@ -663,8 +946,7 @@ Feature: Concept Owns
       | datetimetz |
       | duration   |
 
-  Scenario Outline: Owns can not set @key annotation for <value-type> as it is not keyable
-    When put entity type: person
+  Scenario Outline: Owns cannot set @key annotation for <value-type> as it is not keyable
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
@@ -693,7 +975,6 @@ Feature: Concept Owns
     When attribute(name) set value-type: string
     When put attribute type: age
     When attribute(age) set value-type: long
-    When put entity type: person
     When entity(person) set owns: email
     When entity(person) get owns: email, set annotation: @key
     When entity(person) set owns: username
@@ -726,12 +1007,9 @@ Feature: Concept Owns
     When attribute(reference) set value-type: string
     When put attribute type: rating
     When attribute(rating) set value-type: double
-    When put entity type: person
     When entity(person) set owns: email
     When entity(person) get owns: email, set annotation: @key
     When entity(person) set owns: name
-    When put entity type: customer
-    When entity(customer) set supertype: person
     When entity(customer) set owns: reference
     When entity(customer) get owns: reference, set annotation: @key
     When entity(customer) set owns: rating
@@ -821,14 +1099,11 @@ Feature: Concept Owns
     When attribute(rating) set value-type: double
     When attribute(rating) set annotation: @abstract
     When attribute(rating) set supertype: score
-    When put entity type: person
     When entity(person) set annotation: @abstract
     When entity(person) set owns: username
     When entity(person) get owns: username, set annotation: @key
     When entity(person) set owns: score
-    When put entity type: customer
     When entity(customer) set annotation: @abstract
-    When entity(customer) set supertype: person
     When entity(customer) set owns: reference
     When entity(customer) get owns: reference, set annotation: @key
     When entity(customer) set owns: rating
@@ -929,7 +1204,6 @@ Feature: Concept Owns
     When put attribute type: rating
     When attribute(rating) set value-type: double
     When attribute(rating) set annotation: @abstract
-    When put entity type: person
     When entity(person) set annotation: @abstract
     When entity(person) set owns: username
     When entity(person) get owns: username, set annotation: @key
@@ -937,9 +1211,7 @@ Feature: Concept Owns
     When entity(person) get owns: email, set annotation: @key
     When entity(person) set owns: name
     When entity(person) set owns: age
-    When put entity type: customer
     When entity(customer) set annotation: @abstract
-    When entity(customer) set supertype: person
     When entity(customer) set owns: reference
     When entity(customer) get owns: reference, set annotation: @key
     When entity(customer) set owns: work-email
@@ -1072,7 +1344,6 @@ Feature: Concept Owns
     When attribute(email) set value-type: string
     When put attribute type: username
     When attribute(username) set value-type: string
-    When put entity type: person
     When entity(person) set owns: username
     When entity(person) get owns: username, set annotation: @key
     Then transaction commits
@@ -1108,19 +1379,18 @@ Feature: Concept Owns
   # TODO
 
 
-#################
+########################
 # @subkey
-#################
+########################
   # TODO
 
 
 
-#################
+########################
 # @unique
-#################
+########################
 
   Scenario Outline: Owns can set @unique annotation for <value-type> value type and unset it
-    When put entity type: person
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
@@ -1149,12 +1419,11 @@ Feature: Concept Owns
   # TODO
 
 
-#################
+########################
 # @values
-#################
+########################
 
   Scenario Outline: Owns can set @values annotation for <value-type> value type and unset it
-    When put entity type: person
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
@@ -1230,8 +1499,7 @@ Feature: Concept Owns
   Scenario: Owns can set @values annotation for struct value type
     # TODO: Do we want to have it? If we do, add it to other Scenario Outlines with different value types
 
-  Scenario Outline: Owns can not have @values annotation with empty args
-    When put entity type: person
+  Scenario Outline: Owns cannot have @values annotation with empty args
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
@@ -1251,8 +1519,7 @@ Feature: Concept Owns
       | datetimetz |
       | duration   |
 
-  Scenario Outline: Owns can not have @values annotation for <value-type> value type with args of invalid value or type
-    When put entity type: person
+  Scenario Outline: Owns cannot have @values annotation for <value-type> value type with args of invalid value or type
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(player) set owns: custom-attribute
@@ -1303,8 +1570,7 @@ Feature: Concept Owns
       | duration   | 1Y                              |
       | duration   | year                            |
 
-  Scenario Outline: Owns can not have @values annotation for <value-type> value type with duplicated args
-    When put entity type: person
+  Scenario Outline: Owns cannot have @values annotation for <value-type> value type with duplicated args
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(player) set owns: custom-attribute
@@ -1330,7 +1596,6 @@ Feature: Concept Owns
       | duration   | P1Y1M                       | P1Y1M                        | P1Y2M                        |
 
   Scenario Outline: Owns-related @values annotation for <value-type> value type can be inherited and overridden by a subset of args
-    When put entity type: person
     When put relation type: contract
     When relation(contract) create role: participant
     When put attribute type: custom-attribute
@@ -1399,8 +1664,7 @@ Feature: Concept Owns
       | datetimetz | 2024-06-04+0010, 2024-06-04 Asia/Kathmandu, 2024-06-05+0010, 2024-06-05+0100 | 2024-06-04 Asia/Kathmandu, 2024-06-05+0010 |
       | duration   | P6M, P1Y, P1Y1M, P1Y2M, P1Y3M, P1Y4M, P1Y6M                                  | P6M, P1Y3M, P1Y4M, P1Y6M                   |
 
-  Scenario Outline: Inherited @values annotation on owns for <value-type> value type can not be overridden by the @values of same args or not a subset of args
-    When put entity type: person
+  Scenario Outline: Inherited @values annotation on owns for <value-type> value type cannot be overridden by the @values of same args or not a subset of args
     When put relation type: contract
     When relation(contract) create role: participant
     When put attribute type: custom-attribute
@@ -1459,12 +1723,11 @@ Feature: Concept Owns
       | datetimetz | 2024-06-04+0010, 2024-06-04 Asia/Kathmandu, 2024-06-05+0010, 2024-06-05+0100 | 2024-06-04 Europe/London |
       | duration   | P6M, P1Y, P1Y1M, P1Y2M, P1Y3M, P1Y4M, P1Y6M                                  | P3M, P1Y3M, P1Y4M, P1Y6M |
 
-#################
+########################
 # @range
-#################
+########################
 
   Scenario Outline: Owns can set @range annotation for <value-type> value type in correct order and unset it
-    When put entity type: person
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
@@ -1518,8 +1781,7 @@ Feature: Concept Owns
   Scenario: Owns can set @range annotation for struct value type
     # TODO: Do we want to have it? If we do, add it to other Scenario Outlines with different value types
 
-  Scenario Outline: Owns can not have @range annotation for <value-type> value type with less than two args
-    When put entity type: person
+  Scenario Outline: Owns cannot have @range annotation for <value-type> value type with less than two args
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
@@ -1541,8 +1803,7 @@ Feature: Concept Owns
       | duration   | P1Y             |
 
     # TODO: If we allow arg0 == arg1, move this case to another test!
-  Scenario Outline: Owns can not have @range annotation for <value-type> value type with invalid args or args number
-    When put entity type: person
+  Scenario Outline: Owns cannot have @range annotation for <value-type> value type with invalid args or args number
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(player) set owns: custom-attribute
@@ -1619,7 +1880,6 @@ Feature: Concept Owns
       | duration   | year                            | P1Y                                                |
 
   Scenario Outline: Owns-related @range annotation for <value-type> value type can be inherited and overridden by a subset of args
-    When put entity type: person
     When put relation type: contract
     When relation(contract) create role: participant
     When put attribute type: custom-attribute
@@ -1687,8 +1947,7 @@ Feature: Concept Owns
       | datetimetz | 2024-06-04+0010, 2024-06-05+0010 | 2024-06-04+0010, 2024-06-04T12:00:00+0010 |
       | duration   | P6M, P1Y                         | P8M, P9M                                  |
 
-  Scenario Outline: Inherited @range annotation on owns for <value-type> value type can not be overridden by the @range of same args or not a subset of args
-    When put entity type: person
+  Scenario Outline: Inherited @range annotation on owns for <value-type> value type cannot be overridden by the @range of same args or not a subset of args
     When put relation type: contract
     When relation(contract) create role: participant
     When put attribute type: custom-attribute
@@ -1746,23 +2005,31 @@ Feature: Concept Owns
       | datetimetz | 2024-06-04+0010, 2024-06-05+0010 | 2024-06-04+0010, 2024-06-05T01:00:00+0010 |
       | duration   | P6M, P1Y                         | P8M, P1Y1D                                |
 
-#################
+########################
 # @card
-#################
+########################
 
   Scenario Outline: Owns can set @card annotation for <value-type> value type with args in correct order and unset it
-    When put entity type: person
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
+    When put attribute type: custom-attribute-2
+    When attribute(custom-attribute-2) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
     Then entity(player) get owns: custom-attribute, set annotation: @card(<arg1>, <arg0>); fails
     Then entity(person) get owns: custom-attribute; get annotations is empty
     When entity(person) get owns: custom-attribute, set annotation: @card(<arg0>, <arg1>)
     Then entity(person) get owns: custom-attribute; get annotations contain: @card(<arg0>, <arg1>)
+    When entity(person) set owns: custom-attribute-2[]
+    Then entity(player) get owns: custom-attribute-2[], set annotation: @card(<arg1>, <arg0>); fails
+    Then entity(person) get owns: custom-attribute-2[]; get annotations is empty
+    When entity(person) get owns: custom-attribute-2[], set annotation: @card(<arg0>, <arg1>)
+    Then entity(person) get owns: custom-attribute-2[]; get annotations contain: @card(<arg0>, <arg1>)
     When transaction commits
     When connection opens schema transaction for database: typedb
     Then entity(person) get owns: custom-attribute; get annotations contain: @card(<arg0>, <arg1>)
+    Then entity(person) get owns: custom-attribute-2[]; get annotations contain: @card(<arg0>, <arg1>)
     When entity(person) unset owns: custom-attribute
+    When entity(person) unset owns: custom-attribute-2[]
     Then entity(person) get owns is empty
     When transaction commits
     When connection opens read transaction for database: typedb
@@ -1834,7 +2101,6 @@ Feature: Concept Owns
       | custom-struct | *    | 10                  |
 
   Scenario Outline: Owns can set @card annotation for <value-type> value type with duplicate args (exactly N ownerships)
-    When put entity type: person
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
@@ -1865,8 +2131,7 @@ Feature: Concept Owns
       | custom-struct | 1    |
       | custom-struct | 11   |
 
-  Scenario Outline: Owns can not have @card annotation for <value-type> value type with less than two args
-    When put entity type: person
+  Scenario Outline: Owns cannot have @card annotation for <value-type> value type with less than two args
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
@@ -1888,8 +2153,7 @@ Feature: Concept Owns
       | datetimetz |
       | duration   |
 
-  Scenario Outline: Owns can not have @card annotation for <value-type> value type with invalid args or args number
-    When put entity type: person
+  Scenario Outline: Owns cannot have @card annotation for <value-type> value type with invalid args or args number
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(player) set owns: custom-attribute
@@ -1917,7 +2181,6 @@ Feature: Concept Owns
       | duration   |
 
   Scenario Outline: Owns-related @card annotation for <value-type> value type can be inherited and overridden by a subset of args
-    When put entity type: person
     When put relation type: contract
     When relation(contract) create role: participant
     When put attribute type: custom-attribute
@@ -1985,8 +2248,7 @@ Feature: Concept Owns
       | datetimetz | 38, 111    | 39, 111       |
       | duration   | 1000, 1100 | 1000, 1099    |
 
-  Scenario Outline: Inherited @card annotation on owns for <value-type> value type can not be overridden by the @card of same args or not a subset of args
-    When put entity type: person
+  Scenario Outline: Inherited @card annotation on owns for <value-type> value type cannot be overridden by the @card of same args or not a subset of args
     When put relation type: contract
     When relation(contract) create role: participant
     When put attribute type: custom-attribute
@@ -2044,15 +2306,24 @@ Feature: Concept Owns
       | datetimetz | 38, 111    | 37, 111       |
       | duration   | 1000, 1100 | 1000, 1199    |
 
-#################
+########################
 # @distinct
-#################
+########################
 
   Scenario Outline: Owns can set @distinct annotation for <value-type> value type list and unset it
-    When put entity type: person
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute[]
+    When entity(person) get owns: custom-attribute[], set annotation: @distinct
+    Then entity(person) get owns: custom-attribute[]; get annotations contain: @distinct
+    When transaction commits
+    When connection opens schema transaction for database: typedb
+    Then entity(person) get owns: custom-attribute[]; get annotations contain: @distinct
+    When entity(person) get owns: custom-attribute[], unset annotation: @distinct
+    Then entity(person) get owns: custom-attribute[]; get annotations is empty
+    When transaction commits
+    When connection opens schema transaction for database: typedb
+    Then entity(person) get owns: custom-attribute[]; get annotations is empty
     When entity(person) get owns: custom-attribute[], set annotation: @distinct
     Then entity(person) get owns: custom-attribute[]; get annotations contain: @distinct
     When transaction commits
@@ -2075,8 +2346,7 @@ Feature: Concept Owns
       | duration      |
       | custom-struct |
 
-  Scenario Outline: Owns can not have @distinct annotation for <value-type> non-list value type
-    When put entity type: person
+  Scenario Outline: Owns cannot have @distinct annotation for <value-type> non-list value type
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
@@ -2097,12 +2367,64 @@ Feature: Concept Owns
       | duration      |
       | custom-struct |
 
-#################
-# @annotations not compatible to owns: @abstract, @cascade, @independent, @replace
-#################
+########################
+# @regex
+########################
 
-  Scenario Outline: Owns can not have @abstract, @cascade, @independent, and @replace annotations for <value-type> value type
-    When put entity type: person
+  Scenario Outline: Owns can set @regex annotation for <value-type> value type and unset it
+    When put attribute type: custom-attribute
+    When attribute(custom-attribute) set value-type: <value-type>
+    When entity(person) set owns: custom-attribute
+    When entity(person) get owns: custom-attribute, set annotation: @regex(<arg>)
+    Then entity(person) get owns: custom-attribute; get annotations contain: @regex(<arg>)
+    When transaction commits
+    When connection opens schema transaction for database: typedb
+    Then entity(person) get owns: custom-attribute; get annotations contain: @regex(<arg>)
+    When entity(person) get owns: custom-attribute, unset annotation: @regex(<arg>)
+    Then entity(person) get owns: custom-attribute; get annotations is empty
+    When transaction commits
+    When connection opens schema transaction for database: typedb
+    Then entity(person) get owns: custom-attribute; get annotations is empty
+    When entity(person) get owns: custom-attribute, set annotation: @regex(<arg>)
+    Then entity(person) get owns: custom-attribute; get annotations contain: @regex(<arg>)
+    When transaction commits
+    When connection opens schema transaction for database: typedb
+    Then entity(person) get owns: custom-attribute; get annotations contain: @regex(<arg>)
+    When entity(person) unset owns: custom-attribute
+    Then entity(person) get owns is empty
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then entity(person) get owns is empty
+    Examples:
+      | value-type | arg            |
+      | string     | "\S+@\S+\.\S+" |
+
+  Scenario Outline: Owns cannot have @regex annotation for <value-type> value type
+    When put attribute type: custom-attribute
+    When attribute(custom-attribute) set value-type: <value-type>
+    When entity(person) set owns: custom-attribute
+    Then entity(person) get owns: custom-attribute, set annotation: @regex; fails
+    Then entity(person) get owns: custom-attribute; get annotations is empty
+    When transaction commits
+    When connection opens read transaction for database: typedb
+    Then entity(person) get owns: custom-attribute; get annotations is empty
+    Examples:
+      | value-type    |
+      | long          |
+      | boolean       |
+      | double        |
+      | decimal       |
+      | datetime      |
+      | datetimetz    |
+      | duration      |
+      | custom-struct |
+
+
+########################
+# @annotations not compatible to owns: @abstract, @cascade, @independent, @replace
+########################
+
+  Scenario Outline: Owns cannot have @abstract, @cascade, @independent, and @replace annotations for <value-type> value type
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
@@ -2126,7 +2448,7 @@ Feature: Concept Owns
       | duration      |
       | custom-struct |
 
-#################
+########################
 # @annotations combinations
-#################
+########################
   # TODO
