@@ -762,10 +762,301 @@ Feature: Concept Plays
       | relation  | description    | registration |
 
 ########################
+# plays role from a list
+########################
+
+  Scenario: Entity types can play role from a list
+    When put relation type: marriage
+    When relation(marriage) create role: husband[]
+    When entity(person) set plays role: marriage:husband
+    Then entity(person) get plays roles contain:
+      | marriage:husband |
+    Then relation(marriage) get role(husband) get players contain:
+      | person |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When relation(marriage) create role: wife[]
+    When entity(person) set plays role: marriage:wife
+    Then entity(person) get plays roles contain:
+      | marriage:husband |
+      | marriage:wife    |
+    Then relation(marriage) get role(husband) get players contain:
+      | person |
+    Then relation(marriage) get role(wife) get players contain:
+      | person |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get plays roles contain:
+      | marriage:husband |
+      | marriage:wife    |
+    Then relation(marriage) get role(husband) get players contain:
+      | person |
+    Then relation(marriage) get role(wife) get players contain:
+      | person |
+
+  Scenario: Entity types can unset playing role from a list
+    When put relation type: marriage
+    When relation(marriage) create role: husband[]
+    When relation(marriage) create role: wife[]
+    When entity(person) set plays role: marriage:husband
+    When entity(person) set plays role: marriage:wife
+    Then entity(person) unset plays role: marriage:husband
+    Then entity(person) get plays roles do not contain:
+      | marriage:husband |
+    Then relation(marriage) get role(husband) get players do not contain:
+      | person |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) unset plays role: marriage:wife
+    Then entity(person) get plays roles do not contain:
+      | marriage:husband |
+      | marriage:wife    |
+    Then relation(marriage) get role(husband) get players do not contain:
+      | person |
+    Then relation(marriage) get role(wife) get players do not contain:
+      | person |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get plays roles do not contain:
+      | marriage:husband |
+      | marriage:wife    |
+    Then relation(marriage) get role(husband) get players do not contain:
+      | person |
+    Then relation(marriage) get role(wife) get players do not contain:
+      | person |
+
+  Scenario: Entity types can inherit playing role from a list
+    When put relation type: parentship
+    When relation(parentship) create role: parent[]
+    When relation(parentship) create role: child[]
+    When put relation type: marriage
+    When relation(marriage) create role: husband[]
+    When relation(marriage) create role: wife[]
+    When put entity type: animal
+    When entity(animal) set plays role: parentship:parent
+    When entity(animal) set plays role: parentship:child
+    When entity(person) set supertype: animal
+    When entity(person) set plays role: marriage:husband
+    When entity(person) set plays role: marriage:wife
+    Then entity(person) get plays roles contain:
+      | parentship:parent |
+      | parentship:child  |
+      | marriage:husband  |
+      | marriage:wife     |
+    Then entity(person) get plays roles explicit contain:
+      | marriage:husband |
+      | marriage:wife    |
+    Then entity(person) get plays roles explicit do not contain:
+      | parentship:parent |
+      | parentship:child  |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get plays roles contain:
+      | parentship:parent |
+      | parentship:child  |
+      | marriage:husband  |
+      | marriage:wife     |
+    Then entity(person) get plays roles explicit contain:
+      | marriage:husband |
+      | marriage:wife    |
+    Then entity(person) get plays roles explicit do not contain:
+      | parentship:parent |
+      | parentship:child  |
+    When put relation type: sales
+    When relation(sales) create role: buyer[]
+    When put entity type: customer
+    When entity(customer) set supertype: person
+    When entity(customer) set plays role: sales:buyer
+    Then entity(customer) get plays roles contain:
+      | parentship:parent |
+      | parentship:child  |
+      | marriage:husband  |
+      | marriage:wife     |
+      | sales:buyer       |
+    Then entity(customer) get plays roles explicit contain:
+      | sales:buyer |
+    Then entity(customer) get plays roles explicit do not contain:
+      | parentship:parent |
+      | parentship:child  |
+      | marriage:husband  |
+      | marriage:wife     |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(animal) get plays roles contain:
+      | parentship:parent |
+      | parentship:child  |
+    Then entity(person) get plays roles contain:
+      | parentship:parent |
+      | parentship:child  |
+      | marriage:husband  |
+      | marriage:wife     |
+    Then entity(customer) get plays roles contain:
+      | parentship:parent |
+      | parentship:child  |
+      | marriage:husband  |
+      | marriage:wife     |
+      | sales:buyer       |
+
+  Scenario: Relation types can play role from a list
+    When put relation type: locates
+    When relation(locates) create role: location[]
+    When relation(locates) create role: located[]
+    When put relation type: marriage
+    When relation(marriage) create role: husband[]
+    When relation(marriage) create role: wife[]
+    When relation(marriage) set plays role: locates:located
+    Then relation(marriage) get plays roles contain:
+      | locates:located |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When put relation type: organises
+    When relation(organises) create role: organiser[]
+    When relation(organises) create role: organised[]
+    When relation(marriage) set plays role: organises:organised
+    Then relation(marriage) get plays roles contain:
+      | locates:located     |
+      | organises:organised |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(marriage) get plays roles contain:
+      | locates:located     |
+      | organises:organised |
+
+  Scenario: Relation types can unset playing role from a list
+    When put relation type: locates
+    When relation(locates) create role: location[]
+    When relation(locates) create role: located[]
+    When put relation type: organises
+    When relation(organises) create role: organiser[]
+    When relation(organises) create role: organised[]
+    When put relation type: marriage
+    When relation(marriage) create role: husband[]
+    When relation(marriage) create role: wife[]
+    When relation(marriage) set plays role: locates:located
+    When relation(marriage) set plays role: organises:organised
+    When relation(marriage) unset plays role: locates:located
+    Then relation(marriage) get plays roles do not contain:
+      | locates:located |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When relation(marriage) unset plays role: organises:organised
+    Then relation(marriage) get plays roles do not contain:
+      | locates:located     |
+      | organises:organised |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(marriage) get plays roles do not contain:
+      | locates:located     |
+      | organises:organised |
+
+  Scenario: Relation types can inherit playing role from a list
+    When put relation type: locates
+    When relation(locates) create role: locating[]
+    When relation(locates) create role: located[]
+    When put relation type: contractor-locates
+    When relation(contractor-locates) create role: contractor-locating[]
+    When relation(contractor-locates) create role: contractor-located[]
+    When put relation type: employment
+    When relation(employment) create role: employer[]
+    When relation(employment) create role: employee[]
+    When relation(employment) set plays role: locates:located
+    When put relation type: contractor-employment
+    When relation(contractor-employment) set supertype: employment
+    When relation(contractor-employment) set plays role: contractor-locates:contractor-located
+    Then relation(contractor-employment) get plays roles contain:
+      | locates:located                       |
+      | contractor-locates:contractor-located |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When put relation type: parttime-locates
+    When relation(parttime-locates) create role: parttime-locating[]
+    When relation(parttime-locates) create role: parttime-located[]
+    When put relation type: parttime-employment
+    When relation(parttime-employment) set supertype: contractor-employment
+    When relation(parttime-employment) create role: parttime-employer[]
+    When relation(parttime-employment) create role: parttime-employee[]
+    When relation(parttime-employment) set plays role: parttime-locates:parttime-located
+    Then relation(parttime-employment) get plays roles contain:
+      | locates:located                       |
+      | contractor-locates:contractor-located |
+      | parttime-locates:parttime-located     |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(contractor-employment) get plays roles contain:
+      | locates:located                       |
+      | contractor-locates:contractor-located |
+    Then relation(parttime-employment) get plays roles contain:
+      | locates:located                       |
+      | contractor-locates:contractor-located |
+      | parttime-locates:parttime-located     |
+
+  Scenario Outline: <root-type> types can redeclare playing role from a list
+    When put relation type: parentship
+    When relation(parentship) create role: parent[]
+    When <root-type>(<type-name>) set plays role: parentship:parent
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<type-name>) set plays role: parentship:parent
+    Examples:
+      | root-type | type-name   |
+      | entity    | person      |
+      | relation  | description |
+
+  Scenario Outline: <root-type> types cannot unset not played role from a list
+    When put relation type: marriage
+    When relation(marriage) create role: husband[]
+    When relation(marriage) create role: wife[]
+    When <root-type>(<type-name>) set plays role: marriage:wife
+    Then <root-type>(<type-name>) get plays roles do not contain:
+      | marriage:husband |
+    Then <root-type>(<type-name>) unset plays role: marriage:husband; fails
+    Examples:
+      | root-type | type-name   |
+      | entity    | person      |
+      | relation  | description |
+
+  Scenario Outline: <root-type> types cannot unset playing role from a list that is currently played by existing instances
+    When put relation type: marriage
+    When relation(marriage) create role: husband[]
+    When relation(marriage) create role: wife[]
+    When <root-type>(<type-name>) set plays role: marriage:wife
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $i = <root-type>(<type-name>) create new instance
+    When $m = relation(marriage) create new instance
+    When relation $m add player for role(wife): $i
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<type-name>) unset plays role: marriage:wife; fails
+    Examples:
+      | root-type | type-name   |
+      | entity    | person      |
+      | relation  | description |
+
+  Scenario Outline: <root-type> types can re-override inherited playing role from a list
+    When put relation type: parentship
+    When relation(parentship) create role: parent[]
+    When put relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: father[]
+    When relation(fathership) get role(father); set override: parent
+    When <root-type>(<supertype-name>) set plays role: parentship:parent
+    When <root-type>(<subtype-name>) set supertype: person
+    When <root-type>(<subtype-name>) set plays role: fathership:father
+    When <root-type>(<subtype-name>) get plays role: fathership:father; set override: parentship:parent
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) set plays role: fathership:father
+    When <root-type>(<subtype-name>) get plays role: fathership:father; set override: parentship:parent
+    Examples:
+      | root-type | supertype-name | subtype-name |
+      | entity    | person         | customer     |
+      | relation  | description    | registration |
+
+########################
 # plays lists
 ########################
-# TODO: Copy scalar tests here and refactor it!
-
+# TODO: Add tests here if we allow `set plays role: T:ROL[]`
 
   # TODO: Everything below is just a copypaste from owns.feature! Needs reconsideration!
 ########################
