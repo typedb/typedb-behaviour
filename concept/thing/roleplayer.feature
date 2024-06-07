@@ -11,7 +11,7 @@ Feature: Concept Ordered Role Players
     Given connection has been opened
     Given connection does not have any database
     Given connection create database: typedb
-    Given connection opens schema transaction for database: typedb
+    Given connection open schema transaction for database: typedb
 
     # Write schema for the test scenarios
     Given put attribute type: name
@@ -39,7 +39,7 @@ Feature: Concept Ordered Role Players
 
     Given transaction commits
 
-    Given connection opens write transaction for database: typedb
+    Given connection open write transaction for database: typedb
 
   Scenario: Role players can be ordered
     When $alice = entity(person) create new instance with key(name): alice

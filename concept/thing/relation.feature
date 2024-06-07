@@ -11,7 +11,7 @@ Feature: Concept Relation
     Given connection has been opened
     Given connection does not have any database
     Given connection create database: typedb
-    Given connection opens schema transaction for database: typedb
+    Given connection open schema transaction for database: typedb
 
     # Write schema for the test scenarios
     Given put attribute type: username
@@ -39,7 +39,7 @@ Feature: Concept Relation
 
     Given transaction commits
 
-    Given connection opens write transaction for database: typedb
+    Given connection open write transaction for database: typedb
 
   Scenario: Relation with role players can be created and role players can be retrieved
     When $m = relation(marriage) create new instance with key(license): m
@@ -61,7 +61,7 @@ Feature: Concept Relation
       | wife    | $a |
       | husband | $b |
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     When $m = relation(marriage) get instance with key(license): m
     Then relation $m exists
     Then relation $m has type: marriage
@@ -87,7 +87,7 @@ Feature: Concept Relation
     Then entity $a get relations(marriage) with role(wife) contain: $m
     Then entity $b get relations(marriage) with role(husband) contain: $m
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     When $m = relation(marriage) get instance with key(license): m
     Then relation(marriage) get instances contain: $m
     When $a = entity(person) get instance with key(username): alice
@@ -107,7 +107,7 @@ Feature: Concept Relation
     Then relation $m get players do not contain:
       | wife | $a |
     When transaction commits
-    When connection opens write transaction for database: typedb
+    When connection open write transaction for database: typedb
     When $m = relation(marriage) get instance with key(license): m
     When $a = entity(person) get instance with key(username): alice
     Then entity $a get relations(marriage) with role(wife) do not contain: $m
@@ -116,7 +116,7 @@ Feature: Concept Relation
       | wife | $a |
     When relation $m add player for role(wife): $a
     When transaction commits
-    When connection opens write transaction for database: typedb
+    When connection open write transaction for database: typedb
     When $m = relation(marriage) get instance with key(license): m
     When $a = entity(person) get instance with key(username): alice
     When relation $m remove player for role(wife): $a
@@ -125,7 +125,7 @@ Feature: Concept Relation
     Then relation $m get players do not contain:
       | wife | $a |
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     When $m = relation(marriage) get instance with key(license): m
     When $a = entity(person) get instance with key(username): alice
     Then entity $a get relations(marriage) with role(wife) do not contain: $m
@@ -136,18 +136,18 @@ Feature: Concept Relation
   Scenario: Relation without role players get deleted on commit
     When $m = relation(marriage) create new instance with key(license): m
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     When $m = relation(marriage) get instance with key(license): m
     Then relation $m does not exist
     Then relation(marriage) get instances is empty
 
   Scenario: Relation chain with no other role players gets deleted on commit
     Then transaction commits
-    Given connection opens schema transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     Given relation(marriage) create role: dependent-marriage
     Given relation(marriage) set plays role: marriage:dependent-marriage
     Given transaction commits
-    Given connection opens write transaction for database: typedb
+    Given connection open write transaction for database: typedb
 
     When $m = relation(marriage) create new instance with key(license): m
     When $n = relation(marriage) create new instance with key(license): n
@@ -161,7 +161,7 @@ Feature: Concept Relation
     When relation $p add player for role(dependent-marriage): $q
     When relation $q add player for role(dependent-marriage): $r
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then relation(marriage) get instances is empty
 
   Scenario: Relation with role players can be deleted
@@ -177,14 +177,14 @@ Feature: Concept Relation
     Then entity $b get relations do not contain: $m
     Then relation(marriage) get instances is empty
     When transaction commits
-    When connection opens write transaction for database: typedb
+    When connection open write transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
     When $b = entity(person) get instance with key(username): bob
     When $m = relation(marriage) create new instance with key(license): m
     When relation $m add player for role(wife): $a
     When relation $m add player for role(husband): $b
     When transaction commits
-    When connection opens write transaction for database: typedb
+    When connection open write transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
     When $b = entity(person) get instance with key(username): bob
     When $m = relation(marriage) get instance with key(license): m
@@ -195,7 +195,7 @@ Feature: Concept Relation
     Then entity $b get relations do not contain: $m
     Then relation(marriage) get instances is empty
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     When $m = relation(marriage) get instance with key(license): m
     Then relation $m does not exist
     Then relation(marriage) get instances is empty

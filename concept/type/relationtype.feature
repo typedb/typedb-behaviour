@@ -11,7 +11,7 @@ Feature: Concept Relation Type and Role Type
     Given connection has been opened
     Given connection does not have any database
     Given connection create database: typedb
-    Given connection opens schema transaction for database: typedb
+    Given connection open schema transaction for database: typedb
 
   Scenario: Root relation type cannot be deleted
     Then delete relation type: relation; fails
@@ -30,7 +30,7 @@ Feature: Concept Relation Type and Role Type
       | marriage:husband |
       | marriage:wife    |
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then relation(marriage) exists
     Then relation(marriage) get supertype: relation
     Then relation(marriage) get role(husband) exists
@@ -53,7 +53,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(relation) get role(role) get subtypes do not contain:
       | parentship:parent |
     When transaction commits
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     When delete relation type: parentship
     Then relation(parentship) does not exist
     Then relation(relation) get role(role) get subtypes do not contain:
@@ -65,7 +65,7 @@ Feature: Concept Relation Type and Role Type
     When relation(marriage) create role: husband
     When relation(marriage) create role: wife
     When transaction commits
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     When delete relation type: marriage
     Then relation(marriage) does not exist
     Then relation(relation) get role(role) get subtypes do not contain:
@@ -74,7 +74,7 @@ Feature: Concept Relation Type and Role Type
       | marriage:husband  |
       | marriage:wife     |
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then relation(parentship) does not exist
     Then relation(marriage) does not exist
     Then relation(relation) get role(role) get subtypes do not contain:
@@ -89,12 +89,12 @@ Feature: Concept Relation Type and Role Type
     When put entity type: person
     When entity(person) set plays role: marriage:wife
     When transaction commits
-    When connection opens write transaction for database: typedb
+    When connection open write transaction for database: typedb
     When $m = relation(marriage) create new instance
     When $a = entity(person) create new instance
     When relation $m add player for role(wife): $a
     When transaction commits
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then delete relation type: marriage; fails
 
   Scenario: Role types that have instances cannot be deleted
@@ -104,14 +104,14 @@ Feature: Concept Relation Type and Role Type
     When put entity type: person
     When entity(person) set plays role: marriage:wife
     When transaction commits
-    When connection opens write transaction for database: typedb
+    When connection open write transaction for database: typedb
     When $m = relation(marriage) create new instance
     When $a = entity(person) create new instance
     When relation $m add player for role(wife): $a
     When transaction commits
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then relation(marriage) delete role: wife; fails
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then relation(marriage) delete role: husband
     Then transaction commits
 
@@ -133,7 +133,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) get role(husband) get label: husband
     Then relation(marriage) get role(wife) get label: wife
     When transaction commits
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then relation(marriage) get label: marriage
     Then relation(marriage) get role(husband) get label: husband
     Then relation(marriage) get role(wife) get label: wife
@@ -148,7 +148,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(employment) get role(employee) get label: employee
     Then relation(employment) get role(employer) get label: employer
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then relation(employment) exists
     Then relation(employment) get label: employment
     Then relation(employment) get role(employee) get label: employee
@@ -166,17 +166,17 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) get role(husband) get annotations do not contain: @abstract
     Then relation(marriage) get role(wife) get annotations do not contain: @abstract
     When transaction commits
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then relation(parentship) get annotations do not contain: @abstract
     Then relation(parentship) get role(parent) get annotations do not contain: @abstract
     Then relation(parentship) get role(child) get annotations do not contain: @abstract
     When transaction commits
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then relation(marriage) get annotations contain: @abstract
     Then relation(marriage) get role(husband) get annotations do not contain: @abstract
     Then relation(marriage) get role(wife) get annotations do not contain: @abstract
     When transaction commits
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then relation(parentship) get annotations do not contain: @abstract
     Then relation(parentship) get role(parent) get annotations do not contain: @abstract
     Then relation(parentship) get role(child) get annotations do not contain: @abstract
@@ -185,7 +185,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(parent) get annotations do not contain: @abstract
     Then relation(parentship) get role(child) get annotations do not contain: @abstract
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then relation(parentship) get annotations contain: @abstract
     Then relation(parentship) get role(parent) get annotations do not contain: @abstract
     Then relation(parentship) get role(child) get annotations do not contain: @abstract
@@ -203,21 +203,21 @@ Feature: Concept Relation Type and Role Type
     When put entity type: person
     When entity(person) set plays role: fathership:father
     Then transaction commits
-    When connection opens write transaction for database: typedb
+    When connection open write transaction for database: typedb
     Then $m = relation(fathership) create new instance
     When $a = entity(person) create new instance
     When relation $m add player for role(father): $a
     Then transaction commits
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then relation(parentship) set annotation: @abstract
     Then transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then relation(parentship) get annotations contain: @abstract
 
   Scenario: Relation types must have at least one role in order to commit, unless they are abstract
     When put relation type: connection
     Then transaction commits; fails
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     When put relation type: connection
     When relation(connection) set annotation: @abstract
     Then transaction commits
@@ -254,7 +254,7 @@ Feature: Concept Relation Type and Role Type
       | parentship:child  |
       | fathership:father |
     When transaction commits
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then relation(fathership) get supertype: parentship
     Then relation(fathership) get role(father) get supertype: parentship:parent
     Then relation(fathership) get role(child) get supertype: relation:role
@@ -313,7 +313,7 @@ Feature: Concept Relation Type and Role Type
       | fathership:father |
       | father-son:son    |
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then relation(father-son) get supertype: fathership
     Then relation(father-son) get role(father) get supertype: parentship:parent
     Then relation(father-son) get role(son) get supertype: parentship:child
@@ -360,7 +360,7 @@ Feature: Concept Relation Type and Role Type
     When put relation type: marriage
     When relation(marriage) create role: wife
     When transaction commits
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then relation(marriage) set supertype: marriage; fails
 
   Scenario: Relation types can inherit related role types
@@ -379,7 +379,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get declared roles do not contain:
       | parentship:child  |
     When transaction commits
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     When put relation type: mothership
     When relation(mothership) set supertype: parentship
     When relation(mothership) create role: mother
@@ -392,7 +392,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(mothership) get declared roles do not contain:
       | parentship:child  |
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then relation(fathership) get roles contain:
       | fathership:father |
       | parentship:child  |
@@ -416,7 +416,7 @@ Feature: Concept Relation Type and Role Type
     When put relation type: fathership
     When relation(fathership) set supertype: parentship
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then relation(fathership) get roles contain:
       | parentship:parent |
       | parentship:child  |
@@ -439,7 +439,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get roles do not contain:
       | parentship:parent |
     When transaction commits
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     When put relation type: mothership
     When relation(mothership) set supertype: parentship
     When relation(mothership) create role: mother
@@ -447,7 +447,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(mothership) get roles do not contain:
       | parentship:parent |
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then relation(fathership) get roles do not contain:
       | parentship:parent |
     Then relation(mothership) get roles do not contain:
@@ -474,251 +474,10 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: father
     When transaction commits
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     When relation(parentship) create role: parent
     When relation(fathership) create role: father
     When relation(fathership) get role(father); set override: parent
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then relation(fathership) get overridden role(father) get label: parent
-
-  Scenario: Relation types can play role types
-    When put relation type: locates
-    When relation(locates) create role: location
-    When relation(locates) create role: located
-    When put relation type: marriage
-    When relation(marriage) create role: husband
-    When relation(marriage) create role: wife
-    When relation(marriage) set plays role: locates:located
-    Then relation(marriage) get plays roles contain:
-      | locates:located |
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    When put relation type: organises
-    When relation(organises) create role: organiser
-    When relation(organises) create role: organised
-    When relation(marriage) set plays role: organises:organised
-    Then relation(marriage) get plays roles contain:
-      | locates:located     |
-      | organises:organised |
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    Then relation(marriage) get plays roles contain:
-      | locates:located     |
-      | organises:organised |
-
-  Scenario: Relation types can unset playing role types
-    When put relation type: locates
-    When relation(locates) create role: location
-    When relation(locates) create role: located
-    When put relation type: organises
-    When relation(organises) create role: organiser
-    When relation(organises) create role: organised
-    When put relation type: marriage
-    When relation(marriage) create role: husband
-    When relation(marriage) create role: wife
-    When relation(marriage) set plays role: locates:located
-    When relation(marriage) set plays role: organises:organised
-    When relation(marriage) unset plays role: locates:located
-    Then relation(marriage) get plays roles do not contain:
-      | locates:located |
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    When relation(marriage) unset plays role: organises:organised
-    Then relation(marriage) get plays roles do not contain:
-      | locates:located     |
-      | organises:organised |
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    Then relation(marriage) get plays roles do not contain:
-      | locates:located     |
-      | organises:organised |
-
-  Scenario: Relation types can inherit playing role types
-    When put relation type: locates
-    When relation(locates) create role: locating
-    When relation(locates) create role: located
-    When put relation type: contractor-locates
-    When relation(contractor-locates) create role: contractor-locating
-    When relation(contractor-locates) create role: contractor-located
-    When put relation type: employment
-    When relation(employment) create role: employer
-    When relation(employment) create role: employee
-    When relation(employment) set plays role: locates:located
-    When put relation type: contractor-employment
-    When relation(contractor-employment) set supertype: employment
-    When relation(contractor-employment) set plays role: contractor-locates:contractor-located
-    Then relation(contractor-employment) get plays roles contain:
-      | locates:located                       |
-      | contractor-locates:contractor-located |
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    When put relation type: parttime-locates
-    When relation(parttime-locates) create role: parttime-locating
-    When relation(parttime-locates) create role: parttime-located
-    When put relation type: parttime-employment
-    When relation(parttime-employment) set supertype: contractor-employment
-    When relation(parttime-employment) create role: parttime-employer
-    When relation(parttime-employment) create role: parttime-employee
-    When relation(parttime-employment) set plays role: parttime-locates:parttime-located
-    Then relation(parttime-employment) get plays roles contain:
-      | locates:located                       |
-      | contractor-locates:contractor-located |
-      | parttime-locates:parttime-located     |
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    Then relation(contractor-employment) get plays roles contain:
-      | locates:located                       |
-      | contractor-locates:contractor-located |
-    Then relation(parttime-employment) get plays roles contain:
-      | locates:located                       |
-      | contractor-locates:contractor-located |
-      | parttime-locates:parttime-located     |
-
-  Scenario: Relation types can inherit playing role types that are subtypes of each other
-    When put relation type: locates
-    When relation(locates) create role: locating
-    When relation(locates) create role: located
-    When put relation type: contractor-locates
-    When relation(contractor-locates) set supertype: locates
-    When relation(contractor-locates) create role: contractor-locating
-    When relation(contractor-locates) get role(contractor-locating); set override: locating
-    When relation(contractor-locates) create role: contractor-located
-    When relation(contractor-locates) get role(contractor-located); set override: located
-    When put relation type: employment
-    When relation(employment) create role: employer
-    When relation(employment) create role: employee
-    When relation(employment) set plays role: locates:located
-    When put relation type: contractor-employment
-    When relation(contractor-employment) set supertype: employment
-    When relation(contractor-employment) set plays role: contractor-locates:contractor-located
-    Then relation(contractor-employment) get plays roles contain:
-      | locates:located                       |
-      | contractor-locates:contractor-located |
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    When put relation type: parttime-locates
-    When relation(parttime-locates) set supertype: contractor-locates
-    When relation(parttime-locates) create role: parttime-locating
-    When relation(parttime-locates) get role(parttime-locating); set override: contractor-locating
-    When relation(parttime-locates) create role: parttime-located
-    When relation(parttime-locates) get role(parttime-located); set override: contractor-located
-    When put relation type: parttime-employment
-    When relation(parttime-employment) set supertype: contractor-employment
-    When relation(parttime-employment) create role: parttime-employer
-    When relation(parttime-employment) create role: parttime-employee
-    When relation(parttime-employment) set plays role: parttime-locates:parttime-located
-    Then relation(parttime-employment) get plays roles contain:
-      | locates:located                       |
-      | contractor-locates:contractor-located |
-      | parttime-locates:parttime-located     |
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    Then relation(contractor-employment) get plays roles contain:
-      | locates:located                       |
-      | contractor-locates:contractor-located |
-    Then relation(parttime-employment) get plays roles contain:
-      | locates:located                       |
-      | contractor-locates:contractor-located |
-      | parttime-locates:parttime-located     |
-
-  Scenario: Relation types can override inherited playing role types
-    When put relation type: locates
-    When relation(locates) create role: locating
-    When relation(locates) create role: located
-    When put relation type: contractor-locates
-    When relation(contractor-locates) set supertype: locates
-    When relation(contractor-locates) create role: contractor-locating
-    When relation(contractor-locates) get role(contractor-locating); set override: locating
-    When relation(contractor-locates) create role: contractor-located
-    When relation(contractor-locates) get role(contractor-located); set override: located
-    When put relation type: employment
-    When relation(employment) create role: employer
-    When relation(employment) create role: employee
-    When relation(employment) set plays role: locates:located
-    When put relation type: contractor-employment
-    When relation(contractor-employment) set supertype: employment
-    When relation(contractor-employment) set plays role: contractor-locates:contractor-located
-    When relation(contractor-employment) get plays role: contractor-locates:contractor-located; set override: locates:located
-    Then relation(contractor-employment) get plays roles do not contain:
-      | locates:located |
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    When put relation type: parttime-locates
-    When relation(parttime-locates) set supertype: contractor-locates
-    When relation(parttime-locates) create role: parttime-locating
-    When relation(parttime-locates) get role(parttime-locating); set override: contractor-locating
-    When relation(parttime-locates) create role: parttime-located
-    When relation(parttime-locates) get role(parttime-located); set override: contractor-located
-    When put relation type: parttime-employment
-    When relation(parttime-employment) set supertype: contractor-employment
-    When relation(parttime-employment) create role: parttime-employer
-    When relation(parttime-employment) create role: parttime-employee
-    When relation(parttime-employment) set plays role: parttime-locates:parttime-located
-    When relation(parttime-employment) get plays role: parttime-locates:parttime-located; set override: contractor-locates:contractor-located
-    Then relation(parttime-employment) get plays roles do not contain:
-      | locates:located                       |
-      | contractor-locates:contractor-located |
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    Then relation(contractor-employment) get plays roles do not contain:
-      | locates:located |
-    Then relation(parttime-employment) get plays roles do not contain:
-      | locates:located                       |
-      | contractor-locates:contractor-located |
-
-  Scenario: Relation types cannot redeclare inherited/overridden playing role types
-    When put relation type: locates
-    When relation(locates) create role: located
-    When put relation type: contractor-locates
-    When relation(contractor-locates) set supertype: locates
-    When relation(contractor-locates) create role: contractor-located
-    When relation(contractor-locates) get role(contractor-located); set override: located
-    When put relation type: employment
-    When relation(employment) create role: employee
-    When relation(employment) set plays role: locates:located
-    When put relation type: contractor-employment
-    When relation(contractor-employment) set supertype: employment
-    When relation(contractor-employment) set plays role: contractor-locates:contractor-located
-    When relation(contractor-employment) get plays role: contractor-locates:contractor-located; set override: locates:located
-    When put relation type: parttime-employment
-    When relation(parttime-employment) set supertype: contractor-employment
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    Then relation(parttime-employment) set plays role: locates:located; fails
-    When connection opens schema transaction for database: typedb
-    Then relation(parttime-employment) set plays role: contractor-locates:contractor-located
-    Then transaction commits; fails
-
-  Scenario: Relation types cannot override declared playing role types
-    When put relation type: locates
-    When relation(locates) create role: locating
-    When relation(locates) create role: located
-    When put relation type: employment-locates
-    When relation(employment-locates) set supertype: locates
-    When relation(employment-locates) create role: employment-locating
-    When relation(employment-locates) get role(employment-locating); set override: locating
-    When relation(employment-locates) create role: employment-located
-    When relation(employment-locates) get role(employment-located); set override: located
-    When put relation type: employment
-    When relation(employment) create role: employer
-    When relation(employment) create role: employee
-    When relation(employment) set plays role: locates:located
-    Then relation(employment) set plays role: employment-locates:employment-located
-    Then relation(employment) get plays role: employment-locates:employment-located; set override: locates:located; fails
-
-  Scenario: Relation types cannot override inherited playing role types other than with their subtypes
-    When put relation type: locates
-    When relation(locates) create role: locating
-    When relation(locates) create role: located
-    When put relation type: contractor-locates
-    When relation(contractor-locates) create role: contractor-locating
-    When relation(contractor-locates) create role: contractor-located
-    When put relation type: employment
-    When relation(employment) create role: employer
-    When relation(employment) create role: employee
-    When relation(employment) set plays role: locates:located
-    When put relation type: contractor-employment
-    When relation(contractor-employment) set supertype: employment
-    Then relation(contractor-employment) set plays role: contractor-locates:contractor-located
-    Then relation(contractor-employment) get plays role: contractor-locates:contractor-located; set override: locates:located; fails

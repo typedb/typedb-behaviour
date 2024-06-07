@@ -3,7 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 #noinspection CucumberUndefinedStep
-Feature: Concept Owns
+Feature: Concept Plays
 
   # TODO: Refactor "DEPRECATED"!
   Background:
@@ -15,1064 +15,665 @@ Feature: Concept Owns
     Given connection open schema transaction for database: typedb
     Given put entity type: person
     Given put entity type: customer
-    Given put entity type: subscriber
-    # Notice: supertypes are the same, but can be overridden for the second subtype inside the tests
     Given entity(customer) set supertype: person
-    Given entity(subscriber) set supertype: person
     Given put relation type: description
     Given relation(description) create role: object
     Given put relation type: registration
-    Given put relation type: profile
-    # Notice: supertypes are the same, but can be overridden for the second subtype inside the tests
     Given relation(registration) set supertype: description
-    Given relation(profile) set supertype: description
-    # TODO: Create structs in concept api
-    Given put struct type: custom-struct
-    Given struct(custom-struct) create field: custom-field
-    Given struct(custom-struct) get field(custom-field); set value-type: string
     Given transaction commits
     Given connection open schema transaction for database: typedb
 
 ########################
-# owns common
+# plays common
 ########################
 
-  Scenario Outline: Entity types can own and unset attributes
-    When put attribute type: name
-    When attribute(name) set value-type: <value-type>
-    When put attribute type: surname
-    When attribute(surname) set value-type: <value-type>
-    When put attribute type: birthday
-    When attribute(birthday) set value-type: <value-type-2>
-    When entity(person) set owns: name
-    When entity(person) set owns: birthday
-    When entity(person) set owns: surname
-    Then entity(person) get owns contain:
-      | name     |
-      | surname  |
-      | birthday |
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then entity(person) get owns contain:
-      | name     |
-      | surname  |
-      | birthday |
-    When entity(person) unset owns: surname
-    Then entity(person) get owns do not contain:
-      | surname |
-    Then entity(person) get owns contain:
-      | name     |
-      | birthday |
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then entity(person) get owns contain:
-      | name     |
-      | birthday |
-    When entity(person) unset owns: birthday
-    Then entity(person) get owns do not contain:
-      | birthday |
-    Then entity(person) get owns contain:
-      | name |
-    When entity(person) unset owns: name
-    Then entity(person) get owns do not contain:
-      | name     |
-      | surname  |
-      | birthday |
-    Then entity(person) get owns is empty
-    Examples:
-      | value-type    | value-type-2 |
-      | long          | string       |
-      | double        | datetimetz   |
-      | decimal       | datetime     |
-      | string        | duration     |
-      | boolean       | long         |
-      | datetime      | decimal      |
-      | datetimetz    | double       |
-      | duration      | boolean      |
-      | custom-struct | long         |
-
-  Scenario Outline: Entity types can redeclare owning attributes
-    When put attribute type: name
-    When attribute(name) set value-type: <value-type>
-    When put attribute type: email
-    When attribute(email) set value-type: <value-type>
-    When entity(person) set owns: name
-    When entity(person) set owns: email
-    Then entity(person) set owns: name
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then entity(person) set owns: email
-    Examples:
-      | value-type    |
-      | long          |
-      | double        |
-      | decimal       |
-      | string        |
-      | boolean       |
-      | datetime      |
-      | datetimetz    |
-      | duration      |
-      | custom-struct |
-
-  Scenario: Entity types cannot own entities, relations, roles, structs, and structs fields
-    When put entity type: car
-    When put relation type: credit
-    When relation(marriage) create role: creditor
-    # TODO: Create structs in concept api
-    When put struct type: passport
-    When struct(passport) create field: first-name
-    When struct(passport) get field(first-name); set value-type: string
-    When struct(passport) create field: surname
-    When struct(passport) get field(surname); set value-type: string
-    When struct(passport) create field: birthday
-    When struct(passport) get field(birthday); set value-type: datetime
-    Then entity(person) set owns: car; fails
-    Then entity(person) set owns: credit; fails
-    Then entity(person) set owns: marriage:creditor; fails
-    Then entity(person) set owns: passport; fails
-    Then entity(person) set owns: passport:birthday; fails
-    Then entity(person) get owns is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then entity(person) get owns is empty
-
-  Scenario Outline: Relation types can own and unset attributes
-    When put attribute type: license
-    When attribute(license) set value-type: <value-type>
-    When put attribute type: starting-date
-    When attribute(starting-date) set value-type: <value-type>
-    When put attribute type: comment
-    When attribute(comment) set value-type: <value-type-2>
+  Scenario: Entity types can play role types
     When put relation type: marriage
-    When relation(marriage) create role: spouse
-    When relation(marriage) set owns: license
-    When relation(marriage) set owns: starting-date
-    When relation(marriage) set owns: comment
-    Then relation(marriage) get owns contain:
-      | license       |
-      | starting-date |
-      | comment       |
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then relation(marriage) get owns contain:
-      | license       |
-      | starting-date |
-      | comment       |
-    When relation(marriage) unset owns: starting-date
-    Then relation(marriage) get owns do not contain:
-      | starting-date |
-    Then relation(marriage) get owns contain:
-      | license |
-      | comment |
+    When relation(marriage) create role: husband
+    When entity(person) set plays role: marriage:husband
+    Then entity(person) get plays roles contain:
+      | marriage:husband |
+    Then relation(marriage) get role(husband) get players contain:
+      | person |
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(marriage) get owns contain:
-      | license |
-      | comment |
-    When relation(marriage) unset owns: license
-    Then relation(marriage) get owns do not contain:
-      | license |
-    Then relation(marriage) get owns contain:
-      | comment |
-    When relation(marriage) unset owns: comment
-    Then relation(marriage) get owns do not contain:
-      | license       |
-      | starting-date |
-      | comment       |
-    Then relation(marriage) get owns is empty
-    Examples:
-      | value-type    | value-type-2 |
-      | long          | string       |
-      | double        | datetimetz   |
-      | decimal       | datetime     |
-      | string        | duration     |
-      | boolean       | long         |
-      | datetime      | decimal      |
-      | datetimetz    | double       |
-      | duration      | boolean      |
-      | custom-struct | long         |
+    When relation(marriage) create role: wife
+    When entity(person) set plays role: marriage:wife
+    Then entity(person) get plays roles contain:
+      | marriage:husband |
+      | marriage:wife    |
+    Then relation(marriage) get role(husband) get players contain:
+      | person |
+    Then relation(marriage) get role(wife) get players contain:
+      | person |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get plays roles contain:
+      | marriage:husband |
+      | marriage:wife    |
+    Then relation(marriage) get role(husband) get players contain:
+      | person |
+    Then relation(marriage) get role(wife) get players contain:
+      | person |
 
-  Scenario Outline: Relation types can redeclare owning attributes
-    When put attribute type: name
-    When attribute(name) set value-type: <value-type>
-    When put attribute type: email
-    When attribute(email) set value-type: <value-type>
-    When put relation type: reference
-    When relation(reference) create role: target
-    When relation(reference) set owns: name
-    When relation(reference) set owns: email
-    Then relation(reference) set owns: name
+    # TODO: Entity types cannot play wrong types
+
+  Scenario: Entity types can unset playing role types
+    When put relation type: marriage
+    When relation(marriage) create role: husband
+    When relation(marriage) create role: wife
+    When entity(person) set plays role: marriage:husband
+    When entity(person) set plays role: marriage:wife
+    Then entity(person) unset plays role: marriage:husband
+    Then entity(person) get plays roles do not contain:
+      | marriage:husband |
+    Then relation(marriage) get role(husband) get players do not contain:
+      | person |
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(reference) set owns: email
+    Then entity(person) unset plays role: marriage:wife
+    Then entity(person) get plays roles do not contain:
+      | marriage:husband |
+      | marriage:wife    |
+    Then relation(marriage) get role(husband) get players do not contain:
+      | person |
+    Then relation(marriage) get role(wife) get players do not contain:
+      | person |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get plays roles do not contain:
+      | marriage:husband |
+      | marriage:wife    |
+    Then relation(marriage) get role(husband) get players do not contain:
+      | person |
+    Then relation(marriage) get role(wife) get players do not contain:
+      | person |
+
+  Scenario: Entity types can inherit playing role types
+    When put relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: child
+    When put relation type: marriage
+    When relation(marriage) create role: husband
+    When relation(marriage) create role: wife
+    When put entity type: animal
+    When entity(animal) set plays role: parentship:parent
+    When entity(animal) set plays role: parentship:child
+    When entity(person) set supertype: animal
+    When entity(person) set plays role: marriage:husband
+    When entity(person) set plays role: marriage:wife
+    Then entity(person) get plays roles contain:
+      | parentship:parent |
+      | parentship:child  |
+      | marriage:husband  |
+      | marriage:wife     |
+    Then entity(person) get plays roles explicit contain:
+      | marriage:husband |
+      | marriage:wife    |
+    Then entity(person) get plays roles explicit do not contain:
+      | parentship:parent |
+      | parentship:child  |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get plays roles contain:
+      | parentship:parent |
+      | parentship:child  |
+      | marriage:husband  |
+      | marriage:wife     |
+    Then entity(person) get plays roles explicit contain:
+      | marriage:husband |
+      | marriage:wife    |
+    Then entity(person) get plays roles explicit do not contain:
+      | parentship:parent |
+      | parentship:child  |
+    When put relation type: sales
+    When relation(sales) create role: buyer
+    When put entity type: customer
+    When entity(customer) set supertype: person
+    When entity(customer) set plays role: sales:buyer
+    Then entity(customer) get plays roles contain:
+      | parentship:parent |
+      | parentship:child  |
+      | marriage:husband  |
+      | marriage:wife     |
+      | sales:buyer       |
+    Then entity(customer) get plays roles explicit contain:
+      | sales:buyer |
+    Then entity(customer) get plays roles explicit do not contain:
+      | parentship:parent |
+      | parentship:child  |
+      | marriage:husband  |
+      | marriage:wife     |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(animal) get plays roles contain:
+      | parentship:parent |
+      | parentship:child  |
+    Then entity(person) get plays roles contain:
+      | parentship:parent |
+      | parentship:child  |
+      | marriage:husband  |
+      | marriage:wife     |
+    Then entity(customer) get plays roles contain:
+      | parentship:parent |
+      | parentship:child  |
+      | marriage:husband  |
+      | marriage:wife     |
+      | sales:buyer       |
+
+  Scenario: Entity types can inherit playing role types that are subtypes of each other
+    When put relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: child
+    When put relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: father
+    When relation(fathership) get role(father); set override: parent
+    When entity(person) set plays role: parentship:parent
+    When entity(person) set plays role: parentship:child
+    When put entity type: man
+    When entity(man) set supertype: person
+    When entity(man) set plays role: fathership:father
+    Then entity(man) get plays roles contain:
+      | parentship:parent |
+      | fathership:father |
+      | parentship:child  |
+    Then entity(man) get plays roles explicit contain:
+      | fathership:father |
+    Then entity(man) get plays roles explicit do not contain:
+      | parentship:parent |
+      | parentship:child  |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(man) get plays roles contain:
+      | parentship:parent |
+      | fathership:father |
+      | parentship:child  |
+    Then entity(man) get plays roles explicit contain:
+      | fathership:father |
+    Then entity(man) get plays roles explicit do not contain:
+      | parentship:parent |
+      | parentship:child  |
+    When put relation type: mothership
+    When relation(mothership) set supertype: parentship
+    When relation(mothership) create role: mother
+    When relation(mothership) get role(mother); set override: parent
+    When put entity type: woman
+    When entity(woman) set supertype: person
+    When entity(woman) set plays role: mothership:mother
+    Then entity(woman) get plays roles contain:
+      | parentship:parent |
+      | mothership:mother |
+      | parentship:child  |
+    Then entity(woman) get plays roles explicit contain:
+      | mothership:mother |
+    Then entity(woman) get plays roles explicit do not contain:
+      | parentship:parent |
+      | parentship:child  |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get plays roles contain:
+      | parentship:parent |
+      | parentship:child  |
+    Then entity(man) get plays roles contain:
+      | parentship:parent |
+      | fathership:father |
+      | parentship:child  |
+    Then entity(man) get plays roles explicit contain:
+      | fathership:father |
+    Then entity(man) get plays roles explicit do not contain:
+      | parentship:parent |
+      | parentship:child  |
+    Then entity(woman) get plays roles contain:
+      | parentship:parent |
+      | mothership:mother |
+      | parentship:child  |
+    Then entity(woman) get plays roles explicit contain:
+      | mothership:mother |
+    Then entity(woman) get plays roles explicit do not contain:
+      | parentship:parent |
+      | parentship:child  |
+
+  Scenario: Entity types can override inherited playing role types
+    When put relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: child
+    When put relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: father
+    When relation(fathership) get role(father); set override: parent
+    When entity(person) set plays role: parentship:parent
+    When entity(person) set plays role: parentship:child
+    When put entity type: man
+    When entity(man) set supertype: person
+    When entity(man) set plays role: fathership:father
+    When entity(man) get plays role: fathership:father; set override: parentship:parent
+    Then entity(man) get plays roles contain:
+      | fathership:father |
+      | parentship:child  |
+    Then entity(man) get plays roles do not contain:
+      | parentship:parent |
+    Then entity(man) get plays roles explicit contain:
+      | fathership:father |
+    Then entity(man) get plays roles explicit do not contain:
+      | parentship:child  |
+      | parentship:parent |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(man) get plays roles contain:
+      | fathership:father |
+      | parentship:child  |
+    Then entity(man) get plays roles do not contain:
+      | parentship:parent |
+    Then entity(man) get plays roles explicit contain:
+      | fathership:father |
+    Then entity(man) get plays roles explicit do not contain:
+      | parentship:child  |
+      | parentship:parent |
+    When put relation type: mothership
+    When relation(mothership) set supertype: parentship
+    When relation(mothership) create role: mother
+    When relation(mothership) get role(mother); set override: parent
+    When put entity type: woman
+    When entity(woman) set supertype: person
+    When entity(woman) set plays role: mothership:mother
+    When entity(woman) get plays role: mothership:mother; set override: parentship:parent
+    Then entity(woman) get plays roles contain:
+      | mothership:mother |
+      | parentship:child  |
+    Then entity(woman) get plays roles do not contain:
+      | parentship:parent |
+    Then entity(woman) get plays roles explicit contain:
+      | mothership:mother |
+    Then entity(woman) get plays roles explicit do not contain:
+      | parentship:child  |
+      | parentship:parent |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get plays roles contain:
+      | parentship:parent |
+      | parentship:child  |
+    Then entity(man) get plays roles contain:
+      | fathership:father |
+      | parentship:child  |
+    Then entity(man) get plays roles do not contain:
+      | parentship:parent |
+    Then entity(man) get plays roles explicit contain:
+      | fathership:father |
+    Then entity(man) get plays roles explicit do not contain:
+      | parentship:child  |
+      | parentship:parent |
+    Then entity(woman) get plays roles contain:
+      | mothership:mother |
+      | parentship:child  |
+    Then entity(woman) get plays roles do not contain:
+      | parentship:parent |
+    Then entity(woman) get plays roles explicit contain:
+      | mothership:mother |
+    Then entity(woman) get plays roles explicit do not contain:
+      | parentship:child  |
+      | parentship:parent |
+
+  Scenario: Entity types cannot redeclare inherited/overridden playing role types
+    When put relation type: parentship
+    When relation(parentship) create role: parent
+    When put relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: father
+    When relation(fathership) get role(father); set override: parent
+    When entity(person) set plays role: parentship:parent
+    When put entity type: man
+    When entity(man) set supertype: person
+    When entity(man) set plays role: fathership:father
+    When entity(man) get plays role: fathership:father; set override: parentship:parent
+    When put entity type: boy
+    When entity(boy) set supertype: man
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(boy) set plays role: parentship:parent; fails
+    When connection open schema transaction for database: typedb
+    Then entity(boy) set plays role: fathership:father
+    Then transaction commits; fails
+
+  Scenario: Entity types cannot override declared playing role types
+    When put relation type: parentship
+    When relation(parentship) create role: parent
+    When put relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: father
+    When relation(fathership) get role(father); set override: parent
+    When entity(person) set plays role: parentship:parent
+    Then entity(person) set plays role: fathership:father
+    Then entity(person) get plays role: fathership:father; set override: parentship:parent; fails
+
+  Scenario: Entity types cannot override inherited playing role types other than with their subtypes
+    When put relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: child
+    When put relation type: fathership
+    When relation(fathership) create role: father
+    When entity(person) set plays role: parentship:parent
+    When entity(person) set plays role: parentship:child
+    When put entity type: man
+    When entity(man) set supertype: person
+    Then entity(man) set plays role: fathership:father
+    Then entity(man) get plays role: fathership:father; set override: parentship:parent; fails
+
+  Scenario: Relation types can play role types
+    When put relation type: locates
+    When relation(locates) create role: location
+    When relation(locates) create role: located
+    When put relation type: marriage
+    When relation(marriage) create role: husband
+    When relation(marriage) create role: wife
+    When relation(marriage) set plays role: locates:located
+    Then relation(marriage) get plays roles contain:
+      | locates:located |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When put relation type: organises
+    When relation(organises) create role: organiser
+    When relation(organises) create role: organised
+    When relation(marriage) set plays role: organises:organised
+    Then relation(marriage) get plays roles contain:
+      | locates:located     |
+      | organises:organised |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(marriage) get plays roles contain:
+      | locates:located     |
+      | organises:organised |
+
+    # TODO: Relation types cannot play wrong types
+
+  Scenario: Relation types can unset playing role types
+    When put relation type: locates
+    When relation(locates) create role: location
+    When relation(locates) create role: located
+    When put relation type: organises
+    When relation(organises) create role: organiser
+    When relation(organises) create role: organised
+    When put relation type: marriage
+    When relation(marriage) create role: husband
+    When relation(marriage) create role: wife
+    When relation(marriage) set plays role: locates:located
+    When relation(marriage) set plays role: organises:organised
+    When relation(marriage) unset plays role: locates:located
+    Then relation(marriage) get plays roles do not contain:
+      | locates:located |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When relation(marriage) unset plays role: organises:organised
+    Then relation(marriage) get plays roles do not contain:
+      | locates:located     |
+      | organises:organised |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(marriage) get plays roles do not contain:
+      | locates:located     |
+      | organises:organised |
+
+  Scenario: Relation types can inherit playing role types
+    When put relation type: locates
+    When relation(locates) create role: locating
+    When relation(locates) create role: located
+    When put relation type: contractor-locates
+    When relation(contractor-locates) create role: contractor-locating
+    When relation(contractor-locates) create role: contractor-located
+    When put relation type: employment
+    When relation(employment) create role: employer
+    When relation(employment) create role: employee
+    When relation(employment) set plays role: locates:located
+    When put relation type: contractor-employment
+    When relation(contractor-employment) set supertype: employment
+    When relation(contractor-employment) set plays role: contractor-locates:contractor-located
+    Then relation(contractor-employment) get plays roles contain:
+      | locates:located                       |
+      | contractor-locates:contractor-located |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When put relation type: parttime-locates
+    When relation(parttime-locates) create role: parttime-locating
+    When relation(parttime-locates) create role: parttime-located
+    When put relation type: parttime-employment
+    When relation(parttime-employment) set supertype: contractor-employment
+    When relation(parttime-employment) create role: parttime-employer
+    When relation(parttime-employment) create role: parttime-employee
+    When relation(parttime-employment) set plays role: parttime-locates:parttime-located
+    Then relation(parttime-employment) get plays roles contain:
+      | locates:located                       |
+      | contractor-locates:contractor-located |
+      | parttime-locates:parttime-located     |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(contractor-employment) get plays roles contain:
+      | locates:located                       |
+      | contractor-locates:contractor-located |
+    Then relation(parttime-employment) get plays roles contain:
+      | locates:located                       |
+      | contractor-locates:contractor-located |
+      | parttime-locates:parttime-located     |
+
+  Scenario: Relation types can inherit playing role types that are subtypes of each other
+    When put relation type: locates
+    When relation(locates) create role: locating
+    When relation(locates) create role: located
+    When put relation type: contractor-locates
+    When relation(contractor-locates) set supertype: locates
+    When relation(contractor-locates) create role: contractor-locating
+    When relation(contractor-locates) get role(contractor-locating); set override: locating
+    When relation(contractor-locates) create role: contractor-located
+    When relation(contractor-locates) get role(contractor-located); set override: located
+    When put relation type: employment
+    When relation(employment) create role: employer
+    When relation(employment) create role: employee
+    When relation(employment) set plays role: locates:located
+    When put relation type: contractor-employment
+    When relation(contractor-employment) set supertype: employment
+    When relation(contractor-employment) set plays role: contractor-locates:contractor-located
+    Then relation(contractor-employment) get plays roles contain:
+      | locates:located                       |
+      | contractor-locates:contractor-located |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When put relation type: parttime-locates
+    When relation(parttime-locates) set supertype: contractor-locates
+    When relation(parttime-locates) create role: parttime-locating
+    When relation(parttime-locates) get role(parttime-locating); set override: contractor-locating
+    When relation(parttime-locates) create role: parttime-located
+    When relation(parttime-locates) get role(parttime-located); set override: contractor-located
+    When put relation type: parttime-employment
+    When relation(parttime-employment) set supertype: contractor-employment
+    When relation(parttime-employment) create role: parttime-employer
+    When relation(parttime-employment) create role: parttime-employee
+    When relation(parttime-employment) set plays role: parttime-locates:parttime-located
+    Then relation(parttime-employment) get plays roles contain:
+      | locates:located                       |
+      | contractor-locates:contractor-located |
+      | parttime-locates:parttime-located     |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(contractor-employment) get plays roles contain:
+      | locates:located                       |
+      | contractor-locates:contractor-located |
+    Then relation(parttime-employment) get plays roles contain:
+      | locates:located                       |
+      | contractor-locates:contractor-located |
+      | parttime-locates:parttime-located     |
+
+  Scenario: Relation types can override inherited playing role types
+    When put relation type: locates
+    When relation(locates) create role: locating
+    When relation(locates) create role: located
+    When put relation type: contractor-locates
+    When relation(contractor-locates) set supertype: locates
+    When relation(contractor-locates) create role: contractor-locating
+    When relation(contractor-locates) get role(contractor-locating); set override: locating
+    When relation(contractor-locates) create role: contractor-located
+    When relation(contractor-locates) get role(contractor-located); set override: located
+    When put relation type: employment
+    When relation(employment) create role: employer
+    When relation(employment) create role: employee
+    When relation(employment) set plays role: locates:located
+    When put relation type: contractor-employment
+    When relation(contractor-employment) set supertype: employment
+    When relation(contractor-employment) set plays role: contractor-locates:contractor-located
+    When relation(contractor-employment) get plays role: contractor-locates:contractor-located; set override: locates:located
+    Then relation(contractor-employment) get plays roles do not contain:
+      | locates:located |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When put relation type: parttime-locates
+    When relation(parttime-locates) set supertype: contractor-locates
+    When relation(parttime-locates) create role: parttime-locating
+    When relation(parttime-locates) get role(parttime-locating); set override: contractor-locating
+    When relation(parttime-locates) create role: parttime-located
+    When relation(parttime-locates) get role(parttime-located); set override: contractor-located
+    When put relation type: parttime-employment
+    When relation(parttime-employment) set supertype: contractor-employment
+    When relation(parttime-employment) create role: parttime-employer
+    When relation(parttime-employment) create role: parttime-employee
+    When relation(parttime-employment) set plays role: parttime-locates:parttime-located
+    When relation(parttime-employment) get plays role: parttime-locates:parttime-located; set override: contractor-locates:contractor-located
+    Then relation(parttime-employment) get plays roles do not contain:
+      | locates:located                       |
+      | contractor-locates:contractor-located |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(contractor-employment) get plays roles do not contain:
+      | locates:located |
+    Then relation(parttime-employment) get plays roles do not contain:
+      | locates:located                       |
+      | contractor-locates:contractor-located |
+
+  Scenario: Relation types cannot redeclare inherited/overridden playing role types
+    When put relation type: locates
+    When relation(locates) create role: located
+    When put relation type: contractor-locates
+    When relation(contractor-locates) set supertype: locates
+    When relation(contractor-locates) create role: contractor-located
+    When relation(contractor-locates) get role(contractor-located); set override: located
+    When put relation type: employment
+    When relation(employment) create role: employee
+    When relation(employment) set plays role: locates:located
+    When put relation type: contractor-employment
+    When relation(contractor-employment) set supertype: employment
+    When relation(contractor-employment) set plays role: contractor-locates:contractor-located
+    When relation(contractor-employment) get plays role: contractor-locates:contractor-located; set override: locates:located
+    When put relation type: parttime-employment
+    When relation(parttime-employment) set supertype: contractor-employment
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parttime-employment) set plays role: locates:located; fails
+    When connection open schema transaction for database: typedb
+    Then relation(parttime-employment) set plays role: contractor-locates:contractor-located
+    Then transaction commits; fails
+
+  Scenario: Relation types cannot override declared playing role types
+    When put relation type: locates
+    When relation(locates) create role: locating
+    When relation(locates) create role: located
+    When put relation type: employment-locates
+    When relation(employment-locates) set supertype: locates
+    When relation(employment-locates) create role: employment-locating
+    When relation(employment-locates) get role(employment-locating); set override: locating
+    When relation(employment-locates) create role: employment-located
+    When relation(employment-locates) get role(employment-located); set override: located
+    When put relation type: employment
+    When relation(employment) create role: employer
+    When relation(employment) create role: employee
+    When relation(employment) set plays role: locates:located
+    Then relation(employment) set plays role: employment-locates:employment-located
+    Then relation(employment) get plays role: employment-locates:employment-located; set override: locates:located; fails
+
+  Scenario: Relation types cannot override inherited playing role types other than with their subtypes
+    When put relation type: locates
+    When relation(locates) create role: locating
+    When relation(locates) create role: located
+    When put relation type: contractor-locates
+    When relation(contractor-locates) create role: contractor-locating
+    When relation(contractor-locates) create role: contractor-located
+    When put relation type: employment
+    When relation(employment) create role: employer
+    When relation(employment) create role: employee
+    When relation(employment) set plays role: locates:located
+    When put relation type: contractor-employment
+    When relation(contractor-employment) set supertype: employment
+    Then relation(contractor-employment) set plays role: contractor-locates:contractor-located
+    Then relation(contractor-employment) get plays role: contractor-locates:contractor-located; set override: locates:located; fails
+
+    # TODO: Attributes and structs can not!
+
+  Scenario Outline: <root-type> types can redeclare playing role types
+    When put relation type: parentship
+    When relation(parentship) create role: parent
+    When <root-type>(<type-name>) set plays role: parentship:parent
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<type-name>) set plays role: parentship:parent
     Examples:
-      | value-type    |
-      | long          |
-      | double        |
-      | decimal       |
-      | string        |
-      | boolean       |
-      | datetime      |
-      | datetimetz    |
-      | duration      |
-      | custom-struct |
+      | root-type | type-name   |
+      | entity    | person      |
+      | relation  | description |
 
-  Scenario: Relation types cannot own entities, relations, roles, structs, and structs fields
-    When put relation type: credit
-    When relation(marriage) create role: creditor
+  Scenario Outline: <root-type> types cannot unset not played role
     When put relation type: marriage
-    When relation(marriage) create role: spouse
-    # TODO: Create structs in concept api
-    When put struct type: passport-document
-    When struct(passport-document) create field: first-name
-    When struct(passport-document) get field(first-name); set value-type: string
-    When struct(passport-document) create field: surname
-    When struct(passport-document) get field(surname); set value-type: string
-    When struct(passport-document) create field: birthday
-    When struct(passport-document) get field(birthday); set value-type: datetime
-    Then relation(marriage) set owns: person; fails
-    Then relation(marriage) set owns: credit; fails
-    Then relation(marriage) set owns: marriage:creditor; fails
-    Then relation(marriage) set owns: passport; fails
-    Then relation(marriage) set owns: passport:birthday; fails
-    Then relation(marriage) set owns: marriage:spouse; fails
-    Then relation(marriage) get owns is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then relation(marriage) get owns is empty
+    When relation(marriage) create role: husband
+    When relation(marriage) create role: wife
+    When <root-type>(<type-name>) set plays role: marriage:wife
+    Then <root-type>(<type-name>) get plays roles do not contain:
+      | marriage:husband |
+    Then <root-type>(<type-name>) unset plays role: marriage:husband; fails
+    Examples:
+      | root-type | type-name   |
+      | entity    | person      |
+      | relation  | description |
 
-  Scenario: Attribute types cannot own entities, attributes, relations, roles, structs, and structs fields
-    When put attribute type: surname
+  Scenario Outline: <root-type> types cannot unset playing role types that are currently played by existing instances
     When put relation type: marriage
-    When relation(marriage) create role: spouse
-    When attribute(surname) set value-type: string
-    # TODO: Create structs in concept api
-    When put struct type: passport
-    When struct(passport) create field: first-name
-    When struct(passport) get field(first-name); set value-type: string
-    When struct(passport) create field: surname
-    When struct(passport) get field(surname); set value-type: string
-    When struct(passport) create field: birthday
-    When struct(passport) get field(birthday); set value-type: datetime
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    Then attribute(name) set owns: person; fails
-    Then attribute(name) set owns: surname; fails
-    Then attribute(name) set owns: marriage; fails
-    Then attribute(name) set owns: marriage:spouse; fails
-    Then attribute(name) set owns: passport; fails
-    Then attribute(name) set owns: passport:birthday; fails
-    Then attribute(name) get owns is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then attribute(name) get owns is empty
-
-  Scenario: Struct types cannot own entities, attributes, relations, roles, structs, and structs fields
-    When put attribute type: name
-    When put relation type: marriage
-    When relation(marriage) create role: spouse
-    When attribute(surname) set value-type: string
-    # TODO: Create structs in concept api
-    When put struct type: passport
-    When struct(passport) create field: first-name
-    When struct(passport) get field(first-name); set value-type: string
-    When struct(passport) create field: surname
-    When struct(passport) get field(surname); set value-type: string
-    When struct(passport) create field: birthday
-    When struct(passport) get field(birthday); set value-type: datetime
-    # TODO: Create structs in concept api
-    When put struct type: wallet
-    When struct(wallet) create field: currency
-    When struct(wallet) get field(currency); set value-type: string
-    When struct(wallet) create field: value
-    When struct(wallet) get field(value); set value-type: double
-    Then struct(wallet) set owns: person; fails
-    Then struct(wallet) set owns: name; fails
-    Then struct(wallet) set owns: marriage; fails
-    Then struct(wallet) set owns: marriage:spouse; fails
-    Then struct(wallet) set owns: passport; fails
-    Then struct(wallet) set owns: passport:birthday; fails
-    Then struct(wallet) set owns: wallet:currency; fails
-    Then struct(wallet) get owns is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then struct(wallet) get owns is empty
-
-  Scenario Outline: <root-type> types cannot unset owning attributes that are owned by existing instances
-    When put attribute type: name
-    When attribute(name) set value-type: <value-type>
-    When <root-type>(<type-name>) set owns: name
+    When relation(marriage) create role: husband
+    When relation(marriage) create role: wife
+    When <root-type>(<type-name>) set plays role: marriage:wife
     Then transaction commits
     When connection open write transaction for database: typedb
     When $i = <root-type>(<type-name>) create new instance
-    When $a = attribute(name) as(<value-type>) put: <value>
-    When entity $i set has: $a
+    When $m = relation(marriage) create new instance
+    When relation $m add player for role(wife): $i
     Then transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) unset owns: name; fails
-    Then <root-type>(<type-name>) get owns contain: name
+    Then <root-type>(<type-name>) unset plays role: marriage:wife; fails
     Examples:
-      | root-type | type-name   | value-type | value           |
-      | entity    | person      | long       | 1               |
-      | entity    | person      | double     | 1.0             |
-      | entity    | person      | decimal    | 1.0             |
-      | entity    | person      | string     | "alice"         |
-      | entity    | person      | boolean    | true            |
-      | entity    | person      | datetime   | 2024-05-04      |
-      | entity    | person      | datetimetz | 2024-05-04+0010 |
-      | entity    | person      | duration   | P1Y             |
-      | relation  | description | long       | 1               |
-      | relation  | description | double     | 1.0             |
-      | relation  | description | decimal    | 1.0             |
-      | relation  | description | string     | "alice"         |
-      | relation  | description | boolean    | true            |
-      | relation  | description | datetime   | 2024-05-04      |
-      | relation  | description | datetimetz | 2024-05-04+0010 |
-      | relation  | description | duration   | P1Y             |
+      | root-type | type-name   |
+      | entity    | person      |
+      | relation  | description |
 
-  Scenario Outline: <root-type> types can re-override owns
-    When put attribute type: email
-    When attribute(email) set value-type: <value-type>
-    When attribute(email) set annotation: @abstract
-    When put attribute type: work-email
-    When attribute(work-email) set value-type: <value-type>
-    When attribute(work-email) set supertype: email
-    When <root-type>(<supertype-name>) set annotation: @abstract
-    When <root-type>(<supertype-name>) set owns: email
-    When <root-type>(<sub-name>) set annotation: @abstract
+  Scenario Outline: <root-type> types can re-override inherited playing role types
+    When put relation type: parentship
+    When relation(parentship) create role: parent
+    When put relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: father
+    When relation(fathership) get role(father); set override: parent
+    When <root-type>(<supertype-name>) set plays role: parentship:parent
     When <root-type>(<subtype-name>) set supertype: person
-    When <root-type>(<subtype-name>) set owns: work-email
-    When <root-type>(<subtype-name>) get owns: work-email; set override: email
-    Then <root-type>(<subtype-name>) get owns overridden(work-email) get label: email
+    When <root-type>(<subtype-name>) set plays role: fathership:father
+    When <root-type>(<subtype-name>) get plays role: fathership:father; set override: parentship:parent
     When transaction commits
     When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) set owns: work-email
-    When <root-type>(<subtype-name>) get owns: work-email; set override: email
-    Then <root-type>(<subtype-name>) get owns overridden(work-email) get label: email
+    When <root-type>(<subtype-name>) set plays role: fathership:father
+    When <root-type>(<subtype-name>) get plays role: fathership:father; set override: parentship:parent
     Examples:
-      | root-type | supertype-name | subtype-name | value-type    |
-      | entity    | person         | customer     | long          |
-      | entity    | person         | customer     | double        |
-      | entity    | person         | customer     | decimal       |
-      | entity    | person         | customer     | string        |
-      | entity    | person         | customer     | boolean       |
-      | entity    | person         | customer     | datetime      |
-      | entity    | person         | customer     | datetimetz    |
-      | entity    | person         | customer     | duration      |
-      | entity    | person         | customer     | custom-struct |
-      | relation  | description    | registration | long          |
-      | relation  | description    | registration | double        |
-      | relation  | description    | registration | decimal       |
-      | relation  | description    | registration | string        |
-      | relation  | description    | registration | boolean       |
-      | relation  | description    | registration | datetime      |
-      | relation  | description    | registration | datetimetz    |
-      | relation  | description    | registration | duration      |
-      | relation  | description    | registration | custom-struct |
-
-  Scenario Outline: <root-type> types cannot redeclare inherited owns as owns
-    When put attribute type: email
-    When attribute(email) set value-type: <value-type>
-    When put attribute type: name
-    When attribute(name) set value-type: <value-type>
-    When <root-type>(<supertype-name>) set owns: name
-    Then <root-type>(<subtype-name>) set owns: name
-    Then transaction commits; fails
-    Examples:
-      | root-type | supertype-name | subtype-name | value-type |
-      | entity    | person         | customer     | string     |
-      | entity    | person         | customer     | long       |
-      | relation  | description    | registration | string     |
-      | relation  | description    | registration | datetime   |
-
-  Scenario Outline: <root-type> types cannot redeclare inherited owns in multiple layers of inheritance
-    When put attribute type: name
-    When attribute(name) set value-type: <value-type>
-    When attribute(name) set annotation: @abstract
-    When put attribute type: customer-name
-    When attribute(customer-name) set value-type: <value-type>
-    When attribute(customer-name) set supertype: name
-    When <root-type>(<supertype-name>) set annotation: @abstract
-    When <root-type>(<supertype-name>) set owns: name
-    When <root-type>(<subtype-name>) set owns: customer-name
-    When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
-    Then <root-type>(<subtype-name-2>) set owns: name
-    Then transaction commits; fails
-    Examples:
-      | root-type | supertype-name | subtype-name | subtype-name-2 | value-type    |
-      | entity    | person         | customer     | subscriber     | datetimetz    |
-      | entity    | person         | customer     | subscriber     | custom-struct |
-      | relation  | description    | registration | profile        | decimal       |
-      | relation  | description    | registration | profile        | string        |
-
-  Scenario Outline: <root-type> types cannot redeclare overridden owns as owns
-    When put attribute type: name
-    When attribute(name) set value-type: <value-type>
-    When attribute(name) set annotation: @abstract
-    When put attribute type: customer-name
-    When attribute(customer-name) set value-type: <value-type>
-    When attribute(customer-name) set supertype: name
-    When <root-type>(<supertype-name>) set annotation: @abstract
-    When <root-type>(<supertype-name>) set owns: name
-    # TODO: No set override here?
-    When <root-type>(<subtype-name>) set owns: customer-name
-    When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
-    Then <root-type>(<subtype-name-2>) set owns: customer-name
-    Then transaction commits; fails
-    Examples:
-      | root-type | supertype-name | subtype-name | subtype-name-2 | value-type |
-      | entity    | person         | customer     | subscriber     | boolean    |
-      | entity    | person         | customer     | subscriber     | long       |
-      | relation  | description    | registration | profile        | duration   |
-      | relation  | description    | registration | profile        | double     |
-
-  Scenario Outline: <root-type> types cannot override declared owns with owns
-    When put attribute type: name
-    When attribute(name) set value-type: <value-type>
-    When attribute(name) set annotation: @abstract
-    When put attribute type: first-name
-    When attribute(first-name) set value-type: <value-type>
-    When attribute(first-name) set supertype: name
-    When <root-type>(<type-name>) set annotation: @abstract
-    When <root-type>(<type-name>) set owns: name
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) set owns: first-name
-    Then <root-type>(<type-name>) get owns: first-name; set override: name; fails
-    Examples:
-      | root-type | type-name   | value-type |
-      | entity    | person      | string     |
-      | relation  | description | string     |
-
-  Scenario Outline: <root-type> types cannot override inherited owns other than with their subtypes
-    When put attribute type: username
-    When attribute(username) set value-type: <value-type>
-    When put attribute type: reference
-    When attribute(reference) set value-type: <value-type>
-    When <root-type>(<supertype-name>) set owns: username
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) set owns: reference
-    Then <root-type>(<subtype-name>) get owns: reference; set override: username; fails
-    Examples:
-      | root-type | supertype-name | subtype-name | value-type |
-      | entity    | person         | customer     | double     |
-      | relation  | description    | registration | string     |
-
-  Scenario Outline: <root-type> types cannot unset not owned ownership
-    When put attribute type: username
-    When attribute(username) set value-type: <value-type>
-    When put attribute type: reference
-    When attribute(reference) set value-type: <value-type>
-    When <root-type>(<type-name>) set owns: username
-    Then <root-type>(<type-name>) get owns contain: username
-    Then <root-type>(<type-name>) unset owns: reference; fails
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) get owns contain: username
-    Then <root-type>(<type-name>) unset owns: reference; fails
-    Then <root-type>(<type-name>) unset owns: username
-    Then <root-type>(<type-name>) unset owns: username; fails
-    Then <root-type>(<type-name>) get owns is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then <root-type>(<type-name>) get owns is empty
-    Examples:
-      | root-type | type-name   | value-type |
-      | entity    | person      | string     |
-      | relation  | description | long       |
-
-  Scenario Outline: <root-type> types cannot unset inherited ownership
-    When put attribute type: username
-    When attribute(username) set value-type: <value-type>
-    When <root-type>(<supertype-name>) set owns: username
-    Then <root-type>(<supertype-name>) get owns contain: username
-    Then <root-type>(<subtype-name>) get owns contain: username
-    Then <root-type>(<subtype-name>) unset owns: username; fails
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns contain: username
-    Then <root-type>(<subtype-name>) unset owns: username; fails
-    Examples:
-      | root-type | supertype-name | subtype-name | value-type |
-      | entity    | person         | customer     | string     |
-      | relation  | description    | registration | long       |
+      | root-type | supertype-name | subtype-name |
+      | entity    | person         | customer     |
+      | relation  | description    | registration |
 
 ########################
-# owns lists
+# plays lists
 ########################
+# TODO: Copy scalar tests here and refactor it!
 
-  Scenario Outline: Entity types can own and unset lists of attributes
-    When put attribute type: name
-    When attribute(name) set value-type: <value-type>
-    When put attribute type: surname
-    When attribute(surname) set value-type: <value-type>
-    When put attribute type: birthday
-    When attribute(birthday) set value-type: <value-type-2>
-    When entity(person) set owns: name[]
-    When entity(person) set owns: birthday[]
-    When entity(person) set owns: surname[]
-    Then entity(person) get owns contain:
-      | name[]     |
-      | surname[]  |
-      | birthday[] |
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then entity(person) get owns contain:
-      | name[]     |
-      | surname[]  |
-      | birthday[] |
-    When entity(person) unset owns: surname[]
-    Then entity(person) get owns do not contain:
-      | surname[] |
-    Then entity(person) get owns contain:
-      | name[]     |
-      | birthday[] |
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then entity(person) get owns contain:
-      | name[]     |
-      | birthday[] |
-    When entity(person) unset owns: birthday[]
-    Then entity(person) get owns do not contain:
-      | birthday[] |
-    Then entity(person) get owns contain:
-      | name[] |
-    When entity(person) unset owns: name[]
-    Then entity(person) get owns do not contain:
-      | name[]     |
-      | surname[]  |
-      | birthday[] |
-    Then entity(person) get owns is empty
-    Examples:
-      | value-type    | value-type-2 |
-      | long          | string       |
-      | double        | datetimetz   |
-      | decimal       | datetime     |
-      | string        | duration     |
-      | boolean       | long         |
-      | datetime      | decimal      |
-      | datetimetz    | double       |
-      | duration      | boolean      |
-      | custom-struct | long         |
 
-  Scenario Outline: Entity types can redeclare owning lists of attributes
-    When put attribute type: name
-    When attribute(name) set value-type: <value-type>
-    When put attribute type: email
-    When attribute(email) set value-type: <value-type>
-    When entity(person) set owns: name[]
-    When entity(person) set owns: email[]
-    Then entity(person) set owns: name[]
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then entity(person) set owns: email[]
-    Examples:
-      | value-type    |
-      | long          |
-      | double        |
-      | decimal       |
-      | string        |
-      | boolean       |
-      | datetime      |
-      | datetimetz    |
-      | duration      |
-      | custom-struct |
-
-  Scenario: Entity types cannot own lists of entities, relations, roles, structs, and structs fields
-    When put entity type: car
-    When put relation type: credit
-    When relation(marriage) create role: creditor
-    # TODO: Create structs in concept api
-    When put struct type: passport
-    When struct(passport) create field: first-name
-    When struct(passport) get field(first-name); set value-type: string
-    When struct(passport) create field: surname
-    When struct(passport) get field(surname); set value-type: string
-    When struct(passport) create field: birthday
-    When struct(passport) get field(birthday); set value-type: datetime
-    Then entity(person) set owns: car[]; fails
-    Then entity(person) set owns: credit[]; fails
-    Then entity(person) set owns: marriage:creditor[]; fails
-    Then entity(person) set owns: passport[]; fails
-    Then entity(person) set owns: passport:birthday[]; fails
-    Then entity(person) get owns is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then entity(person) get owns is empty
-
-  Scenario Outline: Relation types can own and unset lists of attributes
-    When put attribute type: license
-    When attribute(license) set value-type: <value-type>
-    When put attribute type: starting-date
-    When attribute(starting-date) set value-type: <value-type>
-    When put attribute type: comment
-    When attribute(comment) set value-type: <value-type-2>
-    When put relation type: marriage
-    When relation(marriage) create role: spouse
-    When relation(marriage) set owns: license[]
-    When relation(marriage) set owns: starting-date[]
-    When relation(marriage) set owns: comment[]
-    Then relation(marriage) get owns contain:
-      | license[]       |
-      | starting-date[] |
-      | comment[]       |
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then relation(marriage) get owns contain:
-      | license[]       |
-      | starting-date[] |
-      | comment[]       |
-    When relation(marriage) unset owns: starting-date[]
-    Then relation(marriage) get owns do not contain:
-      | starting-date[] |
-    Then relation(marriage) get owns contain:
-      | license[] |
-      | comment[] |
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(marriage) get owns contain:
-      | license[] |
-      | comment[] |
-    When relation(marriage) unset owns: license[]
-    Then relation(marriage) get owns do not contain:
-      | license[] |
-    Then relation(marriage) get owns contain:
-      | comment[] |
-    When relation(marriage) unset owns: comment[]
-    Then relation(marriage) get owns do not contain:
-      | license[]       |
-      | starting-date[] |
-      | comment[]       |
-    Then relation(marriage) get owns is empty
-    Examples:
-      | value-type    | value-type-2 |
-      | long          | string       |
-      | double        | datetimetz   |
-      | decimal       | datetime     |
-      | string        | duration     |
-      | boolean       | long         |
-      | datetime      | decimal      |
-      | datetimetz    | double       |
-      | duration      | boolean      |
-      | custom-struct | long         |
-
-  Scenario Outline: Relation types can redeclare owning lists of attributes
-    When put attribute type: name
-    When attribute(name) set value-type: <value-type>
-    When put attribute type: email
-    When attribute(email) set value-type: <value-type>
-    When put relation type: reference
-    When relation(reference) create role: target
-    When relation(reference) set owns: name[]
-    When relation(reference) set owns: email[]
-    Then relation(reference) set owns: name[]
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(reference) set owns: email[]
-    Examples:
-      | value-type    |
-      | long          |
-      | double        |
-      | decimal       |
-      | string        |
-      | boolean       |
-      | datetime      |
-      | datetimetz    |
-      | duration      |
-      | custom-struct |
-
-  Scenario: Relation types cannot own lists of entities, relations, roles, structs, and structs fields
-    When put relation type: credit
-    When relation(marriage) create role: creditor
-    When put relation type: marriage
-    When relation(marriage) create role: spouse
-    # TODO: Create structs in concept api
-    When put struct type: passport-document
-    When struct(passport-document) create field: first-name
-    When struct(passport-document) get field(first-name); set value-type: string
-    When struct(passport-document) create field: surname
-    When struct(passport-document) get field(surname); set value-type: string
-    When struct(passport-document) create field: birthday
-    When struct(passport-document) get field(birthday); set value-type: datetime
-    Then relation(marriage) set owns: person[]; fails
-    Then relation(marriage) set owns: credit[]; fails
-    Then relation(marriage) set owns: marriage:creditor[]; fails
-    Then relation(marriage) set owns: passport[]; fails
-    Then relation(marriage) set owns: passport:birthday[]; fails
-    Then relation(marriage) set owns: marriage:spouse[]; fails
-    Then relation(marriage) get owns is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then relation(marriage) get owns is empty
-
-  Scenario: Attribute types cannot own lists of entities, attributes, relations, roles, structs, and structs fields
-    When put attribute type: surname
-    When put relation type: marriage
-    When relation(marriage) create role: spouse
-    When attribute(surname) set value-type: string
-    # TODO: Create structs in concept api
-    When put struct type: passport
-    When struct(passport) create field: first-name
-    When struct(passport) get field(first-name); set value-type: string
-    When struct(passport) create field: surname
-    When struct(passport) get field(surname); set value-type: string
-    When struct(passport) create field: birthday
-    When struct(passport) get field(birthday); set value-type: datetime
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    Then attribute(name) set owns: person[]; fails
-    Then attribute(name) set owns: surname[]; fails
-    Then attribute(name) set owns: marriage[]; fails
-    Then attribute(name) set owns: marriage:spouse[]; fails
-    Then attribute(name) set owns: passport[]; fails
-    Then attribute(name) set owns: passport:birthday[]; fails
-    Then attribute(name) get owns is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then attribute(name) get owns is empty
-
-  Scenario: Struct types cannot own lists of entities, attributes, relations, roles, structs, and structs fields
-    When put attribute type: name
-    When put relation type: marriage
-    When relation(marriage) create role: spouse
-    When attribute(surname) set value-type: string
-    # TODO: Create structs in concept api
-    When put struct type: passport
-    When struct(passport) create field: first-name
-    When struct(passport) get field(first-name); set value-type: string
-    When struct(passport) create field: surname
-    When struct(passport) get field(surname); set value-type: string
-    When struct(passport) create field: birthday
-    When struct(passport) get field(birthday); set value-type: datetime
-    # TODO: Create structs in concept api
-    When put struct type: wallet
-    When struct(wallet) create field: currency
-    When struct(wallet) get field(currency); set value-type: string
-    When struct(wallet) create field: value
-    When struct(wallet) get field(value); set value-type: double
-    Then struct(wallet) set owns: person[]; fails
-    Then struct(wallet) set owns: name[]; fails
-    Then struct(wallet) set owns: marriage[]; fails
-    Then struct(wallet) set owns: marriage:spouse[]; fails
-    Then struct(wallet) set owns: passport[]; fails
-    Then struct(wallet) set owns: passport:birthday[]; fails
-    Then struct(wallet) set owns: wallet:currency[]; fails
-    Then struct(wallet) get owns is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then struct(wallet) get owns is empty
-
-  Scenario Outline: <root-type> types cannot unset owning lists of attributes that are owned by existing instances
-    When put attribute type: name
-    When attribute(name) set value-type: <value-type>
-    When <root-type>(<type-name>) set owns: name[]
-    Then transaction commits
-    When connection open write transaction for database: typedb
-    When $i = <root-type>(<type-name>) create new instance
-    When $a = attribute(name[]) as(<value-type>) put: [<value>]
-    When entity $i set has: $a
-    Then transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) unset owns: name[]; fails
-    Then <root-type>(<type-name>) get owns contain: name[]
-    Examples:
-      | root-type | type-name   | value-type | value           |
-      | entity    | person      | long       | 1               |
-      | entity    | person      | double     | 1.0             |
-      | entity    | person      | decimal    | 1.0             |
-      | entity    | person      | string     | "alice"         |
-      | entity    | person      | boolean    | true            |
-      | entity    | person      | datetime   | 2024-05-04      |
-      | entity    | person      | datetimetz | 2024-05-04+0010 |
-      | entity    | person      | duration   | P1Y             |
-      | relation  | description | long       | 1               |
-      | relation  | description | double     | 1.0             |
-      | relation  | description | decimal    | 1.0             |
-      | relation  | description | string     | "alice"         |
-      | relation  | description | boolean    | true            |
-      | relation  | description | datetime   | 2024-05-04      |
-      | relation  | description | datetimetz | 2024-05-04+0010 |
-      | relation  | description | duration   | P1Y             |
-
-  Scenario Outline: <root-type> types can re-override owns of lists
-    When put attribute type: email
-    When attribute(email) set value-type: <value-type>
-    When attribute(email) set annotation: @abstract
-    When put attribute type: work-email
-    When attribute(work-email) set value-type: <value-type>
-    When attribute(work-email) set supertype: email
-    When <root-type>(<supertype-name>) set annotation: @abstract
-    When <root-type>(<supertype-name>) set owns: email[]
-    When <root-type>(<sub-name>) set annotation: @abstract
-    When <root-type>(<subtype-name>) set supertype: person
-    When <root-type>(<subtype-name>) set owns: work-email[]
-    When <root-type>(<subtype-name>) get owns: work-email[]; set override: email[]
-    Then <root-type>(<subtype-name>) get owns overridden(work-email[]) get label: email[]
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) set owns: work-email[]
-    When <root-type>(<subtype-name>) get owns: work-email[]; set override: email[]
-    Then <root-type>(<subtype-name>) get owns overridden(work-email[]) get label: email[]
-    Examples:
-      | root-type | supertype-name | subtype-name | value-type    |
-      | entity    | person         | customer     | long          |
-      | entity    | person         | customer     | double        |
-      | entity    | person         | customer     | decimal       |
-      | entity    | person         | customer     | string        |
-      | entity    | person         | customer     | boolean       |
-      | entity    | person         | customer     | datetime      |
-      | entity    | person         | customer     | datetimetz    |
-      | entity    | person         | customer     | duration      |
-      | entity    | person         | customer     | custom-struct |
-      | relation  | description    | registration | long          |
-      | relation  | description    | registration | double        |
-      | relation  | description    | registration | decimal       |
-      | relation  | description    | registration | string        |
-      | relation  | description    | registration | boolean       |
-      | relation  | description    | registration | datetime      |
-      | relation  | description    | registration | datetimetz    |
-      | relation  | description    | registration | duration      |
-      | relation  | description    | registration | custom-struct |
-
-  Scenario Outline: <root-type> types cannot redeclare inherited owns as owns
-    When put attribute type: email
-    When attribute(email) set value-type: <value-type>
-    When put attribute type: name
-    When attribute(name) set value-type: <value-type>
-    When <root-type>(<supertype-name>) set owns: name[]
-    Then <root-type>(<subtype-name>) set owns: name[]
-    Then transaction commits; fails
-    Examples:
-      | root-type | supertype-name | subtype-name | value-type |
-      | entity    | person         | customer     | string     |
-      | entity    | person         | customer     | long       |
-      | relation  | description    | registration | string     |
-      | relation  | description    | registration | datetime   |
-
-  Scenario Outline: <root-type> types cannot redeclare inherited owns in multiple layers of inheritance
-    When put attribute type: name
-    When attribute(name) set value-type: <value-type>
-    When attribute(name) set annotation: @abstract
-    When put attribute type: customer-name
-    When attribute(customer-name) set value-type: <value-type>
-    When attribute(customer-name) set supertype: name
-    When <root-type>(<supertype-name>) set annotation: @abstract
-    When <root-type>(<supertype-name>) set owns: name[]
-    When <root-type>(<subtype-name>) set owns: customer-name[]
-    When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
-    Then <root-type>(<subtype-name-2>) set owns: name[]
-    Then transaction commits; fails
-    Examples:
-      | root-type | supertype-name | subtype-name | subtype-name-2 | value-type    |
-      | entity    | person         | customer     | subscriber     | datetimetz    |
-      | entity    | person         | customer     | subscriber     | custom-struct |
-      | relation  | description    | registration | profile        | decimal       |
-      | relation  | description    | registration | profile        | string        |
-
-  Scenario Outline: <root-type> types cannot redeclare overridden owns as owns
-    When put attribute type: name
-    When attribute(name) set value-type: <value-type>
-    When attribute(name) set annotation: @abstract
-    When put attribute type: customer-name
-    When attribute(customer-name) set value-type: <value-type>
-    When attribute(customer-name) set supertype: name
-    When <root-type>(<supertype-name>) set annotation: @abstract
-    When <root-type>(<supertype-name>) set owns: name[]
-    # TODO: No set override here?
-    When <root-type>(<subtype-name>) set owns: customer-name[]
-    When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
-    Then <root-type>(<subtype-name-2>) set owns: customer-name[]
-    Then transaction commits; fails
-    Examples:
-      | root-type | supertype-name | subtype-name | subtype-name-2 | value-type |
-      | entity    | person         | customer     | subscriber     | boolean    |
-      | entity    | person         | customer     | subscriber     | long       |
-      | relation  | description    | registration | profile        | duration   |
-      | relation  | description    | registration | profile        | double     |
-
-  Scenario Outline: <root-type> types cannot override declared owns with owns
-    When put attribute type: name
-    When attribute(name) set value-type: <value-type>
-    When attribute(name) set annotation: @abstract
-    When put attribute type: first-name
-    When attribute(first-name) set value-type: <value-type>
-    When attribute(first-name) set supertype: name
-    When <root-type>(<type-name>) set annotation: @abstract
-    When <root-type>(<type-name>) set owns: name[]
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) set owns: first-name[]
-    Then <root-type>(<type-name>) get owns: first-name[]; set override: name[]; fails
-    Examples:
-      | root-type | type-name   | value-type |
-      | entity    | person      | string     |
-      | relation  | description | string     |
-
-  Scenario Outline: <root-type> types cannot override inherited owns other than with their subtypes
-    When put attribute type: username
-    When attribute(username) set value-type: <value-type>
-    When put attribute type: reference
-    When attribute(reference) set value-type: <value-type>
-    When <root-type>(<supertype-name>) set owns: username[]
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) set owns: reference[]
-    Then <root-type>(<subtype-name>) get owns: reference[]; set override: username[]; fails
-    Examples:
-      | root-type | supertype-name | subtype-name | value-type |
-      | entity    | person         | customer     | double     |
-      | relation  | description    | registration | string     |
-
-  Scenario Outline: <root-type> types cannot unset not owned list of ownerships
-    When put attribute type: username
-    When attribute(username) set value-type: <value-type>
-    When put attribute type: reference
-    When attribute(reference) set value-type: <value-type>
-    When <root-type>(<type-name>) set owns: username[]
-    Then <root-type>(<type-name>) get owns contain: username[]
-    Then <root-type>(<type-name>) unset owns: reference[]; fails
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) get owns contain: username[]
-    Then <root-type>(<type-name>) unset owns: reference[]; fails
-    Then <root-type>(<type-name>) unset owns: username[]
-    Then <root-type>(<type-name>) unset owns: username[]; fails
-    Then <root-type>(<type-name>) get owns is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then <root-type>(<type-name>) get owns is empty
-    Examples:
-      | root-type | type-name   | value-type |
-      | entity    | person      | string     |
-      | relation  | description | long       |
-
-  Scenario Outline: <root-type> types cannot unset inherited ownership
-    When put attribute type: username
-    When attribute(username) set value-type: <value-type>
-    When <root-type>(<supertype-name>) set owns: username[]
-    Then <root-type>(<supertype-name>) get owns contain: username[]
-    Then <root-type>(<subtype-name>) get owns contain: username[]
-    Then <root-type>(<subtype-name>) unset owns: username[]; fails
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns contain: username[]
-    Then <root-type>(<subtype-name>) unset owns: username[]; fails
-    Examples:
-      | root-type | supertype-name | subtype-name | value-type |
-      | entity    | person         | customer     | string     |
-      | relation  | description    | registration | long       |
-
-  Scenario Outline: <root-type> types cannot set lists of attributes alongside scalar attribute
-    When put attribute type: username
-    When attribute(username) set value-type: <value-type>
-    When <root-type>(<type-name>) set owns: username
-    Then <root-type>(<type-name>) get owns contain: username
-    # TODO: Or it will override the non-list definition?
-    Then <root-type>(<type-name>) set owns: username[]; fails
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) get owns contain: username
-    Then <root-type>(<type-name>) set owns: username[]; fails
-    Examples:
-      | root-type | type-name   | value-type |
-      | entity    | person      | string     |
-      | relation  | description | long       |
-
-  Scenario Outline: <root-type> types cannot set scalar attribute alongside lists of attributes
-    When put attribute type: username
-    When attribute(username) set value-type: <value-type>
-    When <root-type>(<type-name>) set owns: username[]
-    Then <root-type>(<type-name>) get owns contain: username[]
-    # TODO: Or it will override the non-list definition?
-    Then <root-type>(<type-name>) set owns: username; fails
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) get owns contain: username[]
-    Then <root-type>(<type-name>) set owns: username; fails
-    Examples:
-      | root-type | type-name   | value-type |
-      | entity    | person      | string     |
-      | relation  | description | long       |
-
-  Scenario Outline: <root-type> types cannot set lists of attributes alongside inherited scalar attribute
-    When put attribute type: username
-    When attribute(username) set value-type: <value-type>
-    When <root-type>(<supertype-name>) set owns: username
-    Then <root-type>(<supertype-name>) get owns contain: username
-    Then <root-type>(<subtype-name>) get owns contain: username
-    Then <root-type>(<subtype-name>) set owns: username[]; fails
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns contain: username
-    Then <root-type>(<subtype-name>) get owns contain: username
-    Then <root-type>(<subtype-name>) set owns: username[]; fails
-    Examples:
-      | root-type | supertype-name | subtype-name | value-type |
-      | entity    | person         | customer     | string     |
-      | relation  | description    | registration | long       |
-
-  Scenario Outline: <root-type> types cannot set scalar attribute alongside inherited lists of attributes
-    When put attribute type: username
-    When attribute(username) set value-type: <value-type>
-    When <root-type>(<supertype-name>) set owns: username[]
-    Then <root-type>(<supertype-name>) get owns contain: username[]
-    Then <root-type>(<subtype-name>) get owns contain: username[]
-    Then <root-type>(<subtype-name>) set owns: username; fails
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns contain: username[]
-    Then <root-type>(<subtype-name>) get owns contain: username[]
-    Then <root-type>(<subtype-name>) set owns: username; fails
-    Examples:
-      | root-type | supertype-name | subtype-name | value-type |
-      | entity    | person         | customer     | string     |
-      | relation  | description    | registration | long       |
-
-  # TODO: Maybe they can? Change this test's logic!
-  Scenario Outline: <root-type> types cannot override scalar attribute by lists of attributes
-    When put attribute type: email
-    When attribute(email) set value-type: <value-type>
-    When attribute(email) set annotation: @abstract
-    When put attribute type: work-email
-    When attribute(work-email) set value-type: <value-type>
-    When attribute(work-email) set supertype: email
-    When <root-type>(<supertype-name>) set annotation: @abstract
-    When <root-type>(<supertype-name>) set owns: email
-    When <root-type>(<sub-name>) set annotation: @abstract
-    When <root-type>(<subtype-name>) set supertype: person
-    When <root-type>(<subtype-name>) set owns: work-email[]
-    When <root-type>(<subtype-name>) get owns: work-email[]; set override: email; fails
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get owns: work-email[]; set override: email; fails
-    Examples:
-      | root-type | supertype-name | subtype-name | value-type    |
-      | entity    | person         | customer     | decimal       |
-      | relation  | description    | registration | custom-struct |
-
-      # TODO: Maybe they can? Change this test's logic!
-  Scenario Outline: <root-type> types cannot override lists of attributes by scalar attribute
-    When put attribute type: email
-    When attribute(email) set value-type: <value-type>
-    When attribute(email) set annotation: @abstract
-    When put attribute type: work-email
-    When attribute(work-email) set value-type: <value-type>
-    When attribute(work-email) set supertype: email
-    When <root-type>(<supertype-name>) set annotation: @abstract
-    When <root-type>(<supertype-name>) set owns: email[]
-    When <root-type>(<sub-name>) set annotation: @abstract
-    When <root-type>(<subtype-name>) set supertype: person
-    When <root-type>(<subtype-name>) set owns: work-email
-    When <root-type>(<subtype-name>) get owns: work-email; set override: email[]; fails
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get owns: work-email; set override: email[]; fails
-    Examples:
-      | root-type | supertype-name | subtype-name | value-type |
-      | entity    | person         | customer     | datetime   |
-      | relation  | description    | registration | long       |
-
+  # TODO: Everything below is just a copypaste from owns.feature! Needs reconsideration!
 ########################
 # @annotations common: contain common tests for annotations suitable for **scalar** attributes:
 # @key, @unique, @subkey, @values, @range, @card, @regex
@@ -1080,7 +681,7 @@ Feature: Concept Owns
 # @distinct
 ########################
 
-  Scenario Outline: <root-type> types can set owns with @<annotation> and unset it
+  Scenario INPROGRESS Outline: <root-type> types can set owns with @<annotation> and unset it
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When <root-type>(<type-name>) set owns: custom-attribute
@@ -1121,7 +722,7 @@ Feature: Concept Owns
       | relation  | description | card(1, 2)       | string     |
       | relation  | description | regex("\S+")     | string     |
 
-  Scenario Outline: <root-type> types can have owns with @<annotation> alongside pure owns
+  Scenario INPROGRESS Outline: <root-type> types can have owns with @<annotation> alongside pure owns
     When put attribute type: email
     When attribute(email) set value-type: string
     When put attribute type: username
@@ -1169,7 +770,7 @@ Feature: Concept Owns
       | relation  | description | card(1, 2)       |
       | relation  | description | regex("\S+")     |
 
-  Scenario Outline: <root-type> types cannot unset not set @<annotation> of ownership
+  Scenario INPROGRESS Outline: <root-type> types cannot unset not set @<annotation> of ownership
     When put attribute type: username
     When attribute(username) set value-type: string
     When put attribute type: reference
@@ -1208,7 +809,7 @@ Feature: Concept Owns
       | relation  | description | card(1, 2)       |
       | relation  | description | regex("\S+")     |
 
-  Scenario Outline: <root-type> types cannot unset @<annotation> of inherited ownership
+  Scenario INPROGRESS Outline: <root-type> types cannot unset @<annotation> of inherited ownership
     When put attribute type: username
     When attribute(username) set value-type: string
     When <root-type>(<supertype-name>) set owns: username
@@ -1237,7 +838,7 @@ Feature: Concept Owns
       | relation  | description    | registration | card(1, 2)       |
       | relation  | description    | registration | regex("\S+")     |
 
-  Scenario Outline: <root-type> types can inherit owns with @<annotation>s alongside pure owns
+  Scenario INPROGRESS Outline: <root-type> types can inherit owns with @<annotation>s alongside pure owns
     When put attribute type: email
     When attribute(email) set value-type: string
     When put attribute type: name
@@ -1338,7 +939,7 @@ Feature: Concept Owns
       | relation  | description    | registration | profile        | card(1, 2)       |
       | relation  | description    | registration | profile        | regex("\S+")     |
 
-  Scenario Outline: <root-type> types can redeclare @<annotation>s as @<annotation>s
+  Scenario INPROGRESS Outline: <root-type> types can redeclare @<annotation>s as @<annotation>s
     When put attribute type: name
     When attribute(name) set value-type: <value-type>
     When put attribute type: email
@@ -1375,7 +976,7 @@ Feature: Concept Owns
       | relation  | description | card(1, 2)       | string     |
       | relation  | description | regex("\S+")     | string     |
 
-  Scenario Outline: <root-type> types can redeclare owns as owns with @<annotation>
+  Scenario INPROGRESS Outline: <root-type> types can redeclare owns as owns with @<annotation>
     When put attribute type: name
     When attribute(name) set value-type: <value-type>
     When put attribute type: email
@@ -1414,8 +1015,8 @@ Feature: Concept Owns
       | relation  | description | card(1, 2)       | string     |
       | relation  | description | regex("\S+")     | string     |
 
-    # TODO: We set annotations independently now. Is the scenario still relevant? I think so.
-  Scenario Outline: <root-type> types can redeclare owns with @<annotation> as pure owns
+    # TODO: We set annotations independently now. Is the Scenario INPROGRESS still relevant? I think so.
+  Scenario INPROGRESS Outline: <root-type> types can redeclare owns with @<annotation> as pure owns
     When put attribute type: name
     When attribute(name) set value-type: <value-type>
     When put attribute type: email
@@ -1450,7 +1051,7 @@ Feature: Concept Owns
       | relation  | description | card(1, 2)       | string     |
       | relation  | description | regex("\S+")     | string     |
 
-  Scenario Outline: <root-type> types can override inherited pure owns as owns with @<annotation>s
+  Scenario INPROGRESS Outline: <root-type> types can override inherited pure owns as owns with @<annotation>s
     When put attribute type: name
     When attribute(name) set value-type: <value-type>
     When attribute(name) set annotation: @abstract
@@ -1500,7 +1101,7 @@ Feature: Concept Owns
       | relation  | description    | registration | regex("\S+")     | string     |
 
     # TODO: Maybe it should be rejected?
-  Scenario Outline: <root-type> types can re-override owns with <annotation>s
+  Scenario INPROGRESS Outline: <root-type> types can re-override owns with <annotation>s
     When put attribute type: email
     When attribute(email) set value-type: <value-type>
     When attribute(email) set annotation: @abstract
@@ -1542,7 +1143,7 @@ Feature: Concept Owns
       | relation  | description    | registration | card(1, 2)       | string     |
       | relation  | description    | registration | regex("\S+")     | string     |
 
-  Scenario Outline: <root-type> types can redeclare inherited attributes as keys (which will override)
+  Scenario INPROGRESS Outline: <root-type> types can redeclare inherited attributes as keys (which will override)
     When put attribute type: email
     When attribute(email) set value-type: <value-type>
     When <root-type>(<supertype-name>) set owns: email
@@ -1575,7 +1176,7 @@ Feature: Concept Owns
       | relation  | description    | registration | profile        | card(1, 2)       | string     |
       | relation  | description    | registration | profile        | regex("\S+")     | string     |
 
-  Scenario Outline: <root-type> types cannot redeclare inherited owns with @<annotation> as pure owns or owns with @<annotation>
+  Scenario INPROGRESS Outline: <root-type> types cannot redeclare inherited owns with @<annotation> as pure owns or owns with @<annotation>
     When put attribute type: email
     When attribute(email) set value-type: <value-type>
     When put attribute type: name
@@ -1608,7 +1209,7 @@ Feature: Concept Owns
       | relation  | description    | registration | card(1, 2)       | string     |
       | relation  | description    | registration | regex("\S+")     | string     |
 
-  Scenario Outline: <root-type> types cannot redeclare inherited owns with @<annotation>
+  Scenario INPROGRESS Outline: <root-type> types cannot redeclare inherited owns with @<annotation>
     When put attribute type: email
     When attribute(email) set value-type: <value-type>
     When attribute(email) set annotation: @abstract
@@ -1641,7 +1242,7 @@ Feature: Concept Owns
       | relation  | description    | registration | profile        | card(1, 2)       | string     |
       | relation  | description    | registration | profile        | regex("\S+")     | string     |
 
-  Scenario Outline: <root-type> types cannot redeclare overridden owns with @<annotation>s
+  Scenario INPROGRESS Outline: <root-type> types cannot redeclare overridden owns with @<annotation>s
     When put attribute type: email
     When attribute(email) set value-type: <value-type>
     When attribute(email) set annotation: @abstract
@@ -1675,7 +1276,7 @@ Feature: Concept Owns
       | relation  | description    | registration | profile        | card(1, 2)       | string     |
       | relation  | description    | registration | profile        | regex("\S+")     | string     |
 
-  Scenario Outline: <root-type> types cannot redeclare overridden owns with @<annotation>s on multiple layers
+  Scenario INPROGRESS Outline: <root-type> types cannot redeclare overridden owns with @<annotation>s on multiple layers
     When put attribute type: email
     When attribute(email) set value-type: <value-type>
     When attribute(email) set annotation: @abstract
@@ -1710,7 +1311,7 @@ Feature: Concept Owns
       | relation  | description    | registration | profile        | card(1, 2)       | string     |
       | relation  | description    | registration | profile        | regex("\S+")     | string     |
 
-  Scenario Outline: <root-type> subtypes can redeclare @<annotation>s after it is unset from supertype
+  Scenario INPROGRESS Outline: <root-type> subtypes can redeclare @<annotation>s after it is unset from supertype
     When put attribute type: name
     When attribute(name) set value-type: <value-type>
     When put attribute type: surname
@@ -1752,7 +1353,7 @@ Feature: Concept Owns
       | relation  | description | card(1, 2)       | string     |
       | relation  | description | regex("\S+")     | string     |
 
-  Scenario Outline: <root-type> types can inherit owns with @<annotation>s and pure owns that are subtypes of each other
+  Scenario INPROGRESS Outline: <root-type> types can inherit owns with @<annotation>s and pure owns that are subtypes of each other
     When put attribute type: username
     When attribute(username) set value-type: string
     When attribute(username) set annotation: @abstract
@@ -1888,7 +1489,7 @@ Feature: Concept Owns
       | relation  | description    | registration | profile        | card(1, 2)       |
       | relation  | description    | registration | profile        | regex("\S+")     |
 
-  Scenario Outline: <root-type> types can override inherited owns with @<annotation>s and pure owns
+  Scenario INPROGRESS Outline: <root-type> types can override inherited owns with @<annotation>s and pure owns
     When put attribute type: username
     When attribute(username) set value-type: string
     When put attribute type: email
@@ -2064,7 +1665,7 @@ Feature: Concept Owns
 # @key
 ########################
 
-  Scenario Outline: Owns can set @key annotation for <value-type> value type and unset it
+  Scenario INPROGRESS Outline: Owns can set @key annotation for <value-type> value type and unset it
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
@@ -2097,7 +1698,7 @@ Feature: Concept Owns
       | datetimetz |
       | duration   |
 
-  Scenario Outline: Owns cannot set @key annotation for <value-type> as it is not keyable
+  Scenario INPROGRESS Outline: Owns cannot set @key annotation for <value-type> as it is not keyable
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
@@ -2112,7 +1713,7 @@ Feature: Concept Owns
       | decimal       |
       | custom-struct |
 
-  Scenario Outline: Owns cannot set @key annotation for lists
+  Scenario INPROGRESS Outline: Owns cannot set @key annotation for lists
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute[]
@@ -2133,47 +1734,11 @@ Feature: Concept Owns
       | duration      |
       | custom-struct |
 
-  Scenario: Entity types can only commit keys if every instance owns a distinct key
-    When put attribute type: email
-    When attribute(email) set value-type: string
-    When put attribute type: username
-    When attribute(username) set value-type: string
-    When entity(person) set owns: username
-    When entity(person) get owns: username, set annotation: @key
-    Then transaction commits
-    When connection open write transaction for database: typedb
-    When $a = entity(person) create new instance with key(username): alice
-    When $b = entity(person) create new instance with key(username): bob
-    Then transaction commits
-    When connection open schema transaction for database: typedb
-    When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: @key; fails
-    When connection open schema transaction for database: typedb
-    When entity(person) set owns: email
-    Then transaction commits
-    When connection open write transaction for database: typedb
-    When $a = entity(person) get instance with key(username): alice
-    When $alice = attribute(email) as(string) put: alice@vaticle.com
-    When entity $a set has: $alice
-    When $b = entity(person) get instance with key(username): bob
-    When $bob = attribute(email) as(string) put: bob@vaticle.com
-    When entity $b set has: $bob
-    Then transaction commits
-    When connection open schema transaction for database: typedb
-    When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: @key
-    Then entity(person) get owns: email; get annotations contain: @key
-    Then entity(person) get owns: username; get annotations contain: @key
-    Then transaction commits
-    When connection open read transaction for database: typedb
-    Then entity(person) get owns: email; get annotations contain: @key
-    Then entity(person) get owns: username; get annotations contain: @key
-
 ########################
 # @subkey
 ########################
 
-  Scenario Outline: Owns can set @subkey annotation for <value-type> value type and unset it
+  Scenario INPROGRESS Outline: Owns can set @subkey annotation for <value-type> value type and unset it
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
@@ -2206,7 +1771,7 @@ Feature: Concept Owns
       | datetimetz | l2                    |
       | duration   | trydigits2723andafter |
 
-  Scenario Outline: Owns can set @subkey annotation for multiple attributes of <root-type> type
+  Scenario INPROGRESS Outline: Owns can set @subkey annotation for multiple attributes of <root-type> type
     When put attribute type: first-name
     When attribute(first-name) set value-type: string
     When put attribute type: second-name
@@ -2256,7 +1821,7 @@ Feature: Concept Owns
       | entity    | person      |
       | relation  | description |
 
-  Scenario: Owns can set multiple @subkey annotations with different arguments
+  Scenario INPROGRESS: Owns can set multiple @subkey annotations with different arguments
     When put attribute type: name
     When attribute(name) set value-type: string
     When put attribute type: surname
@@ -2283,7 +1848,7 @@ Feature: Concept Owns
     Then entity(person) get owns: surname, get annotations contain: @subkey(FULL-NAME)
     Then entity(person) get owns: age, get annotations contain: @subkey(NAME-AGE)
 
-  Scenario Outline: Owns cannot set @subkey annotation for <value-type> as it is not keyable
+  Scenario INPROGRESS Outline: Owns cannot set @subkey annotation for <value-type> as it is not keyable
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
@@ -2298,7 +1863,7 @@ Feature: Concept Owns
       | decimal       |
       | custom-struct |
 
-  Scenario: Owns cannot set @subkey annotation for incorrect arguments
+  Scenario INPROGRESS: Owns cannot set @subkey annotation for incorrect arguments
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: long
     When entity(person) set owns: custom-attribute
@@ -2317,7 +1882,7 @@ Feature: Concept Owns
     When connection open read transaction for database: typedb
     Then entity(person) get owns: custom-attribute, get annotations is empty
 
-  Scenario Outline: Owns cannot set @subkey annotation for lists
+  Scenario INPROGRESS Outline: Owns cannot set @subkey annotation for lists
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute[]
@@ -2342,7 +1907,7 @@ Feature: Concept Owns
 # @unique
 ########################
 
-  Scenario Outline: Owns can set @unique annotation for <value-type> value type and unset it
+  Scenario INPROGRESS Outline: Owns can set @unique annotation for <value-type> value type and unset it
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
@@ -2375,7 +1940,7 @@ Feature: Concept Owns
       | datetimetz |
       | duration   |
 
-  Scenario Outline: Owns cannot set @unique annotation for <value-type> as it is not keyable
+  Scenario INPROGRESS Outline: Owns cannot set @unique annotation for <value-type> as it is not keyable
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
@@ -2391,7 +1956,7 @@ Feature: Concept Owns
       | custom-struct |
 
   # TODO: Change the test if owns can set @unique annotation for lists!
-  Scenario Outline: Owns cannot set @unique annotation for lists
+  Scenario INPROGRESS Outline: Owns cannot set @unique annotation for lists
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute[]
@@ -2416,7 +1981,7 @@ Feature: Concept Owns
 # @values
 ########################
 
-  Scenario Outline: Owns can set @values annotation for <value-type> value type and lists and unset it
+  Scenario INPROGRESS Outline: Owns can set @values annotation for <value-type> value type and lists and unset it
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When put attribute type: custom-attribute-2
@@ -2496,10 +2061,10 @@ Feature: Concept Owns
       | duration   | P1Y2M3DT4H5M6.789S                                                                                                                                                                                                                                                                                                                                                                                   |
       | duration   | P1Y, P1Y1M, P1Y1M1D, P1Y1M1DT1H, P1Y1M1DT1H1M, P1Y1M1DT1H1M1S, 1Y1M1DT1H1M1S0.1S, 1Y1M1DT1H1M1S0.001S, 1Y1M1DT1H1M0.000001S                                                                                                                                                                                                                                                                          |
 
-  Scenario: Owns can set @values annotation for struct value type
-    # TODO: Do we want to have it? If we do, add it to other Scenario Outlines with different value types
+  Scenario INPROGRESS: Owns can set @values annotation for struct value type
+    # TODO: Do we want to have it? If we do, add it to other Scenario INPROGRESS Outlines with different value types
 
-  Scenario Outline: Owns cannot have @values annotation with empty args
+  Scenario INPROGRESS Outline: Owns cannot have @values annotation with empty args
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
@@ -2520,7 +2085,7 @@ Feature: Concept Owns
       | datetimetz |
       | duration   |
 
-  Scenario Outline: Owns cannot have @values annotation for <value-type> value type with args of invalid value or type
+  Scenario INPROGRESS Outline: Owns cannot have @values annotation for <value-type> value type with args of invalid value or type
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(player) set owns: custom-attribute
@@ -2572,7 +2137,7 @@ Feature: Concept Owns
       | duration   | 1Y                              |
       | duration   | year                            |
 
-  Scenario Outline: Owns cannot have @values annotation for <value-type> value type with duplicated args
+  Scenario INPROGRESS Outline: Owns cannot have @values annotation for <value-type> value type with duplicated args
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(player) set owns: custom-attribute
@@ -2597,7 +2162,7 @@ Feature: Concept Owns
       | datetimetz | 2020-06-04T16:35:02.10+0100 | 2020-06-04T16:35:02.10+0000  | 2020-06-04T16:35:02.10+0100  |
       | duration   | P1Y1M                       | P1Y1M                        | P1Y2M                        |
 
-  Scenario: Owns cannot set multiple @values annotations with different arguments
+  Scenario INPROGRESS: Owns cannot set multiple @values annotations with different arguments
     When put attribute type: name
     When attribute(name) set value-type: string
     When entity(person) set owns: name
@@ -2610,7 +2175,7 @@ Feature: Concept Owns
     Then entity(person) get owns: name, get annotations contain: @values("hi", "HI")
     Then entity(person) get owns: name, get annotations do not contain: @values("Hi")
 
-  Scenario Outline: Owns-related @values annotation for <value-type> value type can be inherited and overridden by a subset of args
+  Scenario INPROGRESS Outline: Owns-related @values annotation for <value-type> value type can be inherited and overridden by a subset of args
     When put relation type: contract
     When relation(contract) create role: participant
     When put attribute type: custom-attribute
@@ -2679,7 +2244,7 @@ Feature: Concept Owns
       | datetimetz | 2024-06-04+0010, 2024-06-04 Asia/Kathmandu, 2024-06-05+0010, 2024-06-05+0100 | 2024-06-04 Asia/Kathmandu, 2024-06-05+0010 |
       | duration   | P6M, P1Y, P1Y1M, P1Y2M, P1Y3M, P1Y4M, P1Y6M                                  | P6M, P1Y3M, P1Y4M, P1Y6M                   |
 
-  Scenario Outline: Inherited @values annotation on owns for <value-type> value type cannot be overridden by the @values of same args or not a subset of args
+  Scenario INPROGRESS Outline: Inherited @values annotation on owns for <value-type> value type cannot be overridden by the @values of same args or not a subset of args
     When put relation type: contract
     When relation(contract) create role: participant
     When put attribute type: custom-attribute
@@ -2742,7 +2307,7 @@ Feature: Concept Owns
 # @range
 ########################
 
-  Scenario Outline: Owns can set @range annotation for <value-type> value type and lists in correct order and unset it
+  Scenario INPROGRESS Outline: Owns can set @range annotation for <value-type> value type and lists in correct order and unset it
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When put attribute type: custom-attribute-2
@@ -2802,10 +2367,10 @@ Feature: Concept Owns
       | duration   | P1Y2M                        | P1Y2M3DT4H5M6.789S                                    |
       | duration   | P1Y2M3DT4H5M6.788S           | P1Y2M3DT4H5M6.789S                                    |
 
-  Scenario: Owns can set @range annotation for struct value type
-    # TODO: Do we want to have it? If we do, add it to other Scenario Outlines with different value types
+  Scenario INPROGRESS: Owns can set @range annotation for struct value type
+    # TODO: Do we want to have it? If we do, add it to other Scenario INPROGRESS Outlines with different value types
 
-  Scenario Outline: Owns cannot have @range annotation for <value-type> value type with less than two args
+  Scenario INPROGRESS Outline: Owns cannot have @range annotation for <value-type> value type with less than two args
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
@@ -2828,7 +2393,7 @@ Feature: Concept Owns
       | duration   | P1Y             |
 
     # TODO: If we allow arg0 == arg1, move this case to another test!
-  Scenario Outline: Owns cannot have @range annotation for <value-type> value type with invalid args or args number
+  Scenario INPROGRESS Outline: Owns cannot have @range annotation for <value-type> value type with invalid args or args number
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(player) set owns: custom-attribute
@@ -2905,7 +2470,7 @@ Feature: Concept Owns
       | duration   | 1Y                              | P1Y                                                |
       | duration   | year                            | P1Y                                                |
 
-  Scenario Outline: Owns cannot set multiple @range annotations with different arguments
+  Scenario INPROGRESS Outline: Owns cannot set multiple @range annotations with different arguments
     When put attribute type: name
     When attribute(name) set value-type: long
     When entity(person) set owns: name
@@ -2934,7 +2499,7 @@ Feature: Concept Owns
       | 5, 6      |
       | 6, 10     |
 
-  Scenario Outline: Owns-related @range annotation for <value-type> value type can be inherited and overridden by a subset of args
+  Scenario INPROGRESS Outline: Owns-related @range annotation for <value-type> value type can be inherited and overridden by a subset of args
     When put relation type: contract
     When relation(contract) create role: participant
     When put attribute type: custom-attribute
@@ -3002,7 +2567,7 @@ Feature: Concept Owns
       | datetimetz | 2024-06-04+0010, 2024-06-05+0010 | 2024-06-04+0010, 2024-06-04T12:00:00+0010 |
       | duration   | P6M, P1Y                         | P8M, P9M                                  |
 
-  Scenario Outline: Inherited @range annotation on owns for <value-type> value type cannot be overridden by the @range of same args or not a subset of args
+  Scenario INPROGRESS Outline: Inherited @range annotation on owns for <value-type> value type cannot be overridden by the @range of same args or not a subset of args
     When put relation type: contract
     When relation(contract) create role: participant
     When put attribute type: custom-attribute
@@ -3064,7 +2629,7 @@ Feature: Concept Owns
 # @card
 ########################
 
-  Scenario Outline: Owns can set @card annotation for <value-type> value type with args in correct order and unset it
+  Scenario INPROGRESS Outline: Owns can set @card annotation for <value-type> value type with args in correct order and unset it
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When put attribute type: custom-attribute-2
@@ -3157,7 +2722,7 @@ Feature: Concept Owns
       | custom-struct | 1    | *                   |
       | custom-struct | *    | 10                  |
 
-  Scenario Outline: Owns can set @card annotation for <value-type> value type with duplicate args (exactly N ownerships)
+  Scenario INPROGRESS Outline: Owns can set @card annotation for <value-type> value type with duplicate args (exactly N ownerships)
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
@@ -3188,7 +2753,7 @@ Feature: Concept Owns
       | custom-struct | 1    |
       | custom-struct | 11   |
 
-  Scenario Outline: Owns cannot have @card annotation for <value-type> value type with less than two args
+  Scenario INPROGRESS Outline: Owns cannot have @card annotation for <value-type> value type with less than two args
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
@@ -3211,7 +2776,7 @@ Feature: Concept Owns
       | datetimetz |
       | duration   |
 
-  Scenario Outline: Owns cannot have @card annotation for <value-type> value type with invalid args or args number
+  Scenario INPROGRESS Outline: Owns cannot have @card annotation for <value-type> value type with invalid args or args number
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(player) set owns: custom-attribute
@@ -3238,7 +2803,7 @@ Feature: Concept Owns
       | datetimetz |
       | duration   |
 
-  Scenario Outline: Owns cannot set multiple @card annotations with different arguments
+  Scenario INPROGRESS Outline: Owns cannot set multiple @card annotations with different arguments
     When put attribute type: name
     When attribute(name) set value-type: long
     When entity(person) set owns: name
@@ -3267,7 +2832,7 @@ Feature: Concept Owns
       | 5, *      |
       | 6, *      |
 
-  Scenario Outline: Owns-related @card annotation for <value-type> value type can be inherited and overridden by a subset of args
+  Scenario INPROGRESS Outline: Owns-related @card annotation for <value-type> value type can be inherited and overridden by a subset of args
     When put relation type: contract
     When relation(contract) create role: participant
     When put attribute type: custom-attribute
@@ -3335,7 +2900,7 @@ Feature: Concept Owns
       | datetimetz | 38, 111    | 39, 111       |
       | duration   | 1000, 1100 | 1000, 1099    |
 
-  Scenario Outline: Inherited @card annotation on owns for <value-type> value type cannot be overridden by the @card of same args or not a subset of args
+  Scenario INPROGRESS Outline: Inherited @card annotation on owns for <value-type> value type cannot be overridden by the @card of same args or not a subset of args
     When put relation type: contract
     When relation(contract) create role: participant
     When put attribute type: custom-attribute
@@ -3397,7 +2962,7 @@ Feature: Concept Owns
 # @distinct
 ########################
 
-  Scenario Outline: Owns for <root-type> can set @distinct annotation for <value-type> value type list and unset it
+  Scenario INPROGRESS Outline: Owns for <root-type> can set @distinct annotation for <value-type> value type list and unset it
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When <root-type>(<type-name>) set owns: custom-attribute[]
@@ -3442,7 +3007,7 @@ Feature: Concept Owns
       | relation  | description | duration      |
       | relation  | description | custom-struct |
 
-  Scenario Outline: Owns for <root-type> cannot have @distinct annotation for <value-type> non-list value type
+  Scenario INPROGRESS Outline: Owns for <root-type> cannot have @distinct annotation for <value-type> non-list value type
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When <root-type>(<type-name>) set owns: custom-attribute
@@ -3472,7 +3037,7 @@ Feature: Concept Owns
       | relation  | description | duration      |
       | relation  | description | custom-struct |
 
-  Scenario Outline: Owns cannot have @distinct annotation for <value-type> with args
+  Scenario INPROGRESS Outline: Owns cannot have @distinct annotation for <value-type> with args
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
@@ -3495,7 +3060,7 @@ Feature: Concept Owns
       | duration      |
       | custom-struct |
 
-  Scenario Outline: <root-type> types can redeclare owns as owns with @distinct
+  Scenario INPROGRESS Outline: <root-type> types can redeclare owns as owns with @distinct
     When put attribute type: name
     When attribute(name) set value-type: <value-type>
     When put attribute type: email
@@ -3524,7 +3089,7 @@ Feature: Concept Owns
       | relation  | description | datetime   |
       | relation  | description | duration   |
 
-  Scenario Outline: <root-type> types cannot unset not set @distinct of ownership of <value-type> value type
+  Scenario INPROGRESS Outline: <root-type> types cannot unset not set @distinct of ownership of <value-type> value type
     When put attribute type: username
     When attribute(username) set value-type: <value-type>
     When put attribute type: reference
@@ -3553,7 +3118,7 @@ Feature: Concept Owns
       | relation  | description | datetime   |
       | relation  | description | duration   |
 
-  Scenario Outline: <root-type> types cannot unset @distinct of inherited ownership
+  Scenario INPROGRESS Outline: <root-type> types cannot unset @distinct of inherited ownership
     When put attribute type: username
     When attribute(username) set value-type: string
     When <root-type>(<supertype-name>) set owns: username
@@ -3574,7 +3139,7 @@ Feature: Concept Owns
 # @regex
 ########################
 
-  Scenario Outline: Owns can set @regex annotation for <value-type> value type and unset it
+  Scenario INPROGRESS Outline: Owns can set @regex annotation for <value-type> value type and unset it
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When put attribute type: custom-attribute-2
@@ -3623,7 +3188,7 @@ Feature: Concept Owns
       | string     | "^(one \| another)$" |
       | string     | "2024-06-04+0100"    |
 
-  Scenario Outline: Owns cannot have @regex annotation for <value-type> value type
+  Scenario INPROGRESS Outline: Owns cannot have @regex annotation for <value-type> value type
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
@@ -3643,7 +3208,7 @@ Feature: Concept Owns
       | duration      |
       | custom-struct |
 
-  Scenario Outline: Owns cannot have @regex annotation of invalid args
+  Scenario INPROGRESS Outline: Owns cannot have @regex annotation of invalid args
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
@@ -3671,7 +3236,7 @@ Feature: Concept Owns
 # not compatible @annotations: @abstract, @cascade, @independent, @replace
 ########################
 
-  Scenario Outline: Owns cannot have @abstract, @cascade, @independent, and @replace annotations for <value-type> value type
+  Scenario INPROGRESS Outline: Owns cannot have @abstract, @cascade, @independent, and @replace annotations for <value-type> value type
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
@@ -3700,7 +3265,7 @@ Feature: Concept Owns
 # @key, @unique, @subkey, @values, @range, @card, @regex, @distinct
 ########################
 
-  Scenario Outline: Owns can set @<annotation-1> and @<annotation-2> together and unset it for scalar <value-type>
+  Scenario INPROGRESS Outline: Owns can set @<annotation-1> and @<annotation-2> together and unset it for scalar <value-type>
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When relation(description) set owns: custom-attribute
@@ -3754,7 +3319,7 @@ Feature: Concept Owns
       | range        | card         | datetime   |
       | card         | regex        | string     |
 
-  Scenario Outline: Owns can set @<annotation-1> and @<annotation-2> together and unset it for lists of <value-type>
+  Scenario INPROGRESS Outline: Owns can set @<annotation-1> and @<annotation-2> together and unset it for lists of <value-type>
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When relation(description) set owns: custom-attribute[]
@@ -3804,7 +3369,7 @@ Feature: Concept Owns
       | card         | distinct     | custom-struct |
       | regex        | distinct     | string        |
 
-  Scenario Outline: Owns cannot set @<annotation-1> and @<annotation-2> together for scalar <value-type>
+  Scenario INPROGRESS Outline: Owns cannot set @<annotation-1> and @<annotation-2> together for scalar <value-type>
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When transaction commits
@@ -3834,7 +3399,7 @@ Feature: Concept Owns
       # TODO: If we allow range + regex, write a test to check args compatibility!
       | range        | regex        | string     |
 
-  Scenario Outline: Owns can set @<annotation-1> and @<annotation-2> together and unset it for lists of <value-type>
+  Scenario INPROGRESS Outline: Owns can set @<annotation-1> and @<annotation-2> together and unset it for lists of <value-type>
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When transaction commits

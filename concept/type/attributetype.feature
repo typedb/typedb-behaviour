@@ -11,7 +11,7 @@ Feature: Concept Attribute Type
     Given connection has been opened
     Given connection does not have any database
     Given connection create database: typedb
-    Given connection opens schema transaction for database: typedb
+    Given connection open schema transaction for database: typedb
 
   Scenario: Root attribute type cannot be deleted
     Then delete attribute type: attribute; fails
@@ -22,7 +22,7 @@ Feature: Concept Attribute Type
     Then attribute(name) exists
     Then attribute(name) get supertype: attribute
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then attribute(name) exists
     Then attribute(name) get supertype: attribute
 
@@ -31,7 +31,7 @@ Feature: Concept Attribute Type
     When attribute(is-open) set value-type: boolean
     Then attribute(is-open) get value type: boolean
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then attribute(is-open) get value type: boolean
 
   Scenario: Attribute types can be created with value type long
@@ -39,7 +39,7 @@ Feature: Concept Attribute Type
     When attribute(age) set value-type: long
     Then attribute(age) get value type: long
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then attribute(age) get value type: long
 
   Scenario: Attribute types can be created with value type double
@@ -47,7 +47,7 @@ Feature: Concept Attribute Type
     When attribute(rating) set value-type: double
     Then attribute(rating) get value type: double
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then attribute(rating) get value type: double
 
   Scenario: Attribute types can be created with value type string
@@ -55,7 +55,7 @@ Feature: Concept Attribute Type
     When attribute(name) set value-type: string
     Then attribute(name) get value type: string
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then attribute(name) get value type: string
 
   Scenario: Attribute types with value type string and regular expression can be created
@@ -64,7 +64,7 @@ Feature: Concept Attribute Type
     When attribute(email) set annotation: @regex("\S+@\S+\.\S+")
     Then attribute(email) get annotations contain: @regex("\S+@\S+\.\S+")
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then attribute(email) get annotations contain: @regex("\S+@\S+\.\S+")
 
   Scenario: Attribute types can be created with value type datetime
@@ -72,7 +72,7 @@ Feature: Concept Attribute Type
     When attribute(timestamp) set value-type: datetime
     Then attribute(timestamp) get value type: datetime
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then attribute(timestamp) get value type: datetime
 
   Scenario: Attribute types can be deleted
@@ -87,7 +87,7 @@ Feature: Concept Attribute Type
     Then attribute(attribute) get subtypes do not contain:
       | age |
     When transaction commits
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(name) exists
     Then attribute(age) does not exist
     Then attribute(attribute) get subtypes do not contain:
@@ -98,7 +98,7 @@ Feature: Concept Attribute Type
       | name |
       | age  |
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then attribute(name) does not exist
     Then attribute(age) does not exist
     Then attribute(attribute) get subtypes do not contain:
@@ -109,10 +109,10 @@ Feature: Concept Attribute Type
     When put attribute type: name
     When attribute(name) set value-type: string
     When transaction commits
-    When connection opens write transaction for database: typedb
+    When connection open write transaction for database: typedb
     When $x = attribute(name) put: alice
     When transaction commits
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then delete attribute type: name; fails
 
   Scenario: Attribute types can change labels
@@ -124,14 +124,14 @@ Feature: Concept Attribute Type
     Then attribute(username) exists
     Then attribute(username) get label: username
     When transaction commits
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(username) get label: username
     When attribute(username) set label: email
     Then attribute(username) does not exist
     Then attribute(email) exists
     Then attribute(email) get label: email
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then attribute(email) exists
     Then attribute(email) get label: email
 
@@ -141,19 +141,19 @@ Feature: Concept Attribute Type
     When attribute(name) set annotation: @abstract
     Then attribute(name) get annotations contain: @abstract
     When transaction commits
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     When put attribute type: email
     When attribute(email) set value-type: string
     Then attribute(email) get annotations do not contain: @abstract
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then attribute(name) get annotations contain: @abstract
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(email) get annotations do not contain: @abstract
     When attribute(email) set annotation: @abstract
     Then attribute(email) get annotations contain: @abstract
     When transaction commits
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     When put attribute type: company-email
     When attribute(company-email) set value-type: string
     When attribute(company-email) set supertype: email
@@ -212,7 +212,7 @@ Feature: Concept Attribute Type
       | first-name |
       | last-name  |
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then attribute(first-name) get supertype: real-name
     Then attribute(last-name) get supertype: real-name
     Then attribute(real-name) get supertype: name
@@ -261,15 +261,15 @@ Feature: Concept Attribute Type
     When put attribute type: timestamp
     When attribute(timestamp) set value-type: datetime
     When transaction commits
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(is-open) set supertype: is-open; fails
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(age) set supertype: age; fails
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(rating) set supertype: rating; fails
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(name) set supertype: name; fails
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(timestamp) set supertype: timestamp; fails
 
   Scenario: Attribute types cannot subtype non abstract attribute types
@@ -280,9 +280,9 @@ Feature: Concept Attribute Type
     When put attribute type: last-name
     When attribute(last-name) set value-type: string
     When transaction commits
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(first-name) set supertype: name; fails
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(last-name) set supertype: name; fails
 
   Scenario: Attribute types cannot subtype another attribute type of different value type
@@ -297,45 +297,45 @@ Feature: Concept Attribute Type
     When put attribute type: timestamp
     When attribute(timestamp) set value-type: datetime
     When transaction commits
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(is-open) set supertype: age; fails
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(is-open) set supertype: rating; fails
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(is-open) set supertype: name; fails
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(is-open) set supertype: timestamp; fails
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(age) set supertype: is-open; fails
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(age) set supertype: rating; fails
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(age) set supertype: name; fails
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(age) set supertype: timestamp; fails
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(rating) set supertype: is-open; fails
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(rating) set supertype: age; fails
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(rating) set supertype: name; fails
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(rating) set supertype: timestamp; fails
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(name) set supertype: is-open; fails
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(name) set supertype: age; fails
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(name) set supertype: rating; fails
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(name) set supertype: timestamp; fails
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(timestamp) set supertype: is-open; fails
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(timestamp) set supertype: age; fails
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(timestamp) set supertype: rating; fails
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(timestamp) set supertype: name; fails
 
   Scenario: Attribute types can get the root type
@@ -355,7 +355,7 @@ Feature: Concept Attribute Type
     Then attribute(name) get supertype: attribute
     Then attribute(timestamp) get supertype: attribute
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then attribute(is-open) get supertype: attribute
     Then attribute(age) get supertype: attribute
     Then attribute(rating) get supertype: attribute
@@ -413,7 +413,7 @@ Feature: Concept Attribute Type
 #      | rating  |
 #      | name    |
 #    When transaction commits
-#    When connection opens read transaction for database: typedb
+#    When connection open read transaction for database: typedb
 #    Then attribute(attribute) as(boolean) get subtypes contain:
 #      | is-open   |
 #    Then attribute(attribute) as(boolean) get subtypes do not contain:
@@ -469,7 +469,7 @@ Feature: Concept Attribute Type
 #      | name      |
 #      | timestamp |
 #    When transaction commits
-#    When connection opens read transaction for database: typedb
+#    When connection open read transaction for database: typedb
 #    Then attribute(attribute) get subtypes contain:
 #      | attribute |
 #      | is-open   |
@@ -484,9 +484,9 @@ Feature: Concept Attribute Type
     When attribute(email) set annotation: @regex("\S+@\S+\.\S+")
     Then attribute(email) get annotations contain: @regex("\S+@\S+\.\S+")
     When transaction commits
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(email) unset annotation: @regex("\S+@\S+\.\S+")
     Then attribute(email) get annotations do not contain: @regex("\S+@\S+\.\S+")
     Then transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then attribute(email) get annotations do not contain: @regex("\S+@\S+\.\S+")

@@ -13,25 +13,25 @@ Feature: Connection Transaction
 
   Scenario: one database, one transaction to read
     When connection create database: typedb
-    Given connection opens read transaction for database: typedb
+    Given connection open read transaction for database: typedb
     Then transaction is open: true
     Then transaction has type: read
 
   Scenario: one database, one transaction to write
     When connection create database: typedb
-    Given connection opens write transaction for database: typedb
+    Given connection open write transaction for database: typedb
     Then transaction is open: true
     Then transaction has type: write
 
   Scenario: one database, one committed write transaction is closed
     When connection create database: typedb
-    Given connection opens write transaction for database: typedb
+    Given connection open write transaction for database: typedb
     Then transaction commits
     Then transaction is open: false
 
   Scenario: one database, transaction close
     When connection create database: typedb
-    Given connection opens write transaction for database: typedb
+    Given connection open write transaction for database: typedb
     Then transaction closes
     Then transaction is open: false
 
@@ -226,13 +226,13 @@ Feature: Connection Transaction
 
   Scenario: write in a read transaction throws
     When connection create database: typedb
-    Given connection opens schema transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define person sub entity;
       """
     Given transaction commits
-    Given connection opens read transaction for database: typedb
+    Given connection open read transaction for database: typedb
      # TODO: 3.0: Message update for 3.0
     Given typeql insert; throws exception containing "transaction type does not allow"
       """
@@ -241,12 +241,12 @@ Feature: Connection Transaction
 
   Scenario: commit in a read transaction throws
     When connection create database: typedb
-    Given connection opens read transaction for database: typedb
+    Given connection open read transaction for database: typedb
     Then transaction commits; throws exception
 
   Scenario: schema modification in a write transaction throws
     When connection create database: typedb
-    Given connection opens write transaction for database: typedb
+    Given connection open write transaction for database: typedb
     # TODO: 3.0: Message update for 3.0
     Then typeql define; throws exception containing "transaction type does not allow"
       """
@@ -255,7 +255,7 @@ Feature: Connection Transaction
 
   Scenario: write data in a schema transaction throws
     When connection create database: typedb
-    Given connection opens schema transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     Then typeql define
       """
       define person sub entity;
@@ -270,7 +270,7 @@ Feature: Connection Transaction
   Scenario: transaction timeouts are configurable
     When connection create database: typedb
     Then set session option session-idle-timeout-millis to: 20000
-    Given connection opens schema session for database: typedb
+    Given connection open schema session for database: typedb
     Given set transaction option transaction-timeout-millis to: 10000
     When session opens transaction of type: write
     Then wait 8 seconds

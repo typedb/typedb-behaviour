@@ -11,7 +11,7 @@ Feature: Concept Ordered Ownership
     Given connection has been opened
     Given connection does not have any database
     Given connection create database: typedb
-    Given connection opens schema transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     # Write schema for the test scenarios
     Given put attribute type: username
     Given attribute(username) set value-type: string
@@ -22,7 +22,7 @@ Feature: Concept Ordered Ownership
     Given entity(person) get owns: username, set annotation: @key
     Given entity(person) set owns: email[]
     Given transaction commits
-    Given connection opens write transaction for database: typedb
+    Given connection open write transaction for database: typedb
 
   Scenario: Entity can have an ordered collection of attributes
     When $a = entity(person) create new instance with key(username): alice
@@ -37,7 +37,7 @@ Feature: Concept Ordered Ownership
     When $alt = attribute(email) put instance with value: alice2@email.com
     When entity $a set has(email[]): [$main, $alt]
     Then transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then $emails = entity $a get has(email[])
     Then attribute $emails[0] is $main
     Then attribute $emails[1] is $alt
@@ -48,7 +48,7 @@ Feature: Concept Ordered Ownership
     When $alt = attribute(email) put instance with value: alice2@email.com
     When entity $a set has(email[]): [$main, $alt]
     Then transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then entity $a get has(email) contain: $main
     Then entity $a get has(email) contain: $alt
 
@@ -58,7 +58,7 @@ Feature: Concept Ordered Ownership
     When $alt = attribute(email) put instance with value: alice2@email.com
     When entity $a set has(email[]): [$main, $alt, $main, $main, $alt]
     Then transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then $emails = entity $a get has(email[])
     Then attribute $emails[0] is $main
     Then attribute $emails[1] is $alt
@@ -72,7 +72,7 @@ Feature: Concept Ordered Ownership
     When $alt = attribute(email) put instance with value: alice2@email.com
     When entity $a set has(email[]): [$main, $alt]
     Then transaction commits
-    When connection opens write transaction for database: typedb
+    When connection open write transaction for database: typedb
     Then $emails = entity $a get has(email[])
     Then attribute $emails[0] is $main
     Then attribute $emails[1] is $alt
@@ -82,7 +82,7 @@ Feature: Concept Ordered Ownership
     Then entity $a get has(email) do not contain: $alt2
     When entity $a set has(email[]): [$alt2, $main]
     Then transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then $emails = entity $a get has(email[])
     Then attribute $emails[0] is $alt2
     Then attribute $emails[1] is $main
