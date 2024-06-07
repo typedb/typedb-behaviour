@@ -13,6 +13,7 @@ Feature: Concept Owns
     Given connection does not have any database
     Given connection create database: typedb
     Given connection open schema transaction for database: typedb
+
     Given put entity type: person
     Given put entity type: customer
     Given put entity type: subscriber
@@ -30,6 +31,7 @@ Feature: Concept Owns
     Given put struct type: custom-struct
     Given struct(custom-struct) create field: custom-field
     Given struct(custom-struct) get field(custom-field); set value-type: string
+
     Given transaction commits
     Given connection open schema transaction for database: typedb
 

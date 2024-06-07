@@ -13,6 +13,18 @@ Feature: Concept Attribute Type
     Given connection create database: typedb
     Given connection open schema transaction for database: typedb
 
+    # TODO: Create structs in concept api
+    Given put struct type: custom-struct
+    Given struct(custom-struct) create field: custom-field
+    Given struct(custom-struct) get field(custom-field); set value-type: string
+
+    Given transaction commits
+    Given connection open schema transaction for database: typedb
+
+########################
+# attribute type common
+########################
+
   Scenario: Root attribute type cannot be deleted
     Then delete attribute type: attribute; fails
 
@@ -58,15 +70,6 @@ Feature: Concept Attribute Type
     When connection open read transaction for database: typedb
     Then attribute(name) get value type: string
 
-  Scenario: Attribute types with value type string and regular expression can be created
-    When put attribute type: email
-    When attribute(email) set value-type: string
-    When attribute(email) set annotation: @regex("\S+@\S+\.\S+")
-    Then attribute(email) get annotations contain: @regex("\S+@\S+\.\S+")
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then attribute(email) get annotations contain: @regex("\S+@\S+\.\S+")
-
   Scenario: Attribute types can be created with value type datetime
     When put attribute type: timestamp
     When attribute(timestamp) set value-type: datetime
@@ -105,6 +108,30 @@ Feature: Concept Attribute Type
       | name |
       | age  |
 
+  Scenario: Attribute types can get the root type
+    When put attribute type: is-open
+    When attribute(is-open) set value-type: boolean
+    When put attribute type: age
+    When attribute(age) set value-type: long
+    When put attribute type: rating
+    When attribute(rating) set value-type: double
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    When put attribute type: timestamp
+    When attribute(timestamp) set value-type: datetime
+    Then attribute(is-open) get supertype: attribute
+    Then attribute(age) get supertype: attribute
+    Then attribute(rating) get supertype: attribute
+    Then attribute(name) get supertype: attribute
+    Then attribute(timestamp) get supertype: attribute
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(is-open) get supertype: attribute
+    Then attribute(age) get supertype: attribute
+    Then attribute(rating) get supertype: attribute
+    Then attribute(name) get supertype: attribute
+    Then attribute(timestamp) get supertype: attribute
+
   Scenario: Attribute types that have instances cannot be deleted
     When put attribute type: name
     When attribute(name) set value-type: string
@@ -135,120 +162,6 @@ Feature: Concept Attribute Type
     Then attribute(email) exists
     Then attribute(email) get label: email
 
-  Scenario: Attribute types can be set to abstract
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When attribute(name) set annotation: @abstract
-    Then attribute(name) get annotations contain: @abstract
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When put attribute type: email
-    When attribute(email) set value-type: string
-    Then attribute(email) get annotations do not contain: @abstract
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then attribute(name) get annotations contain: @abstract
-    When connection open schema transaction for database: typedb
-    Then attribute(email) get annotations do not contain: @abstract
-    When attribute(email) set annotation: @abstract
-    Then attribute(email) get annotations contain: @abstract
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When put attribute type: company-email
-    When attribute(company-email) set value-type: string
-    When attribute(company-email) set supertype: email
-    Then attribute(email) unset annotation: @abstract; fails
-
-  Scenario: Attribute types can be subtypes of other attribute types
-    When put attribute type: first-name
-    When attribute(first-name) set value-type: string
-    When put attribute type: last-name
-    When attribute(last-name) set value-type: string
-    When put attribute type: real-name
-    When attribute(real-name) set value-type: string
-    When put attribute type: username
-    When attribute(username) set value-type: string
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When attribute(real-name) set annotation: @abstract
-    When attribute(name) set annotation: @abstract
-    When attribute(first-name) set supertype: real-name
-    When attribute(last-name) set supertype: real-name
-    When attribute(real-name) set supertype: name
-    When attribute(username) set supertype: name
-    Then attribute(first-name) get supertype: real-name
-    Then attribute(last-name) get supertype: real-name
-    Then attribute(real-name) get supertype: name
-    Then attribute(username) get supertype: name
-    Then attribute(first-name) get supertypes contain:
-      | attribute  |
-      | real-name  |
-      | name       |
-    Then attribute(last-name) get supertypes contain:
-      | attribute |
-      | real-name |
-      | name      |
-    Then attribute(real-name) get supertypes contain:
-      | attribute |
-      | name      |
-    Then attribute(username) get supertypes contain:
-      | attribute |
-      | name      |
-    Then attribute(first-name) get subtypes is empty
-    Then attribute(last-name) get subtypes is empty
-    Then attribute(real-name) get subtypes contain:
-      | first-name |
-      | last-name  |
-    Then attribute(username) get subtypes is empty
-    Then attribute(name) get subtypes contain:
-      | username   |
-      | real-name  |
-      | first-name |
-      | last-name  |
-    Then attribute(attribute) get subtypes contain:
-      | name       |
-      | username   |
-      | real-name  |
-      | first-name |
-      | last-name  |
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then attribute(first-name) get supertype: real-name
-    Then attribute(last-name) get supertype: real-name
-    Then attribute(real-name) get supertype: name
-    Then attribute(username) get supertype: name
-    Then attribute(first-name) get supertypes contain:
-      | attribute  |
-      | real-name  |
-      | name       |
-    Then attribute(last-name) get supertypes contain:
-      | attribute |
-      | real-name |
-      | name      |
-    Then attribute(real-name) get supertypes contain:
-      | attribute |
-      | name      |
-    Then attribute(username) get supertypes contain:
-      | attribute |
-      | name      |
-    Then attribute(first-name) get subtypes is empty
-    Then attribute(last-name) get subtypes is empty
-    Then attribute(real-name) get subtypes contain:
-      | first-name |
-      | last-name  |
-    Then attribute(username) get subtypes is empty
-    Then attribute(name) get subtypes contain:
-      | username   |
-      | real-name  |
-      | first-name |
-      | last-name  |
-    Then attribute(attribute) get subtypes contain:
-      | name       |
-      | username   |
-      | real-name  |
-      | first-name |
-      | last-name  |
-
   Scenario: Attribute types cannot subtype itself
     When put attribute type: is-open
     When attribute(is-open) set value-type: boolean
@@ -271,19 +184,6 @@ Feature: Concept Attribute Type
     Then attribute(name) set supertype: name; fails
     When connection open schema transaction for database: typedb
     Then attribute(timestamp) set supertype: timestamp; fails
-
-  Scenario: Attribute types cannot subtype non abstract attribute types
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When put attribute type: first-name
-    When attribute(first-name) set value-type: string
-    When put attribute type: last-name
-    When attribute(last-name) set value-type: string
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then attribute(first-name) set supertype: name; fails
-    When connection open schema transaction for database: typedb
-    Then attribute(last-name) set supertype: name; fails
 
   Scenario: Attribute types cannot subtype another attribute type of different value type
     When put attribute type: is-open
@@ -337,30 +237,6 @@ Feature: Concept Attribute Type
     Then attribute(timestamp) set supertype: rating; fails
     When connection open schema transaction for database: typedb
     Then attribute(timestamp) set supertype: name; fails
-
-  Scenario: Attribute types can get the root type
-    When put attribute type: is-open
-    When attribute(is-open) set value-type: boolean
-    When put attribute type: age
-    When attribute(age) set value-type: long
-    When put attribute type: rating
-    When attribute(rating) set value-type: double
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When put attribute type: timestamp
-    When attribute(timestamp) set value-type: datetime
-    Then attribute(is-open) get supertype: attribute
-    Then attribute(age) get supertype: attribute
-    Then attribute(rating) get supertype: attribute
-    Then attribute(name) get supertype: attribute
-    Then attribute(timestamp) get supertype: attribute
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then attribute(is-open) get supertype: attribute
-    Then attribute(age) get supertype: attribute
-    Then attribute(rating) get supertype: attribute
-    Then attribute(name) get supertype: attribute
-    Then attribute(timestamp) get supertype: attribute
 
   # Revisit if this is still valid
 #  # TODO: Doesn't need to be tied to the root since we can have abstract non-valued attribute types.
@@ -478,6 +354,150 @@ Feature: Concept Attribute Type
 #      | name      |
 #      | timestamp |
 
+########################
+# @abstract
+########################
+
+  Scenario: Attribute types can be set to abstract
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    When attribute(name) set annotation: @abstract
+    Then attribute(name) get annotations contain: @abstract
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When put attribute type: email
+    When attribute(email) set value-type: string
+    Then attribute(email) get annotations do not contain: @abstract
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get annotations contain: @abstract
+    When connection open schema transaction for database: typedb
+    Then attribute(email) get annotations do not contain: @abstract
+    When attribute(email) set annotation: @abstract
+    Then attribute(email) get annotations contain: @abstract
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When put attribute type: company-email
+    When attribute(company-email) set value-type: string
+    When attribute(company-email) set supertype: email
+    Then attribute(email) unset annotation: @abstract; fails
+
+  Scenario: Attribute types can be subtypes of other attribute types
+    When put attribute type: first-name
+    When attribute(first-name) set value-type: string
+    When put attribute type: last-name
+    When attribute(last-name) set value-type: string
+    When put attribute type: real-name
+    When attribute(real-name) set value-type: string
+    When put attribute type: username
+    When attribute(username) set value-type: string
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    When attribute(real-name) set annotation: @abstract
+    When attribute(name) set annotation: @abstract
+    When attribute(first-name) set supertype: real-name
+    When attribute(last-name) set supertype: real-name
+    When attribute(real-name) set supertype: name
+    When attribute(username) set supertype: name
+    Then attribute(first-name) get supertype: real-name
+    Then attribute(last-name) get supertype: real-name
+    Then attribute(real-name) get supertype: name
+    Then attribute(username) get supertype: name
+    Then attribute(first-name) get supertypes contain:
+      | attribute  |
+      | real-name  |
+      | name       |
+    Then attribute(last-name) get supertypes contain:
+      | attribute |
+      | real-name |
+      | name      |
+    Then attribute(real-name) get supertypes contain:
+      | attribute |
+      | name      |
+    Then attribute(username) get supertypes contain:
+      | attribute |
+      | name      |
+    Then attribute(first-name) get subtypes is empty
+    Then attribute(last-name) get subtypes is empty
+    Then attribute(real-name) get subtypes contain:
+      | first-name |
+      | last-name  |
+    Then attribute(username) get subtypes is empty
+    Then attribute(name) get subtypes contain:
+      | username   |
+      | real-name  |
+      | first-name |
+      | last-name  |
+    Then attribute(attribute) get subtypes contain:
+      | name       |
+      | username   |
+      | real-name  |
+      | first-name |
+      | last-name  |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(first-name) get supertype: real-name
+    Then attribute(last-name) get supertype: real-name
+    Then attribute(real-name) get supertype: name
+    Then attribute(username) get supertype: name
+    Then attribute(first-name) get supertypes contain:
+      | attribute  |
+      | real-name  |
+      | name       |
+    Then attribute(last-name) get supertypes contain:
+      | attribute |
+      | real-name |
+      | name      |
+    Then attribute(real-name) get supertypes contain:
+      | attribute |
+      | name      |
+    Then attribute(username) get supertypes contain:
+      | attribute |
+      | name      |
+    Then attribute(first-name) get subtypes is empty
+    Then attribute(last-name) get subtypes is empty
+    Then attribute(real-name) get subtypes contain:
+      | first-name |
+      | last-name  |
+    Then attribute(username) get subtypes is empty
+    Then attribute(name) get subtypes contain:
+      | username   |
+      | real-name  |
+      | first-name |
+      | last-name  |
+    Then attribute(attribute) get subtypes contain:
+      | name       |
+      | username   |
+      | real-name  |
+      | first-name |
+      | last-name  |
+
+  Scenario: Attribute types cannot subtype non abstract attribute types
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    When put attribute type: first-name
+    When attribute(first-name) set value-type: string
+    When put attribute type: last-name
+    When attribute(last-name) set value-type: string
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(first-name) set supertype: name; fails
+    When connection open schema transaction for database: typedb
+    Then attribute(last-name) set supertype: name; fails
+
+########################
+# @regex
+########################
+
+  Scenario: Attribute types with value type string and regular expression can be created
+    When put attribute type: email
+    When attribute(email) set value-type: string
+    When attribute(email) set annotation: @regex("\S+@\S+\.\S+")
+    Then attribute(email) get annotations contain: @regex("\S+@\S+\.\S+")
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(email) get annotations contain: @regex("\S+@\S+\.\S+")
+
   Scenario: Attribute types with value type string can unset their regular expression
     When put attribute type: email
     When attribute(email) set value-type: string
@@ -490,3 +510,49 @@ Feature: Concept Attribute Type
     Then transaction commits
     When connection open read transaction for database: typedb
     Then attribute(email) get annotations do not contain: @regex("\S+@\S+\.\S+")
+
+########################
+# @independent
+########################
+    # TODO: Implement
+
+########################
+# @values
+########################
+    # TODO: Implement
+
+########################
+# @range
+########################
+    # TODO: Implement
+
+########################
+# not compatible @annotations: @distinct, @key, @unique, @subkey, @card, @cascade, @replace
+########################
+
+  Scenario Outline: Attribute type of <value-type> value type cannot have @distinct, @key, @unique, @subkey, @card, @cascade, and @replace annotations
+    When put attribute type: email
+    When attribute(email) set value-type: <value-type>
+    Then attribute(email) set annotation: @distinct; fails
+    Then attribute(email) set annotation: @key; fails
+    Then attribute(email) set annotation: @unique; fails
+    Then attribute(email) set annotation: @subkey; fails
+    Then attribute(email) set annotation: @card; fails
+    Then attribute(email) set annotation: @cascade; fails
+    Then attribute(email) set annotation: @replace; fails
+    Then attribute(email) set annotation: @does-not-exist; fails
+    Then attribute(email) get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(email) get annotations is empty
+    Examples:
+      | value-type    |
+      | long          |
+      | double        |
+      | decimal       |
+      | string        |
+      | boolean       |
+      | datetime      |
+      | datetimetz    |
+      | duration      |
+      | custom-struct |

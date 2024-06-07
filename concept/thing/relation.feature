@@ -13,7 +13,6 @@ Feature: Concept Relation
     Given connection create database: typedb
     Given connection open schema transaction for database: typedb
 
-    # Write schema for the test scenarios
     Given put attribute type: username
     Given attribute(username) set value-type: string
     Given put attribute type: license
@@ -38,7 +37,6 @@ Feature: Concept Relation
     Given entity(person) set plays role: marriage:husband
 
     Given transaction commits
-
     Given connection open write transaction for database: typedb
 
   Scenario: Relation with role players can be created and role players can be retrieved

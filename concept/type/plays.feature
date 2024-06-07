@@ -13,6 +13,7 @@ Feature: Concept Plays
     Given connection does not have any database
     Given connection create database: typedb
     Given connection open schema transaction for database: typedb
+
     Given put entity type: person
     Given put entity type: customer
     Given put entity type: subscriber
@@ -26,6 +27,7 @@ Feature: Concept Plays
     # Notice: supertypes are the same, but can be overridden for the second subtype inside the tests
     Given relation(registration) set supertype: description
     Given relation(profile) set supertype: description
+
     Given transaction commits
     Given connection open schema transaction for database: typedb
 
@@ -1834,7 +1836,7 @@ Feature: Concept Plays
       | relation  | description    | registration | profile        | card(1, 2) |
 
 ########################
-# @card # TODO: Adapt to plays!
+# @card
 ########################
 
   Scenario Outline: Plays can set @card annotation with args in correct order and unset it

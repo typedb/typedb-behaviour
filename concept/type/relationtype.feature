@@ -13,6 +13,10 @@ Feature: Concept Relation Type and Role Type
     Given connection create database: typedb
     Given connection open schema transaction for database: typedb
 
+########################
+# relation type common
+########################
+
   Scenario: Root relation type cannot be deleted
     Then delete relation type: relation; fails
 
@@ -153,74 +157,6 @@ Feature: Concept Relation Type and Role Type
     Then relation(employment) get label: employment
     Then relation(employment) get role(employee) get label: employee
     Then relation(employment) get role(employer) get label: employer
-
-  Scenario: Relation type can be set to abstract while role types remain concrete
-    When put relation type: marriage
-    When relation(marriage) create role: husband
-    When relation(marriage) create role: wife
-    When relation(marriage) set annotation: @abstract
-    When put relation type: parentship
-    When relation(parentship) create role: parent
-    When relation(parentship) create role: child
-    Then relation(marriage) get annotations contain: @abstract
-    Then relation(marriage) get role(husband) get annotations do not contain: @abstract
-    Then relation(marriage) get role(wife) get annotations do not contain: @abstract
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(parentship) get annotations do not contain: @abstract
-    Then relation(parentship) get role(parent) get annotations do not contain: @abstract
-    Then relation(parentship) get role(child) get annotations do not contain: @abstract
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(marriage) get annotations contain: @abstract
-    Then relation(marriage) get role(husband) get annotations do not contain: @abstract
-    Then relation(marriage) get role(wife) get annotations do not contain: @abstract
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(parentship) get annotations do not contain: @abstract
-    Then relation(parentship) get role(parent) get annotations do not contain: @abstract
-    Then relation(parentship) get role(child) get annotations do not contain: @abstract
-    Then relation(parentship) set annotation: @abstract
-    Then relation(parentship) get annotations contain: @abstract
-    Then relation(parentship) get role(parent) get annotations do not contain: @abstract
-    Then relation(parentship) get role(child) get annotations do not contain: @abstract
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then relation(parentship) get annotations contain: @abstract
-    Then relation(parentship) get role(parent) get annotations do not contain: @abstract
-    Then relation(parentship) get role(child) get annotations do not contain: @abstract
-
-  Scenario: relation types can be set to abstract when a subtype has instances
-    When put relation type: parentship
-    When relation(parentship) create role: parent
-    When relation(parentship) create role: child
-    When put relation type: fathership
-    When relation(fathership) set supertype: parentship
-    When relation(fathership) create role: father
-    When relation(fathership) get role(father); set override: parent
-    When relation(fathership) create role: father-child
-    When relation(fathership) get role(father-child); set override: child
-    When put entity type: person
-    When entity(person) set plays role: fathership:father
-    Then transaction commits
-    When connection open write transaction for database: typedb
-    Then $m = relation(fathership) create new instance
-    When $a = entity(person) create new instance
-    When relation $m add player for role(father): $a
-    Then transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(parentship) set annotation: @abstract
-    Then transaction commits
-    When connection open read transaction for database: typedb
-    Then relation(parentship) get annotations contain: @abstract
-
-  Scenario: Relation types must have at least one role in order to commit, unless they are abstract
-    When put relation type: connection
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When put relation type: connection
-    When relation(connection) set annotation: @abstract
-    Then transaction commits
 
   Scenario: Relation and role types can be subtypes of other relation and role types
     When put relation type: parentship
@@ -408,24 +344,6 @@ Feature: Concept Relation Type and Role Type
     Then relation(mothership) get declared roles do not contain:
       | parentship:child  |
 
-  Scenario: Roles can be inherited from abstract relation types
-    When put relation type: parentship
-    Then relation(parentship) set annotation: @abstract
-    When relation(parentship) create role: parent
-    When relation(parentship) create role: child
-    When put relation type: fathership
-    When relation(fathership) set supertype: parentship
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then relation(fathership) get roles contain:
-      | parentship:parent |
-      | parentship:child  |
-    Then relation(fathership) get declared roles do not contain:
-      | fathership:parent |
-      | fathership:child  |
-    Then relation(fathership) get role(parent) get annotations do not contain: @abstract
-    Then relation(fathership) get role(child) get annotations do not contain: @abstract
-
   Scenario: Relation types can override inherited related role types
     When put relation type: parentship
     When relation(parentship) create role: parent
@@ -481,3 +399,117 @@ Feature: Concept Relation Type and Role Type
     When transaction commits
     When connection open read transaction for database: typedb
     Then relation(fathership) get overridden role(father) get label: parent
+
+########################
+# @abstract
+########################
+
+  Scenario: Relation type can be set to abstract while role types remain concrete
+    When put relation type: marriage
+    When relation(marriage) create role: husband
+    When relation(marriage) create role: wife
+    When relation(marriage) set annotation: @abstract
+    When put relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: child
+    Then relation(marriage) get annotations contain: @abstract
+    Then relation(marriage) get role(husband) get annotations do not contain: @abstract
+    Then relation(marriage) get role(wife) get annotations do not contain: @abstract
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get annotations do not contain: @abstract
+    Then relation(parentship) get role(parent) get annotations do not contain: @abstract
+    Then relation(parentship) get role(child) get annotations do not contain: @abstract
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(marriage) get annotations contain: @abstract
+    Then relation(marriage) get role(husband) get annotations do not contain: @abstract
+    Then relation(marriage) get role(wife) get annotations do not contain: @abstract
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get annotations do not contain: @abstract
+    Then relation(parentship) get role(parent) get annotations do not contain: @abstract
+    Then relation(parentship) get role(child) get annotations do not contain: @abstract
+    Then relation(parentship) set annotation: @abstract
+    Then relation(parentship) get annotations contain: @abstract
+    Then relation(parentship) get role(parent) get annotations do not contain: @abstract
+    Then relation(parentship) get role(child) get annotations do not contain: @abstract
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get annotations contain: @abstract
+    Then relation(parentship) get role(parent) get annotations do not contain: @abstract
+    Then relation(parentship) get role(child) get annotations do not contain: @abstract
+
+  Scenario: relation types can be set to abstract when a subtype has instances
+    When put relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: child
+    When put relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: father
+    When relation(fathership) get role(father); set override: parent
+    When relation(fathership) create role: father-child
+    When relation(fathership) get role(father-child); set override: child
+    When put entity type: person
+    When entity(person) set plays role: fathership:father
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    Then $m = relation(fathership) create new instance
+    When $a = entity(person) create new instance
+    When relation $m add player for role(father): $a
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) set annotation: @abstract
+    Then transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get annotations contain: @abstract
+
+  Scenario: Relation types must have at least one role in order to commit, unless they are abstract
+    When put relation type: connection
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When put relation type: connection
+    When relation(connection) set annotation: @abstract
+    Then transaction commits
+
+  Scenario: Roles can be inherited from abstract relation types
+    When put relation type: parentship
+    Then relation(parentship) set annotation: @abstract
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: child
+    When put relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(fathership) get roles contain:
+      | parentship:parent |
+      | parentship:child  |
+    Then relation(fathership) get declared roles do not contain:
+      | fathership:parent |
+      | fathership:child  |
+    Then relation(fathership) get role(parent) get annotations do not contain: @abstract
+    Then relation(fathership) get role(child) get annotations do not contain: @abstract
+
+########################
+# not compatible @annotations: @distinct, @key, @unique, @subkey, @values, @range, @card, @cascade, @independent, @replace, @regex
+########################
+
+  Scenario: Relation type of <value-type> type cannot have @distinct, @key, @unique, @subkey, @values, @range, @card, @cascade, @independent, @replace, and @regex annotations
+    When put relation type: parentship
+    When relation(parentship) create role: parent
+    Then relation(parentship) set annotation: @distinct; fails
+    Then relation(parentship) set annotation: @key; fails
+    Then relation(parentship) set annotation: @unique; fails
+    Then relation(parentship) set annotation: @subkey; fails
+    Then relation(parentship) set annotation: @values; fails
+    Then relation(parentship) set annotation: @range; fails
+    Then relation(parentship) set annotation: @card; fails
+    Then relation(parentship) set annotation: @cascade; fails
+    Then relation(parentship) set annotation: @independent; fails
+    Then relation(parentship) set annotation: @replace; fails
+    Then relation(parentship) set annotation: @regex; fails
+    Then relation(parentship) set annotation: @does-not-exist; fails
+    Then relation(parentship) get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get annotations is empty
