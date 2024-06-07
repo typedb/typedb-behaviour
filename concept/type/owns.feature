@@ -336,7 +336,6 @@ Feature: Concept Owns
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: email
     When <root-type>(<sub-name>) set annotation: @abstract
-    When <root-type>(<subtype-name>) set supertype: person
     When <root-type>(<subtype-name>) set owns: work-email
     When <root-type>(<subtype-name>) get owns: work-email; set override: email
     Then <root-type>(<subtype-name>) get owns overridden(work-email) get label: email
@@ -801,7 +800,6 @@ Feature: Concept Owns
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: email[]
     When <root-type>(<sub-name>) set annotation: @abstract
-    When <root-type>(<subtype-name>) set supertype: person
     When <root-type>(<subtype-name>) set owns: work-email[]
     When <root-type>(<subtype-name>) get owns: work-email[]; set override: email[]
     Then <root-type>(<subtype-name>) get owns overridden(work-email[]) get label: email[]
@@ -1036,7 +1034,6 @@ Feature: Concept Owns
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: email
     When <root-type>(<sub-name>) set annotation: @abstract
-    When <root-type>(<subtype-name>) set supertype: person
     When <root-type>(<subtype-name>) set owns: work-email[]
     When <root-type>(<subtype-name>) get owns: work-email[]; set override: email; fails
     When transaction commits
@@ -1058,7 +1055,6 @@ Feature: Concept Owns
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: email[]
     When <root-type>(<sub-name>) set annotation: @abstract
-    When <root-type>(<subtype-name>) set supertype: person
     When <root-type>(<subtype-name>) set owns: work-email
     When <root-type>(<subtype-name>) get owns: work-email; set override: email[]; fails
     When transaction commits
@@ -1070,7 +1066,7 @@ Feature: Concept Owns
       | relation  | description    | registration | long       |
 
 ########################
-# @annotations common: contain common tests for annotations suitable for **scalar** attributes:
+# @annotations common: contain common tests for annotations suitable for **scalar** owns:
 # @key, @unique, @subkey, @values, @range, @card, @regex
 # DOES NOT test:
 # @distinct
@@ -1334,7 +1330,7 @@ Feature: Concept Owns
       | relation  | description    | registration | profile        | card(1, 2)       |
       | relation  | description    | registration | profile        | regex("\S+")     |
 
-  Scenario Outline: <root-type> types can redeclare @<annotation>s as @<annotation>s
+  Scenario Outline: <root-type> types can redeclare owns with @<annotation>s as owns with @<annotation>s
     When put attribute type: name
     When attribute(name) set value-type: <value-type>
     When put attribute type: email
@@ -1507,7 +1503,6 @@ Feature: Concept Owns
     When <root-type>(<supertype-name>) set owns: email
     When <root-type>(<supertype-name>) get owns: email, set annotation: @<annotation>
     When <root-type>(<subtype-name>) set annotation: @abstract
-    When <root-type>(<subtype-name>) set supertype: person
     Then <root-type>(<subtype-name>) get owns contain: email
     Then <root-type>(<subtype-name>) get owns: email, get annotations contain: @<annotation>
     When <root-type>(<subtype-name>) set owns: work-email
@@ -1538,7 +1533,7 @@ Feature: Concept Owns
       | relation  | description    | registration | card(1, 2)       | string     |
       | relation  | description    | registration | regex("\S+")     | string     |
 
-  Scenario Outline: <root-type> types can redeclare inherited attributes as keys (which will override)
+  Scenario Outline: <root-type> types can redeclare inherited owns as owns with @<annotation> (which will override)
     When put attribute type: email
     When attribute(email) set value-type: <value-type>
     When <root-type>(<supertype-name>) set owns: email
@@ -1706,7 +1701,7 @@ Feature: Concept Owns
       | relation  | description    | registration | profile        | card(1, 2)       | string     |
       | relation  | description    | registration | profile        | regex("\S+")     | string     |
 
-  Scenario Outline: <root-type> subtypes can redeclare @<annotation>s after it is unset from supertype
+  Scenario Outline: <root-type> subtypes can redeclare owns with @<annotation>s after it is unset from supertype
     When put attribute type: name
     When attribute(name) set value-type: <value-type>
     When put attribute type: surname
@@ -3667,29 +3662,23 @@ Feature: Concept Owns
 # not compatible @annotations: @abstract, @cascade, @independent, @replace
 ########################
 
-  Scenario Outline: Owns cannot have @abstract, @cascade, @independent, and @replace annotations for <value-type> value type
+  Scenario Outline: <root-type> cannot own with @abstract, @cascade, @independent, and @replace annotations for <value-type> value type
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
-    When entity(person) set owns: custom-attribute
-    Then entity(person) get owns: custom-attribute, set annotation: @abstract; fails
-    Then entity(person) get owns: custom-attribute, set annotation: @cascade; fails
-    Then entity(person) get owns: custom-attribute, set annotation: @independent; fails
-    Then entity(person) get owns: custom-attribute, set annotation: @replace; fails
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    When <root-type>(<type-name>) set owns: custom-attribute
+    Then <root-type>(<type-name>) get owns: custom-attribute, set annotation: @abstract; fails
+    Then <root-type>(<type-name>) get owns: custom-attribute, set annotation: @cascade; fails
+    Then <root-type>(<type-name>) get owns: custom-attribute, set annotation: @independent; fails
+    Then <root-type>(<type-name>) get owns: custom-attribute, set annotation: @replace; fails
+    Then <root-type>(<type-name>) get owns: custom-attribute, set annotation: @does-not-exist; fails
+    Then <root-type>(<type-name>) get owns: custom-attribute, get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then <root-type>(<type-name>) get owns: custom-attribute, get annotations is empty
     Examples:
-      | value-type    |
-      | long          |
-      | string        |
-      | boolean       |
-      | double        |
-      | decimal       |
-      | datetime      |
-      | datetimetz    |
-      | duration      |
-      | custom-struct |
+      | root-type | type-name   | value-type    |
+      | entity    | person      | long          |
+      | relation  | description | string        |
 
 ########################
 # @annotations combinations:
