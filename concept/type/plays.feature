@@ -56,7 +56,26 @@ Feature: Concept Plays
     Then relation(marriage) get role(wife) get players contain:
       | person |
 
-    # TODO: Entity types cannot play wrong types
+  Scenario: Entity types cannot play entities, relations, attributes, structs, structs fields, and non-existing things
+    When put entity type: car
+    When put relation type: credit
+    When put attribute type: id
+    When attribute(id) set value-type: long
+    When relation(credit) create role: creditor
+    # TODO: Create structs in concept api
+    When put struct type: passport
+    When struct(passport) create field: birthday
+    When struct(passport) get field(birthday); set value-type: datetime
+    Then entity(person) set plays role: car; fails
+    Then entity(person) set plays role: credit; fails
+    Then entity(person) set plays role: id; fails
+    Then entity(person) set plays role: passport; fails
+    Then entity(person) set plays role: passport:birthday; fails
+    Then entity(person) set plays role: does-not-exist; fails
+    Then entity(person) get plays roles is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get plays roles is empty
 
   Scenario: Entity types can unset playing role types
     When put relation type: marriage
@@ -384,7 +403,29 @@ Feature: Concept Plays
       | locates:located     |
       | organises:organised |
 
-    # TODO: Relation types cannot play wrong types
+  Scenario: Relation types cannot play entities, relations, attributes, structs, structs fields, and non-existing things
+    When put entity type: car
+    When put relation type: credit
+    When put attribute type: id
+    When attribute(id) set value-type: long
+    When relation(credit) create role: creditor
+    When put relation type: marriage
+    When relation(marriage) create role: spouse
+    # TODO: Create structs in concept api
+    When put struct type: passport
+    When struct(passport) create field: birthday
+    When struct(passport) get field(birthday); set value-type: datetime
+    Then relation(marriage) set plays role: car; fails
+    Then relation(marriage) set plays role: credit; fails
+    Then relation(marriage) set plays role: id; fails
+    Then relation(marriage) set plays role: passport; fails
+    Then relation(marriage) set plays role: passport:birthday; fails
+    Then relation(marriage) set plays role: marriage:spouse; fails
+    Then relation(marriage) set plays role: does-not-exist; fails
+    Then relation(marriage) get plays roles is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(marriage) get plays roles is empty
 
   Scenario: Relation types can unset playing role types
     When put relation type: locates
@@ -602,7 +643,60 @@ Feature: Concept Plays
     Then relation(contractor-employment) set plays role: contractor-locates:contractor-located
     Then relation(contractor-employment) get plays role: contractor-locates:contractor-located; set override: locates:located; fails
 
-    # TODO: Attributes and structs can not!
+  Scenario: Attribute types cannot play entities, attributes, relations, roles, structs, structs fields, and non-existing things
+    When put attribute type: surname
+    When put relation type: marriage
+    When relation(marriage) create role: spouse
+    When attribute(surname) set value-type: string
+    # TODO: Create structs in concept api
+    When put struct type: passport
+    When struct(passport) create field: first-name
+    When struct(passport) get field(first-name); set value-type: string
+    When struct(passport) create field: surname
+    When struct(passport) get field(surname); set value-type: string
+    When struct(passport) create field: birthday
+    When struct(passport) get field(birthday); set value-type: datetime
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    Then attribute(name) set plays role: person; fails
+    Then attribute(name) set plays role: surname; fails
+    Then attribute(name) set plays role: marriage; fails
+    Then attribute(name) set plays role: marriage:spouse; fails
+    Then attribute(name) set plays role: passport; fails
+    Then attribute(name) set plays role: passport:birthday; fails
+    Then attribute(name) set plays role: does-not-exist; fails
+    Then attribute(name) get plays roles is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get plays roles is empty
+
+  Scenario: Struct types cannot play entities, attributes, relations, roles, structs, structs fields, and non-existing things
+    When put attribute type: name
+    When put relation type: marriage
+    When relation(marriage) create role: spouse
+    When attribute(surname) set value-type: string
+    # TODO: Create structs in concept api
+    When put struct type: passport
+    When struct(passport) create field: birthday
+    When struct(passport) get field(birthday); set value-type: datetime
+    # TODO: Create structs in concept api
+    When put struct type: wallet
+    When struct(wallet) create field: currency
+    When struct(wallet) get field(currency); set value-type: string
+    When struct(wallet) create field: value
+    When struct(wallet) get field(value); set value-type: double
+    Then struct(wallet) set plays role: person; fails
+    Then struct(wallet) set plays role: name; fails
+    Then struct(wallet) set plays role: marriage; fails
+    Then struct(wallet) set plays role: marriage:spouse; fails
+    Then struct(wallet) set plays role: passport; fails
+    Then struct(wallet) set plays role: passport:birthday; fails
+    Then struct(wallet) set plays role: wallet:currency; fails
+    Then struct(wallet) set plays role: does-not-exist; fails
+    Then struct(wallet) get plays roles is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then struct(wallet) get plays roles is empty
 
   Scenario Outline: <root-type> types can redeclare playing role types
     When put relation type: parentship

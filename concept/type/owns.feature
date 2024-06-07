@@ -114,23 +114,20 @@ Feature: Concept Owns
       | duration      |
       | custom-struct |
 
-  Scenario: Entity types cannot own entities, relations, roles, structs, and structs fields
+  Scenario: Entity types cannot own entities, relations, roles, structs, structs fields, and non-existing things
     When put entity type: car
     When put relation type: credit
-    When relation(marriage) create role: creditor
+    When relation(credit) create role: creditor
     # TODO: Create structs in concept api
     When put struct type: passport
-    When struct(passport) create field: first-name
-    When struct(passport) get field(first-name); set value-type: string
-    When struct(passport) create field: surname
-    When struct(passport) get field(surname); set value-type: string
     When struct(passport) create field: birthday
     When struct(passport) get field(birthday); set value-type: datetime
     Then entity(person) set owns: car; fails
     Then entity(person) set owns: credit; fails
-    Then entity(person) set owns: marriage:creditor; fails
+    Then entity(person) set owns: credit:creditor; fails
     Then entity(person) set owns: passport; fails
     Then entity(person) set owns: passport:birthday; fails
+    Then entity(person) set owns: does-not-exist; fails
     Then entity(person) get owns is empty
     When transaction commits
     When connection open read transaction for database: typedb
@@ -217,9 +214,9 @@ Feature: Concept Owns
       | duration      |
       | custom-struct |
 
-  Scenario: Relation types cannot own entities, relations, roles, structs, and structs fields
+  Scenario: Relation types cannot own entities, relations, roles, structs, structs fields, and non-existing things
     When put relation type: credit
-    When relation(marriage) create role: creditor
+    When relation(credit) create role: creditor
     When put relation type: marriage
     When relation(marriage) create role: spouse
     # TODO: Create structs in concept api
@@ -232,16 +229,17 @@ Feature: Concept Owns
     When struct(passport-document) get field(birthday); set value-type: datetime
     Then relation(marriage) set owns: person; fails
     Then relation(marriage) set owns: credit; fails
-    Then relation(marriage) set owns: marriage:creditor; fails
+    Then relation(marriage) set owns: credit:creditor; fails
     Then relation(marriage) set owns: passport; fails
     Then relation(marriage) set owns: passport:birthday; fails
     Then relation(marriage) set owns: marriage:spouse; fails
+    Then relation(marriage) set owns: does-not-exist; fails
     Then relation(marriage) get owns is empty
     When transaction commits
     When connection open read transaction for database: typedb
     Then relation(marriage) get owns is empty
 
-  Scenario: Attribute types cannot own entities, attributes, relations, roles, structs, and structs fields
+  Scenario: Attribute types cannot own entities, attributes, relations, roles, structs, structs fields, and non-existing things
     When put attribute type: surname
     When put relation type: marriage
     When relation(marriage) create role: spouse
@@ -262,22 +260,19 @@ Feature: Concept Owns
     Then attribute(name) set owns: marriage:spouse; fails
     Then attribute(name) set owns: passport; fails
     Then attribute(name) set owns: passport:birthday; fails
+    Then attribute(name) set owns: does-not-exist; fails
     Then attribute(name) get owns is empty
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(name) get owns is empty
 
-  Scenario: Struct types cannot own entities, attributes, relations, roles, structs, and structs fields
+  Scenario: Struct types cannot own entities, attributes, relations, roles, structs, structs fields, and non-existing things
     When put attribute type: name
     When put relation type: marriage
     When relation(marriage) create role: spouse
     When attribute(surname) set value-type: string
     # TODO: Create structs in concept api
     When put struct type: passport
-    When struct(passport) create field: first-name
-    When struct(passport) get field(first-name); set value-type: string
-    When struct(passport) create field: surname
-    When struct(passport) get field(surname); set value-type: string
     When struct(passport) create field: birthday
     When struct(passport) get field(birthday); set value-type: datetime
     # TODO: Create structs in concept api
@@ -293,6 +288,7 @@ Feature: Concept Owns
     Then struct(wallet) set owns: passport; fails
     Then struct(wallet) set owns: passport:birthday; fails
     Then struct(wallet) set owns: wallet:currency; fails
+    Then struct(wallet) set owns: does-not-exist; fails
     Then struct(wallet) get owns is empty
     When transaction commits
     When connection open read transaction for database: typedb
@@ -582,7 +578,7 @@ Feature: Concept Owns
   Scenario: Entity types cannot own lists of entities, relations, roles, structs, and structs fields
     When put entity type: car
     When put relation type: credit
-    When relation(marriage) create role: creditor
+    When relation(credit) create role: creditor
     # TODO: Create structs in concept api
     When put struct type: passport
     When struct(passport) create field: first-name
@@ -593,7 +589,7 @@ Feature: Concept Owns
     When struct(passport) get field(birthday); set value-type: datetime
     Then entity(person) set owns: car[]; fails
     Then entity(person) set owns: credit[]; fails
-    Then entity(person) set owns: marriage:creditor[]; fails
+    Then entity(person) set owns: credit:creditor[]; fails
     Then entity(person) set owns: passport[]; fails
     Then entity(person) set owns: passport:birthday[]; fails
     Then entity(person) get owns is empty
@@ -684,7 +680,7 @@ Feature: Concept Owns
 
   Scenario: Relation types cannot own lists of entities, relations, roles, structs, and structs fields
     When put relation type: credit
-    When relation(marriage) create role: creditor
+    When relation(credit) create role: creditor
     When put relation type: marriage
     When relation(marriage) create role: spouse
     # TODO: Create structs in concept api
@@ -697,7 +693,7 @@ Feature: Concept Owns
     When struct(passport-document) get field(birthday); set value-type: datetime
     Then relation(marriage) set owns: person[]; fails
     Then relation(marriage) set owns: credit[]; fails
-    Then relation(marriage) set owns: marriage:creditor[]; fails
+    Then relation(marriage) set owns: credit:creditor[]; fails
     Then relation(marriage) set owns: passport[]; fails
     Then relation(marriage) set owns: passport:birthday[]; fails
     Then relation(marriage) set owns: marriage:spouse[]; fails
