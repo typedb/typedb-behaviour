@@ -369,6 +369,7 @@ Feature: Concept Plays
     When relation(fathership) get role(father); set override: parent
     When entity(person) set plays role: parentship:parent
     Then entity(person) set plays role: fathership:father
+    Then entity(person) get plays role: fathership:father; set override: fathership:father; fails
     Then entity(person) get plays role: fathership:father; set override: parentship:parent; fails
 
   Scenario: Entity types cannot override inherited playing role types other than with their subtypes
@@ -382,6 +383,7 @@ Feature: Concept Plays
     When put entity type: man
     When entity(man) set supertype: person
     Then entity(man) set plays role: fathership:father
+    Then entity(man) get plays role: fathership:father; set override: fathership:father; fails
     Then entity(man) get plays role: fathership:father; set override: parentship:parent; fails
 
   Scenario: Relation types can play role types
@@ -631,6 +633,7 @@ Feature: Concept Plays
     When relation(employment) create role: employee
     When relation(employment) set plays role: locates:located
     Then relation(employment) set plays role: employment-locates:employment-located
+    Then relation(contractor-employment) get plays role: contractor-locates:contractor-located; set override: contractor-locates:contractor-located; fails
     Then relation(employment) get plays role: employment-locates:employment-located; set override: locates:located; fails
 
   Scenario: Relation types cannot override inherited playing role types other than with their subtypes
@@ -647,6 +650,7 @@ Feature: Concept Plays
     When put relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
     Then relation(contractor-employment) set plays role: contractor-locates:contractor-located
+    Then relation(contractor-employment) get plays role: contractor-locates:contractor-located; set override: contractor-locates:contractor-located; fails
     Then relation(contractor-employment) get plays role: contractor-locates:contractor-located; set override: locates:located; fails
 
   Scenario: Attribute types cannot play entities, attributes, relations, roles, structs, structs fields, and non-existing things
@@ -1546,133 +1550,132 @@ Feature: Concept Plays
       | entity    | person      | card(1, 2) |
       | relation  | description | card(1, 2) |
 
-  Scenario INPROGRESS Outline: <root-type> types can inherit plays with @<annotation>s and pure plays that are subtypes of each other
+  Scenario Outline: <root-type> types can inherit plays with @<annotation>s and pure plays that are subtypes of each other
+    When put relation type: contract
+    When relation(contract) create role: contractor
+    When relation(contract) set annotation: @abstract
+    When put relation type: family
+    When relation(family) create role: member
+    When relation(family) set annotation: @abstract
     When put relation type: marriage
     When relation(marriage) create role: spouse
     When relation(marriage) set annotation: @abstract
-    When put attribute type: score
-    When attribute(score) set value-type: double
-    When attribute(score) set annotation: @abstract
-    When put attribute type: reference
-    When attribute(reference) set value-type: string
-    When attribute(reference) set annotation: @abstract
-    When attribute(reference) set supertype: marriage:spouse
-    When put attribute type: rating
-    When attribute(rating) set value-type: double
-    When attribute(rating) set annotation: @abstract
-    When attribute(rating) set supertype: score
+    When relation(marriage) set supertype: contract
+    When put relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) set annotation: @abstract
+    When relation(parentship) set supertype: family
     When <root-type>(<supertype-name>) set annotation: @abstract
-    When <root-type>(<supertype-name>) set plays role: marriage:spouse
-    When <root-type>(<supertype-name>) get plays role: marriage:spouse, set annotation: @<annotation>
-    When <root-type>(<supertype-name>) set plays role: score
+    When <root-type>(<supertype-name>) set plays role: contract:contractor
+    When <root-type>(<supertype-name>) get plays role: contract:contractor, set annotation: @<annotation>
+    When <root-type>(<supertype-name>) set plays role: family:member
     When <root-type>(<subtype-name>) set annotation: @abstract
-    When <root-type>(<subtype-name>) set plays role: reference
-    When <root-type>(<subtype-name>) get plays role: reference, set annotation: @<annotation>
-    When <root-type>(<subtype-name>) set plays role: rating
+    When <root-type>(<subtype-name>) set plays role: marriage:spouse
+    When <root-type>(<subtype-name>) get plays role: marriage:spouse, set annotation: @<annotation>
+    When <root-type>(<subtype-name>) set plays role: parentship:parent
     Then <root-type>(<subtype-name>) get plays role contain:
-      | marriage:spouse |
-      | reference       |
-      | score           |
-      | rating          |
+      | contract:contractor |
+      | marriage:spouse     |
+      | family:member       |
+      | parentship:parent   |
     Then <root-type>(<subtype-name>) get declared plays role contain:
-      | reference |
-      | rating    |
+      | marriage:spouse   |
+      | parentship:parent |
     Then <root-type>(<subtype-name>) get declared plays role do not contain:
-      | marriage:spouse |
-      | score           |
+      | contract:contractor |
+      | family:member       |
+    Then <root-type>(<subtype-name>) get plays role: contract:contractor, get annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get plays role: marriage:spouse, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get plays role: reference, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get plays role: score, get annotations do not contain: @<annotation>
-    Then <root-type>(<subtype-name>) get plays role: rating, get annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name>) get plays role: family:member, get annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name>) get plays role: parentship:parent, get annotations do not contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get plays role contain:
-      | marriage:spouse |
-      | reference       |
-      | score           |
-      | rating          |
+      | contract:contractor |
+      | marriage:spouse     |
+      | family:member       |
+      | parentship:parent   |
     Then <root-type>(<subtype-name>) get declared plays role contain:
-      | reference |
-      | rating    |
+      | marriage:spouse   |
+      | parentship:parent |
     Then <root-type>(<subtype-name>) get declared plays role do not contain:
-      | marriage:spouse |
-      | score           |
+      | contract:contractor |
+      | family:member       |
+    Then <root-type>(<subtype-name>) get plays role: contract:contractor, get annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get plays role: marriage:spouse, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get plays role: reference, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get plays role: score, get annotations do not contain: @<annotation>
-    Then <root-type>(<subtype-name>) get plays role: rating, get annotations do not contain: @<annotation>
-    When put attribute type: license
-    When attribute(license) set value-type: string
-    When attribute(license) set supertype: reference
-    When put attribute type: points
-    When attribute(points) set value-type: double
-    When attribute(points) set supertype: rating
+    Then <root-type>(<subtype-name>) get plays role: family:member, get annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name>) get plays role: parentship:parent, get annotations do not contain: @<annotation>
+    When put relation type: civil-marriage
+    When relation(civil-marriage) set supertype: marriage
+    When relation(fathership) create role: father
+    When relation(fathership) set annotation: @abstract
+    When relation(fathership) set supertype: parentship
     When <root-type>(<subtype-name-2>) set annotation: @abstract
     When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
-    When <root-type>(<subtype-name-2>) set plays role: license
-    When <root-type>(<subtype-name-2>) get plays role: license, set annotation: @<annotation>
-    When <root-type>(<subtype-name-2>) set plays role: points
+    When <root-type>(<subtype-name-2>) set plays role: civil-marriage:spouse
+    When <root-type>(<subtype-name-2>) get plays role: civil-marriage:spouse, set annotation: @<annotation>
+    When <root-type>(<subtype-name-2>) set plays role: fathership:father
     Then <root-type>(<subtype-name-2>) get plays role contain:
-      | marriage:spouse |
-      | reference       |
-      | license         |
-      | score           |
-      | rating          |
-      | points          |
+      | contract:contractor   |
+      | marriage:spouse       |
+      | civil-marriage:spouse |
+      | family:member         |
+      | parentship:parent     |
+      | fathership:father     |
     Then <root-type>(<subtype-name-2>) get declared plays role contain:
-      | license |
-      | points  |
+      | civil-marriage:spouse |
+      | fathership:father     |
     Then <root-type>(<subtype-name-2>) get declared plays role do not contain:
-      | marriage:spouse |
-      | reference       |
-      | score           |
-      | rating          |
+      | contract:contractor |
+      | marriage:spouse     |
+      | family:member       |
+      | parentship:parent   |
     When transaction commits
     When connection open read transaction for database: typedb
     Then <root-type>(<subtype-name>) get plays role contain:
-      | marriage:spouse |
-      | reference       |
-      | score           |
-      | rating          |
+      | contract:contractor |
+      | marriage:spouse     |
+      | family:member       |
+      | parentship:parent   |
     Then <root-type>(<subtype-name>) get declared plays role contain:
-      | reference |
-      | rating    |
+      | marriage:spouse   |
+      | parentship:parent |
     Then <root-type>(<subtype-name>) get declared plays role do not contain:
-      | marriage:spouse |
-      | score           |
+      | contract:contractor |
+      | family:member       |
+    Then <root-type>(<subtype-name>) get plays role: contract:contractor, get annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get plays role: marriage:spouse, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get plays role: reference, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get plays role: score, get annotations do not contain: @<annotation>
-    Then <root-type>(<subtype-name>) get plays role: rating, get annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name>) get plays role: family:member, get annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name>) get plays role: parentship:parent, get annotations do not contain: @<annotation>
     Then <root-type>(<subtype-name-2>) get plays role contain:
-      | marriage:spouse |
-      | reference       |
-      | license         |
-      | score           |
-      | rating          |
-      | points          |
+      | contract:contractor   |
+      | marriage:spouse       |
+      | civil-marriage:spouse |
+      | family:member         |
+      | parentship:parent     |
+      | fathership:father     |
     Then <root-type>(<subtype-name-2>) get declared plays role contain:
-      | license |
-      | points  |
+      | civil-marriage:spouse |
+      | fathership:father     |
     Then <root-type>(<subtype-name-2>) get declared plays role do not contain:
-      | marriage:spouse |
-      | reference       |
-      | score           |
-      | rating          |
+      | contract:contractor |
+      | marriage:spouse     |
+      | family:member       |
+      | parentship:parent   |
+    Then <root-type>(<subtype-name-2>) get plays role: contract:contractor, get annotations contain: @<annotation>
     Then <root-type>(<subtype-name-2>) get plays role: marriage:spouse, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name-2>) get plays role: reference, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name-2>) get plays role: license, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name-2>) get plays role: score, get annotations do not contain: @<annotation>
-    Then <root-type>(<subtype-name-2>) get plays role: rating, get annotations do not contain: @<annotation>
-    Then <root-type>(<subtype-name-2>) get plays role: points, get annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name-2>) get plays role: civil-marriage:spouse, get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name-2>) get plays role: family:member, get annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name-2>) get plays role: parentship:parent, get annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name-2>) get plays role: fathership:father, get annotations do not contain: @<annotation>
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | annotation |
       | entity    | person         | customer     | subscriber     | card(1, 2) |
       | relation  | description    | registration | profile        | card(1, 2) |
 
-  Scenario INPROGRESS Outline: <root-type> types can override inherited plays with @<annotation>s and pure plays
-    When put relation type: marriage
-    When relation(marriage) create role: spouse
+  Scenario Outline: <root-type> types can override inherited plays with @<annotation>s and pure plays
+    When put relation type: dispatch
+    When relation(dispatch) create role: recipient
     When put relation type: parentship
     When relation(parentship) create role: parent
     When relation(parentship) set annotation: @abstract
@@ -1681,149 +1684,149 @@ Feature: Concept Plays
     When relation(contract) set annotation: @abstract
     When put relation type: employment
     When relation(employment) create role: employee
-    When put attribute type: reference
-    When attribute(reference) set value-type: string
-    When attribute(reference) set annotation: @abstract
+    When put relation type: reference
+    When relation(reference) create role: target
+    When relation(reference) set annotation: @abstract
     When put relation type: fathership
     When relation(fathership) create role: father
     When relation(fathership) set supertype: parentship
-    When put attribute type: nick-name
-    When attribute(nick-name) set value-type: string
-    When attribute(nick-name) set supertype: contract
-    When put attribute type: rating
-    When attribute(rating) set value-type: double
-    When attribute(rating) set annotation: @abstract
+    When put relation type: marriage
+    When relation(marriage) create role: spouse
+    When relation(marriage) set supertype: contract
+    When put relation type: celebration
+    When relation(celebration) create role: cause
+    When relation(celebration) set annotation: @abstract
     When <root-type>(<supertype-name>) set annotation: @abstract
-    When <root-type>(<supertype-name>) set plays role: marriage:spouse
-    When <root-type>(<supertype-name>) get plays role: marriage:spouse, set annotation: @<annotation>
+    When <root-type>(<supertype-name>) set plays role: dispatch:recipient
+    When <root-type>(<supertype-name>) get plays role: dispatch:recipient, set annotation: @<annotation>
     When <root-type>(<supertype-name>) set plays role: parentship:parent
     When <root-type>(<supertype-name>) get plays role: parentship:parent, set annotation: @<annotation>
     When <root-type>(<supertype-name>) set plays role: contract:contractor
     When <root-type>(<supertype-name>) set plays role: employment:employee
     When <root-type>(<subtype-name>) set annotation: @abstract
-    When <root-type>(<subtype-name>) set plays role: reference
-    When <root-type>(<subtype-name>) get plays role: reference, set annotation: @<annotation>
+    When <root-type>(<subtype-name>) set plays role: reference:target
+    When <root-type>(<subtype-name>) get plays role: reference:target, set annotation: @<annotation>
     When <root-type>(<subtype-name>) set plays role: fathership:father
     When <root-type>(<subtype-name>) get plays role: fathership:father; set override: parentship:parent
-    When <root-type>(<subtype-name>) set plays role: rating
-    When <root-type>(<subtype-name>) set plays role: nick-name
-    When <root-type>(<subtype-name>) get plays role: nick-name; set override: contract:contractor
+    When <root-type>(<subtype-name>) set plays role: celebration:cause
+    When <root-type>(<subtype-name>) set plays role: marriage:spouse
+    When <root-type>(<subtype-name>) get plays role: marriage:spouse; set override: contract:contractor
     Then <root-type>(<subtype-name>) get plays role overridden(fathership:father) get label: parentship:parent
-    Then <root-type>(<subtype-name>) get plays role overridden(nick-name) get label: contract:contractor
+    Then <root-type>(<subtype-name>) get plays role overridden(marriage:spouse) get label: contract:contractor
     Then <root-type>(<subtype-name>) get plays role contain:
-      | marriage:spouse     |
-      | reference           |
+      | dispatch:recipient  |
+      | reference:target    |
       | fathership:father   |
       | employment:employee |
-      | rating              |
-      | nick-name           |
+      | celebration:cause   |
+      | marriage:spouse     |
     Then <root-type>(<subtype-name>) get plays role do not contain:
       | parentship:parent   |
       | contract:contractor |
     Then <root-type>(<subtype-name>) get declared plays role contain:
-      | reference         |
+      | reference:target  |
       | fathership:father |
-      | rating            |
-      | nick-name         |
+      | celebration:cause |
+      | marriage:spouse   |
     Then <root-type>(<subtype-name>) get declared plays role do not contain:
-      | marriage:spouse     |
+      | dispatch:recipient  |
       | employment:employee |
       | parentship:parent   |
       | contract:contractor |
-    Then <root-type>(<subtype-name>) get plays role: marriage:spouse, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get plays role: reference, get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get plays role: dispatch:recipient, get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get plays role: reference:target, get annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get plays role: fathership:father, get annotations contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get plays role overridden(fathership:father) get label: parentship:parent
-    Then <root-type>(<subtype-name>) get plays role overridden(nick-name) get label: contract:contractor
+    Then <root-type>(<subtype-name>) get plays role overridden(marriage:spouse) get label: contract:contractor
     Then <root-type>(<subtype-name>) get plays role contain:
-      | marriage:spouse     |
-      | reference           |
+      | dispatch:recipient  |
+      | reference:target    |
       | fathership:father   |
       | employment:employee |
-      | rating              |
-      | nick-name           |
+      | celebration:cause   |
+      | marriage:spouse     |
     Then <root-type>(<subtype-name>) get plays role do not contain:
       | parentship:parent   |
       | contract:contractor |
     Then <root-type>(<subtype-name>) get declared plays role contain:
-      | reference         |
+      | reference:target  |
       | fathership:father |
-      | rating            |
-      | nick-name         |
+      | celebration:cause |
+      | marriage:spouse   |
     Then <root-type>(<subtype-name>) get declared plays role do not contain:
-      | marriage:spouse     |
+      | dispatch:recipient  |
       | employment:employee |
       | parentship:parent   |
       | contract:contractor |
-    Then <root-type>(<subtype-name>) get plays role: marriage:spouse, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get plays role: reference, get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get plays role: dispatch:recipient, get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get plays role: reference:target, get annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get plays role: fathership:father, get annotations contain: @<annotation>
-    When put attribute type: license
-    When attribute(license) set value-type: string
-    When attribute(license) set supertype: reference
-    When put attribute type: points
-    When attribute(points) set value-type: double
-    When attribute(points) set supertype: rating
+    When put relation type: publication-reference
+    When relation(publication-reference) create role: publication
+    When relation(publication-reference) set supertype: reference
+    When put relation type: birthday
+    When relation(birthday) create role: celebrant
+    When relation(birthday) set supertype: celebration
     When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
-    When <root-type>(<subtype-name-2>) set plays role: license
-    When <root-type>(<subtype-name-2>) get plays role: license; set override: reference
-    When <root-type>(<subtype-name-2>) set plays role: points
-    When <root-type>(<subtype-name-2>) get plays role: points; set override: rating
+    When <root-type>(<subtype-name-2>) set plays role: publication-reference:publication
+    When <root-type>(<subtype-name-2>) get plays role: publication-reference:publication; set override: reference:target
+    When <root-type>(<subtype-name-2>) set plays role: birthday:celebrant
+    When <root-type>(<subtype-name-2>) get plays role: birthday:celebrant; set override: celebration
     When transaction commits
     When connection open read transaction for database: typedb
     Then <root-type>(<subtype-name>) get plays role contain:
-      | marriage:spouse     |
-      | reference           |
+      | dispatch:recipient  |
+      | reference:target    |
       | fathership:father   |
       | employment:employee |
-      | rating              |
-      | nick-name           |
+      | celebration:cause   |
+      | marriage:spouse     |
     Then <root-type>(<subtype-name>) get plays role do not contain:
       | parentship:parent   |
       | contract:contractor |
     Then <root-type>(<subtype-name>) get declared plays role contain:
-      | reference         |
+      | reference:target  |
       | fathership:father |
-      | rating            |
-      | nick-name         |
+      | celebration:cause |
+      | marriage:spouse   |
     Then <root-type>(<subtype-name>) get declared plays role do not contain:
-      | marriage:spouse     |
+      | dispatch:recipient  |
       | employment:employee |
       | parentship:parent   |
       | contract:contractor |
-    Then <root-type>(<subtype-name>) get plays role: marriage:spouse, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get plays role: reference, get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get plays role: dispatch:recipient, get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get plays role: reference:target, get annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get plays role: fathership:father, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name-2>) get plays role overridden(license) get label: reference
-    Then <root-type>(<subtype-name-2>) get plays role overridden(points) get label: rating
+    Then <root-type>(<subtype-name-2>) get plays role overridden(publication-reference:publication) get label: reference:target
+    Then <root-type>(<subtype-name-2>) get plays role overridden(birthday:celebrant) get label: celebration:cause
     Then <root-type>(<subtype-name-2>) get plays role contain:
-      | marriage:spouse     |
-      | license             |
-      | fathership:father   |
-      | employment:employee |
-      | points              |
-      | nick-name           |
+      | dispatch:recipient                |
+      | publication-reference:publication |
+      | fathership:father                 |
+      | employment:employee               |
+      | birthday:celebrant                |
+      | marriage:spouse                   |
     Then <root-type>(<subtype-name-2>) get plays role do not contain:
       | parentship:parent   |
-      | reference           |
+      | reference:target    |
       | contract:contractor |
-      | rating              |
+      | celebration:cause   |
     Then <root-type>(<subtype-name-2>) get declared plays role contain:
-      | license |
-      | points  |
+      | publication-reference:publication |
+      | birthday:celebrant                |
     Then <root-type>(<subtype-name-2>) get declared plays role do not contain:
-      | marriage:spouse     |
+      | dispatch:recipient  |
       | fathership:father   |
       | employment:employee |
-      | nick-name           |
+      | marriage:spouse     |
       | parentship:parent   |
-      | reference           |
+      | reference:target    |
       | contract:contractor |
-      | rating              |
-    Then <root-type>(<subtype-name-2>) get plays role: marriage:spouse, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name-2>) get plays role: license, get annotations contain: @<annotation>
+      | celebration:cause   |
+    Then <root-type>(<subtype-name-2>) get plays role: dispatch:recipient, get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name-2>) get plays role: publication-reference:publication, get annotations contain: @<annotation>
     Then <root-type>(<subtype-name-2>) get plays role: fathership:father, get annotations contain: @<annotation>
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | annotation |
@@ -1834,193 +1837,101 @@ Feature: Concept Plays
 # @card # TODO: Adapt to plays!
 ########################
 
-  Scenario INPROGRESS Outline: Owns can set @card annotation for <value-type> value type with args in correct order and unset it
-    When put attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
-    When put attribute type: custom-attribute-2
-    When attribute(custom-attribute-2) set value-type: <value-type>
-    When entity(person) set plays role: custom-attribute
-    Then entity(player) get plays role: custom-attribute, set annotation: @card(<arg1>, <arg0>); fails
-    Then entity(person) get plays role: custom-attribute, get annotations is empty
-    When entity(person) get plays role: custom-attribute, set annotation: @card(<arg0>, <arg1>)
-    Then entity(person) get plays role: custom-attribute, get annotations contain: @card(<arg0>, <arg1>)
-    When entity(person) set plays role: custom-attribute-2[]
-    Then entity(player) get plays role: custom-attribute-2[], set annotation: @card(<arg1>, <arg0>); fails
-    Then entity(person) get plays role: custom-attribute-2[], get annotations is empty
-    When entity(person) get plays role: custom-attribute-2[], set annotation: @card(<arg0>, <arg1>)
-    Then entity(person) get plays role: custom-attribute-2[], get annotations contain: @card(<arg0>, <arg1>)
+  Scenario Outline: Plays can set @card annotation with args in correct order and unset it
+    When put relation type: marriage
+    When relation(marriage) create role: spouse
+    When entity(person) set plays role: marriage:spouse
+    Then entity(player) get plays role: marriage:spouse, set annotation: @card(<arg1>, <arg0>); fails
+    Then entity(person) get plays role: marriage:spouse, get annotations is empty
+    When entity(person) get plays role: marriage:spouse, set annotation: @card(<arg0>, <arg1>)
+    Then entity(person) get plays role: marriage:spouse, get annotations contain: @card(<arg0>, <arg1>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get plays role: custom-attribute, get annotations contain: @card(<arg0>, <arg1>)
-    Then entity(person) get plays role: custom-attribute-2[], get annotations contain: @card(<arg0>, <arg1>)
-    When entity(person) unset plays role: custom-attribute
-    When entity(person) unset plays role: custom-attribute-2[]
+    Then entity(person) get plays role: marriage:spouse, get annotations contain: @card(<arg0>, <arg1>)
+    Then entity(person) get plays role: marriage:spouse, unset annotation: @card(<arg0>, <arg1>)
+    Then entity(person) get plays role: marriage:spouse, get annotations is empty
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get plays role: marriage:spouse, get annotations is empty
+    When entity(person) get plays role: marriage:spouse, set annotation: @card(<arg0>, <arg1>)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get plays role: marriage:spouse, get annotations contain: @card(<arg0>, <arg1>)
+    When entity(person) unset plays role: marriage:spouse
     Then entity(person) get plays role is empty
     When transaction commits
     When connection open read transaction for database: typedb
     Then entity(person) get plays role is empty
     Examples:
-    # TODO: card(0, 1) or @card(1, 1) for lists? If we don't allow it, refactor this test (move list cases to a separate test)
-    # If we allow it, maybe we should allow @key and @subkey for lists as well. Refactor @key and @subkey tests for lists as well!
-      | value-type    | arg0 | arg1                |
-      | long          | 0    | 1                   |
-      | long          | 0    | 10                  |
-      | long          | 0    | 9223372036854775807 |
-      | long          | 1    | 10                  |
-      | long          | 0    | *                   |
-      | long          | 1    | *                   |
-      | long          | *    | 10                  |
-      | string        | 0    | 1                   |
-      | string        | 0    | 10                  |
-      | string        | 0    | 9223372036854775807 |
-      | string        | 1    | 10                  |
-      | string        | 0    | *                   |
-      | string        | 1    | *                   |
-      | string        | *    | 10                  |
-      | boolean       | 0    | 1                   |
-      | boolean       | 0    | 10                  |
-      | boolean       | 0    | 9223372036854775807 |
-      | boolean       | 1    | 10                  |
-      | boolean       | 0    | *                   |
-      | boolean       | 1    | *                   |
-      | boolean       | *    | 10                  |
-      | double        | 0    | 1                   |
-      | double        | 0    | 10                  |
-      | double        | 0    | 9223372036854775807 |
-      | double        | 1    | 10                  |
-      | double        | 0    | *                   |
-      | double        | 1    | *                   |
-      | double        | *    | 10                  |
-      | decimal       | 0    | 1                   |
-      | decimal       | 0    | 10                  |
-      | decimal       | 0    | 9223372036854775807 |
-      | decimal       | 1    | 10                  |
-      | decimal       | 0    | *                   |
-      | decimal       | 1    | *                   |
-      | decimal       | *    | 10                  |
-      | datetime      | 0    | 1                   |
-      | datetime      | 0    | 10                  |
-      | datetime      | 0    | 9223372036854775807 |
-      | datetime      | 1    | 10                  |
-      | datetime      | 0    | *                   |
-      | datetime      | 1    | *                   |
-      | datetime      | *    | 10                  |
-      | datetimetz    | 0    | 1                   |
-      | datetimetz    | 0    | 10                  |
-      | datetimetz    | 0    | 9223372036854775807 |
-      | datetimetz    | 1    | 10                  |
-      | datetimetz    | 0    | *                   |
-      | datetimetz    | 1    | *                   |
-      | datetimetz    | *    | 10                  |
-      | duration      | 0    | 1                   |
-      | duration      | 0    | 10                  |
-      | duration      | 0    | 9223372036854775807 |
-      | duration      | 1    | 10                  |
-      | duration      | 0    | *                   |
-      | duration      | 1    | *                   |
-      | duration      | *    | 10                  |
-      | custom-struct | 0    | 1                   |
-      | custom-struct | 0    | 10                  |
-      | custom-struct | 0    | 9223372036854775807 |
-      | custom-struct | 1    | 10                  |
-      | custom-struct | 0    | *                   |
-      | custom-struct | 1    | *                   |
-      | custom-struct | *    | 10                  |
+      | arg0 | arg1                |
+      | 0    | 1                   |
+      | 0    | 10                  |
+      | 0    | 9223372036854775807 |
+      | 1    | 10                  |
+      | 0    | *                   |
+      | 1    | *                   |
+      | *    | 10                  |
 
-  Scenario INPROGRESS Outline: Owns can set @card annotation for <value-type> value type with duplicate args (exactly N ownerships)
-    When put attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
-    When entity(person) set plays role: custom-attribute
-    Then entity(person) get plays role: custom-attribute, get annotations is empty
-    When entity(person) get plays role: custom-attribute, set annotation: @card(<arg>, <arg>)
-    Then entity(person) get plays role: custom-attribute, get annotations contain: @card(<arg>, <arg>)
+  Scenario Outline: Plays can set @card annotation with duplicate args (exactly N plays)
+    When put relation type: marriage
+    When relation(marriage) create role: spouse
+    When entity(person) set plays role: marriage:spouse
+    Then entity(person) get plays role: marriage:spouse, get annotations is empty
+    When entity(person) get plays role: marriage:spouse, set annotation: @card(<arg>, <arg>)
+    Then entity(person) get plays role: marriage:spouse, get annotations contain: @card(<arg>, <arg>)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get plays role: custom-attribute, get annotations contain: @card(<arg>, <arg>)
+    Then entity(person) get plays role: marriage:spouse, get annotations contain: @card(<arg>, <arg>)
     Examples:
-      | value-type    | arg  |
-      | long          | 1    |
-      | long          | 9999 |
-      | string        | 1    |
-      | string        | 8888 |
-      | boolean       | 1    |
-      | boolean       | 7777 |
-      | double        | 1    |
-      | double        | 666  |
-      | decimal       | 1    |
-      | decimal       | 555  |
-      | datetime      | 1    |
-      | datetime      | 444  |
-      | datetimetz    | 1    |
-      | datetimetz    | 33   |
-      | duration      | 1    |
-      | duration      | 22   |
-      | custom-struct | 1    |
-      | custom-struct | 11   |
+      | arg                 |
+      | 1                   |
+      | 2                   |
+      | 9999                |
+      | 9223372036854775807 |
 
-  Scenario INPROGRESS Outline: Owns cannot have @card annotation for <value-type> value type with less than two args
-    When put attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
-    When entity(person) set plays role: custom-attribute
-    Then entity(person) get plays role: custom-attribute, set annotation: @card; fails
-    Then entity(person) get plays role: custom-attribute, set annotation: @card(); fails
-    Then entity(person) get plays role: custom-attribute, set annotation: @card(1); fails
-    Then entity(person) get plays role: custom-attribute, set annotation: @card(*); fails
-    Then entity(person) get plays role: custom-attribute, get annotations is empty
+  Scenario: Plays cannot have @card annotation with less than two args
+    When put relation type: marriage
+    When relation(marriage) create role: spouse
+    When entity(person) set plays role: marriage:spouse
+    Then entity(person) get plays role: marriage:spouse, set annotation: @card; fails
+    Then entity(person) get plays role: marriage:spouse, set annotation: @card(); fails
+    Then entity(person) get plays role: marriage:spouse, set annotation: @card(1); fails
+    Then entity(person) get plays role: marriage:spouse, set annotation: @card(*); fails
+    Then entity(person) get plays role: marriage:spouse, get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get plays role: custom-attribute, get annotations is empty
-    Examples:
-      | value-type |
-      | long       |
-      | double     |
-      | decimal    |
-      | string     |
-      | boolean    |
-      | datetime   |
-      | datetimetz |
-      | duration   |
+    Then entity(person) get plays role: marriage:spouse, get annotations is empty
 
-  Scenario INPROGRESS Outline: Owns cannot have @card annotation for <value-type> value type with invalid args or args number
-    When put attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
-    When entity(player) set plays role: custom-attribute
-    Then entity(player) get plays role: custom-attribute, set annotation: @card(-1, 1); fails
-    Then entity(player) get plays role: custom-attribute, set annotation: @card(0, 0.1); fails
-    Then entity(player) get plays role: custom-attribute, set annotation: @card(0, 1.5); fails
-    Then entity(player) get plays role: custom-attribute, set annotation: @card(*, *); fails
-    Then entity(player) get plays role: custom-attribute, set annotation: @card(0, **); fails
-    Then entity(player) get plays role: custom-attribute, set annotation: @card(1, 2, 3); fails
-    Then entity(player) get plays role: custom-attribute, set annotation: @card(1, "2"); fails
-    Then entity(player) get plays role: custom-attribute, set annotation: @card("1", 2); fails
-    Then entity(player) get plays role: custom-attribute, get annotations is empty
+  Scenario: Plays cannot have @card annotation with invalid args or args number
+    When put relation type: marriage
+    When relation(marriage) create role: spouse
+    When entity(player) set plays role: marriage:spouse
+    Then entity(player) get plays role: marriage:spouse, set annotation: @card(-1, 1); fails
+    Then entity(player) get plays role: marriage:spouse, set annotation: @card(0, 0.1); fails
+    Then entity(player) get plays role: marriage:spouse, set annotation: @card(0, 1.5); fails
+    Then entity(player) get plays role: marriage:spouse, set annotation: @card(*, *); fails
+    Then entity(player) get plays role: marriage:spouse, set annotation: @card(0, **); fails
+    Then entity(player) get plays role: marriage:spouse, set annotation: @card(1, 2, 3); fails
+    Then entity(player) get plays role: marriage:spouse, set annotation: @card(1, "2"); fails
+    Then entity(player) get plays role: marriage:spouse, set annotation: @card("1", 2); fails
+    Then entity(player) get plays role: marriage:spouse, get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(player) get plays role: custom-attribute, get annotations is empty
-    Examples:
-      | value-type |
-      | long       |
-      | double     |
-      | decimal    |
-      | string     |
-      | boolean    |
-      | datetime   |
-      | datetimetz |
-      | duration   |
+    Then entity(player) get plays role: marriage:spouse, get annotations is empty
 
-  Scenario INPROGRESS Outline: Owns cannot set multiple @card annotations with different arguments
-    When put attribute type: name
-    When attribute(name) set value-type: long
-    When entity(person) set plays role: name
-    When entity(person) get plays role: name, set annotation: @card(2, 5)
-    Then entity(person) get plays role: name, set annotation: @card(<fail-args>); fails
-    Then entity(person) get plays role: name, set annotation: @card(<fail-args>); fails
-    Then entity(person) get plays role: name, get annotations contain: @card(2, 5)
-    Then entity(person) get plays role: name, get annotations do not contain: @card(<fail-args>)
+  Scenario Outline: Plays cannot set multiple @card annotations with different arguments
+    When put relation type: marriage
+    When relation(marriage) create role: spouse
+    When entity(person) set plays role: marriage:spouse
+    When entity(person) get plays role: marriage:spouse, set annotation: @card(2, 5)
+    Then entity(person) get plays role: marriage:spouse, set annotation: @card(<fail-args>); fails
+    Then entity(person) get plays role: marriage:spouse, set annotation: @card(<fail-args>); fails
+    Then entity(person) get plays role: marriage:spouse, get annotations contain: @card(2, 5)
+    Then entity(person) get plays role: marriage:spouse, get annotations do not contain: @card(<fail-args>)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get plays role: name, get annotations contain: @card(2, 5)
-    Then entity(person) get plays role: name, get annotations do not contain: @card(<fail-args>)
+    Then entity(person) get plays role: marriage:spouse, get annotations contain: @card(2, 5)
+    Then entity(person) get plays role: marriage:spouse, get annotations do not contain: @card(<fail-args>)
     Examples:
       | fail-args |
       | 0, 1      |
@@ -2037,131 +1948,157 @@ Feature: Concept Plays
       | 5, *      |
       | 6, *      |
 
-  Scenario INPROGRESS Outline: Owns-related @card annotation for <value-type> value type can be inherited and overridden by a subset of args
-    When put relation type: contract
-    When relation(contract) create role: participant
-    When put attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
-    When put attribute type: second-custom-attribute
-    When attribute(second-custom-attribute) set value-type: <value-type>
-    When entity(person) set plays role: custom-attribute
-    When relation(contract) set plays role: custom-attribute
-    When entity(person) set plays role: second-custom-attribute
-    When relation(contract) set plays role: second-custom-attribute
-    When entity(person) get plays role: custom-attribute, set annotation: @card(<args>)
-    When relation(contract) get plays role: custom-attribute, set annotation: @card(<args>)
-    Then entity(person) get plays role: custom-attribute, get annotations contain: @card(<args>)
-    Then relation(contract) get plays role: custom-attribute, get annotations contain: @card(<args>)
-    When entity(person) get plays role: second-custom-attribute, set annotation: @card(<args>)
-    When relation(contract) get plays role: second-custom-attribute, set annotation: @card(<args>)
-    Then entity(person) get plays role: second-custom-attribute, get annotations contain: @card(<args>)
-    Then relation(contract) get plays role: second-custom-attribute, get annotations contain: @card(<args>)
-    When put entity type: player
+    # TODO: Maybe we allow it, then change the test considering the expected behavior
+  Scenario Outline: Plays cannot redeclare @card annotation with different arguments
     When put relation type: marriage
-    When entity(player) set supertype: person
-    When relation(marriage) set supertype: contract
-    Then entity(player) get plays role contain: custom-attribute
-    Then relation(marriage) get plays role contain: custom-attribute
-    Then entity(player) get plays role: custom-attribute, get annotations contain: @card(<args>)
-    Then relation(marriage) get plays role: custom-attribute, get annotations contain: @card(<args>)
-    Then entity(player) get plays role contain: second-custom-attribute
-    Then relation(marriage) get plays role contain: second-custom-attribute
-    # TODO: Overrides? Remove second-custom-attribute from test if we remove overrides!
-    When entity(player) get plays role: second-custom-attribute; set override: overridden-custom-attribute
-    When relation(marriage) get plays role: second-custom-attribute; set override: overridden-custom-attribute
-    Then entity(player) get plays role do not contain: second-custom-attribute
-    Then relation(marriage) get plays role do not contain: second-custom-attribute
-    Then entity(player) get plays role contain: overridden-custom-attribute
-    Then relation(marriage) get plays role contain: overridden-custom-attribute
-    Then entity(player) get plays role: overridden-custom-attribute, get annotations contain: @card(<args>)
-    Then relation(marriage) get plays role: overridden-custom-attribute, get annotations contain: @card(<args>)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then entity(player) get plays role: custom-attribute, get annotations contain: @card(<args>)
-    Then relation(marriage) get plays role: custom-attribute, get annotations contain: @card(<args>)
-    Then entity(player) get plays role: overridden-custom-attribute, get annotations contain: @card(<args>)
-    Then relation(marriage) get plays role: overridden-custom-attribute, get annotations contain: @card(<args>)
-    When entity(player) get plays role: custom-attribute, set annotation: @card(<args-override>)
-    When relation(marriage) get plays role: custom-attribute, set annotation: @card(<args-override>)
-    Then entity(player) get plays role: custom-attribute, get annotations contain: @card(<args-override>)
-    Then relation(marriage) get plays role: custom-attribute, get annotations contain: @card(<args-override>)
-    When entity(player) get plays role: overridden-custom-attribute, set annotation: @card(<args-override>)
-    When relation(marriage) get plays role: overridden-custom-attribute, set annotation: @card(<args-override>)
-    Then entity(player) get plays role: overridden-custom-attribute, get annotations contain: @card(<args-override>)
-    Then relation(marriage) get plays role: overridden-custom-attribute, get annotations contain: @card(<args-override>)
+    When relation(marriage) create role: spouse
+    When entity(person) set plays role: marriage:spouse
+    Then entity(person) get plays role: marriage:spouse, set annotation: @card(<args>)
+    Then entity(person) get plays role: marriage:spouse, set annotation: @card(<args-redeclared>); fails
+    Then entity(person) get plays role: marriage:spouse, get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(player) get plays role: custom-attribute, get annotations contain: @card(<args-override>)
-    Then relation(marriage) get plays role: custom-attribute, get annotations contain: @card(<args-override>)
-    Then entity(player) get plays role: overridden-custom-attribute, get annotations contain: @card(<args-override>)
-    Then relation(marriage) get plays role: overridden-custom-attribute, get annotations contain: @card(<args-override>)
+    Then entity(person) get plays role: marriage:spouse, get annotations is empty
     Examples:
-      | value-type | args       | args-override |
-      | long       | 0, *       | 0, 10000      |
-      | double     | 0, 10      | 0, 1          |
-      | decimal    | 0, 2       | 1, 2          |
-      | string     | 1, *       | 1, 1          |
-      | datetime   | 1, 5       | 3, 4          |
-      | datetimetz | 38, 111    | 39, 111       |
-      | duration   | 1000, 1100 | 1000, 1099    |
+      | args | args-redeclared |
+      | 0, * | 0, 1            |
+      | 0, 5 | 0, 1            |
+      | 1, 5 | 0, 1            |
+      | 2, 5 | 0, 1            |
+      | 2, 5 | 0, 2            |
+      | 2, 5 | 2, *            |
+      | 2, 5 | 2, 6            |
+      | 2, 5 | 7, 11            |
 
-  Scenario INPROGRESS Outline: Inherited @card annotation on plays role for <value-type> value type cannot be overridden by the @card of same args or not a subset of args
-    When put relation type: contract
-    When relation(contract) create role: participant
-    When put attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
-    When put attribute type: second-custom-attribute
-    When attribute(second-custom-attribute) set value-type: <value-type>
-    When entity(person) set plays role: custom-attribute
-    When relation(contract) set plays role: custom-attribute
-    When entity(person) set plays role: second-custom-attribute
-    When relation(contract) set plays role: second-custom-attribute
-    When entity(person) get plays role: custom-attribute, set annotation: @card(<args>)
-    When relation(contract) get plays role: custom-attribute, set annotation: @card(<args>)
-    Then entity(person) get plays role: custom-attribute, get annotations contain: @card(<args>)
-    Then relation(contract) get plays role: custom-attribute, get annotations contain: @card(<args>)
-    When entity(person) get plays role: second-custom-attribute, set annotation: @card(<args>)
-    When relation(contract) get plays role: second-custom-attribute, set annotation: @card(<args>)
-    Then entity(person) get plays role: second-custom-attribute, get annotations contain: @card(<args>)
-    Then relation(contract) get plays role: second-custom-attribute, get annotations contain: @card(<args>)
+  Scenario Outline: Plays-related @card annotation can be inherited and overridden by a subset of args
+    When put relation type: custom-relation
+    When relation(custom-relation) create role: r1
+    When put relation type: second-custom-relation
+    When relation(second-custom-relation) create role: r2
+    When put relation type: overridden-custom-relation
+    When relation(overridden-custom-relation) create role: overridden-r2
+    When relation(overridden-custom-relation) set supertype: second-custom-relation
+    When entity(person) set plays role: custom-relation:r1
+    When relation(description) set plays role: custom-relation:r1
+    When entity(person) set plays role: second-custom-relation:r2
+    When relation(description) set plays role: second-custom-relation:r2
+    When entity(person) get plays role: custom-relation:r1, set annotation: @card(<args>)
+    When relation(description) get plays role: custom-relation:r1, set annotation: @card(<args>)
+    Then entity(person) get plays role: custom-relation:r1, get annotations contain: @card(<args>)
+    Then relation(description) get plays role: custom-relation:r1, get annotations contain: @card(<args>)
+    When entity(person) get plays role: second-custom-relation:r1-2, set annotation: @card(<args>)
+    When relation(description) get plays role: second-custom-relation:r2, set annotation: @card(<args>)
+    Then entity(person) get plays role: second-custom-relation:r2, get annotations contain: @card(<args>)
+    Then relation(description) get plays role: second-custom-relation:r2, get annotations contain: @card(<args>)
     When put entity type: player
     When put relation type: marriage
     When entity(player) set supertype: person
-    When relation(marriage) set supertype: contract
-    Then entity(player) get plays role: custom-attribute, get annotations contain: @card(<args>)
-    Then relation(marriage) get plays role: custom-attribute, get annotations contain: @card(<args>)
-    # TODO: Overrides? Remove second-custom-attribute from test if we remove overrides!
-    When entity(player) get plays role: second-custom-attribute; set override: overridden-custom-attribute
-    When relation(marriage) get plays role: second-custom-attribute; set override: overridden-custom-attribute
-    Then entity(player) get plays role: overridden-custom-attribute, get annotations contain: @card(<args>)
-    Then relation(marriage) get plays role: overridden-custom-attribute, get annotations contain: @card(<args>)
-    Then entity(player) get plays role: custom-attribute, set annotation: @card(<args>); fails
-    Then relation(marriage) get plays role: custom-attribute, set annotation: @card(<args>); fails
-    Then entity(player) get plays role: overridden-custom-attribute, set annotation: @card(<args>); fails
-    Then relation(marriage) get plays role: overridden-custom-attribute, set annotation: @card(<args>); fails
-    Then entity(player) get plays role: custom-attribute, set annotation: @card(<args-override>); fails
-    Then relation(marriage) get plays role: custom-attribute, set annotation: @card(<args-override>); fails
-    Then entity(player) get plays role: overridden-custom-attribute, set annotation: @card(<args-override>); fails
-    Then relation(marriage) get plays role: overridden-custom-attribute, set annotation: @card(<args-override>); fails
-    Then entity(player) get plays role: custom-attribute, get annotations contain: @card(<args>)
-    Then relation(marriage) get plays role: custom-attribute, get annotations contain: @card(<args>)
-    Then entity(player) get plays role: overridden-custom-attribute, get annotations contain: @card(<args>)
-    Then relation(marriage) get plays role: overridden-custom-attribute, get annotations contain: @card(<args>)
+    When relation(marriage) set supertype: description
+    When entity(player) set plays role: overridden-custom-relation:overridden-r2
+    When relation(marriage) set plays role: overridden-custom-relation:overridden-r2
+    # TODO: Overrides? Remove second-custom-relation:r2 from test if we remove overrides!
+    When entity(player) get plays role: overridden-custom-relation:overridden-r2; set override: second-custom-relation:r2
+    When relation(marriage) get plays role: overridden-custom-relation:overridden-r2; set override: second-custom-relation:r2
+    Then entity(player) get plays role contain: custom-relation:r1
+    Then relation(marriage) get plays role contain: custom-relation:r1
+    Then entity(player) get plays role: custom-relation:r1, get annotations contain: @card(<args>)
+    Then relation(marriage) get plays role: custom-relation:r1, get annotations contain: @card(<args>)
+    Then entity(player) get plays role do not contain: second-custom-relation:r2
+    Then relation(marriage) get plays role do not contain: second-custom-relation:r2
+    Then entity(player) get plays role contain: overridden-custom-relation:overridden-r2
+    Then relation(marriage) get plays role contain: overridden-custom-relation:overridden-r2
+    Then entity(player) get plays role: overridden-custom-relation:overridden-r2, get annotations contain: @card(<args>)
+    Then relation(marriage) get plays role: overridden-custom-relation:overridden-r2, get annotations contain: @card(<args>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(player) get plays role: custom-attribute, get annotations contain: @card(<args>)
-    Then relation(marriage) get plays role: custom-attribute, get annotations contain: @card(<args>)
-    Then entity(player) get plays role: overridden-custom-attribute, get annotations contain: @card(<args>)
-    Then relation(marriage) get plays role: overridden-custom-attribute, get annotations contain: @card(<args>)
+    Then entity(player) get plays role: custom-relation:r1, get annotations contain: @card(<args>)
+    Then relation(marriage) get plays role: custom-relation:r1, get annotations contain: @card(<args>)
+    Then entity(player) get plays role: overridden-custom-relation:overridden-r2, get annotations contain: @card(<args>)
+    Then relation(marriage) get plays role: overridden-custom-relation:overridden-r2, get annotations contain: @card(<args>)
+    When entity(player) get plays role: custom-relation:r1, set annotation: @card(<args-override>)
+    When relation(marriage) get plays role: custom-relation:r1, set annotation: @card(<args-override>)
+    Then entity(player) get plays role: custom-relation:r1, get annotations contain: @card(<args-override>)
+    Then relation(marriage) get plays role: custom-relation:r1, get annotations contain: @card(<args-override>)
+    When entity(player) get plays role: overridden-custom-relation:overridden-r2, set annotation: @card(<args-override>)
+    When relation(marriage) get plays role: overridden-custom-relation:overridden-r2, set annotation: @card(<args-override>)
+    Then entity(player) get plays role: overridden-custom-relation:overridden-r2, get annotations contain: @card(<args-override>)
+    Then relation(marriage) get plays role: overridden-custom-relation:overridden-r2, get annotations contain: @card(<args-override>)
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(player) get plays role: custom-relation:r1, get annotations contain: @card(<args-override>)
+    Then relation(marriage) get plays role: custom-relation:r1, get annotations contain: @card(<args-override>)
+    Then entity(player) get plays role: overridden-custom-relation:overridden-r2, get annotations contain: @card(<args-override>)
+    Then relation(marriage) get plays role: overridden-custom-relation:overridden-r2, get annotations contain: @card(<args-override>)
     Examples:
-      | value-type | args       | args-override |
-      | long       | 0, 10000   | 0, 10001      |
-      | double     | 0, 10      | 1, 11         |
-      | decimal    | 0, 2       | 0, 0          |
-      | string     | 1, *       | 0, 2          |
-      | datetime   | 1, 5       | 6, 10         |
-      | datetimetz | 38, 111    | 37, 111       |
-      | duration   | 1000, 1100 | 1000, 1199    |
+      | args       | args-override |
+      | 0, *       | 0, 10000      |
+      | 0, 10      | 0, 1          |
+      | 0, 2       | 1, 2          |
+      | 1, *       | 1, 1          |
+      | 1, 5       | 3, 4          |
+      | 38, 111    | 39, 111       |
+      | 1000, 1100 | 1000, 1099    |
+
+  Scenario Outline: Inherited @card annotation on plays role cannot be overridden by the @card of same args or not a subset of args
+    When put relation type: custom-relation
+    When relation(custom-relation) create role: r1
+    When put relation type: second-custom-relation
+    When relation(second-custom-relation) create role: r2
+    When put relation type: overridden-custom-relation
+    When relation(overridden-custom-relation) create role: overridden-r2
+    When relation(overridden-custom-relation) set supertype: second-custom-relation
+    When entity(person) set plays role: custom-relation:r1
+    When relation(description) set plays role: custom-relation:r1
+    When entity(person) set plays role: second-custom-relation:r2
+    When relation(description) set plays role: second-custom-relation:r2
+    When entity(person) get plays role: custom-relation:r1, set annotation: @card(<args>)
+    When relation(description) get plays role: custom-relation:r1, set annotation: @card(<args>)
+    Then entity(person) get plays role: custom-relation:r1, get annotations contain: @card(<args>)
+    Then relation(description) get plays role: custom-relation:r1, get annotations contain: @card(<args>)
+    When entity(person) get plays role: second-custom-relation:r2, set annotation: @card(<args>)
+    When relation(description) get plays role: second-custom-relation:r2, set annotation: @card(<args>)
+    Then entity(person) get plays role: second-custom-relation:r2, get annotations contain: @card(<args>)
+    Then relation(description) get plays role: second-custom-relation:r2, get annotations contain: @card(<args>)
+    When put entity type: player
+    When put relation type: marriage
+    When entity(player) set supertype: person
+    When relation(marriage) set supertype: description
+    When entity(player) set plays role: overridden-custom-relation:overridden-r2
+    When relation(marriage) set plays role: overridden-custom-relation:overridden-r2
+    # TODO: Overrides? Remove second-custom-relation:r2 from test if we remove overrides!
+    When entity(player) get plays role: overridden-custom-relation:overridden-r2; set override: second-custom-relation:r2
+    When relation(marriage) get plays role: overridden-custom-relation:overridden-r2; set override: second-custom-relation:r2
+    Then entity(player) get plays role: custom-relation:r1, get annotations contain: @card(<args>)
+    Then relation(marriage) get plays role: custom-relation:r1, get annotations contain: @card(<args>)
+    Then entity(player) get plays role: overridden-custom-relation:overridden-r2, get annotations contain: @card(<args>)
+    Then relation(marriage) get plays role: overridden-custom-relation:overridden-r2, get annotations contain: @card(<args>)
+    Then entity(player) get plays role: custom-relation:r1, set annotation: @card(<args>); fails
+    Then relation(marriage) get plays role: custom-relation:r1, set annotation: @card(<args>); fails
+    Then entity(player) get plays role: overridden-custom-relation:overridden-r2, set annotation: @card(<args>); fails
+    Then relation(marriage) get plays role: overridden-custom-relation:overridden-r2, set annotation: @card(<args>); fails
+    Then entity(player) get plays role: custom-relation:r1, set annotation: @card(<args-override>); fails
+    Then relation(marriage) get plays role: custom-relation:r1, set annotation: @card(<args-override>); fails
+    Then entity(player) get plays role: overridden-custom-relation:overridden-r2, set annotation: @card(<args-override>); fails
+    Then relation(marriage) get plays role: overridden-custom-relation:overridden-r2, set annotation: @card(<args-override>); fails
+    Then entity(player) get plays role: custom-relation:r1, get annotations contain: @card(<args>)
+    Then relation(marriage) get plays role: custom-relation:r1, get annotations contain: @card(<args>)
+    Then entity(player) get plays role: overridden-custom-relation:overridden-r2, get annotations contain: @card(<args>)
+    Then relation(marriage) get plays role: overridden-custom-relation:overridden-r2, get annotations contain: @card(<args>)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(player) get plays role: custom-relation:r1, get annotations contain: @card(<args>)
+    Then relation(marriage) get plays role: custom-relation:r1, get annotations contain: @card(<args>)
+    Then entity(player) get plays role: overridden-custom-relation:overridden-r2, get annotations contain: @card(<args>)
+    Then relation(marriage) get plays role: overridden-custom-relation:overridden-r2, get annotations contain: @card(<args>)
+    Examples:
+      | args       | args-override |
+      | 0, 10000   | 0, 10001      |
+      | 0, 10      | 1, 11         |
+      | 0, 2       | 0, 0          |
+      | 1, *       | 0, 2          |
+      | 1, 5       | 6, 10         |
+      | 38, 111    | 37, 111       |
+      | 1000, 1100 | 1000, 1199    |
 
 ########################
 # not compatible @annotations: @distinct, @key, @unique, @subkey, @values, @range, @regex, @abstract, @cascade, @independent, @replace

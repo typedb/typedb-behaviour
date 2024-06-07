@@ -433,6 +433,7 @@ Feature: Concept Owns
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<type-name>) set owns: first-name
+    Then <root-type>(<type-name>) get owns: first-name; set override: first-name; fails
     Then <root-type>(<type-name>) get owns: first-name; set override: name; fails
     Examples:
       | root-type | type-name   | value-type |
@@ -448,6 +449,7 @@ Feature: Concept Owns
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) set owns: reference
+    Then <root-type>(<subtype-name>) get owns: reference; set override: reference; fails
     Then <root-type>(<subtype-name>) get owns: reference; set override: username; fails
     Examples:
       | root-type | supertype-name | subtype-name | value-type |
@@ -897,6 +899,7 @@ Feature: Concept Owns
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<type-name>) set owns: first-name[]
+    Then <root-type>(<type-name>) get owns: first-name[]; set override: first-name[]; fails
     Then <root-type>(<type-name>) get owns: first-name[]; set override: name[]; fails
     Examples:
       | root-type | type-name   | value-type |
@@ -912,6 +915,7 @@ Feature: Concept Owns
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) set owns: reference[]
+    Then <root-type>(<subtype-name>) get owns: reference[]; set override: reference[]; fails
     Then <root-type>(<subtype-name>) get owns: reference[]; set override: username[]; fails
     Examples:
       | root-type | supertype-name | subtype-name | value-type |
@@ -2563,6 +2567,28 @@ Feature: Concept Owns
       | duration   | 1Y                              |
       | duration   | year                            |
 
+    # TODO: Maybe we allow it, then change the test considering the expected behavior
+  Scenario Outline: Owns cannot redeclare @values annotation with different arguments
+    When put attribute type: custom-attribute
+    When attribute(custom-attribute) set value-type: <value-type>
+    When entity(person) set owns: custom-attribute
+    Then entity(person) get owns: custom-attribute, set annotation: @values(<args>)
+    Then entity(person) get owns: custom-attribute, set annotation: @values(<args-redeclared>); fails
+    Then entity(person) get owns: custom-attribute, get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Examples:
+      | value-type | args            | args-redeclared |
+      | long       | 1, 5            | 7, 9            |
+      | double     | 1.1, 1.5        | -8.0, 88.3      |
+      | decimal    | -8.0, 88.3      | 1.1, 1.5        |
+      | string     | "s"             | "not s"         |
+      | boolean    | true            | false           |
+      | datetime   | 2024-05-05      | 2024-06-05      |
+      | datetimetz | 2024-05-05+0100 | 2024-05-05+0010 |
+      | duration   | P1Y             | P2Y             |
+
   Scenario Outline: Owns cannot have @values annotation for <value-type> value type with duplicated args
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
@@ -2602,37 +2628,38 @@ Feature: Concept Owns
     Then entity(person) get owns: name, get annotations do not contain: @values("Hi")
 
   Scenario Outline: Owns-related @values annotation for <value-type> value type can be inherited and overridden by a subset of args
-    When put relation type: contract
-    When relation(contract) create role: participant
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When put attribute type: second-custom-attribute
     When attribute(second-custom-attribute) set value-type: <value-type>
+    When put attribute type: overridden-custom-attribute
+    When attribute(overridden-custom-attribute) set value-type: <value-type>
+    When attribute(overridden-custom-attribute) set supertype: second-custom-attribute
     When entity(person) set owns: custom-attribute
-    When relation(contract) set owns: custom-attribute
+    When relation(description) set owns: custom-attribute
     When entity(person) set owns: second-custom-attribute
-    When relation(contract) set owns: second-custom-attribute
+    When relation(description) set owns: second-custom-attribute
     When entity(person) get owns: custom-attribute, set annotation: @values(<args>)
-    When relation(contract) get owns: custom-attribute, set annotation: @values(<args>)
+    When relation(description) get owns: custom-attribute, set annotation: @values(<args>)
     Then entity(person) get owns: custom-attribute, get annotations contain: @values(<args>)
-    Then relation(contract) get owns: custom-attribute, get annotations contain: @values(<args>)
+    Then relation(description) get owns: custom-attribute, get annotations contain: @values(<args>)
     When entity(person) get owns: second-custom-attribute, set annotation: @values(<args>)
-    When relation(contract) get owns: second-custom-attribute, set annotation: @values(<args>)
+    When relation(description) get owns: second-custom-attribute, set annotation: @values(<args>)
     Then entity(person) get owns: second-custom-attribute, get annotations contain: @values(<args>)
-    Then relation(contract) get owns: second-custom-attribute, get annotations contain: @values(<args>)
+    Then relation(description) get owns: second-custom-attribute, get annotations contain: @values(<args>)
     When put entity type: player
     When put relation type: marriage
     When entity(player) set supertype: person
-    When relation(marriage) set supertype: contract
+    When relation(marriage) set supertype: description
+    When entity(player) set owns: overridden-custom-attribute
+    When relation(marriage) set owns: overridden-custom-attribute
+    # TODO: Overrides? Remove second-custom-attribute from test if we remove overrides!
+    When entity(player) get owns: overridden-custom-attribute; set override: second-custom-attribute
+    When relation(marriage) get owns: overridden-custom-attribute; set override: second-custom-attribute
     Then entity(player) get owns contain: custom-attribute
     Then relation(marriage) get owns contain: custom-attribute
     Then entity(player) get owns: custom-attribute, get annotations contain: @values(<args>)
     Then relation(marriage) get owns: custom-attribute, get annotations contain: @values(<args>)
-    Then entity(player) get owns contain: second-custom-attribute
-    Then relation(marriage) get owns contain: second-custom-attribute
-    # TODO: Overrides? Remove second-custom-attribute from test if we remove overrides!
-    When entity(player) get owns: second-custom-attribute; set override: overridden-custom-attribute
-    When relation(marriage) get owns: second-custom-attribute; set override: overridden-custom-attribute
     Then entity(player) get owns do not contain: second-custom-attribute
     Then relation(marriage) get owns do not contain: second-custom-attribute
     Then entity(player) get owns contain: overridden-custom-attribute
@@ -2671,33 +2698,36 @@ Feature: Concept Owns
       | duration   | P6M, P1Y, P1Y1M, P1Y2M, P1Y3M, P1Y4M, P1Y6M                                  | P6M, P1Y3M, P1Y4M, P1Y6M                   |
 
   Scenario Outline: Inherited @values annotation on owns for <value-type> value type cannot be overridden by the @values of same args or not a subset of args
-    When put relation type: contract
-    When relation(contract) create role: participant
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When put attribute type: second-custom-attribute
     When attribute(second-custom-attribute) set value-type: <value-type>
+    When put attribute type: overridden-custom-attribute
+    When attribute(overridden-custom-attribute) set value-type: <value-type>
+    When attribute(overridden-custom-attribute) set supertype: second-custom-attribute
     When entity(person) set owns: custom-attribute
-    When relation(contract) set owns: custom-attribute
+    When relation(description) set owns: custom-attribute
     When entity(person) set owns: second-custom-attribute
-    When relation(contract) set owns: second-custom-attribute
+    When relation(description) set owns: second-custom-attribute
     When entity(person) get owns: custom-attribute, set annotation: @values(<args>)
-    When relation(contract) get owns: custom-attribute, set annotation: @values(<args>)
+    When relation(description) get owns: custom-attribute, set annotation: @values(<args>)
     Then entity(person) get owns: custom-attribute, get annotations contain: @values(<args>)
-    Then relation(contract) get owns: custom-attribute, get annotations contain: @values(<args>)
+    Then relation(description) get owns: custom-attribute, get annotations contain: @values(<args>)
     When entity(person) get owns: second-custom-attribute, set annotation: @values(<args>)
-    When relation(contract) get owns: second-custom-attribute, set annotation: @values(<args>)
+    When relation(description) get owns: second-custom-attribute, set annotation: @values(<args>)
     Then entity(person) get owns: second-custom-attribute, get annotations contain: @values(<args>)
-    Then relation(contract) get owns: second-custom-attribute, get annotations contain: @values(<args>)
+    Then relation(description) get owns: second-custom-attribute, get annotations contain: @values(<args>)
     When put entity type: player
     When put relation type: marriage
     When entity(player) set supertype: person
-    When relation(marriage) set supertype: contract
+    When relation(marriage) set supertype: description
+    When entity(player) set owns: overridden-custom-attribute
+    When relation(marriage) set owns: overridden-custom-attribute
+    # TODO: Overrides? Remove second-custom-attribute from test if we remove overrides!
+    When entity(player) get owns: overridden-custom-attribute; set override: second-custom-attribute
+    When relation(marriage) get owns: overridden-custom-attribute; set override: second-custom-attribute
     Then entity(player) get owns: custom-attribute, get annotations contain: @values(<args>)
     Then relation(marriage) get owns: custom-attribute, get annotations contain: @values(<args>)
-    # TODO: Overrides? Remove second-custom-attribute from test if we remove overrides!
-    When entity(player) get owns: second-custom-attribute; set override: overridden-custom-attribute
-    When relation(marriage) get owns: second-custom-attribute; set override: overridden-custom-attribute
     Then entity(player) get owns: overridden-custom-attribute, get annotations contain: @values(<args>)
     Then relation(marriage) get owns: overridden-custom-attribute, get annotations contain: @values(<args>)
     Then entity(player) get owns: custom-attribute, set annotation: @values(<args>); fails
@@ -2818,6 +2848,27 @@ Feature: Concept Owns
       | datetimetz | 2024-06-04+0100 |
       | duration   | P1Y             |
 
+    # TODO: Maybe we allow it, then change the test considering the expected behavior
+  Scenario Outline: Owns cannot redeclare @range annotation with different arguments
+    When put attribute type: custom-attribute
+    When attribute(custom-attribute) set value-type: <value-type>
+    When entity(person) set owns: custom-attribute
+    Then entity(person) get owns: custom-attribute, set annotation: @range(<args>)
+    Then entity(person) get owns: custom-attribute, set annotation: @range(<args-redeclared>); fails
+    Then entity(person) get owns: custom-attribute, get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Examples:
+      | value-type | args                             | args-redeclared                  |
+      | long       | 1, 5                             | 7, 9                             |
+      | double     | 1.1, 1.5                         | -8.0, 88.3                       |
+      | decimal    | -8.0, 88.3                       | 1.1, 1.5                         |
+      | string     | "S", "s"                         | "not s", "xxxxxxxxx"             |
+      | datetime   | 2024-05-05, 2024-05-06           | 2024-06-05, 2024-06-06           |
+      | datetimetz | 2024-05-05+0100, 2024-05-06+0100 | 2024-05-05+0100, 2024-05-07+0100 |
+      | duration   | P1Y, P2Y                         | P1Y6M, P2Y                       |
+
     # TODO: If we allow arg0 == arg1, move this case to another test!
   Scenario Outline: Owns cannot have @range annotation for <value-type> value type with invalid args or args number
     When put attribute type: custom-attribute
@@ -2897,18 +2948,18 @@ Feature: Concept Owns
       | duration   | year                            | P1Y                                                |
 
   Scenario Outline: Owns cannot set multiple @range annotations with different arguments
-    When put attribute type: name
-    When attribute(name) set value-type: long
-    When entity(person) set owns: name
-    When entity(person) get owns: name, set annotation: @range(2, 5)
-    Then entity(person) get owns: name, set annotation: @range(<fail-args>); fails
-    Then entity(person) get owns: name, set annotation: @range(<fail-args>); fails
-    Then entity(person) get owns: name, get annotations contain: @range(2, 5)
-    Then entity(person) get owns: name, get annotations do not contain: @range(<fail-args>)
+    When put attribute type: age
+    When attribute(age) set value-type: long
+    When entity(person) set owns: age
+    When entity(person) get owns: age, set annotation: @range(2, 5)
+    Then entity(person) get owns: age, set annotation: @range(<fail-args>); fails
+    Then entity(person) get owns: age, set annotation: @range(<fail-args>); fails
+    Then entity(person) get owns: age, get annotations contain: @range(2, 5)
+    Then entity(person) get owns: age, get annotations do not contain: @range(<fail-args>)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns: name, get annotations contain: @range(2, 5)
-    Then entity(person) get owns: name, get annotations do not contain: @range(<fail-args>)
+    Then entity(person) get owns: age, get annotations contain: @range(2, 5)
+    Then entity(person) get owns: age, get annotations do not contain: @range(<fail-args>)
     Examples:
       | fail-args |
       | 0, 1      |
@@ -2926,37 +2977,38 @@ Feature: Concept Owns
       | 6, 10     |
 
   Scenario Outline: Owns-related @range annotation for <value-type> value type can be inherited and overridden by a subset of args
-    When put relation type: contract
-    When relation(contract) create role: participant
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When put attribute type: second-custom-attribute
     When attribute(second-custom-attribute) set value-type: <value-type>
+    When put attribute type: overridden-custom-attribute
+    When attribute(overridden-custom-attribute) set value-type: <value-type>
+    When attribute(overridden-custom-attribute) set supertype: second-custom-attribute
     When entity(person) set owns: custom-attribute
-    When relation(contract) set owns: custom-attribute
+    When relation(description) set owns: custom-attribute
     When entity(person) set owns: second-custom-attribute
-    When relation(contract) set owns: second-custom-attribute
+    When relation(description) set owns: second-custom-attribute
     When entity(person) get owns: custom-attribute, set annotation: @range(<args>)
-    When relation(contract) get owns: custom-attribute, set annotation: @range(<args>)
+    When relation(description) get owns: custom-attribute, set annotation: @range(<args>)
     Then entity(person) get owns: custom-attribute, get annotations contain: @range(<args>)
-    Then relation(contract) get owns: custom-attribute, get annotations contain: @range(<args>)
+    Then relation(description) get owns: custom-attribute, get annotations contain: @range(<args>)
     When entity(person) get owns: second-custom-attribute, set annotation: @range(<args>)
-    When relation(contract) get owns: second-custom-attribute, set annotation: @range(<args>)
+    When relation(description) get owns: second-custom-attribute, set annotation: @range(<args>)
     Then entity(person) get owns: second-custom-attribute, get annotations contain: @range(<args>)
-    Then relation(contract) get owns: second-custom-attribute, get annotations contain: @range(<args>)
+    Then relation(description) get owns: second-custom-attribute, get annotations contain: @range(<args>)
     When put entity type: player
     When put relation type: marriage
     When entity(player) set supertype: person
-    When relation(marriage) set supertype: contract
+    When relation(marriage) set supertype: description
+    When entity(player) set owns: overridden-custom-attribute
+    When relation(marriage) set owns: overridden-custom-attribute
+    # TODO: Overrides? Remove second-custom-attribute from test if we remove overrides!
+    When entity(player) get owns: overridden-custom-attribute; set override: second-custom-attribute
+    When relation(marriage) get owns: overridden-custom-attribute; set override: second-custom-attribute
     Then entity(player) get owns contain: custom-attribute
     Then relation(marriage) get owns contain: custom-attribute
     Then entity(player) get owns: custom-attribute, get annotations contain: @range(<args>)
     Then relation(marriage) get owns: custom-attribute, get annotations contain: @range(<args>)
-    Then entity(player) get owns contain: second-custom-attribute
-    Then relation(marriage) get owns contain: second-custom-attribute
-    # TODO: Overrides? Remove second-custom-attribute from test if we remove overrides!
-    When entity(player) get owns: second-custom-attribute; set override: overridden-custom-attribute
-    When relation(marriage) get owns: second-custom-attribute; set override: overridden-custom-attribute
     Then entity(player) get owns do not contain: second-custom-attribute
     Then relation(marriage) get owns do not contain: second-custom-attribute
     Then entity(player) get owns contain: overridden-custom-attribute
@@ -2994,33 +3046,36 @@ Feature: Concept Owns
       | duration   | P6M, P1Y                         | P8M, P9M                                  |
 
   Scenario Outline: Inherited @range annotation on owns for <value-type> value type cannot be overridden by the @range of same args or not a subset of args
-    When put relation type: contract
-    When relation(contract) create role: participant
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When put attribute type: second-custom-attribute
     When attribute(second-custom-attribute) set value-type: <value-type>
+    When put attribute type: overridden-custom-attribute
+    When attribute(overridden-custom-attribute) set value-type: <value-type>
+    When attribute(overridden-custom-attribute) set supertype: second-custom-attribute
     When entity(person) set owns: custom-attribute
-    When relation(contract) set owns: custom-attribute
+    When relation(description) set owns: custom-attribute
     When entity(person) set owns: second-custom-attribute
-    When relation(contract) set owns: second-custom-attribute
+    When relation(description) set owns: second-custom-attribute
     When entity(person) get owns: custom-attribute, set annotation: @range(<args>)
-    When relation(contract) get owns: custom-attribute, set annotation: @range(<args>)
+    When relation(description) get owns: custom-attribute, set annotation: @range(<args>)
     Then entity(person) get owns: custom-attribute, get annotations contain: @range(<args>)
-    Then relation(contract) get owns: custom-attribute, get annotations contain: @range(<args>)
+    Then relation(description) get owns: custom-attribute, get annotations contain: @range(<args>)
     When entity(person) get owns: second-custom-attribute, set annotation: @range(<args>)
-    When relation(contract) get owns: second-custom-attribute, set annotation: @range(<args>)
+    When relation(description) get owns: second-custom-attribute, set annotation: @range(<args>)
     Then entity(person) get owns: second-custom-attribute, get annotations contain: @range(<args>)
-    Then relation(contract) get owns: second-custom-attribute, get annotations contain: @range(<args>)
+    Then relation(description) get owns: second-custom-attribute, get annotations contain: @range(<args>)
     When put entity type: player
     When put relation type: marriage
     When entity(player) set supertype: person
-    When relation(marriage) set supertype: contract
+    When relation(marriage) set supertype: description
+    When entity(player) set owns: overridden-custom-attribute
+    When relation(marriage) set owns: overridden-custom-attribute
+    # TODO: Overrides? Remove second-custom-attribute from test if we remove overrides!
+    When entity(player) get owns: overridden-custom-attribute; set override: second-custom-attribute
+    When relation(marriage) get owns: overridden-custom-attribute; set override: second-custom-attribute
     Then entity(player) get owns: custom-attribute, get annotations contain: @range(<args>)
     Then relation(marriage) get owns: custom-attribute, get annotations contain: @range(<args>)
-    # TODO: Overrides? Remove second-custom-attribute from test if we remove overrides!
-    When entity(player) get owns: second-custom-attribute; set override: overridden-custom-attribute
-    When relation(marriage) get owns: second-custom-attribute; set override: overridden-custom-attribute
     Then entity(player) get owns: overridden-custom-attribute, get annotations contain: @range(<args>)
     Then relation(marriage) get owns: overridden-custom-attribute, get annotations contain: @range(<args>)
     Then entity(player) get owns: custom-attribute, set annotation: @range(<args>); fails
@@ -3230,18 +3285,18 @@ Feature: Concept Owns
       | duration   |
 
   Scenario Outline: Owns cannot set multiple @card annotations with different arguments
-    When put attribute type: name
-    When attribute(name) set value-type: long
-    When entity(person) set owns: name
-    When entity(person) get owns: name, set annotation: @card(2, 5)
-    Then entity(person) get owns: name, set annotation: @card(<fail-args>); fails
-    Then entity(person) get owns: name, set annotation: @card(<fail-args>); fails
-    Then entity(person) get owns: name, get annotations contain: @card(2, 5)
-    Then entity(person) get owns: name, get annotations do not contain: @card(<fail-args>)
+    When put attribute type: custom-attribute
+    When attribute(custom-attribute) set value-type: decimal
+    When entity(person) set owns: custom-attribute
+    When entity(person) get owns: custom-attribute, set annotation: @card(2, 5)
+    Then entity(person) get owns: custom-attribute, set annotation: @card(<fail-args>); fails
+    Then entity(person) get owns: custom-attribute, set annotation: @card(<fail-args>); fails
+    Then entity(person) get owns: custom-attribute, get annotations contain: @card(2, 5)
+    Then entity(person) get owns: custom-attribute, get annotations do not contain: @card(<fail-args>)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns: name, get annotations contain: @card(2, 5)
-    Then entity(person) get owns: name, get annotations do not contain: @card(<fail-args>)
+    Then entity(person) get owns: custom-attribute, get annotations contain: @card(2, 5)
+    Then entity(person) get owns: custom-attribute, get annotations do not contain: @card(<fail-args>)
     Examples:
       | fail-args |
       | 0, 1      |
@@ -3258,38 +3313,61 @@ Feature: Concept Owns
       | 5, *      |
       | 6, *      |
 
+    # TODO: Maybe we allow it, then change the test considering the expected behavior
+  Scenario Outline: Owns cannot redeclare @card annotation with different arguments
+    When put attribute type: custom-attribute
+    When attribute(custom-attribute) set value-type: <value-type>
+    When entity(person) set owns: custom-attribute
+    Then entity(person) get owns: custom-attribute, set annotation: @card(<args>)
+    Then entity(person) get owns: custom-attribute, set annotation: @card(<args-redeclared>); fails
+    Then entity(person) get owns: custom-attribute, get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Examples:
+      | value-type | args | args-redeclared |
+      | long       | 2, 5 | 7, 9            |
+      | double     | 2, 5 | 0, 1            |
+      | decimal    | 2, 5 | 0, *            |
+      | string     | 2, 5 | 4, *            |
+      | boolean    | 2, 5 | 4, 5            |
+      | datetime   | 2, 5 | 2, 6            |
+      | datetimetz | 2, 5 | 2, 4            |
+      | duration   | 2, 5 | 2, *            |
+
   Scenario Outline: Owns-related @card annotation for <value-type> value type can be inherited and overridden by a subset of args
-    When put relation type: contract
-    When relation(contract) create role: participant
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When put attribute type: second-custom-attribute
     When attribute(second-custom-attribute) set value-type: <value-type>
+    When put attribute type: overridden-custom-attribute
+    When attribute(overridden-custom-attribute) set value-type: <value-type>
+    When attribute(overridden-custom-attribute) set supertype: second-custom-attribute
     When entity(person) set owns: custom-attribute
-    When relation(contract) set owns: custom-attribute
+    When relation(description) set owns: custom-attribute
     When entity(person) set owns: second-custom-attribute
-    When relation(contract) set owns: second-custom-attribute
+    When relation(description) set owns: second-custom-attribute
     When entity(person) get owns: custom-attribute, set annotation: @card(<args>)
-    When relation(contract) get owns: custom-attribute, set annotation: @card(<args>)
+    When relation(description) get owns: custom-attribute, set annotation: @card(<args>)
     Then entity(person) get owns: custom-attribute, get annotations contain: @card(<args>)
-    Then relation(contract) get owns: custom-attribute, get annotations contain: @card(<args>)
+    Then relation(description) get owns: custom-attribute, get annotations contain: @card(<args>)
     When entity(person) get owns: second-custom-attribute, set annotation: @card(<args>)
-    When relation(contract) get owns: second-custom-attribute, set annotation: @card(<args>)
+    When relation(description) get owns: second-custom-attribute, set annotation: @card(<args>)
     Then entity(person) get owns: second-custom-attribute, get annotations contain: @card(<args>)
-    Then relation(contract) get owns: second-custom-attribute, get annotations contain: @card(<args>)
+    Then relation(description) get owns: second-custom-attribute, get annotations contain: @card(<args>)
     When put entity type: player
     When put relation type: marriage
     When entity(player) set supertype: person
-    When relation(marriage) set supertype: contract
+    When relation(marriage) set supertype: description
+    When entity(player) set owns: overridden-custom-attribute
+    When relation(marriage) set owns: overridden-custom-attribute
+    # TODO: Overrides? Remove second-custom-attribute from test if we remove overrides!
+    When entity(player) get owns: overridden-custom-attribute; set override: second-custom-attribute
+    When relation(marriage) get owns: overridden-custom-attribute; set override: second-custom-attribute
     Then entity(player) get owns contain: custom-attribute
     Then relation(marriage) get owns contain: custom-attribute
     Then entity(player) get owns: custom-attribute, get annotations contain: @card(<args>)
     Then relation(marriage) get owns: custom-attribute, get annotations contain: @card(<args>)
-    Then entity(player) get owns contain: second-custom-attribute
-    Then relation(marriage) get owns contain: second-custom-attribute
-    # TODO: Overrides? Remove second-custom-attribute from test if we remove overrides!
-    When entity(player) get owns: second-custom-attribute; set override: overridden-custom-attribute
-    When relation(marriage) get owns: second-custom-attribute; set override: overridden-custom-attribute
     Then entity(player) get owns do not contain: second-custom-attribute
     Then relation(marriage) get owns do not contain: second-custom-attribute
     Then entity(player) get owns contain: overridden-custom-attribute
@@ -3327,33 +3405,36 @@ Feature: Concept Owns
       | duration   | 1000, 1100 | 1000, 1099    |
 
   Scenario Outline: Inherited @card annotation on owns for <value-type> value type cannot be overridden by the @card of same args or not a subset of args
-    When put relation type: contract
-    When relation(contract) create role: participant
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When put attribute type: second-custom-attribute
     When attribute(second-custom-attribute) set value-type: <value-type>
+    When put attribute type: overridden-custom-attribute
+    When attribute(overridden-custom-attribute) set value-type: <value-type>
+    When attribute(overridden-custom-attribute) set supertype: second-custom-attribute
     When entity(person) set owns: custom-attribute
-    When relation(contract) set owns: custom-attribute
+    When relation(description) set owns: custom-attribute
     When entity(person) set owns: second-custom-attribute
-    When relation(contract) set owns: second-custom-attribute
+    When relation(description) set owns: second-custom-attribute
     When entity(person) get owns: custom-attribute, set annotation: @card(<args>)
-    When relation(contract) get owns: custom-attribute, set annotation: @card(<args>)
+    When relation(description) get owns: custom-attribute, set annotation: @card(<args>)
     Then entity(person) get owns: custom-attribute, get annotations contain: @card(<args>)
-    Then relation(contract) get owns: custom-attribute, get annotations contain: @card(<args>)
+    Then relation(description) get owns: custom-attribute, get annotations contain: @card(<args>)
     When entity(person) get owns: second-custom-attribute, set annotation: @card(<args>)
-    When relation(contract) get owns: second-custom-attribute, set annotation: @card(<args>)
+    When relation(description) get owns: second-custom-attribute, set annotation: @card(<args>)
     Then entity(person) get owns: second-custom-attribute, get annotations contain: @card(<args>)
-    Then relation(contract) get owns: second-custom-attribute, get annotations contain: @card(<args>)
+    Then relation(description) get owns: second-custom-attribute, get annotations contain: @card(<args>)
     When put entity type: player
     When put relation type: marriage
     When entity(player) set supertype: person
-    When relation(marriage) set supertype: contract
+    When relation(marriage) set supertype: description
+    When entity(player) set owns: overridden-custom-attribute
+    When relation(marriage) set owns: overridden-custom-attribute
+    # TODO: Overrides? Remove second-custom-attribute from test if we remove overrides!
+    When entity(player) get owns: overridden-custom-attribute; set override: second-custom-attribute
+    When relation(marriage) get owns: overridden-custom-attribute; set override: second-custom-attribute
     Then entity(player) get owns: custom-attribute, get annotations contain: @card(<args>)
     Then relation(marriage) get owns: custom-attribute, get annotations contain: @card(<args>)
-    # TODO: Overrides? Remove second-custom-attribute from test if we remove overrides!
-    When entity(player) get owns: second-custom-attribute; set override: overridden-custom-attribute
-    When relation(marriage) get owns: second-custom-attribute; set override: overridden-custom-attribute
     Then entity(player) get owns: overridden-custom-attribute, get annotations contain: @card(<args>)
     Then relation(marriage) get owns: overridden-custom-attribute, get annotations contain: @card(<args>)
     Then entity(player) get owns: custom-attribute, set annotation: @card(<args>); fails
@@ -3676,9 +3757,9 @@ Feature: Concept Owns
     When connection open read transaction for database: typedb
     Then <root-type>(<type-name>) get owns: custom-attribute, get annotations is empty
     Examples:
-      | root-type | type-name   | value-type    |
-      | entity    | person      | long          |
-      | relation  | description | string        |
+      | root-type | type-name   | value-type |
+      | entity    | person      | long       |
+      | relation  | description | string     |
 
 ########################
 # @annotations combinations:
