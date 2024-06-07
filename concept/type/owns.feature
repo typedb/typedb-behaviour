@@ -2475,6 +2475,8 @@ Feature: Concept Owns
     When connection opens read transaction for database: typedb
     Then entity(person) get owns is empty
     Examples:
+    # TODO: card(0, 1) or @card(1, 1) for lists? If we don't allow it, refactor this test (move list cases to a separate test)
+    # If we allow it, maybe we should allow @key and @subkey for lists as well. Refactor @key and @subkey tests for lists as well!
       | value-type    | arg0 | arg1                |
       | long          | 0    | 1                   |
       | long          | 0    | 10                  |
@@ -3079,10 +3081,9 @@ Feature: Concept Owns
       | custom-struct |
 
 ########################
-# @annotations combinations
+# @annotations combinations:
+# @key, @unique, @subkey, @values, @range, @card, @regex, @distinct
 ########################
-  # TODO
-  # @key, @unique, @subkey, @values, @range, @card, @regex, @distinct
 
   Scenario Outline: Owns can set @<annotation-1> and @<annotation-2> together and unset it for scalar <value-type>
     When put attribute type: custom-attribute
@@ -3119,17 +3120,25 @@ Feature: Concept Owns
     When connection opens read transaction for database: typedb
     Then relation(description) get owns: custom-attribute, get annotations is empty
     Examples:
+    # TODO: Move to "cannot" test if something is wrong here.
       | annotation-1 | annotation-2 | value-type |
-      | key          |              | long       |
-      | subkey       |              | double     |
-      | unique       |              | decimal    |
-      | values       |              | string     |
-      | range        |              | datetime   |
-      | card         |              | datetimetz |
-      | regex        |              | duration   |
-      | distinct     |              | string     |
-    # TODO fill the values!
-  
+      | key          | subkey       | long       |
+      | key          | values       | double     |
+      | key          | range        | decimal    |
+      | key          | regex        | string     |
+      | subkey       | unique       | duration   |
+      | subkey       | values       | long       |
+      | subkey       | range        | boolean    |
+      | subkey       | card         | long       |
+      | subkey       | regex        | string     |
+      | unique       | values       | long       |
+      | unique       | range        | decimal    |
+      | unique       | card         | double     |
+      | unique       | regex        | string     |
+      | values       | card         | datetimetz |
+      | range        | card         | datetime   |
+      | card         | regex        | string     |
+
   Scenario Outline: Owns can set @<annotation-1> and @<annotation-2> together and unset it for lists of <value-type>
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
@@ -3165,16 +3174,20 @@ Feature: Concept Owns
     When connection opens read transaction for database: typedb
     Then relation(description) get owns: custom-attribute[], get annotations is empty
     Examples:
-      | annotation-1 | annotation-2 | value-type |
-      | key          |              | long       |
-      | subkey       |              | double     |
-      | unique       |              | decimal    |
-      | values       |              | string     |
-      | range        |              | datetime   |
-      | card         |              | datetimetz |
-      | regex        |              | duration   |
-      | distinct     |              | string     |
-    # TODO fill the values!
+    # TODO: Move to "cannot" test if something is wrong here.
+      | annotation-1 | annotation-2 | value-type    |
+      | unique       | values       | long          |
+      | unique       | range        | decimal       |
+      | unique       | card         | double        |
+      | unique       | regex        | string        |
+      | unique       | distinct     | string        |
+      | values       | card         | datetimetz    |
+      | values       | distinct     | long          |
+      | range        | card         | datetime      |
+      | range        | distinct     | datetime      |
+      | card         | regex        | string        |
+      | card         | distinct     | custom-struct |
+      | regex        | distinct     | string        |
 
   Scenario Outline: Owns cannot set @<annotation-1> and @<annotation-2> together for scalar <value-type>
     When put attribute type: custom-attribute
@@ -3193,16 +3206,18 @@ Feature: Concept Owns
     Then relation(description) get owns: custom-attribute, get annotation contain: @<annotation-2>
     Then relation(description) get owns: custom-attribute, get annotation do not contain: @<annotation-1>
     Examples:
+    # TODO: Move to "can" test if something is wrong here.
       | annotation-1 | annotation-2 | value-type |
-      | key          |              | long       |
-      | subkey       |              | double     |
-      | unique       |              | decimal    |
-      | values       |              | string     |
-      | range        |              | datetime   |
-      | card         |              | datetimetz |
-      | regex        |              | duration   |
-      | distinct     |              | string     |
-    # TODO fill the values!
+      # TODO: Key + unique = key in 2.x, but it would be good to restrict it for explicitness.
+      | key          | unique       | long       |
+      # TODO: key + card is similar to key + unique. I'd just restrict it.
+      | key          | card         | long       |
+      # TODO: If we allow values + range, write a test to check args compatibility!
+      | values       | range        | double     |
+      # TODO: If we allow values + regex, write a test to check args compatibility!
+      | values       | regex        | string     |
+      # TODO: If we allow range + regex, write a test to check args compatibility!
+      | range        | regex        | string     |
 
   Scenario Outline: Owns can set @<annotation-1> and @<annotation-2> together and unset it for lists of <value-type>
     When put attribute type: custom-attribute
@@ -3221,16 +3236,11 @@ Feature: Concept Owns
     Then relation(description) get owns: custom-attribute[], get annotation contain: @<annotation-2>
     Then relation(description) get owns: custom-attribute[], get annotation do not contain: @<annotation-1>
     Examples:
+    # TODO: Move to "can" test if something is wrong here.
       | annotation-1 | annotation-2 | value-type |
-      | key          |              | long       |
-      | subkey       |              | double     |
-      | unique       |              | decimal    |
-      | values       |              | string     |
-      | range        |              | datetime   |
-      | card         |              | datetimetz |
-      | regex        |              | duration   |
-      | distinct     |              | string     |
-    # TODO fill the values!
-
-
-# TODO: Tests for lists without annotations!
+      # TODO: If we allow values + range, write a test to check args compatibility!
+      | values       | range        | double     |
+      # TODO: If we allow values + regex, write a test to check args compatibility!
+      | values       | regex        | string     |
+      # TODO: If we allow range + regex, write a test to check args compatibility!
+      | range        | regex        | string     |
