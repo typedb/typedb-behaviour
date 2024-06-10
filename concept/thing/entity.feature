@@ -19,7 +19,7 @@ Feature: Concept Entity
     Given attribute(email) set value-type: string
     Given put entity type: person
     Given entity(person) set owns: username
-    Given entity(person) get owns: username, set annotation: @key
+    Given entity(person) get owns(username) set annotation: @key
     Given entity(person) set owns: email
     Given transaction commits
     Given connection open write transaction for database: typedb

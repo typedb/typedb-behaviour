@@ -339,12 +339,12 @@ Feature: Concept Owns
     When <root-type>(<supertype-name>) set owns: email
     When <root-type>(<sub-name>) set annotation: @abstract
     When <root-type>(<subtype-name>) set owns: work-email
-    When <root-type>(<subtype-name>) get owns: work-email; set override: email
+    When <root-type>(<subtype-name>) get owns(work-email) set override: email
     Then <root-type>(<subtype-name>) get owns overridden(work-email) get label: email
     When transaction commits
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name>) set owns: work-email
-    When <root-type>(<subtype-name>) get owns: work-email; set override: email
+    When <root-type>(<subtype-name>) get owns(work-email) set override: email
     Then <root-type>(<subtype-name>) get owns overridden(work-email) get label: email
     Examples:
       | root-type | supertype-name | subtype-name | value-type    |
@@ -435,8 +435,8 @@ Feature: Concept Owns
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<type-name>) set owns: first-name
-    Then <root-type>(<type-name>) get owns: first-name; set override: first-name; fails
-    Then <root-type>(<type-name>) get owns: first-name; set override: name; fails
+    Then <root-type>(<type-name>) get owns(first-name) set override: first-name; fails
+    Then <root-type>(<type-name>) get owns(first-name) set override: name; fails
     Examples:
       | root-type | type-name   | value-type |
       | entity    | person      | string     |
@@ -451,8 +451,8 @@ Feature: Concept Owns
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) set owns: reference
-    Then <root-type>(<subtype-name>) get owns: reference; set override: reference; fails
-    Then <root-type>(<subtype-name>) get owns: reference; set override: username; fails
+    Then <root-type>(<subtype-name>) get owns(reference) set override: reference; fails
+    Then <root-type>(<subtype-name>) get owns(reference) set override: username; fails
     Examples:
       | root-type | supertype-name | subtype-name | value-type |
       | entity    | person         | customer     | double     |
@@ -506,8 +506,8 @@ Feature: Concept Owns
     When connection open read transaction for database: typedb
     Then <root-type>(<supertype-name>) get owns contain: username
     Then <root-type>(<subtype-name>) get owns contain: username
-    Then <root-type>(<supertype-name>) get owns: username, get annotations do not contain: @abstract
-    Then <root-type>(<subtype-name>) get owns: username, get annotations do not contain: @abstract
+    Then <root-type>(<supertype-name>) get owns(username) get annotations do not contain: @abstract
+    Then <root-type>(<subtype-name>) get owns(username) get annotations do not contain: @abstract
     Examples:
       | root-type | supertype-name | subtype-name |
       | entity    | person         | customer     |
@@ -821,12 +821,12 @@ Feature: Concept Owns
     When <root-type>(<supertype-name>) set owns: email[]
     When <root-type>(<sub-name>) set annotation: @abstract
     When <root-type>(<subtype-name>) set owns: work-email[]
-    When <root-type>(<subtype-name>) get owns: work-email[]; set override: email[]
+    When <root-type>(<subtype-name>) get owns(work-email[]) set override: email[]
     Then <root-type>(<subtype-name>) get owns overridden(work-email[]) get label: email[]
     When transaction commits
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name>) set owns: work-email[]
-    When <root-type>(<subtype-name>) get owns: work-email[]; set override: email[]
+    When <root-type>(<subtype-name>) get owns(work-email[]) set override: email[]
     Then <root-type>(<subtype-name>) get owns overridden(work-email[]) get label: email[]
     Examples:
       | root-type | supertype-name | subtype-name | value-type    |
@@ -917,8 +917,8 @@ Feature: Concept Owns
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<type-name>) set owns: first-name[]
-    Then <root-type>(<type-name>) get owns: first-name[]; set override: first-name[]; fails
-    Then <root-type>(<type-name>) get owns: first-name[]; set override: name[]; fails
+    Then <root-type>(<type-name>) get owns(first-name[]) set override: first-name[]; fails
+    Then <root-type>(<type-name>) get owns(first-name[]) set override: name[]; fails
     Examples:
       | root-type | type-name   | value-type |
       | entity    | person      | string     |
@@ -933,8 +933,8 @@ Feature: Concept Owns
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) set owns: reference[]
-    Then <root-type>(<subtype-name>) get owns: reference[]; set override: reference[]; fails
-    Then <root-type>(<subtype-name>) get owns: reference[]; set override: username[]; fails
+    Then <root-type>(<subtype-name>) get owns(reference[]) set override: reference[]; fails
+    Then <root-type>(<subtype-name>) get owns(reference[]) set override: username[]; fails
     Examples:
       | root-type | supertype-name | subtype-name | value-type |
       | entity    | person         | customer     | double     |
@@ -1057,10 +1057,10 @@ Feature: Concept Owns
     When <root-type>(<supertype-name>) set owns: email
     When <root-type>(<sub-name>) set annotation: @abstract
     When <root-type>(<subtype-name>) set owns: work-email[]
-    When <root-type>(<subtype-name>) get owns: work-email[]; set override: email; fails
+    When <root-type>(<subtype-name>) get owns(work-email[]) set override: email; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get owns: work-email[]; set override: email; fails
+    When <root-type>(<subtype-name>) get owns(work-email[]) set override: email; fails
     Examples:
       | root-type | supertype-name | subtype-name | value-type    |
       | entity    | person         | customer     | decimal       |
@@ -1078,10 +1078,10 @@ Feature: Concept Owns
     When <root-type>(<supertype-name>) set owns: email[]
     When <root-type>(<sub-name>) set annotation: @abstract
     When <root-type>(<subtype-name>) set owns: work-email
-    When <root-type>(<subtype-name>) get owns: work-email; set override: email[]; fails
+    When <root-type>(<subtype-name>) get owns(work-email) set override: email[]; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get owns: work-email; set override: email[]; fails
+    When <root-type>(<subtype-name>) get owns(work-email) set override: email[]; fails
     Examples:
       | root-type | supertype-name | subtype-name | value-type |
       | entity    | person         | customer     | datetime   |
@@ -1098,21 +1098,21 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When <root-type>(<type-name>) set owns: custom-attribute
-    When <root-type>(<type-name>) get owns: custom-attribute, set annotation: @<annotation>
-    Then <root-type>(<type-name>) get owns: custom-attribute, get annotations contain: @<annotation>
+    When <root-type>(<type-name>) get owns(custom-attribute) set annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns(custom-attribute) get annotations contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) get owns: custom-attribute, get annotations contain: @<annotation>
-    When <root-type>(<type-name>) get owns: custom-attribute, unset annotation: @<annotation>
-    Then <root-type>(<type-name>) get owns: custom-attribute, get annotations is empty
+    Then <root-type>(<type-name>) get owns(custom-attribute) get annotations contain: @<annotation>
+    When <root-type>(<type-name>) get owns(custom-attribute) unset annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) get owns: custom-attribute, get annotations is empty
-    When <root-type>(<type-name>) get owns: custom-attribute, set annotation: @<annotation>
-    Then <root-type>(<type-name>) get owns: custom-attribute, get annotations contain: @<annotation>
+    Then <root-type>(<type-name>) get owns(custom-attribute) get annotations is empty
+    When <root-type>(<type-name>) get owns(custom-attribute) set annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns(custom-attribute) get annotations contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) get owns: custom-attribute, get annotations contain: @<annotation>
+    Then <root-type>(<type-name>) get owns(custom-attribute) get annotations contain: @<annotation>
     When <root-type>(<type-name>) unset owns: custom-attribute
     Then <root-type>(<type-name>) get owns is empty
     When transaction commits
@@ -1145,13 +1145,13 @@ Feature: Concept Owns
     When put attribute type: age
     When attribute(age) set value-type: long
     When <root-type>(<type-name>) set owns: email
-    When <root-type>(<type-name>) get owns: email, set annotation: @<annotation>
+    When <root-type>(<type-name>) get owns(email) set annotation: @<annotation>
     When <root-type>(<type-name>) set owns: username
-    When <root-type>(<type-name>) get owns: username, set annotation: @<annotation>
+    When <root-type>(<type-name>) get owns(username) set annotation: @<annotation>
     When <root-type>(<type-name>) set owns: name
     When <root-type>(<type-name>) set owns: age
-    Then <root-type>(<type-name>) get owns: email, get annotations contain: @<annotation>
-    Then <root-type>(<type-name>) get owns: username, get annotations contain: @<annotation>
+    Then <root-type>(<type-name>) get owns(email) get annotations contain: @<annotation>
+    Then <root-type>(<type-name>) get owns(username) get annotations contain: @<annotation>
     Then <root-type>(<type-name>) get owns contain:
       | email    |
       | username |
@@ -1159,8 +1159,8 @@ Feature: Concept Owns
       | age      |
     When transaction commits
     When connection open read transaction for database: typedb
-    Then <root-type>(<type-name>) get owns: email, get annotations contain: @<annotation>
-    Then <root-type>(<type-name>) get owns: username, get annotations contain: @<annotation>
+    Then <root-type>(<type-name>) get owns(email) get annotations contain: @<annotation>
+    Then <root-type>(<type-name>) get owns(username) get annotations contain: @<annotation>
     Then <root-type>(<type-name>) get owns contain:
       | email    |
       | username |
@@ -1189,22 +1189,22 @@ Feature: Concept Owns
     When put attribute type: reference
     When attribute(reference) set value-type: string
     When <root-type>(<type-name>) set owns: username
-    When <root-type>(<type-name>) get owns: username, set annotation: @<annotation>
-    Then <root-type>(<type-name>) get owns: username, get annotation contain: @<annotation>
+    When <root-type>(<type-name>) get owns(username) set annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns(username) get annotation contain: @<annotation>
     When <root-type>(<type-name>) set owns: reference
-    Then <root-type>(<type-name>) get owns: reference, unset annotation: @<annotation>; fails
+    Then <root-type>(<type-name>) get owns(reference) unset annotation: @<annotation>; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) get owns: username, get annotation contain: @<annotation>
-    Then <root-type>(<type-name>) get owns: reference, unset annotation: @<annotation>; fails
-    Then <root-type>(<type-name>) get owns: username, unset annotation: @<annotation>
-    Then <root-type>(<type-name>) get owns: username, unset annotation: @<annotation>; fails
-    Then <root-type>(<type-name>) get owns: username, get annotations is empty
-    Then <root-type>(<type-name>) get owns: reference, get annotations is empty
+    Then <root-type>(<type-name>) get owns(username) get annotation contain: @<annotation>
+    Then <root-type>(<type-name>) get owns(reference) unset annotation: @<annotation>; fails
+    Then <root-type>(<type-name>) get owns(username) unset annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns(username) unset annotation: @<annotation>; fails
+    Then <root-type>(<type-name>) get owns(username) get annotations is empty
+    Then <root-type>(<type-name>) get owns(reference) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then <root-type>(<type-name>) get owns: username, get annotations is empty
-    Then <root-type>(<type-name>) get owns: reference, get annotations is empty
+    Then <root-type>(<type-name>) get owns(username) get annotations is empty
+    Then <root-type>(<type-name>) get owns(reference) get annotations is empty
     Examples:
       | root-type | type-name   | annotation       |
       | entity    | person      | key              |
@@ -1226,14 +1226,14 @@ Feature: Concept Owns
     When put attribute type: username
     When attribute(username) set value-type: string
     When <root-type>(<supertype-name>) set owns: username
-    When <root-type>(<supertype-name>) get owns: username, set annotation: @<annotation>
-    Then <root-type>(<supertype-name>) get owns: username, get annotation contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns: username, get annotation contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns: username, unset annotation: @<annotation>; fails
+    When <root-type>(<supertype-name>) get owns(username) set annotation: @<annotation>
+    Then <root-type>(<supertype-name>) get owns(username) get annotation contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(username) get annotation contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(username) unset annotation: @<annotation>; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns: username, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns: username, unset annotation: @<annotation>; fails
+    Then <root-type>(<subtype-name>) get owns(username) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(username) unset annotation: @<annotation>; fails
     Examples:
       | root-type | supertype-name | subtype-name | annotation       |
       | entity    | person         | customer     | key              |
@@ -1261,10 +1261,10 @@ Feature: Concept Owns
     When put attribute type: rating
     When attribute(rating) set value-type: double
     When <root-type>(<supertype-name>) set owns: email
-    When <root-type>(<supertype-name>) get owns: email, set annotation: @<annotation>
+    When <root-type>(<supertype-name>) get owns(email) set annotation: @<annotation>
     When <root-type>(<supertype-name>) set owns: name
     When <root-type>(<subtype-name>) set owns: reference
-    When <root-type>(<subtype-name>) get owns: reference, set annotation: @<annotation>
+    When <root-type>(<subtype-name>) get owns(reference) set annotation: @<annotation>
     When <root-type>(<subtype-name>) set owns: rating
     Then <root-type>(<subtype-name>) get owns contain:
       | email     |
@@ -1277,8 +1277,8 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get declared owns do not contain:
       | email |
       | name  |
-    Then <root-type>(<subtype-name>) get owns: email, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns: reference, get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(email) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(reference) get annotations contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get owns contain:
@@ -1292,15 +1292,15 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get declared owns do not contain:
       | email |
       | name  |
-    Then <root-type>(<subtype-name>) get owns: email, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns: reference, get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(email) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(reference) get annotations contain: @<annotation>
     When put attribute type: license
     When attribute(license) set value-type: string
     When put attribute type: points
     When attribute(points) set value-type: double
     When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
     When <root-type>(<subtype-name-2>) set owns: license
-    When <root-type>(<subtype-name-2>) get owns: license, set annotation: @<annotation>
+    When <root-type>(<subtype-name-2>) get owns(license) set annotation: @<annotation>
     When <root-type>(<subtype-name-2>) set owns: points
     When transaction commits
     When connection open read transaction for database: typedb
@@ -1315,11 +1315,11 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get declared owns do not contain:
       | email |
       | name  |
-    Then <root-type>(<subtype-name>) get owns: email, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns: reference, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name-2>) get owns: email, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name-2>) get owns: reference, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name-2>) get owns: license, get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(email) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(reference) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns(email) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns(reference) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns(license) get annotations contain: @<annotation>
     Then <root-type>(<subtype-name-2>) get owns contain:
       | email     |
       | reference |
@@ -1358,20 +1358,20 @@ Feature: Concept Owns
     When put attribute type: email
     When attribute(email) set value-type: <value-type>
     When <root-type>(<type-name>) set owns: name
-    When <root-type>(<type-name>) get owns: name, set annotation: @<annotation>
-    Then <root-type>(<type-name>) get owns: name, get annotation contain: @<annotation>
+    When <root-type>(<type-name>) get owns(name) set annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns(name) get annotation contain: @<annotation>
     When <root-type>(<type-name>) set owns: email
-    When <root-type>(<type-name>) get owns: email, set annotation: @<annotation>
-    Then <root-type>(<type-name>) get owns: email, get annotation contain: @<annotation>
+    When <root-type>(<type-name>) get owns(email) set annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns(email) get annotation contain: @<annotation>
     Then <root-type>(<type-name>) set owns: name
-    Then <root-type>(<type-name>) get owns: name, set annotation: @<annotation>
-    Then <root-type>(<type-name>) get owns: name, get annotation contain: @<annotation>
+    Then <root-type>(<type-name>) get owns(name) set annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns(name) get annotation contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) get owns: name, get annotation contain: @<annotation>
+    Then <root-type>(<type-name>) get owns(name) get annotation contain: @<annotation>
     Then <root-type>(<type-name>) set owns: email
-    Then <root-type>(<type-name>) get owns: email, set annotation: @<annotation>
-    Then <root-type>(<type-name>) get owns: email, get annotation contain: @<annotation>
+    Then <root-type>(<type-name>) get owns(email) set annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns(email) get annotation contain: @<annotation>
     Examples:
       | root-type | type-name   | annotation       | value-type |
       | entity    | person      | key              | string     |
@@ -1400,17 +1400,17 @@ Feature: Concept Owns
     When <root-type>(<type-name>) set owns: email
     When <root-type>(<type-name>) set owns: address
     Then <root-type>(<type-name>) set owns: name
-    Then <root-type>(<type-name>) get owns: name, set annotation: @<annotation>
-    Then <root-type>(<type-name>) get owns: name, get annotations contain: @<annotation>
+    Then <root-type>(<type-name>) get owns(name) set annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns(name) get annotations contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<type-name>) set owns: email
-    Then <root-type>(<type-name>) get owns: email, get annotations is empty
-    When <root-type>(<type-name>) get owns: email, set annotation: @<annotation>
-    Then <root-type>(<type-name>) get owns: email, get annotations contain: @<annotation>
-    Then <root-type>(<type-name>) get owns: address, get annotations is empty
-    When <root-type>(<type-name>) get owns: address, set annotation: @<annotation>
-    Then <root-type>(<type-name>) get owns: address, get annotations contain: @<annotation>
+    Then <root-type>(<type-name>) get owns(email) get annotations is empty
+    When <root-type>(<type-name>) get owns(email) set annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns(email) get annotations contain: @<annotation>
+    Then <root-type>(<type-name>) get owns(address) get annotations is empty
+    When <root-type>(<type-name>) get owns(address) set annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns(address) get annotations contain: @<annotation>
     Examples:
       | root-type | type-name   | annotation       | value-type |
       | entity    | person      | key              | string     |
@@ -1435,18 +1435,18 @@ Feature: Concept Owns
     When put attribute type: email
     When attribute(email) set value-type: <value-type>
     When <root-type>(<type-name>) set owns: name
-    When <root-type>(<type-name>) get owns: name, set annotation: @<annotation>
-    Then <root-type>(<type-name>) get owns: name, get annotations contain: @<annotation>
+    When <root-type>(<type-name>) get owns(name) set annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns(name) get annotations contain: @<annotation>
     When <root-type>(<type-name>) set owns: email
-    When <root-type>(<type-name>) get owns: email, set annotation: @<annotation>
-    Then <root-type>(<type-name>) get owns: email, get annotations contain: @<annotation>
+    When <root-type>(<type-name>) get owns(email) set annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns(email) get annotations contain: @<annotation>
     Then <root-type>(<type-name>) set owns: name
-    Then <root-type>(<type-name>) get owns: name, get annotations is empty
+    Then <root-type>(<type-name>) get owns(name) get annotations is empty
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) get owns: email, get annotations contain: @<annotation>
+    Then <root-type>(<type-name>) get owns(email) get annotations contain: @<annotation>
     When <root-type>(<type-name>) set owns: email
-    Then <root-type>(<type-name>) get owns: email, get annotations is empty
+    Then <root-type>(<type-name>) get owns(email) get annotations is empty
     Examples:
       | root-type | type-name   | annotation       | value-type |
       | entity    | person      | key              | string     |
@@ -1474,8 +1474,8 @@ Feature: Concept Owns
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: name
     When <root-type>(<subtype-name>) set owns: username
-    When <root-type>(<subtype-name>) get owns: username; set override: name
-    When <root-type>(<subtype-name>) get owns: username, set annotation: @<annotation>
+    When <root-type>(<subtype-name>) get owns(username) set override: name
+    When <root-type>(<subtype-name>) get owns(username) set annotation: @<annotation>
     Then <root-type>(<subtype-name>) get owns overridden(username) get label: name
     Then <root-type>(<subtype-name>) get owns, with annotations (DEPRECATED): <annotation>; contain:
       | username |
@@ -1523,21 +1523,21 @@ Feature: Concept Owns
     When attribute(work-email) set supertype: email
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: email
-    When <root-type>(<supertype-name>) get owns: email, set annotation: @<annotation>
+    When <root-type>(<supertype-name>) get owns(email) set annotation: @<annotation>
     When <root-type>(<subtype-name>) set annotation: @abstract
     Then <root-type>(<subtype-name>) get owns contain: email
-    Then <root-type>(<subtype-name>) get owns: email, get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(email) get annotations contain: @<annotation>
     When <root-type>(<subtype-name>) set owns: work-email
-    When <root-type>(<subtype-name>) get owns: work-email; set override: email
+    When <root-type>(<subtype-name>) get owns(work-email) set override: email
     # TODO: These commas, semicolons, and colons are a mess and are different for different subcases. Need to refactor it!
     Then <root-type>(<subtype-name>) get owns overridden(work-email) get label: email
-    Then <root-type>(<subtype-name>) get owns overridden(work-email), get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns overridden(work-email)) get annotations contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name>) set owns: work-email
-    When <root-type>(<subtype-name>) get owns: work-email; set override: email
+    When <root-type>(<subtype-name>) get owns(work-email) set override: email
     Then <root-type>(<subtype-name>) get owns overridden(work-email) get label: email
-    Then <root-type>(<subtype-name>) get owns overridden(work-email), get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns overridden(work-email)) get annotations contain: @<annotation>
     Examples:
       | root-type | supertype-name | subtype-name | annotation       | value-type |
       | entity    | person         | customer     | key              | string     |
@@ -1561,7 +1561,7 @@ Feature: Concept Owns
     When <root-type>(<supertype-name>) set owns: email
     Then <root-type>(<supertype-name>) get owns overridden(email) does not exist
     Then <root-type>(<subtype-name>) set owns: email
-    Then <root-type>(<subtype-name>) get owns: email, set annotation: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(email) set annotation: @<annotation>
     Then <root-type>(<subtype-name>) get owns overridden(email) exists
     Then <root-type>(<subtype-name>) get owns overridden(email) get label: email
     Then <root-type>(<subtype-name>) get owns, with annotations (DEPRECATED): <annotation>; contain: email
@@ -1569,7 +1569,7 @@ Feature: Concept Owns
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get owns, with annotations (DEPRECATED): <annotation>; contain: email
     Then <root-type>(<subtype-name-2>) set owns: email
-    Then <root-type>(<subtype-name-2>) get owns: email, set annotation: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns(email) set annotation: @<annotation>
     Then <root-type>(<subtype-name-2>) get owns, with annotations (DEPRECATED): <annotation>; contain: email
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | annotation       | value-type |
@@ -1594,7 +1594,7 @@ Feature: Concept Owns
     When put attribute type: name
     When attribute(name) set value-type: <value-type>
     When <root-type>(<supertype-name>) set owns: email
-    When <root-type>(<supertype-name>) get owns: email, set annotation: @<annotation>
+    When <root-type>(<supertype-name>) get owns(email) set annotation: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) set owns: email
@@ -1602,7 +1602,7 @@ Feature: Concept Owns
     Then transaction closes
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) set owns: email
-    Then <root-type>(<subtype-name>) get owns: email, set annotation: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(email) set annotation: @<annotation>
     Then transaction commits; fails
     Examples:
       | root-type | supertype-name | subtype-name | annotation       | value-type |
@@ -1630,12 +1630,12 @@ Feature: Concept Owns
     When attribute(customer-email) set supertype: email
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: email
-    When <root-type>(<supertype-name>) get owns: email, set annotation: @<annotation>
+    When <root-type>(<supertype-name>) get owns(email) set annotation: @<annotation>
     When <root-type>(<subtype-name>) set owns: customer-email
-    When <root-type>(<subtype-name>) get owns: customer-email, set annotation: @<annotation>
+    When <root-type>(<subtype-name>) get owns(customer-email) set annotation: @<annotation>
     When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
     Then <root-type>(<subtype-name-2>) set owns: email
-    Then <root-type>(<subtype-name-2>) get owns: email, set annotation: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns(email) set annotation: @<annotation>
     Then transaction commits; fails
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | annotation       | value-type |
@@ -1663,13 +1663,13 @@ Feature: Concept Owns
     When attribute(customer-email) set supertype: email
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: email
-    When <root-type>(<supertype-name>) get owns: email, set annotation: @<annotation>
+    When <root-type>(<supertype-name>) get owns(email) set annotation: @<annotation>
     When <root-type>(<subtype-name>) set owns: customer-email
     # TODO: Do we have overrides? Revalidate "override"-mentioning tests if we do need it and place it everywhere!
-#    When <root-type>(<subtype-name>) get owns: customer-email, set override: email
+#    When <root-type>(<subtype-name>) get owns(customer-email) set override: email
     When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
     Then <root-type>(<subtype-name-2>) set owns: customer-email
-    Then <root-type>(<subtype-name-2>) get owns: customer-email, set annotation: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns(customer-email) set annotation: @<annotation>
     Then transaction commits; fails
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | annotation       | value-type |
@@ -1697,14 +1697,14 @@ Feature: Concept Owns
     When attribute(customer-email) set supertype: email
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: email
-    When <root-type>(<supertype-name>) get owns: email, set annotation: @<annotation>
+    When <root-type>(<supertype-name>) get owns(email) set annotation: @<annotation>
     When <root-type>(<subtype-name>) set owns: customer-email
-    When <root-type>(<subtype-name>) get owns: customer-email, set annotation: @<annotation>
+    When <root-type>(<subtype-name>) get owns(customer-email) set annotation: @<annotation>
         # TODO: Do we have overrides?
-#    When <root-type>(<subtype-name>) get owns: customer-email, set override: email
+#    When <root-type>(<subtype-name>) get owns(customer-email) set override: email
     When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
     Then <root-type>(<subtype-name-2>) set owns: customer-email
-    Then <root-type>(<subtype-name-2>) get owns: customer-email, set annotation: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns(customer-email) set annotation: @<annotation>
     Then transaction commits; fails
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | annotation       | value-type |
@@ -1729,25 +1729,25 @@ Feature: Concept Owns
     When put attribute type: surname
     When attribute(surname) set supertype: name
     When <root-type>(<type-name>) set owns: name
-    When <root-type>(<type-name>) get owns: name, set annotation: @<annotation>
-    Then <root-type>(<type-name>) get owns: name, get annotation contain: @<annotation>
+    When <root-type>(<type-name>) get owns(name) set annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns(name) get annotation contain: @<annotation>
     When <root-type>(<type-name>) set owns: surname
-    Then <root-type>(<type-name>) get owns: surname, get annotation contain: @<annotation>
+    Then <root-type>(<type-name>) get owns(surname) get annotation contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) get owns: name, get annotation contain: @<annotation>
-    Then <root-type>(<type-name>) get owns: surname, get annotation contain: @<annotation>
-    Then <root-type>(<type-name>) get owns: surname, set annotation: @<annotation>; fails
-    When <root-type>(<type-name>) get owns: name, unset annotation: @<annotation>
-    Then <root-type>(<type-name>) get owns: name, get annotation is empty
-    Then <root-type>(<type-name>) get owns: surname, get annotation is empty
-    Then <root-type>(<type-name>) get owns: surname, set annotation: @<annotation>
-    Then <root-type>(<type-name>) get owns: name, get annotation is empty
-    Then <root-type>(<type-name>) get owns: surname, get annotation contain: @<annotation>
+    Then <root-type>(<type-name>) get owns(name) get annotation contain: @<annotation>
+    Then <root-type>(<type-name>) get owns(surname) get annotation contain: @<annotation>
+    Then <root-type>(<type-name>) get owns(surname) set annotation: @<annotation>; fails
+    When <root-type>(<type-name>) get owns(name) unset annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns(name) get annotation is empty
+    Then <root-type>(<type-name>) get owns(surname) get annotation is empty
+    Then <root-type>(<type-name>) get owns(surname) set annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns(name) get annotation is empty
+    Then <root-type>(<type-name>) get owns(surname) get annotation contain: @<annotation>
     When transaction commits
     When connection open read transaction for database: typedb
-    Then <root-type>(<type-name>) get owns: name, get annotation is empty
-    Then <root-type>(<type-name>) get owns: surname, get annotation contain: @<annotation>
+    Then <root-type>(<type-name>) get owns(name) get annotation is empty
+    Then <root-type>(<type-name>) get owns(surname) get annotation contain: @<annotation>
     Examples:
       | root-type | type-name   | annotation       | value-type |
       | entity    | person      | key              | string     |
@@ -1782,11 +1782,11 @@ Feature: Concept Owns
     When attribute(rating) set supertype: score
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: username
-    When <root-type>(<supertype-name>) get owns: username, set annotation: @<annotation>
+    When <root-type>(<supertype-name>) get owns(username) set annotation: @<annotation>
     When <root-type>(<supertype-name>) set owns: score
     When <root-type>(<subtype-name>) set annotation: @abstract
     When <root-type>(<subtype-name>) set owns: reference
-    When <root-type>(<subtype-name>) get owns: reference, set annotation: @<annotation>
+    When <root-type>(<subtype-name>) get owns(reference) set annotation: @<annotation>
     When <root-type>(<subtype-name>) set owns: rating
     Then <root-type>(<subtype-name>) get owns contain:
       | username  |
@@ -1799,10 +1799,10 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get declared owns do not contain:
       | username |
       | score    |
-    Then <root-type>(<subtype-name>) get owns: username, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns: reference, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns: score, get annotations do not contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns: rating, get annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(username) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(reference) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(score) get annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(rating) get annotations do not contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get owns contain:
@@ -1816,10 +1816,10 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get declared owns do not contain:
       | username |
       | score    |
-    Then <root-type>(<subtype-name>) get owns: username, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns: reference, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns: score, get annotations do not contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns: rating, get annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(username) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(reference) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(score) get annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(rating) get annotations do not contain: @<annotation>
     When put attribute type: license
     When attribute(license) set value-type: string
     When attribute(license) set supertype: reference
@@ -1829,7 +1829,7 @@ Feature: Concept Owns
     When <root-type>(<subtype-name-2>) set annotation: @abstract
     When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
     When <root-type>(<subtype-name-2>) set owns: license
-    When <root-type>(<subtype-name-2>) get owns: license, set annotation: @<annotation>
+    When <root-type>(<subtype-name-2>) get owns(license) set annotation: @<annotation>
     When <root-type>(<subtype-name-2>) set owns: points
     Then <root-type>(<subtype-name-2>) get owns contain:
       | username  |
@@ -1859,10 +1859,10 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get declared owns do not contain:
       | username |
       | score    |
-    Then <root-type>(<subtype-name>) get owns: username, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns: reference, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns: score, get annotations do not contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns: rating, get annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(username) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(reference) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(score) get annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(rating) get annotations do not contain: @<annotation>
     Then <root-type>(<subtype-name-2>) get owns contain:
       | username  |
       | reference |
@@ -1878,12 +1878,12 @@ Feature: Concept Owns
       | reference |
       | score     |
       | rating    |
-    Then <root-type>(<subtype-name-2>) get owns: username, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name-2>) get owns: reference, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name-2>) get owns: license, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name-2>) get owns: score, get annotations do not contain: @<annotation>
-    Then <root-type>(<subtype-name-2>) get owns: rating, get annotations do not contain: @<annotation>
-    Then <root-type>(<subtype-name-2>) get owns: points, get annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns(username) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns(reference) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns(license) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns(score) get annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns(rating) get annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns(points) get annotations do not contain: @<annotation>
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | annotation       |
       | entity    | person         | customer     | subscriber     | key              |
@@ -1926,19 +1926,19 @@ Feature: Concept Owns
     When attribute(rating) set annotation: @abstract
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: username
-    When <root-type>(<supertype-name>) get owns: username, set annotation: @<annotation>
+    When <root-type>(<supertype-name>) get owns(username) set annotation: @<annotation>
     When <root-type>(<supertype-name>) set owns: email
-    When <root-type>(<supertype-name>) get owns: email, set annotation: @<annotation>
+    When <root-type>(<supertype-name>) get owns(email) set annotation: @<annotation>
     When <root-type>(<supertype-name>) set owns: name
     When <root-type>(<supertype-name>) set owns: age
     When <root-type>(<subtype-name>) set annotation: @abstract
     When <root-type>(<subtype-name>) set owns: reference
-    When <root-type>(<subtype-name>) get owns: reference, set annotation: @<annotation>
+    When <root-type>(<subtype-name>) get owns(reference) set annotation: @<annotation>
     When <root-type>(<subtype-name>) set owns: work-email
-    When <root-type>(<subtype-name>) get owns: work-email; set override: email
+    When <root-type>(<subtype-name>) get owns(work-email) set override: email
     When <root-type>(<subtype-name>) set owns: rating
     When <root-type>(<subtype-name>) set owns: nick-name
-    When <root-type>(<subtype-name>) get owns: nick-name; set override: name
+    When <root-type>(<subtype-name>) get owns(nick-name) set override: name
     Then <root-type>(<subtype-name>) get owns overridden(work-email) get label: email
     Then <root-type>(<subtype-name>) get owns overridden(nick-name) get label: name
     Then <root-type>(<subtype-name>) get owns contain:
@@ -1961,9 +1961,9 @@ Feature: Concept Owns
       | age      |
       | email    |
       | name     |
-    Then <root-type>(<subtype-name>) get owns: username, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns: reference, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns: work-email, get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(username) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(reference) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(work-email) get annotations contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get owns overridden(work-email) get label: email
@@ -1988,9 +1988,9 @@ Feature: Concept Owns
       | age      |
       | email    |
       | name     |
-    Then <root-type>(<subtype-name>) get owns: username, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns: reference, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns: work-email, get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(username) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(reference) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(work-email) get annotations contain: @<annotation>
     When put attribute type: license
     When attribute(license) set value-type: string
     When attribute(license) set supertype: reference
@@ -1999,9 +1999,9 @@ Feature: Concept Owns
     When attribute(points) set supertype: rating
     When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
     When <root-type>(<subtype-name-2>) set owns: license
-    When <root-type>(<subtype-name-2>) get owns: license; set override: reference
+    When <root-type>(<subtype-name-2>) get owns(license) set override: reference
     When <root-type>(<subtype-name-2>) set owns: points
-    When <root-type>(<subtype-name-2>) get owns: points; set override: rating
+    When <root-type>(<subtype-name-2>) get owns(points) set override: rating
     When transaction commits
     When connection open read transaction for database: typedb
     Then <root-type>(<subtype-name>) get owns contain:
@@ -2024,9 +2024,9 @@ Feature: Concept Owns
       | age      |
       | email    |
       | name     |
-    Then <root-type>(<subtype-name>) get owns: username, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns: reference, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns: work-email, get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(username) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(reference) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(work-email) get annotations contain: @<annotation>
     Then <root-type>(<subtype-name-2>) get owns overridden(license) get label: reference
     Then <root-type>(<subtype-name-2>) get owns overridden(points) get label: rating
     Then <root-type>(<subtype-name-2>) get owns contain:
@@ -2053,9 +2053,9 @@ Feature: Concept Owns
       | reference  |
       | name       |
       | rating     |
-    Then <root-type>(<subtype-name-2>) get owns: username, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name-2>) get owns: license, get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name-2>) get owns: work-email, get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns(username) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns(license) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns(work-email) get annotations contain: @<annotation>
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | annotation       |
       | entity    | person         | customer     | subscriber     | key              |
@@ -2081,21 +2081,21 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
-    When entity(person) get owns: custom-attribute, set annotation: @key
-    Then entity(person) get owns: custom-attribute, get annotations contain: @key
+    When entity(person) get owns(custom-attribute) set annotation: @key
+    Then entity(person) get owns(custom-attribute) get annotations contain: @key
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations contain: @key
-    When entity(person) get owns: custom-attribute, unset annotation: @key
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then entity(person) get owns(custom-attribute) get annotations contain: @key
+    When entity(person) get owns(custom-attribute) unset annotation: @key
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations is empty
-    When entity(person) get owns: custom-attribute, set annotation: @key
-    Then entity(person) get owns: custom-attribute, get annotations contain: @key
+    Then entity(person) get owns(custom-attribute) get annotations is empty
+    When entity(person) get owns(custom-attribute) set annotation: @key
+    Then entity(person) get owns(custom-attribute) get annotations contain: @key
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations contain: @key
+    Then entity(person) get owns(custom-attribute) get annotations contain: @key
     When entity(person) unset owns: custom-attribute
     Then entity(person) get owns is empty
     When transaction commits
@@ -2114,11 +2114,11 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
-    Then entity(person) get owns: custom-attribute, set annotation: @key; fails
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then entity(person) get owns(custom-attribute) set annotation: @key; fails
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     Examples:
       | value-type    |
       | double        |
@@ -2129,11 +2129,11 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute[]
-    Then entity(person) get owns: custom-attribute[], set annotation: @key; fails
-    Then entity(person) get owns: custom-attribute[], get annotations is empty
+    Then entity(person) get owns(custom-attribute[]) set annotation: @key; fails
+    Then entity(person) get owns(custom-attribute[]) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns: custom-attribute[], get annotations is empty
+    Then entity(person) get owns(custom-attribute[]) get annotations is empty
     Examples:
       | value-type    |
       | long          |
@@ -2152,7 +2152,7 @@ Feature: Concept Owns
     When put attribute type: username
     When attribute(username) set value-type: string
     When entity(person) set owns: username
-    When entity(person) get owns: username, set annotation: @key
+    When entity(person) get owns(username) set annotation: @key
     Then transaction commits
     When connection open write transaction for database: typedb
     When $a = entity(person) create new instance with key(username): alice
@@ -2160,7 +2160,7 @@ Feature: Concept Owns
     Then transaction commits
     When connection open schema transaction for database: typedb
     When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: @key; fails
+    When entity(person) get owns(email) set annotation: @key; fails
     When connection open schema transaction for database: typedb
     When entity(person) set owns: email
     Then transaction commits
@@ -2174,13 +2174,13 @@ Feature: Concept Owns
     Then transaction commits
     When connection open schema transaction for database: typedb
     When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: @key
-    Then entity(person) get owns: email; get annotations contain: @key
-    Then entity(person) get owns: username; get annotations contain: @key
+    When entity(person) get owns(email) set annotation: @key
+    Then entity(person) get owns(email; get annotations contain: @key
+    Then entity(person) get owns(username; get annotations contain: @key
     Then transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns: email; get annotations contain: @key
-    Then entity(person) get owns: username; get annotations contain: @key
+    Then entity(person) get owns(email; get annotations contain: @key
+    Then entity(person) get owns(username; get annotations contain: @key
 
 ########################
 # @subkey
@@ -2190,21 +2190,21 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
-    When entity(person) get owns: custom-attribute, set annotation: @subkey(<arg>)
-    Then entity(person) get owns: custom-attribute, get annotations contain: @subkey(<arg>)
+    When entity(person) get owns(custom-attribute) set annotation: @subkey(<arg>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @subkey(<arg>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations contain: @subkey(<arg>)
-    When entity(person) get owns: custom-attribute, unset annotation: @subkey(<arg>)
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then entity(person) get owns(custom-attribute) get annotations contain: @subkey(<arg>)
+    When entity(person) get owns(custom-attribute) unset annotation: @subkey(<arg>)
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations is empty
-    When entity(person) get owns: custom-attribute, set annotation: @subkey(<arg>)
-    Then entity(person) get owns: custom-attribute, get annotations contain: @subkey(<arg>)
+    Then entity(person) get owns(custom-attribute) get annotations is empty
+    When entity(person) get owns(custom-attribute) set annotation: @subkey(<arg>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @subkey(<arg>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations contain: @subkey(<arg>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @subkey(<arg>)
     When entity(person) unset owns: custom-attribute
     Then entity(person) get owns is empty
     When transaction commits
@@ -2235,35 +2235,35 @@ Feature: Concept Owns
     When put attribute type: age
     When attribute(age) set value-type: long
     When <root-type>(<type-name>) set owns: first-name
-    When <root-type>(<type-name>) get owns: first-name, set annotation: @subkey(primary)
-    Then <root-type>(<type-name>) get owns: first-name, get annotations contain: @subkey(primary)
+    When <root-type>(<type-name>) get owns(first-name) set annotation: @subkey(primary)
+    Then <root-type>(<type-name>) get owns(first-name) get annotations contain: @subkey(primary)
     When <root-type>(<type-name>) set owns: second-name
-    When <root-type>(<type-name>) get owns: second-name, set annotation: @subkey(primary)
-    Then <root-type>(<type-name>) get owns: second-name, get annotations contain: @subkey(primary)
+    When <root-type>(<type-name>) get owns(second-name) set annotation: @subkey(primary)
+    Then <root-type>(<type-name>) get owns(second-name) get annotations contain: @subkey(primary)
     When <root-type>(<type-name>) set owns: third-name
-    When <root-type>(<type-name>) get owns: third-name, set annotation: @subkey(optional)
-    Then <root-type>(<type-name>) get owns: third-name, get annotations contain: @subkey(optional)
+    When <root-type>(<type-name>) get owns(third-name) set annotation: @subkey(optional)
+    Then <root-type>(<type-name>) get owns(third-name) get annotations contain: @subkey(optional)
     When <root-type>(<type-name>) set owns: birthday
-    When <root-type>(<type-name>) get owns: birthday, set annotation: @subkey(primary)
-    Then <root-type>(<type-name>) get owns: birthday, get annotations contain: @subkey(primary)
+    When <root-type>(<type-name>) get owns(birthday) set annotation: @subkey(primary)
+    Then <root-type>(<type-name>) get owns(birthday) get annotations contain: @subkey(primary)
     When <root-type>(<type-name>) set owns: balance
-    When <root-type>(<type-name>) get owns: balance, set annotation: @subkey(single)
-    Then <root-type>(<type-name>) get owns: balance, get annotations contain: @subkey(single)
+    When <root-type>(<type-name>) get owns(balance) set annotation: @subkey(single)
+    Then <root-type>(<type-name>) get owns(balance) get annotations contain: @subkey(single)
     When <root-type>(<type-name>) set owns: progress
-    When <root-type>(<type-name>) get owns: progress, set annotation: @subkey(optional)
-    Then <root-type>(<type-name>) get owns: progress, get annotations contain: @subkey(optional)
+    When <root-type>(<type-name>) get owns(progress) set annotation: @subkey(optional)
+    Then <root-type>(<type-name>) get owns(progress) get annotations contain: @subkey(optional)
     When <root-type>(<type-name>) set owns: age
-    When <root-type>(<type-name>) get owns: age, set annotation: @subkey(primary)
-    Then <root-type>(<type-name>) get owns: age, get annotations contain: @subkey(primary)
+    When <root-type>(<type-name>) get owns(age) set annotation: @subkey(primary)
+    Then <root-type>(<type-name>) get owns(age) get annotations contain: @subkey(primary)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then <root-type>(<type-name>) get owns: first-name, get annotations contain: @subkey(primary)
-    Then <root-type>(<type-name>) get owns: second-name, get annotations contain: @subkey(primary)
-    Then <root-type>(<type-name>) get owns: third-name, get annotations contain: @subkey(optional)
-    Then <root-type>(<type-name>) get owns: birthday, get annotations contain: @subkey(primary)
-    Then <root-type>(<type-name>) get owns: balance, get annotations contain: @subkey(single)
-    Then <root-type>(<type-name>) get owns: progress, get annotations contain: @subkey(optional)
-    Then <root-type>(<type-name>) get owns: age, get annotations contain: @subkey(primary)
+    Then <root-type>(<type-name>) get owns(first-name) get annotations contain: @subkey(primary)
+    Then <root-type>(<type-name>) get owns(second-name) get annotations contain: @subkey(primary)
+    Then <root-type>(<type-name>) get owns(third-name) get annotations contain: @subkey(optional)
+    Then <root-type>(<type-name>) get owns(birthday) get annotations contain: @subkey(primary)
+    Then <root-type>(<type-name>) get owns(balance) get annotations contain: @subkey(single)
+    Then <root-type>(<type-name>) get owns(progress) get annotations contain: @subkey(optional)
+    Then <root-type>(<type-name>) get owns(age) get annotations contain: @subkey(primary)
     Examples:
       | root-type | type-name   |
       | entity    | person      |
@@ -2277,34 +2277,34 @@ Feature: Concept Owns
     When put attribute type: age
     When attribute(age) set value-type: long
     When entity(person) set owns: name
-    When entity(person) get owns: name, set annotation: @subkey(NAME-AGE)
-    When entity(person) get owns: name, set annotation: @subkey(FULL-NAME)
-    Then entity(person) get owns: name, get annotations contain:
+    When entity(person) get owns(name) set annotation: @subkey(NAME-AGE)
+    When entity(person) get owns(name) set annotation: @subkey(FULL-NAME)
+    Then entity(person) get owns(name) get annotations contain:
       | @subkey(NAME-AGE)  |
       | @subkey(FULL-NAME) |
     When entity(person) set owns: surname
-    When entity(person) get owns: surname, set annotation: @subkey(FULL-NAME)
-    Then entity(person) get owns: surname, get annotations contain: @subkey(FULL-NAME)
+    When entity(person) get owns(surname) set annotation: @subkey(FULL-NAME)
+    Then entity(person) get owns(surname) get annotations contain: @subkey(FULL-NAME)
     When entity(person) set owns: age
-    When entity(person) get owns: age, set annotation: @subkey(NAME-AGE)
-    Then entity(person) get owns: age, get annotations contain: @subkey(NAME-AGE)
+    When entity(person) get owns(age) set annotation: @subkey(NAME-AGE)
+    Then entity(person) get owns(age) get annotations contain: @subkey(NAME-AGE)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns: name, get annotations contain:
+    Then entity(person) get owns(name) get annotations contain:
       | @subkey(NAME-AGE)  |
       | @subkey(FULL-NAME) |
-    Then entity(person) get owns: surname, get annotations contain: @subkey(FULL-NAME)
-    Then entity(person) get owns: age, get annotations contain: @subkey(NAME-AGE)
+    Then entity(person) get owns(surname) get annotations contain: @subkey(FULL-NAME)
+    Then entity(person) get owns(age) get annotations contain: @subkey(NAME-AGE)
 
   Scenario Outline: Owns cannot set @subkey annotation for <value-type> as it is not keyable
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
-    Then entity(person) get owns: custom-attribute, set annotation: @subkey(LABEL); fails
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then entity(person) get owns(custom-attribute) set annotation: @subkey(LABEL); fails
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     Examples:
       | value-type    |
       | double        |
@@ -2316,29 +2316,29 @@ Feature: Concept Owns
     When attribute(custom-attribute) set value-type: long
     When entity(person) set owns: custom-attribute
     # TODO: Move the case to successful cases if it should work!
-    Then entity(person) get owns: custom-attribute, set annotation: @subkey; fails
-    Then entity(person) get owns: custom-attribute, set annotation: @subkey(); fails
-    Then entity(person) get owns: custom-attribute, set annotation: @subkey("LABEL"); fails
-    Then entity(person) get owns: custom-attribute, set annotation: @subkey(福); fails
-    Then entity(person) get owns: custom-attribute, set annotation: @subkey(d./';;p480909!208923r09zlmk*((*£*()(@£Q**&$@)); fails
-    Then entity(person) get owns: custom-attribute, set annotation: @subkey(49j93848); fails
-    Then entity(person) get owns: custom-attribute, set annotation: @subkey(LABEL, LABEL); fails
-    Then entity(person) get owns: custom-attribute, set annotation: @subkey(LABEL, LABEL2); fails
-    Then entity(person) get owns: custom-attribute, set annotation: @subkey(LABEL, LABEL2, LABEL3); fails
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then entity(person) get owns(custom-attribute) set annotation: @subkey; fails
+    Then entity(person) get owns(custom-attribute) set annotation: @subkey(); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @subkey("LABEL"); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @subkey(福); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @subkey(d./';;p480909!208923r09zlmk*((*£*()(@£Q**&$@)); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @subkey(49j93848); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @subkey(LABEL, LABEL); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @subkey(LABEL, LABEL2); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @subkey(LABEL, LABEL2, LABEL3); fails
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then entity(person) get owns(custom-attribute) get annotations is empty
 
   Scenario Outline: Owns cannot set @subkey annotation for lists
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute[]
-    Then entity(person) get owns: custom-attribute[], set annotation: @subkey(LABEL); fails
-    Then entity(person) get owns: custom-attribute[], get annotations is empty
+    Then entity(person) get owns(custom-attribute[]) set annotation: @subkey(LABEL); fails
+    Then entity(person) get owns(custom-attribute[]) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns: custom-attribute[], get annotations is empty
+    Then entity(person) get owns(custom-attribute[]) get annotations is empty
     Examples:
       | value-type    |
       | long          |
@@ -2359,21 +2359,21 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
-    When entity(person) get owns: custom-attribute, set annotation: @unique
-    Then entity(person) get owns: custom-attribute, get annotations contain: @unique
+    When entity(person) get owns(custom-attribute) set annotation: @unique
+    Then entity(person) get owns(custom-attribute) get annotations contain: @unique
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations contain: @unique
-    When entity(person) get owns: custom-attribute, unset annotation: @unique
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then entity(person) get owns(custom-attribute) get annotations contain: @unique
+    When entity(person) get owns(custom-attribute) unset annotation: @unique
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations is empty
-    When entity(person) get owns: custom-attribute, set annotation: @unique
-    Then entity(person) get owns: custom-attribute, get annotations contain: @unique
+    Then entity(person) get owns(custom-attribute) get annotations is empty
+    When entity(person) get owns(custom-attribute) set annotation: @unique
+    Then entity(person) get owns(custom-attribute) get annotations contain: @unique
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations contain: @unique
+    Then entity(person) get owns(custom-attribute) get annotations contain: @unique
     When entity(person) unset owns: custom-attribute
     Then entity(person) get owns is empty
     When transaction commits
@@ -2392,11 +2392,11 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
-    Then entity(person) get owns: custom-attribute, set annotation: @unique; fails
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then entity(person) get owns(custom-attribute) set annotation: @unique; fails
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     Examples:
       | value-type    |
       | double        |
@@ -2408,11 +2408,11 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute[]
-    Then entity(person) get owns: custom-attribute[], set annotation: @unique; fails
-    Then entity(person) get owns: custom-attribute[], get annotations is empty
+    Then entity(person) get owns(custom-attribute[]) set annotation: @unique; fails
+    Then entity(person) get owns(custom-attribute[]) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns: custom-attribute[], get annotations is empty
+    Then entity(person) get owns(custom-attribute[]) get annotations is empty
     Examples:
       | value-type    |
       | long          |
@@ -2435,15 +2435,15 @@ Feature: Concept Owns
     When put attribute type: custom-attribute-2
     When attribute(custom-attribute-2) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
-    When entity(person) get owns: custom-attribute, set annotation: @values(<args>)
-    Then entity(person) get owns: custom-attribute, get annotations contain: @values(<args>)
+    When entity(person) get owns(custom-attribute) set annotation: @values(<args>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @values(<args>)
     When entity(person) set owns: custom-attribute-2[]
-    When entity(person) get owns: custom-attribute-2[], set annotation: @values(<args>)
-    Then entity(person) get owns: custom-attribute-2[], get annotations contain: @values(<args>)
+    When entity(person) get owns(custom-attribute-2[]) set annotation: @values(<args>)
+    Then entity(person) get owns(custom-attribute-2[]) get annotations contain: @values(<args>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations contain: @values(<args>)
-    Then entity(person) get owns: custom-attribute-2[], get annotations contain: @values(<args>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @values(<args>)
+    Then entity(person) get owns(custom-attribute-2[]) get annotations contain: @values(<args>)
     When entity(person) unset owns: custom-attribute
     When entity(person) unset owns: custom-attribute-2[]
     Then entity(person) get owns is empty
@@ -2516,12 +2516,12 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
-    Then entity(person) get owns: custom-attribute, set annotation: @values; fails
-    Then entity(person) get owns: custom-attribute, set annotation: @values(); fails
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then entity(person) get owns(custom-attribute) set annotation: @values; fails
+    Then entity(person) get owns(custom-attribute) set annotation: @values(); fails
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     Examples:
       | value-type |
       | long       |
@@ -2537,11 +2537,11 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(player) set owns: custom-attribute
-    Then entity(player) get owns: custom-attribute, set annotation: @values(<args>); fails
-    Then entity(player) get owns: custom-attribute, get annotations is empty
+    Then entity(player) get owns(custom-attribute) set annotation: @values(<args>); fails
+    Then entity(player) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(player) get owns: custom-attribute, get annotations is empty
+    Then entity(player) get owns(custom-attribute) get annotations is empty
     Examples:
       | value-type | args                            |
       | long       | 0.1                             |
@@ -2590,12 +2590,12 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
-    Then entity(person) get owns: custom-attribute, set annotation: @values(<args>)
-    Then entity(person) get owns: custom-attribute, set annotation: @values(<args-redeclared>); fails
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then entity(person) get owns(custom-attribute) set annotation: @values(<args>)
+    Then entity(person) get owns(custom-attribute) set annotation: @values(<args-redeclared>); fails
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     Examples:
       | value-type | args            | args-redeclared |
       | long       | 1, 5            | 7, 9            |
@@ -2611,11 +2611,11 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(player) set owns: custom-attribute
-    Then entity(player) get owns: custom-attribute, set annotation: @values(<arg0>, <arg1>, <arg2>); fails
-    Then entity(player) get owns: custom-attribute, get annotations is empty
+    Then entity(player) get owns(custom-attribute) set annotation: @values(<arg0>, <arg1>, <arg2>); fails
+    Then entity(player) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(player) get owns: custom-attribute, get annotations is empty
+    Then entity(player) get owns(custom-attribute) get annotations is empty
     Examples:
       | value-type | arg0                        | arg1                         | arg2                         |
       | long       | 1                           | 1                            | 1                            |
@@ -2636,14 +2636,14 @@ Feature: Concept Owns
     When put attribute type: name
     When attribute(name) set value-type: string
     When entity(person) set owns: name
-    When entity(person) get owns: name, set annotation: @values("hi", "HI")
-    Then entity(person) get owns: name, set annotation: @values("Hi"); fails
-    Then entity(person) get owns: name, get annotations contain: @values("hi", "HI")
-    Then entity(person) get owns: name, get annotations do not contain: @values("Hi")
+    When entity(person) get owns(name) set annotation: @values("hi", "HI")
+    Then entity(person) get owns(name) set annotation: @values("Hi"); fails
+    Then entity(person) get owns(name) get annotations contain: @values("hi", "HI")
+    Then entity(person) get owns(name) get annotations do not contain: @values("Hi")
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns: name, get annotations contain: @values("hi", "HI")
-    Then entity(person) get owns: name, get annotations do not contain: @values("Hi")
+    Then entity(person) get owns(name) get annotations contain: @values("hi", "HI")
+    Then entity(person) get owns(name) get annotations do not contain: @values("Hi")
 
   Scenario Outline: Owns-related @values annotation for <value-type> value type can be inherited and overridden by a subset of arguments
     When put attribute type: custom-attribute
@@ -2657,14 +2657,14 @@ Feature: Concept Owns
     When relation(description) set owns: custom-attribute
     When entity(person) set owns: second-custom-attribute
     When relation(description) set owns: second-custom-attribute
-    When entity(person) get owns: custom-attribute, set annotation: @values(<args>)
-    When relation(description) get owns: custom-attribute, set annotation: @values(<args>)
-    Then entity(person) get owns: custom-attribute, get annotations contain: @values(<args>)
-    Then relation(description) get owns: custom-attribute, get annotations contain: @values(<args>)
-    When entity(person) get owns: second-custom-attribute, set annotation: @values(<args>)
-    When relation(description) get owns: second-custom-attribute, set annotation: @values(<args>)
-    Then entity(person) get owns: second-custom-attribute, get annotations contain: @values(<args>)
-    Then relation(description) get owns: second-custom-attribute, get annotations contain: @values(<args>)
+    When entity(person) get owns(custom-attribute) set annotation: @values(<args>)
+    When relation(description) get owns(custom-attribute) set annotation: @values(<args>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @values(<args>)
+    Then relation(description) get owns(custom-attribute) get annotations contain: @values(<args>)
+    When entity(person) get owns(second-custom-attribute) set annotation: @values(<args>)
+    When relation(description) get owns(second-custom-attribute) set annotation: @values(<args>)
+    Then entity(person) get owns(second-custom-attribute) get annotations contain: @values(<args>)
+    Then relation(description) get owns(second-custom-attribute) get annotations contain: @values(<args>)
     When put entity type: player
     When put relation type: marriage
     When entity(player) set supertype: person
@@ -2672,38 +2672,38 @@ Feature: Concept Owns
     When entity(player) set owns: overridden-custom-attribute
     When relation(marriage) set owns: overridden-custom-attribute
     # TODO: Overrides? Remove second-custom-attribute from test if we remove overrides!
-    When entity(player) get owns: overridden-custom-attribute; set override: second-custom-attribute
-    When relation(marriage) get owns: overridden-custom-attribute; set override: second-custom-attribute
+    When entity(player) get owns(overridden-custom-attribute) set override: second-custom-attribute
+    When relation(marriage) get owns(overridden-custom-attribute) set override: second-custom-attribute
     Then entity(player) get owns contain: custom-attribute
     Then relation(marriage) get owns contain: custom-attribute
-    Then entity(player) get owns: custom-attribute, get annotations contain: @values(<args>)
-    Then relation(marriage) get owns: custom-attribute, get annotations contain: @values(<args>)
+    Then entity(player) get owns(custom-attribute) get annotations contain: @values(<args>)
+    Then relation(marriage) get owns(custom-attribute) get annotations contain: @values(<args>)
     Then entity(player) get owns do not contain: second-custom-attribute
     Then relation(marriage) get owns do not contain: second-custom-attribute
     Then entity(player) get owns contain: overridden-custom-attribute
     Then relation(marriage) get owns contain: overridden-custom-attribute
-    Then entity(player) get owns: overridden-custom-attribute, get annotations contain: @values(<args>)
-    Then relation(marriage) get owns: overridden-custom-attribute, get annotations contain: @values(<args>)
+    Then entity(player) get owns(overridden-custom-attribute) get annotations contain: @values(<args>)
+    Then relation(marriage) get owns(overridden-custom-attribute) get annotations contain: @values(<args>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(player) get owns: custom-attribute, get annotations contain: @values(<args>)
-    Then relation(marriage) get owns: custom-attribute, get annotations contain: @values(<args>)
-    Then entity(player) get owns: overridden-custom-attribute, get annotations contain: @values(<args>)
-    Then relation(marriage) get owns: overridden-custom-attribute, get annotations contain: @values(<args>)
-    When entity(player) get owns: custom-attribute, set annotation: @values(<args-override>)
-    When relation(marriage) get owns: custom-attribute, set annotation: @values(<args-override>)
-    Then entity(player) get owns: custom-attribute, get annotations contain: @values(<args-override>)
-    Then relation(marriage) get owns: custom-attribute, get annotations contain: @values(<args-override>)
-    When entity(player) get owns: overridden-custom-attribute, set annotation: @values(<args-override>)
-    When relation(marriage) get owns: overridden-custom-attribute, set annotation: @values(<args-override>)
-    Then entity(player) get owns: overridden-custom-attribute, get annotations contain: @values(<args-override>)
-    Then relation(marriage) get owns: overridden-custom-attribute, get annotations contain: @values(<args-override>)
+    Then entity(player) get owns(custom-attribute) get annotations contain: @values(<args>)
+    Then relation(marriage) get owns(custom-attribute) get annotations contain: @values(<args>)
+    Then entity(player) get owns(overridden-custom-attribute) get annotations contain: @values(<args>)
+    Then relation(marriage) get owns(overridden-custom-attribute) get annotations contain: @values(<args>)
+    When entity(player) get owns(custom-attribute) set annotation: @values(<args-override>)
+    When relation(marriage) get owns(custom-attribute) set annotation: @values(<args-override>)
+    Then entity(player) get owns(custom-attribute) get annotations contain: @values(<args-override>)
+    Then relation(marriage) get owns(custom-attribute) get annotations contain: @values(<args-override>)
+    When entity(player) get owns(overridden-custom-attribute) set annotation: @values(<args-override>)
+    When relation(marriage) get owns(overridden-custom-attribute) set annotation: @values(<args-override>)
+    Then entity(player) get owns(overridden-custom-attribute) get annotations contain: @values(<args-override>)
+    Then relation(marriage) get owns(overridden-custom-attribute) get annotations contain: @values(<args-override>)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(player) get owns: custom-attribute, get annotations contain: @values(<args-override>)
-    Then relation(marriage) get owns: custom-attribute, get annotations contain: @values(<args-override>)
-    Then entity(player) get owns: overridden-custom-attribute, get annotations contain: @values(<args-override>)
-    Then relation(marriage) get owns: overridden-custom-attribute, get annotations contain: @values(<args-override>)
+    Then entity(player) get owns(custom-attribute) get annotations contain: @values(<args-override>)
+    Then relation(marriage) get owns(custom-attribute) get annotations contain: @values(<args-override>)
+    Then entity(player) get owns(overridden-custom-attribute) get annotations contain: @values(<args-override>)
+    Then relation(marriage) get owns(overridden-custom-attribute) get annotations contain: @values(<args-override>)
     Examples:
       | value-type | args                                                                         | args-override                              |
       | long       | 1, 10, 20, 30                                                                | 10, 30                                     |
@@ -2727,14 +2727,14 @@ Feature: Concept Owns
     When relation(description) set owns: custom-attribute
     When entity(person) set owns: second-custom-attribute
     When relation(description) set owns: second-custom-attribute
-    When entity(person) get owns: custom-attribute, set annotation: @values(<args>)
-    When relation(description) get owns: custom-attribute, set annotation: @values(<args>)
-    Then entity(person) get owns: custom-attribute, get annotations contain: @values(<args>)
-    Then relation(description) get owns: custom-attribute, get annotations contain: @values(<args>)
-    When entity(person) get owns: second-custom-attribute, set annotation: @values(<args>)
-    When relation(description) get owns: second-custom-attribute, set annotation: @values(<args>)
-    Then entity(person) get owns: second-custom-attribute, get annotations contain: @values(<args>)
-    Then relation(description) get owns: second-custom-attribute, get annotations contain: @values(<args>)
+    When entity(person) get owns(custom-attribute) set annotation: @values(<args>)
+    When relation(description) get owns(custom-attribute) set annotation: @values(<args>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @values(<args>)
+    Then relation(description) get owns(custom-attribute) get annotations contain: @values(<args>)
+    When entity(person) get owns(second-custom-attribute) set annotation: @values(<args>)
+    When relation(description) get owns(second-custom-attribute) set annotation: @values(<args>)
+    Then entity(person) get owns(second-custom-attribute) get annotations contain: @values(<args>)
+    Then relation(description) get owns(second-custom-attribute) get annotations contain: @values(<args>)
     When put entity type: player
     When put relation type: marriage
     When entity(player) set supertype: person
@@ -2742,30 +2742,30 @@ Feature: Concept Owns
     When entity(player) set owns: overridden-custom-attribute
     When relation(marriage) set owns: overridden-custom-attribute
     # TODO: Overrides? Remove second-custom-attribute from test if we remove overrides!
-    When entity(player) get owns: overridden-custom-attribute; set override: second-custom-attribute
-    When relation(marriage) get owns: overridden-custom-attribute; set override: second-custom-attribute
-    Then entity(player) get owns: custom-attribute, get annotations contain: @values(<args>)
-    Then relation(marriage) get owns: custom-attribute, get annotations contain: @values(<args>)
-    Then entity(player) get owns: overridden-custom-attribute, get annotations contain: @values(<args>)
-    Then relation(marriage) get owns: overridden-custom-attribute, get annotations contain: @values(<args>)
-    Then entity(player) get owns: custom-attribute, set annotation: @values(<args>); fails
-    Then relation(marriage) get owns: custom-attribute, set annotation: @values(<args>); fails
-    Then entity(player) get owns: overridden-custom-attribute, set annotation: @values(<args>); fails
-    Then relation(marriage) get owns: overridden-custom-attribute, set annotation: @values(<args>); fails
-    Then entity(player) get owns: custom-attribute, set annotation: @values(<args-override>); fails
-    Then relation(marriage) get owns: custom-attribute, set annotation: @values(<args-override>); fails
-    Then entity(player) get owns: overridden-custom-attribute, set annotation: @values(<args-override>); fails
-    Then relation(marriage) get owns: overridden-custom-attribute, set annotation: @values(<args-override>); fails
-    Then entity(player) get owns: custom-attribute, get annotations contain: @values(<args>)
-    Then relation(marriage) get owns: custom-attribute, get annotations contain: @values(<args>)
-    Then entity(player) get owns: overridden-custom-attribute, get annotations contain: @values(<args>)
-    Then relation(marriage) get owns: overridden-custom-attribute, get annotations contain: @values(<args>)
+    When entity(player) get owns(overridden-custom-attribute) set override: second-custom-attribute
+    When relation(marriage) get owns(overridden-custom-attribute) set override: second-custom-attribute
+    Then entity(player) get owns(custom-attribute) get annotations contain: @values(<args>)
+    Then relation(marriage) get owns(custom-attribute) get annotations contain: @values(<args>)
+    Then entity(player) get owns(overridden-custom-attribute) get annotations contain: @values(<args>)
+    Then relation(marriage) get owns(overridden-custom-attribute) get annotations contain: @values(<args>)
+    Then entity(player) get owns(custom-attribute) set annotation: @values(<args>); fails
+    Then relation(marriage) get owns(custom-attribute) set annotation: @values(<args>); fails
+    Then entity(player) get owns(overridden-custom-attribute) set annotation: @values(<args>); fails
+    Then relation(marriage) get owns(overridden-custom-attribute) set annotation: @values(<args>); fails
+    Then entity(player) get owns(custom-attribute) set annotation: @values(<args-override>); fails
+    Then relation(marriage) get owns(custom-attribute) set annotation: @values(<args-override>); fails
+    Then entity(player) get owns(overridden-custom-attribute) set annotation: @values(<args-override>); fails
+    Then relation(marriage) get owns(overridden-custom-attribute) set annotation: @values(<args-override>); fails
+    Then entity(player) get owns(custom-attribute) get annotations contain: @values(<args>)
+    Then relation(marriage) get owns(custom-attribute) get annotations contain: @values(<args>)
+    Then entity(player) get owns(overridden-custom-attribute) get annotations contain: @values(<args>)
+    Then relation(marriage) get owns(overridden-custom-attribute) get annotations contain: @values(<args>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(player) get owns: custom-attribute, get annotations contain: @values(<args>)
-    Then relation(marriage) get owns: custom-attribute, get annotations contain: @values(<args>)
-    Then entity(player) get owns: overridden-custom-attribute, get annotations contain: @values(<args>)
-    Then relation(marriage) get owns: overridden-custom-attribute, get annotations contain: @values(<args>)
+    Then entity(player) get owns(custom-attribute) get annotations contain: @values(<args>)
+    Then relation(marriage) get owns(custom-attribute) get annotations contain: @values(<args>)
+    Then entity(player) get owns(overridden-custom-attribute) get annotations contain: @values(<args>)
+    Then relation(marriage) get owns(overridden-custom-attribute) get annotations contain: @values(<args>)
     Examples:
       | value-type | args                                                                         | args-override            |
       | long       | 1, 10, 20, 30                                                                | 10, 31                   |
@@ -2787,19 +2787,19 @@ Feature: Concept Owns
     When put attribute type: custom-attribute-2
     When attribute(custom-attribute-2) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
-    Then entity(player) get owns: custom-attribute, set annotation: @range(<arg1>, <arg0>); fails
-    Then entity(person) get owns: custom-attribute, get annotations is empty
-    When entity(person) get owns: custom-attribute, set annotation: @range(<arg0>, <arg1>)
-    Then entity(person) get owns: custom-attribute, get annotations contain: @range(<arg0>, <arg1>)
+    Then entity(player) get owns(custom-attribute) set annotation: @range(<arg1>, <arg0>); fails
+    Then entity(person) get owns(custom-attribute) get annotations is empty
+    When entity(person) get owns(custom-attribute) set annotation: @range(<arg0>, <arg1>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @range(<arg0>, <arg1>)
     When entity(person) set owns: custom-attribute-2[]
-    Then entity(player) get owns: custom-attribute-2[], set annotation: @range(<arg1>, <arg0>); fails
-    Then entity(person) get owns: custom-attribute-2[], get annotations is empty
-    When entity(person) get owns: custom-attribute-2[], set annotation: @range(<arg0>, <arg1>)
-    Then entity(person) get owns: custom-attribute-2[], get annotations contain: @range(<arg0>, <arg1>)
+    Then entity(player) get owns(custom-attribute-2[]) set annotation: @range(<arg1>, <arg0>); fails
+    Then entity(person) get owns(custom-attribute-2[]) get annotations is empty
+    When entity(person) get owns(custom-attribute-2[]) set annotation: @range(<arg0>, <arg1>)
+    Then entity(person) get owns(custom-attribute-2[]) get annotations contain: @range(<arg0>, <arg1>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations contain: @range(<arg0>, <arg1>)
-    Then entity(person) get owns: custom-attribute-2[], get annotations contain: @range(<arg0>, <arg1>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @range(<arg0>, <arg1>)
+    Then entity(person) get owns(custom-attribute-2[]) get annotations contain: @range(<arg0>, <arg1>)
     When entity(person) unset owns: custom-attribute
     When entity(person) unset owns: custom-attribute-2[]
     Then entity(person) get owns is empty
@@ -2848,13 +2848,13 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
-    Then entity(person) get owns: custom-attribute, set annotation: @range; fails
-    Then entity(person) get owns: custom-attribute, set annotation: @range(); fails
-    Then entity(person) get owns: custom-attribute, set annotation: @range(<arg0>); fails
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then entity(person) get owns(custom-attribute) set annotation: @range; fails
+    Then entity(person) get owns(custom-attribute) set annotation: @range(); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @range(<arg0>); fails
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     Examples:
       | value-type | arg0            |
       | long       | 1               |
@@ -2871,12 +2871,12 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
-    Then entity(person) get owns: custom-attribute, set annotation: @range(<args>)
-    Then entity(person) get owns: custom-attribute, set annotation: @range(<args-redeclared>); fails
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then entity(person) get owns(custom-attribute) set annotation: @range(<args>)
+    Then entity(person) get owns(custom-attribute) set annotation: @range(<args-redeclared>); fails
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     Examples:
       | value-type | args                             | args-redeclared                  |
       | long       | 1, 5                             | 7, 9                             |
@@ -2892,11 +2892,11 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(player) set owns: custom-attribute
-    Then entity(player) get owns: custom-attribute, set annotation: @range(<arg0>, <args>); fails
-    Then entity(player) get owns: custom-attribute, get annotations is empty
+    Then entity(player) get owns(custom-attribute) set annotation: @range(<arg0>, <args>); fails
+    Then entity(player) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(player) get owns: custom-attribute, get annotations is empty
+    Then entity(player) get owns(custom-attribute) get annotations is empty
     Examples:
       | value-type | arg0                            | args                                               |
       | long       | 1                               | 1                                                  |
@@ -2969,15 +2969,15 @@ Feature: Concept Owns
     When put attribute type: age
     When attribute(age) set value-type: long
     When entity(person) set owns: age
-    When entity(person) get owns: age, set annotation: @range(2, 5)
-    Then entity(person) get owns: age, set annotation: @range(<fail-args>); fails
-    Then entity(person) get owns: age, set annotation: @range(<fail-args>); fails
-    Then entity(person) get owns: age, get annotations contain: @range(2, 5)
-    Then entity(person) get owns: age, get annotations do not contain: @range(<fail-args>)
+    When entity(person) get owns(age) set annotation: @range(2, 5)
+    Then entity(person) get owns(age) set annotation: @range(<fail-args>); fails
+    Then entity(person) get owns(age) set annotation: @range(<fail-args>); fails
+    Then entity(person) get owns(age) get annotations contain: @range(2, 5)
+    Then entity(person) get owns(age) get annotations do not contain: @range(<fail-args>)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns: age, get annotations contain: @range(2, 5)
-    Then entity(person) get owns: age, get annotations do not contain: @range(<fail-args>)
+    Then entity(person) get owns(age) get annotations contain: @range(2, 5)
+    Then entity(person) get owns(age) get annotations do not contain: @range(<fail-args>)
     Examples:
       | fail-args |
       | 0, 1      |
@@ -3006,14 +3006,14 @@ Feature: Concept Owns
     When relation(description) set owns: custom-attribute
     When entity(person) set owns: second-custom-attribute
     When relation(description) set owns: second-custom-attribute
-    When entity(person) get owns: custom-attribute, set annotation: @range(<args>)
-    When relation(description) get owns: custom-attribute, set annotation: @range(<args>)
-    Then entity(person) get owns: custom-attribute, get annotations contain: @range(<args>)
-    Then relation(description) get owns: custom-attribute, get annotations contain: @range(<args>)
-    When entity(person) get owns: second-custom-attribute, set annotation: @range(<args>)
-    When relation(description) get owns: second-custom-attribute, set annotation: @range(<args>)
-    Then entity(person) get owns: second-custom-attribute, get annotations contain: @range(<args>)
-    Then relation(description) get owns: second-custom-attribute, get annotations contain: @range(<args>)
+    When entity(person) get owns(custom-attribute) set annotation: @range(<args>)
+    When relation(description) get owns(custom-attribute) set annotation: @range(<args>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @range(<args>)
+    Then relation(description) get owns(custom-attribute) get annotations contain: @range(<args>)
+    When entity(person) get owns(second-custom-attribute) set annotation: @range(<args>)
+    When relation(description) get owns(second-custom-attribute) set annotation: @range(<args>)
+    Then entity(person) get owns(second-custom-attribute) get annotations contain: @range(<args>)
+    Then relation(description) get owns(second-custom-attribute) get annotations contain: @range(<args>)
     When put entity type: player
     When put relation type: marriage
     When entity(player) set supertype: person
@@ -3021,38 +3021,38 @@ Feature: Concept Owns
     When entity(player) set owns: overridden-custom-attribute
     When relation(marriage) set owns: overridden-custom-attribute
     # TODO: Overrides? Remove second-custom-attribute from test if we remove overrides!
-    When entity(player) get owns: overridden-custom-attribute; set override: second-custom-attribute
-    When relation(marriage) get owns: overridden-custom-attribute; set override: second-custom-attribute
+    When entity(player) get owns(overridden-custom-attribute) set override: second-custom-attribute
+    When relation(marriage) get owns(overridden-custom-attribute) set override: second-custom-attribute
     Then entity(player) get owns contain: custom-attribute
     Then relation(marriage) get owns contain: custom-attribute
-    Then entity(player) get owns: custom-attribute, get annotations contain: @range(<args>)
-    Then relation(marriage) get owns: custom-attribute, get annotations contain: @range(<args>)
+    Then entity(player) get owns(custom-attribute) get annotations contain: @range(<args>)
+    Then relation(marriage) get owns(custom-attribute) get annotations contain: @range(<args>)
     Then entity(player) get owns do not contain: second-custom-attribute
     Then relation(marriage) get owns do not contain: second-custom-attribute
     Then entity(player) get owns contain: overridden-custom-attribute
     Then relation(marriage) get owns contain: overridden-custom-attribute
-    Then entity(player) get owns: overridden-custom-attribute, get annotations contain: @range(<args>)
-    Then relation(marriage) get owns: overridden-custom-attribute, get annotations contain: @range(<args>)
+    Then entity(player) get owns(overridden-custom-attribute) get annotations contain: @range(<args>)
+    Then relation(marriage) get owns(overridden-custom-attribute) get annotations contain: @range(<args>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(player) get owns: custom-attribute, get annotations contain: @range(<args>)
-    Then relation(marriage) get owns: custom-attribute, get annotations contain: @range(<args>)
-    Then entity(player) get owns: overridden-custom-attribute, get annotations contain: @range(<args>)
-    Then relation(marriage) get owns: overridden-custom-attribute, get annotations contain: @range(<args>)
-    When entity(player) get owns: custom-attribute, set annotation: @range(<args-override>)
-    When relation(marriage) get owns: custom-attribute, set annotation: @range(<args-override>)
-    Then entity(player) get owns: custom-attribute, get annotations contain: @range(<args-override>)
-    Then relation(marriage) get owns: custom-attribute, get annotations contain: @range(<args-override>)
-    When entity(player) get owns: overridden-custom-attribute, set annotation: @range(<args-override>)
-    When relation(marriage) get owns: overridden-custom-attribute, set annotation: @range(<args-override>)
-    Then entity(player) get owns: overridden-custom-attribute, get annotations contain: @range(<args-override>)
-    Then relation(marriage) get owns: overridden-custom-attribute, get annotations contain: @range(<args-override>)
+    Then entity(player) get owns(custom-attribute) get annotations contain: @range(<args>)
+    Then relation(marriage) get owns(custom-attribute) get annotations contain: @range(<args>)
+    Then entity(player) get owns(overridden-custom-attribute) get annotations contain: @range(<args>)
+    Then relation(marriage) get owns(overridden-custom-attribute) get annotations contain: @range(<args>)
+    When entity(player) get owns(custom-attribute) set annotation: @range(<args-override>)
+    When relation(marriage) get owns(custom-attribute) set annotation: @range(<args-override>)
+    Then entity(player) get owns(custom-attribute) get annotations contain: @range(<args-override>)
+    Then relation(marriage) get owns(custom-attribute) get annotations contain: @range(<args-override>)
+    When entity(player) get owns(overridden-custom-attribute) set annotation: @range(<args-override>)
+    When relation(marriage) get owns(overridden-custom-attribute) set annotation: @range(<args-override>)
+    Then entity(player) get owns(overridden-custom-attribute) get annotations contain: @range(<args-override>)
+    Then relation(marriage) get owns(overridden-custom-attribute) get annotations contain: @range(<args-override>)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(player) get owns: custom-attribute, get annotations contain: @range(<args-override>)
-    Then relation(marriage) get owns: custom-attribute, get annotations contain: @range(<args-override>)
-    Then entity(player) get owns: overridden-custom-attribute, get annotations contain: @range(<args-override>)
-    Then relation(marriage) get owns: overridden-custom-attribute, get annotations contain: @range(<args-override>)
+    Then entity(player) get owns(custom-attribute) get annotations contain: @range(<args-override>)
+    Then relation(marriage) get owns(custom-attribute) get annotations contain: @range(<args-override>)
+    Then entity(player) get owns(overridden-custom-attribute) get annotations contain: @range(<args-override>)
+    Then relation(marriage) get owns(overridden-custom-attribute) get annotations contain: @range(<args-override>)
     Examples:
       | value-type | args                             | args-override                             |
       | long       | 1, 10                            | 1, 5                                      |
@@ -3075,14 +3075,14 @@ Feature: Concept Owns
     When relation(description) set owns: custom-attribute
     When entity(person) set owns: second-custom-attribute
     When relation(description) set owns: second-custom-attribute
-    When entity(person) get owns: custom-attribute, set annotation: @range(<args>)
-    When relation(description) get owns: custom-attribute, set annotation: @range(<args>)
-    Then entity(person) get owns: custom-attribute, get annotations contain: @range(<args>)
-    Then relation(description) get owns: custom-attribute, get annotations contain: @range(<args>)
-    When entity(person) get owns: second-custom-attribute, set annotation: @range(<args>)
-    When relation(description) get owns: second-custom-attribute, set annotation: @range(<args>)
-    Then entity(person) get owns: second-custom-attribute, get annotations contain: @range(<args>)
-    Then relation(description) get owns: second-custom-attribute, get annotations contain: @range(<args>)
+    When entity(person) get owns(custom-attribute) set annotation: @range(<args>)
+    When relation(description) get owns(custom-attribute) set annotation: @range(<args>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @range(<args>)
+    Then relation(description) get owns(custom-attribute) get annotations contain: @range(<args>)
+    When entity(person) get owns(second-custom-attribute) set annotation: @range(<args>)
+    When relation(description) get owns(second-custom-attribute) set annotation: @range(<args>)
+    Then entity(person) get owns(second-custom-attribute) get annotations contain: @range(<args>)
+    Then relation(description) get owns(second-custom-attribute) get annotations contain: @range(<args>)
     When put entity type: player
     When put relation type: marriage
     When entity(player) set supertype: person
@@ -3090,30 +3090,30 @@ Feature: Concept Owns
     When entity(player) set owns: overridden-custom-attribute
     When relation(marriage) set owns: overridden-custom-attribute
     # TODO: Overrides? Remove second-custom-attribute from test if we remove overrides!
-    When entity(player) get owns: overridden-custom-attribute; set override: second-custom-attribute
-    When relation(marriage) get owns: overridden-custom-attribute; set override: second-custom-attribute
-    Then entity(player) get owns: custom-attribute, get annotations contain: @range(<args>)
-    Then relation(marriage) get owns: custom-attribute, get annotations contain: @range(<args>)
-    Then entity(player) get owns: overridden-custom-attribute, get annotations contain: @range(<args>)
-    Then relation(marriage) get owns: overridden-custom-attribute, get annotations contain: @range(<args>)
-    Then entity(player) get owns: custom-attribute, set annotation: @range(<args>); fails
-    Then relation(marriage) get owns: custom-attribute, set annotation: @range(<args>); fails
-    Then entity(player) get owns: overridden-custom-attribute, set annotation: @range(<args>); fails
-    Then relation(marriage) get owns: overridden-custom-attribute, set annotation: @range(<args>); fails
-    Then entity(player) get owns: custom-attribute, set annotation: @range(<args-override>); fails
-    Then relation(marriage) get owns: custom-attribute, set annotation: @range(<args-override>); fails
-    Then entity(player) get owns: overridden-custom-attribute, set annotation: @range(<args-override>); fails
-    Then relation(marriage) get owns: overridden-custom-attribute, set annotation: @range(<args-override>); fails
-    Then entity(player) get owns: custom-attribute, get annotations contain: @range(<args>)
-    Then relation(marriage) get owns: custom-attribute, get annotations contain: @range(<args>)
-    Then entity(player) get owns: overridden-custom-attribute, get annotations contain: @range(<args>)
-    Then relation(marriage) get owns: overridden-custom-attribute, get annotations contain: @range(<args>)
+    When entity(player) get owns(overridden-custom-attribute) set override: second-custom-attribute
+    When relation(marriage) get owns(overridden-custom-attribute) set override: second-custom-attribute
+    Then entity(player) get owns(custom-attribute) get annotations contain: @range(<args>)
+    Then relation(marriage) get owns(custom-attribute) get annotations contain: @range(<args>)
+    Then entity(player) get owns(overridden-custom-attribute) get annotations contain: @range(<args>)
+    Then relation(marriage) get owns(overridden-custom-attribute) get annotations contain: @range(<args>)
+    Then entity(player) get owns(custom-attribute) set annotation: @range(<args>); fails
+    Then relation(marriage) get owns(custom-attribute) set annotation: @range(<args>); fails
+    Then entity(player) get owns(overridden-custom-attribute) set annotation: @range(<args>); fails
+    Then relation(marriage) get owns(overridden-custom-attribute) set annotation: @range(<args>); fails
+    Then entity(player) get owns(custom-attribute) set annotation: @range(<args-override>); fails
+    Then relation(marriage) get owns(custom-attribute) set annotation: @range(<args-override>); fails
+    Then entity(player) get owns(overridden-custom-attribute) set annotation: @range(<args-override>); fails
+    Then relation(marriage) get owns(overridden-custom-attribute) set annotation: @range(<args-override>); fails
+    Then entity(player) get owns(custom-attribute) get annotations contain: @range(<args>)
+    Then relation(marriage) get owns(custom-attribute) get annotations contain: @range(<args>)
+    Then entity(player) get owns(overridden-custom-attribute) get annotations contain: @range(<args>)
+    Then relation(marriage) get owns(overridden-custom-attribute) get annotations contain: @range(<args>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(player) get owns: custom-attribute, get annotations contain: @range(<args>)
-    Then relation(marriage) get owns: custom-attribute, get annotations contain: @range(<args>)
-    Then entity(player) get owns: overridden-custom-attribute, get annotations contain: @range(<args>)
-    Then relation(marriage) get owns: overridden-custom-attribute, get annotations contain: @range(<args>)
+    Then entity(player) get owns(custom-attribute) get annotations contain: @range(<args>)
+    Then relation(marriage) get owns(custom-attribute) get annotations contain: @range(<args>)
+    Then entity(player) get owns(overridden-custom-attribute) get annotations contain: @range(<args>)
+    Then relation(marriage) get owns(overridden-custom-attribute) get annotations contain: @range(<args>)
     Examples:
       | value-type | args                             | args-override                             |
       | long       | 1, 10                            | -1, 5                                     |
@@ -3134,19 +3134,19 @@ Feature: Concept Owns
     When put attribute type: custom-attribute-2
     When attribute(custom-attribute-2) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
-    Then entity(player) get owns: custom-attribute, set annotation: @card(<arg1>, <arg0>); fails
-    Then entity(person) get owns: custom-attribute, get annotations is empty
-    When entity(person) get owns: custom-attribute, set annotation: @card(<arg0>, <arg1>)
-    Then entity(person) get owns: custom-attribute, get annotations contain: @card(<arg0>, <arg1>)
+    Then entity(player) get owns(custom-attribute) set annotation: @card(<arg1>, <arg0>); fails
+    Then entity(person) get owns(custom-attribute) get annotations is empty
+    When entity(person) get owns(custom-attribute) set annotation: @card(<arg0>, <arg1>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @card(<arg0>, <arg1>)
     When entity(person) set owns: custom-attribute-2[]
-    Then entity(player) get owns: custom-attribute-2[], set annotation: @card(<arg1>, <arg0>); fails
-    Then entity(person) get owns: custom-attribute-2[], get annotations is empty
-    When entity(person) get owns: custom-attribute-2[], set annotation: @card(<arg0>, <arg1>)
-    Then entity(person) get owns: custom-attribute-2[], get annotations contain: @card(<arg0>, <arg1>)
+    Then entity(player) get owns(custom-attribute-2[]) set annotation: @card(<arg1>, <arg0>); fails
+    Then entity(person) get owns(custom-attribute-2[]) get annotations is empty
+    When entity(person) get owns(custom-attribute-2[]) set annotation: @card(<arg0>, <arg1>)
+    Then entity(person) get owns(custom-attribute-2[]) get annotations contain: @card(<arg0>, <arg1>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations contain: @card(<arg0>, <arg1>)
-    Then entity(person) get owns: custom-attribute-2[], get annotations contain: @card(<arg0>, <arg1>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @card(<arg0>, <arg1>)
+    Then entity(person) get owns(custom-attribute-2[]) get annotations contain: @card(<arg0>, <arg1>)
     When entity(person) unset owns: custom-attribute
     When entity(person) unset owns: custom-attribute-2[]
     Then entity(person) get owns is empty
@@ -3225,12 +3225,12 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
-    Then entity(person) get owns: custom-attribute, get annotations is empty
-    When entity(person) get owns: custom-attribute, set annotation: @card(<arg>, <arg>)
-    Then entity(person) get owns: custom-attribute, get annotations contain: @card(<arg>, <arg>)
+    Then entity(person) get owns(custom-attribute) get annotations is empty
+    When entity(person) get owns(custom-attribute) set annotation: @card(<arg>, <arg>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @card(<arg>, <arg>)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations contain: @card(<arg>, <arg>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @card(<arg>, <arg>)
     Examples:
       | value-type    | arg  |
       | long          | 1    |
@@ -3256,23 +3256,23 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
-    Then entity(person) get owns: custom-attribute, set annotation: @card; fails
-    Then entity(person) get owns: custom-attribute, set annotation: @card(); fails
-    Then entity(person) get owns: custom-attribute, set annotation: @card(1); fails
-    Then entity(person) get owns: custom-attribute, set annotation: @card(*); fails
-    Then entity(person) get owns: custom-attribute, set annotation: @card(-1, 1); fails
-    Then entity(person) get owns: custom-attribute, set annotation: @card(0, 0.1); fails
-    Then entity(person) get owns: custom-attribute, set annotation: @card(0, 1.5); fails
-    Then entity(person) get owns: custom-attribute, set annotation: @card(*, *); fails
-    Then entity(person) get owns: custom-attribute, set annotation: @card(0, **); fails
-    Then entity(person) get owns: custom-attribute, set annotation: @card(1, 2, 3); fails
-    Then entity(person) get owns: custom-attribute, set annotation: @card(1, "2"); fails
-    Then entity(person) get owns: custom-attribute, set annotation: @card("1", 2); fails
-    Then entity(person) get owns: custom-attribute, set annotation: @card(2, 1); fails
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then entity(person) get owns(custom-attribute) set annotation: @card; fails
+    Then entity(person) get owns(custom-attribute) set annotation: @card(); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @card(1); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @card(*); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @card(-1, 1); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @card(0, 0.1); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @card(0, 1.5); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @card(*, *); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @card(0, **); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @card(1, 2, 3); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @card(1, "2"); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @card("1", 2); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @card(2, 1); fails
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     Examples:
       | value-type |
       | long       |
@@ -3288,14 +3288,14 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: decimal
     When entity(person) set owns: custom-attribute
-    When entity(person) get owns: custom-attribute, set annotation: @card(2, 5)
-    Then entity(person) get owns: custom-attribute, set annotation: @card(<fail-args>); fails
-    Then entity(person) get owns: custom-attribute, get annotations contain: @card(2, 5)
-    Then entity(person) get owns: custom-attribute, get annotations do not contain: @card(<fail-args>)
+    When entity(person) get owns(custom-attribute) set annotation: @card(2, 5)
+    Then entity(person) get owns(custom-attribute) set annotation: @card(<fail-args>); fails
+    Then entity(person) get owns(custom-attribute) get annotations contain: @card(2, 5)
+    Then entity(person) get owns(custom-attribute) get annotations do not contain: @card(<fail-args>)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations contain: @card(2, 5)
-    Then entity(person) get owns: custom-attribute, get annotations do not contain: @card(<fail-args>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @card(2, 5)
+    Then entity(person) get owns(custom-attribute) get annotations do not contain: @card(<fail-args>)
     Examples:
       | fail-args |
       | 0, 1      |
@@ -3317,12 +3317,12 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
-    Then entity(person) get owns: custom-attribute, set annotation: @card(<args>)
-    Then entity(person) get owns: custom-attribute, set annotation: @card(<args-redeclared>); fails
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then entity(person) get owns(custom-attribute) set annotation: @card(<args>)
+    Then entity(person) get owns(custom-attribute) set annotation: @card(<args-redeclared>); fails
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     Examples:
       | value-type | args | args-redeclared |
       | long       | 2, 5 | 7, 9            |
@@ -3346,14 +3346,14 @@ Feature: Concept Owns
     When relation(description) set owns: custom-attribute
     When entity(person) set owns: second-custom-attribute
     When relation(description) set owns: second-custom-attribute
-    When entity(person) get owns: custom-attribute, set annotation: @card(<args>)
-    When relation(description) get owns: custom-attribute, set annotation: @card(<args>)
-    Then entity(person) get owns: custom-attribute, get annotations contain: @card(<args>)
-    Then relation(description) get owns: custom-attribute, get annotations contain: @card(<args>)
-    When entity(person) get owns: second-custom-attribute, set annotation: @card(<args>)
-    When relation(description) get owns: second-custom-attribute, set annotation: @card(<args>)
-    Then entity(person) get owns: second-custom-attribute, get annotations contain: @card(<args>)
-    Then relation(description) get owns: second-custom-attribute, get annotations contain: @card(<args>)
+    When entity(person) get owns(custom-attribute) set annotation: @card(<args>)
+    When relation(description) get owns(custom-attribute) set annotation: @card(<args>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @card(<args>)
+    Then relation(description) get owns(custom-attribute) get annotations contain: @card(<args>)
+    When entity(person) get owns(second-custom-attribute) set annotation: @card(<args>)
+    When relation(description) get owns(second-custom-attribute) set annotation: @card(<args>)
+    Then entity(person) get owns(second-custom-attribute) get annotations contain: @card(<args>)
+    Then relation(description) get owns(second-custom-attribute) get annotations contain: @card(<args>)
     When put entity type: player
     When put relation type: marriage
     When entity(player) set supertype: person
@@ -3361,38 +3361,38 @@ Feature: Concept Owns
     When entity(player) set owns: overridden-custom-attribute
     When relation(marriage) set owns: overridden-custom-attribute
     # TODO: Overrides? Remove second-custom-attribute from test if we remove overrides!
-    When entity(player) get owns: overridden-custom-attribute; set override: second-custom-attribute
-    When relation(marriage) get owns: overridden-custom-attribute; set override: second-custom-attribute
+    When entity(player) get owns(overridden-custom-attribute) set override: second-custom-attribute
+    When relation(marriage) get owns(overridden-custom-attribute) set override: second-custom-attribute
     Then entity(player) get owns contain: custom-attribute
     Then relation(marriage) get owns contain: custom-attribute
-    Then entity(player) get owns: custom-attribute, get annotations contain: @card(<args>)
-    Then relation(marriage) get owns: custom-attribute, get annotations contain: @card(<args>)
+    Then entity(player) get owns(custom-attribute) get annotations contain: @card(<args>)
+    Then relation(marriage) get owns(custom-attribute) get annotations contain: @card(<args>)
     Then entity(player) get owns do not contain: second-custom-attribute
     Then relation(marriage) get owns do not contain: second-custom-attribute
     Then entity(player) get owns contain: overridden-custom-attribute
     Then relation(marriage) get owns contain: overridden-custom-attribute
-    Then entity(player) get owns: overridden-custom-attribute, get annotations contain: @card(<args>)
-    Then relation(marriage) get owns: overridden-custom-attribute, get annotations contain: @card(<args>)
+    Then entity(player) get owns(overridden-custom-attribute) get annotations contain: @card(<args>)
+    Then relation(marriage) get owns(overridden-custom-attribute) get annotations contain: @card(<args>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(player) get owns: custom-attribute, get annotations contain: @card(<args>)
-    Then relation(marriage) get owns: custom-attribute, get annotations contain: @card(<args>)
-    Then entity(player) get owns: overridden-custom-attribute, get annotations contain: @card(<args>)
-    Then relation(marriage) get owns: overridden-custom-attribute, get annotations contain: @card(<args>)
-    When entity(player) get owns: custom-attribute, set annotation: @card(<args-override>)
-    When relation(marriage) get owns: custom-attribute, set annotation: @card(<args-override>)
-    Then entity(player) get owns: custom-attribute, get annotations contain: @card(<args-override>)
-    Then relation(marriage) get owns: custom-attribute, get annotations contain: @card(<args-override>)
-    When entity(player) get owns: overridden-custom-attribute, set annotation: @card(<args-override>)
-    When relation(marriage) get owns: overridden-custom-attribute, set annotation: @card(<args-override>)
-    Then entity(player) get owns: overridden-custom-attribute, get annotations contain: @card(<args-override>)
-    Then relation(marriage) get owns: overridden-custom-attribute, get annotations contain: @card(<args-override>)
+    Then entity(player) get owns(custom-attribute) get annotations contain: @card(<args>)
+    Then relation(marriage) get owns(custom-attribute) get annotations contain: @card(<args>)
+    Then entity(player) get owns(overridden-custom-attribute) get annotations contain: @card(<args>)
+    Then relation(marriage) get owns(overridden-custom-attribute) get annotations contain: @card(<args>)
+    When entity(player) get owns(custom-attribute) set annotation: @card(<args-override>)
+    When relation(marriage) get owns(custom-attribute) set annotation: @card(<args-override>)
+    Then entity(player) get owns(custom-attribute) get annotations contain: @card(<args-override>)
+    Then relation(marriage) get owns(custom-attribute) get annotations contain: @card(<args-override>)
+    When entity(player) get owns(overridden-custom-attribute) set annotation: @card(<args-override>)
+    When relation(marriage) get owns(overridden-custom-attribute) set annotation: @card(<args-override>)
+    Then entity(player) get owns(overridden-custom-attribute) get annotations contain: @card(<args-override>)
+    Then relation(marriage) get owns(overridden-custom-attribute) get annotations contain: @card(<args-override>)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(player) get owns: custom-attribute, get annotations contain: @card(<args-override>)
-    Then relation(marriage) get owns: custom-attribute, get annotations contain: @card(<args-override>)
-    Then entity(player) get owns: overridden-custom-attribute, get annotations contain: @card(<args-override>)
-    Then relation(marriage) get owns: overridden-custom-attribute, get annotations contain: @card(<args-override>)
+    Then entity(player) get owns(custom-attribute) get annotations contain: @card(<args-override>)
+    Then relation(marriage) get owns(custom-attribute) get annotations contain: @card(<args-override>)
+    Then entity(player) get owns(overridden-custom-attribute) get annotations contain: @card(<args-override>)
+    Then relation(marriage) get owns(overridden-custom-attribute) get annotations contain: @card(<args-override>)
     Examples:
       | value-type | args       | args-override |
       | long       | 0, *       | 0, 10000      |
@@ -3415,14 +3415,14 @@ Feature: Concept Owns
     When relation(description) set owns: custom-attribute
     When entity(person) set owns: second-custom-attribute
     When relation(description) set owns: second-custom-attribute
-    When entity(person) get owns: custom-attribute, set annotation: @card(<args>)
-    When relation(description) get owns: custom-attribute, set annotation: @card(<args>)
-    Then entity(person) get owns: custom-attribute, get annotations contain: @card(<args>)
-    Then relation(description) get owns: custom-attribute, get annotations contain: @card(<args>)
-    When entity(person) get owns: second-custom-attribute, set annotation: @card(<args>)
-    When relation(description) get owns: second-custom-attribute, set annotation: @card(<args>)
-    Then entity(person) get owns: second-custom-attribute, get annotations contain: @card(<args>)
-    Then relation(description) get owns: second-custom-attribute, get annotations contain: @card(<args>)
+    When entity(person) get owns(custom-attribute) set annotation: @card(<args>)
+    When relation(description) get owns(custom-attribute) set annotation: @card(<args>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @card(<args>)
+    Then relation(description) get owns(custom-attribute) get annotations contain: @card(<args>)
+    When entity(person) get owns(second-custom-attribute) set annotation: @card(<args>)
+    When relation(description) get owns(second-custom-attribute) set annotation: @card(<args>)
+    Then entity(person) get owns(second-custom-attribute) get annotations contain: @card(<args>)
+    Then relation(description) get owns(second-custom-attribute) get annotations contain: @card(<args>)
     When put entity type: player
     When put relation type: marriage
     When entity(player) set supertype: person
@@ -3430,30 +3430,30 @@ Feature: Concept Owns
     When entity(player) set owns: overridden-custom-attribute
     When relation(marriage) set owns: overridden-custom-attribute
     # TODO: Overrides? Remove second-custom-attribute from test if we remove overrides!
-    When entity(player) get owns: overridden-custom-attribute; set override: second-custom-attribute
-    When relation(marriage) get owns: overridden-custom-attribute; set override: second-custom-attribute
-    Then entity(player) get owns: custom-attribute, get annotations contain: @card(<args>)
-    Then relation(marriage) get owns: custom-attribute, get annotations contain: @card(<args>)
-    Then entity(player) get owns: overridden-custom-attribute, get annotations contain: @card(<args>)
-    Then relation(marriage) get owns: overridden-custom-attribute, get annotations contain: @card(<args>)
-    Then entity(player) get owns: custom-attribute, set annotation: @card(<args>); fails
-    Then relation(marriage) get owns: custom-attribute, set annotation: @card(<args>); fails
-    Then entity(player) get owns: overridden-custom-attribute, set annotation: @card(<args>); fails
-    Then relation(marriage) get owns: overridden-custom-attribute, set annotation: @card(<args>); fails
-    Then entity(player) get owns: custom-attribute, set annotation: @card(<args-override>); fails
-    Then relation(marriage) get owns: custom-attribute, set annotation: @card(<args-override>); fails
-    Then entity(player) get owns: overridden-custom-attribute, set annotation: @card(<args-override>); fails
-    Then relation(marriage) get owns: overridden-custom-attribute, set annotation: @card(<args-override>); fails
-    Then entity(player) get owns: custom-attribute, get annotations contain: @card(<args>)
-    Then relation(marriage) get owns: custom-attribute, get annotations contain: @card(<args>)
-    Then entity(player) get owns: overridden-custom-attribute, get annotations contain: @card(<args>)
-    Then relation(marriage) get owns: overridden-custom-attribute, get annotations contain: @card(<args>)
+    When entity(player) get owns(overridden-custom-attribute) set override: second-custom-attribute
+    When relation(marriage) get owns(overridden-custom-attribute) set override: second-custom-attribute
+    Then entity(player) get owns(custom-attribute) get annotations contain: @card(<args>)
+    Then relation(marriage) get owns(custom-attribute) get annotations contain: @card(<args>)
+    Then entity(player) get owns(overridden-custom-attribute) get annotations contain: @card(<args>)
+    Then relation(marriage) get owns(overridden-custom-attribute) get annotations contain: @card(<args>)
+    Then entity(player) get owns(custom-attribute) set annotation: @card(<args>); fails
+    Then relation(marriage) get owns(custom-attribute) set annotation: @card(<args>); fails
+    Then entity(player) get owns(overridden-custom-attribute) set annotation: @card(<args>); fails
+    Then relation(marriage) get owns(overridden-custom-attribute) set annotation: @card(<args>); fails
+    Then entity(player) get owns(custom-attribute) set annotation: @card(<args-override>); fails
+    Then relation(marriage) get owns(custom-attribute) set annotation: @card(<args-override>); fails
+    Then entity(player) get owns(overridden-custom-attribute) set annotation: @card(<args-override>); fails
+    Then relation(marriage) get owns(overridden-custom-attribute) set annotation: @card(<args-override>); fails
+    Then entity(player) get owns(custom-attribute) get annotations contain: @card(<args>)
+    Then relation(marriage) get owns(custom-attribute) get annotations contain: @card(<args>)
+    Then entity(player) get owns(overridden-custom-attribute) get annotations contain: @card(<args>)
+    Then relation(marriage) get owns(overridden-custom-attribute) get annotations contain: @card(<args>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(player) get owns: custom-attribute, get annotations contain: @card(<args>)
-    Then relation(marriage) get owns: custom-attribute, get annotations contain: @card(<args>)
-    Then entity(player) get owns: overridden-custom-attribute, get annotations contain: @card(<args>)
-    Then relation(marriage) get owns: overridden-custom-attribute, get annotations contain: @card(<args>)
+    Then entity(player) get owns(custom-attribute) get annotations contain: @card(<args>)
+    Then relation(marriage) get owns(custom-attribute) get annotations contain: @card(<args>)
+    Then entity(player) get owns(overridden-custom-attribute) get annotations contain: @card(<args>)
+    Then relation(marriage) get owns(overridden-custom-attribute) get annotations contain: @card(<args>)
     Examples:
       | value-type | args       | args-override |
       | long       | 0, 10000   | 0, 10001      |
@@ -3472,21 +3472,21 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When <root-type>(<type-name>) set owns: custom-attribute[]
-    When <root-type>(<type-name>) get owns: custom-attribute[], set annotation: @distinct
-    Then <root-type>(<type-name>) get owns: custom-attribute[], get annotations contain: @distinct
+    When <root-type>(<type-name>) get owns(custom-attribute[]) set annotation: @distinct
+    Then <root-type>(<type-name>) get owns(custom-attribute[]) get annotations contain: @distinct
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) get owns: custom-attribute[], get annotations contain: @distinct
-    When <root-type>(<type-name>) get owns: custom-attribute[], unset annotation: @distinct
-    Then <root-type>(<type-name>) get owns: custom-attribute[], get annotations is empty
+    Then <root-type>(<type-name>) get owns(custom-attribute[]) get annotations contain: @distinct
+    When <root-type>(<type-name>) get owns(custom-attribute[]) unset annotation: @distinct
+    Then <root-type>(<type-name>) get owns(custom-attribute[]) get annotations is empty
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) get owns: custom-attribute[], get annotations is empty
-    When <root-type>(<type-name>) get owns: custom-attribute[], set annotation: @distinct
-    Then <root-type>(<type-name>) get owns: custom-attribute[], get annotations contain: @distinct
+    Then <root-type>(<type-name>) get owns(custom-attribute[]) get annotations is empty
+    When <root-type>(<type-name>) get owns(custom-attribute[]) set annotation: @distinct
+    Then <root-type>(<type-name>) get owns(custom-attribute[]) get annotations contain: @distinct
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) get owns: custom-attribute[], get annotations contain: @distinct
+    Then <root-type>(<type-name>) get owns(custom-attribute[]) get annotations contain: @distinct
     When <root-type>(<type-name>) unset owns: custom-attribute[]
     Then <root-type>(<type-name>) get owns is empty
     When transaction commits
@@ -3517,11 +3517,11 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When <root-type>(<type-name>) set owns: custom-attribute
-    Then <root-type>(<type-name>) get owns: custom-attribute, set annotation: @distinct; fails
-    Then <root-type>(<type-name>) get owns: custom-attribute, get annotations is empty
+    Then <root-type>(<type-name>) get owns(custom-attribute) set annotation: @distinct; fails
+    Then <root-type>(<type-name>) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then <root-type>(<type-name>) get owns: custom-attribute, get annotations is empty
+    Then <root-type>(<type-name>) get owns(custom-attribute) get annotations is empty
     Examples:
       | root-type | type-name   | value-type    |
       | entity    | person      | long          |
@@ -3547,13 +3547,13 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
-    Then entity(person) get owns: custom-attribute, set annotation: @distinct(); fails
-    Then entity(person) get owns: custom-attribute, set annotation: @distinct(1); fails
-    Then entity(person) get owns: custom-attribute, set annotation: @distinct("1"); fails
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then entity(person) get owns(custom-attribute) set annotation: @distinct(); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @distinct(1); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @distinct("1"); fails
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     Examples:
       | value-type    |
       | long          |
@@ -3577,17 +3577,17 @@ Feature: Concept Owns
     When <root-type>(<type-name>) set owns: email[]
     When <root-type>(<type-name>) set owns: address[]
     Then <root-type>(<type-name>) set owns: name[]
-    Then <root-type>(<type-name>) get owns: name[], set annotation: @distinct
-    Then <root-type>(<type-name>) get owns: name[], get annotations contain: @distinct
+    Then <root-type>(<type-name>) get owns(name[]) set annotation: @distinct
+    Then <root-type>(<type-name>) get owns(name[]) get annotations contain: @distinct
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<type-name>) set owns: email[]
-    Then <root-type>(<type-name>) get owns: email[], get annotations is empty
-    When <root-type>(<type-name>) get owns: email[], set annotation: @distinct
-    Then <root-type>(<type-name>) get owns: email[], get annotations contain: @distinct
-    Then <root-type>(<type-name>) get owns: address[], get annotations is empty
-    When <root-type>(<type-name>) get owns: address[], set annotation: @distinct
-    Then <root-type>(<type-name>) get owns: address[], get annotations contain: @distinct
+    Then <root-type>(<type-name>) get owns(email[]) get annotations is empty
+    When <root-type>(<type-name>) get owns(email[]) set annotation: @distinct
+    Then <root-type>(<type-name>) get owns(email[]) get annotations contain: @distinct
+    Then <root-type>(<type-name>) get owns(address[]) get annotations is empty
+    When <root-type>(<type-name>) get owns(address[]) set annotation: @distinct
+    Then <root-type>(<type-name>) get owns(address[]) get annotations contain: @distinct
     Examples:
       | root-type | type-name   | value-type |
       | entity    | person      | string     |
@@ -3601,22 +3601,22 @@ Feature: Concept Owns
     When put attribute type: reference
     When attribute(reference) set value-type: <value-type>
     When <root-type>(<type-name>) set owns: username[]
-    When <root-type>(<type-name>) get owns: username[], set annotation: @distinct
-    Then <root-type>(<type-name>) get owns: username[], get annotation contain: @distinct
+    When <root-type>(<type-name>) get owns(username[]) set annotation: @distinct
+    Then <root-type>(<type-name>) get owns(username[]) get annotation contain: @distinct
     When <root-type>(<type-name>) set owns: reference[]
-    Then <root-type>(<type-name>) get owns: reference[], unset annotation: @distinct; fails
+    Then <root-type>(<type-name>) get owns(reference[]) unset annotation: @distinct; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) get owns: username[], get annotation contain: @distinct
-    Then <root-type>(<type-name>) get owns: reference[], unset annotation: @distinct; fails
-    Then <root-type>(<type-name>) get owns: username[], unset annotation: @distinct
-    Then <root-type>(<type-name>) get owns: username[], unset annotation: @distinct; fails
-    Then <root-type>(<type-name>) get owns: username[], get annotations is empty
-    Then <root-type>(<type-name>) get owns: reference[], get annotations is empty
+    Then <root-type>(<type-name>) get owns(username[]) get annotation contain: @distinct
+    Then <root-type>(<type-name>) get owns(reference[]) unset annotation: @distinct; fails
+    Then <root-type>(<type-name>) get owns(username[]) unset annotation: @distinct
+    Then <root-type>(<type-name>) get owns(username[]) unset annotation: @distinct; fails
+    Then <root-type>(<type-name>) get owns(username[]) get annotations is empty
+    Then <root-type>(<type-name>) get owns(reference[]) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then <root-type>(<type-name>) get owns: username[], get annotations is empty
-    Then <root-type>(<type-name>) get owns: reference[], get annotations is empty
+    Then <root-type>(<type-name>) get owns(username[]) get annotations is empty
+    Then <root-type>(<type-name>) get owns(reference[]) get annotations is empty
     Examples:
       | root-type | type-name   | value-type |
       | entity    | person      | string     |
@@ -3628,14 +3628,14 @@ Feature: Concept Owns
     When put attribute type: username
     When attribute(username) set value-type: string
     When <root-type>(<supertype-name>) set owns: username
-    When <root-type>(<supertype-name>) get owns: username, set annotation: @distinct
-    Then <root-type>(<supertype-name>) get owns: username, get annotation contain: @distinct
-    Then <root-type>(<subtype-name>) get owns: username, get annotation contain: @distinct
-    Then <root-type>(<subtype-name>) get owns: username, unset annotation: @distinct; fails
+    When <root-type>(<supertype-name>) get owns(username) set annotation: @distinct
+    Then <root-type>(<supertype-name>) get owns(username) get annotation contain: @distinct
+    Then <root-type>(<subtype-name>) get owns(username) get annotation contain: @distinct
+    Then <root-type>(<subtype-name>) get owns(username) unset annotation: @distinct; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns: username, get annotations contain: @distinct
-    Then <root-type>(<subtype-name>) get owns: username, unset annotation: @distinct; fails
+    Then <root-type>(<subtype-name>) get owns(username) get annotations contain: @distinct
+    Then <root-type>(<subtype-name>) get owns(username) unset annotation: @distinct; fails
     Examples:
       | root-type | supertype-name | subtype-name |
       | entity    | person         | customer     |
@@ -3651,31 +3651,31 @@ Feature: Concept Owns
     When put attribute type: custom-attribute-2
     When attribute(custom-attribute-2) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
-    When entity(person) get owns: custom-attribute, set annotation: @regex(<arg>)
-    Then entity(person) get owns: custom-attribute, get annotations contain: @regex(<arg>)
+    When entity(person) get owns(custom-attribute) set annotation: @regex(<arg>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @regex(<arg>)
     When entity(person) set owns: custom-attribute-2[]
-    When entity(person) get owns: custom-attribute-2[], set annotation: @regex(<arg>)
-    Then entity(person) get owns: custom-attribute-2[], get annotations contain: @regex(<arg>)
+    When entity(person) get owns(custom-attribute-2[]) set annotation: @regex(<arg>)
+    Then entity(person) get owns(custom-attribute-2[]) get annotations contain: @regex(<arg>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations contain: @regex(<arg>)
-    When entity(person) get owns: custom-attribute, unset annotation: @regex(<arg>)
-    Then entity(person) get owns: custom-attribute, get annotations is empty
-    Then entity(person) get owns: custom-attribute-2[], get annotations contain: @regex(<arg>)
-    When entity(person) get owns: custom-attribute-2[], unset annotation: @regex(<arg>)
-    Then entity(person) get owns: custom-attribute-2[], get annotations is empty
+    Then entity(person) get owns(custom-attribute) get annotations contain: @regex(<arg>)
+    When entity(person) get owns(custom-attribute) unset annotation: @regex(<arg>)
+    Then entity(person) get owns(custom-attribute) get annotations is empty
+    Then entity(person) get owns(custom-attribute-2[]) get annotations contain: @regex(<arg>)
+    When entity(person) get owns(custom-attribute-2[]) unset annotation: @regex(<arg>)
+    Then entity(person) get owns(custom-attribute-2[]) get annotations is empty
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations is empty
-    When entity(person) get owns: custom-attribute, set annotation: @regex(<arg>)
-    Then entity(person) get owns: custom-attribute, get annotations contain: @regex(<arg>)
-    Then entity(person) get owns: custom-attribute-2[], get annotations is empty
-    When entity(person) get owns: custom-attribute-2[], set annotation: @regex(<arg>)
-    Then entity(person) get owns: custom-attribute-2[], get annotations contain: @regex(<arg>)
+    Then entity(person) get owns(custom-attribute) get annotations is empty
+    When entity(person) get owns(custom-attribute) set annotation: @regex(<arg>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @regex(<arg>)
+    Then entity(person) get owns(custom-attribute-2[]) get annotations is empty
+    When entity(person) get owns(custom-attribute-2[]) set annotation: @regex(<arg>)
+    Then entity(person) get owns(custom-attribute-2[]) get annotations contain: @regex(<arg>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations contain: @regex(<arg>)
-    Then entity(person) get owns: custom-attribute-2[], get annotations contain: @regex(<arg>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @regex(<arg>)
+    Then entity(person) get owns(custom-attribute-2[]) get annotations contain: @regex(<arg>)
     When entity(person) unset owns: custom-attribute
     When entity(person) unset owns: custom-attribute-2[]
     Then entity(person) get owns is empty
@@ -3698,11 +3698,11 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
-    Then entity(person) get owns: custom-attribute, set annotation: @regex("\S+"); fails
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then entity(person) get owns(custom-attribute) set annotation: @regex("\S+"); fails
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     Examples:
       | value-type    |
       | long          |
@@ -3718,13 +3718,13 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
-    Then entity(person) get owns: custom-attribute, set annotation: @regex; fails
-    Then entity(person) get owns: custom-attribute, set annotation: @regex(); fails
-    Then entity(person) get owns: custom-attribute, set annotation: @regex(<args>); fails
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then entity(person) get owns(custom-attribute) set annotation: @regex; fails
+    Then entity(person) get owns(custom-attribute) set annotation: @regex(); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @regex(<args>); fails
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns: custom-attribute, get annotations is empty
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     Examples:
       | args                  |
       | ""                    |
@@ -3746,15 +3746,15 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When <root-type>(<type-name>) set owns: custom-attribute
-    Then <root-type>(<type-name>) get owns: custom-attribute, set annotation: @abstract; fails
-    Then <root-type>(<type-name>) get owns: custom-attribute, set annotation: @cascade; fails
-    Then <root-type>(<type-name>) get owns: custom-attribute, set annotation: @independent; fails
-    Then <root-type>(<type-name>) get owns: custom-attribute, set annotation: @replace; fails
-    Then <root-type>(<type-name>) get owns: custom-attribute, set annotation: @does-not-exist; fails
-    Then <root-type>(<type-name>) get owns: custom-attribute, get annotations is empty
+    Then <root-type>(<type-name>) get owns(custom-attribute) set annotation: @abstract; fails
+    Then <root-type>(<type-name>) get owns(custom-attribute) set annotation: @cascade; fails
+    Then <root-type>(<type-name>) get owns(custom-attribute) set annotation: @independent; fails
+    Then <root-type>(<type-name>) get owns(custom-attribute) set annotation: @replace; fails
+    Then <root-type>(<type-name>) get owns(custom-attribute) set annotation: @does-not-exist; fails
+    Then <root-type>(<type-name>) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then <root-type>(<type-name>) get owns: custom-attribute, get annotations is empty
+    Then <root-type>(<type-name>) get owns(custom-attribute) get annotations is empty
     Examples:
       | root-type | type-name   | value-type |
       | entity    | person      | long       |
@@ -3769,36 +3769,36 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When relation(description) set owns: custom-attribute
-    When relation(description) get owns: custom-attribute, set annotation: @<annotation-1>
-    When relation(description) get owns: custom-attribute, set annotation: @<annotation-2>
-    Then relation(description) get owns: custom-attribute, get annotations contain:
+    When relation(description) get owns(custom-attribute) set annotation: @<annotation-1>
+    When relation(description) get owns(custom-attribute) set annotation: @<annotation-2>
+    Then relation(description) get owns(custom-attribute) get annotations contain:
       | @<annotation-1> |
       | @<annotation-2> |
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(description) get owns: custom-attribute, get annotations contain:
+    Then relation(description) get owns(custom-attribute) get annotations contain:
       | @<annotation-1> |
       | @<annotation-2> |
-    When relation(description) get owns: custom-attribute, unset annotation: @<annotation-1>
-    Then relation(description) get owns: custom-attribute, get annotations do not contain: @<annotation-1>
-    Then relation(description) get owns: custom-attribute, get annotations contain: @<annotation-2>
+    When relation(description) get owns(custom-attribute) unset annotation: @<annotation-1>
+    Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-1>
+    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-2>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(description) get owns: custom-attribute, get annotations do not contain: @<annotation-1>
-    Then relation(description) get owns: custom-attribute, get annotations contain: @<annotation-2>
-    When relation(description) get owns: custom-attribute, set annotation: @<annotation-1>
-    When relation(description) get owns: custom-attribute, unset annotation: @<annotation-2>
-    Then relation(description) get owns: custom-attribute, get annotations do not contain: @<annotation-2>
-    Then relation(description) get owns: custom-attribute, get annotations contain: @<annotation-1>
+    Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-1>
+    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-2>
+    When relation(description) get owns(custom-attribute) set annotation: @<annotation-1>
+    When relation(description) get owns(custom-attribute) unset annotation: @<annotation-2>
+    Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-2>
+    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-1>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(description) get owns: custom-attribute, get annotations do not contain: @<annotation-2>
-    Then relation(description) get owns: custom-attribute, get annotations contain: @<annotation-1>
-    When relation(description) get owns: custom-attribute, unset annotation: @<annotation-1>
-    Then relation(description) get owns: custom-attribute, get annotations is empty
+    Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-2>
+    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-1>
+    When relation(description) get owns(custom-attribute) unset annotation: @<annotation-1>
+    Then relation(description) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then relation(description) get owns: custom-attribute, get annotations is empty
+    Then relation(description) get owns(custom-attribute) get annotations is empty
     Examples:
     # TODO: Move to "cannot" test if something is wrong here.
       | annotation-1                      | annotation-2       | value-type |
@@ -3823,36 +3823,36 @@ Feature: Concept Owns
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When relation(description) set owns: custom-attribute[]
-    When relation(description) get owns: custom-attribute[], set annotation: @<annotation-1>
-    When relation(description) get owns: custom-attribute[], set annotation: @<annotation-2>
-    Then relation(description) get owns: custom-attribute[], get annotations contain:
+    When relation(description) get owns(custom-attribute[]) set annotation: @<annotation-1>
+    When relation(description) get owns(custom-attribute[]) set annotation: @<annotation-2>
+    Then relation(description) get owns(custom-attribute[]) get annotations contain:
       | @<annotation-1> |
       | @<annotation-2> |
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(description) get owns: custom-attribute[], get annotations contain:
+    Then relation(description) get owns(custom-attribute[]) get annotations contain:
       | @<annotation-1> |
       | @<annotation-2> |
-    When relation(description) get owns: custom-attribute[], unset annotation: @<annotation-1>
-    Then relation(description) get owns: custom-attribute[], get annotations do not contain: @<annotation-1>
-    Then relation(description) get owns: custom-attribute[], get annotations contain: @<annotation-2>
+    When relation(description) get owns(custom-attribute[]) unset annotation: @<annotation-1>
+    Then relation(description) get owns(custom-attribute[]) get annotations do not contain: @<annotation-1>
+    Then relation(description) get owns(custom-attribute[]) get annotations contain: @<annotation-2>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(description) get owns: custom-attribute[], get annotations do not contain: @<annotation-1>
-    Then relation(description) get owns: custom-attribute[], get annotations contain: @<annotation-2>
-    When relation(description) get owns: custom-attribute[], set annotation: @<annotation-1>
-    When relation(description) get owns: custom-attribute[], unset annotation: @<annotation-2>
-    Then relation(description) get owns: custom-attribute[], get annotations do not contain: @<annotation-2>
-    Then relation(description) get owns: custom-attribute[], get annotations contain: @<annotation-1>
+    Then relation(description) get owns(custom-attribute[]) get annotations do not contain: @<annotation-1>
+    Then relation(description) get owns(custom-attribute[]) get annotations contain: @<annotation-2>
+    When relation(description) get owns(custom-attribute[]) set annotation: @<annotation-1>
+    When relation(description) get owns(custom-attribute[]) unset annotation: @<annotation-2>
+    Then relation(description) get owns(custom-attribute[]) get annotations do not contain: @<annotation-2>
+    Then relation(description) get owns(custom-attribute[]) get annotations contain: @<annotation-1>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(description) get owns: custom-attribute[], get annotations do not contain: @<annotation-2>
-    Then relation(description) get owns: custom-attribute[], get annotations contain: @<annotation-1>
-    When relation(description) get owns: custom-attribute[], unset annotation: @<annotation-1>
-    Then relation(description) get owns: custom-attribute[], get annotations is empty
+    Then relation(description) get owns(custom-attribute[]) get annotations do not contain: @<annotation-2>
+    Then relation(description) get owns(custom-attribute[]) get annotations contain: @<annotation-1>
+    When relation(description) get owns(custom-attribute[]) unset annotation: @<annotation-1>
+    Then relation(description) get owns(custom-attribute[]) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then relation(description) get owns: custom-attribute[], get annotations is empty
+    Then relation(description) get owns(custom-attribute[]) get annotations is empty
     Examples:
     # TODO: Move to "cannot" test if something is wrong here.
       | annotation-1                      | annotation-2    | value-type    |
@@ -3875,16 +3875,16 @@ Feature: Concept Owns
     When transaction commits
     When connection open schema transaction for database: typedb
     When relation(description) set owns: custom-attribute
-    When relation(description) get owns: custom-attribute, set annotation: @<annotation-1>
-    Then relation(description) get owns: custom-attribute, set annotation: @<annotation-2>; fails
+    When relation(description) get owns(custom-attribute) set annotation: @<annotation-1>
+    Then relation(description) get owns(custom-attribute) set annotation: @<annotation-2>; fails
     When connection open schema transaction for database: typedb
     When relation(description) set owns: custom-attribute
-    Then relation(description) get owns: custom-attribute, set annotation: @<annotation-2>
-    When relation(description) get owns: custom-attribute, set annotation: @<annotation-1>; fails
+    Then relation(description) get owns(custom-attribute) set annotation: @<annotation-2>
+    When relation(description) get owns(custom-attribute) set annotation: @<annotation-1>; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(description) get owns: custom-attribute, get annotation contain: @<annotation-2>
-    Then relation(description) get owns: custom-attribute, get annotation do not contain: @<annotation-1>
+    Then relation(description) get owns(custom-attribute) get annotation contain: @<annotation-2>
+    Then relation(description) get owns(custom-attribute) get annotation do not contain: @<annotation-1>
     Examples:
     # TODO: Move to "can" test if something is wrong here.
       | annotation-1     | annotation-2    | value-type |
@@ -3905,16 +3905,16 @@ Feature: Concept Owns
     When transaction commits
     When connection open schema transaction for database: typedb
     When relation(description) set owns: custom-attribute[]
-    When relation(description) get owns: custom-attribute[], set annotation: @<annotation-1>
-    Then relation(description) get owns: custom-attribute[], set annotation: @<annotation-2>; fails
+    When relation(description) get owns(custom-attribute[]) set annotation: @<annotation-1>
+    Then relation(description) get owns(custom-attribute[]) set annotation: @<annotation-2>; fails
     When connection open schema transaction for database: typedb
     When relation(description) set owns: custom-attribute[]
-    Then relation(description) get owns: custom-attribute[], set annotation: @<annotation-2>
-    When relation(description) get owns: custom-attribute[], set annotation: @<annotation-1>; fails
+    Then relation(description) get owns(custom-attribute[]) set annotation: @<annotation-2>
+    When relation(description) get owns(custom-attribute[]) set annotation: @<annotation-1>; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(description) get owns: custom-attribute[], get annotation contain: @<annotation-2>
-    Then relation(description) get owns: custom-attribute[], get annotation do not contain: @<annotation-1>
+    Then relation(description) get owns(custom-attribute[]) get annotation contain: @<annotation-2>
+    Then relation(description) get owns(custom-attribute[]) get annotation do not contain: @<annotation-1>
     Examples:
     # TODO: Move to "can" test if something is wrong here.
       | annotation-1     | annotation-2    | value-type |

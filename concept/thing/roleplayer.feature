@@ -29,12 +29,12 @@ Feature: Concept Ordered Role Players
 
     Given put entity type: company
     Given entity(company) set owns: company-name
-    Given entity(company) get owns: company-name, set annotation: @key
+    Given entity(company) get owns(company-name) set annotation: @key
     Given entity(company) set plays role: employment:employer
 
     Given put entity type: person
     Given entity(person) set owns: name
-    Given entity(person) get owns: name, set annotation: @key
+    Given entity(person) get owns(name) set annotation: @key
     Given entity(person) set plays role: employment:employee
 
     Given transaction commits

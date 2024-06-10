@@ -92,7 +92,7 @@ Feature: Concept Relation Type and Role Type
     When put relation type: marriage
     When relation(marriage) create role: wife
     When put entity type: person
-    When entity(person) set plays role: marriage:wife
+    When entity(person) set plays: marriage:wife
     When transaction commits
     When connection open write transaction for database: typedb
     When $m = relation(marriage) create new instance
@@ -107,7 +107,7 @@ Feature: Concept Relation Type and Role Type
     When relation(marriage) create role: wife
     When relation(marriage) create role: husband
     When put entity type: person
-    When entity(person) set plays role: marriage:wife
+    When entity(person) set plays: marriage:wife
     When transaction commits
     When connection open write transaction for database: typedb
     When $m = relation(marriage) create new instance
@@ -847,7 +847,7 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) create role: father-child
     When relation(fathership) get role(father-child); set override: child
     When put entity type: person
-    When entity(person) set plays role: fathership:father
+    When entity(person) set plays: fathership:father
     Then transaction commits
     When connection open write transaction for database: typedb
     Then $m = relation(fathership) create new instance
@@ -1215,10 +1215,10 @@ Feature: Concept Relation Type and Role Type
     When put relation type: parentship
     When relation(parentship) create role: custom-role
     When relation(parentship) create role: second-custom-role
-    When relation(parentship) get owns: custom-role, set annotation: @card(<args>)
-    Then relation(parentship) get owns: custom-role, get annotations contain: @card(<args>)
-    When relation(parentship) get owns: second-custom-role, set annotation: @card(<args>)
-    Then relation(parentship) get owns: second-custom-role, get annotations contain: @card(<args>)
+    When relation(parentship) get role(custom-role) set annotation: @card(<args>)
+    Then relation(parentship) get role(custom-role) get annotations contain: @card(<args>)
+    When relation(parentship) get role(second-custom-role) set annotation: @card(<args>)
+    Then relation(parentship) get role(second-custom-role) get annotations contain: @card(<args>)
     When put relation type: fathership
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: overridden-custom-role
@@ -1255,10 +1255,10 @@ Feature: Concept Relation Type and Role Type
     When put relation type: parentship
     When relation(parentship) create role: custom-role
     When relation(parentship) create role: second-custom-role
-    When relation(parentship) get owns: custom-role, set annotation: @card(<args>)
-    Then relation(parentship) get owns: custom-role, get annotations contain: @card(<args>)
-    When relation(parentship) get owns: second-custom-role, set annotation: @card(<args>)
-    Then relation(parentship) get owns: second-custom-role, get annotations contain: @card(<args>)
+    When relation(parentship) get role(custom-role) set annotation: @card(<args>)
+    Then relation(parentship) get role(custom-role) get annotations contain: @card(<args>)
+    When relation(parentship) get role(second-custom-role) set annotation: @card(<args>)
+    Then relation(parentship) get role(second-custom-role) get annotations contain: @card(<args>)
     When put relation type: fathership
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: overridden-custom-role

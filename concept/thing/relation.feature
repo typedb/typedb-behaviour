@@ -22,7 +22,7 @@ Feature: Concept Relation
 
     Given put relation type: marriage
     Given relation(marriage) set owns: license
-    Given relation(marriage) get owns: license, set annotation: @key
+    Given relation(marriage) get owns(license) set annotation: @key
     Given relation(marriage) set owns: date
 
     Given relation(marriage) create role: wife
@@ -32,7 +32,7 @@ Feature: Concept Relation
 
     Given put entity type: person
     Given entity(person) set owns: username
-    Given entity(person) get owns: username, set annotation: @key
+    Given entity(person) get owns(username) set annotation: @key
     Given entity(person) set plays role: marriage:wife
     Given entity(person) set plays role: marriage:husband
 
