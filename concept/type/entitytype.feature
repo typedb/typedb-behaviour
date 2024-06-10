@@ -204,6 +204,42 @@ Feature: Concept Entity Type
     Then entity(company) get annotations contain: @abstract
     Then entity(company) create new instance; fails
 
+  Scenario: Entity types can be set to abstract when a subtype has instances
+    When put entity type: person
+    When put entity type: player
+    When entity(player) set supertype: person
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $m = entity(player) create new instance
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) set annotation: @abstract
+    Then transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get annotations contain: @abstract
+
+  Scenario: Entity cannot set @abstract annotation with arguments
+    When put entity type: person
+    Then entity(person) set annotation: @abstract(); fails
+    Then entity(person) set annotation: @abstract(1); fails
+    Then entity(person) set annotation: @abstract(1, 2); fails
+    Then entity(person) get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get annotations is empty
+
+  Scenario: Entity types can subtype non abstract entity types
+    When put entity type: person
+    When put entity type: player
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get annotations do not contain: @abstract
+    When entity(player) set supertype: person
+    Then entity(player) get supertypes contain: person
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(player) get supertypes contain: person
+
 ########################
 # not compatible @annotations: @distinct, @key, @unique, @subkey, @values, @range, @card, @cascade, @independent, @replace, @regex
 ########################
@@ -215,13 +251,18 @@ Feature: Concept Entity Type
     Then entity(person) set annotation: @key; fails
     Then entity(person) set annotation: @unique; fails
     Then entity(person) set annotation: @subkey; fails
+    Then entity(person) set annotation: @subkey(LABEL); fails
     Then entity(person) set annotation: @values; fails
+    Then entity(person) set annotation: @values(1, 2); fails
     Then entity(person) set annotation: @range; fails
+    Then entity(person) set annotation: @range(1, 2); fails
     Then entity(person) set annotation: @card; fails
+    Then entity(person) set annotation: @card(1, 2); fails
     Then entity(person) set annotation: @cascade; fails
     Then entity(person) set annotation: @independent; fails
     Then entity(person) set annotation: @replace; fails
     Then entity(person) set annotation: @regex; fails
+    Then entity(person) set annotation: @regex("val"); fails
     Then entity(person) set annotation: @does-not-exist; fails
     Then entity(person) get annotations is empty
     When transaction commits

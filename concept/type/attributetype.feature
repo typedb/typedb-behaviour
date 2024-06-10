@@ -485,31 +485,47 @@ Feature: Concept Attribute Type
     When connection open schema transaction for database: typedb
     Then attribute(last-name) set supertype: name; fails
 
+  Scenario: Attribute type cannot set @abstract annotation with arguments
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    Then attribute(name) set annotation: @abstract(); fails
+    Then attribute(name) set annotation: @abstract(1); fails
+    Then attribute(name) set annotation: @abstract(1, 2); fails
+    Then attribute(name) get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get annotations is empty
+
 ########################
 # @regex
 ########################
 
-  Scenario: Attribute types with value type string and regular expression can be created
+  Scenario Outline: Attribute types with value type string and regular expression can be created and unset
     When put attribute type: email
     When attribute(email) set value-type: string
-    When attribute(email) set annotation: @regex("\S+@\S+\.\S+")
-    Then attribute(email) get annotations contain: @regex("\S+@\S+\.\S+")
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then attribute(email) get annotations contain: @regex("\S+@\S+\.\S+")
-
-  Scenario: Attribute types with value type string can unset their regular expression
-    When put attribute type: email
-    When attribute(email) set value-type: string
-    When attribute(email) set annotation: @regex("\S+@\S+\.\S+")
-    Then attribute(email) get annotations contain: @regex("\S+@\S+\.\S+")
+    When attribute(email) set annotation: @regex(<arg>)
+    Then attribute(email) get annotations contain: @regex(<arg>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(email) unset annotation: @regex("\S+@\S+\.\S+")
-    Then attribute(email) get annotations do not contain: @regex("\S+@\S+\.\S+")
+    Then attribute(email) get annotations contain: @regex(<arg>)
+    Then attribute(email) unset annotation: @regex(<arg>)
+    Then attribute(email) get annotations do not contain: @regex(<arg>)
     Then transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(email) get annotations do not contain: @regex("\S+@\S+\.\S+")
+    Then attribute(email) get annotations do not contain: @regex(<arg>)
+    Examples:
+      | arg                  |
+      | "value"              |
+      | "123.456"            |
+      | "\S+"                |
+      | "\S+@\S+\.\S+"       |
+      | "^starts"            |
+      | "ends$"              |
+      | "^starts and ends$"  |
+      | "^(one \| another)$" |
+      | "2024-06-04+0100"    |
+
+ # TODO: Enhance
 
 ########################
 # @independent
@@ -537,7 +553,9 @@ Feature: Concept Attribute Type
     Then attribute(email) set annotation: @key; fails
     Then attribute(email) set annotation: @unique; fails
     Then attribute(email) set annotation: @subkey; fails
+    Then attribute(email) set annotation: @subkey(LABEL); fails
     Then attribute(email) set annotation: @card; fails
+    Then attribute(email) set annotation: @card(1, 2); fails
     Then attribute(email) set annotation: @cascade; fails
     Then attribute(email) set annotation: @replace; fails
     Then attribute(email) set annotation: @does-not-exist; fails

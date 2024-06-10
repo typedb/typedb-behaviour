@@ -13,6 +13,7 @@ Feature: Concept Relation Type and Role Type
     Given connection create database: typedb
     Given connection open schema transaction for database: typedb
 
+    # TODO: `get label` and `set label` rename into `set name` and `get name` instead of label becasue it works ont with the whole label LA:BEL but name BEL in it! Do we want this reanme?
 ########################
 # relation type common
 ########################
@@ -129,8 +130,8 @@ Feature: Concept Relation Type and Role Type
     When relation(parentship) set label: marriage
     Then relation(parentship) does not exist
     Then relation(marriage) exists
-    When relation(marriage) get role(parent) set name: husband
-    When relation(marriage) get role(child) set name: wife
+    When relation(marriage) get role(parent) set label: husband
+    When relation(marriage) get role(child) set label: wife
     Then relation(marriage) get role(parent) does not exist
     Then relation(marriage) get role(child) does not exist
     Then relation(marriage) get label: marriage
@@ -144,8 +145,8 @@ Feature: Concept Relation Type and Role Type
     When relation(marriage) set label: employment
     Then relation(marriage) does not exist
     Then relation(employment) exists
-    When relation(employment) get role(husband) set name: employee
-    When relation(employment) get role(wife) set name: employer
+    When relation(employment) get role(husband) set label: employee
+    When relation(employment) get role(wife) set label: employer
     Then relation(employment) get role(husband) does not exist
     Then relation(employment) get role(wife) does not exist
     Then relation(employment) get label: employment
@@ -176,7 +177,7 @@ Feature: Concept Relation Type and Role Type
       | relation:role     |
       | parentship:parent |
     Then relation(fathership) get role(child) get supertypes contain:
-      | relation:role    |
+      | relation:role |
     Then relation(parentship) get subtypes contain:
       | fathership |
     Then relation(parentship) get role(parent) get subtypes contain:
@@ -201,7 +202,7 @@ Feature: Concept Relation Type and Role Type
       | relation:role     |
       | parentship:parent |
     Then relation(fathership) get role(child) get supertypes contain:
-      | relation:role    |
+      | relation:role |
     Then relation(parentship) get subtypes contain:
       | fathership |
     Then relation(parentship) get role(parent) get subtypes contain:
@@ -235,11 +236,11 @@ Feature: Concept Relation Type and Role Type
       | father-son |
     Then relation(fathership) get role(father) get subtypes is empty
     Then relation(fathership) get role(child) get subtypes contain:
-      | father-son:son   |
+      | father-son:son |
     Then relation(parentship) get role(parent) get subtypes contain:
       | fathership:father |
     Then relation(parentship) get role(child) get subtypes contain:
-      | father-son:son   |
+      | father-son:son |
     Then relation(relation) get subtypes contain:
       | parentship |
       | fathership |
@@ -273,16 +274,16 @@ Feature: Concept Relation Type and Role Type
       | relation:role     |
       | parentship:parent |
     Then relation(fathership) get role(child) get supertypes contain:
-      | relation:role    |
+      | relation:role |
     Then relation(fathership) get subtypes contain:
       | father-son |
     Then relation(fathership) get role(father) get subtypes is empty
     Then relation(fathership) get role(child) get subtypes contain:
-      | father-son:son   |
+      | father-son:son |
     Then relation(parentship) get role(parent) get subtypes contain:
       | fathership:father |
     Then relation(parentship) get role(child) get subtypes contain:
-      | father-son:son   |
+      | father-son:son |
     Then relation(relation) get subtypes contain:
       | parentship |
       | fathership |
@@ -313,7 +314,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get declared roles contain:
       | fathership:father |
     Then relation(fathership) get declared roles do not contain:
-      | parentship:child  |
+      | parentship:child |
     When transaction commits
     When connection open schema transaction for database: typedb
     When put relation type: mothership
@@ -326,7 +327,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(mothership) get declared roles contain:
       | mothership:mother |
     Then relation(mothership) get declared roles do not contain:
-      | parentship:child  |
+      | parentship:child |
     When transaction commits
     When connection open read transaction for database: typedb
     Then relation(fathership) get roles contain:
@@ -335,14 +336,14 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get declared roles contain:
       | fathership:father |
     Then relation(fathership) get declared roles do not contain:
-      | parentship:child  |
+      | parentship:child |
     Then relation(mothership) get roles contain:
       | mothership:mother |
       | parentship:child  |
     Then relation(mothership) get declared roles contain:
       | mothership:mother |
     Then relation(mothership) get declared roles do not contain:
-      | parentship:child  |
+      | parentship:child |
 
   Scenario: Relation types can override inherited related role types
     When put relation type: parentship
@@ -401,6 +402,401 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get overridden role(father) get label: parent
 
 ########################
+# relates (roles) lists
+########################
+
+  Scenario: Relation and role lists can be created
+    When put relation type: marriage
+    When relation(marriage) create role: husband[]
+    When relation(marriage) create role: wife[]
+    Then relation(marriage) exists
+    Then relation(marriage) get supertype: relation
+    Then relation(marriage) get role(husband) exists
+    Then relation(marriage) get role(wife) exists
+    Then relation(marriage) get role(husband) get supertype: relation:role
+    Then relation(marriage) get role(wife) get supertype: relation:role
+    Then relation(marriage) get roles contain:
+      | marriage:husband |
+      | marriage:wife    |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(marriage) exists
+    Then relation(marriage) get supertype: relation
+    Then relation(marriage) get role(husband) exists
+    Then relation(marriage) get role(wife) exists
+    Then relation(marriage) get role(husband) get supertype: relation:role
+    Then relation(marriage) get role(wife) get supertype: relation:role
+    Then relation(marriage) get roles contain:
+      | marriage:husband |
+      | marriage:wife    |
+
+  Scenario: Relation and role lists can be deleted
+    When put relation type: marriage
+    When relation(marriage) create role: spouse[]
+    When put relation type: parentship
+    When relation(parentship) create role: parent[]
+    When relation(parentship) create role: child[]
+    When relation(parentship) delete role: parent[]
+    Then relation(parentship) get roles do not contain:
+      | parent |
+    Then relation(relation) get role(role) get subtypes do not contain:
+      | parentship:parent |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When delete relation type: parentship
+    Then relation(parentship) does not exist
+    Then relation(relation) get role(role) get subtypes do not contain:
+      | parentship:parent |
+      | parentship:child  |
+    When relation(marriage) delete role: spouse[]
+    Then relation(marriage) get roles do not contain:
+      | spouse |
+    When relation(marriage) create role: husband[]
+    When relation(marriage) create role: wife[]
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When delete relation type: marriage
+    Then relation(marriage) does not exist
+    Then relation(relation) get role(role) get subtypes do not contain:
+      | parentship:parent |
+      | parentship:child  |
+      | marriage:husband  |
+      | marriage:wife     |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) does not exist
+    Then relation(marriage) does not exist
+    Then relation(relation) get role(role) get subtypes do not contain:
+      | parentship:parent |
+      | parentship:child  |
+      | marriage:husband  |
+      | marriage:wife     |
+
+  Scenario: Relation and role lists can change labels
+    When put relation type: parentship
+    When relation(parentship) create role: parent[]
+    When relation(parentship) create role: child[]
+    Then relation(parentship) get label: parentship
+    Then relation(parentship) get role(parent[]) get label: parent[]
+    Then relation(parentship) get role(child[]) get label: child[]
+    When relation(parentship) set label: marriage
+    Then relation(parentship) does not exist
+    Then relation(marriage) exists
+    When relation(marriage) get role(parent[]) set label: husband[]
+    When relation(marriage) get role(child[]) set label: wife[]
+    Then relation(marriage) get role(parent[]) does not exist
+    Then relation(marriage) get role(child[]) does not exist
+    Then relation(marriage) get label: marriage
+    Then relation(marriage) get role(husband[]) get label: husband[]
+    Then relation(marriage) get role(wife[]) get label: wife[]
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(marriage) get label: marriage
+    Then relation(marriage) get role(husband[]) get label: husband[]
+    Then relation(marriage) get role(wife[]) get label: wife[]
+    When relation(marriage) set label: employment
+    Then relation(marriage) does not exist
+    Then relation(employment) exists
+    When relation(employment) get role(husband[]) set label: employee[]
+    When relation(employment) get role(wife[]) set label: employer[]
+    Then relation(employment) get role(husband[]) does not exist
+    Then relation(employment) get role(wife[]) does not exist
+    Then relation(employment) get label: employment
+    Then relation(employment) get role(employee[]) get label: employee[]
+    Then relation(employment) get role(employer[]) get label: employer[]
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(employment) exists
+    Then relation(employment) get label: employment
+    Then relation(employment) get role(employee[]) get label: employee[]
+    Then relation(employment) get role(employer[]) get label: employer[]
+
+  Scenario: Relation and role lists can be subtypes of other relation and role lists
+    When put relation type: parentship
+    When relation(parentship) create role: parent[]
+    When relation(parentship) create role: child[]
+    When put relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: father[]
+    When relation(fathership) get role(father[]); set override: parent[]
+    Then relation(fathership) get supertype: parentship
+    Then relation(fathership) get role(father[]) get supertype: parentship:parent[]
+    Then relation(fathership) get role(child[]) get supertype: relation:role[]
+    Then relation(fathership) get supertypes contain:
+      | relation   |
+      | parentship |
+    Then relation(fathership) get role(father[]) get supertypes contain:
+      | relation:role[]     |
+      | parentship:parent[] |
+    Then relation(fathership) get role(child[]) get supertypes contain:
+      | relation:role[] |
+    Then relation(parentship) get subtypes contain:
+      | fathership |
+    Then relation(parentship) get role(parent[]) get subtypes contain:
+      | fathership:father[] |
+    Then relation(parentship) get role(child[]) get subtypes is empty
+    Then relation(relation) get subtypes contain:
+      | parentship |
+      | fathership |
+    Then relation(relation) get role(role[]) get subtypes contain:
+      | parentship:parent |
+      | parentship:child  |
+      | fathership:father |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) get supertype: parentship
+    Then relation(fathership) get role(father[]) get supertype: parentship:parent[]
+    Then relation(fathership) get role(child[]) get supertype: relation:role[]
+    Then relation(fathership) get supertypes contain:
+      | relation   |
+      | parentship |
+    Then relation(fathership) get role(father[]) get supertypes contain:
+      | relation:role[]     |
+      | parentship:paren[]t |
+    Then relation(fathership) get role(child[]) get supertypes contain:
+      | relation:role |
+    Then relation(parentship) get subtypes contain:
+      | fathership |
+    Then relation(parentship) get role(parent[]) get subtypes contain:
+      | fathership:father[] |
+    Then relation(parentship) get role(child[]) get subtypes is empty
+    Then relation(relation) get subtypes contain:
+      | parentship |
+      | fathership |
+    Then relation(relation) get role(role[]) get subtypes contain:
+      | parentship:parent[] |
+      | parentship:child[]  |
+      | fathership:father[] |
+    When put relation type: father-son
+    When relation(father-son) set supertype: fathership
+    When relation(father-son) create role: son[]
+    When relation(father-son) get role(son); set override: child
+    Then relation(father-son) get supertype: fathership
+    Then relation(father-son) get role(father) get supertype: parentship:parent[]
+    Then relation(father-son) get role(son) get supertype: parentship:child[]
+    Then relation(father-son) get supertypes contain:
+      | relation   |
+      | parentship |
+      | fathership |
+    Then relation(father-son) get role(father[]) get supertypes contain:
+      | relation:role[]     |
+      | parentship:parent[] |
+    Then relation(father-son) get role(son[]) get supertypes contain:
+      | relation:role[]    |
+      | parentship:child[] |
+    Then relation(fathership) get subtypes contain:
+      | father-son |
+    Then relation(fathership) get role(father[]) get subtypes is empty
+    Then relation(fathership) get role(child[]) get subtypes contain:
+      | father-son:son |
+    Then relation(parentship) get role(parent[]) get subtypes contain:
+      | fathership:father[] |
+    Then relation(parentship) get role(child[]) get subtypes contain:
+      | father-son:son[] |
+    Then relation(relation) get subtypes contain:
+      | parentship |
+      | fathership |
+    Then relation(relation) get role(role[]) get subtypes contain:
+      | parentship:parent[] |
+      | parentship:child[]  |
+      | fathership:father[] |
+      | father-son:son[]    |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(father-son) get supertype: fathership
+    Then relation(father-son) get role(father[]) get supertype: parentship:parent[]
+    Then relation(father-son) get role(son[]) get supertype: parentship:child[]
+    Then relation(father-son) get supertypes contain:
+      | relation   |
+      | parentship |
+      | fathership |
+    Then relation(father-son) get role(father) get supertypes contain:
+      | relation:role[]     |
+      | parentship:parent[] |
+    Then relation(father-son) get role(son) get supertypes contain:
+      | relation:role[]    |
+      | parentship:child[] |
+    Then relation(fathership) get supertype: parentship
+    Then relation(fathership) get role(father[]) get supertype: parentship:parent[]
+    Then relation(fathership) get role(child[]) get supertype: relation:role[]
+    Then relation(fathership) get supertypes contain:
+      | relation   |
+      | parentship |
+    Then relation(fathership) get role(father[]) get supertypes contain:
+      | relation:role[]     |
+      | parentship:parent[] |
+    Then relation(fathership) get role(child[]) get supertypes contain:
+      | relation:role[] |
+    Then relation(fathership) get subtypes contain:
+      | father-son |
+    Then relation(fathership) get role(father[]) get subtypes is empty
+    Then relation(fathership) get role(child[]) get subtypes contain:
+      | father-son:son[] |
+    Then relation(parentship) get role(parent[]) get subtypes contain:
+      | fathership:father[] |
+    Then relation(parentship) get role(child[]) get subtypes contain:
+      | father-son:son[] |
+    Then relation(relation) get subtypes contain:
+      | parentship |
+      | fathership |
+    Then relation(relation) get role(role[]) get subtypes contain:
+      | parentship:parent[] |
+      | parentship:child[]  |
+      | fathership:father[] |
+      | father-son:son[]    |
+
+  Scenario: Relation types can inherit related role lists
+    When put relation type: parentship
+    When relation(parentship) create role: parent[]
+    When relation(parentship) create role: child[]
+    When put relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: father[]
+    When relation(fathership) get role(father[]); set override: parent[]
+    Then relation(fathership) get roles contain:
+      | fathership:father[] |
+      | parentship:child[]  |
+    Then relation(fathership) get declared roles contain:
+      | fathership:father[] |
+    Then relation(fathership) get declared roles do not contain:
+      | parentship:child[] |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When put relation type: mothership
+    When relation(mothership) set supertype: parentship
+    When relation(mothership) create role: mother[]
+    When relation(mothership) get role(mother[]); set override: parent[]
+    Then relation(mothership) get roles contain:
+      | mothership:mother[] |
+      | parentship:child[]  |
+    Then relation(mothership) get declared roles contain:
+      | mothership:mother[] |
+    Then relation(mothership) get declared roles do not contain:
+      | parentship:child[] |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(fathership) get roles contain:
+      | fathership:father[] |
+      | parentship:child[]  |
+    Then relation(fathership) get declared roles contain:
+      | fathership:father[] |
+    Then relation(fathership) get declared roles do not contain:
+      | parentship:child[] |
+    Then relation(mothership) get roles contain:
+      | mothership:mother[] |
+      | parentship:child[]  |
+    Then relation(mothership) get declared roles contain:
+      | mothership:mother[] |
+    Then relation(mothership) get declared roles do not contain:
+      | parentship:child[] |
+
+  Scenario: Relation types can override inherited related role lists
+    When put relation type: parentship
+    When relation(parentship) create role: parent[]
+    When relation(parentship) create role: child[]
+    When put relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: father[]
+    When relation(fathership) get role(father[]); set override: parent[]
+    Then relation(fathership) get overridden role(father[]) exists
+    Then relation(fathership) get overridden role(father[]) get label: parent[]
+    Then relation(fathership) get roles do not contain:
+      | parentship:parent[] |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When put relation type: mothership
+    When relation(mothership) set supertype: parentship
+    When relation(mothership) create role: mother[]
+    When relation(mothership) get role(mother[]); set override: parent[]
+    Then relation(mothership) get roles do not contain:
+      | parentship:parent[] |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(fathership) get roles do not contain:
+      | parentship:parent[] |
+    Then relation(mothership) get roles do not contain:
+      | parentship:parent[] |
+
+  Scenario: Relation types cannot redeclare inherited related role types
+    When put relation type: parentship
+    When relation(parentship) create role: parent[]
+    When relation(parentship) create role: child[]
+    When put relation type: fathership
+    When relation(fathership) set supertype: parentship
+    Then relation(fathership) create role: parent[]; fails
+
+  Scenario: Relation types cannot override declared related role types
+    When put relation type: parentship
+    When relation(parentship) create role: parent[]
+    Then relation(parentship) create role: father[]
+    Then relation(parentship) get role(father[]); set override: parent; fails
+
+  Scenario: Relation types can update existing roles override a newly defined role it inherits
+    When put relation type: parentship
+    When relation(parentship) create role: other-role[]
+    When put relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: father[]
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When relation(parentship) create role: parent[]
+    When relation(fathership) create role: father[]
+    When relation(fathership) get role(father[]); set override: parent[]
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(fathership) get overridden role(father[]) get label: parent[]
+
+  Scenario: Relation can't change label to a list
+    When put relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: child[]
+    Then relation(parentship) get label: parentship
+    Then relation(parentship) set label: marriage; fails
+    Then relation(marriage) does not exist
+    Then relation(parentship) exist
+
+  Scenario: Role can't change label to a list if it's not a list and to a non-list if it's a list
+    When put relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: child[]
+    Then relation(parentship) get role(parent) get label: parent
+    Then relation(parentship) get role(parent) set label: parent[]; fails
+    Then relation(parentship) get role(parent) set label: list-parent[]; fails
+    Then relation(parentship) get role(parent) get label: parent
+    Then relation(parentship) get role(child[]) get label: child[]
+    Then relation(parentship) get role(child[]) set label: child; fails
+    Then relation(parentship) get role(child[]) set label: non-list-child; fails
+    Then relation(parentship) get role(child[]) get label: child[]
+
+  Scenario: Relation can't have a list of roles alongside a scalar role of the same name
+    When put relation type: parentship
+    When relation(parentship) create role: parent
+    Then relation(parentship) create role: parent[]; fails
+    When relation(parentship) create role: child[]
+    Then relation(parentship) create role: child; fails
+    Then relation(parentship) get roles contain:
+      | parent  |
+      | child[] |
+    Then relation(parentship) get roles do no contain:
+      | parent[] |
+      | child    |
+
+  Scenario: Relation can't have a list of roles if it inherits a scalar role of the same name and vice-versa
+    When put relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: child[]
+    When put relation type: fathership
+    When relation(fathership) set supertype: parentship
+    Then relation(fathership) create role: parent[]; fails
+    Then relation(fathership) create role: child; fails
+    Then relation(fathership) get roles contain:
+      | parent  |
+      | child[] |
+    Then relation(fathership) get roles do no contain:
+      | parent[] |
+      | child    |
+
+########################
 # @abstract
 ########################
 
@@ -440,7 +836,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(parent) get annotations do not contain: @abstract
     Then relation(parentship) get role(child) get annotations do not contain: @abstract
 
-  Scenario: relation types can be set to abstract when a subtype has instances
+  Scenario: Relation types can be set to abstract when a subtype has instances
     When put relation type: parentship
     When relation(parentship) create role: parent
     When relation(parentship) create role: child
@@ -463,6 +859,16 @@ Feature: Concept Relation Type and Role Type
     Then transaction commits
     When connection open read transaction for database: typedb
     Then relation(parentship) get annotations contain: @abstract
+
+  Scenario: Relation cannot set @abstract annotation with arguments
+    When put relation type: parentship
+    Then relation(parentship) set annotation: @abstract(); fails
+    Then relation(parentship) set annotation: @abstract(1); fails
+    Then relation(parentship) set annotation: @abstract(1, 2); fails
+    Then relation(parentship) get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get annotations is empty
 
   Scenario: Relation types must have at least one role in order to commit, unless they are abstract
     When put relation type: connection
@@ -490,26 +896,480 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get role(parent) get annotations do not contain: @abstract
     Then relation(fathership) get role(child) get annotations do not contain: @abstract
 
+  Scenario: Relation types can subtype non abstract relation types
+    When put relation type: parentship
+    When relation(parentship) create role: parent
+    When put relation type: fathership
+    When relation(fathership) create role: father
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get annotations do not contain: @abstract
+    When relation(fathership) set supertype: parentship
+    Then relation(fathership) get supertypes contain: parentship
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) get supertypes contain: parentship
+
 ########################
-# not compatible @annotations: @distinct, @key, @unique, @subkey, @values, @range, @card, @cascade, @independent, @replace, @regex
+# @cascade
 ########################
 
-  Scenario: Relation type of <value-type> type cannot have @distinct, @key, @unique, @subkey, @values, @range, @card, @cascade, @independent, @replace, and @regex annotations
+  Scenario: Relation can set and unset @cascade annotation
+    When put relation type: parentship
+    Then relation(parentship) set annotation: @cascade
+    Then relation(parentship) get annotations contain: @cascade
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get annotations contain: @cascade
+    When relation(parentship) unset annotation: @cascade
+    Then relation(parentship) get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get annotations is empty
+
+  Scenario: Relation cannot set @cascade annotation with arguments
+    When put relation type: parentship
+    Then relation(parentship) set annotation: @cascade(); fails
+    Then relation(parentship) set annotation: @cascade(1); fails
+    Then relation(parentship) set annotation: @cascade(1, 2); fails
+    Then relation(parentship) get annotations is empty
+
+########################
+# not compatible @annotations: @distinct, @key, @unique, @subkey, @values, @range, @card, @independent, @replace, @regex
+########################
+
+  Scenario: Relation type cannot have @distinct, @key, @unique, @subkey, @values, @range, @card, @independent, @replace, and @regex annotations
     When put relation type: parentship
     When relation(parentship) create role: parent
     Then relation(parentship) set annotation: @distinct; fails
     Then relation(parentship) set annotation: @key; fails
     Then relation(parentship) set annotation: @unique; fails
     Then relation(parentship) set annotation: @subkey; fails
+    Then relation(parentship) set annotation: @subkey(LABEL); fails
     Then relation(parentship) set annotation: @values; fails
+    Then relation(parentship) set annotation: @values(1, 2); fails
     Then relation(parentship) set annotation: @range; fails
+    Then relation(parentship) set annotation: @range(1, 2); fails
     Then relation(parentship) set annotation: @card; fails
-    Then relation(parentship) set annotation: @cascade; fails
+    Then relation(parentship) set annotation: @card(1, 2); fails
     Then relation(parentship) set annotation: @independent; fails
     Then relation(parentship) set annotation: @replace; fails
     Then relation(parentship) set annotation: @regex; fails
+    Then relation(parentship) set annotation: @regex("val"); fails
     Then relation(parentship) set annotation: @does-not-exist; fails
     Then relation(parentship) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
     Then relation(parentship) get annotations is empty
+
+########################
+# @annotations combinations:
+# @abstract, @cascade
+########################
+
+  Scenario Outline: Relation types can set @<annotation-1> and @<annotation-2> together and unset it
+    When put relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) set annotation: @<annotation-1>
+    When relation(parentship) set annotation: @<annotation-2>
+    Then relation(parentship) get annotations contain:
+      | @<annotation-1> |
+      | @<annotation-2> |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get annotations contain:
+      | @<annotation-1> |
+      | @<annotation-2> |
+    When relation(parentship) unset annotation: @<annotation-1>
+    Then relation(parentship) get annotations do not contain: @<annotation-1>
+    Then relation(parentship) get annotations contain: @<annotation-2>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get annotations do not contain: @<annotation-1>
+    Then relation(parentship) get annotations contain: @<annotation-2>
+    When relation(parentship) set annotation: @<annotation-1>
+    When relation(parentship) unset annotation: @<annotation-2>
+    Then relation(parentship) get annotations do not contain: @<annotation-2>
+    Then relation(parentship) get annotations contain: @<annotation-1>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get annotations do not contain: @<annotation-2>
+    Then relation(parentship) get annotations contain: @<annotation-1>
+    When relation(parentship) unset annotation: @<annotation-1>
+    Then relation(parentship) get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get annotations is empty
+    Examples:
+      | annotation-1 | annotation-2 |
+      | abstract     | cascade      |
+
+    # Uncomment and add Examples when they appear!
+#  Scenario Outline: Relation types cannot set @<annotation-1> and @<annotation-2> together for
+#    When put relation type: parentship
+#    When relation(parentship) create role: parent
+#    When relation(parentship) set annotation: @<annotation-1>
+#    When relation(parentship) set annotation: @<annotation-2>; fails
+#    When connection open schema transaction for database: typedb
+#    When put relation type: parentship
+#    When relation(parentship) create role: parent
+#    When relation(parentship) set annotation: @<annotation-2>
+#    When relation(parentship) set annotation: @<annotation-1>; fails
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then relation(parentship) get annotation contain: @<annotation-2>
+#    Then relation(parentship) get annotation do not contain: @<annotation-1>
+#    Examples:
+#      | annotation-1 | annotation-2 |
+
+########################
+# relates @distinct
+########################
+
+  Scenario: Relation type can set @distinct annotation for list of roles and unset it
+    When put relation type: parentship
+    When relation(parentship) create role: parent[]
+    When relation(parentship) get role(parent[]) set annotation: @distinct
+    Then relation(parentship) get role(parent[]) get annotations contain: @distinct
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent[]) get annotations contain: @distinct
+    When relation(parentship) get role(parent[]) unset annotation: @distinct
+    Then relation(parentship) get role(parent[]) get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get role(parent[]) get annotations is empty
+
+  Scenario: Relation type can set @distinct annotation for non-list roles
+    When put relation type: parentship
+    When relation(parentship) create role: parent
+    Then relation(parentship) get role(parent) set annotation: @distinct; fails
+    Then relation(parentship) get role(parent) get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get role(parent) get annotations is empty
+
+  Scenario: Relation type can set @distinct annotation with arguments
+    When put relation type: parentship
+    When relation(parentship) create role: parent[]
+    Then relation(parentship) get role(parent[]) set annotation: @distinct(); fails
+    Then relation(parentship) get role(parent[]) set annotation: @distinct(1); fails
+    Then relation(parentship) get role(parent[]) set annotation: @distinct(1, 2); fails
+    Then relation(parentship) get role(parent[]) get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get role(parent[]) get annotations is empty
+
+    # TODO: Maybe we can't create role again!
+  Scenario: Relation type can redeclare roles as roles with @distinct
+    When put relation type: parentship
+    When relation(parentship) create role: parent[]
+    Then relation(parentship) get role(parent[]) get annotations is empty
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent[]) get annotations is empty
+    When relation(parentship) create role: parent[]
+    When relation(parentship) get role(parent[]) set annotation: @distinct
+    Then relation(parentship) get role(parent[]) get annotations contain: @distinct
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get role(parent[]) get annotations contain: @distinct
+
+  Scenario: Relation type cannot unset not set @distinct of a role
+    When put relation type: parentship
+    When relation(parentship) create role: parent[]
+    Then relation(parentship) get role(parent[]) unset annotation: @distinct; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent[]) get annotations is empty
+    Then relation(parentship) get role(parent[]) unset annotation: @distinct; fails
+
+  Scenario: Relation type cannot unset @distinct of inherited role
+    When put relation type: parentship
+    When relation(parentship) create role: parent[]
+    Then relation(parentship) get role(parent[]) set annotation: @distinct
+    When put relation type: fathership
+    When relation(fathership) set supertype: parentship
+    Then relation(parentship) get role(parent[]) get annotations contain: @distinct
+    Then relation(fathership) get role(parent[]) get annotations contain: @distinct
+    Then relation(fathership) get role(parent[]) unset annotation: @distinct; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) get role(parent[]) unset annotation: @distinct; fails
+    Then relation(parentship) get role(parent[]) get annotations contain: @distinct
+    Then relation(fathership) get role(parent[]) get annotations contain: @distinct
+
+########################
+# relates @card
+########################
+
+  Scenario: Relation type can set @card annotation on roles and unset it
+    When put relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: child[]
+    When relation(parentship) get role(parent) set annotation: @card(1, 2)
+    Then relation(parentship) get role(parent) get annotations contain: @card(1, 2)
+    When relation(parentship) get role(child[]) set annotation: @card(0, *)
+    Then relation(parentship) get role(child[]) get annotations contain: @card(0, *)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) get annotations contain: @card(1, 2)
+    Then relation(parentship) get role(child[]) get annotations contain: @card(0, *)
+    When relation(parentship) get role(parent) unset annotation: @card(1, 2)
+    Then relation(parentship) get role(parent) get annotations is empty
+    When relation(parentship) get role(child[]) unset annotation: @card(0, *)
+    Then relation(parentship) get role(child[]) get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get role(parent) get annotations is empty
+    Then relation(parentship) get role(child[]) get annotations is empty
+
+  Scenario Outline: Relation type can set @card annotation on roles with duplicate args (exactly N ownerships)
+    When put relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: child[]
+    When relation(parentship) get role(parent) set annotation: @card(<arg>, <arg>)
+    Then relation(parentship) get role(parent) get annotations contain: @card(<arg>, <arg>)
+    When relation(parentship) get role(child[]) set annotation: @card(<arg>, <arg>)
+    Then relation(parentship) get role(child[]) get annotations contain: @card(<arg>, <arg>)
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get role(parent) get annotations contain: @card(<arg>, <arg>)
+    Then relation(parentship) get role(child[]) get annotations contain: @card(<arg>, <arg>)
+    Examples:
+      | arg  |
+      | 1    |
+      | 9999 |
+
+  Scenario: Relation type cannot have @card annotation for with invalid arguments
+    When put relation type: parentship
+    When relation(parentship) create role: parent
+    Then relation(parentship) get role(parent) set annotation: @card(); fails
+    Then relation(parentship) get role(parent) set annotation: @card(0); fails
+    Then relation(parentship) get role(parent) set annotation: @card(1); fails
+    Then relation(parentship) get role(parent) set annotation: @card(*); fails
+    Then relation(parentship) get role(parent) set annotation: @card(-1, 1); fails
+    Then relation(parentship) get role(parent) set annotation: @card(0, 0.1); fails
+    Then relation(parentship) get role(parent) set annotation: @card(0, 1.5); fails
+    Then relation(parentship) get role(parent) set annotation: @card(*, *); fails
+    Then relation(parentship) get role(parent) set annotation: @card(0, **); fails
+    Then relation(parentship) get role(parent) set annotation: @card(1, 2, 3); fails
+    Then relation(parentship) get role(parent) set annotation: @card(1, "2"); fails
+    Then relation(parentship) get role(parent) set annotation: @card("1", 2); fails
+    Then relation(parentship) get role(parent) set annotation: @card(2, 1); fails
+    Then relation(parentship) get role(parent) get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get role(parent) get annotations is empty
+
+  Scenario Outline: Relation type cannot set multiple @card annotations with different arguments on a role
+    When put relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) get role(parent) set annotation: @card(2, 5)
+    Then relation(parentship) get role(parent) set annotation: @card(<fail-args>); fails
+    Then relation(parentship) get role(parent) get annotations contain: @card(2, 5)
+    Then relation(parentship) get role(parent) get annotations do not contain: @card(<fail-args>)
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get role(parent) get annotations contain: @card(2, 5)
+    Then relation(parentship) get role(parent) get annotations do not contain: @card(<fail-args>)
+    Examples:
+      | fail-args |
+      | 0, 1      |
+      | 0, 2      |
+      | 0, 3      |
+      | 0, 5      |
+      | 0, *      |
+      | 2, 3      |
+      | 2, 5      |
+      | 2, *      |
+      | 3, 4      |
+      | 3, 5      |
+      | 3, *      |
+      | 5, *      |
+      | 6, *      |
+
+    # TODO: Maybe we allow it, then change the test considering the expected behavior
+  Scenario Outline: Relation type cannot redeclare @card annotation with different arguments on a role
+    When put relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) get role(parent) set annotation: @card(<args>)
+    Then relation(parentship) get role(parent) set annotation: @card(<args>)
+    Then relation(parentship) get role(parent) set annotation: @card(<args-redeclared>); fails
+    Then relation(parentship) get role(parent) get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get role(parent) get annotations is empty
+    Examples:
+      | args | args-redeclared |
+      | 2, 5 | 7, 9            |
+      | 2, 5 | 0, 1            |
+      | 2, 5 | 0, *            |
+      | 2, 5 | 4, *            |
+      | 2, 5 | 4, 5            |
+      | 2, 5 | 2, 6            |
+      | 2, 5 | 2, 4            |
+      | 2, 5 | 2, *            |
+
+  Scenario Outline: Role's @card annotation can be inherited and overridden by a subset of arguments
+    When put relation type: parentship
+    When relation(parentship) create role: custom-role
+    When relation(parentship) create role: second-custom-role
+    When relation(parentship) get owns: custom-role, set annotation: @card(<args>)
+    Then relation(parentship) get owns: custom-role, get annotations contain: @card(<args>)
+    When relation(parentship) get owns: second-custom-role, set annotation: @card(<args>)
+    Then relation(parentship) get owns: second-custom-role, get annotations contain: @card(<args>)
+    When put relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: overridden-custom-role
+    # TODO: Overrides? Remove second-custom-role from test if we remove overrides!
+    When relation(fathership) get role(overridden-custom-role) set override: second-custom-role
+    Then relation(fathership) get roles contain: custom-role
+    Then relation(fathership) get role(custom-role) get annotations contain: @card(<args>)
+    Then relation(fathership) get roles do not contain: second-custom-role
+    Then relation(fathership) get roles contain: overridden-custom-role
+    Then relation(fathership) get role(overridden-custom-role) get annotations contain: @card(<args>)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) get role(custom-role) get annotations contain: @card(<args>)
+    Then relation(fathership) get role(overridden-custom-role) get annotations contain: @card(<args>)
+    When relation(fathership) get role(custom-role) set annotation: @card(<args-override>)
+    Then relation(fathership) get role(custom-role) get annotations contain: @card(<args-override>)
+    When relation(fathership) get role(overridden-custom-role) set annotation: @card(<args-override>)
+    Then relation(fathership) get role(overridden-custom-role) get annotations contain: @card(<args-override>)
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(fathership) get role(custom-role) get annotations contain: @card(<args-override>)
+    Then relation(fathership) get role(overridden-custom-role) get annotations contain: @card(<args-override>)
+    Examples:
+      | args       | args-override |
+      | 0, *       | 0, 10000      |
+      | 0, 10      | 0, 1          |
+      | 0, 2       | 1, 2          |
+      | 1, *       | 1, 1          |
+      | 1, 5       | 3, 4          |
+      | 38, 111    | 39, 111       |
+      | 1000, 1100 | 1000, 1099    |
+
+  Scenario Outline: Inherited @card annotation of roles cannot be overridden by the @card of same arguments or not a subset of arguments
+    When put relation type: parentship
+    When relation(parentship) create role: custom-role
+    When relation(parentship) create role: second-custom-role
+    When relation(parentship) get owns: custom-role, set annotation: @card(<args>)
+    Then relation(parentship) get owns: custom-role, get annotations contain: @card(<args>)
+    When relation(parentship) get owns: second-custom-role, set annotation: @card(<args>)
+    Then relation(parentship) get owns: second-custom-role, get annotations contain: @card(<args>)
+    When put relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: overridden-custom-role
+    # TODO: Overrides? Remove second-custom-role from test if we remove overrides!
+    When relation(fathership) get role(overridden-custom-role) set override: second-custom-role
+    Then relation(fathership) get role(custom-role) get annotations contain: @card(<args>)
+    Then relation(fathership) get role(overridden-custom-role) get annotations contain: @card(<args>)
+    Then relation(fathership) get role(custom-role) set annotation: @card(<args>); fails
+    Then relation(fathership) get role(overridden-custom-role) set annotation: @card(<args>); fails
+    Then relation(fathership) get role(custom-role) set annotation: @card(<args-override>); fails
+    Then relation(fathership) get role(overridden-custom-role) set annotation: @card(<args-override>); fails
+    Then relation(fathership) get role(custom-role) get annotations contain: @card(<args>)
+    Then relation(fathership) get role(overridden-custom-role) get annotations contain: @card(<args>)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) get role(custom-role) get annotations contain: @card(<args>)
+    Then relation(fathership) get role(overridden-custom-role) get annotations contain: @card(<args>)
+    Examples:
+      | args       | args-override |
+      | 0, 10000   | 0, 10001      |
+      | 0, 10      | 1, 11         |
+      | 0, 2       | 0, 0          |
+      | 1, *       | 0, 2          |
+      | 1, 5       | 6, 10         |
+      | 38, 111    | 37, 111       |
+      | 1000, 1100 | 1000, 1199    |
+
+########################
+# relates not compatible @annotations: @key, @unique, @subkey, @values, @range, @abstract, @cascade, @independent, @replace, @regex
+########################
+
+  Scenario: Relation's role cannot have @key, @unique, @subkey, @values, @range, @abstract, @cascade, @independent, @replace, and @regex annotations
+    When put relation type: parentship
+    When relation(parentship) create role: parent
+    Then relation(parentship) get role(parent) set annotation: @key; fails
+    Then relation(parentship) get role(parent) set annotation: @unique; fails
+    Then relation(parentship) get role(parent) set annotation: @subkey; fails
+    Then relation(parentship) get role(parent) set annotation: @subkey(LABEL); fails
+    Then relation(parentship) get role(parent) set annotation: @values; fails
+    Then relation(parentship) get role(parent) set annotation: @values(1, 2); fails
+    Then relation(parentship) get role(parent) set annotation: @range; fails
+    Then relation(parentship) get role(parent) set annotation: @range(1, 2); fails
+    Then relation(parentship) get role(parent) set annotation: @abstract; fails
+    Then relation(parentship) get role(parent) set annotation: @cascade; fails
+    Then relation(parentship) get role(parent) set annotation: @independent; fails
+    Then relation(parentship) get role(parent) set annotation: @replace; fails
+    Then relation(parentship) get role(parent) set annotation: @regex; fails
+    Then relation(parentship) get role(parent) set annotation: @regex("val"); fails
+    Then relation(parentship) get role(parent) set annotation: @does-not-exist; fails
+    Then relation(parentship) get role(parent) get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get role(parent) get annotations is empty
+
+########################
+# relates @annotations combinations:
+# @distinct, @card
+# Right now only for lists as there are no combinations for scalar roles!
+########################
+
+  Scenario Outline: Roles lists can set @<annotation-1> and @<annotation-2> together and unset it
+    When put relation type: parentship
+    When relation(parentship) create role: parent[]
+    When relation(parentship) get role(parent[]) set annotation: @<annotation-1>
+    When relation(parentship) get role(parent[]) set annotation: @<annotation-2>
+    Then relation(parentship) get role(parent[]) get annotations contain:
+      | @<annotation-1> |
+      | @<annotation-2> |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent[]) get annotations contain:
+      | @<annotation-1> |
+      | @<annotation-2> |
+    When relation(parentship) get role(parent[]) unset annotation: @<annotation-1>
+    Then relation(parentship) get role(parent[]) get annotations do not contain: @<annotation-1>
+    Then relation(parentship) get role(parent[]) get annotations contain: @<annotation-2>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent[]) get annotations do not contain: @<annotation-1>
+    Then relation(parentship) get role(parent[]) get annotations contain: @<annotation-2>
+    When relation(parentship) get role(parent[]) set annotation: @<annotation-1>
+    When relation(parentship) get role(parent[]) unset annotation: @<annotation-2>
+    Then relation(parentship) get role(parent[]) get annotations do not contain: @<annotation-2>
+    Then relation(parentship) get role(parent[]) get annotations contain: @<annotation-1>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent[]) get annotations do not contain: @<annotation-2>
+    Then relation(parentship) get role(parent[]) get annotations contain: @<annotation-1>
+    When relation(parentship) get role(parent[]) unset annotation: @<annotation-1>
+    Then relation(parentship) get role(parent[]) get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get role(parent[]) get annotations is empty
+    Examples:
+      | annotation-1 | annotation-2 |
+      | distinct     | card(0, 1)   |
+
+      # Uncomment and add Examples when they appear!
+#  Scenario Outline: Roles lists cannot set @<annotation-1> and @<annotation-2> together and unset it
+#    When put relation type: parentship
+#    When relation(parentship) create role: parent[]
+#    When relation(parentship) get role(parent[]) set annotation: @<annotation-1>
+#    Then relation(parentship) get role(parent[]) set annotation: @<annotation-2>; fails
+#    When connection open schema transaction for database: typedb
+#    When put relation type: parentship
+#    When relation(parentship) create role: parent[]
+#    Then relation(parentship) get role(parent[]) set annotation: @<annotation-2>
+#    When relation(parentship) get role(parent[]) set annotation: @<annotation-1>; fails
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then relation(parentship) get role(parent[]) get annotation contain: @<annotation-2>
+#    Then relation(parentship) get role(parent[]) get annotation do not contain: @<annotation-1>
+#    Examples:
+#      | annotation-1 | annotation-2 |

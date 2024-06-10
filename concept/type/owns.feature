@@ -497,6 +497,22 @@ Feature: Concept Owns
       | entity    | person         | customer     | string     |
       | relation  | description    | registration | long       |
 
+  Scenario Outline: Owns can be inherited from abstract <root-type> types
+    Then <root-type>(<supertype-name>) set annotation: @abstract
+    When <root-type>(<supertype-name>) set owns: username
+    When <root-type>(<supertype-name>) get owns contain: username
+    When <root-type>(<subtype-name>) get owns contain: username
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns contain: username
+    Then <root-type>(<subtype-name>) get owns contain: username
+    Then <root-type>(<supertype-name>) get owns: username, get annotations do not contain: @abstract
+    Then <root-type>(<subtype-name>) get owns: username, get annotations do not contain: @abstract
+    Examples:
+      | root-type | supertype-name | subtype-name |
+      | entity    | person         | customer     |
+      | relation  | description    | registration |
+
 ########################
 # owns lists
 ########################
@@ -2517,7 +2533,7 @@ Feature: Concept Owns
       | datetimetz |
       | duration   |
 
-  Scenario Outline: Owns cannot have @values annotation for <value-type> value type with args of invalid value or type
+  Scenario Outline: Owns cannot have @values annotation for <value-type> value type with arguments of invalid value or type
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(player) set owns: custom-attribute
@@ -2629,7 +2645,7 @@ Feature: Concept Owns
     Then entity(person) get owns: name, get annotations contain: @values("hi", "HI")
     Then entity(person) get owns: name, get annotations do not contain: @values("Hi")
 
-  Scenario Outline: Owns-related @values annotation for <value-type> value type can be inherited and overridden by a subset of args
+  Scenario Outline: Owns-related @values annotation for <value-type> value type can be inherited and overridden by a subset of arguments
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When put attribute type: second-custom-attribute
@@ -2699,7 +2715,7 @@ Feature: Concept Owns
       | datetimetz | 2024-06-04+0010, 2024-06-04 Asia/Kathmandu, 2024-06-05+0010, 2024-06-05+0100 | 2024-06-04 Asia/Kathmandu, 2024-06-05+0010 |
       | duration   | P6M, P1Y, P1Y1M, P1Y2M, P1Y3M, P1Y4M, P1Y6M                                  | P6M, P1Y3M, P1Y4M, P1Y6M                   |
 
-  Scenario Outline: Inherited @values annotation on owns for <value-type> value type cannot be overridden by the @values of same args or not a subset of args
+  Scenario Outline: Inherited @values annotation on owns for <value-type> value type cannot be overridden by the @values of same arguments or not a subset of arguments
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When put attribute type: second-custom-attribute
@@ -2872,7 +2888,7 @@ Feature: Concept Owns
       | duration   | P1Y, P2Y                         | P1Y6M, P2Y                       |
 
     # TODO: If we allow arg0 == arg1, move this case to another test!
-  Scenario Outline: Owns cannot have @range annotation for <value-type> value type with invalid args or args number
+  Scenario Outline: Owns cannot have @range annotation for <value-type> value type with invalid arguments or args number
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(player) set owns: custom-attribute
@@ -2978,7 +2994,7 @@ Feature: Concept Owns
       | 5, 6      |
       | 6, 10     |
 
-  Scenario Outline: Owns-related @range annotation for <value-type> value type can be inherited and overridden by a subset of args
+  Scenario Outline: Owns-related @range annotation for <value-type> value type can be inherited and overridden by a subset of arguments
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When put attribute type: second-custom-attribute
@@ -3047,7 +3063,7 @@ Feature: Concept Owns
       | datetimetz | 2024-06-04+0010, 2024-06-05+0010 | 2024-06-04+0010, 2024-06-04T12:00:00+0010 |
       | duration   | P6M, P1Y                         | P8M, P9M                                  |
 
-  Scenario Outline: Inherited @range annotation on owns for <value-type> value type cannot be overridden by the @range of same args or not a subset of args
+  Scenario Outline: Inherited @range annotation on owns for <value-type> value type cannot be overridden by the @range of same arguments or not a subset of arguments
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When put attribute type: second-custom-attribute
@@ -3112,7 +3128,7 @@ Feature: Concept Owns
 # @card
 ########################
 
-  Scenario Outline: Owns can set @card annotation for <value-type> value type with args in correct order and unset it
+  Scenario Outline: Owns can set @card annotation for <value-type> value type with arguments in correct order and unset it
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When put attribute type: custom-attribute-2
@@ -3236,7 +3252,7 @@ Feature: Concept Owns
       | custom-struct | 1    |
       | custom-struct | 11   |
 
-  Scenario Outline: Owns cannot have @card annotation for <value-type> value type with less than two args
+  Scenario Outline: Owns cannot have @card annotation for <value-type> value type with invalid arguments
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
@@ -3244,37 +3260,19 @@ Feature: Concept Owns
     Then entity(person) get owns: custom-attribute, set annotation: @card(); fails
     Then entity(person) get owns: custom-attribute, set annotation: @card(1); fails
     Then entity(person) get owns: custom-attribute, set annotation: @card(*); fails
+    Then entity(person) get owns: custom-attribute, set annotation: @card(-1, 1); fails
+    Then entity(person) get owns: custom-attribute, set annotation: @card(0, 0.1); fails
+    Then entity(person) get owns: custom-attribute, set annotation: @card(0, 1.5); fails
+    Then entity(person) get owns: custom-attribute, set annotation: @card(*, *); fails
+    Then entity(person) get owns: custom-attribute, set annotation: @card(0, **); fails
+    Then entity(person) get owns: custom-attribute, set annotation: @card(1, 2, 3); fails
+    Then entity(person) get owns: custom-attribute, set annotation: @card(1, "2"); fails
+    Then entity(person) get owns: custom-attribute, set annotation: @card("1", 2); fails
+    Then entity(person) get owns: custom-attribute, set annotation: @card(2, 1); fails
     Then entity(person) get owns: custom-attribute, get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
     Then entity(person) get owns: custom-attribute, get annotations is empty
-    Examples:
-      | value-type |
-      | long       |
-      | double     |
-      | decimal    |
-      | string     |
-      | boolean    |
-      | datetime   |
-      | datetimetz |
-      | duration   |
-
-  Scenario Outline: Owns cannot have @card annotation for <value-type> value type with invalid args or args number
-    When put attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
-    When entity(player) set owns: custom-attribute
-    Then entity(player) get owns: custom-attribute, set annotation: @card(-1, 1); fails
-    Then entity(player) get owns: custom-attribute, set annotation: @card(0, 0.1); fails
-    Then entity(player) get owns: custom-attribute, set annotation: @card(0, 1.5); fails
-    Then entity(player) get owns: custom-attribute, set annotation: @card(*, *); fails
-    Then entity(player) get owns: custom-attribute, set annotation: @card(0, **); fails
-    Then entity(player) get owns: custom-attribute, set annotation: @card(1, 2, 3); fails
-    Then entity(player) get owns: custom-attribute, set annotation: @card(1, "2"); fails
-    Then entity(player) get owns: custom-attribute, set annotation: @card("1", 2); fails
-    Then entity(player) get owns: custom-attribute, get annotations is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then entity(player) get owns: custom-attribute, get annotations is empty
     Examples:
       | value-type |
       | long       |
@@ -3291,7 +3289,6 @@ Feature: Concept Owns
     When attribute(custom-attribute) set value-type: decimal
     When entity(person) set owns: custom-attribute
     When entity(person) get owns: custom-attribute, set annotation: @card(2, 5)
-    Then entity(person) get owns: custom-attribute, set annotation: @card(<fail-args>); fails
     Then entity(person) get owns: custom-attribute, set annotation: @card(<fail-args>); fails
     Then entity(person) get owns: custom-attribute, get annotations contain: @card(2, 5)
     Then entity(person) get owns: custom-attribute, get annotations do not contain: @card(<fail-args>)
@@ -3337,7 +3334,7 @@ Feature: Concept Owns
       | datetimetz | 2, 5 | 2, 4            |
       | duration   | 2, 5 | 2, *            |
 
-  Scenario Outline: Owns-related @card annotation for <value-type> value type can be inherited and overridden by a subset of args
+  Scenario Outline: Owns-related @card annotation for <value-type> value type can be inherited and overridden by a subset of arguments
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When put attribute type: second-custom-attribute
@@ -3406,7 +3403,7 @@ Feature: Concept Owns
       | datetimetz | 38, 111    | 39, 111       |
       | duration   | 1000, 1100 | 1000, 1099    |
 
-  Scenario Outline: Inherited @card annotation on owns for <value-type> value type cannot be overridden by the @card of same args or not a subset of args
+  Scenario Outline: Inherited @card annotation on owns for <value-type> value type cannot be overridden by the @card of same arguments or not a subset of arguments
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When put attribute type: second-custom-attribute
@@ -3546,7 +3543,7 @@ Feature: Concept Owns
       | relation  | description | duration      |
       | relation  | description | custom-struct |
 
-  Scenario Outline: Owns cannot have @distinct annotation for <value-type> with args
+  Scenario Outline: Owns cannot have @distinct annotation for <value-type> with arguments
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
@@ -3717,7 +3714,7 @@ Feature: Concept Owns
       | duration      |
       | custom-struct |
 
-  Scenario Outline: Owns cannot have @regex annotation of invalid args
+  Scenario Outline: Owns cannot have @regex annotation of invalid arguments
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
@@ -3804,23 +3801,23 @@ Feature: Concept Owns
     Then relation(description) get owns: custom-attribute, get annotations is empty
     Examples:
     # TODO: Move to "cannot" test if something is wrong here.
-      | annotation-1 | annotation-2 | value-type |
-      | key          | subkey       | long       |
-      | key          | values       | double     |
-      | key          | range        | decimal    |
-      | key          | regex        | string     |
-      | subkey       | unique       | duration   |
-      | subkey       | values       | long       |
-      | subkey       | range        | boolean    |
-      | subkey       | card         | long       |
-      | subkey       | regex        | string     |
-      | unique       | values       | long       |
-      | unique       | range        | decimal    |
-      | unique       | card         | double     |
-      | unique       | regex        | string     |
-      | values       | card         | datetimetz |
-      | range        | card         | datetime   |
-      | card         | regex        | string     |
+      | annotation-1                      | annotation-2       | value-type |
+      | key                               | subkey(L)          | long       |
+      | key                               | values             | double     |
+      | key                               | range(1.0, 2.0)    | decimal    |
+      | key                               | regex("s")         | string     |
+      | subkey(L)                         | unique             | duration   |
+      | subkey(L)                         | values(1, 2)       | long       |
+      | subkey(L)                         | range(false, true) | boolean    |
+      | subkey(L)                         | card(0, 1)         | long       |
+      | subkey(L)                         | regex("s")         | string     |
+      | unique                            | values(1, 2)       | long       |
+      | unique                            | range(1.0, 2.0)    | decimal    |
+      | unique                            | card(0, 1)         | double     |
+      | unique                            | regex("s")         | string     |
+      | values(2024-05-06+0100)           | card(0, 1)         | datetimetz |
+      | range("2020-05-05", "2025-05-05") | card(0, 1)         | datetime   |
+      | card(0, 1)                        | regex("s")         | string     |
 
   Scenario Outline: Owns can set @<annotation-1> and @<annotation-2> together and unset it for lists of <value-type>
     When put attribute type: custom-attribute
@@ -3858,19 +3855,19 @@ Feature: Concept Owns
     Then relation(description) get owns: custom-attribute[], get annotations is empty
     Examples:
     # TODO: Move to "cannot" test if something is wrong here.
-      | annotation-1 | annotation-2 | value-type    |
-      | unique       | values       | long          |
-      | unique       | range        | decimal       |
-      | unique       | card         | double        |
-      | unique       | regex        | string        |
-      | unique       | distinct     | string        |
-      | values       | card         | datetimetz    |
-      | values       | distinct     | long          |
-      | range        | card         | datetime      |
-      | range        | distinct     | datetime      |
-      | card         | regex        | string        |
-      | card         | distinct     | custom-struct |
-      | regex        | distinct     | string        |
+      | annotation-1                      | annotation-2    | value-type    |
+      | unique                            | values(1, 2)    | long          |
+      | unique                            | range(1.0, 2.0) | decimal       |
+      | unique                            | card(0, 1)      | double        |
+      | unique                            | regex("s")      | string        |
+      | unique                            | distinct        | string        |
+      | values(2024-05-06+0100)           | card(0, 1)      | datetimetz    |
+      | values(1, 2)                      | distinct        | long          |
+      | range("2020-05-05", "2025-05-05") | card(0, 1)      | datetime      |
+      | range("2020-05-05", "2025-05-05") | distinct        | datetime      |
+      | card(0, 1)                        | regex("s")      | string        |
+      | card(0, 1)                        | distinct        | custom-struct |
+      | regex("s")                        | distinct        | string        |
 
   Scenario Outline: Owns cannot set @<annotation-1> and @<annotation-2> together for scalar <value-type>
     When put attribute type: custom-attribute
@@ -3890,19 +3887,19 @@ Feature: Concept Owns
     Then relation(description) get owns: custom-attribute, get annotation do not contain: @<annotation-1>
     Examples:
     # TODO: Move to "can" test if something is wrong here.
-      | annotation-1 | annotation-2 | value-type |
+      | annotation-1     | annotation-2    | value-type |
       # TODO: Key + unique = key in 2.x, but it would be good to restrict it for explicitness.
-      | key          | unique       | long       |
+      | key              | unique          | long       |
       # TODO: key + card is similar to key + unique. I'd just restrict it.
-      | key          | card         | long       |
+      | key              | card(0, 1)      | long       |
       # TODO: If we allow values + range, write a test to check args compatibility!
-      | values       | range        | double     |
+      | values(1.0, 2.0) | range(1.0, 2.0) | double     |
       # TODO: If we allow values + regex, write a test to check args compatibility!
-      | values       | regex        | string     |
+      | values("str")    | regex("s")      | string     |
       # TODO: If we allow range + regex, write a test to check args compatibility!
-      | range        | regex        | string     |
+      | range("1", "2")  | regex("s")      | string     |
 
-  Scenario Outline: Owns can set @<annotation-1> and @<annotation-2> together and unset it for lists of <value-type>
+  Scenario Outline: Owns cannot set @<annotation-1> and @<annotation-2> together and unset it for lists of <value-type>
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When transaction commits
@@ -3920,10 +3917,10 @@ Feature: Concept Owns
     Then relation(description) get owns: custom-attribute[], get annotation do not contain: @<annotation-1>
     Examples:
     # TODO: Move to "can" test if something is wrong here.
-      | annotation-1 | annotation-2 | value-type |
+      | annotation-1     | annotation-2    | value-type |
       # TODO: If we allow values + range, write a test to check args compatibility!
-      | values       | range        | double     |
+      | values(1.0, 2.0) | range(1.0, 2.0) | double     |
       # TODO: If we allow values + regex, write a test to check args compatibility!
-      | values       | regex        | string     |
+      | values("str")    | regex("s")      | string     |
       # TODO: If we allow range + regex, write a test to check args compatibility!
-      | range        | regex        | string     |
+      | range("1", "2")  | regex("s")      | string     |

@@ -1066,7 +1066,7 @@ Feature: Concept Plays
 ########################
 # plays lists
 ########################
-# TODO: Add tests here if we allow `set plays role: T:ROL[]`
+# Add tests here if we allow `set plays role: T:ROL[]`
 
 ########################
 # @annotations common: contain common tests for annotations suitable for **scalar** plays:
@@ -1839,7 +1839,7 @@ Feature: Concept Plays
 # @card
 ########################
 
-  Scenario Outline: Plays can set @card annotation with args in correct order and unset it
+  Scenario Outline: Plays can set @card annotation with arguments in correct order and unset it
     When put relation type: marriage
     When relation(marriage) create role: spouse
     When entity(person) set plays role: marriage:spouse
@@ -1891,7 +1891,7 @@ Feature: Concept Plays
       | 9999                |
       | 9223372036854775807 |
 
-  Scenario: Plays cannot have @card annotation with less than two args
+  Scenario: Plays cannot have @card annotation with invalid arguments
     When put relation type: marriage
     When relation(marriage) create role: spouse
     When entity(person) set plays role: marriage:spouse
@@ -1899,34 +1899,25 @@ Feature: Concept Plays
     Then entity(person) get plays role: marriage:spouse, set annotation: @card(); fails
     Then entity(person) get plays role: marriage:spouse, set annotation: @card(1); fails
     Then entity(person) get plays role: marriage:spouse, set annotation: @card(*); fails
+    Then entity(person) get plays role: marriage:spouse, set annotation: @card(-1, 1); fails
+    Then entity(person) get plays role: marriage:spouse, set annotation: @card(0, 0.1); fails
+    Then entity(person) get plays role: marriage:spouse, set annotation: @card(0, 1.5); fails
+    Then entity(person) get plays role: marriage:spouse, set annotation: @card(*, *); fails
+    Then entity(person) get plays role: marriage:spouse, set annotation: @card(0, **); fails
+    Then entity(person) get plays role: marriage:spouse, set annotation: @card(1, 2, 3); fails
+    Then entity(person) get plays role: marriage:spouse, set annotation: @card(1, "2"); fails
+    Then entity(person) get plays role: marriage:spouse, set annotation: @card("1", 2); fails
+    Then entity(person) get plays role: marriage:spouse, set annotation: @card(2, 1); fails
     Then entity(person) get plays role: marriage:spouse, get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
     Then entity(person) get plays role: marriage:spouse, get annotations is empty
-
-  Scenario: Plays cannot have @card annotation with invalid args or args number
-    When put relation type: marriage
-    When relation(marriage) create role: spouse
-    When entity(player) set plays role: marriage:spouse
-    Then entity(player) get plays role: marriage:spouse, set annotation: @card(-1, 1); fails
-    Then entity(player) get plays role: marriage:spouse, set annotation: @card(0, 0.1); fails
-    Then entity(player) get plays role: marriage:spouse, set annotation: @card(0, 1.5); fails
-    Then entity(player) get plays role: marriage:spouse, set annotation: @card(*, *); fails
-    Then entity(player) get plays role: marriage:spouse, set annotation: @card(0, **); fails
-    Then entity(player) get plays role: marriage:spouse, set annotation: @card(1, 2, 3); fails
-    Then entity(player) get plays role: marriage:spouse, set annotation: @card(1, "2"); fails
-    Then entity(player) get plays role: marriage:spouse, set annotation: @card("1", 2); fails
-    Then entity(player) get plays role: marriage:spouse, get annotations is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then entity(player) get plays role: marriage:spouse, get annotations is empty
 
   Scenario Outline: Plays cannot set multiple @card annotations with different arguments
     When put relation type: marriage
     When relation(marriage) create role: spouse
     When entity(person) set plays role: marriage:spouse
     When entity(person) get plays role: marriage:spouse, set annotation: @card(2, 5)
-    Then entity(person) get plays role: marriage:spouse, set annotation: @card(<fail-args>); fails
     Then entity(person) get plays role: marriage:spouse, set annotation: @card(<fail-args>); fails
     Then entity(person) get plays role: marriage:spouse, get annotations contain: @card(2, 5)
     Then entity(person) get plays role: marriage:spouse, get annotations do not contain: @card(<fail-args>)
@@ -1972,7 +1963,7 @@ Feature: Concept Plays
       | 2, 5 | 2, 6            |
       | 2, 5 | 7, 11            |
 
-  Scenario Outline: Plays-related @card annotation can be inherited and overridden by a subset of args
+  Scenario Outline: Plays-related @card annotation can be inherited and overridden by a subset of arguments
     When put relation type: custom-relation
     When relation(custom-relation) create role: r1
     When put relation type: second-custom-relation
@@ -2041,7 +2032,7 @@ Feature: Concept Plays
       | 38, 111    | 39, 111       |
       | 1000, 1100 | 1000, 1099    |
 
-  Scenario Outline: Inherited @card annotation on plays role cannot be overridden by the @card of same args or not a subset of args
+  Scenario Outline: Inherited @card annotation on plays role cannot be overridden by the @card of same arguments or not a subset of arguments
     When put relation type: custom-relation
     When relation(custom-relation) create role: r1
     When put relation type: second-custom-relation
