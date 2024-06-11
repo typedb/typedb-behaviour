@@ -570,19 +570,6 @@ Feature: Concept Attribute Type
     When connection open read transaction for database: typedb
     Then attribute(first-name) get annotations contain: @regex("value")
 
-  Scenario: Attribute type cannot set @regex annotation with wring arguments
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    Then attribute(name) set annotation: @regex; fails
-    Then attribute(name) set annotation: @regex(); fails
-    Then attribute(name) set annotation: @regex(1); fails
-    Then attribute(name) set annotation: @regex(1, 2); fails
-    Then attribute(name) set annotation: @regex("val1", "val2"); fails
-    Then attribute(name) get annotations is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then attribute(name) get annotations is empty
-
   Scenario: Attribute type cannot set @regex annotation with wrong arguments
     When put attribute type: name
     When attribute(name) set value-type: string
@@ -648,17 +635,572 @@ Feature: Concept Attribute Type
 ########################
 # @independent
 ########################
-    # TODO: Implement
+
+  Scenario Outline: Attribute types with <value-type> value type can set @independent annotation and unset it
+    When put attribute type: email
+    When attribute(email) set value-type: <value-type>
+    When attribute(email) set annotation: @independent
+    Then attribute(email) get annotations contain: @independent
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(email) get annotations contain: @independent
+    Then attribute(email) unset annotation: @independent
+    Then attribute(email) get annotations do not contain: @independent
+    Then transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(email) get annotations do not contain: @independent
+    Examples:
+      | value-type    |
+      | long          |
+      | string        |
+      | boolean       |
+      | double        |
+      | decimal       |
+      | datetime      |
+      | datetimetz    |
+      | duration      |
+      | custom-struct |
+
+  Scenario: Attribute types' @independent annotation can be inherited
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set annotation: @independent
+    When put attribute type: first-name
+    When attribute(first-name) set value-type: string
+    When attribute(first-name) set supertype: name
+    Then attribute(first-name) get annotations contain: @independent
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(first-name) get annotations contain: @independent
+
+  Scenario: Attribute type cannot set @independent annotation with arguments
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    Then attribute(name) set annotation: @independent(); fails
+    Then attribute(name) set annotation: @independent(1); fails
+    Then attribute(name) set annotation: @independent(1, 2); fails
+    Then attribute(name) set annotation: @independent("val1"); fails
+    Then attribute(name) get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get annotations is empty
 
 ########################
 # @values
 ########################
-    # TODO: Implement
+
+  Scenario Outline: Attribute types with <value-type> value type can set @values annotation and unset it
+    When put attribute type: email
+    When attribute(email) set value-type: <value-type>
+    When attribute(email) set annotation: @values(<args>)
+    Then attribute(email) get annotations contain: @values(<args>)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(email) get annotations contain: @values(<args>)
+    Then attribute(email) unset annotation: @values(<args>)
+    Then attribute(email) get annotations do not contain: @values(<args>)
+    Then transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(email) get annotations do not contain: @values(<args>)
+    Examples:
+      | value-type | args                                                                                                                                                                                                                                                                                                                                                                                                 |
+      | long       | 0                                                                                                                                                                                                                                                                                                                                                                                                    |
+      | long       | 1                                                                                                                                                                                                                                                                                                                                                                                                    |
+      | long       | -1                                                                                                                                                                                                                                                                                                                                                                                                   |
+      | long       | 1, 2                                                                                                                                                                                                                                                                                                                                                                                                 |
+      | long       | -9223372036854775808, 9223372036854775807                                                                                                                                                                                                                                                                                                                                                            |
+      | long       | 2, 1, 3, 4, 5, 6, 7, 9, 10, 11, 55, -1, -654321, 123456                                                                                                                                                                                                                                                                                                                                              |
+      | long       | 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99 |
+      | string     | ""                                                                                                                                                                                                                                                                                                                                                                                                   |
+      | string     | "1"                                                                                                                                                                                                                                                                                                                                                                                                  |
+      | string     | "福"                                                                                                                                                                                                                                                                                                                                                                                                  |
+      | string     | "s", "S"                                                                                                                                                                                                                                                                                                                                                                                             |
+      | string     | "This rank contain a sufficiently detailed description of its nature"                                                                                                                                                                                                                                                                                                                                |
+      | string     | "Scout", "Stone Guard", "Stone Guard", "High Warlord"                                                                                                                                                                                                                                                                                                                                                |
+      | string     | "Rank with optional space", "Rank with optional space ", " Rank with optional space", "Rankwithoptionalspace", "Rank with optional space  "                                                                                                                                                                                                                                                          |
+      | boolean    | true                                                                                                                                                                                                                                                                                                                                                                                                 |
+      | boolean    | false                                                                                                                                                                                                                                                                                                                                                                                                |
+      | boolean    | false, true                                                                                                                                                                                                                                                                                                                                                                                          |
+      | double     | 0.0                                                                                                                                                                                                                                                                                                                                                                                                  |
+      | double     | 0                                                                                                                                                                                                                                                                                                                                                                                                    |
+      | double     | 1.1                                                                                                                                                                                                                                                                                                                                                                                                  |
+      | double     | -2.45                                                                                                                                                                                                                                                                                                                                                                                                |
+      | double     | -3.444, 3.445                                                                                                                                                                                                                                                                                                                                                                                        |
+      | double     | 0.00001, 0.0001, 0.001, 0.01                                                                                                                                                                                                                                                                                                                                                                         |
+      | double     | -333.553, 33895, 98984.4555, 902394.44, 1000000000, 0.00001, 0.3, 3.14159265358979323                                                                                                                                                                                                                                                                                                                |
+      | decimal    | 0.0                                                                                                                                                                                                                                                                                                                                                                                                  |
+      | decimal    | 0                                                                                                                                                                                                                                                                                                                                                                                                    |
+      | decimal    | 1.1                                                                                                                                                                                                                                                                                                                                                                                                  |
+      | decimal    | -2.45                                                                                                                                                                                                                                                                                                                                                                                                |
+      | decimal    | -3.444, 3.445                                                                                                                                                                                                                                                                                                                                                                                        |
+      | decimal    | 0.00001, 0.0001, 0.001, 0.01                                                                                                                                                                                                                                                                                                                                                                         |
+      | decimal    | -333.553, 33895, 98984.4555, 902394.44, 1000000000, 0.00001, 0.3, 3.14159265358979323                                                                                                                                                                                                                                                                                                                |
+      | datetime   | 2024-06-04                                                                                                                                                                                                                                                                                                                                                                                           |
+      | datetime   | 2024-06-04T16:35                                                                                                                                                                                                                                                                                                                                                                                     |
+      | datetime   | 2024-06-04T16:35:02                                                                                                                                                                                                                                                                                                                                                                                  |
+      | datetime   | 2024-06-04T16:35:02.1                                                                                                                                                                                                                                                                                                                                                                                |
+      | datetime   | 2024-06-04T16:35:02.10                                                                                                                                                                                                                                                                                                                                                                               |
+      | datetime   | 2024-06-04T16:35:02.103                                                                                                                                                                                                                                                                                                                                                                              |
+      | datetime   | 2024-06-04, 2024-06-04T16:35, 2024-06-04T16:35:02, 2024-06-04T16:35:02.1, 2024-06-04T16:35:02.10, 2024-06-04T16:35:02.103                                                                                                                                                                                                                                                                            |
+      | datetimetz | 2024-06-04+0000                                                                                                                                                                                                                                                                                                                                                                                      |
+      | datetimetz | 2024-06-04 Asia/Kathmandu                                                                                                                                                                                                                                                                                                                                                                            |
+      | datetimetz | 2024-06-04+0100                                                                                                                                                                                                                                                                                                                                                                                      |
+      | datetimetz | 2024-06-04T16:35+0100                                                                                                                                                                                                                                                                                                                                                                                |
+      | datetimetz | 2024-06-04T16:35:02+0100                                                                                                                                                                                                                                                                                                                                                                             |
+      | datetimetz | 2024-06-04T16:35:02.1+0100                                                                                                                                                                                                                                                                                                                                                                           |
+      | datetimetz | 2024-06-04T16:35:02.10+0100                                                                                                                                                                                                                                                                                                                                                                          |
+      | datetimetz | 2024-06-04T16:35:02.103+0100                                                                                                                                                                                                                                                                                                                                                                         |
+      | datetimetz | 2024-06-04+0001, 2024-06-04 Asia/Kathmandu, 2024-06-04+0002, 2024-06-04+0010, 2024-06-04+0100, 2024-06-04-0100, 2024-06-04T16:35-0100, 2024-06-04T16:35:02+0200, 2024-06-04T16:35:02.1-0300, 2024-06-04T16:35:02.10+1000, 2024-06-04T16:35:02.103+0011                                                                                                                                               |
+      | duration   | P1Y                                                                                                                                                                                                                                                                                                                                                                                                  |
+      | duration   | P2M                                                                                                                                                                                                                                                                                                                                                                                                  |
+      | duration   | P1Y2M                                                                                                                                                                                                                                                                                                                                                                                                |
+      | duration   | P1Y2M3D                                                                                                                                                                                                                                                                                                                                                                                              |
+      | duration   | P1Y2M3DT4H                                                                                                                                                                                                                                                                                                                                                                                           |
+      | duration   | P1Y2M3DT4H5M                                                                                                                                                                                                                                                                                                                                                                                         |
+      | duration   | P1Y2M3DT4H5M6S                                                                                                                                                                                                                                                                                                                                                                                       |
+      | duration   | P1Y2M3DT4H5M6.789S                                                                                                                                                                                                                                                                                                                                                                                   |
+      | duration   | P1Y, P1Y1M, P1Y1M1D, P1Y1M1DT1H, P1Y1M1DT1H1M, P1Y1M1DT1H1M1S, 1Y1M1DT1H1M1S0.1S, 1Y1M1DT1H1M1S0.001S, 1Y1M1DT1H1M0.000001S                                                                                                                                                                                                                                                                          |
+
+  Scenario: Attribute types' @values annotation can be inherited
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set annotation: @values("value", "value2")
+    When put attribute type: first-name
+    When attribute(first-name) set supertype: name
+    Then attribute(first-name) get annotations contain: @values("value", "value2")
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(first-name) get annotations contain: @values("value", "value2")
+
+  Scenario: Attribute type can set @values annotation for struct value type
+    # TODO: Do we want to have it? If we do, add it to other Scenario Outlines with different value types
+
+  Scenario Outline: Attribute type with <value-type> value type cannot set @values with empty arguments
+    When put attribute type: name
+    When attribute(name) set value-type: <value-type>
+    Then attribute(name) set annotation: @values; fails
+    Then attribute(name) set annotation: @values(); fails
+    Then attribute(name) get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get annotations is empty
+    Examples:
+      | value-type |
+      | long       |
+      | double     |
+      | decimal    |
+      | string     |
+      | boolean    |
+      | datetime   |
+      | datetimetz |
+      | duration   |
+
+  Scenario Outline: Attribute type with <value-type> value type cannot set @values with incorrect arguments
+    When put attribute type: name
+    When attribute(name) set value-type: <value-type>
+    Then attribute(name) set annotation: @values(<args>); fails
+    Then attribute(name) get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get annotations is empty
+    Examples:
+      | value-type | args                            |
+      | long       | 0.1                             |
+      | long       | "string"                        |
+      | long       | true                            |
+      | long       | 2024-06-04                      |
+      | long       | 2024-06-04+0010                 |
+      | double     | "string"                        |
+      | double     | true                            |
+      | double     | 2024-06-04                      |
+      | double     | 2024-06-04+0010                 |
+      | decimal    | "string"                        |
+      | decimal    | true                            |
+      | decimal    | 2024-06-04                      |
+      | decimal    | 2024-06-04+0010                 |
+      | string     | 123                             |
+      | string     | true                            |
+      | string     | 2024-06-04                      |
+      | string     | 2024-06-04+0010                 |
+      | string     | 'notstring'                     |
+      | string     | ""                              |
+      | boolean    | 123                             |
+      | boolean    | "string"                        |
+      | boolean    | 2024-06-04                      |
+      | boolean    | 2024-06-04+0010                 |
+      | boolean    | truefalse                       |
+      | datetime   | 123                             |
+      | datetime   | "string"                        |
+      | datetime   | true                            |
+      | datetime   | 2024-06-04+0010                 |
+      | datetimetz | 123                             |
+      | datetimetz | "string"                        |
+      | datetimetz | true                            |
+      | datetimetz | 2024-06-04                      |
+      | datetimetz | 2024-06-04 NotRealTimeZone/Zone |
+      | duration   | 123                             |
+      | duration   | "string"                        |
+      | duration   | true                            |
+      | duration   | 2024-06-04                      |
+      | duration   | 2024-06-04+0100                 |
+      | duration   | 1Y                              |
+      | duration   | year                            |
+
+  Scenario Outline: Attribute type with <value-type> value type cannot set multiple @values annotations with different arguments
+    When put attribute type: name
+    When attribute(name) set value-type: <value-type>
+    When attribute(name) set annotation: @values(<args>)
+    Then attribute(name) set annotation: @values(<args>)
+    Then attribute(name) set annotation: @values(<fail-args>); fails
+    Then attribute(name) get annotations contain: @values(<args>)
+    Then attribute(name) get annotations do not contain: @values(<fail-args>)
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get annotations contain: @values(<args>)
+    Then attribute(name) get annotations do not contain: @values(<fail-args>)
+    Examples:
+      | value-type | args            | fail-args       |
+      | long       | 1, 5            | 7, 9            |
+      | double     | 1.1, 1.5        | -8.0, 88.3      |
+      | decimal    | -8.0, 88.3      | 1.1, 1.5        |
+      | string     | "s"             | "not s"         |
+      | boolean    | true            | false           |
+      | datetime   | 2024-05-05      | 2024-06-05      |
+      | datetimetz | 2024-05-05+0100 | 2024-05-05+0010 |
+      | duration   | P1Y             | P2Y             |
+
+  Scenario Outline: Attribute type cannot have @values annotation for <value-type> value type with duplicated args
+    When put attribute type: name
+    When attribute(name) set value-type: <value-type>
+    Then attribute(name) set annotation: @values(<arg0>, <arg1>, <arg2>); fails
+    Then attribute(name) get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get annotations is empty
+    Examples:
+      | value-type | arg0                        | arg1                         | arg2                         |
+      | long       | 1                           | 1                            | 1                            |
+      | long       | 1                           | 1                            | 2                            |
+      | long       | 1                           | 2                            | 1                            |
+      | long       | 1                           | 2                            | 2                            |
+      | double     | 0.1                         | 0.0001                       | 0.0001                       |
+      | decimal    | 0.1                         | 0.0001                       | 0.0001                       |
+      | string     | "stringwithoutdifferences"  | "stringwithoutdifferences"   | "stringWITHdifferences"      |
+      | string     | "stringwithoutdifferences " | "stringwithoutdifferences  " | "stringwithoutdifferences  " |
+      | boolean    | true                        | true                         | false                        |
+      | datetime   | 2024-06-04T16:35:02.101     | 2024-06-04T16:35:02.101      | 2024-06-04                   |
+      | datetime   | 2020-06-04T16:35:02.10      | 2025-06-05T16:35             | 2025-06-05T16:35             |
+      | datetimetz | 2020-06-04T16:35:02.10+0100 | 2020-06-04T16:35:02.10+0000  | 2020-06-04T16:35:02.10+0100  |
+      | duration   | P1Y1M                       | P1Y1M                        | P1Y2M                        |
+
+  Scenario Outline: Attribute types' @values annotation for <value-type> value type can be inherited and overridden by a subset of arguments
+    When put attribute type: name
+    When attribute(name) set value-type: <value-type>
+    When put attribute type: overridden-name
+    When attribute(overridden-name) set value-type: <value-type>
+    When attribute(overridden-name) set supertype: name
+    When attribute(name) set annotation: @values(<args>)
+    Then attribute(name) get annotations contain: @values(<args>)
+    Then attribute(overridden-name) get annotations contain: @values(<args>)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotations contain: @values(<args>)
+    Then attribute(overridden-name) get annotations contain: @values(<args>)
+    When attribute(overridden-name) set annotation: @values(<args-override>)
+    Then attribute(name) get annotations contain: @values(<args>)
+    Then attribute(overridden-name) get annotations contain: @values(<args-override>)
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get annotations contain: @values(<args>)
+    Then attribute(overridden-name) get annotations contain: @values(<args-override>)
+    Examples:
+      | value-type | args                                                                         | args-override                              |
+      | long       | 1, 10, 20, 30                                                                | 10, 30                                     |
+      | double     | 1.0, 2.0, 3.0, 4.5                                                           | 2.0                                        |
+      | decimal    | 0.0, 1.0                                                                     | 0.0                                        |
+      | string     | "john", "John", "Johnny", "johnny"                                           | "John", "Johnny"                           |
+      | boolean    | true, false                                                                  | true                                       |
+      | datetime   | 2024-06-04, 2024-06-05, 2024-06-06                                           | 2024-06-04, 2024-06-06                     |
+      | datetimetz | 2024-06-04+0010, 2024-06-04 Asia/Kathmandu, 2024-06-05+0010, 2024-06-05+0100 | 2024-06-04 Asia/Kathmandu, 2024-06-05+0010 |
+      | duration   | P6M, P1Y, P1Y1M, P1Y2M, P1Y3M, P1Y4M, P1Y6M                                  | P6M, P1Y3M, P1Y4M, P1Y6M                   |
+
+  Scenario Outline: Inherited @values annotation on attribute types for <value-type> value type cannot be overridden by the @values of same arguments or not a subset of arguments
+    When put attribute type: name
+    When attribute(name) set value-type: <value-type>
+    When put attribute type: overridden-name
+    When attribute(overridden-name) set value-type: <value-type>
+    When attribute(overridden-name) set supertype: name
+    When attribute(name) set annotation: @values(<args>)
+    Then attribute(name) get annotations contain: @values(<args>)
+    Then attribute(overridden-name) get annotations contain: @values(<args>)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotations contain: @values(<args>)
+    Then attribute(overridden-name) get annotations contain: @values(<args>)
+    Then attribute(overridden-name) set annotation: @values(<args-override>); fails
+    Then attribute(name) get annotations contain: @values(<args>)
+    Then attribute(overridden-name) get annotations contain: @values(<args>)
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get annotations contain: @values(<args>)
+    Then attribute(overridden-name) get annotations contain: @values(<args>)
+    Examples:
+      | value-type | args                                                                         | args-override            |
+      | long       | 1, 10, 20, 30                                                                | 10, 31                   |
+      | double     | 1.0, 2.0, 3.0, 4.5                                                           | 2.001                    |
+      | decimal    | 0.0, 1.0                                                                     | 0.01                     |
+      | string     | "john", "John", "Johnny", "johnny"                                           | "Jonathan"               |
+      | boolean    | false                                                                        | true                     |
+      | datetime   | 2024-06-04, 2024-06-05, 2024-06-06                                           | 2020-06-04, 2020-06-06   |
+      | datetimetz | 2024-06-04+0010, 2024-06-04 Asia/Kathmandu, 2024-06-05+0010, 2024-06-05+0100 | 2024-06-04 Europe/London |
+      | duration   | P6M, P1Y, P1Y1M, P1Y2M, P1Y3M, P1Y4M, P1Y6M                                  | P3M, P1Y3M, P1Y4M, P1Y6M |
 
 ########################
 # @range
 ########################
-    # TODO: Implement
+
+  Scenario Outline: Attribute types with <value-type> value type can set @range annotation and unset it
+    When put attribute type: email
+    When attribute(email) set value-type: <value-type>
+    When attribute(email) set annotation: @range(<arg0>, <arg1>)
+    Then attribute(email) get annotations contain: @range(<arg0>, <arg1>)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(email) get annotations contain: @range(<arg0>, <arg1>)
+    Then attribute(email) unset annotation: @range(<arg0>, <arg1>)
+    Then attribute(email) get annotations do not contain: @range(<arg0>, <arg1>)
+    Then transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(email) get annotations do not contain: @range(<arg0>, <arg1>)
+    Examples:
+      | value-type | arg0                         | arg1                                                  |
+      | long       | 0                            | 1                                                     |
+      | long       | 1                            | 2                                                     |
+      | long       | 0                            | 2                                                     |
+      | long       | -1                           | 1                                                     |
+      | long       | -9223372036854775808         | 9223372036854775807                                   |
+      | string     | "A"                          | "a"                                                   |
+      | string     | "a"                          | "z"                                                   |
+      | string     | "A"                          | "福"                                                   |
+      | string     | "AA"                         | "AAA"                                                 |
+      | string     | "short string"               | "very-very-very-very-very-very-very-very long string" |
+      | boolean    | false                        | true                                                  |
+      | double     | 0.0                          | 0.0001                                                |
+      | double     | 0.01                         | 1.0                                                   |
+      | double     | 123.123                      | 123123123123.122                                      |
+      | double     | -2.45                        | 2.45                                                  |
+      | decimal    | 0.0                          | 0.0001                                                |
+      | decimal    | 0.01                         | 1.0                                                   |
+      | decimal    | 123.123                      | 123123123123.122                                      |
+      | decimal    | -2.45                        | 2.45                                                  |
+      | datetime   | 2024-06-04                   | 2024-06-05                                            |
+      | datetime   | 2024-06-04                   | 2024-07-03                                            |
+      | datetime   | 2024-06-04                   | 2025-01-01                                            |
+      | datetime   | 1970-01-01                   | 9999-12-12                                            |
+      | datetime   | 2024-06-04T16:35:02.10       | 2024-06-04T16:35:02.11                                |
+      | datetimetz | 2024-06-04+0000              | 2024-06-05+0000                                       |
+      | datetimetz | 2024-06-04+0100              | 2048-06-04+0100                                       |
+      | datetimetz | 2024-06-04T16:35:02.103+0100 | 2024-06-04T16:35:02.104+0100                          |
+      | datetimetz | 2024-06-04 Asia/Kathmandu    | 2024-06-05 Asia/Kathmandu                             |
+      | duration   | P1Y                          | P2Y                                                   |
+      | duration   | P2M                          | P1Y2M                                                 |
+      | duration   | P1Y2M                        | P1Y2M3DT4H5M6.789S                                    |
+      | duration   | P1Y2M3DT4H5M6.788S           | P1Y2M3DT4H5M6.789S                                    |
+
+  Scenario: Attribute types' @range annotation can be inherited
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set annotation: @range(3, 5)
+    When put attribute type: first-name
+    When attribute(first-name) set supertype: name
+    Then attribute(first-name) get annotations contain: @range(3, 5)
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(first-name) get annotations contain: @range(3, 5)
+
+  Scenario: Attribute type can set @range annotation for struct value type
+    # TODO: Do we want to have it? If we do, add it to other Scenario Outlines with different value types
+
+  Scenario Outline: Attribute type with <value-type> value type cannot set @range with empty arguments
+    When put attribute type: name
+    When attribute(name) set value-type: <value-type>
+    Then attribute(name) set annotation: @range; fails
+    Then attribute(name) set annotation: @range(); fails
+    Then attribute(name) get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get annotations is empty
+    Examples:
+      | value-type |
+      | long       |
+      | double     |
+      | decimal    |
+      | string     |
+      | boolean    |
+      | datetime   |
+      | datetimetz |
+      | duration   |
+
+  Scenario Outline: Attribute type with <value-type> value type cannot set @range with incorrect arguments
+    When put attribute type: name
+    When attribute(name) set value-type: <value-type>
+    Then attribute(name) set annotation: @range(<arg0>, <args>); fails
+    Then attribute(name) get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get annotations is empty
+    Examples:
+      | value-type | arg0                            | args                                               |
+      | long       | 1                               | 1                                                  |
+      | long       | 1                               | 2, 3                                               |
+      | long       | 1                               | "string"                                           |
+      | long       | 1                               | 2, "string"                                        |
+      | long       | 1                               | 2, "string", true, 2024-06-04, 55                  |
+      | long       | "string"                        | 1                                                  |
+      | long       | true                            | 1                                                  |
+      | long       | 2024-06-04                      | 1                                                  |
+      | long       | 2024-06-04+0010                 | 1                                                  |
+      | double     | 1.0                             | 1.0                                                |
+      | double     | 1.0                             | 2.0, 3.0                                           |
+      | double     | 1.0                             | "string"                                           |
+      | double     | "string"                        | 1.0                                                |
+      | double     | true                            | 1.0                                                |
+      | double     | 2024-06-04                      | 1.0                                                |
+      | double     | 2024-06-04+0010                 | 1.0                                                |
+      | decimal    | 1.0                             | 1.0                                                |
+      | decimal    | 1.0                             | 2.0, 3.0                                           |
+      | decimal    | 1.0                             | "string"                                           |
+      | decimal    | "string"                        | 1.0                                                |
+      | decimal    | true                            | 1.0                                                |
+      | decimal    | 2024-06-04                      | 1.0                                                |
+      | decimal    | 2024-06-04+0010                 | 1.0                                                |
+      | string     | "123"                           | "123"                                              |
+      | string     | "123"                           | "1234", "12345"                                    |
+      | string     | "123"                           | 123                                                |
+      | string     | 123                             | "123"                                              |
+      | string     | true                            | "str"                                              |
+      | string     | 2024-06-04                      | "str"                                              |
+      | string     | 2024-06-04+0010                 | "str"                                              |
+      | string     | 'notstring'                     | "str"                                              |
+      | string     | ""                              | "str"                                              |
+      | boolean    | false                           | false                                              |
+      | boolean    | true                            | true                                               |
+      | boolean    | true                            | 123                                                |
+      | boolean    | 123                             | true                                               |
+      | boolean    | "string"                        | true                                               |
+      | boolean    | 2024-06-04                      | true                                               |
+      | boolean    | 2024-06-04+0010                 | true                                               |
+      | boolean    | truefalse                       | true                                               |
+      | datetime   | 2030-06-04                      | 2030-06-04                                         |
+      | datetime   | 2030-06-04                      | 2030-06-05, 2030-06-06                             |
+      | datetime   | 2030-06-04                      | 123                                                |
+      | datetime   | 123                             | 2030-06-04                                         |
+      | datetime   | "string"                        | 2030-06-04                                         |
+      | datetime   | true                            | 2030-06-04                                         |
+      | datetime   | 2024-06-04+0010                 | 2030-06-04                                         |
+      | datetimetz | 2030-06-04 Europe/London        | 2030-06-04 Europe/London                           |
+      | datetimetz | 2030-06-04 Europe/London        | 2030-06-05 Europe/London, 2030-06-06 Europe/London |
+      | datetimetz | 2030-06-05 Europe/London        | 123                                                |
+      | datetimetz | 123                             | 2030-06-05 Europe/London                           |
+      | datetimetz | "string"                        | 2030-06-05 Europe/London                           |
+      | datetimetz | true                            | 2030-06-05 Europe/London                           |
+      | datetimetz | 2024-06-04                      | 2030-06-05 Europe/London                           |
+      | datetimetz | 2024-06-04 NotRealTimeZone/Zone | 2030-06-05 Europe/London                           |
+      | duration   | P1Y                             | P1Y                                                |
+      | duration   | P1Y                             | P2Y, P3Y                                           |
+      | duration   | P1Y                             | 123                                                |
+      | duration   | 123                             | P1Y                                                |
+      | duration   | "string"                        | P1Y                                                |
+      | duration   | true                            | P1Y                                                |
+      | duration   | 2024-06-04                      | P1Y                                                |
+      | duration   | 2024-06-04+0100                 | P1Y                                                |
+      | duration   | 1Y                              | P1Y                                                |
+      | duration   | year                            | P1Y                                                |
+
+  Scenario Outline: Attribute type with <value-type> value type cannot set multiple @range annotations with different arguments
+    When put attribute type: name
+    When attribute(name) set value-type: <value-type>
+    When attribute(name) set annotation: @range(<args>)
+    Then attribute(name) set annotation: @range(<args>)
+    Then attribute(name) set annotation: @range(<fail-args>); fails
+    Then attribute(name) get annotations contain: @range(<args>)
+    Then attribute(name) get annotations do not contain: @range(<fail-args>)
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get annotations contain: @range(<args>)
+    Then attribute(name) get annotations do not contain: @range(<fail-args>)
+    Examples:
+      | value-type | args                             | fail-args                        |
+      | long       | 1, 5                             | 7, 9                             |
+      | double     | 1.1, 1.5                         | -8.0, 88.3                       |
+      | decimal    | -8.0, 88.3                       | 1.1, 1.5                         |
+      | string     | "S", "s"                         | "not s", "xxxxxxxxx"             |
+      | datetime   | 2024-05-05, 2024-05-06           | 2024-06-05, 2024-06-06           |
+      | datetimetz | 2024-05-05+0100, 2024-05-06+0100 | 2024-05-05+0100, 2024-05-07+0100 |
+      | duration   | P1Y, P2Y                         | P1Y6M, P2Y                       |
+
+  Scenario Outline: Attribute types' @range annotation for <value-type> value type can be inherited and overridden by a subset of arguments
+    When put attribute type: name
+    When attribute(name) set value-type: <value-type>
+    When put attribute type: overridden-name
+    When attribute(overridden-name) set value-type: <value-type>
+    When attribute(overridden-name) set supertype: name
+    When attribute(name) set annotation: @range(<args>)
+    Then attribute(name) get annotations contain: @range(<args>)
+    Then attribute(overridden-name) get annotations contain: @range(<args>)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotations contain: @range(<args>)
+    Then attribute(overridden-name) get annotations contain: @range(<args>)
+    When attribute(overridden-name) set annotation: @range(<args-override>)
+    Then attribute(name) get annotations contain: @range(<args>)
+    Then attribute(overridden-name) get annotations contain: @range(<args-override>)
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get annotations contain: @range(<args>)
+    Then attribute(overridden-name) get annotations contain: @range(<args-override>)
+    Examples:
+      | value-type | args                             | args-override                             |
+      | long       | 1, 10                            | 1, 5                                      |
+      | double     | 1.0, 10.0                        | 2.0, 10.0                                 |
+      | decimal    | 0.0, 1.0                         | 0.0, 0.999999                             |
+      | string     | "A", "Z"                         | "J", "Z"                                  |
+      | datetime   | 2024-06-04, 2024-06-05           | 2024-06-04, 2024-06-04T12:00:00           |
+      | datetimetz | 2024-06-04+0010, 2024-06-05+0010 | 2024-06-04+0010, 2024-06-04T12:00:00+0010 |
+      | duration   | P6M, P1Y                         | P8M, P9M                                  |
+
+  Scenario Outline: Inherited @range annotation on attribute types for <value-type> value type cannot be overridden by the @range of same arguments or not a subset of arguments
+    When put attribute type: name
+    When attribute(name) set value-type: <value-type>
+    When put attribute type: overridden-name
+    When attribute(overridden-name) set value-type: <value-type>
+    When attribute(overridden-name) set supertype: name
+    When attribute(name) set annotation: @range(<args>)
+    Then attribute(name) get annotations contain: @range(<args>)
+    Then attribute(overridden-name) get annotations contain: @range(<args>)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotations contain: @range(<args>)
+    Then attribute(overridden-name) get annotations contain: @range(<args>)
+    Then attribute(overridden-name) set annotation: @range(<args-override>); fails
+    Then attribute(name) get annotations contain: @range(<args>)
+    Then attribute(overridden-name) get annotations contain: @range(<args>)
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get annotations contain: @range(<args>)
+    Then attribute(overridden-name) get annotations contain: @range(<args>)
+    Examples:
+      | value-type | args                             | args-override                             |
+      | long       | 1, 10                            | -1, 5                                     |
+      | double     | 1.0, 10.0                        | 0.0, 150.0                                |
+      | decimal    | 0.0, 1.0                         | -0.0001, 0.999999                         |
+      | string     | "A", "Z"                         | "A", "z"                                  |
+      | datetime   | 2024-06-04, 2024-06-05           | 2023-06-04, 2024-06-04T12:00:00           |
+      | datetimetz | 2024-06-04+0010, 2024-06-05+0010 | 2024-06-04+0010, 2024-06-05T01:00:00+0010 |
+      | duration   | P6M, P1Y                         | P8M, P1Y1D                                |
 
 ########################
 # not compatible @annotations: @distinct, @key, @unique, @subkey, @card, @cascade, @replace
@@ -692,3 +1234,76 @@ Feature: Concept Attribute Type
       | datetimetz    |
       | duration      |
       | custom-struct |
+
+########################
+# @annotations combinations:
+# @abstract, @independent, @values, @range, @regex
+########################
+
+  Scenario Outline: Attribute type can set @<annotation-1> and @<annotation-2> together and unset it for <value-type> value type
+    When put attribute type: name
+    When attribute(name) set value-type: <value-type>
+    When attribute(name) set annotation: @<annotation-1>
+    When attribute(name) set annotation: @<annotation-2>
+    When attribute(name) get annotations contain:
+      | @<annotation-1> |
+      | @<annotation-2> |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotations contain:
+      | @<annotation-1> |
+      | @<annotation-2> |
+    When attribute(name) unset annotation: @<annotation-1>
+    Then attribute(name) get annotations do not contain: @<annotation-1>
+    Then attribute(name) get annotations contain: @<annotation-2>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotations do not contain: @<annotation-1>
+    Then attribute(name) get annotations contain: @<annotation-2>
+    When attribute(name) set annotation: @<annotation-1>
+    When attribute(name) unset annotation: @<annotation-2>
+    Then attribute(name) get annotations do not contain: @<annotation-2>
+    Then attribute(name) get annotations contain: @<annotation-1>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotations do not contain: @<annotation-2>
+    Then attribute(name) get annotations contain: @<annotation-1>
+    When attribute(name) unset annotation: @<annotation-1>
+    Then attribute(name) get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get annotations is empty
+    Examples:
+    # TODO: Move to "cannot" test if something is wrong here.
+      | annotation-1 | annotation-2       | value-type |
+      | abstract     | independent        | datetimetz |
+      | abstract     | values(1, 2)       | double     |
+      | abstract     | range(1.0, 2.0)    | decimal    |
+      | abstract     | regex("s")         | string     |
+      | independent  | values(1, 2)       | long       |
+      | independent  | range(false, true) | boolean    |
+      | independent  | regex("s")         | string     |
+
+  Scenario Outline: Owns cannot set @<annotation-1> and @<annotation-2> together for <value-type> value type
+    When put attribute type: name
+    When attribute(name) set value-type: <value-type>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When attribute(name) set annotation: @<annotation-1>
+    Then attribute(name) set annotation: @<annotation-2>; fails
+    When connection open schema transaction for database: typedb
+    When attribute(name) set annotation: @<annotation-2>
+    Then attribute(name) set annotation: @<annotation-1>; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotation contain: @<annotation-2>
+    Then attribute(name) get annotation do not contain: @<annotation-1>
+    Examples:
+    # TODO: Move to "can" test if something is wrong here.
+      | annotation-1     | annotation-2    | value-type |
+      # TODO: If we allow values + range, write a test to check args compatibility!
+      | values(1.0, 2.0) | range(1.0, 2.0) | double     |
+      # TODO: If we allow values + regex, write a test to check args compatibility!
+      | values("str")    | regex("s")      | string     |
+      # TODO: If we allow range + regex, write a test to check args compatibility!
+      | range("1", "2")  | regex("s")      | string     |

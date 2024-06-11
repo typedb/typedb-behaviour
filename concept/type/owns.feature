@@ -2512,7 +2512,7 @@ Feature: Concept Owns
   Scenario: Owns can set @values annotation for struct value type
     # TODO: Do we want to have it? If we do, add it to other Scenario Outlines with different value types
 
-  Scenario Outline: Owns cannot have @values annotation with empty args
+  Scenario Outline: Owns cannot have @values annotation with empty arguments
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
@@ -2586,18 +2586,18 @@ Feature: Concept Owns
       | duration   | year                            |
 
     # TODO: Maybe we allow it, then change the test considering the expected behavior
-  Scenario Outline: Owns cannot redeclare @values annotation with different arguments
+  Scenario Outline: Owns cannot set multiple @values annotation with different arguments
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
     Then entity(person) get owns(custom-attribute) set annotation: @values(<args>)
-    Then entity(person) get owns(custom-attribute) set annotation: @values(<args-redeclared>); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @values(<fail-args>); fails
     Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get annotations is empty
     Examples:
-      | value-type | args            | args-redeclared |
+      | value-type | args            | fail-args       |
       | long       | 1, 5            | 7, 9            |
       | double     | 1.1, 1.5        | -8.0, 88.3      |
       | decimal    | -8.0, 88.3      | 1.1, 1.5        |
@@ -2631,19 +2631,6 @@ Feature: Concept Owns
       | datetime   | 2020-06-04T16:35:02.10      | 2025-06-05T16:35             | 2025-06-05T16:35             |
       | datetimetz | 2020-06-04T16:35:02.10+0100 | 2020-06-04T16:35:02.10+0000  | 2020-06-04T16:35:02.10+0100  |
       | duration   | P1Y1M                       | P1Y1M                        | P1Y2M                        |
-
-  Scenario: Owns cannot set multiple @values annotations with different arguments
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When entity(person) set owns: name
-    When entity(person) get owns(name) set annotation: @values("hi", "HI")
-    Then entity(person) get owns(name) set annotation: @values("Hi"); fails
-    Then entity(person) get owns(name) get annotations contain: @values("hi", "HI")
-    Then entity(person) get owns(name) get annotations do not contain: @values("Hi")
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then entity(person) get owns(name) get annotations contain: @values("hi", "HI")
-    Then entity(person) get owns(name) get annotations do not contain: @values("Hi")
 
   Scenario Outline: Owns-related @values annotation for <value-type> value type can be inherited and overridden by a subset of arguments
     When put attribute type: custom-attribute
@@ -2872,13 +2859,13 @@ Feature: Concept Owns
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
     Then entity(person) get owns(custom-attribute) set annotation: @range(<args>)
-    Then entity(person) get owns(custom-attribute) set annotation: @range(<args-redeclared>); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @range(<fail-args>); fails
     Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get annotations is empty
     Examples:
-      | value-type | args                             | args-redeclared                  |
+      | value-type | args                             | fail-args                        |
       | long       | 1, 5                             | 7, 9                             |
       | double     | 1.1, 1.5                         | -8.0, 88.3                       |
       | decimal    | -8.0, 88.3                       | 1.1, 1.5                         |
@@ -2888,7 +2875,7 @@ Feature: Concept Owns
       | duration   | P1Y, P2Y                         | P1Y6M, P2Y                       |
 
     # TODO: If we allow arg0 == arg1, move this case to another test!
-  Scenario Outline: Owns cannot have @range annotation for <value-type> value type with invalid arguments or args number
+  Scenario Outline: Owns cannot have @range annotation for <value-type> value type with incorrect arguments
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(player) set owns: custom-attribute
@@ -2964,35 +2951,6 @@ Feature: Concept Owns
       | duration   | 2024-06-04+0100                 | P1Y                                                |
       | duration   | 1Y                              | P1Y                                                |
       | duration   | year                            | P1Y                                                |
-
-  Scenario Outline: Owns cannot set multiple @range annotations with different arguments
-    When put attribute type: age
-    When attribute(age) set value-type: long
-    When entity(person) set owns: age
-    When entity(person) get owns(age) set annotation: @range(2, 5)
-    Then entity(person) get owns(age) set annotation: @range(<fail-args>); fails
-    Then entity(person) get owns(age) set annotation: @range(<fail-args>); fails
-    Then entity(person) get owns(age) get annotations contain: @range(2, 5)
-    Then entity(person) get owns(age) get annotations do not contain: @range(<fail-args>)
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then entity(person) get owns(age) get annotations contain: @range(2, 5)
-    Then entity(person) get owns(age) get annotations do not contain: @range(<fail-args>)
-    Examples:
-      | fail-args |
-      | 0, 1      |
-      | 0, 2      |
-      | 0, 3      |
-      | 0, 5      |
-      | 0, 6      |
-      | 2, 3      |
-      | 2, 5      |
-      | 2, 6      |
-      | 3, 4      |
-      | 3, 5      |
-      | 3, 6      |
-      | 5, 6      |
-      | 6, 10     |
 
   Scenario Outline: Owns-related @range annotation for <value-type> value type can be inherited and overridden by a subset of arguments
     When put attribute type: custom-attribute
@@ -3318,21 +3276,21 @@ Feature: Concept Owns
     When attribute(custom-attribute) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
     Then entity(person) get owns(custom-attribute) set annotation: @card(<args>)
-    Then entity(person) get owns(custom-attribute) set annotation: @card(<args-redeclared>); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @card(<fail-args>); fails
     Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get annotations is empty
     Examples:
-      | value-type | args | args-redeclared |
-      | long       | 2, 5 | 7, 9            |
-      | double     | 2, 5 | 0, 1            |
-      | decimal    | 2, 5 | 0, *            |
-      | string     | 2, 5 | 4, *            |
-      | boolean    | 2, 5 | 4, 5            |
-      | datetime   | 2, 5 | 2, 6            |
-      | datetimetz | 2, 5 | 2, 4            |
-      | duration   | 2, 5 | 2, *            |
+      | value-type | args | fail-args |
+      | long       | 2, 5 | 7, 9      |
+      | double     | 2, 5 | 0, 1      |
+      | decimal    | 2, 5 | 0, *      |
+      | string     | 2, 5 | 4, *      |
+      | boolean    | 2, 5 | 4, 5      |
+      | datetime   | 2, 5 | 2, 6      |
+      | datetimetz | 2, 5 | 2, 4      |
+      | duration   | 2, 5 | 2, *      |
 
   Scenario Outline: Owns-related @card annotation for <value-type> value type can be inherited and overridden by a subset of arguments
     When put attribute type: custom-attribute
@@ -3871,7 +3829,7 @@ Feature: Concept Owns
     # TODO: Move to "cannot" test if something is wrong here.
       | annotation-1                      | annotation-2       | value-type |
       | key                               | subkey(L)          | long       |
-      | key                               | values             | double     |
+      | key                               | values(1, 2)       | double     |
       | key                               | range(1.0, 2.0)    | decimal    |
       | key                               | regex("s")         | string     |
       | subkey(L)                         | unique             | duration   |
@@ -3947,8 +3905,8 @@ Feature: Concept Owns
     Then relation(description) get owns(custom-attribute) set annotation: @<annotation-2>; fails
     When connection open schema transaction for database: typedb
     When relation(description) set owns: custom-attribute
-    Then relation(description) get owns(custom-attribute) set annotation: @<annotation-2>
-    When relation(description) get owns(custom-attribute) set annotation: @<annotation-1>; fails
+    When relation(description) get owns(custom-attribute) set annotation: @<annotation-2>
+    Then relation(description) get owns(custom-attribute) set annotation: @<annotation-1>; fails
     When transaction commits
     When connection open schema transaction for database: typedb
     Then relation(description) get owns(custom-attribute) get annotation contain: @<annotation-2>
@@ -3977,8 +3935,8 @@ Feature: Concept Owns
     Then relation(description) get owns(custom-attribute[]) set annotation: @<annotation-2>; fails
     When connection open schema transaction for database: typedb
     When relation(description) set owns: custom-attribute[]
-    Then relation(description) get owns(custom-attribute[]) set annotation: @<annotation-2>
-    When relation(description) get owns(custom-attribute[]) set annotation: @<annotation-1>; fails
+    When relation(description) get owns(custom-attribute[]) set annotation: @<annotation-2>
+    Then relation(description) get owns(custom-attribute[]) set annotation: @<annotation-1>; fails
     When transaction commits
     When connection open schema transaction for database: typedb
     Then relation(description) get owns(custom-attribute[]) get annotation contain: @<annotation-2>

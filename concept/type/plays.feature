@@ -1942,21 +1942,21 @@ Feature: Concept Plays
     When relation(marriage) create role: spouse
     When entity(person) set plays: marriage:spouse
     Then entity(person) get plays(marriage:spouse) set annotation: @card(<args>)
-    Then entity(person) get plays(marriage:spouse) set annotation: @card(<args-redeclared>); fails
+    Then entity(person) get plays(marriage:spouse) set annotation: @card(<fail-args>); fails
     Then entity(person) get plays(marriage:spouse) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
     Then entity(person) get plays(marriage:spouse) get annotations is empty
     Examples:
-      | args | args-redeclared |
-      | 0, * | 0, 1            |
-      | 0, 5 | 0, 1            |
-      | 1, 5 | 0, 1            |
-      | 2, 5 | 0, 1            |
-      | 2, 5 | 0, 2            |
-      | 2, 5 | 2, *            |
-      | 2, 5 | 2, 6            |
-      | 2, 5 | 7, 11            |
+      | args | fail-args |
+      | 0, * | 0, 1      |
+      | 0, 5 | 0, 1      |
+      | 1, 5 | 0, 1      |
+      | 2, 5 | 0, 1      |
+      | 2, 5 | 0, 2      |
+      | 2, 5 | 2, *      |
+      | 2, 5 | 2, 6      |
+      | 2, 5 | 7, 11     |
 
   Scenario Outline: Plays-related @card annotation can be inherited and overridden by a subset of arguments
     When put relation type: custom-relation
