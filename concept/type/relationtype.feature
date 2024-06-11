@@ -797,6 +797,20 @@ Feature: Concept Relation Type and Role Type
       | child    |
 
 ########################
+# @annotations common
+########################
+
+  Scenario Outline: Relation type cannot unset @<annotation> that has not been set
+    When put relation type: marriage
+    When relation(marriage) create role: husband
+    When relation(marriage) create role: wife
+    Then relation(marriage) unset annotation: @<annotation>; fails
+    Examples:
+      | annotation |
+      | abstract   |
+      | cascade    |
+
+########################
 # @abstract
 ########################
 
@@ -1021,6 +1035,27 @@ Feature: Concept Relation Type and Role Type
 #    Then relation(parentship) get annotation do not contain: @<annotation-1>
 #    Examples:
 #      | annotation-1 | annotation-2 |
+
+########################
+# relates @annotations common
+########################
+
+  Scenario Outline: Roles cannot unset @<annotation> that has not been set
+    When put relation type: marriage
+    When relation(marriage) create role: husband
+    Then relation(marriage) get role(husband) unset annotation: @<annotation>; fails
+    Examples:
+      | annotation |
+      | card(1, 2) |
+
+  Scenario Outline: Roles lists cannot unset @<annotation> that has not been set
+    When put relation type: marriage
+    When relation(marriage) create role: husband[]
+    Then relation(marriage) get role(husband[]) unset annotation: @<annotation>; fails
+    Examples:
+      | annotation |
+      | distinct   |
+      | card(1, 2) |
 
 ########################
 # relates @distinct

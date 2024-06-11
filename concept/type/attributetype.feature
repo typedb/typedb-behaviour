@@ -28,62 +28,52 @@ Feature: Concept Attribute Type
   Scenario: Root attribute type cannot be deleted
     Then delete attribute type: attribute; fails
 
-  Scenario: Attribute types can be created
+  Scenario Outline: Attribute types can be created with <value-type> value type
     When put attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value-type: <value-type>
     Then attribute(name) exists
     Then attribute(name) get supertype: attribute
+    Then attribute(name) get value type: <value-type>
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(name) exists
     Then attribute(name) get supertype: attribute
+    Then attribute(name) get value type: <value-type>
+    Examples:
+      | value-type |
+      | long       |
+      | string     |
+      | boolean    |
+      | double     |
+      | decimal    |
+      | datetime   |
+      | datetimetz |
+      | duration   |
 
-  Scenario: Attribute types can be created with value type boolean
-    When put attribute type: is-open
-    When attribute(is-open) set value-type: boolean
-    Then attribute(is-open) get value type: boolean
+  Scenario: Attribute types can be created with a struct as value type
+    # TODO: Create structs in concept api
+    When put struct type: multi-name
+    When struct(multi-name) create field: first-name
+    When struct(multi-name) get field(first-name); set value-type: string
+    When struct(multi-name) create field: second-name
+    When struct(multi-name) get field(second-name); set value-type: string
+    When put attribute type: full-name
+    When attribute(full-name) set value-type: multi-name
+    Then attribute(full-name) exists
+    Then attribute(full-name) get supertype: attribute
+    Then attribute(full-name) get value type: multi-name
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(is-open) get value type: boolean
+    Then attribute(full-name) exists
+    Then attribute(full-name) get supertype: attribute
+    Then attribute(full-name) get value type: multi-name
 
-  Scenario: Attribute types can be created with value type long
-    When put attribute type: age
-    When attribute(age) set value-type: long
-    Then attribute(age) get value type: long
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then attribute(age) get value type: long
-
-  Scenario: Attribute types can be created with value type double
-    When put attribute type: rating
-    When attribute(rating) set value-type: double
-    Then attribute(rating) get value type: double
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then attribute(rating) get value type: double
-
-  Scenario: Attribute types can be created with value type string
+  Scenario Outline: Attribute types can be deleted
     When put attribute type: name
-    When attribute(name) set value-type: string
-    Then attribute(name) get value type: string
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then attribute(name) get value type: string
-
-  Scenario: Attribute types can be created with value type datetime
-    When put attribute type: timestamp
-    When attribute(timestamp) set value-type: datetime
-    Then attribute(timestamp) get value type: datetime
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then attribute(timestamp) get value type: datetime
-
-  Scenario: Attribute types can be deleted
-    When put attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value-type: <value-type-1>
     Then attribute(name) exists
     When put attribute type: age
-    When attribute(age) set value-type: long
+    When attribute(age) set value-type: <value-type-2>
     Then attribute(age) exists
     When delete attribute type: age
     Then attribute(age) does not exist
@@ -107,6 +97,12 @@ Feature: Concept Attribute Type
     Then attribute(attribute) get subtypes do not contain:
       | name |
       | age  |
+    Examples:
+      | value-type-1 | value-type-2 |
+      | string       | long         |
+      | boolean      | double       |
+      | decimal      | datetimetz   |
+      | datetime     | duration     |
 
   Scenario: Attribute types can get the root type
     When put attribute type: is-open
@@ -355,6 +351,22 @@ Feature: Concept Attribute Type
 #      | timestamp |
 
 ########################
+# @annotations common
+########################
+
+  Scenario Outline: Attribute type cannot unset @<annotation> that has not been set
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    Then attribute(name) unset annotation: @<annotation>; fails
+    Examples:
+      | annotation      |
+      | abstract        |
+      | regex("\S+")    |
+      | independent     |
+      | values("1")     |
+      | range("1", "3") |
+
+########################
 # @abstract
 ########################
 
@@ -404,9 +416,9 @@ Feature: Concept Attribute Type
     Then attribute(real-name) get supertype: name
     Then attribute(username) get supertype: name
     Then attribute(first-name) get supertypes contain:
-      | attribute  |
-      | real-name  |
-      | name       |
+      | attribute |
+      | real-name |
+      | name      |
     Then attribute(last-name) get supertypes contain:
       | attribute |
       | real-name |
@@ -441,9 +453,9 @@ Feature: Concept Attribute Type
     Then attribute(real-name) get supertype: name
     Then attribute(username) get supertype: name
     Then attribute(first-name) get supertypes contain:
-      | attribute  |
-      | real-name  |
-      | name       |
+      | attribute |
+      | real-name |
+      | name      |
     Then attribute(last-name) get supertypes contain:
       | attribute |
       | real-name |
@@ -500,9 +512,9 @@ Feature: Concept Attribute Type
 # @regex
 ########################
 
-  Scenario Outline: Attribute types with value type string and regular expression can be created and unset
+  Scenario Outline: Attribute types with <value-type> value type can set @regex annotation and unset it
     When put attribute type: email
-    When attribute(email) set value-type: string
+    When attribute(email) set value-type: <value-type>
     When attribute(email) set annotation: @regex(<arg>)
     Then attribute(email) get annotations contain: @regex(<arg>)
     When transaction commits
@@ -514,18 +526,124 @@ Feature: Concept Attribute Type
     When connection open read transaction for database: typedb
     Then attribute(email) get annotations do not contain: @regex(<arg>)
     Examples:
-      | arg                  |
-      | "value"              |
-      | "123.456"            |
-      | "\S+"                |
-      | "\S+@\S+\.\S+"       |
-      | "^starts"            |
-      | "ends$"              |
-      | "^starts and ends$"  |
-      | "^(one \| another)$" |
-      | "2024-06-04+0100"    |
+      | value-type | arg                  |
+      | string     | "value"              |
+      | string     | "123.456"            |
+      | string     | "\S+"                |
+      | string     | "\S+@\S+\.\S+"       |
+      | string     | "^starts"            |
+      | string     | "ends$"              |
+      | string     | "^starts and ends$"  |
+      | string     | "^(one \| another)$" |
+      | string     | "2024-06-04+0100"    |
 
- # TODO: Enhance
+  Scenario Outline: Attribute types with incompatible value types can't have @regex annotation
+    When put attribute type: email
+    When attribute(email) set value-type: <value-type>
+    Then attribute(email) set annotation: @regex(<arg>); fails
+    Then attribute(email) get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(email) set annotation: @regex(<arg>); fails
+    Then attribute(email) get annotations is empty
+    Examples:
+      | value-type    | arg     |
+      | long          | "value" |
+      | boolean       | "value" |
+      | double        | "value" |
+      | decimal       | "value" |
+      | datetime      | "value" |
+      | datetimetz    | "value" |
+      | duration      | "value" |
+      | custom-struct | "value" |
+
+  Scenario: Attribute types' @regex annotation can be inherited
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set annotation: @regex("value")
+    When put attribute type: first-name
+    When attribute(first-name) set value-type: string
+    When attribute(first-name) set supertype: name
+    Then attribute(first-name) get annotations contain: @regex("value")
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(first-name) get annotations contain: @regex("value")
+
+  Scenario: Attribute type cannot set @regex annotation with wring arguments
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    Then attribute(name) set annotation: @regex; fails
+    Then attribute(name) set annotation: @regex(); fails
+    Then attribute(name) set annotation: @regex(1); fails
+    Then attribute(name) set annotation: @regex(1, 2); fails
+    Then attribute(name) set annotation: @regex("val1", "val2"); fails
+    Then attribute(name) get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get annotations is empty
+
+  Scenario: Attribute type cannot set @regex annotation with wrong arguments
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    Then attribute(name) set annotation: @regex; fails
+    Then attribute(name) set annotation: @regex(); fails
+    Then attribute(name) set annotation: @regex(1); fails
+    Then attribute(name) set annotation: @regex(1, 2); fails
+    Then attribute(name) set annotation: @regex("val1", "val2"); fails
+    Then attribute(name) get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get annotations is empty
+
+  Scenario Outline: Attribute type cannot set multiple @regex annotations with different arguments
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    When attribute(name) set annotation: @regex("\S+")
+    Then attribute(name) set annotation: @regex("\S+")
+    Then attribute(name) set annotation: @regex(<fail-args>); fails
+    Then attribute(name) get annotations contain: @regex("\S+")
+    Then attribute(name) get annotations do not contain: @regex(<fail-args>)
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get annotations contain: @regex("\S+")
+    Then attribute(name) get annotations do not contain: @regex(<fail-args>)
+    Examples:
+      | fail-args       |
+      | "\S"            |
+      | "S+"            |
+      | "*"             |
+      | "s"             |
+      | " some string " |
+
+  Scenario: Attribute type cannot override inherited @regex annotation
+    When put attribute type: name
+    When attribute(name) set value-type: string
+    When put attribute type: first-name
+    When attribute(name) set annotation: @regex("\S+")
+    Then attribute(name) get annotations contains: @regex("\S+")
+    Then attribute(first-name) get annotations is empty
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotations contains: @regex("\S+")
+    Then attribute(first-name) get annotations is empty
+    When attribute(first-name) set supertype: name
+    Then attribute(first-name) get annotations contains: @regex("\S+")
+    Then attribute(first-name) set annotation: @regex("\S+"); fails
+    Then attribute(first-name) set annotation: @regex("test"); fails
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotations contains: @regex("\S+")
+    Then attribute(first-name) get annotations is empty
+    When attribute(first-name) set annotation: @regex("\S+")
+    Then attribute(first-name) get annotation contains: @regex("\S+")
+    Then attribute(first-name) set supertype: name; fails
+    When attribute(first-name) unset annotation: @regex("\S+")
+    When attribute(first-name) set supertype: name
+    Then attribute(first-name) get annotation contains: @regex("\S+")
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get annotation contains: @regex("\S+")
+    Then attribute(first-name) get annotation contains: @regex("\S+")
 
 ########################
 # @independent

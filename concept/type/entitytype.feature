@@ -178,6 +178,17 @@ Feature: Concept Entity Type
     Then entity(person) set supertype: person; fails
 
 ########################
+# @annotations common
+########################
+
+  Scenario Outline: Entity type cannot unset @<annotation> that has not been set
+    When put entity type: person
+    Then entity(person) unset annotation: @<annotation>; fails
+    Examples:
+      | annotation      |
+      | abstract        |
+
+########################
 # @abstract
 ########################
 

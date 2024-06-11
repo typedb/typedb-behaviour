@@ -3716,7 +3716,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns cannot have @regex annotation of invalid arguments
     When put attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value-type: string
     When entity(person) set owns: custom-attribute
     Then entity(person) get owns(custom-attribute) set annotation: @regex; fails
     Then entity(person) get owns(custom-attribute) set annotation: @regex(); fails
@@ -3737,6 +3737,74 @@ Feature: Concept Owns
       | 123.54543             |
       | value                 |
       | P1Y                   |
+
+  Scenario Outline: Owns cannot set multiple @regex annotations with different arguments
+    When put attribute type: custom-attribute
+    When attribute(custom-attribute) set value-type: string
+    When entity(person) set owns: custom-attribute
+    When entity(person) get owns(custom-attribute) set annotation: @regex("\S+")
+    Then entity(person) get owns(custom-attribute) set annotation: @regex("\S+")
+    Then entity(person) get owns(custom-attribute) set annotation: @regex(<fail-args>); fails
+    Then entity(person) get owns(custom-attribute) get annotations contain: @regex("\S+")
+    Then entity(person) get owns(custom-attribute) get annotations do not contain: @regex(<fail-args>)
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get owns(custom-attribute) get annotations contain: @regex("\S+")
+    Then entity(person) get owns(custom-attribute) get annotations do not contain: @regex(<fail-args>)
+    Examples:
+      | fail-args       |
+      | "\S"            |
+      | "S+"            |
+      | "*"             |
+      | "s"             |
+      | " some string " |
+
+  Scenario: Owns cannot set @regex annotation if there is a @regex annotation on the attribute
+    When put attribute type: custom-attribute
+    When attribute(custom-attribute) set value-type: string
+    When attribute(custom-attribute) set annotation: @regex("\S+")
+    When entity(person) set owns: custom-attribute
+    When entity(person) get owns(custom-attribute) set annotation: @regex("\S+"); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @regex("s"); fails
+    Then entity(person) get owns(custom-attribute) get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get owns(custom-attribute) get annotations is empty
+
+  Scenario: Owns cannot override inherited @regex annotation
+    When put attribute type: custom-attribute
+    When attribute(custom-attribute) set value-type: string
+    When entity(person) set owns: custom-attribute
+    When entity(person) get owns(custom-attribute) set annotation: @regex("\S+")
+    Then entity(person) get owns(custom-attribute) get annotations contains: @regex("\S+")
+    Then entity(player) get owns(custom-attribute) get annotations contains: @regex("\S+")
+    When put attribute type: custom-attribute-2
+    When attribute(custom-attribute-2) set value-type: string
+    When entity(player) set owns: custom-attribute-2
+    Then entity(player) get owns(custom-attribute-2) get annotations is empty
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get owns(custom-attribute) get annotations contains: @regex("\S+")
+    Then entity(player) get owns(custom-attribute) get annotations contains: @regex("\S+")
+    Then entity(player) get owns(custom-attribute-2) get annotations is empty
+    When entity(player) get owns(custom-attribute-2) set override: custom-attribute
+    Then entity(player) get owns(custom-attribute-2) set annotation: @regex("\S+"); fails
+    Then entity(player) get owns(custom-attribute-2) set annotation: @regex("test"); fails
+    When connection open schema transaction for database: typedb
+    Then entity(person) get owns(custom-attribute) get annotations contains: @regex("\S+")
+    Then entity(player) get owns(custom-attribute) get annotations contains: @regex("\S+")
+    Then entity(player) get owns(custom-attribute-2) get annotations is empty
+    When entity(player) get owns(custom-attribute-2) set annotation: @regex("\S+")
+    Then entity(player) get owns(custom-attribute-2) set override: custom-attribute; fails
+    When entity(player) get owns(custom-attribute-2) unset annotation: @regex("\S+")
+    When entity(player) get owns(custom-attribute-2) set override: custom-attribute
+    Then entity(player) get owns(custom-attribute-2) get supertype: custom-attribute
+    Then entity(player) get owns(custom-attribute-2) get annotations contain: @regex("\S+")
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get owns(custom-attribute) get annotations contain: @regex("\S+")
+    Then entity(player) get owns(custom-attribute) get annotations contain: @regex("\S+")
+    Then entity(player) get owns(custom-attribute-2) get annotations contain: @regex("\S+")
 
 ########################
 # not compatible @annotations: @abstract, @cascade, @independent, @replace
