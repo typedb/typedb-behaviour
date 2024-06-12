@@ -21,7 +21,7 @@ Feature: Concept Entity Type
     Then delete entity type: entity; fails
 
   Scenario: Entity types can be created
-    When put entity type: person
+    When create entity type: person
     Then entity(person) exists
     Then entity(person) get supertype: entity
     When transaction commits
@@ -30,9 +30,9 @@ Feature: Concept Entity Type
     Then entity(person) get supertype: entity
 
   Scenario: Entity types can be deleted
-    When put entity type: person
+    When create entity type: person
     Then entity(person) exists
-    When put entity type: company
+    When create entity type: company
     Then entity(company) exists
     When delete entity type: company
     Then entity(company) does not exist
@@ -58,7 +58,7 @@ Feature: Concept Entity Type
       | company |
 
   Scenario: Entity types that have instances cannot be deleted
-    When put entity type: person
+    When create entity type: person
     When transaction commits
     When connection open write transaction for database: typedb
     When $x = entity(person) create new instance
@@ -67,7 +67,7 @@ Feature: Concept Entity Type
     Then delete entity type: person; fails
 
   Scenario: Entity types can change labels
-    When put entity type: person
+    When create entity type: person
     Then entity(person) get label: person
     When entity(person) set label: horse
     Then entity(person) does not exist
@@ -87,11 +87,11 @@ Feature: Concept Entity Type
 
 
   Scenario: Entity types can be subtypes of other entity types
-    When put entity type: man
-    When put entity type: woman
-    When put entity type: person
-    When put entity type: cat
-    When put entity type: animal
+    When create entity type: man
+    When create entity type: woman
+    When create entity type: person
+    When create entity type: cat
+    When create entity type: animal
     When entity(man) set supertype: person
     When entity(woman) set supertype: person
     When entity(person) set supertype: animal
@@ -170,7 +170,7 @@ Feature: Concept Entity Type
       | woman  |
 
   Scenario: Entity types cannot subtype itself
-    When put entity type: person
+    When create entity type: person
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) set supertype: person; fails
@@ -182,7 +182,7 @@ Feature: Concept Entity Type
 ########################
 
   Scenario Outline: Entity type cannot unset @<annotation> that has not been set
-    When put entity type: person
+    When create entity type: person
     Then entity(person) unset annotation: @<annotation>; fails
     Examples:
       | annotation      |
@@ -193,9 +193,9 @@ Feature: Concept Entity Type
 ########################
 
   Scenario: Entity types can be set to abstract
-    When put entity type: person
+    When create entity type: person
     When entity(person) set annotation: @abstract
-    When put entity type: company
+    When create entity type: company
     Then entity(person) get annotations contain: @abstract
     When transaction commits
     When connection open write transaction for database: typedb
@@ -216,8 +216,8 @@ Feature: Concept Entity Type
     Then entity(company) create new instance; fails
 
   Scenario: Entity types can be set to abstract when a subtype has instances
-    When put entity type: person
-    When put entity type: player
+    When create entity type: person
+    When create entity type: player
     When entity(player) set supertype: person
     Then transaction commits
     When connection open write transaction for database: typedb
@@ -230,7 +230,7 @@ Feature: Concept Entity Type
     Then entity(person) get annotations contain: @abstract
 
   Scenario: Entity cannot set @abstract annotation with arguments
-    When put entity type: person
+    When create entity type: person
     Then entity(person) set annotation: @abstract(); fails
     Then entity(person) set annotation: @abstract(1); fails
     Then entity(person) set annotation: @abstract(1, 2); fails
@@ -240,8 +240,8 @@ Feature: Concept Entity Type
     Then entity(person) get annotations is empty
 
   Scenario: Entity types can subtype non abstract entity types
-    When put entity type: person
-    When put entity type: player
+    When create entity type: person
+    When create entity type: player
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) get annotations do not contain: @abstract
@@ -256,7 +256,7 @@ Feature: Concept Entity Type
 ########################
 
   Scenario: Entity type cannot have @distinct, @key, @unique, @subkey, @values, @range, @card, @cascade, @independent, @replace, and @regex annotations
-    When put entity type: person
+    When create entity type: person
     When entity(person) set value-type: <value-type>
     Then entity(person) set annotation: @distinct; fails
     Then entity(person) set annotation: @key; fails

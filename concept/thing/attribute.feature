@@ -13,28 +13,28 @@ Feature: Concept Attribute
     Given connection create database: typedb
     Given connection open schema transaction for database: typedb
     # Write schema for the test scenarios
-    Given put attribute type: is-alive
+    Given create attribute type: is-alive
     Given attribute(is-alive) set value-type: boolean
     Given attribute(is-alive) set annotation: @independent
-    Given put attribute type: age
+    Given create attribute type: age
     Given attribute(age) set value-type: long
     Given attribute(age) set annotation: @independent
-    Given put attribute type: score
+    Given create attribute type: score
     Given attribute(score) set value-type: double
     Given attribute(score) set annotation: @independent
-    Given put attribute type: birth-date
+    Given create attribute type: birth-date
     Given attribute(birth-date) set value-type: datetime
     Given attribute(birth-date) set annotation: @independent
-    Given put attribute type: event-date
+    Given create attribute type: event-date
     Given attribute(event-date) set value-type: datetimetz
     Given attribute(event-date) set annotation: @independent
-    Given put attribute type: schedule-interval
+    Given create attribute type: schedule-interval
     Given attribute(schedule-interval) set value-type: duration
     Given attribute(schedule-interval) set annotation: @independent
-    Given put attribute type: name
+    Given create attribute type: name
     Given attribute(name) set value-type: string
     Given attribute(name) set annotation: @independent
-    Given put attribute type: email
+    Given create attribute type: email
     Given attribute(email) set value-type: string
     Given attribute(email) set annotation: @independent
     Given attribute(email) set annotation: @regex("\S+@\S+\.\S+")
@@ -154,7 +154,7 @@ Feature: Concept Attribute
     Given transaction commits
 
     When connection open schema transaction for database: typedb
-    When put attribute type: ephemeral
+    When create attribute type: ephemeral
     When attribute(ephemeral) set value-type: long
     When transaction commits
 

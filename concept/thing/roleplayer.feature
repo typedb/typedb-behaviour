@@ -14,28 +14,28 @@ Feature: Concept Ordered Role Players
     Given connection open schema transaction for database: typedb
 
     # Write schema for the test scenarios
-    Given put attribute type: name
+    Given create attribute type: name
     Given attribute(name) set value-type: string
-    Given put attribute type: company-name
+    Given create attribute type: company-name
     Given attribute(company-name) set value-type: string
-    Given put attribute type: date
+    Given create attribute type: date
     Given attribute(date) set value-type: datetime
 
-    Given put relation type: employment
+    Given create relation type: employment
     Given relation(employment) set owns: date
 
     Given relation(employment) create role: employer
     Given relation(employment) create role: employee[]
 
-    Given put entity type: company
+    Given create entity type: company
     Given entity(company) set owns: company-name
     Given entity(company) get owns(company-name) set annotation: @key
-    Given entity(company) set plays role: employment:employer
+    Given entity(company) set plays: employment:employer
 
-    Given put entity type: person
+    Given create entity type: person
     Given entity(person) set owns: name
     Given entity(person) get owns(name) set annotation: @key
-    Given entity(person) set plays role: employment:employee
+    Given entity(person) set plays: employment:employee
 
     Given transaction commits
 

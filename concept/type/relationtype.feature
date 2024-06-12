@@ -22,7 +22,7 @@ Feature: Concept Relation Type and Role Type
     Then delete relation type: relation; fails
 
   Scenario: Relation and role types can be created
-    When put relation type: marriage
+    When create relation type: marriage
     When relation(marriage) create role: husband
     When relation(marriage) create role: wife
     Then relation(marriage) exists
@@ -47,9 +47,9 @@ Feature: Concept Relation Type and Role Type
       | marriage:wife    |
 
   Scenario: Relation and role types can be deleted
-    When put relation type: marriage
+    When create relation type: marriage
     When relation(marriage) create role: spouse
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent
     When relation(parentship) create role: child
     When relation(parentship) delete role: parent
@@ -89,9 +89,9 @@ Feature: Concept Relation Type and Role Type
       | marriage:wife     |
 
   Scenario: Relation types that have instances cannot be deleted
-    When put relation type: marriage
+    When create relation type: marriage
     When relation(marriage) create role: wife
-    When put entity type: person
+    When create entity type: person
     When entity(person) set plays: marriage:wife
     When transaction commits
     When connection open write transaction for database: typedb
@@ -103,10 +103,10 @@ Feature: Concept Relation Type and Role Type
     Then delete relation type: marriage; fails
 
   Scenario: Role types that have instances cannot be deleted
-    When put relation type: marriage
+    When create relation type: marriage
     When relation(marriage) create role: wife
     When relation(marriage) create role: husband
-    When put entity type: person
+    When create entity type: person
     When entity(person) set plays: marriage:wife
     When transaction commits
     When connection open write transaction for database: typedb
@@ -121,7 +121,7 @@ Feature: Concept Relation Type and Role Type
     Then transaction commits
 
   Scenario: Relation and role types can change labels
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent
     When relation(parentship) create role: child
     Then relation(parentship) get label: parentship
@@ -160,10 +160,10 @@ Feature: Concept Relation Type and Role Type
     Then relation(employment) get role(employer) get label: employer
 
   Scenario: Relation and role types can be subtypes of other relation and role types
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent
     When relation(parentship) create role: child
-    When put relation type: fathership
+    When create relation type: fathership
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: father
     When relation(fathership) get role(father); set override: parent
@@ -215,7 +215,7 @@ Feature: Concept Relation Type and Role Type
       | parentship:parent |
       | parentship:child  |
       | fathership:father |
-    When put relation type: father-son
+    When create relation type: father-son
     When relation(father-son) set supertype: fathership
     When relation(father-son) create role: son
     When relation(father-son) get role(son); set override: child
@@ -294,17 +294,17 @@ Feature: Concept Relation Type and Role Type
       | father-son:son    |
 
   Scenario: Relation types cannot subtype itself
-    When put relation type: marriage
+    When create relation type: marriage
     When relation(marriage) create role: wife
     When transaction commits
     When connection open schema transaction for database: typedb
     Then relation(marriage) set supertype: marriage; fails
 
   Scenario: Relation types can inherit related role types
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent
     When relation(parentship) create role: child
-    When put relation type: fathership
+    When create relation type: fathership
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: father
     When relation(fathership) get role(father); set override: parent
@@ -317,7 +317,7 @@ Feature: Concept Relation Type and Role Type
       | parentship:child |
     When transaction commits
     When connection open schema transaction for database: typedb
-    When put relation type: mothership
+    When create relation type: mothership
     When relation(mothership) set supertype: parentship
     When relation(mothership) create role: mother
     When relation(mothership) get role(mother); set override: parent
@@ -346,10 +346,10 @@ Feature: Concept Relation Type and Role Type
       | parentship:child |
 
   Scenario: Relation types can override inherited related role types
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent
     When relation(parentship) create role: child
-    When put relation type: fathership
+    When create relation type: fathership
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: father
     When relation(fathership) get role(father); set override: parent
@@ -359,7 +359,7 @@ Feature: Concept Relation Type and Role Type
       | parentship:parent |
     When transaction commits
     When connection open schema transaction for database: typedb
-    When put relation type: mothership
+    When create relation type: mothership
     When relation(mothership) set supertype: parentship
     When relation(mothership) create role: mother
     When relation(mothership) get role(mother); set override: parent
@@ -373,23 +373,23 @@ Feature: Concept Relation Type and Role Type
       | parentship:parent |
 
   Scenario: Relation types cannot redeclare inherited related role types
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent
     When relation(parentship) create role: child
-    When put relation type: fathership
+    When create relation type: fathership
     When relation(fathership) set supertype: parentship
     Then relation(fathership) create role: parent; fails
 
   Scenario: Relation types cannot override declared related role types
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent
     Then relation(parentship) create role: father
     Then relation(parentship) get role(father); set override: parent; fails
 
   Scenario: Relation types can update existing roles override a newly defined role it inherits
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: other-role
-    When put relation type: fathership
+    When create relation type: fathership
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: father
     When transaction commits
@@ -406,7 +406,7 @@ Feature: Concept Relation Type and Role Type
 ########################
 
   Scenario: Relation and role lists can be created
-    When put relation type: marriage
+    When create relation type: marriage
     When relation(marriage) create role: husband[]
     When relation(marriage) create role: wife[]
     Then relation(marriage) exists
@@ -431,9 +431,9 @@ Feature: Concept Relation Type and Role Type
       | marriage:wife    |
 
   Scenario: Relation and role lists can be deleted
-    When put relation type: marriage
+    When create relation type: marriage
     When relation(marriage) create role: spouse[]
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent[]
     When relation(parentship) create role: child[]
     When relation(parentship) delete role: parent[]
@@ -473,7 +473,7 @@ Feature: Concept Relation Type and Role Type
       | marriage:wife     |
 
   Scenario: Relation and role lists can change labels
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent[]
     When relation(parentship) create role: child[]
     Then relation(parentship) get label: parentship
@@ -512,10 +512,10 @@ Feature: Concept Relation Type and Role Type
     Then relation(employment) get role(employer[]) get label: employer[]
 
   Scenario: Relation and role lists can be subtypes of other relation and role lists
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent[]
     When relation(parentship) create role: child[]
-    When put relation type: fathership
+    When create relation type: fathership
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: father[]
     When relation(fathership) get role(father[]); set override: parent[]
@@ -567,7 +567,7 @@ Feature: Concept Relation Type and Role Type
       | parentship:parent[] |
       | parentship:child[]  |
       | fathership:father[] |
-    When put relation type: father-son
+    When create relation type: father-son
     When relation(father-son) set supertype: fathership
     When relation(father-son) create role: son[]
     When relation(father-son) get role(son); set override: child
@@ -646,10 +646,10 @@ Feature: Concept Relation Type and Role Type
       | father-son:son[]    |
 
   Scenario: Relation types can inherit related role lists
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent[]
     When relation(parentship) create role: child[]
-    When put relation type: fathership
+    When create relation type: fathership
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: father[]
     When relation(fathership) get role(father[]); set override: parent[]
@@ -662,7 +662,7 @@ Feature: Concept Relation Type and Role Type
       | parentship:child[] |
     When transaction commits
     When connection open schema transaction for database: typedb
-    When put relation type: mothership
+    When create relation type: mothership
     When relation(mothership) set supertype: parentship
     When relation(mothership) create role: mother[]
     When relation(mothership) get role(mother[]); set override: parent[]
@@ -691,10 +691,10 @@ Feature: Concept Relation Type and Role Type
       | parentship:child[] |
 
   Scenario: Relation types can override inherited related role lists
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent[]
     When relation(parentship) create role: child[]
-    When put relation type: fathership
+    When create relation type: fathership
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: father[]
     When relation(fathership) get role(father[]); set override: parent[]
@@ -704,7 +704,7 @@ Feature: Concept Relation Type and Role Type
       | parentship:parent[] |
     When transaction commits
     When connection open schema transaction for database: typedb
-    When put relation type: mothership
+    When create relation type: mothership
     When relation(mothership) set supertype: parentship
     When relation(mothership) create role: mother[]
     When relation(mothership) get role(mother[]); set override: parent[]
@@ -718,23 +718,23 @@ Feature: Concept Relation Type and Role Type
       | parentship:parent[] |
 
   Scenario: Relation types cannot redeclare inherited related role types
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent[]
     When relation(parentship) create role: child[]
-    When put relation type: fathership
+    When create relation type: fathership
     When relation(fathership) set supertype: parentship
     Then relation(fathership) create role: parent[]; fails
 
   Scenario: Relation types cannot override declared related role types
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent[]
     Then relation(parentship) create role: father[]
     Then relation(parentship) get role(father[]); set override: parent; fails
 
   Scenario: Relation types can update existing roles override a newly defined role it inherits
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: other-role[]
-    When put relation type: fathership
+    When create relation type: fathership
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: father[]
     When transaction commits
@@ -747,7 +747,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get overridden role(father[]) get label: parent[]
 
   Scenario: Relation can't change label to a list
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent
     When relation(parentship) create role: child[]
     Then relation(parentship) get label: parentship
@@ -756,7 +756,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) exist
 
   Scenario: Role can't change label to a list if it's not a list and to a non-list if it's a list
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent
     When relation(parentship) create role: child[]
     Then relation(parentship) get role(parent) get label: parent
@@ -769,7 +769,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(child[]) get label: child[]
 
   Scenario: Relation can't have a list of roles alongside a scalar role of the same name
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent
     Then relation(parentship) create role: parent[]; fails
     When relation(parentship) create role: child[]
@@ -782,10 +782,10 @@ Feature: Concept Relation Type and Role Type
       | child    |
 
   Scenario: Relation can't have a list of roles if it inherits a scalar role of the same name and vice-versa
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent
     When relation(parentship) create role: child[]
-    When put relation type: fathership
+    When create relation type: fathership
     When relation(fathership) set supertype: parentship
     Then relation(fathership) create role: parent[]; fails
     Then relation(fathership) create role: child; fails
@@ -801,7 +801,7 @@ Feature: Concept Relation Type and Role Type
 ########################
 
   Scenario Outline: Relation type cannot unset @<annotation> that has not been set
-    When put relation type: marriage
+    When create relation type: marriage
     When relation(marriage) create role: husband
     When relation(marriage) create role: wife
     Then relation(marriage) unset annotation: @<annotation>; fails
@@ -815,11 +815,11 @@ Feature: Concept Relation Type and Role Type
 ########################
 
   Scenario: Relation type can be set to abstract while role types remain concrete
-    When put relation type: marriage
+    When create relation type: marriage
     When relation(marriage) create role: husband
     When relation(marriage) create role: wife
     When relation(marriage) set annotation: @abstract
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent
     When relation(parentship) create role: child
     Then relation(marriage) get annotations contain: @abstract
@@ -851,16 +851,16 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(child) get annotations do not contain: @abstract
 
   Scenario: Relation types can be set to abstract when a subtype has instances
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent
     When relation(parentship) create role: child
-    When put relation type: fathership
+    When create relation type: fathership
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: father
     When relation(fathership) get role(father); set override: parent
     When relation(fathership) create role: father-child
     When relation(fathership) get role(father-child); set override: child
-    When put entity type: person
+    When create entity type: person
     When entity(person) set plays: fathership:father
     Then transaction commits
     When connection open write transaction for database: typedb
@@ -875,7 +875,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get annotations contain: @abstract
 
   Scenario: Relation cannot set @abstract annotation with arguments
-    When put relation type: parentship
+    When create relation type: parentship
     Then relation(parentship) set annotation: @abstract(); fails
     Then relation(parentship) set annotation: @abstract(1); fails
     Then relation(parentship) set annotation: @abstract(1, 2); fails
@@ -885,19 +885,19 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get annotations is empty
 
   Scenario: Relation types must have at least one role in order to commit, unless they are abstract
-    When put relation type: connection
+    When create relation type: connection
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When put relation type: connection
+    When create relation type: connection
     When relation(connection) set annotation: @abstract
     Then transaction commits
 
   Scenario: Roles can be inherited from abstract relation types
-    When put relation type: parentship
+    When create relation type: parentship
     Then relation(parentship) set annotation: @abstract
     When relation(parentship) create role: parent
     When relation(parentship) create role: child
-    When put relation type: fathership
+    When create relation type: fathership
     When relation(fathership) set supertype: parentship
     When transaction commits
     When connection open read transaction for database: typedb
@@ -911,9 +911,9 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get role(child) get annotations do not contain: @abstract
 
   Scenario: Relation types can subtype non abstract relation types
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent
-    When put relation type: fathership
+    When create relation type: fathership
     When relation(fathership) create role: father
     When transaction commits
     When connection open schema transaction for database: typedb
@@ -929,7 +929,7 @@ Feature: Concept Relation Type and Role Type
 ########################
 
   Scenario: Relation can set and unset @cascade annotation
-    When put relation type: parentship
+    When create relation type: parentship
     Then relation(parentship) set annotation: @cascade
     Then relation(parentship) get annotations contain: @cascade
     When transaction commits
@@ -942,7 +942,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get annotations is empty
 
   Scenario: Relation cannot set @cascade annotation with arguments
-    When put relation type: parentship
+    When create relation type: parentship
     Then relation(parentship) set annotation: @cascade(); fails
     Then relation(parentship) set annotation: @cascade(1); fails
     Then relation(parentship) set annotation: @cascade(1, 2); fails
@@ -953,7 +953,7 @@ Feature: Concept Relation Type and Role Type
 ########################
 
   Scenario: Relation type cannot have @distinct, @key, @unique, @subkey, @values, @range, @card, @independent, @replace, and @regex annotations
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent
     Then relation(parentship) set annotation: @distinct; fails
     Then relation(parentship) set annotation: @key; fails
@@ -982,7 +982,7 @@ Feature: Concept Relation Type and Role Type
 ########################
 
   Scenario Outline: Relation types can set @<annotation-1> and @<annotation-2> together and unset it
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent
     When relation(parentship) set annotation: @<annotation-1>
     When relation(parentship) set annotation: @<annotation-2>
@@ -1020,12 +1020,12 @@ Feature: Concept Relation Type and Role Type
 
     # Uncomment and add Examples when they appear!
 #  Scenario Outline: Relation types cannot set @<annotation-1> and @<annotation-2> together for
-#    When put relation type: parentship
+#    When create relation type: parentship
 #    When relation(parentship) create role: parent
 #    When relation(parentship) set annotation: @<annotation-1>
 #    When relation(parentship) set annotation: @<annotation-2>; fails
 #    When connection open schema transaction for database: typedb
-#    When put relation type: parentship
+#    When create relation type: parentship
 #    When relation(parentship) create role: parent
 #    When relation(parentship) set annotation: @<annotation-2>
 #    When relation(parentship) set annotation: @<annotation-1>; fails
@@ -1041,7 +1041,7 @@ Feature: Concept Relation Type and Role Type
 ########################
 
   Scenario Outline: Roles cannot unset @<annotation> that has not been set
-    When put relation type: marriage
+    When create relation type: marriage
     When relation(marriage) create role: husband
     Then relation(marriage) get role(husband) unset annotation: @<annotation>; fails
     Examples:
@@ -1049,7 +1049,7 @@ Feature: Concept Relation Type and Role Type
       | card(1, 2) |
 
   Scenario Outline: Roles lists cannot unset @<annotation> that has not been set
-    When put relation type: marriage
+    When create relation type: marriage
     When relation(marriage) create role: husband[]
     Then relation(marriage) get role(husband[]) unset annotation: @<annotation>; fails
     Examples:
@@ -1062,7 +1062,7 @@ Feature: Concept Relation Type and Role Type
 ########################
 
   Scenario: Relation type can set @distinct annotation for list of roles and unset it
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent[]
     When relation(parentship) get role(parent[]) set annotation: @distinct
     Then relation(parentship) get role(parent[]) get annotations contain: @distinct
@@ -1076,7 +1076,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(parent[]) get annotations is empty
 
   Scenario: Relation type can set @distinct annotation for non-list roles
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent
     Then relation(parentship) get role(parent) set annotation: @distinct; fails
     Then relation(parentship) get role(parent) get annotations is empty
@@ -1085,7 +1085,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(parent) get annotations is empty
 
   Scenario: Relation type can set @distinct annotation with arguments
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent[]
     Then relation(parentship) get role(parent[]) set annotation: @distinct(); fails
     Then relation(parentship) get role(parent[]) set annotation: @distinct(1); fails
@@ -1097,7 +1097,7 @@ Feature: Concept Relation Type and Role Type
 
     # TODO: Maybe we can't create role again!
   Scenario: Relation type can redeclare roles as roles with @distinct
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent[]
     Then relation(parentship) get role(parent[]) get annotations is empty
     When transaction commits
@@ -1111,7 +1111,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(parent[]) get annotations contain: @distinct
 
   Scenario: Relation type cannot unset not set @distinct of a role
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent[]
     Then relation(parentship) get role(parent[]) unset annotation: @distinct; fails
     When transaction commits
@@ -1120,10 +1120,10 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(parent[]) unset annotation: @distinct; fails
 
   Scenario: Relation type cannot unset @distinct of inherited role
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent[]
     Then relation(parentship) get role(parent[]) set annotation: @distinct
-    When put relation type: fathership
+    When create relation type: fathership
     When relation(fathership) set supertype: parentship
     Then relation(parentship) get role(parent[]) get annotations contain: @distinct
     Then relation(fathership) get role(parent[]) get annotations contain: @distinct
@@ -1139,7 +1139,7 @@ Feature: Concept Relation Type and Role Type
 ########################
 
   Scenario: Relation type can set @card annotation on roles and unset it
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent
     When relation(parentship) create role: child[]
     When relation(parentship) get role(parent) set annotation: @card(1, 2)
@@ -1160,7 +1160,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(child[]) get annotations is empty
 
   Scenario Outline: Relation type can set @card annotation on roles with duplicate args (exactly N ownerships)
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent
     When relation(parentship) create role: child[]
     When relation(parentship) get role(parent) set annotation: @card(<arg>, <arg>)
@@ -1177,7 +1177,7 @@ Feature: Concept Relation Type and Role Type
       | 9999 |
 
   Scenario: Relation type cannot have @card annotation for with invalid arguments
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent
     Then relation(parentship) get role(parent) set annotation: @card(); fails
     Then relation(parentship) get role(parent) set annotation: @card(0); fails
@@ -1198,7 +1198,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(parent) get annotations is empty
 
   Scenario Outline: Relation type cannot set multiple @card annotations with different arguments on a role
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent
     When relation(parentship) get role(parent) set annotation: @card(2, 5)
     Then relation(parentship) get role(parent) set annotation: @card(<fail-args>); fails
@@ -1226,7 +1226,7 @@ Feature: Concept Relation Type and Role Type
 
     # TODO: Maybe we allow it, then change the test considering the expected behavior
   Scenario Outline: Relation type cannot redeclare @card annotation with different arguments on a role
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent
     When relation(parentship) get role(parent) set annotation: @card(<args>)
     Then relation(parentship) get role(parent) set annotation: @card(<args>)
@@ -1247,14 +1247,14 @@ Feature: Concept Relation Type and Role Type
       | 2, 5 | 2, *            |
 
   Scenario Outline: Role's @card annotation can be inherited and overridden by a subset of arguments
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: custom-role
     When relation(parentship) create role: second-custom-role
     When relation(parentship) get role(custom-role) set annotation: @card(<args>)
     Then relation(parentship) get role(custom-role) get annotations contain: @card(<args>)
     When relation(parentship) get role(second-custom-role) set annotation: @card(<args>)
     Then relation(parentship) get role(second-custom-role) get annotations contain: @card(<args>)
-    When put relation type: fathership
+    When create relation type: fathership
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: overridden-custom-role
     # TODO: Overrides? Remove second-custom-role from test if we remove overrides!
@@ -1287,14 +1287,14 @@ Feature: Concept Relation Type and Role Type
       | 1000, 1100 | 1000, 1099    |
 
   Scenario Outline: Inherited @card annotation of roles cannot be overridden by the @card of same arguments or not a subset of arguments
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: custom-role
     When relation(parentship) create role: second-custom-role
     When relation(parentship) get role(custom-role) set annotation: @card(<args>)
     Then relation(parentship) get role(custom-role) get annotations contain: @card(<args>)
     When relation(parentship) get role(second-custom-role) set annotation: @card(<args>)
     Then relation(parentship) get role(second-custom-role) get annotations contain: @card(<args>)
-    When put relation type: fathership
+    When create relation type: fathership
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: overridden-custom-role
     # TODO: Overrides? Remove second-custom-role from test if we remove overrides!
@@ -1326,7 +1326,7 @@ Feature: Concept Relation Type and Role Type
 ########################
 
   Scenario: Relation's role cannot have @key, @unique, @subkey, @values, @range, @abstract, @cascade, @independent, @replace, and @regex annotations
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent
     Then relation(parentship) get role(parent) set annotation: @key; fails
     Then relation(parentship) get role(parent) set annotation: @unique; fails
@@ -1355,7 +1355,7 @@ Feature: Concept Relation Type and Role Type
 ########################
 
   Scenario Outline: Roles lists can set @<annotation-1> and @<annotation-2> together and unset it
-    When put relation type: parentship
+    When create relation type: parentship
     When relation(parentship) create role: parent[]
     When relation(parentship) get role(parent[]) set annotation: @<annotation-1>
     When relation(parentship) get role(parent[]) set annotation: @<annotation-2>
@@ -1393,12 +1393,12 @@ Feature: Concept Relation Type and Role Type
 
       # Uncomment and add Examples when they appear!
 #  Scenario Outline: Roles lists cannot set @<annotation-1> and @<annotation-2> together and unset it
-#    When put relation type: parentship
+#    When create relation type: parentship
 #    When relation(parentship) create role: parent[]
 #    When relation(parentship) get role(parent[]) set annotation: @<annotation-1>
 #    Then relation(parentship) get role(parent[]) set annotation: @<annotation-2>; fails
 #    When connection open schema transaction for database: typedb
-#    When put relation type: parentship
+#    When create relation type: parentship
 #    When relation(parentship) create role: parent[]
 #    Then relation(parentship) get role(parent[]) set annotation: @<annotation-2>
 #    When relation(parentship) get role(parent[]) set annotation: @<annotation-1>; fails

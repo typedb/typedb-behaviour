@@ -13,14 +13,14 @@ Feature: Concept Relation
     Given connection create database: typedb
     Given connection open schema transaction for database: typedb
 
-    Given put attribute type: username
+    Given create attribute type: username
     Given attribute(username) set value-type: string
-    Given put attribute type: license
+    Given create attribute type: license
     Given attribute(license) set value-type: string
-    Given put attribute type: date
+    Given create attribute type: date
     Given attribute(date) set value-type: datetime
 
-    Given put relation type: marriage
+    Given create relation type: marriage
     Given relation(marriage) set owns: license
     Given relation(marriage) get owns(license) set annotation: @key
     Given relation(marriage) set owns: date
@@ -30,11 +30,11 @@ Feature: Concept Relation
     Given relation(marriage) create role: husband
     Given relation(marriage) get role(husband) set annotation: @card(0, 1)
 
-    Given put entity type: person
+    Given create entity type: person
     Given entity(person) set owns: username
     Given entity(person) get owns(username) set annotation: @key
-    Given entity(person) set plays role: marriage:wife
-    Given entity(person) set plays role: marriage:husband
+    Given entity(person) set plays: marriage:wife
+    Given entity(person) set plays: marriage:husband
 
     Given transaction commits
     Given connection open write transaction for database: typedb
@@ -143,7 +143,7 @@ Feature: Concept Relation
     Then transaction commits
     Given connection open schema transaction for database: typedb
     Given relation(marriage) create role: dependent-marriage
-    Given relation(marriage) set plays role: marriage:dependent-marriage
+    Given relation(marriage) set plays: marriage:dependent-marriage
     Given transaction commits
     Given connection open write transaction for database: typedb
 

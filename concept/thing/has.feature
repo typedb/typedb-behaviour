@@ -13,11 +13,11 @@ Feature: Concept Ordered Ownership
     Given connection create database: typedb
     Given connection open schema transaction for database: typedb
     # Write schema for the test scenarios
-    Given put attribute type: username
+    Given create attribute type: username
     Given attribute(username) set value-type: string
-    Given put attribute type: email
+    Given create attribute type: email
     Given attribute(email) set value-type: string
-    Given put entity type: person
+    Given create entity type: person
     Given entity(person) set owns: username
     Given entity(person) get owns(username) set annotation: @key
     Given entity(person) set owns: email[]
