@@ -38,11 +38,11 @@ Feature: Concept Owns
 
   Scenario Outline: Entity types can own and unset attributes
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When create attribute type: surname
-    When attribute(surname) set value-type: <value-type>
+    When attribute(surname) set value type: <value-type>
     When create attribute type: birthday
-    When attribute(birthday) set value-type: <value-type-2>
+    When attribute(birthday) set value type: <value-type-2>
     When entity(person) set owns: name
     When entity(person) set owns: birthday
     When entity(person) set owns: surname
@@ -92,9 +92,9 @@ Feature: Concept Owns
 
   Scenario Outline: Entity types can redeclare owning attributes with <value-type> value type
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When create attribute type: email
-    When attribute(email) set value-type: <value-type>
+    When attribute(email) set value type: <value-type>
     When entity(person) set owns: name
     When entity(person) set owns: email
     Then entity(person) set owns: name
@@ -130,13 +130,85 @@ Feature: Concept Owns
     When connection open read transaction for database: typedb
     Then entity(person) get owns is empty
 
+  Scenario: Entity type cannot own attribute without value type
+    When create entity type: player
+    When create attribute type: name
+    When create attribute type: email
+    When attribute(email) set annotation: @abstract
+    Then entity(player) set owns: name; fails
+    Then entity(player) set owns: email; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(player) set owns: name; fails
+    Then entity(player) set owns: email; fails
+    Then entity(player) get owns is empty
+
+  Scenario: Non-abstract entity type cannot own abstract attribute
+    When create entity type: player
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When create attribute type: email
+    When attribute(email) set value type: string
+    When attribute(email) set annotation: @abstract
+    Then entity(player) set owns: name; fails
+    Then entity(player) set owns: email; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(player) set owns: name; fails
+    Then entity(player) set owns: email; fails
+    Then entity(player) get owns is empty
+
+  Scenario: Abstract entity type cannot own non-abstract attribute without value type
+    When create entity type: player
+    When entity(player) set annotation: @abstract
+    When create attribute type: name
+    Then entity(player) set owns: name; fails
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(player) set owns: name; fails
+
+  Scenario: Abstract entity type can own abstract attribute
+    When create entity type: player
+    When entity(type) set annotation: @abstract
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When create attribute type: email
+    When attribute(email) set value type: string
+    When attribute(email) set annotation: @abstract
+    When entity(player) set owns: name
+    When entity(player) set owns: email
+    Then entity(player) get owns contain:
+      | name  |
+      | email |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(player) get owns contain:
+      | name  |
+      | email |
+
+  Scenario: Entity type cannot unset abstract annotation if it owns an abstract attribute
+    When create entity type: player
+    When entity(type) set annotation: @abstract
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When entity(player) set owns: name
+    When entity(player) get owns contain: name
+    Then entity(player) unset annotation: @abstract; fails
+    Then entity(player) get annotations contain: @abstract
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(player) get owns contain: name
+    Then entity(player) get annotations contain: @abstract
+    Then entity(player) unset annotation: @abstract; fails
+    Then entity(player) get annotations contain: @abstract
+
   Scenario Outline: Relation types can own and unset attributes
     When create attribute type: license
-    When attribute(license) set value-type: <value-type>
+    When attribute(license) set value type: <value-type>
     When create attribute type: starting-date
-    When attribute(starting-date) set value-type: <value-type>
+    When attribute(starting-date) set value type: <value-type>
     When create attribute type: comment
-    When attribute(comment) set value-type: <value-type-2>
+    When attribute(comment) set value type: <value-type-2>
     When create relation type: marriage
     When relation(marriage) create role: spouse
     When relation(marriage) set owns: license
@@ -188,9 +260,9 @@ Feature: Concept Owns
 
   Scenario Outline: Relation types can redeclare owning attributes with <value-type> value type
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When create attribute type: email
-    When attribute(email) set value-type: <value-type>
+    When attribute(email) set value type: <value-type>
     When create relation type: reference
     When relation(reference) create role: target
     When relation(reference) set owns: name
@@ -232,17 +304,94 @@ Feature: Concept Owns
     When connection open read transaction for database: typedb
     Then relation(marriage) get owns is empty
 
+  Scenario: Relation type cannot own attribute without value type
+    When create relation type: brotherhood
+    When relation(brotherhood) create role: brother
+    When create attribute type: name
+    When create attribute type: email
+    When attribute(email) set annotation: @abstract
+    Then relation(brotherhood) set owns: name; fails
+    Then relation(brotherhood) set owns: email; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(brotherhood) set owns: name; fails
+    Then relation(brotherhood) set owns: email; fails
+    Then relation(brotherhood) get owns is empty
+
+  Scenario: Non-abstract relation type cannot own abstract attribute
+    When create relation type: brotherhood
+    When relation(brotherhood) create role: brother
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When create attribute type: email
+    When attribute(email) set value type: string
+    When attribute(email) set annotation: @abstract
+    Then relation(brotherhood) set owns: name; fails
+    Then relation(brotherhood) set owns: email; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(brotherhood) set owns: name; fails
+    Then relation(brotherhood) set owns: email; fails
+    Then relation(brotherhood) get owns is empty
+
+  Scenario: Abstract relation type cannot own non-abstract attribute without value type
+    When create relation type: brotherhood
+    When relation(brotherhood) create role: brother
+    When relation(brotherhood) set annotation: @abstract
+    When create attribute type: name
+    Then relation(brotherhood) set owns: name; fails
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(brotherhood) set owns: name; fails
+
+  Scenario: Abstract relation type can own abstract attribute
+    When create relation type: brotherhood
+    When relation(brotherhood) create role: brother
+    When entity(type) set annotation: @abstract
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When create attribute type: email
+    When attribute(email) set value type: string
+    When attribute(email) set annotation: @abstract
+    When relation(brotherhood) set owns: name
+    When relation(brotherhood) set owns: email
+    Then relation(brotherhood) get owns contain:
+      | name  |
+      | email |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(brotherhood) get owns contain:
+      | name  |
+      | email |
+
+  Scenario: Relation type cannot unset abstract annotation if it owns an abstract attribute
+    When create relation type: brotherhood
+    When relation(brotherhood) create role: brother
+    When entity(type) set annotation: @abstract
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When relation(brotherhood) set owns: name
+    When relation(brotherhood) get owns contain: name
+    Then relation(brotherhood) unset annotation: @abstract; fails
+    Then relation(brotherhood) get annotations contain: @abstract
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(brotherhood) get owns contain: name
+    Then relation(brotherhood) get annotations contain: @abstract
+    Then relation(brotherhood) unset annotation: @abstract; fails
+    Then relation(brotherhood) get annotations contain: @abstract
+
   Scenario: Attribute types cannot own entities, attributes, relations, roles, structs, structs fields, and non-existing things
     When create attribute type: surname
     When create relation type: marriage
     When relation(marriage) create role: spouse
-    When attribute(surname) set value-type: string
+    When attribute(surname) set value type: string
     When create struct type: passport
     When struct(passport) create field: first-name, with value type: string
     When struct(passport) create field: surname, with value type: string
     When struct(passport) create field: birthday, with value type: datetime
     When create attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value type: string
     Then attribute(name) set owns: person; fails
     Then attribute(name) set owns: surname; fails
     Then attribute(name) set owns: marriage; fails
@@ -259,7 +408,7 @@ Feature: Concept Owns
     When create attribute type: name
     When create relation type: marriage
     When relation(marriage) create role: spouse
-    When attribute(surname) set value-type: string
+    When attribute(surname) set value type: string
     When create struct type: passport
     When struct(passport) create field: birthday, with value type: datetime
     When create struct type: wallet
@@ -280,7 +429,7 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types cannot unset owning attributes that are owned by existing instances
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When <root-type>(<type-name>) set owns: name
     Then transaction commits
     When connection open write transaction for database: typedb
@@ -312,10 +461,10 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types can re-override owns
     When create attribute type: email
-    When attribute(email) set value-type: <value-type>
+    When attribute(email) set value type: <value-type>
     When attribute(email) set annotation: @abstract
     When create attribute type: work-email
-    When attribute(work-email) set value-type: <value-type>
+    When attribute(work-email) set value type: <value-type>
     When attribute(work-email) set supertype: email
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: email
@@ -351,9 +500,9 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types cannot redeclare inherited owns as owns
     When create attribute type: email
-    When attribute(email) set value-type: <value-type>
+    When attribute(email) set value type: <value-type>
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When <root-type>(<supertype-name>) set owns: name
     Then <root-type>(<subtype-name>) set owns: name
     Then transaction commits; fails
@@ -366,10 +515,10 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types cannot redeclare inherited owns in multiple layers of inheritance
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
     When create attribute type: customer-name
-    When attribute(customer-name) set value-type: <value-type>
+    When attribute(customer-name) set value type: <value-type>
     When attribute(customer-name) set supertype: name
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: name
@@ -386,10 +535,10 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types cannot redeclare overridden owns as owns
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
     When create attribute type: customer-name
-    When attribute(customer-name) set value-type: <value-type>
+    When attribute(customer-name) set value type: <value-type>
     When attribute(customer-name) set supertype: name
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: name
@@ -407,10 +556,10 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types cannot override declared owns with owns
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
     When create attribute type: first-name
-    When attribute(first-name) set value-type: <value-type>
+    When attribute(first-name) set value type: <value-type>
     When attribute(first-name) set supertype: name
     When <root-type>(<type-name>) set annotation: @abstract
     When <root-type>(<type-name>) set owns: name
@@ -426,9 +575,9 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types cannot override inherited owns other than with their subtypes
     When create attribute type: username
-    When attribute(username) set value-type: <value-type>
+    When attribute(username) set value type: <value-type>
     When create attribute type: reference
-    When attribute(reference) set value-type: <value-type>
+    When attribute(reference) set value type: <value-type>
     When <root-type>(<supertype-name>) set owns: username
     When transaction commits
     When connection open schema transaction for database: typedb
@@ -442,9 +591,9 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types cannot unset not owned ownership
     When create attribute type: username
-    When attribute(username) set value-type: <value-type>
+    When attribute(username) set value type: <value-type>
     When create attribute type: reference
-    When attribute(reference) set value-type: <value-type>
+    When attribute(reference) set value type: <value-type>
     When <root-type>(<type-name>) set owns: username
     Then <root-type>(<type-name>) get owns contain: username
     Then <root-type>(<type-name>) unset owns: reference; fails
@@ -465,7 +614,7 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types cannot unset inherited ownership
     When create attribute type: username
-    When attribute(username) set value-type: <value-type>
+    When attribute(username) set value type: <value-type>
     When <root-type>(<supertype-name>) set owns: username
     Then <root-type>(<supertype-name>) get owns contain: username
     Then <root-type>(<subtype-name>) get owns contain: username
@@ -480,7 +629,9 @@ Feature: Concept Owns
       | relation  | description    | registration | long       |
 
   Scenario Outline: Owns can be inherited from abstract <root-type> types
-    Then <root-type>(<supertype-name>) set annotation: @abstract
+    When create attribute type: username
+    When attribute(username) set value type: string
+    When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: username
     When <root-type>(<supertype-name>) get owns contain: username
     When <root-type>(<subtype-name>) get owns contain: username
@@ -501,11 +652,11 @@ Feature: Concept Owns
 
   Scenario Outline: Entity types can own and unset lists of attributes
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When create attribute type: surname
-    When attribute(surname) set value-type: <value-type>
+    When attribute(surname) set value type: <value-type>
     When create attribute type: birthday
-    When attribute(birthday) set value-type: <value-type-2>
+    When attribute(birthday) set value type: <value-type-2>
     When entity(person) set owns: name[]
     When entity(person) set owns: birthday[]
     When entity(person) set owns: surname[]
@@ -555,9 +706,9 @@ Feature: Concept Owns
 
   Scenario Outline: Entity types can redeclare owning lists of attributes
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When create attribute type: email
-    When attribute(email) set value-type: <value-type>
+    When attribute(email) set value type: <value-type>
     When entity(person) set owns: name[]
     When entity(person) set owns: email[]
     Then entity(person) set owns: name[]
@@ -594,13 +745,85 @@ Feature: Concept Owns
     When connection open read transaction for database: typedb
     Then entity(person) get owns is empty
 
+  Scenario: Entity type cannot own attribute list without value type
+    When create entity type: player
+    When create attribute type: name
+    When create attribute type: email
+    When attribute(email) set annotation: @abstract
+    Then entity(player) set owns: name[]; fails
+    Then entity(player) set owns: email[]; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(player) set owns: name[]; fails
+    Then entity(player) set owns: email[]; fails
+    Then entity(player) get owns is empty
+
+  Scenario: Non-abstract entity type cannot own abstract attribute list
+    When create entity type: player
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When create attribute type: email
+    When attribute(email) set value type: string
+    When attribute(email) set annotation: @abstract
+    Then entity(player) set owns: name[]; fails
+    Then entity(player) set owns: email[]; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(player) set owns: name[]; fails
+    Then entity(player) set owns: email[]; fails
+    Then entity(player) get owns is empty
+
+  Scenario: Abstract entity type cannot own non-abstract attribute list without value type
+    When create entity type: player
+    When entity(player) set annotation: @abstract
+    When create attribute type: name
+    Then entity(player) set owns: name[]; fails
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(player) set owns: name[]; fails
+
+  Scenario: Abstract entity type can own abstract attribute list
+    When create entity type: player
+    When entity(type) set annotation: @abstract
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When create attribute type: email
+    When attribute(email) set value type: string
+    When attribute(email) set annotation: @abstract
+    When entity(player) set owns: name[]
+    When entity(player) set owns: email[]
+    Then entity(player) get owns contain:
+      | name[]  |
+      | email[] |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(player) get owns contain:
+      | name[]  |
+      | email[] |
+
+  Scenario: Entity type cannot unset abstract annotation if it owns an abstract attribute list
+    When create entity type: player
+    When entity(type) set annotation: @abstract
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When entity(player) set owns: name[]
+    When entity(player) get owns contain: name[]
+    Then entity(player) unset annotation: @abstract; fails
+    Then entity(player) get annotations contain: @abstract
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(player) get owns contain: name[]
+    Then entity(player) get annotations contain: @abstract
+    Then entity(player) unset annotation: @abstract; fails
+    Then entity(player) get annotations contain: @abstract
+
   Scenario Outline: Relation types can own and unset lists of attributes
     When create attribute type: license
-    When attribute(license) set value-type: <value-type>
+    When attribute(license) set value type: <value-type>
     When create attribute type: starting-date
-    When attribute(starting-date) set value-type: <value-type>
+    When attribute(starting-date) set value type: <value-type>
     When create attribute type: comment
-    When attribute(comment) set value-type: <value-type-2>
+    When attribute(comment) set value type: <value-type-2>
     When create relation type: marriage
     When relation(marriage) create role: spouse
     When relation(marriage) set owns: license[]
@@ -652,9 +875,9 @@ Feature: Concept Owns
 
   Scenario Outline: Relation types can redeclare owning lists of attributes
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When create attribute type: email
-    When attribute(email) set value-type: <value-type>
+    When attribute(email) set value type: <value-type>
     When create relation type: reference
     When relation(reference) create role: target
     When relation(reference) set owns: name[]
@@ -695,17 +918,94 @@ Feature: Concept Owns
     When connection open read transaction for database: typedb
     Then relation(marriage) get owns is empty
 
+  Scenario: Relation type cannot own attribute list without value type
+    When create relation type: brotherhood
+    When relation(brotherhood) create role: brother
+    When create attribute type: name
+    When create attribute type: email
+    When attribute(email) set annotation: @abstract
+    Then relation(brotherhood) set owns: name[]; fails
+    Then relation(brotherhood) set owns: email[]; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(brotherhood) set owns: name[]; fails
+    Then relation(brotherhood) set owns: email[]; fails
+    Then relation(brotherhood) get owns is empty
+
+  Scenario: Non-abstract relation type cannot own abstract attribute list
+    When create relation type: brotherhood
+    When relation(brotherhood) create role: brother
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When create attribute type: email
+    When attribute(email) set value type: string
+    When attribute(email) set annotation: @abstract
+    Then relation(brotherhood) set owns: name[]; fails
+    Then relation(brotherhood) set owns: email[]; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(brotherhood) set owns: name[]; fails
+    Then relation(brotherhood) set owns: email[]; fails
+    Then relation(brotherhood) get owns is empty
+
+  Scenario: Abstract relation type cannot own non-abstract attribute without value type list
+    When create relation type: brotherhood
+    When relation(brotherhood) create role: brother
+    When relation(brotherhood) set annotation: @abstract
+    When create attribute type: name
+    Then relation(brotherhood) set owns: name[]; fails
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(brotherhood) set owns: name[]; fails
+
+  Scenario: Abstract relation type can own abstract attribute list
+    When create relation type: brotherhood
+    When relation(brotherhood) create role: brother
+    When entity(type) set annotation: @abstract
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When create attribute type: email
+    When attribute(email) set value type: string
+    When attribute(email) set annotation: @abstract
+    When relation(brotherhood) set owns: name[]
+    When relation(brotherhood) set owns: email[]
+    Then relation(brotherhood) get owns contain:
+      | name[]  |
+      | email[] |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(brotherhood) get owns contain:
+      | name[]  |
+      | email[] |
+
+  Scenario: Relation type cannot unset abstract annotation if it owns an abstract attribute list
+    When create relation type: brotherhood
+    When relation(brotherhood) create role: brother
+    When entity(type) set annotation: @abstract
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When relation(brotherhood) set owns: name[]
+    When relation(brotherhood) get owns contain: name[]
+    Then relation(brotherhood) unset annotation: @abstract; fails
+    Then relation(brotherhood) get annotations contain: @abstract
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(brotherhood) get owns contain: name[]
+    Then relation(brotherhood) get annotations contain: @abstract
+    Then relation(brotherhood) unset annotation: @abstract; fails
+    Then relation(brotherhood) get annotations contain: @abstract
+
   Scenario: Attribute types cannot own lists of entities, attributes, relations, roles, structs, and structs fields
     When create attribute type: surname
     When create relation type: marriage
     When relation(marriage) create role: spouse
-    When attribute(surname) set value-type: string
+    When attribute(surname) set value type: string
     When create struct type: passport
     When struct(passport) create field: first-name, with value type: string
     When struct(passport) create field: surname, with value type: string
     When struct(passport) create field: birthday, with value type: datetime
     When create attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value type: string
     Then attribute(name) set owns: person[]; fails
     Then attribute(name) set owns: surname[]; fails
     Then attribute(name) set owns: marriage[]; fails
@@ -721,7 +1021,7 @@ Feature: Concept Owns
     When create attribute type: name
     When create relation type: marriage
     When relation(marriage) create role: spouse
-    When attribute(surname) set value-type: string
+    When attribute(surname) set value type: string
     When create struct type: passport
     When struct(passport) create field: first-name, with value type: string
     When struct(passport) create field: surname, with value type: string
@@ -743,7 +1043,7 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types cannot unset owning lists of attributes that are owned by existing instances
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When <root-type>(<type-name>) set owns: name[]
     Then transaction commits
     When connection open write transaction for database: typedb
@@ -775,10 +1075,10 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types can re-override owns of lists
     When create attribute type: email
-    When attribute(email) set value-type: <value-type>
+    When attribute(email) set value type: <value-type>
     When attribute(email) set annotation: @abstract
     When create attribute type: work-email
-    When attribute(work-email) set value-type: <value-type>
+    When attribute(work-email) set value type: <value-type>
     When attribute(work-email) set supertype: email
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: email[]
@@ -814,9 +1114,9 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types cannot redeclare inherited owns as owns
     When create attribute type: email
-    When attribute(email) set value-type: <value-type>
+    When attribute(email) set value type: <value-type>
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When <root-type>(<supertype-name>) set owns: name[]
     Then <root-type>(<subtype-name>) set owns: name[]
     Then transaction commits; fails
@@ -829,10 +1129,10 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types cannot redeclare inherited owns in multiple layers of inheritance
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
     When create attribute type: customer-name
-    When attribute(customer-name) set value-type: <value-type>
+    When attribute(customer-name) set value type: <value-type>
     When attribute(customer-name) set supertype: name
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: name[]
@@ -849,10 +1149,10 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types cannot redeclare overridden owns as owns
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
     When create attribute type: customer-name
-    When attribute(customer-name) set value-type: <value-type>
+    When attribute(customer-name) set value type: <value-type>
     When attribute(customer-name) set supertype: name
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: name[]
@@ -870,10 +1170,10 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types cannot override declared owns with owns
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
     When create attribute type: first-name
-    When attribute(first-name) set value-type: <value-type>
+    When attribute(first-name) set value type: <value-type>
     When attribute(first-name) set supertype: name
     When <root-type>(<type-name>) set annotation: @abstract
     When <root-type>(<type-name>) set owns: name[]
@@ -889,9 +1189,9 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types cannot override inherited owns other than with their subtypes
     When create attribute type: username
-    When attribute(username) set value-type: <value-type>
+    When attribute(username) set value type: <value-type>
     When create attribute type: reference
-    When attribute(reference) set value-type: <value-type>
+    When attribute(reference) set value type: <value-type>
     When <root-type>(<supertype-name>) set owns: username[]
     When transaction commits
     When connection open schema transaction for database: typedb
@@ -905,9 +1205,9 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types cannot unset not owned list of ownerships
     When create attribute type: username
-    When attribute(username) set value-type: <value-type>
+    When attribute(username) set value type: <value-type>
     When create attribute type: reference
-    When attribute(reference) set value-type: <value-type>
+    When attribute(reference) set value type: <value-type>
     When <root-type>(<type-name>) set owns: username[]
     Then <root-type>(<type-name>) get owns contain: username[]
     Then <root-type>(<type-name>) unset owns: reference[]; fails
@@ -928,7 +1228,7 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types cannot unset inherited ownership
     When create attribute type: username
-    When attribute(username) set value-type: <value-type>
+    When attribute(username) set value type: <value-type>
     When <root-type>(<supertype-name>) set owns: username[]
     Then <root-type>(<supertype-name>) get owns contain: username[]
     Then <root-type>(<subtype-name>) get owns contain: username[]
@@ -944,7 +1244,7 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types cannot set lists of attributes alongside scalar attribute
     When create attribute type: username
-    When attribute(username) set value-type: <value-type>
+    When attribute(username) set value type: <value-type>
     When <root-type>(<type-name>) set owns: username
     Then <root-type>(<type-name>) get owns contain: username
     # TODO: Or it will override the non-list definition?
@@ -960,7 +1260,7 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types cannot set scalar attribute alongside lists of attributes
     When create attribute type: username
-    When attribute(username) set value-type: <value-type>
+    When attribute(username) set value type: <value-type>
     When <root-type>(<type-name>) set owns: username[]
     Then <root-type>(<type-name>) get owns contain: username[]
     # TODO: Or it will override the non-list definition?
@@ -976,7 +1276,7 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types cannot set lists of attributes alongside inherited scalar attribute
     When create attribute type: username
-    When attribute(username) set value-type: <value-type>
+    When attribute(username) set value type: <value-type>
     When <root-type>(<supertype-name>) set owns: username
     Then <root-type>(<supertype-name>) get owns contain: username
     Then <root-type>(<subtype-name>) get owns contain: username
@@ -993,7 +1293,7 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types cannot set scalar attribute alongside inherited lists of attributes
     When create attribute type: username
-    When attribute(username) set value-type: <value-type>
+    When attribute(username) set value type: <value-type>
     When <root-type>(<supertype-name>) set owns: username[]
     Then <root-type>(<supertype-name>) get owns contain: username[]
     Then <root-type>(<subtype-name>) get owns contain: username[]
@@ -1011,10 +1311,10 @@ Feature: Concept Owns
   # TODO: Maybe they can? Change this test's logic!
   Scenario Outline: <root-type> types cannot override scalar attribute by lists of attributes
     When create attribute type: email
-    When attribute(email) set value-type: <value-type>
+    When attribute(email) set value type: <value-type>
     When attribute(email) set annotation: @abstract
     When create attribute type: work-email
-    When attribute(work-email) set value-type: <value-type>
+    When attribute(work-email) set value type: <value-type>
     When attribute(work-email) set supertype: email
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: email
@@ -1032,10 +1332,10 @@ Feature: Concept Owns
       # TODO: Maybe they can? Change this test's logic!
   Scenario Outline: <root-type> types cannot override lists of attributes by scalar attribute
     When create attribute type: email
-    When attribute(email) set value-type: <value-type>
+    When attribute(email) set value type: <value-type>
     When attribute(email) set annotation: @abstract
     When create attribute type: work-email
-    When attribute(work-email) set value-type: <value-type>
+    When attribute(work-email) set value type: <value-type>
     When attribute(work-email) set supertype: email
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: email[]
@@ -1059,7 +1359,7 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types can set owns with @<annotation> and unset it
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When <root-type>(<type-name>) set owns: custom-attribute
     When <root-type>(<type-name>) get owns(custom-attribute) set annotation: @<annotation>
     Then <root-type>(<type-name>) get owns(custom-attribute) get annotations contain: @<annotation>
@@ -1100,13 +1400,13 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types can have owns with @<annotation> alongside pure owns
     When create attribute type: email
-    When attribute(email) set value-type: string
+    When attribute(email) set value type: string
     When create attribute type: username
-    When attribute(username) set value-type: string
+    When attribute(username) set value type: string
     When create attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value type: string
     When create attribute type: age
-    When attribute(age) set value-type: long
+    When attribute(age) set value type: long
     When <root-type>(<type-name>) set owns: email
     When <root-type>(<type-name>) get owns(email) set annotation: @<annotation>
     When <root-type>(<type-name>) set owns: username
@@ -1148,9 +1448,9 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types cannot unset not set @<annotation> of ownership
     When create attribute type: username
-    When attribute(username) set value-type: string
+    When attribute(username) set value type: string
     When create attribute type: reference
-    When attribute(reference) set value-type: string
+    When attribute(reference) set value type: string
     When <root-type>(<type-name>) set owns: username
     When <root-type>(<type-name>) get owns(username) set annotation: @<annotation>
     Then <root-type>(<type-name>) get owns(username) get annotation contain: @<annotation>
@@ -1187,7 +1487,7 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types cannot unset @<annotation> of inherited ownership
     When create attribute type: username
-    When attribute(username) set value-type: string
+    When attribute(username) set value type: string
     When <root-type>(<supertype-name>) set owns: username
     When <root-type>(<supertype-name>) get owns(username) set annotation: @<annotation>
     Then <root-type>(<supertype-name>) get owns(username) get annotation contain: @<annotation>
@@ -1216,13 +1516,13 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types can inherit owns with @<annotation>s alongside pure owns
     When create attribute type: email
-    When attribute(email) set value-type: string
+    When attribute(email) set value type: string
     When create attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value type: string
     When create attribute type: reference
-    When attribute(reference) set value-type: string
+    When attribute(reference) set value type: string
     When create attribute type: rating
-    When attribute(rating) set value-type: double
+    When attribute(rating) set value type: double
     When <root-type>(<supertype-name>) set owns: email
     When <root-type>(<supertype-name>) get owns(email) set annotation: @<annotation>
     When <root-type>(<supertype-name>) set owns: name
@@ -1258,9 +1558,9 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get owns(email) get annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get owns(reference) get annotations contain: @<annotation>
     When create attribute type: license
-    When attribute(license) set value-type: string
+    When attribute(license) set value type: string
     When create attribute type: points
-    When attribute(points) set value-type: double
+    When attribute(points) set value type: double
     When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
     When <root-type>(<subtype-name-2>) set owns: license
     When <root-type>(<subtype-name-2>) get owns(license) set annotation: @<annotation>
@@ -1317,9 +1617,9 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types can redeclare owns with @<annotation>s as owns with @<annotation>s
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When create attribute type: email
-    When attribute(email) set value-type: <value-type>
+    When attribute(email) set value type: <value-type>
     When <root-type>(<type-name>) set owns: name
     When <root-type>(<type-name>) get owns(name) set annotation: @<annotation>
     Then <root-type>(<type-name>) get owns(name) get annotation contain: @<annotation>
@@ -1354,11 +1654,11 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types can redeclare owns as owns with @<annotation>
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When create attribute type: email
-    When attribute(email) set value-type: <value-type>
+    When attribute(email) set value type: <value-type>
     When create attribute type: address
-    When attribute(address) set value-type: <value-type>
+    When attribute(address) set value type: <value-type>
     When <root-type>(<type-name>) set owns: name
     When <root-type>(<type-name>) set owns: email
     When <root-type>(<type-name>) set owns: address
@@ -1393,9 +1693,9 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types can redeclare owns with @<annotation> as pure owns
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When create attribute type: email
-    When attribute(email) set value-type: <value-type>
+    When attribute(email) set value type: <value-type>
     When <root-type>(<type-name>) set owns: name
     When <root-type>(<type-name>) get owns(name) set annotation: @<annotation>
     Then <root-type>(<type-name>) get owns(name) get annotations contain: @<annotation>
@@ -1428,10 +1728,10 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types can override inherited pure owns as owns with @<annotation>s
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
     When create attribute type: username
-    When attribute(username) set value-type: <value-type>
+    When attribute(username) set value type: <value-type>
     When attribute(username) set supertype: name
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: name
@@ -1473,10 +1773,10 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types can re-override owns with <annotation>s
     When create attribute type: email
-    When attribute(email) set value-type: <value-type>
+    When attribute(email) set value type: <value-type>
     When attribute(email) set annotation: @abstract
     When create attribute type: work-email
-    When attribute(work-email) set value-type: <value-type>
+    When attribute(work-email) set value type: <value-type>
     When attribute(work-email) set supertype: email
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: email
@@ -1513,7 +1813,7 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types can redeclare inherited owns as owns with @<annotation> (which will override)
     When create attribute type: email
-    When attribute(email) set value-type: <value-type>
+    When attribute(email) set value type: <value-type>
     When <root-type>(<supertype-name>) set owns: email
     Then <root-type>(<supertype-name>) get owns overridden(email) does not exist
     Then <root-type>(<subtype-name>) set owns: email
@@ -1546,9 +1846,9 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types cannot redeclare inherited owns with @<annotation> as pure owns or owns with @<annotation>
     When create attribute type: email
-    When attribute(email) set value-type: <value-type>
+    When attribute(email) set value type: <value-type>
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When <root-type>(<supertype-name>) set owns: email
     When <root-type>(<supertype-name>) get owns(email) set annotation: @<annotation>
     When transaction commits
@@ -1579,10 +1879,10 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types cannot redeclare inherited owns with @<annotation>
     When create attribute type: email
-    When attribute(email) set value-type: <value-type>
+    When attribute(email) set value type: <value-type>
     When attribute(email) set annotation: @abstract
     When create attribute type: customer-email
-    When attribute(customer-email) set value-type: <value-type>
+    When attribute(customer-email) set value type: <value-type>
     When attribute(customer-email) set supertype: email
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: email
@@ -1612,10 +1912,10 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types cannot redeclare overridden owns with @<annotation>s
     When create attribute type: email
-    When attribute(email) set value-type: <value-type>
+    When attribute(email) set value type: <value-type>
     When attribute(email) set annotation: @abstract
     When create attribute type: customer-email
-    When attribute(customer-email) set value-type: <value-type>
+    When attribute(customer-email) set value type: <value-type>
     When attribute(customer-email) set supertype: email
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: email
@@ -1646,10 +1946,10 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types cannot redeclare overridden owns with @<annotation>s on multiple layers
     When create attribute type: email
-    When attribute(email) set value-type: <value-type>
+    When attribute(email) set value type: <value-type>
     When attribute(email) set annotation: @abstract
     When create attribute type: customer-email
-    When attribute(customer-email) set value-type: <value-type>
+    When attribute(customer-email) set value type: <value-type>
     When attribute(customer-email) set supertype: email
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: email
@@ -1681,7 +1981,7 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> subtypes can redeclare owns with @<annotation>s after it is unset from supertype
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When create attribute type: surname
     When attribute(surname) set supertype: name
     When <root-type>(<type-name>) set owns: name
@@ -1723,17 +2023,17 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types can inherit owns with @<annotation>s and pure owns that are subtypes of each other
     When create attribute type: username
-    When attribute(username) set value-type: string
+    When attribute(username) set value type: string
     When attribute(username) set annotation: @abstract
     When create attribute type: score
-    When attribute(score) set value-type: double
+    When attribute(score) set value type: double
     When attribute(score) set annotation: @abstract
     When create attribute type: reference
-    When attribute(reference) set value-type: string
+    When attribute(reference) set value type: string
     When attribute(reference) set annotation: @abstract
     When attribute(reference) set supertype: username
     When create attribute type: rating
-    When attribute(rating) set value-type: double
+    When attribute(rating) set value type: double
     When attribute(rating) set annotation: @abstract
     When attribute(rating) set supertype: score
     When <root-type>(<supertype-name>) set annotation: @abstract
@@ -1777,10 +2077,10 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get owns(score) get annotations do not contain: @<annotation>
     Then <root-type>(<subtype-name>) get owns(rating) get annotations do not contain: @<annotation>
     When create attribute type: license
-    When attribute(license) set value-type: string
+    When attribute(license) set value type: string
     When attribute(license) set supertype: reference
     When create attribute type: points
-    When attribute(points) set value-type: double
+    When attribute(points) set value type: double
     When attribute(points) set supertype: rating
     When <root-type>(<subtype-name-2>) set annotation: @abstract
     When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
@@ -1859,26 +2159,26 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types can override inherited owns with @<annotation>s and pure owns
     When create attribute type: username
-    When attribute(username) set value-type: string
+    When attribute(username) set value type: string
     When create attribute type: email
-    When attribute(email) set value-type: string
+    When attribute(email) set value type: string
     When attribute(email) set annotation: @abstract
     When create attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value type: string
     When attribute(name) set annotation: @abstract
     When create attribute type: age
-    When attribute(age) set value-type: long
+    When attribute(age) set value type: long
     When create attribute type: reference
-    When attribute(reference) set value-type: string
+    When attribute(reference) set value type: string
     When attribute(reference) set annotation: @abstract
     When create attribute type: work-email
-    When attribute(work-email) set value-type: string
+    When attribute(work-email) set value type: string
     When attribute(work-email) set supertype: email
     When create attribute type: nick-name
-    When attribute(nick-name) set value-type: string
+    When attribute(nick-name) set value type: string
     When attribute(nick-name) set supertype: name
     When create attribute type: rating
-    When attribute(rating) set value-type: double
+    When attribute(rating) set value type: double
     When attribute(rating) set annotation: @abstract
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: username
@@ -1948,10 +2248,10 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get owns(reference) get annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get owns(work-email) get annotations contain: @<annotation>
     When create attribute type: license
-    When attribute(license) set value-type: string
+    When attribute(license) set value type: string
     When attribute(license) set supertype: reference
     When create attribute type: points
-    When attribute(points) set value-type: double
+    When attribute(points) set value type: double
     When attribute(points) set supertype: rating
     When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
     When <root-type>(<subtype-name-2>) set owns: license
@@ -2035,7 +2335,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns can set @key annotation for <value-type> value type and unset it
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When entity(person) set owns: custom-attribute
     When entity(person) get owns(custom-attribute) set annotation: @key
     Then entity(person) get owns(custom-attribute) get annotations contain: @key
@@ -2068,7 +2368,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns cannot set @key annotation for <value-type> as it is not keyable
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When entity(person) set owns: custom-attribute
     Then entity(person) get owns(custom-attribute) set annotation: @key; fails
     Then entity(person) get owns(custom-attribute) get annotations is empty
@@ -2083,7 +2383,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns cannot set @key annotation for lists
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When entity(person) set owns: custom-attribute[]
     Then entity(person) get owns(custom-attribute[]) set annotation: @key; fails
     Then entity(person) get owns(custom-attribute[]) get annotations is empty
@@ -2104,9 +2404,9 @@ Feature: Concept Owns
 
   Scenario: Entity types can only commit keys if every instance owns a distinct key
     When create attribute type: email
-    When attribute(email) set value-type: string
+    When attribute(email) set value type: string
     When create attribute type: username
-    When attribute(username) set value-type: string
+    When attribute(username) set value type: string
     When entity(person) set owns: username
     When entity(person) get owns(username) set annotation: @key
     Then transaction commits
@@ -2144,7 +2444,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns can set @subkey annotation for <value-type> value type and unset it
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When entity(person) set owns: custom-attribute
     When entity(person) get owns(custom-attribute) set annotation: @subkey(<arg>)
     Then entity(person) get owns(custom-attribute) get annotations contain: @subkey(<arg>)
@@ -2177,19 +2477,19 @@ Feature: Concept Owns
 
   Scenario Outline: Owns can set @subkey annotation for multiple attributes of <root-type> type
     When create attribute type: first-name
-    When attribute(first-name) set value-type: string
+    When attribute(first-name) set value type: string
     When create attribute type: second-name
-    When attribute(second-name) set value-type: string
+    When attribute(second-name) set value type: string
     When create attribute type: third-name
-    When attribute(third-name) set value-type: string
+    When attribute(third-name) set value type: string
     When create attribute type: birthday
-    When attribute(birthday) set value-type: datetime
+    When attribute(birthday) set value type: datetime
     When create attribute type: balance
-    When attribute(balance) set value-type: decimal
+    When attribute(balance) set value type: decimal
     When create attribute type: progress
-    When attribute(progress) set value-type: double
+    When attribute(progress) set value type: double
     When create attribute type: age
-    When attribute(age) set value-type: long
+    When attribute(age) set value type: long
     When <root-type>(<type-name>) set owns: first-name
     When <root-type>(<type-name>) get owns(first-name) set annotation: @subkey(primary)
     Then <root-type>(<type-name>) get owns(first-name) get annotations contain: @subkey(primary)
@@ -2227,11 +2527,11 @@ Feature: Concept Owns
 
   Scenario: Owns can set multiple @subkey annotations with different arguments
     When create attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value type: string
     When create attribute type: surname
-    When attribute(surname) set value-type: string
+    When attribute(surname) set value type: string
     When create attribute type: age
-    When attribute(age) set value-type: long
+    When attribute(age) set value type: long
     When entity(person) set owns: name
     When entity(person) get owns(name) set annotation: @subkey(NAME-AGE)
     When entity(person) get owns(name) set annotation: @subkey(FULL-NAME)
@@ -2254,7 +2554,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns cannot set @subkey annotation for <value-type> as it is not keyable
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When entity(person) set owns: custom-attribute
     Then entity(person) get owns(custom-attribute) set annotation: @subkey(LABEL); fails
     Then entity(person) get owns(custom-attribute) get annotations is empty
@@ -2269,7 +2569,7 @@ Feature: Concept Owns
 
   Scenario: Owns cannot set @subkey annotation for incorrect arguments
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: long
+    When attribute(custom-attribute) set value type: long
     When entity(person) set owns: custom-attribute
     # TODO: Move the case to successful cases if it should work!
     Then entity(person) get owns(custom-attribute) set annotation: @subkey; fails
@@ -2288,7 +2588,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns cannot set @subkey annotation for lists
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When entity(person) set owns: custom-attribute[]
     Then entity(person) get owns(custom-attribute[]) set annotation: @subkey(LABEL); fails
     Then entity(person) get owns(custom-attribute[]) get annotations is empty
@@ -2313,7 +2613,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns can set @unique annotation for <value-type> value type and unset it
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When entity(person) set owns: custom-attribute
     When entity(person) get owns(custom-attribute) set annotation: @unique
     Then entity(person) get owns(custom-attribute) get annotations contain: @unique
@@ -2346,7 +2646,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns cannot set @unique annotation for <value-type> as it is not keyable
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When entity(person) set owns: custom-attribute
     Then entity(person) get owns(custom-attribute) set annotation: @unique; fails
     Then entity(person) get owns(custom-attribute) get annotations is empty
@@ -2362,7 +2662,7 @@ Feature: Concept Owns
   # TODO: Change the test if owns can set @unique annotation for lists!
   Scenario Outline: Owns cannot set @unique annotation for lists
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When entity(person) set owns: custom-attribute[]
     Then entity(person) get owns(custom-attribute[]) set annotation: @unique; fails
     Then entity(person) get owns(custom-attribute[]) get annotations is empty
@@ -2387,9 +2687,9 @@ Feature: Concept Owns
 
   Scenario Outline: Owns can set @values annotation for <value-type> value type and lists and unset it
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When create attribute type: custom-attribute-2
-    When attribute(custom-attribute-2) set value-type: <value-type>
+    When attribute(custom-attribute-2) set value type: <value-type>
     When entity(person) set owns: custom-attribute
     When entity(person) get owns(custom-attribute) set annotation: @values(<args>)
     Then entity(person) get owns(custom-attribute) get annotations contain: @values(<args>)
@@ -2467,7 +2767,7 @@ Feature: Concept Owns
 
   Scenario: Owns cannot set @values annotation for struct value type
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: custom-struct
+    When attribute(custom-attribute) set value type: custom-struct
     When entity(person) set owns: custom-attribute
     When entity(person) get owns(custom-attribute) set annotation: @values(custom-struct); fails
     When entity(person) get owns(custom-attribute) set annotation: @values({"string"}); fails
@@ -2478,7 +2778,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns cannot have @values annotation with empty arguments
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When entity(person) set owns: custom-attribute
     Then entity(person) get owns(custom-attribute) set annotation: @values; fails
     Then entity(person) get owns(custom-attribute) set annotation: @values(); fails
@@ -2499,7 +2799,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns cannot have @values annotation for <value-type> value type with arguments of invalid value or type
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When entity(person) set owns: custom-attribute
     Then entity(person) get owns(custom-attribute) set annotation: @values(<args>); fails
     Then entity(person) get owns(custom-attribute) get annotations is empty
@@ -2551,7 +2851,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns cannot set multiple @values annotation with different arguments
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When entity(person) set owns: custom-attribute
     Then entity(person) get owns(custom-attribute) set annotation: @values(<args>)
     Then entity(person) get owns(custom-attribute) set annotation: @values(<fail-args>); fails
@@ -2572,7 +2872,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns cannot have @values annotation for <value-type> value type with duplicated args
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When entity(person) set owns: custom-attribute
     Then entity(person) get owns(custom-attribute) set annotation: @values(<arg0>, <arg1>, <arg2>); fails
     Then entity(person) get owns(custom-attribute) get annotations is empty
@@ -2597,11 +2897,11 @@ Feature: Concept Owns
 
   Scenario Outline: Owns-related @values annotation for <value-type> value type can be inherited and overridden by a subset of arguments
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When create attribute type: second-custom-attribute
-    When attribute(second-custom-attribute) set value-type: <value-type>
+    When attribute(second-custom-attribute) set value type: <value-type>
     When create attribute type: overridden-custom-attribute
-    When attribute(overridden-custom-attribute) set value-type: <value-type>
+    When attribute(overridden-custom-attribute) set value type: <value-type>
     When attribute(overridden-custom-attribute) set supertype: second-custom-attribute
     When entity(person) set owns: custom-attribute
     When relation(description) set owns: custom-attribute
@@ -2667,11 +2967,11 @@ Feature: Concept Owns
 
   Scenario Outline: Inherited @values annotation on owns for <value-type> value type cannot be overridden by the @values of same arguments or not a subset of arguments
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When create attribute type: second-custom-attribute
-    When attribute(second-custom-attribute) set value-type: <value-type>
+    When attribute(second-custom-attribute) set value type: <value-type>
     When create attribute type: overridden-custom-attribute
-    When attribute(overridden-custom-attribute) set value-type: <value-type>
+    When attribute(overridden-custom-attribute) set value type: <value-type>
     When attribute(overridden-custom-attribute) set supertype: second-custom-attribute
     When entity(person) set owns: custom-attribute
     When relation(description) set owns: custom-attribute
@@ -2733,9 +3033,9 @@ Feature: Concept Owns
 
   Scenario Outline: Owns can set @range annotation for <value-type> value type and lists in correct order and unset it
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When create attribute type: custom-attribute-2
-    When attribute(custom-attribute-2) set value-type: <value-type>
+    When attribute(custom-attribute-2) set value type: <value-type>
     When entity(person) set owns: custom-attribute
     Then entity(player) get owns(custom-attribute) set annotation: @range(<arg1>, <arg0>); fails
     Then entity(person) get owns(custom-attribute) get annotations is empty
@@ -2793,7 +3093,7 @@ Feature: Concept Owns
 
   Scenario: Owns cannot set @range annotation for struct value type
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: custom-struct
+    When attribute(custom-attribute) set value type: custom-struct
     When entity(person) set owns: custom-attribute
     When entity(person) get owns(custom-attribute) set annotation: @range(custom-struct, custom-struct); fails
     When entity(person) get owns(custom-attribute) set annotation: @range({"string"}, {"string+1"}); fails
@@ -2804,7 +3104,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns cannot have @range annotation for <value-type> value type with less than two args
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When entity(person) set owns: custom-attribute
     Then entity(person) get owns(custom-attribute) set annotation: @range; fails
     Then entity(person) get owns(custom-attribute) set annotation: @range(); fails
@@ -2826,7 +3126,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns cannot redeclare @range annotation with different arguments
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When entity(person) set owns: custom-attribute
     Then entity(person) get owns(custom-attribute) set annotation: @range(<args>)
     Then entity(person) get owns(custom-attribute) set annotation: @range(<fail-args>); fails
@@ -2846,7 +3146,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns cannot have @range annotation for <value-type> value type with incorrect arguments
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When entity(person) set owns: custom-attribute
     Then entity(person) get owns(custom-attribute) set annotation: @range(<arg0>, <args>); fails
     Then entity(person) get owns(custom-attribute) get annotations is empty
@@ -2923,11 +3223,11 @@ Feature: Concept Owns
 
   Scenario Outline: Owns-related @range annotation for <value-type> value type can be inherited and overridden by a subset of arguments
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When create attribute type: second-custom-attribute
-    When attribute(second-custom-attribute) set value-type: <value-type>
+    When attribute(second-custom-attribute) set value type: <value-type>
     When create attribute type: overridden-custom-attribute
-    When attribute(overridden-custom-attribute) set value-type: <value-type>
+    When attribute(overridden-custom-attribute) set value type: <value-type>
     When attribute(overridden-custom-attribute) set supertype: second-custom-attribute
     When entity(person) set owns: custom-attribute
     When relation(description) set owns: custom-attribute
@@ -2992,11 +3292,11 @@ Feature: Concept Owns
 
   Scenario Outline: Inherited @range annotation on owns for <value-type> value type cannot be overridden by the @range of same arguments or not a subset of arguments
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When create attribute type: second-custom-attribute
-    When attribute(second-custom-attribute) set value-type: <value-type>
+    When attribute(second-custom-attribute) set value type: <value-type>
     When create attribute type: overridden-custom-attribute
-    When attribute(overridden-custom-attribute) set value-type: <value-type>
+    When attribute(overridden-custom-attribute) set value type: <value-type>
     When attribute(overridden-custom-attribute) set supertype: second-custom-attribute
     When entity(person) set owns: custom-attribute
     When relation(description) set owns: custom-attribute
@@ -3057,9 +3357,9 @@ Feature: Concept Owns
 
   Scenario Outline: Owns can set @card annotation for <value-type> value type with arguments in correct order and unset it
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When create attribute type: custom-attribute-2
-    When attribute(custom-attribute-2) set value-type: <value-type>
+    When attribute(custom-attribute-2) set value type: <value-type>
     When entity(person) set owns: custom-attribute
     Then entity(customer) get owns(custom-attribute) set annotation: @card(<arg1>, <arg0>); fails
     Then entity(person) get owns(custom-attribute) get annotations is empty
@@ -3148,7 +3448,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns can set @card annotation for <value-type> value type with duplicate args (exactly N ownerships)
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When entity(person) set owns: custom-attribute
     Then entity(person) get owns(custom-attribute) get annotations is empty
     When entity(person) get owns(custom-attribute) set annotation: @card(<arg>, <arg>)
@@ -3179,7 +3479,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns cannot have @card annotation for <value-type> value type with invalid arguments
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When entity(person) set owns: custom-attribute
     Then entity(person) get owns(custom-attribute) set annotation: @card; fails
     Then entity(person) get owns(custom-attribute) set annotation: @card(); fails
@@ -3211,7 +3511,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns cannot set multiple @card annotations with different arguments
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: decimal
+    When attribute(custom-attribute) set value type: decimal
     When entity(person) set owns: custom-attribute
     When entity(person) get owns(custom-attribute) set annotation: @card(2, 5)
     Then entity(person) get owns(custom-attribute) set annotation: @card(<fail-args>); fails
@@ -3239,7 +3539,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns cannot redeclare @card annotation with different arguments
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When entity(person) set owns: custom-attribute
     Then entity(person) get owns(custom-attribute) set annotation: @card(<args>)
     Then entity(person) get owns(custom-attribute) set annotation: @card(<fail-args>); fails
@@ -3260,11 +3560,11 @@ Feature: Concept Owns
 
   Scenario Outline: Owns-related @card annotation for <value-type> value type can be inherited and overridden by a subset of arguments
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When create attribute type: second-custom-attribute
-    When attribute(second-custom-attribute) set value-type: <value-type>
+    When attribute(second-custom-attribute) set value type: <value-type>
     When create attribute type: overridden-custom-attribute
-    When attribute(overridden-custom-attribute) set value-type: <value-type>
+    When attribute(overridden-custom-attribute) set value type: <value-type>
     When attribute(overridden-custom-attribute) set supertype: second-custom-attribute
     When entity(person) set owns: custom-attribute
     When relation(description) set owns: custom-attribute
@@ -3329,11 +3629,11 @@ Feature: Concept Owns
 
   Scenario Outline: Inherited @card annotation on owns for <value-type> value type cannot be overridden by the @card of same arguments or not a subset of arguments
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When create attribute type: second-custom-attribute
-    When attribute(second-custom-attribute) set value-type: <value-type>
+    When attribute(second-custom-attribute) set value type: <value-type>
     When create attribute type: overridden-custom-attribute
-    When attribute(overridden-custom-attribute) set value-type: <value-type>
+    When attribute(overridden-custom-attribute) set value type: <value-type>
     When attribute(overridden-custom-attribute) set supertype: second-custom-attribute
     When entity(person) set owns: custom-attribute
     When relation(description) set owns: custom-attribute
@@ -3394,7 +3694,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns for <root-type> can set @distinct annotation for <value-type> value type list and unset it
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When <root-type>(<type-name>) set owns: custom-attribute[]
     When <root-type>(<type-name>) get owns(custom-attribute[]) set annotation: @distinct
     Then <root-type>(<type-name>) get owns(custom-attribute[]) get annotations contain: @distinct
@@ -3439,7 +3739,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns for <root-type> cannot have @distinct annotation for <value-type> non-list value type
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When <root-type>(<type-name>) set owns: custom-attribute
     Then <root-type>(<type-name>) get owns(custom-attribute) set annotation: @distinct; fails
     Then <root-type>(<type-name>) get owns(custom-attribute) get annotations is empty
@@ -3469,7 +3769,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns cannot have @distinct annotation for <value-type> with arguments
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When entity(person) set owns: custom-attribute
     Then entity(person) get owns(custom-attribute) set annotation: @distinct(); fails
     Then entity(person) get owns(custom-attribute) set annotation: @distinct(1); fails
@@ -3492,11 +3792,11 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types can redeclare owns as owns with @distinct
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When create attribute type: email
-    When attribute(email) set value-type: <value-type>
+    When attribute(email) set value type: <value-type>
     When create attribute type: address
-    When attribute(address) set value-type: <value-type>
+    When attribute(address) set value type: <value-type>
     When <root-type>(<type-name>) set owns: name[]
     When <root-type>(<type-name>) set owns: email[]
     When <root-type>(<type-name>) set owns: address[]
@@ -3521,9 +3821,9 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types cannot unset not set @distinct of ownership of <value-type> value type
     When create attribute type: username
-    When attribute(username) set value-type: <value-type>
+    When attribute(username) set value type: <value-type>
     When create attribute type: reference
-    When attribute(reference) set value-type: <value-type>
+    When attribute(reference) set value type: <value-type>
     When <root-type>(<type-name>) set owns: username[]
     When <root-type>(<type-name>) get owns(username[]) set annotation: @distinct
     Then <root-type>(<type-name>) get owns(username[]) get annotation contain: @distinct
@@ -3550,7 +3850,7 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types cannot unset @distinct of inherited ownership
     When create attribute type: username
-    When attribute(username) set value-type: string
+    When attribute(username) set value type: string
     When <root-type>(<supertype-name>) set owns: username
     When <root-type>(<supertype-name>) get owns(username) set annotation: @distinct
     Then <root-type>(<supertype-name>) get owns(username) get annotation contain: @distinct
@@ -3571,9 +3871,9 @@ Feature: Concept Owns
 
   Scenario Outline: Owns can set @regex annotation for <value-type> value type and unset it
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When create attribute type: custom-attribute-2
-    When attribute(custom-attribute-2) set value-type: <value-type>
+    When attribute(custom-attribute-2) set value type: <value-type>
     When entity(person) set owns: custom-attribute
     When entity(person) get owns(custom-attribute) set annotation: @regex(<arg>)
     Then entity(person) get owns(custom-attribute) get annotations contain: @regex(<arg>)
@@ -3620,7 +3920,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns cannot have @regex annotation for <value-type> value type
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When entity(person) set owns: custom-attribute
     Then entity(person) get owns(custom-attribute) set annotation: @regex("\S+"); fails
     Then entity(person) get owns(custom-attribute) get annotations is empty
@@ -3640,7 +3940,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns cannot have @regex annotation of invalid arguments
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: string
+    When attribute(custom-attribute) set value type: string
     When entity(person) set owns: custom-attribute
     Then entity(person) get owns(custom-attribute) set annotation: @regex; fails
     Then entity(person) get owns(custom-attribute) set annotation: @regex(); fails
@@ -3664,7 +3964,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns cannot set multiple @regex annotations with different arguments
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: string
+    When attribute(custom-attribute) set value type: string
     When entity(person) set owns: custom-attribute
     When entity(person) get owns(custom-attribute) set annotation: @regex("\S+")
     Then entity(person) get owns(custom-attribute) set annotation: @regex("\S+")
@@ -3685,7 +3985,7 @@ Feature: Concept Owns
 
   Scenario: Owns cannot set @regex annotation if there is a @regex annotation on the attribute
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: string
+    When attribute(custom-attribute) set value type: string
     When attribute(custom-attribute) set annotation: @regex("\S+")
     When entity(person) set owns: custom-attribute
     When entity(person) get owns(custom-attribute) set annotation: @regex("\S+"); fails
@@ -3697,13 +3997,13 @@ Feature: Concept Owns
 
   Scenario: Owns cannot override inherited @regex annotation
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: string
+    When attribute(custom-attribute) set value type: string
     When entity(person) set owns: custom-attribute
     When entity(person) get owns(custom-attribute) set annotation: @regex("\S+")
     Then entity(person) get owns(custom-attribute) get annotations contains: @regex("\S+")
     Then entity(customer) get owns(custom-attribute) get annotations contains: @regex("\S+")
     When create attribute type: custom-attribute-2
-    When attribute(custom-attribute-2) set value-type: string
+    When attribute(custom-attribute-2) set value type: string
     When entity(customer) set owns: custom-attribute-2
     Then entity(customer) get owns(custom-attribute-2) get annotations is empty
     When transaction commits
@@ -3736,7 +4036,7 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> cannot own with @abstract, @cascade, @independent, and @replace annotations for <value-type> value type
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When <root-type>(<type-name>) set owns: custom-attribute
     Then <root-type>(<type-name>) get owns(custom-attribute) set annotation: @abstract; fails
     Then <root-type>(<type-name>) get owns(custom-attribute) set annotation: @cascade; fails
@@ -3759,7 +4059,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns can set @<annotation-1> and @<annotation-2> together and unset it for scalar <value-type>
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When relation(description) set owns: custom-attribute
     When relation(description) get owns(custom-attribute) set annotation: @<annotation-1>
     When relation(description) get owns(custom-attribute) set annotation: @<annotation-2>
@@ -3813,7 +4113,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns can set @<annotation-1> and @<annotation-2> together and unset it for lists of <value-type>
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When relation(description) set owns: custom-attribute[]
     When relation(description) get owns(custom-attribute[]) set annotation: @<annotation-1>
     When relation(description) get owns(custom-attribute[]) set annotation: @<annotation-2>
@@ -3863,7 +4163,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns cannot set @<annotation-1> and @<annotation-2> together for scalar <value-type>
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When transaction commits
     When connection open schema transaction for database: typedb
     When relation(description) set owns: custom-attribute
@@ -3893,7 +4193,7 @@ Feature: Concept Owns
 
   Scenario Outline: Owns cannot set @<annotation-1> and @<annotation-2> together and unset it for lists of <value-type>
     When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value-type: <value-type>
+    When attribute(custom-attribute) set value type: <value-type>
     When transaction commits
     When connection open schema transaction for database: typedb
     When relation(description) set owns: custom-attribute[]

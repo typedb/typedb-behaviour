@@ -28,7 +28,7 @@ Feature: Concept Attribute Type
 
   Scenario Outline: Attribute types can be created with <value-type> value type
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     Then attribute(name) exists
     Then attribute(name) get supertype: attribute
     Then attribute(name) get value type: <value-type>
@@ -53,7 +53,7 @@ Feature: Concept Attribute Type
     When struct(multi-name) create field: first-name, with value type: string
     When struct(multi-name) create field: second-name, with value type: string
     When create attribute type: full-name
-    When attribute(full-name) set value-type: multi-name
+    When attribute(full-name) set value type: multi-name
     Then attribute(full-name) exists
     Then attribute(full-name) get supertype: attribute
     Then attribute(full-name) get value type: multi-name
@@ -65,7 +65,7 @@ Feature: Concept Attribute Type
 
   Scenario Outline: Attribute types cannot be redeclared with <value-type> value type
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     Then attribute(name) exists
     Then create attribute type: name; fails
     When transaction commits
@@ -84,12 +84,18 @@ Feature: Concept Attribute Type
       | duration      |
       | custom-struct |
 
+  Scenario: Attribute types cannot be created without value types
+    When create attribute type: name
+    Then attribute(name) exists
+    Then attribute(name) value type is null
+    Then transaction commits; fails
+
   Scenario Outline: Attribute types can be deleted
     When create attribute type: name
-    When attribute(name) set value-type: <value-type-1>
+    When attribute(name) set value type: <value-type-1>
     Then attribute(name) exists
     When create attribute type: age
-    When attribute(age) set value-type: <value-type-2>
+    When attribute(age) set value type: <value-type-2>
     Then attribute(age) exists
     When delete attribute type: age
     Then attribute(age) does not exist
@@ -122,15 +128,15 @@ Feature: Concept Attribute Type
 
   Scenario: Attribute types can get the root type
     When create attribute type: is-open
-    When attribute(is-open) set value-type: boolean
+    When attribute(is-open) set value type: boolean
     When create attribute type: age
-    When attribute(age) set value-type: long
+    When attribute(age) set value type: long
     When create attribute type: rating
-    When attribute(rating) set value-type: double
+    When attribute(rating) set value type: double
     When create attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value type: string
     When create attribute type: timestamp
-    When attribute(timestamp) set value-type: datetime
+    When attribute(timestamp) set value type: datetime
     Then attribute(is-open) get supertype: attribute
     Then attribute(age) get supertype: attribute
     Then attribute(rating) get supertype: attribute
@@ -146,7 +152,7 @@ Feature: Concept Attribute Type
 
   Scenario: Attribute types that have instances cannot be deleted
     When create attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value type: string
     When transaction commits
     When connection open write transaction for database: typedb
     When $x = attribute(name) put: alice
@@ -156,7 +162,7 @@ Feature: Concept Attribute Type
 
   Scenario: Attribute types can change labels
     When create attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value type: string
     Then attribute(name) get name: name
     When attribute(name) set name: username
     Then attribute(name) does not exist
@@ -176,15 +182,15 @@ Feature: Concept Attribute Type
 
   Scenario: Attribute types cannot subtype itself
     When create attribute type: is-open
-    When attribute(is-open) set value-type: boolean
+    When attribute(is-open) set value type: boolean
     When create attribute type: age
-    When attribute(age) set value-type: long
+    When attribute(age) set value type: long
     When create attribute type: rating
-    When attribute(rating) set value-type: double
+    When attribute(rating) set value type: double
     When create attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value type: string
     When create attribute type: timestamp
-    When attribute(timestamp) set value-type: datetime
+    When attribute(timestamp) set value type: datetime
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(is-open) set supertype: is-open; fails
@@ -199,15 +205,15 @@ Feature: Concept Attribute Type
 
   Scenario: Attribute types cannot subtype another attribute type of different value type
     When create attribute type: is-open
-    When attribute(is-open) set value-type: boolean
+    When attribute(is-open) set value type: boolean
     When create attribute type: age
-    When attribute(age) set value-type: long
+    When attribute(age) set value type: long
     When create attribute type: rating
-    When attribute(rating) set value-type: double
+    When attribute(rating) set value type: double
     When create attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value type: string
     When create attribute type: timestamp
-    When attribute(timestamp) set value-type: datetime
+    When attribute(timestamp) set value type: datetime
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(is-open) set supertype: age; fails
@@ -256,15 +262,15 @@ Feature: Concept Attribute Type
 #  #   Then attribute(???)  get subtypes do not contain:
 #  Scenario: Attribute type root can get attribute types of a specific value type
 #    When create attribute type: is-open
-#    When attribute(is-open) set value-type: boolean
+#    When attribute(is-open) set value type: boolean
 #    When create attribute type: age
-#    When attribute(age) set value-type: long
+#    When attribute(age) set value type: long
 #    When create attribute type: rating
-#    When attribute(rating) set value-type: double
+#    When attribute(rating) set value type: double
 #    When create attribute type: name
-#    When attribute(name) set value-type: string
+#    When attribute(name) set value type: string
 #    When create attribute type: timestamp
-#    When attribute(timestamp) set value-type: datetime
+#    When attribute(timestamp) set value type: datetime
 #    Then attribute(attribute) as(boolean) get subtypes contain:
 #      | is-open   |
 #    Then attribute(attribute) as(boolean) get subtypes do not contain:
@@ -340,15 +346,15 @@ Feature: Concept Attribute Type
 
 #  Scenario: Attribute type root can get attribute types of any value type
 #    When create attribute type: is-open
-#    When attribute(is-open) set value-type: boolean
+#    When attribute(is-open) set value type: boolean
 #    When create attribute type: age
-#    When attribute(age) set value-type: long
+#    When attribute(age) set value type: long
 #    When create attribute type: rating
-#    When attribute(rating) set value-type: double
+#    When attribute(rating) set value type: double
 #    When create attribute type: name
-#    When attribute(name) set value-type: string
+#    When attribute(name) set value type: string
 #    When create attribute type: timestamp
-#    When attribute(timestamp) set value-type: datetime
+#    When attribute(timestamp) set value type: datetime
 #    Then attribute(attribute) get subtypes contain:
 #      | attribute |
 #      | is-open   |
@@ -372,7 +378,7 @@ Feature: Concept Attribute Type
 
   Scenario Outline: Attribute type cannot unset @<annotation> that has not been set
     When create attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value type: string
     Then attribute(name) unset annotation: @<annotation>; fails
     Examples:
       | annotation      |
@@ -388,13 +394,13 @@ Feature: Concept Attribute Type
 
   Scenario: Attribute types can be set to abstract
     When create attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value type: string
     When attribute(name) set annotation: @abstract
     Then attribute(name) get annotations contain: @abstract
     When transaction commits
     When connection open schema transaction for database: typedb
     When create attribute type: email
-    When attribute(email) set value-type: string
+    When attribute(email) set value type: string
     Then attribute(email) get annotations do not contain: @abstract
     When transaction commits
     When connection open read transaction for database: typedb
@@ -406,21 +412,88 @@ Feature: Concept Attribute Type
     When transaction commits
     When connection open schema transaction for database: typedb
     When create attribute type: company-email
-    When attribute(company-email) set value-type: string
+    When attribute(company-email) set value type: string
     When attribute(company-email) set supertype: email
     Then attribute(email) unset annotation: @abstract; fails
 
+  Scenario: Attribute types can be created without value types with @abstract value type
+    When create attribute type: name
+    Then attribute(name) exists
+    When attribute(name) set annotation: @abstract
+    Then attribute(name) exists
+    Then attribute(name) value type is null
+    Then attribute(name) get annotations contain: @abstract
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) exists
+    Then attribute(name) value type is null
+    Then attribute(name) get annotations contain: @abstract
+
+  Scenario: Inherited attribute types without @abstract cannot be created without value type
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When create attribute type: first-name
+    When attribute(first-name) set supertype: name
+    Then attribute(first-name) value type is null
+    Then transaction commits; fails
+
+  Scenario Outline: Attribute types can set <value-type> value type after inheriting from an abstract attribute type without value type
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When create attribute type: first-name
+    When attribute(first-name) set supertype: name
+    When attribute(first-name) set value type: <value-type>
+    Then attribute(name) value type is null
+    Then attribute(first-name) get value type: <value-type>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(first-name) exists
+    Then attribute(first-name) get value type: <value-type>
+    Then attribute(name) value type is null
+    Examples:
+      | value-type    |
+      | long          |
+      | string        |
+      | boolean       |
+      | double        |
+      | decimal       |
+      | datetime      |
+      | datetimetz    |
+      | duration      |
+      | custom-struct |
+
+  Scenario: Attribute types cannot unset @abstract annotation if it does not have value type
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    Then attribute(name) value type is null
+    Then attribute(name) unset annotation: @abstract; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) value type is null
+    Then attribute(name) unset annotation: @abstract; fails
+
+  Scenario: Attribute types can unset @abstract annotation if it gets value type after setting annotation
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set value type: string
+    When attribute(name) unset annotation: @abstract
+    Then attribute(name) get annotations is empty
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When attribute(name) get value type: string
+    Then attribute(name) get annotations is empty
+
   Scenario: Attribute types can be subtypes of other attribute types
     When create attribute type: first-name
-    When attribute(first-name) set value-type: string
+    When attribute(first-name) set value type: string
     When create attribute type: last-name
-    When attribute(last-name) set value-type: string
+    When attribute(last-name) set value type: string
     When create attribute type: real-name
-    When attribute(real-name) set value-type: string
+    When attribute(real-name) set value type: string
     When create attribute type: username
-    When attribute(username) set value-type: string
+    When attribute(username) set value type: string
     When create attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value type: string
     When attribute(real-name) set annotation: @abstract
     When attribute(name) set annotation: @abstract
     When attribute(first-name) set supertype: real-name
@@ -502,11 +575,11 @@ Feature: Concept Attribute Type
 
   Scenario: Attribute types cannot subtype non abstract attribute types
     When create attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value type: string
     When create attribute type: first-name
-    When attribute(first-name) set value-type: string
+    When attribute(first-name) set value type: string
     When create attribute type: last-name
-    When attribute(last-name) set value-type: string
+    When attribute(last-name) set value type: string
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(first-name) set supertype: name; fails
@@ -515,7 +588,7 @@ Feature: Concept Attribute Type
 
   Scenario: Attribute type cannot set @abstract annotation with arguments
     When create attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value type: string
     Then attribute(name) set annotation: @abstract(); fails
     Then attribute(name) set annotation: @abstract(1); fails
     Then attribute(name) set annotation: @abstract(1, 2); fails
@@ -530,7 +603,7 @@ Feature: Concept Attribute Type
 
   Scenario Outline: Attribute types with <value-type> value type can set @regex annotation and unset it
     When create attribute type: email
-    When attribute(email) set value-type: <value-type>
+    When attribute(email) set value type: <value-type>
     When attribute(email) set annotation: @regex(<arg>)
     Then attribute(email) get annotations contain: @regex(<arg>)
     When transaction commits
@@ -555,7 +628,7 @@ Feature: Concept Attribute Type
 
   Scenario Outline: Attribute types with incompatible value types can't have @regex annotation
     When create attribute type: email
-    When attribute(email) set value-type: <value-type>
+    When attribute(email) set value type: <value-type>
     Then attribute(email) set annotation: @regex(<arg>); fails
     Then attribute(email) get annotations is empty
     When transaction commits
@@ -575,11 +648,11 @@ Feature: Concept Attribute Type
 
   Scenario: Attribute types' @regex annotation can be inherited
     When create attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value type: string
     When attribute(name) set annotation: @abstract
     When attribute(name) set annotation: @regex("value")
     When create attribute type: first-name
-    When attribute(first-name) set value-type: string
+    When attribute(first-name) set value type: string
     When attribute(first-name) set supertype: name
     Then attribute(first-name) get annotations contain: @regex("value")
     When transaction commits
@@ -588,7 +661,7 @@ Feature: Concept Attribute Type
 
   Scenario: Attribute type cannot set @regex annotation with wrong arguments
     When create attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value type: string
     Then attribute(name) set annotation: @regex; fails
     Then attribute(name) set annotation: @regex(); fails
     Then attribute(name) set annotation: @regex(1); fails
@@ -602,7 +675,7 @@ Feature: Concept Attribute Type
     # TODO: It should override it instead of failing. All the other similar tests as well!
   Scenario Outline: Attribute type cannot set multiple @regex annotations with different arguments
     When create attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value type: string
     When attribute(name) set annotation: @regex("\S+")
     Then attribute(name) set annotation: @regex("\S+")
     Then attribute(name) set annotation: @regex(<fail-args>); fails
@@ -622,7 +695,7 @@ Feature: Concept Attribute Type
 
   Scenario: Attribute type cannot override inherited @regex annotation
     When create attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value type: string
     When create attribute type: first-name
     When attribute(name) set annotation: @regex("\S+")
     Then attribute(name) get annotations contains: @regex("\S+")
@@ -655,7 +728,7 @@ Feature: Concept Attribute Type
 
   Scenario Outline: Attribute types with <value-type> value type can set @independent annotation and unset it
     When create attribute type: email
-    When attribute(email) set value-type: <value-type>
+    When attribute(email) set value type: <value-type>
     When attribute(email) set annotation: @independent
     Then attribute(email) get annotations contain: @independent
     When transaction commits
@@ -680,11 +753,11 @@ Feature: Concept Attribute Type
 
   Scenario: Attribute types' @independent annotation can be inherited
     When create attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value type: string
     When attribute(name) set annotation: @abstract
     When attribute(name) set annotation: @independent
     When create attribute type: first-name
-    When attribute(first-name) set value-type: string
+    When attribute(first-name) set value type: string
     When attribute(first-name) set supertype: name
     Then attribute(first-name) get annotations contain: @independent
     When transaction commits
@@ -693,7 +766,7 @@ Feature: Concept Attribute Type
 
   Scenario: Attribute type cannot set @independent annotation with arguments
     When create attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value type: string
     Then attribute(name) set annotation: @independent(); fails
     Then attribute(name) set annotation: @independent(1); fails
     Then attribute(name) set annotation: @independent(1, 2); fails
@@ -709,7 +782,7 @@ Feature: Concept Attribute Type
 
   Scenario Outline: Attribute types with <value-type> value type can set @values annotation and unset it
     When create attribute type: email
-    When attribute(email) set value-type: <value-type>
+    When attribute(email) set value type: <value-type>
     When attribute(email) set annotation: @values(<args>)
     Then attribute(email) get annotations contain: @values(<args>)
     When transaction commits
@@ -781,7 +854,7 @@ Feature: Concept Attribute Type
 
   Scenario: Attribute type cannot set @values annotation for struct value type
     When create attribute type: email
-    When attribute(email) set value-type: custom-struct
+    When attribute(email) set value type: custom-struct
     When attribute(email) set annotation: @values(custom-struct); fails
     When attribute(email) set annotation: @values({"string"}); fails
     When attribute(email) set annotation: @values({custom-field: "string"}); fails
@@ -791,7 +864,7 @@ Feature: Concept Attribute Type
 
   Scenario: Attribute types' @values annotation can be inherited
     When create attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value type: string
     When attribute(name) set annotation: @abstract
     When attribute(name) set annotation: @values("value", "value2")
     When create attribute type: first-name
@@ -803,7 +876,7 @@ Feature: Concept Attribute Type
 
   Scenario Outline: Attribute type with <value-type> value type cannot set @values with empty arguments
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     Then attribute(name) set annotation: @values; fails
     Then attribute(name) set annotation: @values(); fails
     Then attribute(name) get annotations is empty
@@ -823,7 +896,7 @@ Feature: Concept Attribute Type
 
   Scenario Outline: Attribute type with <value-type> value type cannot set @values with incorrect arguments
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     Then attribute(name) set annotation: @values(<args>); fails
     Then attribute(name) get annotations is empty
     When transaction commits
@@ -874,7 +947,7 @@ Feature: Concept Attribute Type
 
   Scenario Outline: Attribute type with <value-type> value type cannot set multiple @values annotations with different arguments
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @values(<args>)
     Then attribute(name) set annotation: @values(<args>)
     Then attribute(name) set annotation: @values(<fail-args>); fails
@@ -897,7 +970,7 @@ Feature: Concept Attribute Type
 
   Scenario Outline: Attribute type cannot have @values annotation for <value-type> value type with duplicated args
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     Then attribute(name) set annotation: @values(<arg0>, <arg1>, <arg2>); fails
     Then attribute(name) get annotations is empty
     When transaction commits
@@ -921,9 +994,9 @@ Feature: Concept Attribute Type
 
   Scenario Outline: Attribute types' @values annotation for <value-type> value type can be inherited and overridden by a subset of arguments
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When create attribute type: overridden-name
-    When attribute(overridden-name) set value-type: <value-type>
+    When attribute(overridden-name) set value type: <value-type>
     When attribute(overridden-name) set supertype: name
     When attribute(name) set annotation: @values(<args>)
     Then attribute(name) get annotations contain: @values(<args>)
@@ -952,9 +1025,9 @@ Feature: Concept Attribute Type
 
   Scenario Outline: Inherited @values annotation on attribute types for <value-type> value type cannot be overridden by the @values of same arguments or not a subset of arguments
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When create attribute type: overridden-name
-    When attribute(overridden-name) set value-type: <value-type>
+    When attribute(overridden-name) set value type: <value-type>
     When attribute(overridden-name) set supertype: name
     When attribute(name) set annotation: @values(<args>)
     Then attribute(name) get annotations contain: @values(<args>)
@@ -987,7 +1060,7 @@ Feature: Concept Attribute Type
 
   Scenario Outline: Attribute types with <value-type> value type can set @range annotation and unset it
     When create attribute type: email
-    When attribute(email) set value-type: <value-type>
+    When attribute(email) set value type: <value-type>
     When attribute(email) set annotation: @range(<arg0>, <arg1>)
     Then attribute(email) get annotations contain: @range(<arg0>, <arg1>)
     When transaction commits
@@ -1035,7 +1108,7 @@ Feature: Concept Attribute Type
 
   Scenario: Attribute type can set @range annotation for struct value type
     When create attribute type: name
-    When attribute(name) set value-type: custom-struct
+    When attribute(name) set value type: custom-struct
     When attribute(name) set annotation: @range(custom-struct, custom-struct); fails
     When attribute(name) set annotation: @range({"string"}, {"string+1"}); fails
     When attribute(name) set annotation: @range({custom-field: "string"}, {custom-field: "string+1"}); fails
@@ -1045,7 +1118,7 @@ Feature: Concept Attribute Type
 
   Scenario: Attribute types' @range annotation can be inherited
     When create attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value type: string
     When attribute(name) set annotation: @abstract
     When attribute(name) set annotation: @range(3, 5)
     When create attribute type: first-name
@@ -1057,7 +1130,7 @@ Feature: Concept Attribute Type
 
   Scenario Outline: Attribute type with <value-type> value type cannot set @range with empty arguments
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     Then attribute(name) set annotation: @range; fails
     Then attribute(name) set annotation: @range(); fails
     Then attribute(name) get annotations is empty
@@ -1077,7 +1150,7 @@ Feature: Concept Attribute Type
 
   Scenario Outline: Attribute type with <value-type> value type cannot set @range with incorrect arguments
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     Then attribute(name) set annotation: @range(<arg0>, <args>); fails
     Then attribute(name) get annotations is empty
     When transaction commits
@@ -1153,7 +1226,7 @@ Feature: Concept Attribute Type
 
   Scenario Outline: Attribute type with <value-type> value type cannot set multiple @range annotations with different arguments
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @range(<args>)
     Then attribute(name) set annotation: @range(<args>)
     Then attribute(name) set annotation: @range(<fail-args>); fails
@@ -1175,9 +1248,9 @@ Feature: Concept Attribute Type
 
   Scenario Outline: Attribute types' @range annotation for <value-type> value type can be inherited and overridden by a subset of arguments
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When create attribute type: overridden-name
-    When attribute(overridden-name) set value-type: <value-type>
+    When attribute(overridden-name) set value type: <value-type>
     When attribute(overridden-name) set supertype: name
     When attribute(name) set annotation: @range(<args>)
     Then attribute(name) get annotations contain: @range(<args>)
@@ -1205,9 +1278,9 @@ Feature: Concept Attribute Type
 
   Scenario Outline: Inherited @range annotation on attribute types for <value-type> value type cannot be overridden by the @range of same arguments or not a subset of arguments
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When create attribute type: overridden-name
-    When attribute(overridden-name) set value-type: <value-type>
+    When attribute(overridden-name) set value type: <value-type>
     When attribute(overridden-name) set supertype: name
     When attribute(name) set annotation: @range(<args>)
     Then attribute(name) get annotations contain: @range(<args>)
@@ -1239,7 +1312,7 @@ Feature: Concept Attribute Type
 
   Scenario Outline: Attribute type of <value-type> value type cannot have @distinct, @key, @unique, @subkey, @card, @cascade, and @replace annotations
     When create attribute type: email
-    When attribute(email) set value-type: <value-type>
+    When attribute(email) set value type: <value-type>
     Then attribute(email) set annotation: @distinct; fails
     Then attribute(email) set annotation: @key; fails
     Then attribute(email) set annotation: @unique; fails
@@ -1273,7 +1346,7 @@ Feature: Concept Attribute Type
 
   Scenario Outline: Attribute type can set @<annotation-1> and @<annotation-2> together and unset it for <value-type> value type
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @<annotation-1>
     When attribute(name) set annotation: @<annotation-2>
     When attribute(name) get annotations contain:
@@ -1317,7 +1390,7 @@ Feature: Concept Attribute Type
 
   Scenario Outline: Owns cannot set @<annotation-1> and @<annotation-2> together for <value-type> value type
     When create attribute type: name
-    When attribute(name) set value-type: <value-type>
+    When attribute(name) set value type: <value-type>
     When transaction commits
     When connection open schema transaction for database: typedb
     When attribute(name) set annotation: @<annotation-1>

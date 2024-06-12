@@ -15,11 +15,11 @@ Feature: Concept Ordered Role Players
 
     # Write schema for the test scenarios
     Given create attribute type: name
-    Given attribute(name) set value-type: string
+    Given attribute(name) set value type: string
     Given create attribute type: company-name
-    Given attribute(company-name) set value-type: string
+    Given attribute(company-name) set value type: string
     Given create attribute type: date
-    Given attribute(date) set value-type: datetime
+    Given attribute(date) set value type: datetime
 
     Given create relation type: employment
     Given relation(employment) set owns: date

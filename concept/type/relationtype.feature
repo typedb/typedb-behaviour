@@ -418,7 +418,10 @@ Feature: Concept Relation Type and Role Type
     When transaction commits
     When connection open read transaction for database: typedb
     Then relation(fathership) get overridden role(father) get name: parent
-
+# TODO: Refactor all the lists tests: [] is not a part of the name!!!!
+  # TODO: Add new tests for lists to be able to set ordering after something else (for example annotations)
+  # TODO: Add new tests for lists: can't make it unordered or ordered if we have data
+  # TODO: Add new tests for lists: can make it unordered or ordered if we don't have data
 ########################
 # relates (roles) lists
 ########################

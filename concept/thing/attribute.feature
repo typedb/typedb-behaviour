@@ -14,28 +14,28 @@ Feature: Concept Attribute
     Given connection open schema transaction for database: typedb
     # Write schema for the test scenarios
     Given create attribute type: is-alive
-    Given attribute(is-alive) set value-type: boolean
+    Given attribute(is-alive) set value type: boolean
     Given attribute(is-alive) set annotation: @independent
     Given create attribute type: age
-    Given attribute(age) set value-type: long
+    Given attribute(age) set value type: long
     Given attribute(age) set annotation: @independent
     Given create attribute type: score
-    Given attribute(score) set value-type: double
+    Given attribute(score) set value type: double
     Given attribute(score) set annotation: @independent
     Given create attribute type: birth-date
-    Given attribute(birth-date) set value-type: datetime
+    Given attribute(birth-date) set value type: datetime
     Given attribute(birth-date) set annotation: @independent
     Given create attribute type: event-date
-    Given attribute(event-date) set value-type: datetimetz
+    Given attribute(event-date) set value type: datetimetz
     Given attribute(event-date) set annotation: @independent
     Given create attribute type: schedule-interval
-    Given attribute(schedule-interval) set value-type: duration
+    Given attribute(schedule-interval) set value type: duration
     Given attribute(schedule-interval) set annotation: @independent
     Given create attribute type: name
-    Given attribute(name) set value-type: string
+    Given attribute(name) set value type: string
     Given attribute(name) set annotation: @independent
     Given create attribute type: email
-    Given attribute(email) set value-type: string
+    Given attribute(email) set value type: string
     Given attribute(email) set annotation: @independent
     Given attribute(email) set annotation: @regex("\S+@\S+\.\S+")
     Given transaction commits
@@ -155,7 +155,7 @@ Feature: Concept Attribute
 
     When connection open schema transaction for database: typedb
     When create attribute type: ephemeral
-    When attribute(ephemeral) set value-type: long
+    When attribute(ephemeral) set value type: long
     When transaction commits
 
     When connection open write transaction for database: typedb

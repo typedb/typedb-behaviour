@@ -14,9 +14,9 @@ Feature: Concept Entity
     Given connection open schema transaction for database: typedb
     # Write schema for the test scenarios
     Given create attribute type: username
-    Given attribute(username) set value-type: string
+    Given attribute(username) set value type: string
     Given create attribute type: email
-    Given attribute(email) set value-type: string
+    Given attribute(email) set value type: string
     Given create entity type: person
     Given entity(person) set owns: username
     Given entity(person) get owns(username) set annotation: @key

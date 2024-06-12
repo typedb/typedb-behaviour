@@ -14,11 +14,11 @@ Feature: Concept Relation
     Given connection open schema transaction for database: typedb
 
     Given create attribute type: username
-    Given attribute(username) set value-type: string
+    Given attribute(username) set value type: string
     Given create attribute type: license
-    Given attribute(license) set value-type: string
+    Given attribute(license) set value type: string
     Given create attribute type: date
-    Given attribute(date) set value-type: datetime
+    Given attribute(date) set value type: datetime
 
     Given create relation type: marriage
     Given relation(marriage) set owns: license

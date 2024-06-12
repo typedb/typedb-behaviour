@@ -67,7 +67,7 @@ Feature: Concept Plays
     When create entity type: car
     When create relation type: credit
     When create attribute type: id
-    When attribute(id) set value-type: long
+    When attribute(id) set value type: long
     When relation(credit) create role: creditor
     When create struct type: passport
     When struct(passport) create field: birthday, with value type: datetime
@@ -414,7 +414,7 @@ Feature: Concept Plays
     When create entity type: car
     When create relation type: credit
     When create attribute type: id
-    When attribute(id) set value-type: long
+    When attribute(id) set value type: long
     When relation(credit) create role: creditor
     When create relation type: marriage
     When relation(marriage) create role: spouse
@@ -654,13 +654,13 @@ Feature: Concept Plays
     When create attribute type: surname
     When create relation type: marriage
     When relation(marriage) create role: spouse
-    When attribute(surname) set value-type: string
+    When attribute(surname) set value type: string
     When create struct type: passport
     When struct(passport) create field: first-name, with value type: string
     When struct(passport) create field: surname, with value type: string
     When struct(passport) create field: birthday, with value type: datetime
     When create attribute type: name
-    When attribute(name) set value-type: string
+    When attribute(name) set value type: string
     Then attribute(name) set plays: person; fails
     Then attribute(name) set plays: surname; fails
     Then attribute(name) set plays: marriage; fails
@@ -677,7 +677,7 @@ Feature: Concept Plays
     When create attribute type: name
     When create relation type: marriage
     When relation(marriage) create role: spouse
-    When attribute(surname) set value-type: string
+    When attribute(surname) set value type: string
     When create struct type: passport
     When struct(passport) create field: birthday, with value type: datetime
     When create struct type: wallet

@@ -266,7 +266,7 @@ Feature: Concept Entity Type
 
   Scenario: Entity type cannot have @distinct, @key, @unique, @subkey, @values, @range, @card, @cascade, @independent, @replace, and @regex annotations
     When create entity type: person
-    When entity(person) set value-type: <value-type>
+    When entity(person) set value type: <value-type>
     Then entity(person) set annotation: @distinct; fails
     Then entity(person) set annotation: @key; fails
     Then entity(person) set annotation: @unique; fails
