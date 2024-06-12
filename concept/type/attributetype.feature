@@ -757,6 +757,16 @@ Feature: Concept Attribute Type
       | duration   | P1Y2M3DT4H5M6.789S                                                                                                                                                                                                                                                                                                                                                                                   |
       | duration   | P1Y, P1Y1M, P1Y1M1D, P1Y1M1DT1H, P1Y1M1DT1H1M, P1Y1M1DT1H1M1S, 1Y1M1DT1H1M1S0.1S, 1Y1M1DT1H1M1S0.001S, 1Y1M1DT1H1M0.000001S                                                                                                                                                                                                                                                                          |
 
+  Scenario: Attribute type cannot set @values annotation for struct value type
+    When create attribute type: email
+    When attribute(email) set value-type: custom-struct
+    When attribute(email) set annotation: @values(custom-struct); fails
+    When attribute(email) set annotation: @values({"string"}); fails
+    When attribute(email) set annotation: @values({custom-field: "string"}); fails
+    When attribute(email) set annotation: @values(custom-struct{custom-field: "string"}); fails
+    When attribute(email) set annotation: @values(custom-struct("string")); fails
+    When attribute(email) set annotation: @values(custom-struct(custom-field: "string")); fails
+
   Scenario: Attribute types' @values annotation can be inherited
     When create attribute type: name
     When attribute(name) set value-type: string
@@ -768,9 +778,6 @@ Feature: Concept Attribute Type
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(first-name) get annotations contain: @values("value", "value2")
-
-  Scenario: Attribute type can set @values annotation for struct value type
-    # TODO: Do we want to have it? If we do, add it to other Scenario Outlines with different value types
 
   Scenario Outline: Attribute type with <value-type> value type cannot set @values with empty arguments
     When create attribute type: name
@@ -1004,6 +1011,16 @@ Feature: Concept Attribute Type
       | duration   | P1Y2M                        | P1Y2M3DT4H5M6.789S                                    |
       | duration   | P1Y2M3DT4H5M6.788S           | P1Y2M3DT4H5M6.789S                                    |
 
+  Scenario: Attribute type can set @range annotation for struct value type
+    When create attribute type: name
+    When attribute(name) set value-type: custom-struct
+    When attribute(name) set annotation: @range(custom-struct, custom-struct); fails
+    When attribute(name) set annotation: @range({"string"}, {"string+1"}); fails
+    When attribute(name) set annotation: @range({custom-field: "string"}, {custom-field: "string+1"}); fails
+    When attribute(name) set annotation: @range(custom-struct{custom-field: "string"}, custom-struct{custom-field: "string+1"}); fails
+    When attribute(name) set annotation: @range(custom-struct("string"), custom-struct("string+1")); fails
+    When attribute(name) set annotation: @range(custom-struct(custom-field: "string"), custom-struct(custom-field: "string+1")); fails
+
   Scenario: Attribute types' @range annotation can be inherited
     When create attribute type: name
     When attribute(name) set value-type: string
@@ -1015,9 +1032,6 @@ Feature: Concept Attribute Type
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(first-name) get annotations contain: @range(3, 5)
-
-  Scenario: Attribute type can set @range annotation for struct value type
-    # TODO: Do we want to have it? If we do, add it to other Scenario Outlines with different value types
 
   Scenario Outline: Attribute type with <value-type> value type cannot set @range with empty arguments
     When create attribute type: name

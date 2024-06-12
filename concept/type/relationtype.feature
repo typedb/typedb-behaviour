@@ -1224,7 +1224,6 @@ Feature: Concept Relation Type and Role Type
       | 5, *      |
       | 6, *      |
 
-    # TODO: Maybe we allow it, then change the test considering the expected behavior
   Scenario Outline: Relation type cannot redeclare @card annotation with different arguments on a role
     When create relation type: parentship
     When relation(parentship) create role: parent

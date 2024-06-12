@@ -2467,8 +2467,16 @@ Feature: Concept Owns
       | duration   | P1Y2M3DT4H5M6.789S                                                                                                                                                                                                                                                                                                                                                                                   |
       | duration   | P1Y, P1Y1M, P1Y1M1D, P1Y1M1DT1H, P1Y1M1DT1H1M, P1Y1M1DT1H1M1S, 1Y1M1DT1H1M1S0.1S, 1Y1M1DT1H1M1S0.001S, 1Y1M1DT1H1M0.000001S                                                                                                                                                                                                                                                                          |
 
-  Scenario: Owns can set @values annotation for struct value type
-    # TODO: Do we want to have it? If we do, add it to other Scenario Outlines with different value types
+  Scenario: Owns cannot set @values annotation for struct value type
+    When create attribute type: custom-attribute
+    When attribute(custom-attribute) set value-type: custom-struct
+    When entity(person) set owns: custom-attribute
+    When entity(person) get owns(custom-attribute) set annotation: @values(custom-struct); fails
+    When entity(person) get owns(custom-attribute) set annotation: @values({"string"}); fails
+    When entity(person) get owns(custom-attribute) set annotation: @values({custom-field: "string"}); fails
+    When entity(person) get owns(custom-attribute) set annotation: @values(custom-struct{custom-field: "string"}); fails
+    When entity(person) get owns(custom-attribute) set annotation: @values(custom-struct("string")); fails
+    When entity(person) get owns(custom-attribute) set annotation: @values(custom-struct(custom-field: "string")); fails
 
   Scenario Outline: Owns cannot have @values annotation with empty arguments
     When create attribute type: custom-attribute
@@ -2543,7 +2551,6 @@ Feature: Concept Owns
       | duration   | 1Y                              |
       | duration   | year                            |
 
-    # TODO: Maybe we allow it, then change the test considering the expected behavior
   Scenario Outline: Owns cannot set multiple @values annotation with different arguments
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
@@ -2786,8 +2793,16 @@ Feature: Concept Owns
       | duration   | P1Y2M                        | P1Y2M3DT4H5M6.789S                                    |
       | duration   | P1Y2M3DT4H5M6.788S           | P1Y2M3DT4H5M6.789S                                    |
 
-  Scenario: Owns can set @range annotation for struct value type
-    # TODO: Do we want to have it? If we do, add it to other Scenario Outlines with different value types
+  Scenario: Owns cannot set @range annotation for struct value type
+    When create attribute type: custom-attribute
+    When attribute(custom-attribute) set value-type: custom-struct
+    When entity(person) set owns: custom-attribute
+    When entity(person) get owns(custom-attribute) set annotation: @range(custom-struct, custom-struct); fails
+    When entity(person) get owns(custom-attribute) set annotation: @range({"string"}, {"string+1"}); fails
+    When entity(person) get owns(custom-attribute) set annotation: @range({custom-field: "string"}, {custom-field: "string+1"}); fails
+    When entity(person) get owns(custom-attribute) set annotation: @range(custom-struct{custom-field: "string"}, custom-struct{custom-field: "string+1"}); fails
+    When entity(person) get owns(custom-attribute) set annotation: @range(custom-struct("string"), custom-struct("string+1")); fails
+    When entity(person) get owns(custom-attribute) set annotation: @range(custom-struct(custom-field: "string"), custom-struct(custom-field: "string+1")); fails
 
   Scenario Outline: Owns cannot have @range annotation for <value-type> value type with less than two args
     When create attribute type: custom-attribute
@@ -2811,7 +2826,6 @@ Feature: Concept Owns
       | datetimetz | 2024-06-04+0100 |
       | duration   | P1Y             |
 
-    # TODO: Maybe we allow it, then change the test considering the expected behavior
   Scenario Outline: Owns cannot redeclare @range annotation with different arguments
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
