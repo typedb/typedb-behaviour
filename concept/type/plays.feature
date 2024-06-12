@@ -700,6 +700,7 @@ Feature: Concept Plays
     When create relation type: parentship
     When relation(parentship) create role: parent
     When <root-type>(<type-name>) set plays: parentship:parent
+    When <root-type>(<type-name>) set plays: parentship:parent
     When transaction commits
     When connection open schema transaction for database: typedb
     When <root-type>(<type-name>) set plays: parentship:parent

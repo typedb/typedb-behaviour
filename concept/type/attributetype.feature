@@ -63,6 +63,27 @@ Feature: Concept Attribute Type
     Then attribute(full-name) get supertype: attribute
     Then attribute(full-name) get value type: multi-name
 
+  Scenario Outline: Attribute types cannot be redeclared with <value-type> value type
+    When create attribute type: name
+    When attribute(name) set value-type: <value-type>
+    Then attribute(name) exists
+    Then create attribute type: name; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) exists
+    Then create attribute type: name; fails
+    Examples:
+      | value-type    |
+      | long          |
+      | string        |
+      | boolean       |
+      | double        |
+      | decimal       |
+      | datetime      |
+      | datetimetz    |
+      | duration      |
+      | custom-struct |
+
   Scenario Outline: Attribute types can be deleted
     When create attribute type: name
     When attribute(name) set value-type: <value-type-1>

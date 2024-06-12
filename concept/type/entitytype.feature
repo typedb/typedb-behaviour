@@ -29,6 +29,15 @@ Feature: Concept Entity Type
     Then entity(person) exists
     Then entity(person) get supertype: entity
 
+  Scenario: Entity types cannot be redeclared
+    When create entity type: person
+    Then entity(person) exists
+    Then create entity type: person; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) exists
+    Then create entity type: person; fails
+
   Scenario: Entity types can be deleted
     When create entity type: person
     Then entity(person) exists

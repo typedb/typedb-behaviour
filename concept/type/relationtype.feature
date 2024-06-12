@@ -45,6 +45,25 @@ Feature: Concept Relation Type and Role Type
       | marriage:husband |
       | marriage:wife    |
 
+  Scenario: Relation types cannot be redeclared
+    When create relation type: parentship
+    When relation(parentship) create role: husband
+    Then relation(parentship) exists
+    Then create relation type: parentship; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) exists
+    Then create relation type: parentship; fails
+
+  Scenario: Relation type cannot redeclare role types
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    Then relation(parentship) get roles contain: parent
+    Then relation(parentship) create role: parent; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) create role: parent; fails
+
   Scenario: Relation and role types can be deleted
     When create relation type: marriage
     When relation(marriage) create role: spouse
@@ -119,7 +138,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) delete role: husband
     Then transaction commits
 
-  Scenario: Relation and role types can change labels
+  Scenario: Relation and role types can change names
     When create relation type: parentship
     When relation(parentship) create role: parent
     When relation(parentship) create role: child
@@ -428,6 +447,15 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) get roles contain:
       | marriage:husband |
       | marriage:wife    |
+
+  Scenario: Relation type cannot redeclare roles lists
+    When create relation type: parentship
+    When relation(parentship) create role: parent[]
+    Then relation(parentship) get roles do not contain: parent[]
+    Then relation(parentship) create role: parent[]; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) create role: parent[]; fails
 
   Scenario: Relation and role lists can be deleted
     When create relation type: marriage
@@ -1093,21 +1121,6 @@ Feature: Concept Relation Type and Role Type
     When transaction commits
     When connection open read transaction for database: typedb
     Then relation(parentship) get role(parent[]) get annotations is empty
-
-    # TODO: Maybe we can't create role again!
-  Scenario: Relation type can redeclare roles as roles with @distinct
-    When create relation type: parentship
-    When relation(parentship) create role: parent[]
-    Then relation(parentship) get role(parent[]) get annotations is empty
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(parentship) get role(parent[]) get annotations is empty
-    When relation(parentship) create role: parent[]
-    When relation(parentship) get role(parent[]) set annotation: @distinct
-    Then relation(parentship) get role(parent[]) get annotations contain: @distinct
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then relation(parentship) get role(parent[]) get annotations contain: @distinct
 
   Scenario: Relation type cannot unset not set @distinct of a role
     When create relation type: parentship

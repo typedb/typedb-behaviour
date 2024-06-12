@@ -90,7 +90,7 @@ Feature: Concept Owns
       | duration      | boolean      |
       | custom-struct | long         |
 
-  Scenario Outline: Entity types can redeclare owning attributes
+  Scenario Outline: Entity types can redeclare owning attributes with <value-type> value type
     When create attribute type: name
     When attribute(name) set value-type: <value-type>
     When create attribute type: email
@@ -186,7 +186,7 @@ Feature: Concept Owns
       | duration      | boolean      |
       | custom-struct | long         |
 
-  Scenario Outline: Relation types can redeclare owning attributes
+  Scenario Outline: Relation types can redeclare owning attributes with <value-type> value type
     When create attribute type: name
     When attribute(name) set value-type: <value-type>
     When create attribute type: email
