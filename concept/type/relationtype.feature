@@ -13,7 +13,6 @@ Feature: Concept Relation Type and Role Type
     Given connection create database: typedb
     Given connection open schema transaction for database: typedb
 
-    # TODO: `get label` and `set label` rename into `set name` and `get name` instead of label becasue it works ont with the whole label LA:BEL but name BEL in it! Do we want this reanme?
 ########################
 # relation type common
 ########################
@@ -124,40 +123,40 @@ Feature: Concept Relation Type and Role Type
     When create relation type: parentship
     When relation(parentship) create role: parent
     When relation(parentship) create role: child
-    Then relation(parentship) get label: parentship
-    Then relation(parentship) get role(parent) get label: parent
-    Then relation(parentship) get role(child) get label: child
-    When relation(parentship) set label: marriage
+    Then relation(parentship) get name: parentship
+    Then relation(parentship) get role(parent) get name: parent
+    Then relation(parentship) get role(child) get name: child
+    When relation(parentship) set name: marriage
     Then relation(parentship) does not exist
     Then relation(marriage) exists
-    When relation(marriage) get role(parent) set label: husband
-    When relation(marriage) get role(child) set label: wife
+    When relation(marriage) get role(parent) set name: husband
+    When relation(marriage) get role(child) set name: wife
     Then relation(marriage) get role(parent) does not exist
     Then relation(marriage) get role(child) does not exist
-    Then relation(marriage) get label: marriage
-    Then relation(marriage) get role(husband) get label: husband
-    Then relation(marriage) get role(wife) get label: wife
+    Then relation(marriage) get name: marriage
+    Then relation(marriage) get role(husband) get name: husband
+    Then relation(marriage) get role(wife) get name: wife
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(marriage) get label: marriage
-    Then relation(marriage) get role(husband) get label: husband
-    Then relation(marriage) get role(wife) get label: wife
-    When relation(marriage) set label: employment
+    Then relation(marriage) get name: marriage
+    Then relation(marriage) get role(husband) get name: husband
+    Then relation(marriage) get role(wife) get name: wife
+    When relation(marriage) set name: employment
     Then relation(marriage) does not exist
     Then relation(employment) exists
-    When relation(employment) get role(husband) set label: employee
-    When relation(employment) get role(wife) set label: employer
+    When relation(employment) get role(husband) set name: employee
+    When relation(employment) get role(wife) set name: employer
     Then relation(employment) get role(husband) does not exist
     Then relation(employment) get role(wife) does not exist
-    Then relation(employment) get label: employment
-    Then relation(employment) get role(employee) get label: employee
-    Then relation(employment) get role(employer) get label: employer
+    Then relation(employment) get name: employment
+    Then relation(employment) get role(employee) get name: employee
+    Then relation(employment) get role(employer) get name: employer
     When transaction commits
     When connection open read transaction for database: typedb
     Then relation(employment) exists
-    Then relation(employment) get label: employment
-    Then relation(employment) get role(employee) get label: employee
-    Then relation(employment) get role(employer) get label: employer
+    Then relation(employment) get name: employment
+    Then relation(employment) get role(employee) get name: employee
+    Then relation(employment) get role(employer) get name: employer
 
   Scenario: Relation and role types can be subtypes of other relation and role types
     When create relation type: parentship
@@ -354,7 +353,7 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) create role: father
     When relation(fathership) get role(father); set override: parent
     Then relation(fathership) get overridden role(father) exists
-    Then relation(fathership) get overridden role(father) get label: parent
+    Then relation(fathership) get overridden role(father) get name: parent
     Then relation(fathership) get roles do not contain:
       | parentship:parent |
     When transaction commits
@@ -399,7 +398,7 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) get role(father); set override: parent
     When transaction commits
     When connection open read transaction for database: typedb
-    Then relation(fathership) get overridden role(father) get label: parent
+    Then relation(fathership) get overridden role(father) get name: parent
 
 ########################
 # relates (roles) lists
@@ -476,40 +475,40 @@ Feature: Concept Relation Type and Role Type
     When create relation type: parentship
     When relation(parentship) create role: parent[]
     When relation(parentship) create role: child[]
-    Then relation(parentship) get label: parentship
-    Then relation(parentship) get role(parent[]) get label: parent[]
-    Then relation(parentship) get role(child[]) get label: child[]
-    When relation(parentship) set label: marriage
+    Then relation(parentship) get name: parentship
+    Then relation(parentship) get role(parent[]) get name: parent[]
+    Then relation(parentship) get role(child[]) get name: child[]
+    When relation(parentship) set name: marriage
     Then relation(parentship) does not exist
     Then relation(marriage) exists
-    When relation(marriage) get role(parent[]) set label: husband[]
-    When relation(marriage) get role(child[]) set label: wife[]
+    When relation(marriage) get role(parent[]) set name: husband[]
+    When relation(marriage) get role(child[]) set name: wife[]
     Then relation(marriage) get role(parent[]) does not exist
     Then relation(marriage) get role(child[]) does not exist
-    Then relation(marriage) get label: marriage
-    Then relation(marriage) get role(husband[]) get label: husband[]
-    Then relation(marriage) get role(wife[]) get label: wife[]
+    Then relation(marriage) get name: marriage
+    Then relation(marriage) get role(husband[]) get name: husband[]
+    Then relation(marriage) get role(wife[]) get name: wife[]
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(marriage) get label: marriage
-    Then relation(marriage) get role(husband[]) get label: husband[]
-    Then relation(marriage) get role(wife[]) get label: wife[]
-    When relation(marriage) set label: employment
+    Then relation(marriage) get name: marriage
+    Then relation(marriage) get role(husband[]) get name: husband[]
+    Then relation(marriage) get role(wife[]) get name: wife[]
+    When relation(marriage) set name: employment
     Then relation(marriage) does not exist
     Then relation(employment) exists
-    When relation(employment) get role(husband[]) set label: employee[]
-    When relation(employment) get role(wife[]) set label: employer[]
+    When relation(employment) get role(husband[]) set name: employee[]
+    When relation(employment) get role(wife[]) set name: employer[]
     Then relation(employment) get role(husband[]) does not exist
     Then relation(employment) get role(wife[]) does not exist
-    Then relation(employment) get label: employment
-    Then relation(employment) get role(employee[]) get label: employee[]
-    Then relation(employment) get role(employer[]) get label: employer[]
+    Then relation(employment) get name: employment
+    Then relation(employment) get role(employee[]) get name: employee[]
+    Then relation(employment) get role(employer[]) get name: employer[]
     When transaction commits
     When connection open read transaction for database: typedb
     Then relation(employment) exists
-    Then relation(employment) get label: employment
-    Then relation(employment) get role(employee[]) get label: employee[]
-    Then relation(employment) get role(employer[]) get label: employer[]
+    Then relation(employment) get name: employment
+    Then relation(employment) get role(employee[]) get name: employee[]
+    Then relation(employment) get role(employer[]) get name: employer[]
 
   Scenario: Relation and role lists can be subtypes of other relation and role lists
     When create relation type: parentship
@@ -699,7 +698,7 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) create role: father[]
     When relation(fathership) get role(father[]); set override: parent[]
     Then relation(fathership) get overridden role(father[]) exists
-    Then relation(fathership) get overridden role(father[]) get label: parent[]
+    Then relation(fathership) get overridden role(father[]) get name: parent[]
     Then relation(fathership) get roles do not contain:
       | parentship:parent[] |
     When transaction commits
@@ -744,14 +743,14 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) get role(father[]); set override: parent[]
     When transaction commits
     When connection open read transaction for database: typedb
-    Then relation(fathership) get overridden role(father[]) get label: parent[]
+    Then relation(fathership) get overridden role(father[]) get name: parent[]
 
   Scenario: Relation can't change label to a list
     When create relation type: parentship
     When relation(parentship) create role: parent
     When relation(parentship) create role: child[]
-    Then relation(parentship) get label: parentship
-    Then relation(parentship) set label: marriage; fails
+    Then relation(parentship) get name: parentship
+    Then relation(parentship) set name: marriage; fails
     Then relation(marriage) does not exist
     Then relation(parentship) exist
 
@@ -759,14 +758,14 @@ Feature: Concept Relation Type and Role Type
     When create relation type: parentship
     When relation(parentship) create role: parent
     When relation(parentship) create role: child[]
-    Then relation(parentship) get role(parent) get label: parent
-    Then relation(parentship) get role(parent) set label: parent[]; fails
-    Then relation(parentship) get role(parent) set label: list-parent[]; fails
-    Then relation(parentship) get role(parent) get label: parent
-    Then relation(parentship) get role(child[]) get label: child[]
-    Then relation(parentship) get role(child[]) set label: child; fails
-    Then relation(parentship) get role(child[]) set label: non-list-child; fails
-    Then relation(parentship) get role(child[]) get label: child[]
+    Then relation(parentship) get role(parent) get name: parent
+    Then relation(parentship) get role(parent) set name: parent[]; fails
+    Then relation(parentship) get role(parent) set name: list-parent[]; fails
+    Then relation(parentship) get role(parent) get name: parent
+    Then relation(parentship) get role(child[]) get name: child[]
+    Then relation(parentship) get role(child[]) set name: child; fails
+    Then relation(parentship) get role(child[]) set name: non-list-child; fails
+    Then relation(parentship) get role(child[]) get name: child[]
 
   Scenario: Relation can't have a list of roles alongside a scalar role of the same name
     When create relation type: parentship

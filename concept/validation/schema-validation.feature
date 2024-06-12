@@ -602,7 +602,7 @@ Feature: Schema validation
     Given transaction commits
 
     When session opens transaction of type: write
-    Then relation(rel00) set label: renamed-rel00
+    Then relation(rel00) set name: renamed-rel00
     Then transaction commits; throws exception
 
 

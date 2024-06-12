@@ -68,22 +68,22 @@ Feature: Concept Entity Type
 
   Scenario: Entity types can change labels
     When create entity type: person
-    Then entity(person) get label: person
-    When entity(person) set label: horse
+    Then entity(person) get name: person
+    When entity(person) set name: horse
     Then entity(person) does not exist
     Then entity(horse) exists
-    Then entity(horse) get label: horse
+    Then entity(horse) get name: horse
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(horse) get label: horse
-    When entity(horse) set label: animal
+    Then entity(horse) get name: horse
+    When entity(horse) set name: animal
     Then entity(horse) does not exist
     Then entity(animal) exists
-    Then entity(animal) get label: animal
+    Then entity(animal) get name: animal
     When transaction commits
     When connection open read transaction for database: typedb
     Then entity(animal) exists
-    Then entity(animal) get label: animal
+    Then entity(animal) get name: animal
 
 
   Scenario: Entity types can be subtypes of other entity types

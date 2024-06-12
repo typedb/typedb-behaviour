@@ -1309,7 +1309,6 @@ Feature: Concept Plays
       | entity    | person      | card(1, 2) |
       | relation  | description | card(1, 2) |
 
-    # TODO: We set annotations independently now. Is the Scenario still relevant? I think so.
   Scenario Outline: <root-type> types can redeclare plays with @<annotation> as pure plays
     When create relation type: contract
     When relation(contract) create role: contractor
@@ -1366,7 +1365,6 @@ Feature: Concept Plays
       | entity    | person         | customer     | card(1, 2) |
       | relation  | description    | registration | card(1, 2) |
 
-    # TODO: Maybe it should be rejected?
   Scenario Outline: <root-type> types can re-override plays with <annotation>s
     When create relation type: parentship
     When relation(parentship) create role: parent
@@ -1382,7 +1380,7 @@ Feature: Concept Plays
     Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations contain: @<annotation>
     When <root-type>(<subtype-name>) set plays: fathership:father
     When <root-type>(<subtype-name>) get plays(fathership:father) set override: parentship:parent
-    Then <root-type>(<subtype-name>) get plays overridden(fathership:father) get label: email
+    Then <root-type>(<subtype-name>) get plays overridden(fathership:father) get name: email
     Then <root-type>(<subtype-name>) get plays overridden(fathership:father)) get annotations contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
@@ -1922,7 +1920,6 @@ Feature: Concept Plays
       | 5, *      |
       | 6, *      |
 
-    # TODO: Maybe we allow it, then change the test considering the expected behavior
   Scenario Outline: Plays cannot redeclare @card annotation with different arguments
     When create relation type: marriage
     When relation(marriage) create role: spouse

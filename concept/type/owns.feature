@@ -322,12 +322,12 @@ Feature: Concept Owns
     When <root-type>(<sub-name>) set annotation: @abstract
     When <root-type>(<subtype-name>) set owns: work-email
     When <root-type>(<subtype-name>) get owns(work-email) set override: email
-    Then <root-type>(<subtype-name>) get owns overridden(work-email) get label: email
+    Then <root-type>(<subtype-name>) get owns overridden(work-email) get name: email
     When transaction commits
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name>) set owns: work-email
     When <root-type>(<subtype-name>) get owns(work-email) set override: email
-    Then <root-type>(<subtype-name>) get owns overridden(work-email) get label: email
+    Then <root-type>(<subtype-name>) get owns overridden(work-email) get name: email
     Examples:
       | root-type | supertype-name | subtype-name | value-type    |
       | entity    | person         | customer     | long          |
@@ -785,12 +785,12 @@ Feature: Concept Owns
     When <root-type>(<sub-name>) set annotation: @abstract
     When <root-type>(<subtype-name>) set owns: work-email[]
     When <root-type>(<subtype-name>) get owns(work-email[]) set override: email[]
-    Then <root-type>(<subtype-name>) get owns overridden(work-email[]) get label: email[]
+    Then <root-type>(<subtype-name>) get owns overridden(work-email[]) get name: email[]
     When transaction commits
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name>) set owns: work-email[]
     When <root-type>(<subtype-name>) get owns(work-email[]) set override: email[]
-    Then <root-type>(<subtype-name>) get owns overridden(work-email[]) get label: email[]
+    Then <root-type>(<subtype-name>) get owns overridden(work-email[]) get name: email[]
     Examples:
       | root-type | supertype-name | subtype-name | value-type    |
       | entity    | person         | customer     | long          |
@@ -1391,7 +1391,6 @@ Feature: Concept Owns
       | relation  | description | card(1, 2)       | string     |
       | relation  | description | regex("\S+")     | string     |
 
-    # TODO: We set annotations independently now. Is the scenario still relevant? I think so.
   Scenario Outline: <root-type> types can redeclare owns with @<annotation> as pure owns
     When create attribute type: name
     When attribute(name) set value-type: <value-type>
@@ -1439,7 +1438,7 @@ Feature: Concept Owns
     When <root-type>(<subtype-name>) set owns: username
     When <root-type>(<subtype-name>) get owns(username) set override: name
     When <root-type>(<subtype-name>) get owns(username) set annotation: @<annotation>
-    Then <root-type>(<subtype-name>) get owns overridden(username) get label: name
+    Then <root-type>(<subtype-name>) get owns overridden(username) get name: name
     Then <root-type>(<subtype-name>) get owns(username) get annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @<annotation>
     Then <root-type>(<subtype-name>) get owns contain:
@@ -1448,7 +1447,7 @@ Feature: Concept Owns
       | name |
     When transaction commits
     When connection open read transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns overridden(username) get label: name
+    Then <root-type>(<subtype-name>) get owns overridden(username) get name: name
     Then <root-type>(<subtype-name>) get owns(username) get annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @<annotation>
     Then <root-type>(<subtype-name>) get owns contain:
@@ -1472,7 +1471,6 @@ Feature: Concept Owns
       | relation  | description    | registration | card(1, 2)       | string     |
       | relation  | description    | registration | regex("\S+")     | string     |
 
-    # TODO: Maybe it should be rejected?
   Scenario Outline: <root-type> types can re-override owns with <annotation>s
     When create attribute type: email
     When attribute(email) set value-type: <value-type>
@@ -1488,13 +1486,13 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get owns(email) get annotations contain: @<annotation>
     When <root-type>(<subtype-name>) set owns: work-email
     When <root-type>(<subtype-name>) get owns(work-email) set override: email
-    Then <root-type>(<subtype-name>) get owns overridden(work-email) get label: email
+    Then <root-type>(<subtype-name>) get owns overridden(work-email) get name: email
     Then <root-type>(<subtype-name>) get owns overridden(work-email)) get annotations contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name>) set owns: work-email
     When <root-type>(<subtype-name>) get owns(work-email) set override: email
-    Then <root-type>(<subtype-name>) get owns overridden(work-email) get label: email
+    Then <root-type>(<subtype-name>) get owns overridden(work-email) get name: email
     Then <root-type>(<subtype-name>) get owns overridden(work-email)) get annotations contain: @<annotation>
     Examples:
       | root-type | supertype-name | subtype-name | annotation       | value-type |
@@ -1521,7 +1519,7 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) set owns: email
     Then <root-type>(<subtype-name>) get owns(email) set annotation: @<annotation>
     Then <root-type>(<subtype-name>) get owns overridden(email) exists
-    Then <root-type>(<subtype-name>) get owns overridden(email) get label: email
+    Then <root-type>(<subtype-name>) get owns overridden(email) get name: email
     Then <root-type>(<subtype-name>) get owns(email) get annotations contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
@@ -1897,8 +1895,8 @@ Feature: Concept Owns
     When <root-type>(<subtype-name>) set owns: rating
     When <root-type>(<subtype-name>) set owns: nick-name
     When <root-type>(<subtype-name>) get owns(nick-name) set override: name
-    Then <root-type>(<subtype-name>) get owns overridden(work-email) get label: email
-    Then <root-type>(<subtype-name>) get owns overridden(nick-name) get label: name
+    Then <root-type>(<subtype-name>) get owns overridden(work-email) get name: email
+    Then <root-type>(<subtype-name>) get owns overridden(nick-name) get name: name
     Then <root-type>(<subtype-name>) get owns contain:
       | username   |
       | reference  |
@@ -1924,8 +1922,8 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get owns(work-email) get annotations contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns overridden(work-email) get label: email
-    Then <root-type>(<subtype-name>) get owns overridden(nick-name) get label: name
+    Then <root-type>(<subtype-name>) get owns overridden(work-email) get name: email
+    Then <root-type>(<subtype-name>) get owns overridden(nick-name) get name: name
     Then <root-type>(<subtype-name>) get owns contain:
       | username   |
       | reference  |
@@ -1985,8 +1983,8 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get owns(username) get annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get owns(reference) get annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get owns(work-email) get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name-2>) get owns overridden(license) get label: reference
-    Then <root-type>(<subtype-name-2>) get owns overridden(points) get label: rating
+    Then <root-type>(<subtype-name-2>) get owns overridden(license) get name: reference
+    Then <root-type>(<subtype-name-2>) get owns overridden(points) get name: rating
     Then <root-type>(<subtype-name-2>) get owns contain:
       | username   |
       | license    |
@@ -2846,7 +2844,6 @@ Feature: Concept Owns
       | datetimetz | 2024-05-05+0100, 2024-05-06+0100 | 2024-05-05+0100, 2024-05-07+0100 |
       | duration   | P1Y, P2Y                         | P1Y6M, P2Y                       |
 
-    # TODO: If we allow arg0 == arg1, move this case to another test!
   Scenario Outline: Owns cannot have @range annotation for <value-type> value type with incorrect arguments
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
@@ -3084,8 +3081,6 @@ Feature: Concept Owns
     When connection open read transaction for database: typedb
     Then entity(person) get owns is empty
     Examples:
-    # TODO: card(0, 1) or @card(1, 1) for lists? If we don't allow it, refactor this test (move list cases to a separate test)
-    # If we allow it, maybe we should allow @key and @subkey for lists as well. Refactor @key and @subkey tests for lists as well!
       | value-type    | arg0 | arg1                |
       | long          | 0    | 1                   |
       | long          | 0    | 10                  |
@@ -3242,7 +3237,6 @@ Feature: Concept Owns
       | 5, *      |
       | 6, *      |
 
-    # TODO: Maybe we allow it, then change the test considering the expected behavior
   Scenario Outline: Owns cannot redeclare @card annotation with different arguments
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>

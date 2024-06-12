@@ -136,22 +136,22 @@ Feature: Concept Attribute Type
   Scenario: Attribute types can change labels
     When create attribute type: name
     When attribute(name) set value-type: string
-    Then attribute(name) get label: name
-    When attribute(name) set label: username
+    Then attribute(name) get name: name
+    When attribute(name) set name: username
     Then attribute(name) does not exist
     Then attribute(username) exists
-    Then attribute(username) get label: username
+    Then attribute(username) get name: username
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(username) get label: username
-    When attribute(username) set label: email
+    Then attribute(username) get name: username
+    When attribute(username) set name: email
     Then attribute(username) does not exist
     Then attribute(email) exists
-    Then attribute(email) get label: email
+    Then attribute(email) get name: email
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(email) exists
-    Then attribute(email) get label: email
+    Then attribute(email) get name: email
 
   Scenario: Attribute types cannot subtype itself
     When create attribute type: is-open
@@ -578,6 +578,7 @@ Feature: Concept Attribute Type
     When connection open read transaction for database: typedb
     Then attribute(name) get annotations is empty
 
+    # TODO: It should override it instead of failing. All the other similar tests as well!
   Scenario Outline: Attribute type cannot set multiple @regex annotations with different arguments
     When create attribute type: name
     When attribute(name) set value-type: string
