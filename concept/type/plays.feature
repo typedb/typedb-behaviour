@@ -1395,7 +1395,6 @@ Feature: Concept Plays
     Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations contain: @<annotation>
     When <root-type>(<subtype-name>) set plays: fathership:father
     When <root-type>(<subtype-name>) get plays(fathership:father) set override: parentship:parent
-    # TODO: These commas, semicolons, and colons are a mess and are different for different subcases. Need to refactor it!
     Then <root-type>(<subtype-name>) get plays overridden(fathership:father) get label: email
     Then <root-type>(<subtype-name>) get plays overridden(fathership:father)) get annotations contain: @<annotation>
     When transaction commits

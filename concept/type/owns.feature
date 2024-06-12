@@ -5,7 +5,6 @@
 #noinspection CucumberUndefinedStep
 Feature: Concept Owns
 
-  # TODO: Refactor "DEPRECATED"!
   Background:
     Given typedb starts
     Given connection opens with default authentication
@@ -1477,10 +1476,8 @@ Feature: Concept Owns
     When <root-type>(<subtype-name>) get owns(username) set override: name
     When <root-type>(<subtype-name>) get owns(username) set annotation: @<annotation>
     Then <root-type>(<subtype-name>) get owns overridden(username) get label: name
-    Then <root-type>(<subtype-name>) get owns, with annotations (DEPRECATED): <annotation>; contain:
-      | username |
-    Then <root-type>(<subtype-name>) get owns, with annotations (DEPRECATED): <annotation>; do not contain:
-      | name |
+    Then <root-type>(<subtype-name>) get owns(username) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @<annotation>
     Then <root-type>(<subtype-name>) get owns contain:
       | username |
     Then <root-type>(<subtype-name>) get owns do not contain:
@@ -1488,10 +1485,8 @@ Feature: Concept Owns
     When transaction commits
     When connection open read transaction for database: typedb
     Then <root-type>(<subtype-name>) get owns overridden(username) get label: name
-    Then <root-type>(<subtype-name>) get owns, with annotations (DEPRECATED): <annotation>; contain:
-      | username |
-    Then <root-type>(<subtype-name>) get owns, with annotations (DEPRECATED): <annotation>; do not contain:
-      | name |
+    Then <root-type>(<subtype-name>) get owns(username) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @<annotation>
     Then <root-type>(<subtype-name>) get owns contain:
       | username |
     Then <root-type>(<subtype-name>) get owns do not contain:
@@ -1529,7 +1524,6 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get owns(email) get annotations contain: @<annotation>
     When <root-type>(<subtype-name>) set owns: work-email
     When <root-type>(<subtype-name>) get owns(work-email) set override: email
-    # TODO: These commas, semicolons, and colons are a mess and are different for different subcases. Need to refactor it!
     Then <root-type>(<subtype-name>) get owns overridden(work-email) get label: email
     Then <root-type>(<subtype-name>) get owns overridden(work-email)) get annotations contain: @<annotation>
     When transaction commits
@@ -1564,13 +1558,13 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get owns(email) set annotation: @<annotation>
     Then <root-type>(<subtype-name>) get owns overridden(email) exists
     Then <root-type>(<subtype-name>) get owns overridden(email) get label: email
-    Then <root-type>(<subtype-name>) get owns, with annotations (DEPRECATED): <annotation>; contain: email
+    Then <root-type>(<subtype-name>) get owns(email) get annotations contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns, with annotations (DEPRECATED): <annotation>; contain: email
+    Then <root-type>(<subtype-name>) get owns(email) get annotations contain: @<annotation>
     Then <root-type>(<subtype-name-2>) set owns: email
     Then <root-type>(<subtype-name-2>) get owns(email) set annotation: @<annotation>
-    Then <root-type>(<subtype-name-2>) get owns, with annotations (DEPRECATED): <annotation>; contain: email
+    Then <root-type>(<subtype-name-2>) get owns(email) get annotations contain: @<annotation>
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | annotation       | value-type |
       | entity    | person         | customer     | subscriber     | key              | string     |
@@ -2536,12 +2530,12 @@ Feature: Concept Owns
   Scenario Outline: Owns cannot have @values annotation for <value-type> value type with arguments of invalid value or type
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
-    When entity(player) set owns: custom-attribute
-    Then entity(player) get owns(custom-attribute) set annotation: @values(<args>); fails
-    Then entity(player) get owns(custom-attribute) get annotations is empty
+    When entity(person) set owns: custom-attribute
+    Then entity(person) get owns(custom-attribute) set annotation: @values(<args>); fails
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(player) get owns(custom-attribute) get annotations is empty
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     Examples:
       | value-type | args                            |
       | long       | 0.1                             |
@@ -2610,12 +2604,12 @@ Feature: Concept Owns
   Scenario Outline: Owns cannot have @values annotation for <value-type> value type with duplicated args
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
-    When entity(player) set owns: custom-attribute
-    Then entity(player) get owns(custom-attribute) set annotation: @values(<arg0>, <arg1>, <arg2>); fails
-    Then entity(player) get owns(custom-attribute) get annotations is empty
+    When entity(person) set owns: custom-attribute
+    Then entity(person) get owns(custom-attribute) set annotation: @values(<arg0>, <arg1>, <arg2>); fails
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(player) get owns(custom-attribute) get annotations is empty
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     Examples:
       | value-type | arg0                        | arg1                         | arg2                         |
       | long       | 1                           | 1                            | 1                            |
@@ -2878,12 +2872,12 @@ Feature: Concept Owns
   Scenario Outline: Owns cannot have @range annotation for <value-type> value type with incorrect arguments
     When put attribute type: custom-attribute
     When attribute(custom-attribute) set value-type: <value-type>
-    When entity(player) set owns: custom-attribute
-    Then entity(player) get owns(custom-attribute) set annotation: @range(<arg0>, <args>); fails
-    Then entity(player) get owns(custom-attribute) get annotations is empty
+    When entity(person) set owns: custom-attribute
+    Then entity(person) get owns(custom-attribute) set annotation: @range(<arg0>, <args>); fails
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(player) get owns(custom-attribute) get annotations is empty
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     Examples:
       | value-type | arg0                            | args                                               |
       | long       | 1                               | 1                                                  |
@@ -3092,12 +3086,12 @@ Feature: Concept Owns
     When put attribute type: custom-attribute-2
     When attribute(custom-attribute-2) set value-type: <value-type>
     When entity(person) set owns: custom-attribute
-    Then entity(player) get owns(custom-attribute) set annotation: @card(<arg1>, <arg0>); fails
+    Then entity(customer) get owns(custom-attribute) set annotation: @card(<arg1>, <arg0>); fails
     Then entity(person) get owns(custom-attribute) get annotations is empty
     When entity(person) get owns(custom-attribute) set annotation: @card(<arg0>, <arg1>)
     Then entity(person) get owns(custom-attribute) get annotations contain: @card(<arg0>, <arg1>)
     When entity(person) set owns: custom-attribute-2[]
-    Then entity(player) get owns(custom-attribute-2[]) set annotation: @card(<arg1>, <arg0>); fails
+    Then entity(customer) get owns(custom-attribute-2[]) set annotation: @card(<arg1>, <arg0>); fails
     Then entity(person) get owns(custom-attribute-2[]) get annotations is empty
     When entity(person) get owns(custom-attribute-2[]) set annotation: @card(<arg0>, <arg1>)
     Then entity(person) get owns(custom-attribute-2[]) get annotations contain: @card(<arg0>, <arg1>)
@@ -3735,34 +3729,34 @@ Feature: Concept Owns
     When entity(person) set owns: custom-attribute
     When entity(person) get owns(custom-attribute) set annotation: @regex("\S+")
     Then entity(person) get owns(custom-attribute) get annotations contains: @regex("\S+")
-    Then entity(player) get owns(custom-attribute) get annotations contains: @regex("\S+")
+    Then entity(customer) get owns(custom-attribute) get annotations contains: @regex("\S+")
     When put attribute type: custom-attribute-2
     When attribute(custom-attribute-2) set value-type: string
-    When entity(player) set owns: custom-attribute-2
-    Then entity(player) get owns(custom-attribute-2) get annotations is empty
+    When entity(customer) set owns: custom-attribute-2
+    Then entity(customer) get owns(custom-attribute-2) get annotations is empty
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get annotations contains: @regex("\S+")
-    Then entity(player) get owns(custom-attribute) get annotations contains: @regex("\S+")
-    Then entity(player) get owns(custom-attribute-2) get annotations is empty
-    When entity(player) get owns(custom-attribute-2) set override: custom-attribute
-    Then entity(player) get owns(custom-attribute-2) set annotation: @regex("\S+"); fails
-    Then entity(player) get owns(custom-attribute-2) set annotation: @regex("test"); fails
+    Then entity(customer) get owns(custom-attribute) get annotations contains: @regex("\S+")
+    Then entity(customer) get owns(custom-attribute-2) get annotations is empty
+    When entity(customer) get owns(custom-attribute-2) set override: custom-attribute
+    Then entity(customer) get owns(custom-attribute-2) set annotation: @regex("\S+"); fails
+    Then entity(customer) get owns(custom-attribute-2) set annotation: @regex("test"); fails
     When connection open schema transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get annotations contains: @regex("\S+")
-    Then entity(player) get owns(custom-attribute) get annotations contains: @regex("\S+")
-    Then entity(player) get owns(custom-attribute-2) get annotations is empty
-    When entity(player) get owns(custom-attribute-2) set annotation: @regex("\S+")
-    Then entity(player) get owns(custom-attribute-2) set override: custom-attribute; fails
-    When entity(player) get owns(custom-attribute-2) unset annotation: @regex("\S+")
-    When entity(player) get owns(custom-attribute-2) set override: custom-attribute
-    Then entity(player) get owns(custom-attribute-2) get supertype: custom-attribute
-    Then entity(player) get owns(custom-attribute-2) get annotations contain: @regex("\S+")
+    Then entity(customer) get owns(custom-attribute) get annotations contains: @regex("\S+")
+    Then entity(customer) get owns(custom-attribute-2) get annotations is empty
+    When entity(customer) get owns(custom-attribute-2) set annotation: @regex("\S+")
+    Then entity(customer) get owns(custom-attribute-2) set override: custom-attribute; fails
+    When entity(customer) get owns(custom-attribute-2) unset annotation: @regex("\S+")
+    When entity(customer) get owns(custom-attribute-2) set override: custom-attribute
+    Then entity(customer) get owns(custom-attribute-2) get supertype: custom-attribute
+    Then entity(customer) get owns(custom-attribute-2) get annotations contain: @regex("\S+")
     When transaction commits
     When connection open read transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get annotations contain: @regex("\S+")
-    Then entity(player) get owns(custom-attribute) get annotations contain: @regex("\S+")
-    Then entity(player) get owns(custom-attribute-2) get annotations contain: @regex("\S+")
+    Then entity(customer) get owns(custom-attribute) get annotations contain: @regex("\S+")
+    Then entity(customer) get owns(custom-attribute-2) get annotations contain: @regex("\S+")
 
 ########################
 # not compatible @annotations: @abstract, @cascade, @independent, @replace
