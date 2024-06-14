@@ -1041,6 +1041,47 @@ Feature: Concept Owns
     When connection open read transaction for database: typedb
     Then struct(wallet) get owns is empty
 
+  Scenario Outline: <root-type> can change ordering of owns
+    When create attribute type: name
+    When attribute(name) set value type: <value-type>
+    When create attribute type: surname
+    When attribute(surname) set value type: <value-type>
+    When <root-type>(<type-name>) set owns: name
+    When <root-type>(<type-name>) set owns: surname
+    When <root-type>(<type-name>) get owns(surname) set ordering: ordered
+    Then <root-type>(<type-name>) get owns(name) get ordering: unordered
+    Then <root-type>(<type-name>) get owns(surname) get ordering: ordered
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<type-name>) get owns(name) get ordering: unordered
+    Then <root-type>(<type-name>) get owns(surname) get ordering: ordered
+    When <root-type>(<type-name>) get owns(name) set ordering: ordered
+    When <root-type>(<type-name>) get owns(surname) set ordering: unordered
+    Then <root-type>(<type-name>) get owns(name) get ordering: ordered
+    Then <root-type>(<type-name>) get owns(surname) get ordering: unordered
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then <root-type>(<type-name>) get owns(name) get ordering: ordered
+    Then <root-type>(<type-name>) get owns(surname) get ordering: unordered
+    Examples:
+      | root-type | type-name   | value-type |
+      | entity    | person      | long       |
+      | entity    | person      | double     |
+      | entity    | person      | decimal    |
+      | entity    | person      | string     |
+      | entity    | person      | boolean    |
+      | entity    | person      | datetime   |
+      | entity    | person      | datetimetz |
+      | entity    | person      | duration   |
+      | relation  | description | long       |
+      | relation  | description | double     |
+      | relation  | description | decimal    |
+      | relation  | description | string     |
+      | relation  | description | boolean    |
+      | relation  | description | datetime   |
+      | relation  | description | datetimetz |
+      | relation  | description | duration   |
+
   Scenario Outline: <root-type> types cannot unset owning lists of attributes that are owned by existing instances
     When create attribute type: name
     When attribute(name) set value type: <value-type>
