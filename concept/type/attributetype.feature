@@ -63,7 +63,7 @@ Feature: Concept Attribute Type
     Then attribute(full-name) get supertype: attribute
     Then attribute(full-name) get value type: multi-name
 
-  Scenario Outline: Attribute types cannot be redeclared with <value-type> value type
+  Scenario Outline: Attribute types cannot be resetared with <value-type> value type
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     Then attribute(name) exists
@@ -383,8 +383,8 @@ Feature: Concept Attribute Type
     Examples:
       | annotation      |
       | abstract        |
-      | regex("\S+")    |
       | independent     |
+      | regex("\S+")    |
       | values("1")     |
       | range("1", "3") |
 
@@ -437,6 +437,17 @@ Feature: Concept Attribute Type
     Then attribute(first-name) value type is null
     Then transaction commits; fails
 
+  Scenario: Attribute type can reset @abstract annotation
+    When create attribute type: name
+    When attribute(name) set value type: string
+    When attribute(name) set annotation: @abstract
+    Then attribute(name) get annotations contain: @abstract
+    When attribute(name) set annotation: @abstract
+    Then attribute(name) get annotations contain: @abstract
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get annotations contain: @abstract
+
   Scenario Outline: Attribute types can set <value-type> value type after inheriting from an abstract attribute type without value type
     When create attribute type: name
     When attribute(name) set annotation: @abstract
@@ -450,6 +461,58 @@ Feature: Concept Attribute Type
     Then attribute(first-name) exists
     Then attribute(first-name) get value type: <value-type>
     Then attribute(name) value type is null
+    Examples:
+      | value-type    |
+      | long          |
+      | string        |
+      | boolean       |
+      | double        |
+      | decimal       |
+      | datetime      |
+      | datetimetz    |
+      | duration      |
+      | custom-struct |
+
+  Scenario Outline: Attribute type of <value-type> value type can inherit value type
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set value type: <value-type>
+    When create attribute type: first-name
+    When attribute(first-name) set supertype: name
+    Then attribute(first-name) get value type: <value-type>
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(first-name) get value type: <value-type>
+    Examples:
+      | value-type    |
+      | long          |
+      | string        |
+      | boolean       |
+      | double        |
+      | decimal       |
+      | datetime      |
+      | datetimetz    |
+      | duration      |
+      | custom-struct |
+
+  Scenario Outline: Attribute type of <value-type> value type cannot inherit @abstract annotation, but can set it being a subtype
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    Then attribute(name) get annotations contain: @abstract
+    When attribute(name) set value type: <value-type>
+    When create attribute type: first-name
+    When attribute(first-name) set supertype: name
+    Then attribute(name) get annotations contain: @abstract
+    Then attribute(first-name) get annotations do not contain: @abstract
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotations contain: @abstract
+    Then attribute(first-name) get annotations do not contain: @abstract
+    When attribute(first-name) set annotation: @abstract
+    Then attribute(first-name) get annotations contain: @abstract
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(first-name) get annotations contain: @abstract
     Examples:
       | value-type    |
       | long          |
@@ -659,6 +722,24 @@ Feature: Concept Attribute Type
     When connection open read transaction for database: typedb
     Then attribute(first-name) get annotations contain: @regex("value")
 
+  Scenario: Attribute type cannot reset inherited @regex annotation
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set annotation: @regex("value")
+    When attribute(name) set value type: string
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When create attribute type: first-name
+    When attribute(first-name) set supertype: name
+    Then attribute(first-name) get annotations contain: @regex("value")
+    Then attribute(first-name) set annotation: @regex("another value"); fails
+    Then attribute(first-name) get annotations contain: @regex("value")
+    When attribute(first-name) set annotation: @regex("value")
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When attribute(first-name) set annotation: @regex("value")
+    Then transaction commits; fails
+
   Scenario: Attribute type cannot set @regex annotation with wrong arguments
     When create attribute type: name
     When attribute(name) set value type: string
@@ -672,26 +753,32 @@ Feature: Concept Attribute Type
     When connection open read transaction for database: typedb
     Then attribute(name) get annotations is empty
 
-    # TODO: It should override it instead of failing. All the other similar tests as well!
-  Scenario Outline: Attribute type cannot set multiple @regex annotations with different arguments
+  Scenario Outline: Attribute type can reset @regex annotation
     When create attribute type: name
     When attribute(name) set value type: string
-    When attribute(name) set annotation: @regex("\S+")
-    Then attribute(name) set annotation: @regex("\S+")
-    Then attribute(name) set annotation: @regex(<fail-args>); fails
-    Then attribute(name) get annotations contain: @regex("\S+")
-    Then attribute(name) get annotations do not contain: @regex(<fail-args>)
+    When attribute(name) set annotation: @regex(<init-args>)
+    Then attribute(name) get annotations contain: @regex(<init-args>)
+    Then attribute(name) get annotations do not contain: @regex(<reset-args>)
+    When attribute(name) set annotation: @regex(<init-args>)
+    Then attribute(name) get annotations contain: @regex(<init-args>)
+    Then attribute(name) get annotations do not contain: @regex(<reset-args>)
+    When attribute(name) set annotation: @regex(<reset-args>)
+    Then attribute(name) get annotations contain: @regex(<reset-args>)
+    Then attribute(name) get annotations do not contain: @regex(<init-args>)
     When transaction commits
-    When connection open read transaction for database: typedb
-    Then attribute(name) get annotations contain: @regex("\S+")
-    Then attribute(name) get annotations do not contain: @regex(<fail-args>)
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotations contain: @regex(<reset-args>)
+    Then attribute(name) get annotations do not contain: @regex(<init-args>)
+    When attribute(name) set annotation: @regex(<init-args>)
+    Then attribute(name) get annotations contain: @regex(<init-args>)
+    Then attribute(name) get annotations do not contain: @regex(<reset-args>)
     Examples:
-      | fail-args       |
-      | "\S"            |
-      | "S+"            |
-      | "*"             |
-      | "s"             |
-      | " some string " |
+      | init-args | reset-args      |
+      | "\S+"     | "\S"            |
+      | "\S+"     | "S+"            |
+      | "\S+"     | "*"             |
+      | "\S+"     | "s"             |
+      | "\S+"     | " some string " |
 
   Scenario: Attribute type cannot override inherited @regex annotation
     When create attribute type: name
@@ -751,6 +838,17 @@ Feature: Concept Attribute Type
       | duration      |
       | custom-struct |
 
+  Scenario: Attribute type can reset @independent annotation
+    When create attribute type: name
+    When attribute(name) set value type: string
+    When attribute(name) set annotation: @independent
+    Then attribute(name) get annotations contain: @independent
+    When attribute(name) set annotation: @independent
+    Then attribute(name) get annotations contain: @independent
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get annotations contain: @independent
+
   Scenario: Attribute types' @independent annotation can be inherited
     When create attribute type: name
     When attribute(name) set value type: string
@@ -763,6 +861,25 @@ Feature: Concept Attribute Type
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(first-name) get annotations contain: @independent
+
+  Scenario: Attribute type cannot reset inherited @independent annotation
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set annotation: @independent
+    When attribute(name) set value type: string
+    When create attribute type: first-name
+    When attribute(first-name) set supertype: name
+    Then attribute(first-name) get annotations contain: @independent
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When attribute(first-name) set annotation: @independent
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When create attribute type: second-name
+    When attribute(second-name) set supertype: name
+    Then attribute(second-name) get annotations contain: @independent
+    When attribute(second-name) set annotation: @independent
+    Then transaction commits; fails
 
   Scenario: Attribute type cannot set @independent annotation with arguments
     When create attribute type: name
@@ -945,20 +1062,27 @@ Feature: Concept Attribute Type
       | duration   | 1Y                              |
       | duration   | year                            |
 
-  Scenario Outline: Attribute type with <value-type> value type cannot set multiple @values annotations with different arguments
+  Scenario Outline: Attribute type with <value-type> value type can reset @values annotation
     When create attribute type: name
     When attribute(name) set value type: <value-type>
-    When attribute(name) set annotation: @values(<args>)
-    Then attribute(name) set annotation: @values(<args>)
-    Then attribute(name) set annotation: @values(<fail-args>); fails
-    Then attribute(name) get annotations contain: @values(<args>)
-    Then attribute(name) get annotations do not contain: @values(<fail-args>)
+    When attribute(name) set annotation: @values(<init-args>)
+    Then attribute(name) get annotation contain: @values(<init-args>)
+    Then attribute(name) get annotation do not contain: @values(<reset-args>)
+    When attribute(name) set annotation: @values(<init-args>)
+    Then attribute(name) get annotation contain: @values(<init-args>)
+    Then attribute(name) get annotation do not contain: @values(<reset-args>)
+    When attribute(name) set annotation: @values(<reset-args>)
+    Then attribute(name) get annotations contain: @values(<reset-args>)
+    Then attribute(name) get annotations do not contain: @values(<init-args>)
     When transaction commits
-    When connection open read transaction for database: typedb
-    Then attribute(name) get annotations contain: @values(<args>)
-    Then attribute(name) get annotations do not contain: @values(<fail-args>)
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotations contain: @values(<reset-args>)
+    Then attribute(name) get annotations do not contain: @values(<init-args>)
+    When attribute(name) set annotation: @values(<init-args>)
+    Then attribute(name) get annotation contain: @values(<init-args>)
+    Then attribute(name) get annotation do not contain: @values(<reset-args>)
     Examples:
-      | value-type | args            | fail-args       |
+      | value-type | init-args       | reset-args      |
       | long       | 1, 5            | 7, 9            |
       | double     | 1.1, 1.5        | -8.0, 88.3      |
       | decimal    | -8.0, 88.3      | 1.1, 1.5        |
@@ -992,6 +1116,25 @@ Feature: Concept Attribute Type
       | datetimetz | 2020-06-04T16:35:02.10+0100 | 2020-06-04T16:35:02.10+0000  | 2020-06-04T16:35:02.10+0100  |
       | duration   | P1Y1M                       | P1Y1M                        | P1Y2M                        |
 
+  Scenario: Attribute type cannot reset inherited @values annotation
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set annotation: @values("value")
+    When attribute(name) set value type: string
+    When create attribute type: first-name
+    When attribute(first-name) set supertype: name
+    Then attribute(first-name) get annotations contain: @values("value")
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When attribute(first-name) set annotation: @values("value")
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When create attribute type: second-name
+    When attribute(second-name) set supertype: name
+    Then attribute(second-name) get annotations contain: @values("value")
+    When attribute(second-name) set annotation: @values("value")
+    Then transaction commits; fails
+
   Scenario Outline: Attribute types' @values annotation for <value-type> value type can be inherited and overridden by a subset of arguments
     When create attribute type: name
     When attribute(name) set value type: <value-type>
@@ -1023,7 +1166,7 @@ Feature: Concept Attribute Type
       | datetimetz | 2024-06-04+0010, 2024-06-04 Asia/Kathmandu, 2024-06-05+0010, 2024-06-05+0100 | 2024-06-04 Asia/Kathmandu, 2024-06-05+0010 |
       | duration   | P6M, P1Y, P1Y1M, P1Y2M, P1Y3M, P1Y4M, P1Y6M                                  | P6M, P1Y3M, P1Y4M, P1Y6M                   |
 
-  Scenario Outline: Inherited @values annotation on attribute types for <value-type> value type cannot be overridden by the @values of same arguments or not a subset of arguments
+  Scenario Outline: Inherited @values annotation on attribute types for <value-type> value type cannot be overridden by the @values of not a subset of arguments
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When create attribute type: overridden-name
@@ -1224,20 +1367,27 @@ Feature: Concept Attribute Type
       | duration   | 1Y                              | P1Y                                                |
       | duration   | year                            | P1Y                                                |
 
-  Scenario Outline: Attribute type with <value-type> value type cannot set multiple @range annotations with different arguments
+  Scenario Outline: Attribute type with <value-type> value type can reset @range annotation
     When create attribute type: name
     When attribute(name) set value type: <value-type>
-    When attribute(name) set annotation: @range(<args>)
-    Then attribute(name) set annotation: @range(<args>)
-    Then attribute(name) set annotation: @range(<fail-args>); fails
-    Then attribute(name) get annotations contain: @range(<args>)
-    Then attribute(name) get annotations do not contain: @range(<fail-args>)
+    When attribute(name) set annotation: @range(<init-args>)
+    Then attribute(name) get annotations contain: @range(<init-args>)
+    Then attribute(name) get annotations do not contain: @range(<reset-args>)
+    When attribute(name) set annotation: @range(<init-args>)
+    Then attribute(name) get annotations contain: @range(<init-args>)
+    Then attribute(name) get annotations do not contain: @range(<reset-args>)
+    When attribute(name) set annotation: @range(<reset-args>)
+    Then attribute(name) get annotations contain: @range(<reset-args>)
+    Then attribute(name) get annotations do not contain: @range(<init-args>)
     When transaction commits
-    When connection open read transaction for database: typedb
-    Then attribute(name) get annotations contain: @range(<args>)
-    Then attribute(name) get annotations do not contain: @range(<fail-args>)
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotations contain: @range(<reset-args>)
+    Then attribute(name) get annotations do not contain: @range(<init-args>)
+    When attribute(name) set annotation: @range(<init-args>)
+    Then attribute(name) get annotations contain: @range(<init-args>)
+    Then attribute(name) get annotations do not contain: @range(<reset-args>)
     Examples:
-      | value-type | args                             | fail-args                        |
+      | value-type | init-args                        | reset-args                       |
       | long       | 1, 5                             | 7, 9                             |
       | double     | 1.1, 1.5                         | -8.0, 88.3                       |
       | decimal    | -8.0, 88.3                       | 1.1, 1.5                         |
@@ -1245,6 +1395,25 @@ Feature: Concept Attribute Type
       | datetime   | 2024-05-05, 2024-05-06           | 2024-06-05, 2024-06-06           |
       | datetimetz | 2024-05-05+0100, 2024-05-06+0100 | 2024-05-05+0100, 2024-05-07+0100 |
       | duration   | P1Y, P2Y                         | P1Y6M, P2Y                       |
+
+  Scenario: Attribute type cannot reset inherited @range annotation
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set annotation: @range("value", "value+1")
+    When attribute(name) set value type: string
+    When create attribute type: first-name
+    When attribute(first-name) set supertype: name
+    Then attribute(first-name) get annotations contain: @range("value", "value+1")
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When attribute(first-name) set annotation: @range("value", "value+1")
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When create attribute type: second-name
+    When attribute(second-name) set supertype: name
+    Then attribute(second-name) get annotations contain: @range("value", "value+1")
+    When attribute(second-name) set annotation: @range("value", "value+1")
+    Then transaction commits; fails
 
   Scenario Outline: Attribute types' @range annotation for <value-type> value type can be inherited and overridden by a subset of arguments
     When create attribute type: name
@@ -1276,7 +1445,7 @@ Feature: Concept Attribute Type
       | datetimetz | 2024-06-04+0010, 2024-06-05+0010 | 2024-06-04+0010, 2024-06-04T12:00:00+0010 |
       | duration   | P6M, P1Y                         | P8M, P9M                                  |
 
-  Scenario Outline: Inherited @range annotation on attribute types for <value-type> value type cannot be overridden by the @range of same arguments or not a subset of arguments
+  Scenario Outline: Inherited @range annotation on attribute types for <value-type> value type cannot be overridden by the @range of not a subset of arguments
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When create attribute type: overridden-name
