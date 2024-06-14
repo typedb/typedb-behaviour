@@ -388,6 +388,57 @@ Feature: Concept Attribute Type
       | values("1")     |
       | range("1", "3") |
 
+  Scenario Outline: Attribute type can set and unset @<annotation>
+    When create attribute type: name
+    When attribute(name) set value type: <value-type>
+    When attribute(name) set annotation: @<annotation>
+    Then attribute(name) get annotations contain: @<annotation>
+    When attribute(name) unset annotation: @<annotation>
+    Then attribute(name) get annotations do not contain: @<annotation>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotations do not contain: @<annotation>
+    When attribute(name) set annotation: @<annotation>
+    Then attribute(name) get annotations contain: @<annotation>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotations contain: @<annotation>
+    Examples:
+      | value-type | annotation                              |
+      | long       | abstract                                |
+      | long       | independent                             |
+      | long       | values(1)                               |
+      | long       | range(1, 3)                             |
+      | string     | abstract                                |
+      | string     | independent                             |
+      | string     | regex("\S+")                            |
+      | string     | values("1")                             |
+      | string     | range("1", "3")                         |
+      | boolean    | abstract                                |
+      | boolean    | independent                             |
+      | boolean    | values(true)                            |
+      | boolean    | range(false, true)                      |
+      | double     | abstract                                |
+      | double     | independent                             |
+      | double     | values(1.0)                             |
+      | double     | range(1.0, 3.0)                         |
+      | decimal    | abstract                                |
+      | decimal    | independent                             |
+      | decimal    | values(1.0)                             |
+      | decimal    | range(1.0, 3.0)                         |
+      | datetime   | abstract                                |
+      | datetime   | independent                             |
+      | datetime   | values(2024-05-06)                      |
+      | datetime   | range(2024-05-06, 2024-05-07)           |
+      | datetimetz | abstract                                |
+      | datetimetz | independent                             |
+      | datetimetz | values(2024-05-06+0010)                 |
+      | datetimetz | range(2024-05-06+0100, 2024-05-07+0100) |
+      | duration   | abstract                                |
+      | duration   | independent                             |
+      | duration   | values(P1Y)                             |
+      | duration   | range(P1Y, P5Y)                         |
+
 ########################
 # @abstract
 ########################
@@ -722,24 +773,6 @@ Feature: Concept Attribute Type
     When connection open read transaction for database: typedb
     Then attribute(first-name) get annotations contain: @regex("value")
 
-  Scenario: Attribute type cannot reset inherited @regex annotation
-    When create attribute type: name
-    When attribute(name) set annotation: @abstract
-    When attribute(name) set annotation: @regex("value")
-    When attribute(name) set value type: string
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When create attribute type: first-name
-    When attribute(first-name) set supertype: name
-    Then attribute(first-name) get annotations contain: @regex("value")
-    Then attribute(first-name) set annotation: @regex("another value"); fails
-    Then attribute(first-name) get annotations contain: @regex("value")
-    When attribute(first-name) set annotation: @regex("value")
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When attribute(first-name) set annotation: @regex("value")
-    Then transaction commits; fails
-
   Scenario: Attribute type cannot set @regex annotation with wrong arguments
     When create attribute type: name
     When attribute(name) set value type: string
@@ -808,6 +841,43 @@ Feature: Concept Attribute Type
     When connection open read transaction for database: typedb
     Then attribute(name) get annotation contains: @regex("\S+")
     Then attribute(first-name) get annotation contains: @regex("\S+")
+
+  Scenario: Attribute type cannot reset inherited @regex annotation
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set annotation: @regex("value")
+    When attribute(name) set value type: string
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When create attribute type: first-name
+    When attribute(first-name) set supertype: name
+    Then attribute(first-name) get annotations contain: @regex("value")
+    Then attribute(first-name) set annotation: @regex("another value"); fails
+    Then attribute(first-name) get annotations contain: @regex("value")
+    When attribute(first-name) set annotation: @regex("value")
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When attribute(first-name) set annotation: @regex("value")
+    Then transaction commits; fails
+
+  Scenario: Attribute type cannot unset inherited @regex annotation
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set annotation: @regex("value")
+    When attribute(name) set value type: string
+    When create attribute type: first-name
+    When attribute(first-name) set supertype: name
+    Then attribute(first-name) get annotations contain: @regex("value")
+    Then attribute(first-name) unset annotation: @regex("another value"); fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(first-name) get annotations contain: @regex("value")
+    Then attribute(first-name) unset annotation: @regex("another value"); fails
+    When attribute(first-name) unset supertype: name
+    Then attribute(first-name) get annotations do not contain: @regex("value")
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(first-name) get annotations do not contain: @regex("value")
 
 ########################
 # @independent
@@ -880,6 +950,25 @@ Feature: Concept Attribute Type
     Then attribute(second-name) get annotations contain: @independent
     When attribute(second-name) set annotation: @independent
     Then transaction commits; fails
+
+  Scenario: Attribute type cannot unset inherited @independent annotation
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set annotation: @independent
+    When attribute(name) set value type: string
+    When create attribute type: first-name
+    When attribute(first-name) set supertype: name
+    Then attribute(first-name) get annotations contain: @independent
+    Then attribute(first-name) unset annotation: @independent; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(first-name) get annotations contain: @independent
+    Then attribute(first-name) unset annotation: @independent; fails
+    When attribute(first-name) unset supertype: name
+    Then attribute(first-name) get annotations do not contain: @independent
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(first-name) get annotations do not contain: @independent
 
   Scenario: Attribute type cannot set @independent annotation with arguments
     When create attribute type: name
@@ -1134,6 +1223,25 @@ Feature: Concept Attribute Type
     Then attribute(second-name) get annotations contain: @values("value")
     When attribute(second-name) set annotation: @values("value")
     Then transaction commits; fails
+
+  Scenario: Attribute type cannot unset inherited @values annotation
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set annotation: @values("value")
+    When attribute(name) set value type: string
+    When create attribute type: first-name
+    When attribute(first-name) set supertype: name
+    Then attribute(first-name) get annotations contain: @values("value")
+    Then attribute(first-name) unset annotation: @values("value"); fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(first-name) get annotations contain: @values("value")
+    Then attribute(first-name) unset annotation: @values("value"); fails
+    When attribute(first-name) unset supertype: name
+    Then attribute(first-name) get annotations do not contain: @values("value")
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(first-name) get annotations do not contain: @values("value")
 
   Scenario Outline: Attribute types' @values annotation for <value-type> value type can be inherited and overridden by a subset of arguments
     When create attribute type: name
@@ -1414,6 +1522,25 @@ Feature: Concept Attribute Type
     Then attribute(second-name) get annotations contain: @range("value", "value+1")
     When attribute(second-name) set annotation: @range("value", "value+1")
     Then transaction commits; fails
+
+  Scenario: Attribute type cannot unset inherited @range annotation
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set annotation: @range("value", "value+1")
+    When attribute(name) set value type: string
+    When create attribute type: first-name
+    When attribute(first-name) set supertype: name
+    Then attribute(first-name) get annotations contain: @range("value", "value+1")
+    Then attribute(first-name) unset annotation: @range("value", "value+1"); fail
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(first-name) get annotations contain: @range("value", "value+1")
+    Then attribute(first-name) unset annotation: @range("value", "value+1"); fail
+    Then attribute(first-name) unset supertype: name
+    Then attribute(first-name) get annotations do not contain: @range("value", "value+1")
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(first-name) get annotations do not contain: @range("value", "value+1")
 
   Scenario Outline: Attribute types' @range annotation for <value-type> value type can be inherited and overridden by a subset of arguments
     When create attribute type: name

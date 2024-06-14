@@ -197,6 +197,24 @@ Feature: Concept Entity Type
       | annotation      |
       | abstract        |
 
+  Scenario Outline: Entity type can set and unset @<annotation>
+    When create entity type: person
+    When entity(person) set annotation: @<annotation>
+    Then entity(person) get annotations contain: @<annotation>
+    When entity(person) unset annotation: @<annotation>
+    Then entity(person) get annotations do not contain: @<annotation>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get annotations do not contain: @<annotation>
+    When entity(person) set annotation: @<annotation>
+    Then entity(person) get annotations contain: @<annotation>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get annotations contain: @<annotation>
+    Examples:
+      | annotation      |
+      | abstract        |
+
 ########################
 # @abstract
 ########################
@@ -248,6 +266,16 @@ Feature: Concept Entity Type
     When connection open read transaction for database: typedb
     Then entity(person) get annotations is empty
 
+  Scenario: Entity type can reset @abstract annotation
+    When create entity type: person
+    When entity(person) set annotation: @abstract
+    Then entity(person) get annotations contain: @abstract
+    When entity(person) set annotation: @abstract
+    Then entity(person) get annotations contain: @abstract
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get annotations contain: @abstract
+
   Scenario: Entity types can subtype non abstract entity types
     When create entity type: person
     When create entity type: player
@@ -259,6 +287,24 @@ Feature: Concept Entity Type
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(player) get supertypes contain: person
+
+  Scenario: Entity type cannot inherit @abstract annotation, but can set it being a subtype
+    When create entity type: person
+    When entity(person) set annotation: @abstract
+    Then entity(person) get annotations contain: @abstract
+    When create entity type: player
+    When entity(player) set supertype: person
+    Then entity(person) get annotations contain: @abstract
+    Then entity(player) get annotations do not contain: @abstract
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get annotations contain: @abstract
+    Then entity(player) get annotations do not contain: @abstract
+    When entity(player) set annotation: @abstract
+    Then entity(player) get annotations contain: @abstract
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(player) get annotations contain: @abstract
 
 ########################
 # not compatible @annotations: @distinct, @key, @unique, @subkey, @values, @range, @card, @cascade, @independent, @replace, @regex
