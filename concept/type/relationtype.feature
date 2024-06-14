@@ -1455,6 +1455,8 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(parent) get annotations do not contain: @card(<reset-args>)
     Examples:
       | init-args | reset-args |
+      | 0, *      | 0, 1       |
+      | 0, 5      | 0, 1       |
       | 2, 5      | 0, 1       |
       | 2, 5      | 0, 2       |
       | 2, 5      | 0, 3       |
@@ -1569,8 +1571,10 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get role(custom-role) get annotations contain: @card(<args>)
     Then relation(fathership) get role(overridden-custom-role) get annotations contain: @card(<args>)
     When relation(fathership) get role(custom-role) set annotation: @card(<args>)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
     When relation(fathership) get role(overridden-custom-role) set annotation: @card(<args>)
-    When transaction commits; fails
+    Then transaction commits; fails
     Examples:
       | args       | args-override |
       | 0, 10000   | 0, 10001      |
