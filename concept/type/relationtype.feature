@@ -419,575 +419,6 @@ Feature: Concept Relation Type and Role Type
     When connection open read transaction for database: typedb
     Then relation(fathership) get overridden role(father) get name: parent
 
-  # TODO: Add new tests for lists to be able to set ordering after something else (for example annotations)
-  # TODO: Add new tests for lists: can't make it unordered or ordered if we have data
-  # TODO: Add new tests for lists: can make it unordered or ordered if we don't have data
-########################
-# relates (roles) lists
-########################
-
-  Scenario: Relation and ordered roles can be created
-    When create relation type: marriage
-    When relation(marriage) create role: husband
-    When relation(marriage) create role: wife
-    Then relation(marriage) exists
-    Then relation(marriage) get supertype: relation
-    Then relation(marriage) get role(husband) exists
-    Then relation(marriage) get role(husband) get ordering: unordered
-    When relation(marriage) get role(husband) set ordering: ordered
-    Then relation(marriage) get role(husband) get ordering: ordered
-    Then relation(marriage) get role(wife) exists
-    Then relation(marriage) get role(wife) get ordering: unordered
-    When relation(marriage) get role(wife) set ordering: ordered
-    Then relation(marriage) get role(wife) get ordering: ordered
-    Then relation(marriage) get role(husband) get supertype: relation:role
-    Then relation(marriage) get role(wife) get supertype: relation:role
-    Then relation(marriage) get roles contain:
-      | marriage:husband |
-      | marriage:wife    |
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then relation(marriage) exists
-    Then relation(marriage) get supertype: relation
-    Then relation(marriage) get role(husband) exists
-    Then relation(marriage) get role(wife) exists
-    Then relation(marriage) get role(husband) get supertype: relation:role
-    Then relation(marriage) get role(wife) get supertype: relation:role
-    Then relation(marriage) get roles contain:
-      | marriage:husband |
-      | marriage:wife    |
-    Then relation(marriage) get role(husband) get ordering: ordered
-    Then relation(marriage) get role(wife) get ordering: ordered
-
-  Scenario: Role can change ordering
-    When create relation type: parentship
-    When relation(parentship) create role: parent
-    When relation(parentship) create role: child
-    When relation(parentship) get role(child) set ordering: ordered
-    Then relation(parentship) get role(parent) get ordering: unordered
-    Then relation(parentship) get role(child) get ordering: ordered
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(parentship) get role(parent) get ordering: unordered
-    Then relation(parentship) get role(child) get ordering: ordered
-    When relation(parentship) get role(parent) set ordering: ordered
-    When relation(parentship) get role(child) set ordering: unordered
-    Then relation(parentship) get role(parent) get ordering: ordered
-    Then relation(parentship) get role(child) get ordering: unordered
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then relation(parentship) get role(parent) get ordering: ordered
-    Then relation(parentship) get role(child) get ordering: unordered
-
-  Scenario: Relation type cannot redeclare ordered role types
-    When create relation type: parentship
-    When relation(parentship) create role: parent
-    When relation(parentship) get role(parent) set ordering: ordered
-    Then relation(parentship) get roles contain: parent
-    Then relation(parentship) create role: parent; fails
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(parentship) create role: parent; fails
-# TODO: Cannot set ordering for anything else (entitytypes, etc.)!
-  Scenario: Ordered roles can redeclare ordering
-    When create relation type: marriage
-    When relation(marriage) create role: spouse
-    When relation(marriage) get role(spouse) set ordering: ordered
-    Then relation(marriage) get role(spouse) get ordering: ordered
-    When relation(marriage) get role(spouse) set ordering: ordered
-    Then relation(marriage) get role(spouse) get ordering: ordered
-    When connection open schema transaction for database: typedb
-    Then relation(parentship) create role: parent; fails
-    When relation(marriage) get role(spouse) set ordering: ordered
-    Then relation(marriage) get role(spouse) get ordering: ordered
-
-  Scenario: Relation and ordered roles can be deleted
-    When create relation type: marriage
-    When relation(marriage) create role: spouse
-    When relation(marriage) get role(spouse) set ordering: ordered
-    When create relation type: parentship
-    When relation(parentship) create role: parent
-    When relation(parentship) get role(parent) set ordering: ordered
-    When relation(parentship) create role: child
-    When relation(parentship) get role(child) set ordering: ordered
-    When relation(parentship) delete role: parent
-    Then relation(parentship) get roles do not contain:
-      | parent |
-    Then relation(relation) get role(role) get subtypes do not contain:
-      | parentship:parent |
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When delete relation type: parentship
-    Then relation(parentship) does not exist
-    Then relation(relation) get role(role) get subtypes do not contain:
-      | parentship:parent |
-      | parentship:child  |
-    When relation(marriage) delete role: spouse
-    Then relation(marriage) get roles do not contain:
-      | spouse |
-    When relation(marriage) create role: husband
-    When relation(marriage) get role(husband) set ordering: ordered
-    When relation(marriage) create role: wife
-    When relation(marriage) get role(wife) set ordering: ordered
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When delete relation type: marriage
-    Then relation(marriage) does not exist
-    Then relation(relation) get role(role) get subtypes do not contain:
-      | parentship:parent |
-      | parentship:child  |
-      | marriage:husband  |
-      | marriage:wife     |
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then relation(parentship) does not exist
-    Then relation(marriage) does not exist
-    Then relation(relation) get role(role) get subtypes do not contain:
-      | parentship:parent |
-      | parentship:child  |
-      | marriage:husband  |
-      | marriage:wife     |
-
-  Scenario: Relation and role lists can change labels
-    When create relation type: parentship
-    When relation(parentship) create role: parent
-    When relation(parentship) get role(parent) set ordering: ordered
-    When relation(parentship) create role: child
-    When relation(parentship) get role(child) set ordering: ordered
-    Then relation(parentship) get name: parentship
-    Then relation(parentship) get role(parent) get name: parent
-    Then relation(parentship) get role(child) get name: child
-    When relation(parentship) set name: marriage
-    Then relation(parentship) does not exist
-    Then relation(marriage) exists
-    When relation(marriage) get role(parent) set name: husband
-    When relation(marriage) get role(child) set name: wife
-    Then relation(marriage) get role(parent) does not exist
-    Then relation(marriage) get role(child) does not exist
-    Then relation(marriage) get name: marriage
-    Then relation(marriage) get role(husband) get name: husband
-    Then relation(marriage) get role(wife) get name: wife
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(marriage) get name: marriage
-    Then relation(marriage) get role(husband) get name: husband
-    Then relation(marriage) get role(wife) get name: wife
-    When relation(marriage) set name: employment
-    Then relation(marriage) does not exist
-    Then relation(employment) exists
-    When relation(employment) get role(husband) set name: employee
-    When relation(employment) get role(wife) set name: employer
-    Then relation(employment) get role(husband) does not exist
-    Then relation(employment) get role(wife) does not exist
-    Then relation(employment) get name: employment
-    Then relation(employment) get role(employee) get name: employee
-    Then relation(employment) get role(employer) get name: employer
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then relation(employment) exists
-    Then relation(employment) get name: employment
-    Then relation(employment) get role(employee) get name: employee
-    Then relation(employment) get role(employer) get name: employer
-
-  Scenario: Relation and role lists can be subtypes of other relation and role lists
-    When create relation type: parentship
-    When relation(parentship) create role: parent
-    When relation(parentship) get role(parent) set ordering: ordered
-    When relation(parentship) create role: child
-    When relation(parentship) get role(child) set ordering: ordered
-    When create relation type: fathership
-    When relation(fathership) set supertype: parentship
-    When relation(fathership) create role: father
-    When relation(fathership) get role(father) set ordering: ordered
-    When relation(fathership) get role(father) set override: parent
-    Then relation(fathership) get supertype: parentship
-    Then relation(fathership) get role(father) get supertype: parentship:parent
-    Then relation(fathership) get role(child) get supertype: relation:role
-    Then relation(fathership) get supertypes contain:
-      | relation   |
-      | parentship |
-    Then relation(fathership) get role(father) get supertypes contain:
-      | relation:role     |
-      | parentship:parent |
-    Then relation(fathership) get role(child) get supertypes contain:
-      | relation:role |
-    Then relation(parentship) get subtypes contain:
-      | fathership |
-    Then relation(parentship) get role(parent) get subtypes contain:
-      | fathership:father |
-    Then relation(parentship) get role(child) get subtypes is empty
-    Then relation(relation) get subtypes contain:
-      | parentship |
-      | fathership |
-    Then relation(relation) get role(role) get subtypes contain:
-      | parentship:parent |
-      | parentship:child  |
-      | fathership:father |
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(fathership) get supertype: parentship
-    Then relation(fathership) get role(father) get supertype: parentship:parent
-    Then relation(fathership) get role(child) get supertype: relation:role
-    Then relation(fathership) get supertypes contain:
-      | relation   |
-      | parentship |
-    Then relation(fathership) get role(father) get supertypes contain:
-      | relation:role     |
-      | parentship:parent |
-    Then relation(fathership) get role(child) get supertypes contain:
-      | relation:role |
-    Then relation(parentship) get subtypes contain:
-      | fathership |
-    Then relation(parentship) get role(parent) get subtypes contain:
-      | fathership:father |
-    Then relation(parentship) get role(child) get subtypes is empty
-    Then relation(relation) get subtypes contain:
-      | parentship |
-      | fathership |
-    Then relation(relation) get role(role) get subtypes contain:
-      | parentship:parent |
-      | parentship:child  |
-      | fathership:father |
-    When create relation type: father-son
-    When relation(father-son) set supertype: fathership
-    When relation(father-son) create role: son
-    When relation(father-son) get role(son) set ordering: ordered
-    When relation(father-son) get role(son) set override: child
-    Then relation(father-son) get supertype: fathership
-    Then relation(father-son) get role(father) get supertype: parentship:parent
-    Then relation(father-son) get role(son) get supertype: parentship:child
-    Then relation(father-son) get supertypes contain:
-      | relation   |
-      | parentship |
-      | fathership |
-    Then relation(father-son) get role(father) get supertypes contain:
-      | relation:role     |
-      | parentship:parent |
-    Then relation(father-son) get role(son) get supertypes contain:
-      | relation:role    |
-      | parentship:child |
-    Then relation(fathership) get subtypes contain:
-      | father-son |
-    Then relation(fathership) get role(father) get subtypes is empty
-    Then relation(fathership) get role(child) get subtypes contain:
-      | father-son:son |
-    Then relation(parentship) get role(parent) get subtypes contain:
-      | fathership:father |
-    Then relation(parentship) get role(child) get subtypes contain:
-      | father-son:son |
-    Then relation(relation) get subtypes contain:
-      | parentship |
-      | fathership |
-    Then relation(relation) get role(role) get subtypes contain:
-      | parentship:parent |
-      | parentship:child  |
-      | fathership:father |
-      | father-son:son    |
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then relation(father-son) get supertype: fathership
-    Then relation(father-son) get role(father) get supertype: parentship:parent
-    Then relation(father-son) get role(son) get supertype: parentship:child
-    Then relation(father-son) get supertypes contain:
-      | relation   |
-      | parentship |
-      | fathership |
-    Then relation(father-son) get role(father) get supertypes contain:
-      | relation:role     |
-      | parentship:parent |
-    Then relation(father-son) get role(son) get supertypes contain:
-      | relation:role    |
-      | parentship:child |
-    Then relation(fathership) get supertype: parentship
-    Then relation(fathership) get role(father) get supertype: parentship:parent
-    Then relation(fathership) get role(child) get supertype: relation:role
-    Then relation(fathership) get supertypes contain:
-      | relation   |
-      | parentship |
-    Then relation(fathership) get role(father) get supertypes contain:
-      | relation:role     |
-      | parentship:parent |
-    Then relation(fathership) get role(child) get supertypes contain:
-      | relation:role |
-    Then relation(fathership) get subtypes contain:
-      | father-son |
-    Then relation(fathership) get role(father) get subtypes is empty
-    Then relation(fathership) get role(child) get subtypes contain:
-      | father-son:son |
-    Then relation(parentship) get role(parent) get subtypes contain:
-      | fathership:father |
-    Then relation(parentship) get role(child) get subtypes contain:
-      | father-son:son |
-    Then relation(relation) get subtypes contain:
-      | parentship |
-      | fathership |
-    Then relation(relation) get role(role) get subtypes contain:
-      | parentship:parent |
-      | parentship:child  |
-      | fathership:father |
-      | father-son:son    |
-
-    # TODO: Can ordered override unordered?
-    # TODO: Can unordered override ordered?
-
-  Scenario: Relation types can inherit related role lists
-    When create relation type: parentship
-    When relation(parentship) create role: parent
-    When relation(parentship) get role(parent) set ordering: ordered
-    When relation(parentship) create role: child
-    When relation(parentship) get role(child) set ordering: ordered
-    When create relation type: fathership
-    When relation(fathership) set supertype: parentship
-    When relation(fathership) create role: father
-    When relation(fathership) get role(father) set ordering: ordered
-    When relation(fathership) get role(father) set override: parent
-    Then relation(fathership) get roles contain:
-      | fathership:father |
-      | parentship:child  |
-    Then relation(fathership) get declared roles contain:
-      | fathership:father |
-    Then relation(fathership) get declared roles do not contain:
-      | parentship:child |
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When create relation type: mothership
-    When relation(mothership) set supertype: parentship
-    When relation(mothership) create role: mother
-    When relation(mothership) get role(mother) set ordering: ordered
-    When relation(mothership) get role(mother) set override: parent
-    Then relation(mothership) get roles contain:
-      | mothership:mother |
-      | parentship:child  |
-    Then relation(mothership) get declared roles contain:
-      | mothership:mother |
-    Then relation(mothership) get declared roles do not contain:
-      | parentship:child |
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then relation(fathership) get roles contain:
-      | fathership:father |
-      | parentship:child  |
-    Then relation(fathership) get declared roles contain:
-      | fathership:father |
-    Then relation(fathership) get declared roles do not contain:
-      | parentship:child |
-    Then relation(mothership) get roles contain:
-      | mothership:mother |
-      | parentship:child  |
-    Then relation(mothership) get declared roles contain:
-      | mothership:mother |
-    Then relation(mothership) get declared roles do not contain:
-      | parentship:child |
-
-  Scenario: Relation types can override inherited related role lists
-    When create relation type: parentship
-    When relation(parentship) create role: parent
-    When relation(parentship) get role(parent) set ordering: ordered
-    When relation(parentship) create role: child
-    When relation(parentship) get role(child) set ordering: ordered
-    When create relation type: fathership
-    When relation(fathership) set supertype: parentship
-    When relation(fathership) create role: father
-    When relation(fathership) get role(father) set ordering: ordered
-    When relation(fathership) get role(father) set override: parent
-    Then relation(fathership) get overridden role(father) exists
-    Then relation(fathership) get overridden role(father) get name: parent
-    Then relation(fathership) get roles do not contain:
-      | parentship:parent |
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When create relation type: mothership
-    When relation(mothership) set supertype: parentship
-    When relation(mothership) create role: mother
-    When relation(mothership) get role(mother) set ordering: ordered
-    When relation(mothership) get role(mother) set override: parent
-    Then relation(mothership) get roles do not contain:
-      | parentship:parent |
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then relation(fathership) get roles do not contain:
-      | parentship:parent |
-    Then relation(mothership) get roles do not contain:
-      | parentship:parent |
-
-  Scenario: Relation types cannot redeclare inherited related role types
-    When create relation type: parentship
-    When relation(parentship) create role: parent
-    When relation(parentship) get role(parent) set ordering: ordered
-    When relation(parentship) create role: child
-    When relation(parentship) get role(child) set ordering: ordered
-    When create relation type: fathership
-    When relation(fathership) set supertype: parentship
-    Then relation(fathership) create role: parent; fails
-
-  Scenario: Relation types cannot override declared related role types
-    When create relation type: parentship
-    When relation(parentship) create role: parent
-    When relation(parentship) get role(parent) set ordering: ordered
-    Then relation(parentship) create role: father
-    When relation(parentship) get role(father) set ordering: ordered
-    Then relation(parentship) get role(father) set override: parent; fails
-
-  Scenario: Relation types can update existing roles override a newly defined role it inherits
-    When create relation type: parentship
-    When relation(parentship) create role: other-role
-    When relation(parentship) get role(other-role) set ordering: ordered
-    When create relation type: fathership
-    When relation(fathership) set supertype: parentship
-    When relation(fathership) create role: father
-    When relation(fathership) get role(father) set ordering: ordered
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When relation(parentship) create role: parent
-    When relation(parentship) get role(parent) set ordering: ordered
-    When relation(fathership) create role: father
-    When relation(fathership) get role(father) set ordering: ordered
-    When relation(fathership) get role(father) set override: parent
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then relation(fathership) get overridden role(father) get name: parent
-
-    # TODO: Do the same tests for owns
-
-  Scenario: Relation can set and unset ordering if it inherits non-ordered roles
-    When create relation type: parentship
-    When relation(parentship) create role: parent
-    When create relation type: fathership
-    When relation(fathership) set supertype: parentship
-    Then relation(parentship) get role(parent) get ordering: unordered
-    Then relation(fathership) get role(parent) get ordering: unordered
-    When relation(fathership) get role(parent) set ordering: ordered
-    Then relation(parentship) get role(parent) get ordering: unordered
-    Then relation(fathership) get role(parent) get ordering: ordered
-    When transaction commit
-    When connection open schema transaction for database: typedb
-    Then relation(parentship) get role(parent) get ordering: unordered
-    Then relation(fathership) get role(parent) get ordering: ordered
-    When relation(fathership) get role(parent) set ordering: unordered
-    Then relation(parentship) get role(parent) get ordering: unordered
-    Then relation(fathership) get role(parent) get ordering: unordered
-    When transaction commit
-    When connection open read transaction for database: typedb
-    Then relation(parentship) get role(parent) get ordering: unordered
-    Then relation(fathership) get role(parent) get ordering: unordered
-
-  Scenario: Relation cannot set or unset ordering if it inherits ordered roles
-    When create relation type: parentship
-    When relation(parentship) create role: parent
-    When relation(parentship) get role(parent) set ordering: ordered
-    Then relation(parentship) get role(parent) get ordering: ordered
-    When transaction commit
-    When connection open schema transaction for database: typedb
-    When create relation type: fathership
-    When relation(fathership) set supertype: parentship
-    Then relation(parentship) get role(parent) get ordering: ordered
-    Then relation(fathership) get role(parent) get ordering: ordered
-    When relation(fathership) get role(parent) set ordering: ordered
-    Then transaction commit; fails
-    When connection open schema transaction for database: typedb
-    When create relation type: fathership
-    When relation(fathership) set supertype: parentship
-    Then relation(parentship) get role(parent) get ordering: ordered
-    Then relation(fathership) get role(parent) get ordering: ordered
-    Then relation(fathership) get role(parent) set ordering: unordered; fails
-    Then relation(parentship) get role(parent) get ordering: ordered
-    Then relation(fathership) get role(parent) get ordering: ordered
-    Then transaction commit
-    When connection open read transaction for database: typedb
-    Then relation(parentship) get role(parent) get ordering: ordered
-    Then relation(fathership) get role(parent) get ordering: ordered
-
-  Scenario: Relation can set and unset ordering if it overrides non-ordered roles
-    When create relation type: parentship
-    When relation(parentship) create role: parent
-    Then relation(parentship) get role(parent) get ordering: unordered
-    When transaction commit
-    When connection open schema transaction for database: typedb
-    When create relation type: fathership
-    When relation(fathership) set supertype: parentship
-    When relation(fathership) create role: father
-    When realtion(fathership) get role(father) set override: parent
-    Then relation(parentship) get role(parent) get ordering: unordered
-    Then relation(fathership) get role(father) get ordering: unordered
-    When relation(fathership) get role(father) set ordering: ordered
-    Then relation(parentship) get role(parent) get ordering: unordered
-    Then relation(fathership) get role(father) get ordering: ordered
-    Then relation(fathership) get role(father) get supertype: parent
-    When transaction commit
-    When connection open schema transaction for database: typedb
-    Then relation(parentship) get role(parent) get ordering: unordered
-    Then relation(fathership) get role(father) get ordering: ordered
-    When relation(fathership) get role(father) set ordering: unordered
-    Then relation(parentship) get role(parent) get ordering: unordered
-    Then relation(fathership) get role(father) get ordering: unordered
-    When transaction commit
-    When connection open schema transaction for database: typedb
-    Then relation(parentship) get role(parent) get ordering: unordered
-    Then relation(fathership) get role(father) get ordering: unordered
-    When connection open schema transaction for database: typedb
-    When create relation type: mothership
-    When relation(mothership) set supertype: parentship
-    When relation(mothership) create role: mother
-    When relation(mothership) get role(mother) set ordering: ordered
-    When realtion(mothership) get role(mother) set override: parent
-    Then relation(parentship) get role(parent) get ordering: unordered
-    Then relation(mothership) get role(mother) get ordering: ordered
-    Then relation(mothership) get role(mother) get supertype: parent
-    When transaction commit
-    When connection open schema transaction for database: typedb
-    Then relation(parentship) get role(parent) get ordering: unordered
-    Then relation(mothership) get role(mother) get ordering: ordered
-    When relation(mothership) get role(mother) set ordering: unordered
-    Then relation(parentship) get role(parent) get ordering: unordered
-    Then relation(mothership) get role(mother) get ordering: unordered
-    When transaction commit
-    When connection open read transaction for database: typedb
-    Then relation(parentship) get role(parent) get ordering: unordered
-    Then relation(mothership) get role(mother) get ordering: unordered
-
-  Scenario: Relation cannot set or unset ordering if it overrides ordered roles
-    When create relation type: parentship
-    When relation(parentship) create role: parent
-    When relation(parentship) get role(parent) set ordering: ordered
-    Then relation(parentship) get role(parent) get ordering: ordered
-    When transaction commit
-    When connection open schema transaction for database: typedb
-    When create relation type: fathership
-    When relation(fathership) set supertype: parentship
-    When relation(fathership) create role: father
-    When realtion(fathership) get role(father) set override: parent
-    Then relation(parentship) get role(parent) get ordering: ordered
-    Then relation(fathership) get role(father) get ordering: ordered
-    When transaction commit
-    When connection open schema transaction for database: typedb
-    Then relation(parentship) get role(parent) get ordering: ordered
-    Then relation(fathership) get role(father) get ordering: ordered
-    When relation(fathership) get role(father) set ordering: ordered
-    Then transaction commit; fails
-    When connection open schema transaction for database: typedb
-    Then relation(parentship) get role(parent) get ordering: ordered
-    Then relation(fathership) get role(father) get ordering: ordered
-    Then relation(fathership) get role(father) set ordering: unordered; fails
-    When connection open schema transaction for database: typedb
-    When create relation type: mothership
-    When relation(mothership) set supertype: parentship
-    When relation(mothership) create role: mother
-    When relation(mothership) get role(mother) set ordering: ordered
-    When realtion(mothership) get role(mother) set override: parent
-    Then relation(parentship) get role(parent) get ordering: ordered
-    Then relation(mothership) get role(mother) get ordering: ordered
-    Then relation(mothership) get role(mother) get supertype: parent
-    When transaction commit
-    When connection open schema transaction for database: typedb
-    Then relation(parentship) get role(parent) get ordering: ordered
-    Then relation(mothership) get role(mother) get ordering: ordered
-    When relation(mothership) get role(mother) set ordering: ordered
-    Then transaction commit; fails
-    When connection open schema transaction for database: typedb
-    Then relation(parentship) get role(parent) get ordering: ordered
-    Then relation(mothership) get role(mother) get ordering: ordered
-    Then relation(mothership) get role(mother) set ordering: unordered; fails
-
 ########################
 # @annotations common
 ########################
@@ -1338,6 +769,725 @@ Feature: Concept Relation Type and Role Type
 #      | annotation-1 | annotation-2 |
 
 ########################
+# relates (roles) lists
+########################
+
+  Scenario: Relation and ordered roles can be created
+    When create relation type: marriage
+    When relation(marriage) create role: husband
+    When relation(marriage) create role: wife
+    Then relation(marriage) exists
+    Then relation(marriage) get supertype: relation
+    Then relation(marriage) get role(husband) exists
+    Then relation(marriage) get role(husband) get ordering: unordered
+    When relation(marriage) get role(husband) set ordering: ordered
+    Then relation(marriage) get role(husband) get ordering: ordered
+    Then relation(marriage) get role(wife) exists
+    Then relation(marriage) get role(wife) get ordering: unordered
+    When relation(marriage) get role(wife) set ordering: ordered
+    Then relation(marriage) get role(wife) get ordering: ordered
+    Then relation(marriage) get role(husband) get supertype: relation:role
+    Then relation(marriage) get role(wife) get supertype: relation:role
+    Then relation(marriage) get roles contain:
+      | marriage:husband |
+      | marriage:wife    |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(marriage) exists
+    Then relation(marriage) get supertype: relation
+    Then relation(marriage) get role(husband) exists
+    Then relation(marriage) get role(wife) exists
+    Then relation(marriage) get role(husband) get supertype: relation:role
+    Then relation(marriage) get role(wife) get supertype: relation:role
+    Then relation(marriage) get roles contain:
+      | marriage:husband |
+      | marriage:wife    |
+    Then relation(marriage) get role(husband) get ordering: ordered
+    Then relation(marriage) get role(wife) get ordering: ordered
+
+  Scenario: Role can change ordering
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: child
+    When relation(parentship) get role(child) set ordering: ordered
+    Then relation(parentship) get role(parent) get ordering: unordered
+    Then relation(parentship) get role(child) get ordering: ordered
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) get ordering: unordered
+    Then relation(parentship) get role(child) get ordering: ordered
+    When relation(parentship) get role(parent) set ordering: ordered
+    When relation(parentship) get role(child) set ordering: unordered
+    Then relation(parentship) get role(parent) get ordering: ordered
+    Then relation(parentship) get role(child) get ordering: unordered
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get role(parent) get ordering: ordered
+    Then relation(parentship) get role(child) get ordering: unordered
+
+  Scenario: Role can set ordering after setting an override or an annotation
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When create realtion type: fathership
+    When relation(fathership) create role: father
+    When relation(fathership) set supertype: fathership
+    When relation(fathership) get role(father) set override: parent
+    When relation(fathership) get role(father) set annotation: @card(0, 1)
+    When relation(fathership) get role(father) set ordering: ordered
+    Then relation(fathership) get role(father) get ordering: ordered
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(fathership) get role(father) get ordering: ordered
+
+  Scenario: Relation type cannot redeclare ordered role types
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) get role(parent) set ordering: ordered
+    Then relation(parentship) get roles contain: parent
+    Then relation(parentship) create role: parent; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) create role: parent; fails
+# TODO: Cannot set ordering for anything else (entitytypes, etc.)!
+  Scenario: Ordered roles can redeclare ordering
+    When create relation type: marriage
+    When relation(marriage) create role: spouse
+    When relation(marriage) get role(spouse) set ordering: ordered
+    Then relation(marriage) get role(spouse) get ordering: ordered
+    When relation(marriage) get role(spouse) set ordering: ordered
+    Then relation(marriage) get role(spouse) get ordering: ordered
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) create role: parent; fails
+    When relation(marriage) get role(spouse) set ordering: ordered
+    Then relation(marriage) get role(spouse) get ordering: ordered
+
+  Scenario: Relation and ordered roles can be deleted
+    When create relation type: marriage
+    When relation(marriage) create role: spouse
+    When relation(marriage) get role(spouse) set ordering: ordered
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) get role(parent) set ordering: ordered
+    When relation(parentship) create role: child
+    When relation(parentship) get role(child) set ordering: ordered
+    When relation(parentship) delete role: parent
+    Then relation(parentship) get roles do not contain:
+      | parent |
+    Then relation(relation) get role(role) get subtypes do not contain:
+      | parentship:parent |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When delete relation type: parentship
+    Then relation(parentship) does not exist
+    Then relation(relation) get role(role) get subtypes do not contain:
+      | parentship:parent |
+      | parentship:child  |
+    When relation(marriage) delete role: spouse
+    Then relation(marriage) get roles do not contain:
+      | spouse |
+    When relation(marriage) create role: husband
+    When relation(marriage) get role(husband) set ordering: ordered
+    When relation(marriage) create role: wife
+    When relation(marriage) get role(wife) set ordering: ordered
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When delete relation type: marriage
+    Then relation(marriage) does not exist
+    Then relation(relation) get role(role) get subtypes do not contain:
+      | parentship:parent |
+      | parentship:child  |
+      | marriage:husband  |
+      | marriage:wife     |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) does not exist
+    Then relation(marriage) does not exist
+    Then relation(relation) get role(role) get subtypes do not contain:
+      | parentship:parent |
+      | parentship:child  |
+      | marriage:husband  |
+      | marriage:wife     |
+
+  Scenario: Role can change ordering if it does not have role instances even if its relation has instances
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: child
+    When create entity type: person
+    When entity(person) set plays: parentship:parent
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $m = relation(parentship) create new instance
+    When $a = entity(person) create new instance
+    When relation $m add player for role(parent): $a
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When relation(parentship) get role(child) set ordering: ordered
+    Then relation(parentship) get role(child) get ordering: ordered
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(child) get ordering: ordered
+    When relation(parentship) get role(child) set ordering: unordered
+    Then relation(parentship) get role(child) get ordering: unordered
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(child) get ordering: unordered
+
+  Scenario: Role cannot change ordering if it has role instances
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: child
+    When relation(parentship) get role(child) set ordering: ordered
+    When create entity type: person
+    When entity(person) set plays: parentship:parent
+    When entity(person) set plays: parentship:child
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $m = relation(parentship) create new instance
+    When $a = entity(person) create new instance
+    When relation $m add player for role(parent): $a
+    When relation $m add player for role(child): $a
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) set ordering: unordered; fails
+    Then relation(parentship) get role(parent) set ordering: ordered; fails
+    Then relation(parentship) get role(child) set ordering: unordered; fails
+    Then relation(parentship) get role(child) set ordering: ordered; fails
+
+  Scenario: Relation and role lists can change labels
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) get role(parent) set ordering: ordered
+    When relation(parentship) create role: child
+    When relation(parentship) get role(child) set ordering: ordered
+    Then relation(parentship) get name: parentship
+    Then relation(parentship) get role(parent) get name: parent
+    Then relation(parentship) get role(child) get name: child
+    When relation(parentship) set name: marriage
+    Then relation(parentship) does not exist
+    Then relation(marriage) exists
+    When relation(marriage) get role(parent) set name: husband
+    When relation(marriage) get role(child) set name: wife
+    Then relation(marriage) get role(parent) does not exist
+    Then relation(marriage) get role(child) does not exist
+    Then relation(marriage) get name: marriage
+    Then relation(marriage) get role(husband) get name: husband
+    Then relation(marriage) get role(wife) get name: wife
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(marriage) get name: marriage
+    Then relation(marriage) get role(husband) get name: husband
+    Then relation(marriage) get role(wife) get name: wife
+    When relation(marriage) set name: employment
+    Then relation(marriage) does not exist
+    Then relation(employment) exists
+    When relation(employment) get role(husband) set name: employee
+    When relation(employment) get role(wife) set name: employer
+    Then relation(employment) get role(husband) does not exist
+    Then relation(employment) get role(wife) does not exist
+    Then relation(employment) get name: employment
+    Then relation(employment) get role(employee) get name: employee
+    Then relation(employment) get role(employer) get name: employer
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(employment) exists
+    Then relation(employment) get name: employment
+    Then relation(employment) get role(employee) get name: employee
+    Then relation(employment) get role(employer) get name: employer
+
+  Scenario: Relation and role lists can be subtypes of other relation and role lists
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) get role(parent) set ordering: ordered
+    When relation(parentship) create role: child
+    When relation(parentship) get role(child) set ordering: ordered
+    When create relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: father
+    When relation(fathership) get role(father) set ordering: ordered
+    When relation(fathership) get role(father) set override: parent
+    Then relation(fathership) get supertype: parentship
+    Then relation(fathership) get role(father) get supertype: parentship:parent
+    Then relation(fathership) get role(child) get supertype: relation:role
+    Then relation(fathership) get supertypes contain:
+      | relation   |
+      | parentship |
+    Then relation(fathership) get role(father) get supertypes contain:
+      | relation:role     |
+      | parentship:parent |
+    Then relation(fathership) get role(child) get supertypes contain:
+      | relation:role |
+    Then relation(parentship) get subtypes contain:
+      | fathership |
+    Then relation(parentship) get role(parent) get subtypes contain:
+      | fathership:father |
+    Then relation(parentship) get role(child) get subtypes is empty
+    Then relation(relation) get subtypes contain:
+      | parentship |
+      | fathership |
+    Then relation(relation) get role(role) get subtypes contain:
+      | parentship:parent |
+      | parentship:child  |
+      | fathership:father |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) get supertype: parentship
+    Then relation(fathership) get role(father) get supertype: parentship:parent
+    Then relation(fathership) get role(child) get supertype: relation:role
+    Then relation(fathership) get supertypes contain:
+      | relation   |
+      | parentship |
+    Then relation(fathership) get role(father) get supertypes contain:
+      | relation:role     |
+      | parentship:parent |
+    Then relation(fathership) get role(child) get supertypes contain:
+      | relation:role |
+    Then relation(parentship) get subtypes contain:
+      | fathership |
+    Then relation(parentship) get role(parent) get subtypes contain:
+      | fathership:father |
+    Then relation(parentship) get role(child) get subtypes is empty
+    Then relation(relation) get subtypes contain:
+      | parentship |
+      | fathership |
+    Then relation(relation) get role(role) get subtypes contain:
+      | parentship:parent |
+      | parentship:child  |
+      | fathership:father |
+    When create relation type: father-son
+    When relation(father-son) set supertype: fathership
+    When relation(father-son) create role: son
+    When relation(father-son) get role(son) set ordering: ordered
+    When relation(father-son) get role(son) set override: child
+    Then relation(father-son) get supertype: fathership
+    Then relation(father-son) get role(father) get supertype: parentship:parent
+    Then relation(father-son) get role(son) get supertype: parentship:child
+    Then relation(father-son) get supertypes contain:
+      | relation   |
+      | parentship |
+      | fathership |
+    Then relation(father-son) get role(father) get supertypes contain:
+      | relation:role     |
+      | parentship:parent |
+    Then relation(father-son) get role(son) get supertypes contain:
+      | relation:role    |
+      | parentship:child |
+    Then relation(fathership) get subtypes contain:
+      | father-son |
+    Then relation(fathership) get role(father) get subtypes is empty
+    Then relation(fathership) get role(child) get subtypes contain:
+      | father-son:son |
+    Then relation(parentship) get role(parent) get subtypes contain:
+      | fathership:father |
+    Then relation(parentship) get role(child) get subtypes contain:
+      | father-son:son |
+    Then relation(relation) get subtypes contain:
+      | parentship |
+      | fathership |
+    Then relation(relation) get role(role) get subtypes contain:
+      | parentship:parent |
+      | parentship:child  |
+      | fathership:father |
+      | father-son:son    |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(father-son) get supertype: fathership
+    Then relation(father-son) get role(father) get supertype: parentship:parent
+    Then relation(father-son) get role(son) get supertype: parentship:child
+    Then relation(father-son) get supertypes contain:
+      | relation   |
+      | parentship |
+      | fathership |
+    Then relation(father-son) get role(father) get supertypes contain:
+      | relation:role     |
+      | parentship:parent |
+    Then relation(father-son) get role(son) get supertypes contain:
+      | relation:role    |
+      | parentship:child |
+    Then relation(fathership) get supertype: parentship
+    Then relation(fathership) get role(father) get supertype: parentship:parent
+    Then relation(fathership) get role(child) get supertype: relation:role
+    Then relation(fathership) get supertypes contain:
+      | relation   |
+      | parentship |
+    Then relation(fathership) get role(father) get supertypes contain:
+      | relation:role     |
+      | parentship:parent |
+    Then relation(fathership) get role(child) get supertypes contain:
+      | relation:role |
+    Then relation(fathership) get subtypes contain:
+      | father-son |
+    Then relation(fathership) get role(father) get subtypes is empty
+    Then relation(fathership) get role(child) get subtypes contain:
+      | father-son:son |
+    Then relation(parentship) get role(parent) get subtypes contain:
+      | fathership:father |
+    Then relation(parentship) get role(child) get subtypes contain:
+      | father-son:son |
+    Then relation(relation) get subtypes contain:
+      | parentship |
+      | fathership |
+    Then relation(relation) get role(role) get subtypes contain:
+      | parentship:parent |
+      | parentship:child  |
+      | fathership:father |
+      | father-son:son    |
+
+  Scenario: Relation types can inherit ordered related role
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) get role(parent) set ordering: ordered
+    When relation(parentship) create role: child
+    When relation(parentship) get role(child) set ordering: ordered
+    When create relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: father
+    When relation(fathership) get role(father) set ordering: ordered
+    When relation(fathership) get role(father) set override: parent
+    Then relation(fathership) get roles contain:
+      | fathership:father |
+      | parentship:child  |
+    Then relation(fathership) get declared roles contain:
+      | fathership:father |
+    Then relation(fathership) get declared roles do not contain:
+      | parentship:child |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When create relation type: mothership
+    When relation(mothership) set supertype: parentship
+    When relation(mothership) create role: mother
+    When relation(mothership) get role(mother) set ordering: ordered
+    When relation(mothership) get role(mother) set override: parent
+    Then relation(mothership) get roles contain:
+      | mothership:mother |
+      | parentship:child  |
+    Then relation(mothership) get declared roles contain:
+      | mothership:mother |
+    Then relation(mothership) get declared roles do not contain:
+      | parentship:child |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(fathership) get roles contain:
+      | fathership:father |
+      | parentship:child  |
+    Then relation(fathership) get declared roles contain:
+      | fathership:father |
+    Then relation(fathership) get declared roles do not contain:
+      | parentship:child |
+    Then relation(mothership) get roles contain:
+      | mothership:mother |
+      | parentship:child  |
+    Then relation(mothership) get declared roles contain:
+      | mothership:mother |
+    Then relation(mothership) get declared roles do not contain:
+      | parentship:child |
+
+  Scenario: Relation types can override inherited related role lists
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) get role(parent) set ordering: ordered
+    When relation(parentship) create role: child
+    When relation(parentship) get role(child) set ordering: ordered
+    When create relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: father
+    When relation(fathership) get role(father) set ordering: ordered
+    When relation(fathership) get role(father) set override: parent
+    Then relation(fathership) get overridden role(father) exists
+    Then relation(fathership) get overridden role(father) get name: parent
+    Then relation(fathership) get roles do not contain:
+      | parentship:parent |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When create relation type: mothership
+    When relation(mothership) set supertype: parentship
+    When relation(mothership) create role: mother
+    When relation(mothership) get role(mother) set ordering: ordered
+    When relation(mothership) get role(mother) set override: parent
+    Then relation(mothership) get roles do not contain:
+      | parentship:parent |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(fathership) get roles do not contain:
+      | parentship:parent |
+    Then relation(mothership) get roles do not contain:
+      | parentship:parent |
+
+  Scenario: Relation types cannot redeclare inherited related role types
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) get role(parent) set ordering: ordered
+    When relation(parentship) create role: child
+    When relation(parentship) get role(child) set ordering: ordered
+    When create relation type: fathership
+    When relation(fathership) set supertype: parentship
+    Then relation(fathership) create role: parent; fails
+
+  Scenario: Relation types cannot override declared related role types
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) get role(parent) set ordering: ordered
+    Then relation(parentship) create role: father
+    When relation(parentship) get role(father) set ordering: ordered
+    Then relation(parentship) get role(father) set override: parent; fails
+
+  Scenario: Relation types can update existing roles override a newly defined role it inherits
+    When create relation type: parentship
+    When relation(parentship) create role: other-role
+    When relation(parentship) get role(other-role) set ordering: ordered
+    When create relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: father
+    When relation(fathership) get role(father) set ordering: ordered
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When relation(parentship) create role: parent
+    When relation(parentship) get role(parent) set ordering: ordered
+    When relation(fathership) create role: father
+    When relation(fathership) get role(father) set ordering: ordered
+    When relation(fathership) get role(father) set override: parent
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(fathership) get overridden role(father) get name: parent
+
+  Scenario: Relation type can set ordered for inherited unordered roles
+    When create relation type: parentship
+    When relation(parentship) set annotation: @abstract
+    When relation(parentship) create role: parent
+    When create relation type: fathership
+    When relation(fathership) create role: father
+    When relation(fathership) set supertype: parentship
+    When create relation type: mothership
+    When relation(mothership) create role: mother
+    When relation(mothership) set supertype: parentship
+    Then relation(parentship) get role(parent) get ordering: unordered
+    Then relation(fathership) get role(father) get ordering: unordered
+    Then relation(mothership) get role(mother) get ordering: unordered
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When relation(fathership) get role(father) set ordering: ordered
+    When relation(fathership) get role(father) set override: parent
+    When relation(mothership) get role(mother) set override: parent
+    Then relation(fathership) get role(father) get supertype: parent
+    Then relation(mothership) get role(mother) get supertype: parent
+    When relation(mothership) get role(mother) set ordering: ordered
+    Then relation(parentship) get role(parent) get ordering: unordered
+    Then relation(fathership) get role(father) get ordering: ordered
+    Then relation(mothership) get role(mother) get ordering: ordered
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) get ordering: unordered
+    Then relation(fathership) get role(father) get ordering: ordered
+    Then relation(mothership) get role(mother) get ordering: ordered
+    When relation(fathership) get role(father) set ordering: unordered
+    When relation(mothership) get role(mother) set ordering: unordered
+    Then relation(parentship) get role(parent) get ordering: unordered
+    Then relation(fathership) get role(father) get ordering: unordered
+    Then relation(mothership) get role(mother) get ordering: unordered
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get role(parent) get ordering: unordered
+    Then relation(fathership) get role(father) get ordering: unordered
+    Then relation(mothership) get role(mother) get ordering: unordered
+
+  Scenario: Unordered and ordered are propagated to subtypes of roles unless overridden
+    When create relation type: parentship
+    When relation(parentship) set annotation: @abstract
+    When relation(parentship) create role: parent
+    Then relation(parentship) get role(parent) get ordering: unordered
+    When relation(parentship) create role: child
+    When relation(parentship) get role(child) set ordering: ordered
+    Then relation(parentship) get role(child) get ordering: ordered
+    When create relation type: fathership
+    When relation(fathership) create role: father
+    When relation(fathership) create role: father-child
+    When relation(fathership) set supertype: parentship
+    When create relation type: mothership
+    When relation(mothership) create role: mother
+    When relation(mothership) create role: mother-child
+    When relation(mothership) set supertype: parentship
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) get role(father) get ordering: unordered
+    Then relation(mothership) get role(mother) get ordering: unordered
+    Then relation(fathership) get role(father-child) get ordering: unordered
+    Then relation(mothership) get role(mother-child) get ordering: unordered
+    When relation(fathership) get role(father) set override: parent
+    Then relation(fathership) get role(father) get ordering: unordered
+    When relation(mothership) get role(mother) set override: parent
+    Then relation(mothership) get role(mother) get ordering: unordered
+    When relation(fathership) get role(father-child) set override: child
+    Then relation(fathership) get role(father-child) get ordering: ordered
+    When relation(mothership) get role(mother-child) set override: child
+    Then relation(mothership) get role(mother-child) get ordering: ordered
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) get role(father) get ordering: unordered
+    Then relation(mothership) get role(mother) get ordering: unordered
+    Then relation(fathership) get role(father-child) get ordering: ordered
+    Then relation(mothership) get role(mother-child) get ordering: ordered
+    When <root-type>(mothership) get role(mother) set ordering: ordered
+    Then <root-type>(mothership) get role(mother) get ordering: ordered
+    When <root-type>(mothership) get role(mother-child) set ordering: ordered
+    Then <root-type>(mothership) get role(mother-child) get ordering: ordered
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) get role(father) get ordering: unordered
+    Then relation(mothership) get role(mother) get ordering: unordered
+    Then relation(fathership) get role(father-child) get ordering: ordered
+    Then relation(mothership) get role(mother-child) get ordering: ordered
+    When relation(parenship) get owns(name) set ordering: ordered
+    Then relation(fathership) get role(father) get ordering: ordered
+    Then relation(mothership) get role(mother) get ordering: ordered
+    When relation(parenship) get owns(email) set ordering: unordered
+    Then relation(fathership) get role(father) get ordering: unordered
+    Then relation(mothership) get role(mother) get ordering: ordered
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(fathership) get role(father) get ordering: ordered
+    Then relation(mothership) get role(mother) get ordering: ordered
+    Then relation(fathership) get role(father) get ordering: unordered
+    Then relation(mothership) get role(mother) get ordering: ordered
+
+  Scenario: Relation can set and unset ordering if it inherits unordered roles
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When create relation type: fathership
+    When relation(fathership) set supertype: parentship
+    Then relation(parentship) get role(parent) get ordering: unordered
+    Then relation(fathership) get role(parent) get ordering: unordered
+    When relation(fathership) get role(parent) set ordering: ordered
+    Then relation(parentship) get role(parent) get ordering: unordered
+    Then relation(fathership) get role(parent) get ordering: ordered
+    When transaction commit
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) get ordering: unordered
+    Then relation(fathership) get role(parent) get ordering: ordered
+    When relation(fathership) get role(parent) set ordering: unordered
+    Then relation(parentship) get role(parent) get ordering: unordered
+    Then relation(fathership) get role(parent) get ordering: unordered
+    When transaction commit
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get role(parent) get ordering: unordered
+    Then relation(fathership) get role(parent) get ordering: unordered
+
+  Scenario: Relation cannot set or unset ordering if it inherits ordered roles
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) get role(parent) set ordering: ordered
+    Then relation(parentship) get role(parent) get ordering: ordered
+    When transaction commit
+    When connection open schema transaction for database: typedb
+    When create relation type: fathership
+    When relation(fathership) set supertype: parentship
+    Then relation(parentship) get role(parent) get ordering: ordered
+    Then relation(fathership) get role(parent) get ordering: ordered
+    When relation(fathership) get role(parent) set ordering: ordered
+    Then transaction commit; fails
+    When connection open schema transaction for database: typedb
+    When create relation type: fathership
+    When relation(fathership) set supertype: parentship
+    Then relation(parentship) get role(parent) get ordering: ordered
+    Then relation(fathership) get role(parent) get ordering: ordered
+    Then relation(fathership) get role(parent) set ordering: unordered; fails
+    Then relation(parentship) get role(parent) get ordering: ordered
+    Then relation(fathership) get role(parent) get ordering: ordered
+    Then transaction commit
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get role(parent) get ordering: ordered
+    Then relation(fathership) get role(parent) get ordering: ordered
+
+  Scenario: Relation can set and unset ordering if it overrides unordered roles
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    Then relation(parentship) get role(parent) get ordering: unordered
+    When transaction commit
+    When connection open schema transaction for database: typedb
+    When create relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: father
+    When relation(fathership) get role(father) set override: parent
+    Then relation(parentship) get role(parent) get ordering: unordered
+    Then relation(fathership) get role(father) get ordering: unordered
+    When relation(fathership) get role(father) set ordering: ordered
+    Then relation(parentship) get role(parent) get ordering: unordered
+    Then relation(fathership) get role(father) get ordering: ordered
+    Then relation(fathership) get role(father) get supertype: parent
+    When transaction commit
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) get ordering: unordered
+    Then relation(fathership) get role(father) get ordering: ordered
+    When relation(fathership) get role(father) set ordering: unordered
+    Then relation(parentship) get role(parent) get ordering: unordered
+    Then relation(fathership) get role(father) get ordering: unordered
+    When transaction commit
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) get ordering: unordered
+    Then relation(fathership) get role(father) get ordering: unordered
+    When connection open schema transaction for database: typedb
+    When create relation type: mothership
+    When relation(mothership) set supertype: parentship
+    When relation(mothership) create role: mother
+    When relation(mothership) get role(mother) set ordering: ordered
+    When relation(mothership) get role(mother) set override: parent
+    Then relation(parentship) get role(parent) get ordering: unordered
+    Then relation(mothership) get role(mother) get ordering: ordered
+    Then relation(mothership) get role(mother) get supertype: parent
+    When transaction commit
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) get ordering: unordered
+    Then relation(mothership) get role(mother) get ordering: ordered
+    When relation(mothership) get role(mother) set ordering: unordered
+    Then relation(parentship) get role(parent) get ordering: unordered
+    Then relation(mothership) get role(mother) get ordering: unordered
+    When transaction commit
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get role(parent) get ordering: unordered
+    Then relation(mothership) get role(mother) get ordering: unordered
+
+  Scenario: Relation cannot set or unset ordering if it overrides ordered roles
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) get role(parent) set ordering: ordered
+    Then relation(parentship) get role(parent) get ordering: ordered
+    When transaction commit
+    When connection open schema transaction for database: typedb
+    When create relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: father
+    When relation(fathership) get role(father) set override: parent
+    Then relation(parentship) get role(parent) get ordering: ordered
+    Then relation(fathership) get role(father) get ordering: ordered
+    When transaction commit
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) get ordering: ordered
+    Then relation(fathership) get role(father) get ordering: ordered
+    When relation(fathership) get role(father) set ordering: ordered
+    Then transaction commit; fails
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) get ordering: ordered
+    Then relation(fathership) get role(father) get ordering: ordered
+    Then relation(fathership) get role(father) set ordering: unordered; fails
+    When connection open schema transaction for database: typedb
+    When create relation type: mothership
+    When relation(mothership) set supertype: parentship
+    When relation(mothership) create role: mother
+    When relation(mothership) get role(mother) set ordering: ordered
+    When relation(mothership) get role(mother) set override: parent
+    Then relation(parentship) get role(parent) get ordering: ordered
+    Then relation(mothership) get role(mother) get ordering: ordered
+    Then relation(mothership) get role(mother) get supertype: parent
+    When transaction commit
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) get ordering: ordered
+    Then relation(mothership) get role(mother) get ordering: ordered
+    When relation(mothership) get role(mother) set ordering: ordered
+    Then transaction commit; fails
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) get ordering: ordered
+    Then relation(mothership) get role(mother) get ordering: ordered
+    Then relation(mothership) get role(mother) set ordering: unordered; fails
+
+########################
 # relates @annotations common
 ########################
 
@@ -1429,7 +1579,6 @@ Feature: Concept Relation Type and Role Type
     When connection open read transaction for database: typedb
     Then relation(parentship) get role(parent) get annotations is empty
 
-    # TODO: Add the same test for owns
   Scenario: Relation type cannot unset ordering if @distinct annotation is set
     When create relation type: parentship
     When relation(parentship) create role: parent

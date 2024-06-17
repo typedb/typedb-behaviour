@@ -716,6 +716,50 @@ Feature: Concept Owns
       | duration      | boolean      |
       | custom-struct | long         |
 
+  Scenario: Ownership can change ordering if it does not have instances even if its owner has instances for entity type
+    When create attribute type: name
+    When attribute(name) set value type: double
+    When create entity type: person
+    When entity(person) set owns: name
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $a = entity(person) create new instance
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(person) get owns(name) set ordering: ordered
+    Then entity(person) get owns(name) get ordering: ordered
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get owns(name) get ordering: ordered
+    When entity(person) get owns(name) set ordering: unordered
+    Then entity(person) get owns(name) get ordering: unordered
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get owns(name) get ordering: unordered
+
+  Scenario: Ownership cannot change ordering if it has role instances for entity type
+    When create attribute type: name
+    When attribute(name) set value type: string
+    When create attribute type: email
+    When attribute(email) set value type: decimal
+    When create entity type: person
+    When entity(person) set owns: name
+    When entity(person) set owns: email
+    When entity(person) get owns(email) set ordering: ordered
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $e = entity(person) create new instance
+    When $a1 = attribute(name) create new instance
+    When $a2 = attribute(name) create new instance
+    When entity $e set has: $a1
+    When entity $e set has: $a2
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get owns(name) set ordering: unordered; fails
+    Then entity(person) get owns(name) set ordering: ordered; fails
+    Then entity(person) get owns(email) set ordering: unordered; fails
+    Then entity(person) get owns(email) set ordering: ordered; fails
+
   Scenario Outline: Entity types can redeclare ordered ownership
     When create attribute type: name
     When attribute(name) set value type: <value-type>
@@ -744,19 +788,6 @@ Feature: Concept Owns
       | datetimetz    |
       | duration      |
       | custom-struct |
-
-  Scenario: Ordered owns can redeclare ordering
-    When create attribute type: name
-    When attribute(name) set value type: long
-    When entity(person) set owns: name
-    When entity(person) get owns(name) set ordering: ordered
-    Then entity(person) get owns(name) get ordering: ordered
-    When entity(person) get owns(name) set ordering: ordered
-    Then entity(person) get owns(name) get ordering: ordered
-    When connection open schema transaction for database: typedb
-    Then relation(parentship) create role: parent; fails
-    When entity(person) get owns(name) set ordering: ordered
-    Then entity(person) get owns(name) get ordering: ordered
 
   Scenario: Abstract entity type can set ordered ownership
     When create entity type: player
@@ -850,6 +881,60 @@ Feature: Concept Owns
       | datetimetz    | double       |
       | duration      | boolean      |
       | custom-struct | long         |
+
+  Scenario: Ownership can change ordering if it does not have instances even if its owner has instances for relation type
+    When create attribute type: name
+    When attribute(name) set value type: double
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) set owns: name
+    When create entity type: person
+    When entity(person) set plays: parentship:parent
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $e = entity(person) create new instance
+    When $r = relation(parentship) create new instance
+    When relation $r add player for role(parent): $e
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When relation(parentship) get owns(name) set ordering: ordered
+    Then relation(parentship) get owns(name) get ordering: ordered
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get owns(name) get ordering: ordered
+    When relation(parentship) get owns(name) set ordering: unordered
+    Then relation(parentship) get owns(name) get ordering: unordered
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get owns(name) get ordering: unordered
+
+  Scenario: Ownership cannot change ordering if it has role instances for relation type
+    When create attribute type: name
+    When attribute(name) set value type: string
+    When create attribute type: email
+    When attribute(email) set value type: decimal
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) set owns: name
+    When relation(parentship) set owns: email
+    When relation(parentship) get owns(email) set ordering: ordered
+    When create entity type: person
+    When entity(person) set plays: parentship:parent
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $e = entity(person) create new instance
+    When $r = relation(parentship) create new instance
+    When relation $r add player for role(parent): $e
+    When $a1 = attribute(name) create new instance
+    When $a2 = attribute(name) create new instance
+    When entity $r set has: $a1
+    When entity $r set has: $a2
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get owns(name) set ordering: unordered; fails
+    Then relation(parentship) get owns(name) set ordering: ordered; fails
+    Then relation(parentship) get owns(email) set ordering: unordered; fails
+    Then relation(parentship) get owns(email) set ordering: ordered; fails
 
   Scenario Outline: Relation types can redeclare ordered ownership
     When create attribute type: name
@@ -968,6 +1053,42 @@ Feature: Concept Owns
       | relation  | description | datetime   |
       | relation  | description | datetimetz |
       | relation  | description | duration   |
+
+  Scenario Outline: Ordered owns can redeclare ordering
+    When create attribute type: name
+    When attribute(name) set value type: <value-type>
+    When <root-type>(<type-name>) set owns: name
+    When <root-type>(<type-name>) get owns(name) set ordering: ordered
+    Then <root-type>(<type-name>) get owns(name) get ordering: ordered
+    When <root-type>(<type-name>) get owns(name) set ordering: ordered
+    Then <root-type>(<type-name>) get owns(name) get ordering: ordered
+    When connection open schema transaction for database: typedb
+    When <root-type>(<type-name>) get owns(name) set ordering: ordered
+    Then <root-type>(<type-name>) get owns(name) get ordering: ordered
+    Examples:
+      | root-type | type-name   | value-type |
+      | entity    | person      | duration   |
+      | relation  | description | string     |
+
+  Scenario Outline: <root-type> can set ordering for ownership after setting an override or an annotation
+    When create attribute type: name
+    When attribute(name) set value type: <value-type>
+    When attribute(name) set annotation: @abstract
+    When create attribute type: surname
+    When attribute(surname) set supertype: name
+    When <root-type>(<supertype-name>) set owns: name
+    When <root-type>(<subtype-name>) set owns: surname
+    When <root-type>(<subtype-name>) get owns(surname) set override: surname
+    When <root-type>(<subtype-name>) get owns(surname) set annotation: @card(0, 1)
+    When <root-type>(<subtype-name>) get owns(surname) set ordering: ordered
+    Then <root-type>(<subtype-name>) get owns(surname) get ordering: ordered
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then <root-type>(<subtype-name>) get owns(surname) get ordering: ordered
+    Examples:
+      | root-type | supertype-name | subtype-name | value-type |
+      | entity    | person         | customer     | duration   |
+      | relation  | description    | registration | string     |
 
   Scenario Outline: <root-type> types cannot unset ordered ownership of attributes that are owned by existing instances
     When create attribute type: name
@@ -1205,7 +1326,9 @@ Feature: Concept Owns
     When <root-type>(<supertype-name>) set owns: email
     Then <root-type>(<supertype-name>) get owns(email) get ordering: unordered
     When <root-type>(<subtype-name>) set owns: work-email
+    Then <root-type>(<subtype-name>) get owns(work-email) get ordering: unordered
     When <root-type>(<subtype-name-2>) set owns: personal-email
+    Then <root-type>(<subtype-name-2>) get owns(personal-email) get ordering: unordered
     When transaction commits
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name>) get owns(work-email) set ordering: ordered
@@ -1236,31 +1359,6 @@ Feature: Concept Owns
       | root-type | supertype-name | subtype-name | subtype-name-2 | value-type    |
       | entity    | person         | customer     | subscriber     | decimal       |
       | relation  | description    | registration | profile        | custom-struct |
-
-  Scenario Outline: <root-type> types cannot set unordered for inherited ordered ownerships
-    When create attribute type: email
-    When attribute(email) set value type: <value-type>
-    When attribute(email) set annotation: @abstract
-    When create attribute type: work-email
-    When attribute(work-email) set value type: <value-type>
-    When attribute(work-email) set supertype: email
-    When create attribute type: personal-email
-    When attribute(personal-email) set value type: <value-type>
-    When attribute(personal-email) set supertype: email
-    When <root-type>(<supertype-name>) set annotation: @abstract
-    When <root-type>(<supertype-name>) set owns: email
-    When <root-type>(<supertype-name>) get owns(email) set ordering: ordered
-    Then <root-type>(<supertype-name>) get owns(email) get ordering: ordered
-    When <root-type>(<subtype-name>) set owns: work-email
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(email) get ordering: ordered
-    Then <root-type>(<subtype-name>) get owns(work-email) get ordering: unordered
-    Then <root-type>(<subtype-name>) get owns(work-email) set override: email; fails
-    Examples:
-      | root-type | supertype-name | subtype-name | value-type |
-      | entity    | person         | customer     | string     |
-      | relation  | description    | registration | long       |
 
   Scenario Outline: Unordered and ordered are propagated to subtypes of ownerships for <root-type> types unless overridden
     When create attribute type: name
@@ -1307,10 +1405,10 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name-2>) get owns(surname) get ordering: unordered
     Then <root-type>(<subtype-name>) get owns(work-email) get ordering: ordered
     Then <root-type>(<subtype-name-2>) get owns(personal-email) get ordering: ordered
-    When <root-type>(<supertype-name-2>) get owns(surname) set ordering: ordered
-    Then <root-type>(<supertype-name-2>) get owns(surname) get ordering: ordered
-    When <root-type>(<supertype-name-2>) get owns(personal-email) set ordering: ordered
-    Then <root-type>(<supertype-name-2>) get owns(personal-email) get ordering: ordered
+    When <root-type>(<subtype-name-2>) get owns(surname) set ordering: ordered
+    Then <root-type>(<subtype-name-2>) get owns(surname) get ordering: ordered
+    When <root-type>(<subtype-name-2>) get owns(personal-email) set ordering: ordered
+    Then <root-type>(<subtype-name-2>) get owns(personal-email) get ordering: ordered
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get owns(first-name) get ordering: unordered
@@ -1333,6 +1431,159 @@ Feature: Concept Owns
       | root-type | supertype-name | subtype-name | value-type |
       | entity    | person         | customer     | datetime   |
       | relation  | description    | registration | double     |
+
+  Scenario Outline: Ownership can set and unset ordering if it inherits unordered ownership for <root-type>
+    When create attribute type: name
+    When attribute(name) set value type: <value-type>
+    When <root-type>(<supertype-name>) set owns: name
+    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
+    Then <root-type>(<subtype-name>) get owns(name) get ordering: unordered
+    When <root-type>(<subtype-name>) get owns(name) set ordering: ordered
+    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
+    Then <root-type>(<subtype-name>) get owns(name) get ordering: ordered
+    When transaction commit
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
+    Then <root-type>(<subtype-name>) get owns(name) get ordering: ordered
+    When <root-type>(<subtype-name>) get owns(name) set ordering: unordered
+    Then <root-type>(supertype-name>) get owns(name) get ordering: unordered
+    Then <root-type>(<subtype-name>) get owns(name) get ordering: unordered
+    When transaction commit
+    When connection open read transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
+    Then <root-type>(<subtype-name>) get owns(name) get ordering: unordered
+    Examples:
+      | root-type | supertype-name | subtype-name | value-type |
+      | entity    | person         | customer     | decimal    |
+      | relation  | description    | registration | long       |
+
+  Scenario Outline: Ownership cannot set or unset ordering if it inherits ordered ownership for <root-type>
+    When create attribute type: name
+    When attribute(name) set value type: <value-type>
+    When <root-type>(<supertype-name>) set owns: name
+    When <root-type>(<supertype-name>) get owns(name) set ordering: ordered
+    Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
+    When transaction commit
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
+    Then <root-type>(<subtype-name>) get owns(name) get ordering: ordered
+    When <root-type>(<subtype-name>) get owns(name) set ordering: ordered
+    Then transaction commit; fails
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
+    Then <root-type>(<subtype-name>) get owns(name) get ordering: ordered
+    Then <root-type>(<subtype-name>) get owns(name) set ordering: unordered; fails
+    Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
+    Then <root-type>(<subtype-name>) get owns(name) get ordering: ordered
+    Then transaction commit
+    When connection open read transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
+    Then <root-type>(<subtype-name>) get owns(name) get ordering: ordered
+    Examples:
+      | root-type | supertype-name | subtype-name | value-type |
+      | entity    | person         | customer     | boolean    |
+      | relation  | description    | registration | datetimetz |
+
+  Scenario Outline: Ownership can set and unset ordering if it overrides unordered ownership for <root-type>
+    When create attribute type: name
+    When attribute(name) set value type: <value-type>
+    When attribute(name) set annotation: @abstract
+    When create attribute type: surname
+    When attribute(surname) set supertype: name
+    When <root-type>(<supertype-name>) set owns: name
+    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
+    When transaction commit
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) set owns: surname
+    When <root-type>(<subtype-name>) get owns(surname) set override: name
+    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
+    Then <root-type>(<subtype-name>) get owns(surname) get ordering: unordered
+    When <root-type>(<subtype-name>) get owns(surname) set ordering: ordered
+    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
+    Then <root-type>(<subtype-name>) get owns(surname) get ordering: ordered
+    Then <root-type>(<subtype-name>) get owns(surname) get supertype: name
+    When transaction commit
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
+    Then <root-type>(<subtype-name>) get owns(surname) get ordering: ordered
+    When <root-type>(<subtype-name>) get owns(surname) set ordering: unordered
+    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
+    Then <root-type>(<subtype-name>) get owns(surname) get ordering: unordered
+    When transaction commit
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
+    Then <root-type>(<subtype-name>) get owns(surname) get ordering: unordered
+    When connection open schema transaction for database: typedb
+    When create attribute type: third-name
+    When attribute(third-name) set supertype: name
+    When <root-type>(<subtype-name-2>) set owns: third-name
+    When <root-type>(<subtype-name-2>) get owns(third-name) set ordering: ordered
+    When <root-type>(<subtype-name-2>) get owns(third-name) set override: name
+    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
+    Then <root-type>(<subtype-name-2>) get owns(third-name) get ordering: ordered
+    Then <root-type>(<subtype-name-2>) get owns(third-name) get supertype: name
+    When transaction commit
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
+    Then <root-type>(<subtype-name-2>) get owns(third-name) get ordering: ordered
+    When <root-type>(<subtype-name-2>) get owns(third-name) set ordering: unordered
+    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
+    Then <root-type>(<subtype-name-2>) get owns(third-name) get ordering: unordered
+    When transaction commit
+    When connection open read transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
+    Then <root-type>(<subtype-name-2>) get owns(third-name) get ordering: unordered
+    Examples:
+      | root-type | supertype-name | subtype-name | subtype-name-2 | value-type    |
+      | entity    | person         | customer     | subscriber     | decimal       |
+      | relation  | description    | registration | profile        | custom-struct |
+
+  Scenario Outline: Ownership cannot set or unset ordering if it overrides ordered ownership for <root-type>
+    When create attribute type: name
+    When attribute(name) set value type: <value-type>
+    When attribute(name) set annotation: @abstract
+    When <root-type>(<supertype-name>) set owns: name
+    When <root-type>(<supertype-name>) get owns(name) set ordering: ordered
+    Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
+    When transaction commit
+    When connection open schema transaction for database: typedb
+    When create attribute type: surname
+    When attribute(surname) set supertype: name
+    When <root-type>(<subtype-name>) set owns: surname
+    When <root-type>(<subtype-name>) get owns(surname) set override: name
+    Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
+    Then <root-type>(<subtype-name>) get owns(surname) get ordering: ordered
+    When transaction commit
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
+    Then <root-type>(<subtype-name>) get owns(surname) get ordering: ordered
+    When <root-type>(<subtype-name>) get owns(surname) set ordering: ordered
+    Then transaction commit; fails
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
+    Then <root-type>(<subtype-name>) get owns(surname) get ordering: ordered
+    Then <root-type>(<subtype-name>) get owns(surname) set ordering: unordered; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name-2>) set owns: third-name
+    When <root-type>(<subtype-name-2>) get owns(third-name) set ordering: ordered
+    When relation(third-nameship) get owns(third-name) set override: name
+    Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
+    Then <root-type>(<subtype-name-2>) get owns(third-name) get ordering: ordered
+    Then <root-type>(<subtype-name-2>) get owns(third-name) get supertype: name
+    When transaction commit
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
+    Then <root-type>(<subtype-name-2>) get owns(third-name) get ordering: ordered
+    When <root-type>(<subtype-name-2>) get owns(third-name) set ordering: ordered
+    Then transaction commit; fails
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
+    Then <root-type>(<subtype-name-2>) get owns(third-name) get ordering: ordered
+    Then <root-type>(<subtype-name-2>) get owns(third-name) set ordering: unordered; fails
+    Examples:
+      | root-type | supertype-name | subtype-name | subtype-name-2 | value-type    |
+      | entity    | person         | customer     | subscriber     | decimal       |
+      | relation  | description    | registration | profile        | custom-struct |
 
 ########################
 # @annotations common: contain common tests for annotations suitable for **scalar** owns:
