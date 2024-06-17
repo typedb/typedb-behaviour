@@ -25,7 +25,8 @@ Feature: Concept Ordered Role Players
     Given relation(employment) set owns: date
 
     Given relation(employment) create role: employer
-    Given relation(employment) create role: employee[]
+    Given relation(employment) create role: employee
+    Given relation(employment) get role(employee) set ordering: ordered
 
     Given create entity type: company
     Given entity(company) set owns: company-name
@@ -109,4 +110,3 @@ Feature: Concept Ordered Role Players
     Then roleplayer $employees[2] is $alice
     Then roleplayer $employees[3] is $alice
     Then roleplayer $employees[4] is $bob
-

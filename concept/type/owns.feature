@@ -305,81 +305,81 @@ Feature: Concept Owns
     Then relation(marriage) get owns is empty
 
   Scenario: Relation type cannot own attribute without value type
-    When create relation type: brotherhood
-    When relation(brotherhood) create role: brother
+    When create relation type: reference
+    When relation(reference) create role: target
     When create attribute type: name
     When create attribute type: email
     When attribute(email) set annotation: @abstract
-    Then relation(brotherhood) set owns: name; fails
-    Then relation(brotherhood) set owns: email; fails
+    Then relation(reference) set owns: name; fails
+    Then relation(reference) set owns: email; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(brotherhood) set owns: name; fails
-    Then relation(brotherhood) set owns: email; fails
-    Then relation(brotherhood) get owns is empty
+    Then relation(reference) set owns: name; fails
+    Then relation(reference) set owns: email; fails
+    Then relation(reference) get owns is empty
 
   Scenario: Non-abstract relation type cannot own abstract attribute
-    When create relation type: brotherhood
-    When relation(brotherhood) create role: brother
+    When create relation type: reference
+    When relation(reference) create role: target
     When create attribute type: name
     When attribute(name) set annotation: @abstract
     When create attribute type: email
     When attribute(email) set value type: string
     When attribute(email) set annotation: @abstract
-    Then relation(brotherhood) set owns: name; fails
-    Then relation(brotherhood) set owns: email; fails
+    Then relation(reference) set owns: name; fails
+    Then relation(reference) set owns: email; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(brotherhood) set owns: name; fails
-    Then relation(brotherhood) set owns: email; fails
-    Then relation(brotherhood) get owns is empty
+    Then relation(reference) set owns: name; fails
+    Then relation(reference) set owns: email; fails
+    Then relation(reference) get owns is empty
 
   Scenario: Abstract relation type cannot own non-abstract attribute without value type
-    When create relation type: brotherhood
-    When relation(brotherhood) create role: brother
-    When relation(brotherhood) set annotation: @abstract
+    When create relation type: reference
+    When relation(reference) create role: target
+    When relation(reference) set annotation: @abstract
     When create attribute type: name
-    Then relation(brotherhood) set owns: name; fails
+    Then relation(reference) set owns: name; fails
     When transaction commits
     When connection open read transaction for database: typedb
-    Then relation(brotherhood) set owns: name; fails
+    Then relation(reference) set owns: name; fails
 
   Scenario: Abstract relation type can own abstract attribute
-    When create relation type: brotherhood
-    When relation(brotherhood) create role: brother
+    When create relation type: reference
+    When relation(reference) create role: target
     When entity(type) set annotation: @abstract
     When create attribute type: name
     When attribute(name) set annotation: @abstract
     When create attribute type: email
     When attribute(email) set value type: string
     When attribute(email) set annotation: @abstract
-    When relation(brotherhood) set owns: name
-    When relation(brotherhood) set owns: email
-    Then relation(brotherhood) get owns contain:
+    When relation(reference) set owns: name
+    When relation(reference) set owns: email
+    Then relation(reference) get owns contain:
       | name  |
       | email |
     When transaction commits
     When connection open read transaction for database: typedb
-    Then relation(brotherhood) get owns contain:
+    Then relation(reference) get owns contain:
       | name  |
       | email |
 
   Scenario: Relation type cannot unset abstract annotation if it owns an abstract attribute
-    When create relation type: brotherhood
-    When relation(brotherhood) create role: brother
+    When create relation type: reference
+    When relation(reference) create role: target
     When entity(type) set annotation: @abstract
     When create attribute type: name
     When attribute(name) set annotation: @abstract
-    When relation(brotherhood) set owns: name
-    When relation(brotherhood) get owns contain: name
-    Then relation(brotherhood) unset annotation: @abstract; fails
-    Then relation(brotherhood) get annotations contain: @abstract
+    When relation(reference) set owns: name
+    When relation(reference) get owns contain: name
+    Then relation(reference) unset annotation: @abstract; fails
+    Then relation(reference) get annotations contain: @abstract
     When transaction commits
     When connection open read transaction for database: typedb
-    Then relation(brotherhood) get owns contain: name
-    Then relation(brotherhood) get annotations contain: @abstract
-    Then relation(brotherhood) unset annotation: @abstract; fails
-    Then relation(brotherhood) get annotations contain: @abstract
+    Then relation(reference) get owns contain: name
+    Then relation(reference) get annotations contain: @abstract
+    Then relation(reference) unset annotation: @abstract; fails
+    Then relation(reference) get annotations contain: @abstract
 
   Scenario: Attribute types cannot own entities, attributes, relations, roles, structs, structs fields, and non-existing things
     When create attribute type: surname
@@ -650,47 +650,59 @@ Feature: Concept Owns
 # owns lists
 ########################
 
-  Scenario Outline: Entity types can own and unset lists of attributes
+  Scenario Outline: Entity types can set and unset ordered ownership
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When create attribute type: surname
     When attribute(surname) set value type: <value-type>
     When create attribute type: birthday
     When attribute(birthday) set value type: <value-type-2>
-    When entity(person) set owns: name[]
-    When entity(person) set owns: birthday[]
-    When entity(person) set owns: surname[]
+    When entity(person) set owns: name
+    When entity(person) set owns: birthday
+    When entity(person) set owns: surname
     Then entity(person) get owns contain:
-      | name[]     |
-      | surname[]  |
-      | birthday[] |
+      | name     |
+      | surname  |
+      | birthday |
+    Then entity(person) get owns(name) get ordering: unordered
+    Then entity(person) get owns(birthday) get ordering: unordered
+    Then entity(person) get owns(surname) get ordering: unordered
+    When entity(person) get owns(name) set ordering: ordered
+    When entity(person) get owns(birthday) set ordering: ordered
+    When entity(person) get owns(surname) set ordering: ordered
+    Then entity(person) get owns(name) get ordering: ordered
+    Then entity(person) get owns(birthday) get ordering: ordered
+    Then entity(person) get owns(surname) get ordering: ordered
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) get owns contain:
-      | name[]     |
-      | surname[]  |
-      | birthday[] |
-    When entity(person) unset owns: surname[]
+      | name     |
+      | surname  |
+      | birthday |
+    Then entity(person) get owns(name) get ordering: ordered
+    Then entity(person) get owns(birthday) get ordering: ordered
+    Then entity(person) get owns(surname) get ordering: ordered
+    When entity(person) unset owns: surname
     Then entity(person) get owns do not contain:
-      | surname[] |
+      | surname |
     Then entity(person) get owns contain:
-      | name[]     |
-      | birthday[] |
+      | name     |
+      | birthday |
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) get owns contain:
-      | name[]     |
-      | birthday[] |
-    When entity(person) unset owns: birthday[]
+      | name     |
+      | birthday |
+    When entity(person) unset owns: birthday
     Then entity(person) get owns do not contain:
-      | birthday[] |
+      | birthday |
     Then entity(person) get owns contain:
-      | name[] |
-    When entity(person) unset owns: name[]
+      | name |
+    When entity(person) unset owns: name
     Then entity(person) get owns do not contain:
-      | name[]     |
-      | surname[]  |
-      | birthday[] |
+      | name     |
+      | surname  |
+      | birthday |
     Then entity(person) get owns is empty
     Examples:
       | value-type    | value-type-2 |
@@ -704,17 +716,23 @@ Feature: Concept Owns
       | duration      | boolean      |
       | custom-struct | long         |
 
-  Scenario Outline: Entity types can redeclare owning lists of attributes
+  Scenario Outline: Entity types can redeclare ordered ownership
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When create attribute type: email
     When attribute(email) set value type: <value-type>
-    When entity(person) set owns: name[]
-    When entity(person) set owns: email[]
-    Then entity(person) set owns: name[]
+    When entity(person) set owns: name
+    When entity(person) get owns(name) set ordering: ordered
+    When entity(person) set owns: email
+    When entity(person) get owns(email) set ordering: ordered
+    Then entity(person) set owns: name
+    When entity(person) get owns(name) set ordering: ordered
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) set owns: email[]
+    Then entity(person) set owns: email
+    Then entity(person) get owns(email) get ordering: unordered
+    When entity(person) get owns(email) set ordering: ordered
+    Then entity(person) get owns(email) get ordering: ordered
     Examples:
       | value-type    |
       | long          |
@@ -727,62 +745,20 @@ Feature: Concept Owns
       | duration      |
       | custom-struct |
 
-  Scenario: Entity types cannot own lists of entities, relations, roles, structs, and structs fields
-    When create entity type: car
-    When create relation type: credit
-    When relation(credit) create role: creditor
-    When create struct type: passport
-    When struct(passport) create field: first-name, with value type: string
-    When struct(passport) create field: surname, with value type: string
-    When struct(passport) create field: birthday, with value type: datetime
-    Then entity(person) set owns: car[]; fails
-    Then entity(person) set owns: credit[]; fails
-    Then entity(person) set owns: credit:creditor[]; fails
-    Then entity(person) set owns: passport[]; fails
-    Then entity(person) set owns: passport:birthday[]; fails
-    Then entity(person) get owns is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then entity(person) get owns is empty
-
-  Scenario: Entity type cannot own attribute list without value type
-    When create entity type: player
+  Scenario: Ordered owns can redeclare ordering
     When create attribute type: name
-    When create attribute type: email
-    When attribute(email) set annotation: @abstract
-    Then entity(player) set owns: name[]; fails
-    Then entity(player) set owns: email[]; fails
-    When transaction commits
+    When attribute(name) set value type: long
+    When entity(person) set owns: name
+    When entity(person) get owns(name) set ordering: ordered
+    Then entity(person) get owns(name) get ordering: ordered
+    When entity(person) get owns(name) set ordering: ordered
+    Then entity(person) get owns(name) get ordering: ordered
     When connection open schema transaction for database: typedb
-    Then entity(player) set owns: name[]; fails
-    Then entity(player) set owns: email[]; fails
-    Then entity(player) get owns is empty
+    Then relation(parentship) create role: parent; fails
+    When entity(person) get owns(name) set ordering: ordered
+    Then entity(person) get owns(name) get ordering: ordered
 
-  Scenario: Non-abstract entity type cannot own abstract attribute list
-    When create entity type: player
-    When create attribute type: name
-    When attribute(name) set annotation: @abstract
-    When create attribute type: email
-    When attribute(email) set value type: string
-    When attribute(email) set annotation: @abstract
-    Then entity(player) set owns: name[]; fails
-    Then entity(player) set owns: email[]; fails
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then entity(player) set owns: name[]; fails
-    Then entity(player) set owns: email[]; fails
-    Then entity(player) get owns is empty
-
-  Scenario: Abstract entity type cannot own non-abstract attribute list without value type
-    When create entity type: player
-    When entity(player) set annotation: @abstract
-    When create attribute type: name
-    Then entity(player) set owns: name[]; fails
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then entity(player) set owns: name[]; fails
-
-  Scenario: Abstract entity type can own abstract attribute list
+  Scenario: Abstract entity type can set ordered ownership
     When create entity type: player
     When entity(type) set annotation: @abstract
     When create attribute type: name
@@ -790,34 +766,24 @@ Feature: Concept Owns
     When create attribute type: email
     When attribute(email) set value type: string
     When attribute(email) set annotation: @abstract
-    When entity(player) set owns: name[]
-    When entity(player) set owns: email[]
+    When entity(player) set owns: name
+    When entity(player) set owns: email
     Then entity(player) get owns contain:
-      | name[]  |
-      | email[] |
+      | name  |
+      | email |
+    When entity(player) get owns(name) set ordering: ordered
+    When entity(player) get owns(email) set ordering: ordered
+    Then entity(player) get owns(name) get ordering: ordered
+    Then entity(player) get owns(email) get ordering: ordered
     When transaction commits
     When connection open read transaction for database: typedb
     Then entity(player) get owns contain:
-      | name[]  |
-      | email[] |
+      | name  |
+      | email |
+    Then entity(player) get owns(name) get ordering: ordered
+    Then entity(player) get owns(email) get ordering: ordered
 
-  Scenario: Entity type cannot unset abstract annotation if it owns an abstract attribute list
-    When create entity type: player
-    When entity(type) set annotation: @abstract
-    When create attribute type: name
-    When attribute(name) set annotation: @abstract
-    When entity(player) set owns: name[]
-    When entity(player) get owns contain: name[]
-    Then entity(player) unset annotation: @abstract; fails
-    Then entity(player) get annotations contain: @abstract
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then entity(player) get owns contain: name[]
-    Then entity(player) get annotations contain: @abstract
-    Then entity(player) unset annotation: @abstract; fails
-    Then entity(player) get annotations contain: @abstract
-
-  Scenario Outline: Relation types can own and unset lists of attributes
+  Scenario Outline: Relation types can set and unset ordered ownership
     When create attribute type: license
     When attribute(license) set value type: <value-type>
     When create attribute type: starting-date
@@ -826,40 +792,52 @@ Feature: Concept Owns
     When attribute(comment) set value type: <value-type-2>
     When create relation type: marriage
     When relation(marriage) create role: spouse
-    When relation(marriage) set owns: license[]
-    When relation(marriage) set owns: starting-date[]
-    When relation(marriage) set owns: comment[]
+    When relation(marriage) set owns: license
+    When relation(marriage) set owns: starting-date
+    When relation(marriage) set owns: comment
     Then relation(marriage) get owns contain:
-      | license[]       |
-      | starting-date[] |
-      | comment[]       |
+      | license       |
+      | starting-date |
+      | comment       |
+    Then relation(marriage) get owns(license) get ordering: unordered
+    Then relation(marriage) get owns(starting-date) get ordering: unordered
+    Then relation(marriage) get owns(comment) get ordering: unordered
+    When relation(marriage) get owns(license) set ordering: ordered
+    When relation(marriage) get owns(starting-date) set ordering: ordered
+    When relation(marriage) get owns(comment) set ordering: ordered
+    Then relation(marriage) get owns(license) get ordering: ordered
+    Then relation(marriage) get owns(starting-date) get ordering: ordered
+    Then relation(marriage) get owns(comment) get ordering: ordered
     When transaction commits
     When connection open read transaction for database: typedb
     Then relation(marriage) get owns contain:
-      | license[]       |
-      | starting-date[] |
-      | comment[]       |
-    When relation(marriage) unset owns: starting-date[]
+      | license       |
+      | starting-date |
+      | comment       |
+    Then relation(marriage) get owns(license) get ordering: ordered
+    Then relation(marriage) get owns(starting-date) get ordering: ordered
+    Then relation(marriage) get owns(comment) get ordering: ordered
+    When relation(marriage) unset owns: starting-date
     Then relation(marriage) get owns do not contain:
-      | starting-date[] |
+      | starting-date |
     Then relation(marriage) get owns contain:
-      | license[] |
-      | comment[] |
+      | license |
+      | comment |
     When transaction commits
     When connection open schema transaction for database: typedb
     Then relation(marriage) get owns contain:
-      | license[] |
-      | comment[] |
-    When relation(marriage) unset owns: license[]
+      | license |
+      | comment |
+    When relation(marriage) unset owns: license
     Then relation(marriage) get owns do not contain:
-      | license[] |
+      | license |
     Then relation(marriage) get owns contain:
-      | comment[] |
-    When relation(marriage) unset owns: comment[]
+      | comment |
+    When relation(marriage) unset owns: comment
     Then relation(marriage) get owns do not contain:
-      | license[]       |
-      | starting-date[] |
-      | comment[]       |
+      | license       |
+      | starting-date |
+      | comment       |
     Then relation(marriage) get owns is empty
     Examples:
       | value-type    | value-type-2 |
@@ -873,19 +851,25 @@ Feature: Concept Owns
       | duration      | boolean      |
       | custom-struct | long         |
 
-  Scenario Outline: Relation types can redeclare owning lists of attributes
+  Scenario Outline: Relation types can redeclare ordered ownership
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When create attribute type: email
     When attribute(email) set value type: <value-type>
     When create relation type: reference
     When relation(reference) create role: target
-    When relation(reference) set owns: name[]
-    When relation(reference) set owns: email[]
-    Then relation(reference) set owns: name[]
+    When relation(reference) set owns: name
+    When relation(reference) get owns(name) set ordering: ordered
+    When relation(reference) set owns: email
+    When relation(reference) get owns(email) set ordering: ordered
+    Then relation(reference) set owns: name
+    When relation(reference) get owns(name) set ordering: ordered
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(reference) set owns: email[]
+    Then relation(reference) set owns: email
+    Then relation(reference) get owns(email) get ordering: unordered
+    When relation(reference) get owns(email) set ordering: ordered
+    Then relation(reference) get owns(email) get ordering: ordered
     Examples:
       | value-type    |
       | long          |
@@ -898,148 +882,51 @@ Feature: Concept Owns
       | duration      |
       | custom-struct |
 
-  Scenario: Relation types cannot own lists of entities, relations, roles, structs, and structs fields
-    When create relation type: credit
-    When relation(credit) create role: creditor
-    When create relation type: marriage
-    When relation(marriage) create role: spouse
-    When create struct type: passport-document
-    When struct(passport-document) create field: first-name, with value type: string
-    When struct(passport-document) create field: surname, with value type: string
-    When struct(passport-document) create field: birthday, with value type: datetime
-    Then relation(marriage) set owns: person[]; fails
-    Then relation(marriage) set owns: credit[]; fails
-    Then relation(marriage) set owns: credit:creditor[]; fails
-    Then relation(marriage) set owns: passport[]; fails
-    Then relation(marriage) set owns: passport:birthday[]; fails
-    Then relation(marriage) set owns: marriage:spouse[]; fails
-    Then relation(marriage) get owns is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then relation(marriage) get owns is empty
-
-  Scenario: Relation type cannot own attribute list without value type
-    When create relation type: brotherhood
-    When relation(brotherhood) create role: brother
-    When create attribute type: name
-    When create attribute type: email
-    When attribute(email) set annotation: @abstract
-    Then relation(brotherhood) set owns: name[]; fails
-    Then relation(brotherhood) set owns: email[]; fails
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(brotherhood) set owns: name[]; fails
-    Then relation(brotherhood) set owns: email[]; fails
-    Then relation(brotherhood) get owns is empty
-
-  Scenario: Non-abstract relation type cannot own abstract attribute list
-    When create relation type: brotherhood
-    When relation(brotherhood) create role: brother
-    When create attribute type: name
-    When attribute(name) set annotation: @abstract
-    When create attribute type: email
-    When attribute(email) set value type: string
-    When attribute(email) set annotation: @abstract
-    Then relation(brotherhood) set owns: name[]; fails
-    Then relation(brotherhood) set owns: email[]; fails
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(brotherhood) set owns: name[]; fails
-    Then relation(brotherhood) set owns: email[]; fails
-    Then relation(brotherhood) get owns is empty
-
-  Scenario: Abstract relation type cannot own non-abstract attribute without value type list
-    When create relation type: brotherhood
-    When relation(brotherhood) create role: brother
-    When relation(brotherhood) set annotation: @abstract
-    When create attribute type: name
-    Then relation(brotherhood) set owns: name[]; fails
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then relation(brotherhood) set owns: name[]; fails
-
-  Scenario: Abstract relation type can own abstract attribute list
-    When create relation type: brotherhood
-    When relation(brotherhood) create role: brother
+  Scenario: Abstract relation type can set ordered ownership of abstract attribute
+    When create relation type: reference
+    When relation(reference) create role: target
     When entity(type) set annotation: @abstract
     When create attribute type: name
     When attribute(name) set annotation: @abstract
     When create attribute type: email
     When attribute(email) set value type: string
     When attribute(email) set annotation: @abstract
-    When relation(brotherhood) set owns: name[]
-    When relation(brotherhood) set owns: email[]
-    Then relation(brotherhood) get owns contain:
-      | name[]  |
-      | email[] |
+    When relation(reference) set owns: name
+    When relation(reference) get owns(name) set ordering: ordered
+    When relation(reference) set owns: email
+    When relation(reference) get owns(email) set ordering: ordered
+    Then relation(reference) get owns contain:
+      | name  |
+      | email |
+    Then relation(reference) get owns(name) get ordering: ordered
+    Then relation(reference) get owns(email) get ordering: ordered
     When transaction commits
     When connection open read transaction for database: typedb
-    Then relation(brotherhood) get owns contain:
-      | name[]  |
-      | email[] |
+    Then relation(reference) get owns contain:
+      | name  |
+      | email |
+    Then relation(reference) get owns(name) get ordering: ordered
+    Then relation(reference) get owns(email) get ordering: ordered
 
-  Scenario: Relation type cannot unset abstract annotation if it owns an abstract attribute list
-    When create relation type: brotherhood
-    When relation(brotherhood) create role: brother
+  Scenario: Relation type cannot unset abstract annotation if it has ordered ownership of abstract attribute
+    When create relation type: reference
+    When relation(reference) create role: target
     When entity(type) set annotation: @abstract
     When create attribute type: name
     When attribute(name) set annotation: @abstract
-    When relation(brotherhood) set owns: name[]
-    When relation(brotherhood) get owns contain: name[]
-    Then relation(brotherhood) unset annotation: @abstract; fails
-    Then relation(brotherhood) get annotations contain: @abstract
+    When relation(reference) set owns: name
+    When relation(reference) get owns contain: name
+    When relation(reference) get owns(name) set ordering: ordered
+    Then relation(reference) unset annotation: @abstract; fails
+    Then relation(reference) get annotations contain: @abstract
+    Then relation(reference) get owns(name) get ordering: ordered
     When transaction commits
     When connection open read transaction for database: typedb
-    Then relation(brotherhood) get owns contain: name[]
-    Then relation(brotherhood) get annotations contain: @abstract
-    Then relation(brotherhood) unset annotation: @abstract; fails
-    Then relation(brotherhood) get annotations contain: @abstract
-
-  Scenario: Attribute types cannot own lists of entities, attributes, relations, roles, structs, and structs fields
-    When create attribute type: surname
-    When create relation type: marriage
-    When relation(marriage) create role: spouse
-    When attribute(surname) set value type: string
-    When create struct type: passport
-    When struct(passport) create field: first-name, with value type: string
-    When struct(passport) create field: surname, with value type: string
-    When struct(passport) create field: birthday, with value type: datetime
-    When create attribute type: name
-    When attribute(name) set value type: string
-    Then attribute(name) set owns: person[]; fails
-    Then attribute(name) set owns: surname[]; fails
-    Then attribute(name) set owns: marriage[]; fails
-    Then attribute(name) set owns: marriage:spouse[]; fails
-    Then attribute(name) set owns: passport[]; fails
-    Then attribute(name) set owns: passport:birthday[]; fails
-    Then attribute(name) get owns is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then attribute(name) get owns is empty
-
-  Scenario: Struct types cannot own lists of entities, attributes, relations, roles, structs, and structs fields
-    When create attribute type: name
-    When create relation type: marriage
-    When relation(marriage) create role: spouse
-    When attribute(surname) set value type: string
-    When create struct type: passport
-    When struct(passport) create field: first-name, with value type: string
-    When struct(passport) create field: surname, with value type: string
-    When struct(passport) create field: birthday, with value type: datetime
-    When create struct type: wallet
-    When struct(wallet) create field: currency, with value type: string
-    When struct(wallet) create field: value, with value type: double
-    Then struct(wallet) set owns: person[]; fails
-    Then struct(wallet) set owns: name[]; fails
-    Then struct(wallet) set owns: marriage[]; fails
-    Then struct(wallet) set owns: marriage:spouse[]; fails
-    Then struct(wallet) set owns: passport[]; fails
-    Then struct(wallet) set owns: passport:birthday[]; fails
-    Then struct(wallet) set owns: wallet:currency[]; fails
-    Then struct(wallet) get owns is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then struct(wallet) get owns is empty
+    Then relation(reference) get owns contain: name
+    Then relation(reference) get owns(name) get ordering: ordered
+    Then relation(reference) get annotations contain: @abstract
+    Then relation(reference) unset annotation: @abstract; fails
+    Then relation(reference) get annotations contain: @abstract
 
   Scenario Outline: <root-type> can change ordering of owns
     When create attribute type: name
@@ -1082,19 +969,21 @@ Feature: Concept Owns
       | relation  | description | datetimetz |
       | relation  | description | duration   |
 
-  Scenario Outline: <root-type> types cannot unset owning lists of attributes that are owned by existing instances
+  Scenario Outline: <root-type> types cannot unset ordered ownership of attributes that are owned by existing instances
     When create attribute type: name
     When attribute(name) set value type: <value-type>
-    When <root-type>(<type-name>) set owns: name[]
+    When <root-type>(<type-name>) set owns: name
+    When <root-type>(<type-name>) get owns(name) set ordering: ordered
     Then transaction commits
     When connection open write transaction for database: typedb
     When $i = <root-type>(<type-name>) create new instance
-    When $a = attribute(name[]) as(<value-type>) put: [<value>]
+    When $a = attribute(name) as(<value-type>) put: [<value>]
     When entity $i set has: $a
     Then transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) unset owns: name[]; fails
-    Then <root-type>(<type-name>) get owns contain: name[]
+    Then <root-type>(<type-name>) unset owns: name; fails
+    Then <root-type>(<type-name>) get owns contain: name
+    Then <root-type>(<type-name>) get owns(name) get ordering: ordered
     Examples:
       | root-type | type-name   | value-type | value           |
       | entity    | person      | long       | 1               |
@@ -1114,7 +1003,7 @@ Feature: Concept Owns
       | relation  | description | datetimetz | 2024-05-04+0010 |
       | relation  | description | duration   | P1Y             |
 
-  Scenario Outline: <root-type> types can re-override owns of lists
+  Scenario Outline: <root-type> types can re-override ordered ownership
     When create attribute type: email
     When attribute(email) set value type: <value-type>
     When attribute(email) set annotation: @abstract
@@ -1122,16 +1011,20 @@ Feature: Concept Owns
     When attribute(work-email) set value type: <value-type>
     When attribute(work-email) set supertype: email
     When <root-type>(<supertype-name>) set annotation: @abstract
-    When <root-type>(<supertype-name>) set owns: email[]
+    When <root-type>(<supertype-name>) set owns: email
+    When <root-type>(<supertype-name>) get owns(email) set ordering: ordered
+    Then <root-type>(<supertype-name>) get owns(email) get ordering: ordered
     When <root-type>(<sub-name>) set annotation: @abstract
-    When <root-type>(<subtype-name>) set owns: work-email[]
-    When <root-type>(<subtype-name>) get owns(work-email[]) set override: email[]
-    Then <root-type>(<subtype-name>) get owns overridden(work-email[]) get name: email[]
+    When <root-type>(<subtype-name>) set owns: work-email
+    When <root-type>(<subtype-name>) get owns(work-email) set override: email
+    Then <root-type>(<subtype-name>) get owns overridden(work-email) get name: email
+    Then <root-type>(<subtype-name>) get owns(work-email) get ordering: ordered
     When transaction commits
     When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) set owns: work-email[]
-    When <root-type>(<subtype-name>) get owns(work-email[]) set override: email[]
-    Then <root-type>(<subtype-name>) get owns overridden(work-email[]) get name: email[]
+    When <root-type>(<subtype-name>) set owns: work-email
+    When <root-type>(<subtype-name>) get owns(work-email) set override: email
+    Then <root-type>(<subtype-name>) get owns overridden(work-email) get name: email
+    Then <root-type>(<subtype-name>) get owns(work-email) get ordering: ordered
     Examples:
       | root-type | supertype-name | subtype-name | value-type    |
       | entity    | person         | customer     | long          |
@@ -1158,8 +1051,9 @@ Feature: Concept Owns
     When attribute(email) set value type: <value-type>
     When create attribute type: name
     When attribute(name) set value type: <value-type>
-    When <root-type>(<supertype-name>) set owns: name[]
-    Then <root-type>(<subtype-name>) set owns: name[]
+    When <root-type>(<supertype-name>) set owns: name
+    When <root-type>(<supertype-name>) get owns(name) set ordering: ordered
+    Then <root-type>(<subtype-name>) set owns: name
     Then transaction commits; fails
     Examples:
       | root-type | supertype-name | subtype-name | value-type |
@@ -1176,10 +1070,12 @@ Feature: Concept Owns
     When attribute(customer-name) set value type: <value-type>
     When attribute(customer-name) set supertype: name
     When <root-type>(<supertype-name>) set annotation: @abstract
-    When <root-type>(<supertype-name>) set owns: name[]
-    When <root-type>(<subtype-name>) set owns: customer-name[]
+    When <root-type>(<supertype-name>) set owns: name
+    When <root-type>(<supertype-name>) get owns(name) set ordering: ordered
+    When <root-type>(<subtype-name>) set owns: customer-name
+    When <root-type>(<subtype-name>) get owns(customer-name) set ordering: ordered
     When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
-    Then <root-type>(<subtype-name-2>) set owns: name[]
+    Then <root-type>(<subtype-name-2>) set owns: name
     Then transaction commits; fails
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | value-type    |
@@ -1196,11 +1092,14 @@ Feature: Concept Owns
     When attribute(customer-name) set value type: <value-type>
     When attribute(customer-name) set supertype: name
     When <root-type>(<supertype-name>) set annotation: @abstract
-    When <root-type>(<supertype-name>) set owns: name[]
+    When <root-type>(<supertype-name>) set owns: name
+    When <root-type>(<supertype-name>) get owns(name) set ordering: ordered
     # TODO: No set override here?
-    When <root-type>(<subtype-name>) set owns: customer-name[]
+    When <root-type>(<subtype-name>) set owns: customer-name
+    When <root-type>(<subtype-name>) get owns(customer-name) set ordering: ordered
     When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
-    Then <root-type>(<subtype-name-2>) set owns: customer-name[]
+    Then <root-type>(<subtype-name-2>) set owns: customer-name
+    When <root-type>(<subtype-name-2>) get owns(customer-name) set ordering: ordered
     Then transaction commits; fails
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | value-type |
@@ -1217,12 +1116,14 @@ Feature: Concept Owns
     When attribute(first-name) set value type: <value-type>
     When attribute(first-name) set supertype: name
     When <root-type>(<type-name>) set annotation: @abstract
-    When <root-type>(<type-name>) set owns: name[]
+    When <root-type>(<type-name>) set owns: name
+    When <root-type>(<type-name>) get owns(name) set ordering: ordered
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) set owns: first-name[]
-    Then <root-type>(<type-name>) get owns(first-name[]) set override: first-name[]; fails
-    Then <root-type>(<type-name>) get owns(first-name[]) set override: name[]; fails
+    Then <root-type>(<type-name>) set owns: first-name
+    When <root-type>(<type-name>) get owns(first-name) set ordering: ordered
+    Then <root-type>(<type-name>) get owns(first-name) set override: first-name; fails
+    Then <root-type>(<type-name>) get owns(first-name) set override: name; fails
     Examples:
       | root-type | type-name   | value-type |
       | entity    | person      | string     |
@@ -1233,31 +1134,35 @@ Feature: Concept Owns
     When attribute(username) set value type: <value-type>
     When create attribute type: reference
     When attribute(reference) set value type: <value-type>
-    When <root-type>(<supertype-name>) set owns: username[]
+    When <root-type>(<supertype-name>) set owns: username
+    When <root-type>(<supertype-name>) get owns(username) set ordering: ordered
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) set owns: reference[]
-    Then <root-type>(<subtype-name>) get owns(reference[]) set override: reference[]; fails
-    Then <root-type>(<subtype-name>) get owns(reference[]) set override: username[]; fails
+    Then <root-type>(<subtype-name>) set owns: reference
+    When <root-type>(<subtype-name>) get owns(reference) set ordering: ordered
+    Then <root-type>(<subtype-name>) get owns(reference) set override: reference; fails
+    Then <root-type>(<subtype-name>) get owns(reference) set override: username; fails
     Examples:
       | root-type | supertype-name | subtype-name | value-type |
       | entity    | person         | customer     | double     |
       | relation  | description    | registration | string     |
 
-  Scenario Outline: <root-type> types cannot unset not owned list of ownerships
+  Scenario Outline: <root-type> types cannot unset not owned ordered ownership
     When create attribute type: username
     When attribute(username) set value type: <value-type>
     When create attribute type: reference
     When attribute(reference) set value type: <value-type>
-    When <root-type>(<type-name>) set owns: username[]
-    Then <root-type>(<type-name>) get owns contain: username[]
-    Then <root-type>(<type-name>) unset owns: reference[]; fails
+    When <root-type>(<type-name>) set owns: username
+    Then <root-type>(<type-name>) get owns contain: username
+    When <root-type>(<type-name>) get owns(username) set ordering: ordered
+    Then <root-type>(<type-name>) unset owns: reference; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) get owns contain: username[]
-    Then <root-type>(<type-name>) unset owns: reference[]; fails
-    Then <root-type>(<type-name>) unset owns: username[]
-    Then <root-type>(<type-name>) unset owns: username[]; fails
+    Then <root-type>(<type-name>) get owns contain: username
+    Then <root-type>(<type-name>) get owns(username) get ordering: ordered
+    Then <root-type>(<type-name>) unset owns: reference; fails
+    Then <root-type>(<type-name>) unset owns: username
+    Then <root-type>(<type-name>) unset owns: username; fails
     Then <root-type>(<type-name>) get owns is empty
     When transaction commits
     When connection open read transaction for database: typedb
@@ -1267,129 +1172,167 @@ Feature: Concept Owns
       | entity    | person      | string     |
       | relation  | description | long       |
 
-  Scenario Outline: <root-type> types cannot unset inherited ownership
-    When create attribute type: username
-    When attribute(username) set value type: <value-type>
-    When <root-type>(<supertype-name>) set owns: username[]
-    Then <root-type>(<supertype-name>) get owns contain: username[]
-    Then <root-type>(<subtype-name>) get owns contain: username[]
-    Then <root-type>(<subtype-name>) unset owns: username[]; fails
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns contain: username[]
-    Then <root-type>(<subtype-name>) unset owns: username[]; fails
-    Examples:
-      | root-type | supertype-name | subtype-name | value-type |
-      | entity    | person         | customer     | string     |
-      | relation  | description    | registration | long       |
-
-  Scenario Outline: <root-type> types cannot set lists of attributes alongside scalar attribute
-    When create attribute type: username
-    When attribute(username) set value type: <value-type>
-    When <root-type>(<type-name>) set owns: username
-    Then <root-type>(<type-name>) get owns contain: username
-    # TODO: Or it will override the non-list definition?
-    Then <root-type>(<type-name>) set owns: username[]; fails
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) get owns contain: username
-    Then <root-type>(<type-name>) set owns: username[]; fails
-    Examples:
-      | root-type | type-name   | value-type |
-      | entity    | person      | string     |
-      | relation  | description | long       |
-
-  Scenario Outline: <root-type> types cannot set scalar attribute alongside lists of attributes
-    When create attribute type: username
-    When attribute(username) set value type: <value-type>
-    When <root-type>(<type-name>) set owns: username[]
-    Then <root-type>(<type-name>) get owns contain: username[]
-    # TODO: Or it will override the non-list definition?
-    Then <root-type>(<type-name>) set owns: username; fails
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) get owns contain: username[]
-    Then <root-type>(<type-name>) set owns: username; fails
-    Examples:
-      | root-type | type-name   | value-type |
-      | entity    | person      | string     |
-      | relation  | description | long       |
-
-  Scenario Outline: <root-type> types cannot set lists of attributes alongside inherited scalar attribute
+  Scenario Outline: <root-type> types cannot unset inherited ordered ownership
     When create attribute type: username
     When attribute(username) set value type: <value-type>
     When <root-type>(<supertype-name>) set owns: username
     Then <root-type>(<supertype-name>) get owns contain: username
+    When <root-type>(<supertype-name>) get owns(username) set ordering: ordered
     Then <root-type>(<subtype-name>) get owns contain: username
-    Then <root-type>(<subtype-name>) set owns: username[]; fails
+    Then <root-type>(<subtype-name>) get owns(username) get ordering: ordered
+    Then <root-type>(<subtype-name>) unset owns: username; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns contain: username
     Then <root-type>(<subtype-name>) get owns contain: username
-    Then <root-type>(<subtype-name>) set owns: username[]; fails
+    Then <root-type>(<subtype-name>) get owns(username) get ordering: ordered
+    Then <root-type>(<subtype-name>) unset owns: username; fails
     Examples:
       | root-type | supertype-name | subtype-name | value-type |
       | entity    | person         | customer     | string     |
       | relation  | description    | registration | long       |
 
-  Scenario Outline: <root-type> types cannot set scalar attribute alongside inherited lists of attributes
-    When create attribute type: username
-    When attribute(username) set value type: <value-type>
-    When <root-type>(<supertype-name>) set owns: username[]
-    Then <root-type>(<supertype-name>) get owns contain: username[]
-    Then <root-type>(<subtype-name>) get owns contain: username[]
-    Then <root-type>(<subtype-name>) set owns: username; fails
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns contain: username[]
-    Then <root-type>(<subtype-name>) get owns contain: username[]
-    Then <root-type>(<subtype-name>) set owns: username; fails
-    Examples:
-      | root-type | supertype-name | subtype-name | value-type |
-      | entity    | person         | customer     | string     |
-      | relation  | description    | registration | long       |
-
-  # TODO: Maybe they can? Change this test's logic!
-  Scenario Outline: <root-type> types cannot override scalar attribute by lists of attributes
+  Scenario Outline: <root-type> types can set ordered for inherited unordered ownerships
     When create attribute type: email
     When attribute(email) set value type: <value-type>
     When attribute(email) set annotation: @abstract
     When create attribute type: work-email
     When attribute(work-email) set value type: <value-type>
     When attribute(work-email) set supertype: email
+    When create attribute type: personal-email
+    When attribute(personal-email) set value type: <value-type>
+    When attribute(personal-email) set supertype: email
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: email
-    When <root-type>(<sub-name>) set annotation: @abstract
-    When <root-type>(<subtype-name>) set owns: work-email[]
-    When <root-type>(<subtype-name>) get owns(work-email[]) set override: email; fails
+    Then <root-type>(<supertype-name>) get owns(email) get ordering: unordered
+    When <root-type>(<subtype-name>) set owns: work-email
+    When <root-type>(<subtype-name-2>) set owns: personal-email
     When transaction commits
     When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get owns(work-email[]) set override: email; fails
+    When <root-type>(<subtype-name>) get owns(work-email) set ordering: ordered
+    When <root-type>(<subtype-name>) get owns(work-email) set override: email
+    When <root-type>(<subtype-name-2>) get owns(personal-email) set override: email
+    Then <root-type>(<subtype-name>) get owns(work-email) get supertype: email
+    Then <root-type>(<subtype-name-2>) get owns(personal-email) get supertype: email
+    When <root-type>(<subtype-name-2>) get owns(personal-email) set ordering: ordered
+    Then <root-type>(<supertype-name>) get owns(email) get ordering: unordered
+    Then <root-type>(<subtype-name>) get owns(work-email) get ordering: ordered
+    Then <root-type>(<subtype-name-2>) get owns(personal-email) get ordering: ordered
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(email) get ordering: unordered
+    Then <root-type>(<subtype-name>) get owns(work-email) get ordering: ordered
+    Then <root-type>(<subtype-name-2>) get owns(personal-email) get ordering: ordered
+    When <root-type>(<subtype-name>) get owns(work-email) set ordering: unordered
+    When <root-type>(<subtype-name-2>) get owns(personal-email) set ordering: unordered
+    Then <root-type>(<supertype-name>) get owns(email) get ordering: unordered
+    Then <root-type>(<subtype-name>) get owns(work-email) get ordering: unordered
+    Then <root-type>(<subtype-name-2>) get owns(personal-email) get ordering: unordered
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(email) get ordering: unordered
+    Then <root-type>(<subtype-name>) get owns(work-email) get ordering: unordered
+    Then <root-type>(<subtype-name-2>) get owns(personal-email) get ordering: unordered
     Examples:
-      | root-type | supertype-name | subtype-name | value-type    |
-      | entity    | person         | customer     | decimal       |
-      | relation  | description    | registration | custom-struct |
+      | root-type | supertype-name | subtype-name | subtype-name-2 | value-type    |
+      | entity    | person         | customer     | subscriber     | decimal       |
+      | relation  | description    | registration | profile        | custom-struct |
 
-      # TODO: Maybe they can? Change this test's logic!
-  Scenario Outline: <root-type> types cannot override lists of attributes by scalar attribute
+  Scenario Outline: <root-type> types cannot set unordered for inherited ordered ownerships
     When create attribute type: email
     When attribute(email) set value type: <value-type>
     When attribute(email) set annotation: @abstract
     When create attribute type: work-email
     When attribute(work-email) set value type: <value-type>
     When attribute(work-email) set supertype: email
+    When create attribute type: personal-email
+    When attribute(personal-email) set value type: <value-type>
+    When attribute(personal-email) set supertype: email
     When <root-type>(<supertype-name>) set annotation: @abstract
-    When <root-type>(<supertype-name>) set owns: email[]
-    When <root-type>(<sub-name>) set annotation: @abstract
+    When <root-type>(<supertype-name>) set owns: email
+    When <root-type>(<supertype-name>) get owns(email) set ordering: ordered
+    Then <root-type>(<supertype-name>) get owns(email) get ordering: ordered
     When <root-type>(<subtype-name>) set owns: work-email
-    When <root-type>(<subtype-name>) get owns(work-email) set override: email[]; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get owns(work-email) set override: email[]; fails
+    Then <root-type>(<supertype-name>) get owns(email) get ordering: ordered
+    Then <root-type>(<subtype-name>) get owns(work-email) get ordering: unordered
+    Then <root-type>(<subtype-name>) get owns(work-email) set override: email; fails
+    Examples:
+      | root-type | supertype-name | subtype-name | value-type |
+      | entity    | person         | customer     | string     |
+      | relation  | description    | registration | long       |
+
+  Scenario Outline: Unordered and ordered are propagated to subtypes of ownerships for <root-type> types unless overridden
+    When create attribute type: name
+    When attribute(name) set value type: <value-type>
+    When attribute(name) set annotation: @abstract
+    When create attribute type: email
+    When attribute(email) set value type: <value-type>
+    When attribute(email) set annotation: @abstract
+    When create attribute type: work-email
+    When attribute(work-email) set supertype: email
+    When create attribute type: first-name
+    When attribute(first-name) set supertype: name
+    When create attribute type: personal-email
+    When attribute(personal-email) set supertype: email
+    When create attribute type: surname
+    When attribute(surname) set supertype: name
+    When <root-type>(<supertype-name>) set annotation: @abstract
+    When <root-type>(<supertype-name>) set owns: name
+    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
+    When <root-type>(<supertype-name>) set owns: email
+    When <root-type>(<supertype-name>) get owns(email) set ordering: ordered
+    Then <root-type>(<supertype-name>) get owns(email) get ordering: ordered
+    When <root-type>(<subtype-name>) set owns: first-name
+    When <root-type>(<subtype-name-2>) set owns: surname
+    When <root-type>(<subtype-name>) set owns: work-email
+    When <root-type>(<subtype-name-2>) set owns: personal-email
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<subtype-name>) get owns(first-name) get ordering: unordered
+    Then <root-type>(<subtype-name-2>) get owns(surname) get ordering: unordered
+    Then <root-type>(<subtype-name>) get owns(work-email) get ordering: unordered
+    Then <root-type>(<subtype-name-2>) get owns(personal-email) get ordering: unordered
+    When <root-type>(<subtype-name>) get owns(first-name) set override: name
+    Then <root-type>(<subtype-name>) get owns(first-name) get ordering: unordered
+    When <root-type>(<subtype-name-2>) get owns(surname) set override: name
+    Then <root-type>(<subtype-name-2>) get owns(surname) get ordering: unordered
+    When <root-type>(<subtype-name>) get owns(work-email) set override: email
+    Then <root-type>(<subtype-name>) get owns(work-email) get ordering: ordered
+    When <root-type>(<subtype-name-2>) get owns(personal-email) set override: email
+    Then <root-type>(<subtype-name-2>) get owns(personal-email) get ordering: ordered
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<subtype-name>) get owns(first-name) get ordering: unordered
+    Then <root-type>(<subtype-name-2>) get owns(surname) get ordering: unordered
+    Then <root-type>(<subtype-name>) get owns(work-email) get ordering: ordered
+    Then <root-type>(<subtype-name-2>) get owns(personal-email) get ordering: ordered
+    When <root-type>(<supertype-name-2>) get owns(surname) set ordering: ordered
+    Then <root-type>(<supertype-name-2>) get owns(surname) get ordering: ordered
+    When <root-type>(<supertype-name-2>) get owns(personal-email) set ordering: ordered
+    Then <root-type>(<supertype-name-2>) get owns(personal-email) get ordering: ordered
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<subtype-name>) get owns(first-name) get ordering: unordered
+    Then <root-type>(<subtype-name-2>) get owns(surname) get ordering: unordered
+    Then <root-type>(<subtype-name>) get owns(work-email) get ordering: ordered
+    Then <root-type>(<subtype-name-2>) get owns(personal-email) get ordering: ordered
+    When <root-type>(<supertype-name>) get owns(name) set ordering: ordered
+    Then <root-type>(<subtype-name>) get owns(first-name) get ordering: ordered
+    Then <root-type>(<subtype-name-2>) get owns(surname) get ordering: ordered
+    When <root-type>(<supertype-name>) get owns(email) set ordering: unordered
+    Then <root-type>(<subtype-name>) get owns(first-name) get ordering: unordered
+    Then <root-type>(<subtype-name-2>) get owns(surname) get ordering: ordered
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then <root-type>(<subtype-name>) get owns(first-name) get ordering: ordered
+    Then <root-type>(<subtype-name-2>) get owns(surname) get ordering: ordered
+    Then <root-type>(<subtype-name>) get owns(first-name) get ordering: unordered
+    Then <root-type>(<subtype-name-2>) get owns(surname) get ordering: ordered
     Examples:
       | root-type | supertype-name | subtype-name | value-type |
       | entity    | person         | customer     | datetime   |
-      | relation  | description    | registration | long       |
+      | relation  | description    | registration | double     |
 
 ########################
 # @annotations common: contain common tests for annotations suitable for **scalar** owns:
@@ -2444,15 +2387,16 @@ Feature: Concept Owns
       | decimal       |
       | custom-struct |
 
-  Scenario Outline: Owns cannot set @key annotation for lists
+  Scenario Outline: Owns cannot set @key annotation for ordered ownership
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
-    When entity(person) set owns: custom-attribute[]
-    Then entity(person) get owns(custom-attribute[]) set annotation: @key; fails
-    Then entity(person) get owns(custom-attribute[]) get annotations is empty
+    When entity(person) set owns: custom-attribute
+    When entity(person) get owns(custom-attribute) set ordering: ordered
+    Then entity(person) get owns(custom-attribute) set annotation: @key; fails
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns(custom-attribute[]) get annotations is empty
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     Examples:
       | value-type    |
       | long          |
@@ -2671,15 +2615,16 @@ Feature: Concept Owns
     When connection open read transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get annotations is empty
 
-  Scenario Outline: Owns cannot set @subkey annotation for lists
+  Scenario Outline: Owns cannot set @subkey annotation for ordered ownership
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
-    When entity(person) set owns: custom-attribute[]
-    Then entity(person) get owns(custom-attribute[]) set annotation: @subkey(LABEL); fails
-    Then entity(person) get owns(custom-attribute[]) get annotations is empty
+    When entity(person) set owns: custom-attribute
+    When entity(person) get owns(custom-attribute) set ordering: ordered
+    Then entity(person) get owns(custom-attribute) set annotation: @subkey(LABEL); fails
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns(custom-attribute[]) get annotations is empty
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     Examples:
       | value-type    |
       | long          |
@@ -2766,16 +2711,17 @@ Feature: Concept Owns
       | decimal       |
       | custom-struct |
 
-  # TODO: Change the test if owns can set @unique annotation for lists!
-  Scenario Outline: Owns cannot set @unique annotation for lists
+  # TODO: Change the test if owns can set @unique annotation for ordered ownership!
+  Scenario Outline: Owns cannot set @unique annotation for ordered ownership
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
-    When entity(person) set owns: custom-attribute[]
-    Then entity(person) get owns(custom-attribute[]) set annotation: @unique; fails
-    Then entity(person) get owns(custom-attribute[]) get annotations is empty
+    When entity(person) set owns: custom-attribute
+    When entity(person) get owns(custom-attribute) set ordering: ordered
+    Then entity(person) get owns(custom-attribute) set annotation: @unique; fails
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns(custom-attribute[]) get annotations is empty
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     Examples:
       | value-type    |
       | long          |
@@ -2792,7 +2738,7 @@ Feature: Concept Owns
 # @values
 ########################
 
-  Scenario Outline: Owns can set @values annotation for <value-type> value type and lists and unset it
+  Scenario Outline: Ordered owns can set @values annotation for <value-type> value type and unset it
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
     When create attribute type: custom-attribute-2
@@ -2800,15 +2746,16 @@ Feature: Concept Owns
     When entity(person) set owns: custom-attribute
     When entity(person) get owns(custom-attribute) set annotation: @values(<args>)
     Then entity(person) get owns(custom-attribute) get annotations contain: @values(<args>)
-    When entity(person) set owns: custom-attribute-2[]
-    When entity(person) get owns(custom-attribute-2[]) set annotation: @values(<args>)
-    Then entity(person) get owns(custom-attribute-2[]) get annotations contain: @values(<args>)
+    When entity(person) set owns: custom-attribute-2
+    When entity(person) get owns(custom-attribute-2) set ordering: ordered
+    When entity(person) get owns(custom-attribute-2) set annotation: @values(<args>)
+    Then entity(person) get owns(custom-attribute-2) get annotations contain: @values(<args>)
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get annotations contain: @values(<args>)
-    Then entity(person) get owns(custom-attribute-2[]) get annotations contain: @values(<args>)
+    Then entity(person) get owns(custom-attribute-2) get annotations contain: @values(<args>)
     When entity(person) unset owns: custom-attribute
-    When entity(person) unset owns: custom-attribute-2[]
+    When entity(person) unset owns: custom-attribute-2
     Then entity(person) get owns is empty
     When transaction commits
     When connection open read transaction for database: typedb
@@ -3175,7 +3122,7 @@ Feature: Concept Owns
 # @range
 ########################
 
-  Scenario Outline: Owns can set @range annotation for <value-type> value type and lists in correct order and unset it
+  Scenario Outline: Ordered owns can set @range annotation for <value-type> value type in correct order and unset it
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
     When create attribute type: custom-attribute-2
@@ -3185,17 +3132,18 @@ Feature: Concept Owns
     Then entity(person) get owns(custom-attribute) get annotations is empty
     When entity(person) get owns(custom-attribute) set annotation: @range(<arg0>, <arg1>)
     Then entity(person) get owns(custom-attribute) get annotations contain: @range(<arg0>, <arg1>)
-    When entity(person) set owns: custom-attribute-2[]
-    Then entity(player) get owns(custom-attribute-2[]) set annotation: @range(<arg1>, <arg0>); fails
-    Then entity(person) get owns(custom-attribute-2[]) get annotations is empty
-    When entity(person) get owns(custom-attribute-2[]) set annotation: @range(<arg0>, <arg1>)
-    Then entity(person) get owns(custom-attribute-2[]) get annotations contain: @range(<arg0>, <arg1>)
+    When entity(person) set owns: custom-attribute-2
+    When entity(person) get owns(custom-attribute-2) set ordering: ordered
+    Then entity(player) get owns(custom-attribute-2) set annotation: @range(<arg1>, <arg0>); fails
+    Then entity(person) get owns(custom-attribute-2) get annotations is empty
+    When entity(person) get owns(custom-attribute-2) set annotation: @range(<arg0>, <arg1>)
+    Then entity(person) get owns(custom-attribute-2) get annotations contain: @range(<arg0>, <arg1>)
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get annotations contain: @range(<arg0>, <arg1>)
-    Then entity(person) get owns(custom-attribute-2[]) get annotations contain: @range(<arg0>, <arg1>)
+    Then entity(person) get owns(custom-attribute-2) get annotations contain: @range(<arg0>, <arg1>)
     When entity(person) unset owns: custom-attribute
-    When entity(person) unset owns: custom-attribute-2[]
+    When entity(person) unset owns: custom-attribute-2
     Then entity(person) get owns is empty
     When transaction commits
     When connection open read transaction for database: typedb
@@ -3546,17 +3494,18 @@ Feature: Concept Owns
     Then entity(person) get owns(custom-attribute) get annotations is empty
     When entity(person) get owns(custom-attribute) set annotation: @card(<arg0>, <arg1>)
     Then entity(person) get owns(custom-attribute) get annotations contain: @card(<arg0>, <arg1>)
-    When entity(person) set owns: custom-attribute-2[]
-    Then entity(customer) get owns(custom-attribute-2[]) set annotation: @card(<arg1>, <arg0>); fails
-    Then entity(person) get owns(custom-attribute-2[]) get annotations is empty
-    When entity(person) get owns(custom-attribute-2[]) set annotation: @card(<arg0>, <arg1>)
-    Then entity(person) get owns(custom-attribute-2[]) get annotations contain: @card(<arg0>, <arg1>)
+    When entity(person) set owns: custom-attribute-2
+    When entity(person) get owns(custom-attribute-2) set ordering: ordered
+    Then entity(customer) get owns(custom-attribute-2) set annotation: @card(<arg1>, <arg0>); fails
+    Then entity(person) get owns(custom-attribute-2) get annotations is empty
+    When entity(person) get owns(custom-attribute-2) set annotation: @card(<arg0>, <arg1>)
+    Then entity(person) get owns(custom-attribute-2) get annotations contain: @card(<arg0>, <arg1>)
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get annotations contain: @card(<arg0>, <arg1>)
-    Then entity(person) get owns(custom-attribute-2[]) get annotations contain: @card(<arg0>, <arg1>)
+    Then entity(person) get owns(custom-attribute-2) get annotations contain: @card(<arg0>, <arg1>)
     When entity(person) unset owns: custom-attribute
-    When entity(person) unset owns: custom-attribute-2[]
+    When entity(person) unset owns: custom-attribute-2
     Then entity(person) get owns is empty
     When transaction commits
     When connection open read transaction for database: typedb
@@ -3914,26 +3863,27 @@ Feature: Concept Owns
 # @distinct
 ########################
 
-  Scenario Outline: Owns for <root-type> can set @distinct annotation for <value-type> value type list and unset it
+  Scenario Outline: Ordered owns for <root-type> can set @distinct annotation for <value-type> value type and unset it
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
-    When <root-type>(<type-name>) set owns: custom-attribute[]
-    When <root-type>(<type-name>) get owns(custom-attribute[]) set annotation: @distinct
-    Then <root-type>(<type-name>) get owns(custom-attribute[]) get annotations contain: @distinct
+    When <root-type>(<type-name>) set owns: custom-attribute
+    When <root-type>(<type-name>) get owns(custom-attribute) set ordering: ordered
+    When <root-type>(<type-name>) get owns(custom-attribute) set annotation: @distinct
+    Then <root-type>(<type-name>) get owns(custom-attribute) get annotations contain: @distinct
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) get owns(custom-attribute[]) get annotations contain: @distinct
-    When <root-type>(<type-name>) get owns(custom-attribute[]) unset annotation: @distinct
-    Then <root-type>(<type-name>) get owns(custom-attribute[]) get annotations is empty
+    Then <root-type>(<type-name>) get owns(custom-attribute) get annotations contain: @distinct
+    When <root-type>(<type-name>) get owns(custom-attribute) unset annotation: @distinct
+    Then <root-type>(<type-name>) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) get owns(custom-attribute[]) get annotations is empty
-    When <root-type>(<type-name>) get owns(custom-attribute[]) set annotation: @distinct
-    Then <root-type>(<type-name>) get owns(custom-attribute[]) get annotations contain: @distinct
+    Then <root-type>(<type-name>) get owns(custom-attribute) get annotations is empty
+    When <root-type>(<type-name>) get owns(custom-attribute) set annotation: @distinct
+    Then <root-type>(<type-name>) get owns(custom-attribute) get annotations contain: @distinct
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) get owns(custom-attribute[]) get annotations contain: @distinct
-    When <root-type>(<type-name>) unset owns: custom-attribute[]
+    Then <root-type>(<type-name>) get owns(custom-attribute) get annotations contain: @distinct
+    When <root-type>(<type-name>) unset owns: custom-attribute
     Then <root-type>(<type-name>) get owns is empty
     When transaction commits
     When connection open read transaction for database: typedb
@@ -3959,7 +3909,7 @@ Feature: Concept Owns
       | relation  | description | duration      |
       | relation  | description | custom-struct |
 
-  Scenario Outline: Owns for <root-type> cannot have @distinct annotation for <value-type> non-list value type
+  Scenario Outline: Unordered ownership for <root-type> cannot have @distinct annotation for <value-type> value type
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
     When <root-type>(<type-name>) set owns: custom-attribute
@@ -3992,14 +3942,15 @@ Feature: Concept Owns
   Scenario Outline: Owns cannot have @distinct annotation for <value-type> with arguments
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
-    When entity(person) set owns: custom-attribute[]
-    Then entity(person) get owns(custom-attribute[]) set annotation: @distinct(); fails
-    Then entity(person) get owns(custom-attribute[]) set annotation: @distinct(1); fails
-    Then entity(person) get owns(custom-attribute[]) set annotation: @distinct("1"); fails
-    Then entity(person) get owns(custom-attribute[]) get annotations is empty
+    When entity(person) set owns: custom-attribute
+    When entity(person) get owns(custom-attribute) set ordering: ordered
+    Then entity(person) get owns(custom-attribute) set annotation: @distinct(); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @distinct(1); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @distinct("1"); fails
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns(custom-attribute[]) get annotations is empty
+    Then entity(person) get owns(custom-attribute) get annotations is empty
     Examples:
       | value-type    |
       | long          |
@@ -4015,16 +3966,17 @@ Feature: Concept Owns
   Scenario Outline: Owns can reset @distinct annotations
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
-    When entity(person) set owns: custom-attribute[]
-    When entity(person) get owns(custom-attribute[]) set annotation: @distinct
-    Then entity(person) get owns(custom-attribute[]) get annotations contain: @distinct
-    When entity(person) get owns(custom-attribute[]) set annotation: @distinct
-    Then entity(person) get owns(custom-attribute[]) get annotations contain: @distinct
+    When entity(person) set owns: custom-attribute
+    When entity(person) get owns(custom-attribute) set ordering: ordered
+    When entity(person) get owns(custom-attribute) set annotation: @distinct
+    Then entity(person) get owns(custom-attribute) get annotations contain: @distinct
+    When entity(person) get owns(custom-attribute) set annotation: @distinct
+    Then entity(person) get owns(custom-attribute) get annotations contain: @distinct
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get owns(custom-attribute[]) get annotations contain: @distinct
-    When entity(person) get owns(custom-attribute[]) set annotation: @distinct
-    Then entity(person) get owns(custom-attribute[]) get annotations contain: @distinct
+    Then entity(person) get owns(custom-attribute) get annotations contain: @distinct
+    When entity(person) get owns(custom-attribute) set annotation: @distinct
+    Then entity(person) get owns(custom-attribute) get annotations contain: @distinct
     Examples:
       | value-type    |
       | long          |
@@ -4044,21 +3996,31 @@ Feature: Concept Owns
     When attribute(email) set value type: <value-type>
     When create attribute type: address
     When attribute(address) set value type: <value-type>
-    When <root-type>(<type-name>) set owns: name[]
-    When <root-type>(<type-name>) set owns: email[]
-    When <root-type>(<type-name>) set owns: address[]
-    Then <root-type>(<type-name>) set owns: name[]
-    Then <root-type>(<type-name>) get owns(name[]) set annotation: @distinct
-    Then <root-type>(<type-name>) get owns(name[]) get annotations contain: @distinct
+    When <root-type>(<type-name>) set owns: name
+    When <root-type>(<type-name>) get owns(name) set ordering: ordered
+    When <root-type>(<type-name>) set owns: email
+    When <root-type>(<type-name>) get owns(email) set ordering: ordered
+    When <root-type>(<type-name>) set owns: address
+    When <root-type>(<type-name>) get owns(address) set ordering: ordered
+    When <root-type>(<type-name>) set owns: name
+    Then <root-type>(<type-name>) get owns(name) get ordering: unordered
+    Then <root-type>(<type-name>) get owns(name) get annotations is empty
+    When <root-type>(<type-name>) get owns(name) set ordering: ordered
+    When <root-type>(<type-name>) get owns(name) set annotation: @distinct
+    Then <root-type>(<type-name>) get owns(name) get ordering: unordered
+    Then <root-type>(<type-name>) get owns(name) get annotations contain: @distinct
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) set owns: email[]
-    Then <root-type>(<type-name>) get owns(email[]) get annotations is empty
-    When <root-type>(<type-name>) get owns(email[]) set annotation: @distinct
-    Then <root-type>(<type-name>) get owns(email[]) get annotations contain: @distinct
-    Then <root-type>(<type-name>) get owns(address[]) get annotations is empty
-    When <root-type>(<type-name>) get owns(address[]) set annotation: @distinct
-    Then <root-type>(<type-name>) get owns(address[]) get annotations contain: @distinct
+    Then <root-type>(<type-name>) set owns: email
+    Then <root-type>(<type-name>) get owns(email) get ordering: unordered
+    Then <root-type>(<type-name>) get owns(email) get annotations is empty
+    Then <root-type>(<type-name>) get owns(email) set annotation: @distinct; fails
+    When <root-type>(<type-name>) get owns(email) set ordering: ordered
+    When <root-type>(<type-name>) get owns(email) set annotation: @distinct
+    Then <root-type>(<type-name>) get owns(email) get annotations contain: @distinct
+    Then <root-type>(<type-name>) get owns(address) get annotations is empty
+    When <root-type>(<type-name>) get owns(address) set annotation: @distinct
+    Then <root-type>(<type-name>) get owns(address) get annotations contain: @distinct
     Examples:
       | root-type | type-name   | value-type |
       | entity    | person      | string     |
@@ -4071,23 +4033,25 @@ Feature: Concept Owns
     When attribute(username) set value type: <value-type>
     When create attribute type: reference
     When attribute(reference) set value type: <value-type>
-    When <root-type>(<type-name>) set owns: username[]
-    When <root-type>(<type-name>) get owns(username[]) set annotation: @distinct
-    Then <root-type>(<type-name>) get owns(username[]) get annotation contain: @distinct
-    When <root-type>(<type-name>) set owns: reference[]
-    Then <root-type>(<type-name>) get owns(reference[]) unset annotation: @distinct; fails
+    When <root-type>(<type-name>) set owns: username
+    When <root-type>(<type-name>) get owns(username) set ordering: ordered
+    When <root-type>(<type-name>) get owns(username) set annotation: @distinct
+    Then <root-type>(<type-name>) get owns(username) get annotation contain: @distinct
+    When <root-type>(<type-name>) set owns: reference
+    When <root-type>(<type-name>) get owns(reference) set ordering: ordered
+    Then <root-type>(<type-name>) get owns(reference) unset annotation: @distinct; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) get owns(username[]) get annotation contain: @distinct
-    Then <root-type>(<type-name>) get owns(reference[]) unset annotation: @distinct; fails
-    Then <root-type>(<type-name>) get owns(username[]) unset annotation: @distinct
-    Then <root-type>(<type-name>) get owns(username[]) unset annotation: @distinct; fails
-    Then <root-type>(<type-name>) get owns(username[]) get annotations is empty
-    Then <root-type>(<type-name>) get owns(reference[]) get annotations is empty
+    Then <root-type>(<type-name>) get owns(username) get annotation contain: @distinct
+    Then <root-type>(<type-name>) get owns(reference) unset annotation: @distinct; fails
+    Then <root-type>(<type-name>) get owns(username) unset annotation: @distinct
+    Then <root-type>(<type-name>) get owns(username) unset annotation: @distinct; fails
+    Then <root-type>(<type-name>) get owns(username) get annotations is empty
+    Then <root-type>(<type-name>) get owns(reference) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then <root-type>(<type-name>) get owns(username[]) get annotations is empty
-    Then <root-type>(<type-name>) get owns(reference[]) get annotations is empty
+    Then <root-type>(<type-name>) get owns(username) get annotations is empty
+    Then <root-type>(<type-name>) get owns(reference) get annotations is empty
     Examples:
       | root-type | type-name   | value-type |
       | entity    | person      | string     |
@@ -4124,31 +4088,32 @@ Feature: Concept Owns
     When entity(person) set owns: custom-attribute
     When entity(person) get owns(custom-attribute) set annotation: @regex(<arg>)
     Then entity(person) get owns(custom-attribute) get annotations contain: @regex(<arg>)
-    When entity(person) set owns: custom-attribute-2[]
-    When entity(person) get owns(custom-attribute-2[]) set annotation: @regex(<arg>)
-    Then entity(person) get owns(custom-attribute-2[]) get annotations contain: @regex(<arg>)
+    When entity(person) set owns: custom-attribute-2
+    When entity(person) get owns(custom-attribute-2) set ordering: ordered
+    When entity(person) get owns(custom-attribute-2) set annotation: @regex(<arg>)
+    Then entity(person) get owns(custom-attribute-2) get annotations contain: @regex(<arg>)
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get annotations contain: @regex(<arg>)
     When entity(person) get owns(custom-attribute) unset annotation: @regex(<arg>)
     Then entity(person) get owns(custom-attribute) get annotations is empty
-    Then entity(person) get owns(custom-attribute-2[]) get annotations contain: @regex(<arg>)
-    When entity(person) get owns(custom-attribute-2[]) unset annotation: @regex(<arg>)
-    Then entity(person) get owns(custom-attribute-2[]) get annotations is empty
+    Then entity(person) get owns(custom-attribute-2) get annotations contain: @regex(<arg>)
+    When entity(person) get owns(custom-attribute-2) unset annotation: @regex(<arg>)
+    Then entity(person) get owns(custom-attribute-2) get annotations is empty
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get annotations is empty
     When entity(person) get owns(custom-attribute) set annotation: @regex(<arg>)
     Then entity(person) get owns(custom-attribute) get annotations contain: @regex(<arg>)
-    Then entity(person) get owns(custom-attribute-2[]) get annotations is empty
-    When entity(person) get owns(custom-attribute-2[]) set annotation: @regex(<arg>)
-    Then entity(person) get owns(custom-attribute-2[]) get annotations contain: @regex(<arg>)
+    Then entity(person) get owns(custom-attribute-2) get annotations is empty
+    When entity(person) get owns(custom-attribute-2) set annotation: @regex(<arg>)
+    Then entity(person) get owns(custom-attribute-2) get annotations contain: @regex(<arg>)
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get annotations contain: @regex(<arg>)
-    Then entity(person) get owns(custom-attribute-2[]) get annotations contain: @regex(<arg>)
+    Then entity(person) get owns(custom-attribute-2) get annotations contain: @regex(<arg>)
     When entity(person) unset owns: custom-attribute
-    When entity(person) unset owns: custom-attribute-2[]
+    When entity(person) unset owns: custom-attribute-2
     Then entity(person) get owns is empty
     When transaction commits
     When connection open read transaction for database: typedb
@@ -4212,16 +4177,17 @@ Feature: Concept Owns
   Scenario Outline: Owns can reset @regex annotation of the same argument
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
-    When entity(person) set owns: custom-attribute[]
-    When entity(person) get owns(custom-attribute[]) set annotation: @regex(<args>)
-    Then entity(person) get owns(custom-attribute[]) get annotations contain: @regex(<args>)
-    When entity(person) get owns(custom-attribute[]) set annotation: @regex(<args>)
-    Then entity(person) get owns(custom-attribute[]) get annotations contain: @regex(<args>)
+    When entity(person) set owns: custom-attribute
+    When entity(person) get owns(custom-attribute) set ordering: ordered
+    When entity(person) get owns(custom-attribute) set annotation: @regex(<args>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @regex(<args>)
+    When entity(person) get owns(custom-attribute) set annotation: @regex(<args>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @regex(<args>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get owns(custom-attribute[]) get annotations contain: @regex(<args>)
-    When entity(person) get owns(custom-attribute[]) set annotation: @regex(<args>)
-    Then entity(person) get owns(custom-attribute[]) get annotations contain: @regex(<args>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @regex(<args>)
+    When entity(person) get owns(custom-attribute) set annotation: @regex(<args>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @regex(<args>)
     Examples:
       | value-type    | args  |
       | long          | "\S+" |
@@ -4388,40 +4354,41 @@ Feature: Concept Owns
       | range("2020-05-05", "2025-05-05") | card(0, 1)         | datetime   |
       | card(0, 1)                        | regex("s")         | string     |
 
-  Scenario Outline: Owns can set @<annotation-1> and @<annotation-2> together and unset it for lists of <value-type>
+  Scenario Outline: Ordered ownership can set @<annotation-1> and @<annotation-2> together and unset it for <value-type> value type
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
-    When relation(description) set owns: custom-attribute[]
-    When relation(description) get owns(custom-attribute[]) set annotation: @<annotation-1>
-    When relation(description) get owns(custom-attribute[]) set annotation: @<annotation-2>
-    Then relation(description) get owns(custom-attribute[]) get annotations contain:
+    When relation(description) set owns: custom-attribute
+    When relation(description) get owns(custom-attribute) set ordering: ordered
+    When relation(description) get owns(custom-attribute) set annotation: @<annotation-1>
+    When relation(description) get owns(custom-attribute) set annotation: @<annotation-2>
+    Then relation(description) get owns(custom-attribute) get annotations contain:
       | @<annotation-1> |
       | @<annotation-2> |
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(description) get owns(custom-attribute[]) get annotations contain:
+    Then relation(description) get owns(custom-attribute) get annotations contain:
       | @<annotation-1> |
       | @<annotation-2> |
-    When relation(description) get owns(custom-attribute[]) unset annotation: @<annotation-1>
-    Then relation(description) get owns(custom-attribute[]) get annotations do not contain: @<annotation-1>
-    Then relation(description) get owns(custom-attribute[]) get annotations contain: @<annotation-2>
+    When relation(description) get owns(custom-attribute) unset annotation: @<annotation-1>
+    Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-1>
+    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-2>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(description) get owns(custom-attribute[]) get annotations do not contain: @<annotation-1>
-    Then relation(description) get owns(custom-attribute[]) get annotations contain: @<annotation-2>
-    When relation(description) get owns(custom-attribute[]) set annotation: @<annotation-1>
-    When relation(description) get owns(custom-attribute[]) unset annotation: @<annotation-2>
-    Then relation(description) get owns(custom-attribute[]) get annotations do not contain: @<annotation-2>
-    Then relation(description) get owns(custom-attribute[]) get annotations contain: @<annotation-1>
+    Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-1>
+    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-2>
+    When relation(description) get owns(custom-attribute) set annotation: @<annotation-1>
+    When relation(description) get owns(custom-attribute) unset annotation: @<annotation-2>
+    Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-2>
+    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-1>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(description) get owns(custom-attribute[]) get annotations do not contain: @<annotation-2>
-    Then relation(description) get owns(custom-attribute[]) get annotations contain: @<annotation-1>
-    When relation(description) get owns(custom-attribute[]) unset annotation: @<annotation-1>
-    Then relation(description) get owns(custom-attribute[]) get annotations is empty
+    Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-2>
+    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-1>
+    When relation(description) get owns(custom-attribute) unset annotation: @<annotation-1>
+    Then relation(description) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then relation(description) get owns(custom-attribute[]) get annotations is empty
+    Then relation(description) get owns(custom-attribute) get annotations is empty
     Examples:
     # TODO: Move to "cannot" test if something is wrong here.
       | annotation-1                      | annotation-2    | value-type    |
@@ -4468,22 +4435,24 @@ Feature: Concept Owns
       # TODO: If we allow range + regex, write a test to check args compatibility!
       | range("1", "2")  | regex("s")      | string     |
 
-  Scenario Outline: Owns cannot set @<annotation-1> and @<annotation-2> together and unset it for lists of <value-type>
+  Scenario Outline: Ordered ownership cannot set @<annotation-1> and @<annotation-2> together and unset it for <value-type> value type
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
     When transaction commits
     When connection open schema transaction for database: typedb
-    When relation(description) set owns: custom-attribute[]
-    When relation(description) get owns(custom-attribute[]) set annotation: @<annotation-1>
-    Then relation(description) get owns(custom-attribute[]) set annotation: @<annotation-2>; fails
+    When relation(description) set owns: custom-attribute
+    When relation(description) get owns(custom-attribute) set ordering: ordered
+    When relation(description) get owns(custom-attribute) set annotation: @<annotation-1>
+    Then relation(description) get owns(custom-attribute) set annotation: @<annotation-2>; fails
     When connection open schema transaction for database: typedb
-    When relation(description) set owns: custom-attribute[]
-    When relation(description) get owns(custom-attribute[]) set annotation: @<annotation-2>
-    Then relation(description) get owns(custom-attribute[]) set annotation: @<annotation-1>; fails
+    When relation(description) set owns: custom-attribute
+    When relation(description) get owns(custom-attribute) set ordering: ordered
+    When relation(description) get owns(custom-attribute) set annotation: @<annotation-2>
+    Then relation(description) get owns(custom-attribute) set annotation: @<annotation-1>; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(description) get owns(custom-attribute[]) get annotation contain: @<annotation-2>
-    Then relation(description) get owns(custom-attribute[]) get annotation do not contain: @<annotation-1>
+    Then relation(description) get owns(custom-attribute) get annotation contain: @<annotation-2>
+    Then relation(description) get owns(custom-attribute) get annotation do not contain: @<annotation-1>
     Examples:
     # TODO: Move to "can" test if something is wrong here.
       | annotation-1     | annotation-2    | value-type |

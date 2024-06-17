@@ -763,9 +763,10 @@ Feature: Concept Plays
 # plays from a list
 ########################
 
-  Scenario: Entity types can play role from a list
+  Scenario: Entity types can play ordered role
     When create relation type: marriage
-    When relation(marriage) create role: husband[]
+    When relation(marriage) create role: husband
+    When relation(marriage) get role(husband) set ordering: ordered
     When entity(person) set plays: marriage:husband
     Then entity(person) get plays contain:
       | marriage:husband |
@@ -773,7 +774,8 @@ Feature: Concept Plays
       | person |
     When transaction commits
     When connection open schema transaction for database: typedb
-    When relation(marriage) create role: wife[]
+    When relation(marriage) create role: wife
+    When relation(marriage) get role(wife) set ordering: ordered
     When entity(person) set plays: marriage:wife
     Then entity(person) get plays contain:
       | marriage:husband |
@@ -792,10 +794,12 @@ Feature: Concept Plays
     Then relation(marriage) get role(wife) get players contain:
       | person |
 
-  Scenario: Entity types can unset playing role from a list
+  Scenario: Entity types can unset playing ordered role
     When create relation type: marriage
-    When relation(marriage) create role: husband[]
-    When relation(marriage) create role: wife[]
+    When relation(marriage) create role: husband
+    When relation(marriage) get role(husband) set ordering: ordered
+    When relation(marriage) create role: wife
+    When relation(marriage) get role(wife) set ordering: ordered
     When entity(person) set plays: marriage:husband
     When entity(person) set plays: marriage:wife
     Then entity(person) unset plays: marriage:husband
@@ -823,13 +827,17 @@ Feature: Concept Plays
     Then relation(marriage) get role(wife) get players do not contain:
       | person |
 
-  Scenario: Entity types can inherit playing role from a list
+  Scenario: Entity types can inherit playing ordered role
     When create relation type: parentship
-    When relation(parentship) create role: parent[]
-    When relation(parentship) create role: child[]
+    When relation(parentship) create role: parent
+    When relation(parentship) get role(parent) set ordering: ordered
+    When relation(parentship) create role: child
+    When relation(parentship) get role(child) set ordering: ordered
     When create relation type: marriage
-    When relation(marriage) create role: husband[]
-    When relation(marriage) create role: wife[]
+    When relation(marriage) create role: husband
+    When relation(marriage) get role(husband) set ordering: ordered
+    When relation(marriage) create role: wife
+    When relation(marriage) get role(wife) set ordering: ordered
     When create entity type: animal
     When entity(animal) set plays: parentship:parent
     When entity(animal) set plays: parentship:child
@@ -861,7 +869,8 @@ Feature: Concept Plays
       | parentship:parent |
       | parentship:child  |
     When create relation type: sales
-    When relation(sales) create role: buyer[]
+    When relation(sales) create role: buyer
+    When relation(sales) get role(buyer) set ordering: ordered
     When create entity type: customer
     When entity(customer) set supertype: person
     When entity(customer) set plays: sales:buyer
@@ -895,21 +904,27 @@ Feature: Concept Plays
       | marriage:wife     |
       | sales:buyer       |
 
-  Scenario: Relation types can play role from a list
+  Scenario: Relation types can play ordered role
     When create relation type: locates
-    When relation(locates) create role: location[]
-    When relation(locates) create role: located[]
+    When relation(locates) create role: location
+    When relation(locates) get role(location) set ordering: ordered
+    When relation(locates) create role: located
+    When relation(locates) get role(located) set ordering: ordered
     When create relation type: marriage
-    When relation(marriage) create role: husband[]
-    When relation(marriage) create role: wife[]
+    When relation(marriage) create role: husband
+    When relation(marriage) get role(husband) set ordering: ordered
+    When relation(marriage) create role: wife
+    When relation(marriage) get role(wife) set ordering: ordered
     When relation(marriage) set plays: locates:located
     Then relation(marriage) get plays contain:
       | locates:located |
     When transaction commits
     When connection open schema transaction for database: typedb
     When create relation type: organises
-    When relation(organises) create role: organiser[]
-    When relation(organises) create role: organised[]
+    When relation(organises) create role: organiser
+    When relation(organises) get role(organiser) set ordering: ordered
+    When relation(organises) create role: organised
+    When relation(organises) get role(organised) set ordering: ordered
     When relation(marriage) set plays: organises:organised
     Then relation(marriage) get plays contain:
       | locates:located     |
@@ -920,16 +935,22 @@ Feature: Concept Plays
       | locates:located     |
       | organises:organised |
 
-  Scenario: Relation types can unset playing role from a list
+  Scenario: Relation types can unset playing ordered role
     When create relation type: locates
-    When relation(locates) create role: location[]
-    When relation(locates) create role: located[]
+    When relation(locates) create role: location
+    When relation(locates) get role(location) set ordering: ordered
+    When relation(locates) create role: located
+    When relation(locates) get role(located) set ordering: ordered
     When create relation type: organises
-    When relation(organises) create role: organiser[]
-    When relation(organises) create role: organised[]
+    When relation(organises) create role: organiser
+    When relation(organises) get role(organiser) set ordering: ordered
+    When relation(organises) create role: organised
+    When relation(organises) get role(organised) set ordering: ordered
     When create relation type: marriage
-    When relation(marriage) create role: husband[]
-    When relation(marriage) create role: wife[]
+    When relation(marriage) create role: husband
+    When relation(marriage) get role(husband) set ordering: ordered
+    When relation(marriage) create role: wife
+    When relation(marriage) get role(wife) set ordering: ordered
     When relation(marriage) set plays: locates:located
     When relation(marriage) set plays: organises:organised
     When relation(marriage) unset plays: locates:located
@@ -947,16 +968,22 @@ Feature: Concept Plays
       | locates:located     |
       | organises:organised |
 
-  Scenario: Relation types can inherit playing role from a list
+  Scenario: Relation types can inherit playing ordered role
     When create relation type: locates
-    When relation(locates) create role: locating[]
-    When relation(locates) create role: located[]
+    When relation(locates) create role: locating
+    When relation(locates) get role(locating) set ordering: ordered
+    When relation(locates) create role: located
+    When relation(locates) get role(located) set ordering: ordered
     When create relation type: contractor-locates
-    When relation(contractor-locates) create role: contractor-locating[]
-    When relation(contractor-locates) create role: contractor-located[]
+    When relation(contractor-locates) create role: contractor-locating
+    When relation(contractor-locates) get role(contractor-locating) set ordering: ordered
+    When relation(contractor-locates) create role: contractor-located
+    When relation(contractor-locates) get role(contractor-located) set ordering: ordered
     When create relation type: employment
-    When relation(employment) create role: employer[]
-    When relation(employment) create role: employee[]
+    When relation(employment) create role: employer
+    When relation(employment) get role(employer) set ordering: ordered
+    When relation(employment) create role: employee
+    When relation(employment) get role(employer) set ordering: ordered
     When relation(employment) set plays: locates:located
     When create relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
@@ -967,12 +994,16 @@ Feature: Concept Plays
     When transaction commits
     When connection open schema transaction for database: typedb
     When create relation type: parttime-locates
-    When relation(parttime-locates) create role: parttime-locating[]
-    When relation(parttime-locates) create role: parttime-located[]
+    When relation(parttime-locates) create role: parttime-locating
+    When relation(parttime-locates) get role(parttime-locating) set ordering: ordered
+    When relation(parttime-locates) create role: parttime-located
+    When relation(parttime-locates) get role(parttime-located) set ordering: ordered
     When create relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
-    When relation(parttime-employment) create role: parttime-employer[]
-    When relation(parttime-employment) create role: parttime-employee[]
+    When relation(parttime-employment) create role: parttime-employer
+    When relation(parttime-employment) get role(parttime-employer) set ordering: ordered
+    When relation(parttime-employment) create role: parttime-employee
+    When relation(parttime-employment) get role(parttime-employee) set ordering: ordered
     When relation(parttime-employment) set plays: parttime-locates:parttime-located
     Then relation(parttime-employment) get plays contain:
       | locates:located                       |
@@ -988,9 +1019,10 @@ Feature: Concept Plays
       | contractor-locates:contractor-located |
       | parttime-locates:parttime-located     |
 
-  Scenario Outline: <root-type> types can redeclare playing role from a list
+  Scenario Outline: <root-type> types can redeclare playing ordered role
     When create relation type: parentship
-    When relation(parentship) create role: parent[]
+    When relation(parentship) create role: parent
+    When relation(parentship) get role(parent) set ordering: ordered
     When <root-type>(<type-name>) set plays: parentship:parent
     When transaction commits
     When connection open schema transaction for database: typedb
@@ -1000,10 +1032,12 @@ Feature: Concept Plays
       | entity    | person      |
       | relation  | description |
 
-  Scenario Outline: <root-type> types cannot unset not played role from a list
+  Scenario Outline: <root-type> types cannot unset not played ordered role
     When create relation type: marriage
-    When relation(marriage) create role: husband[]
-    When relation(marriage) create role: wife[]
+    When relation(marriage) create role: husband
+    When relation(marriage) get role(husband) set ordering: ordered
+    When relation(marriage) create role: wife
+    When relation(marriage) get role(wife) set ordering: ordered
     When <root-type>(<type-name>) set plays: marriage:wife
     Then <root-type>(<type-name>) get plays do not contain:
       | marriage:husband |
@@ -1013,10 +1047,12 @@ Feature: Concept Plays
       | entity    | person      |
       | relation  | description |
 
-  Scenario Outline: <root-type> types cannot unset playing role from a list that is currently played by existing instances
+  Scenario Outline: <root-type> types cannot unset playing ordered role that is currently played by existing instances
     When create relation type: marriage
-    When relation(marriage) create role: husband[]
-    When relation(marriage) create role: wife[]
+    When relation(marriage) create role: husband
+    When relation(marriage) get role(husband) set ordering: ordered
+    When relation(marriage) create role: wife
+    When relation(marriage) get role(wife) set ordering: ordered
     When <root-type>(<type-name>) set plays: marriage:wife
     Then transaction commits
     When connection open write transaction for database: typedb
@@ -1031,12 +1067,14 @@ Feature: Concept Plays
       | entity    | person      |
       | relation  | description |
 
-  Scenario Outline: <root-type> types can re-override inherited playing role from a list
+  Scenario Outline: <root-type> types can re-override inherited playing ordered role
     When create relation type: parentship
-    When relation(parentship) create role: parent[]
+    When relation(parentship) create role: parent
+    When relation(parentship) get role(parent) set ordering: ordered
     When create relation type: fathership
     When relation(fathership) set supertype: parentship
-    When relation(fathership) create role: father[]
+    When relation(fathership) create role: father
+    When relation(fathership) get role(father) set ordering: ordered
     When relation(fathership) get role(father) set override: parent
     When <root-type>(<supertype-name>) set plays: parentship:parent
     When <root-type>(<subtype-name>) set plays: fathership:father
