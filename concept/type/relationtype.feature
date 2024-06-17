@@ -848,7 +848,7 @@ Feature: Concept Relation Type and Role Type
     When transaction commits
     When connection open schema transaction for database: typedb
     Then relation(parentship) create role: parent; fails
-# TODO: Cannot set ordering for anything else (entitytypes, etc.)!
+
   Scenario: Ordered roles can redeclare ordering
     When create relation type: marriage
     When relation(marriage) create role: spouse
@@ -937,13 +937,19 @@ Feature: Concept Relation Type and Role Type
     When relation(parentship) create role: parent
     When relation(parentship) create role: child
     When relation(parentship) get role(child) set ordering: ordered
+    When create attribute type: id
+    When attribute(id) set value type: long
+    When relation(parentship) set owns: id
+    When relation(parentship) get owns(id) set annotation: @key
     When create entity type: person
     When entity(person) set plays: parentship:parent
     When entity(person) set plays: parentship:child
+    When entity(person) set owns: id
+    When entity(person) get owns(id) set annotation: @key
     When transaction commits
     When connection open write transaction for database: typedb
-    When $m = relation(parentship) create new instance
-    When $a = entity(person) create new instance
+    When $m = relation(parentship) create new instance with key(id): 1
+    When $a = entity(person) create new instance with key(id): 1
     When relation $m add player for role(parent): $a
     When relation $m add player for role(child): $a
     When transaction commits
@@ -952,6 +958,21 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(parent) set ordering: ordered; fails
     Then relation(parentship) get role(child) set ordering: unordered; fails
     Then relation(parentship) get role(child) set ordering: ordered; fails
+    When connection open write transaction for database: typedb
+    When $m = relation(parentship) get instance with key(id): 1
+    When $a = entity(person) get instance with key(id): 1
+    When delete entity: $a
+    When delete relation: $m
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When relation(parentship) get role(parent) set ordering: ordered
+    Then relation(parentship) get role(parent) get ordering: ordered
+    When relation(parentship) get role(child) set ordering: unordered
+    Then relation(parentship) get role(child) get ordering: unordered
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get role(parent) get ordering: ordered
+    Then relation(parentship) get role(child) get ordering: unordered
 
   Scenario: Relation and role lists can change labels
     When create relation type: parentship

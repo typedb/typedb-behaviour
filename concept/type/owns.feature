@@ -738,17 +738,21 @@ Feature: Concept Owns
     Then entity(person) get owns(name) get ordering: unordered
 
   Scenario: Ownership cannot change ordering if it has role instances for entity type
+    When create attribute type: id
+    When attribute(id) set value type: long
     When create attribute type: name
     When attribute(name) set value type: string
     When create attribute type: email
     When attribute(email) set value type: decimal
     When create entity type: person
+    When entity(person) set owns: id
+    When entity(person) get owns(id) set annotation: @key
     When entity(person) set owns: name
     When entity(person) set owns: email
     When entity(person) get owns(email) set ordering: ordered
     When transaction commits
     When connection open write transaction for database: typedb
-    When $e = entity(person) create new instance
+    When $e = entity(person) create new instance with key(id): 1
     When $a1 = attribute(name) create new instance
     When $a2 = attribute(name) create new instance
     When entity $e set has: $a1
@@ -759,6 +763,19 @@ Feature: Concept Owns
     Then entity(person) get owns(name) set ordering: ordered; fails
     Then entity(person) get owns(email) set ordering: unordered; fails
     Then entity(person) get owns(email) set ordering: ordered; fails
+    When connection open write transaction for database: typedb
+    When $a = entity(person) get instance with key(id): 1
+    When delete entity: $a
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(person) get owns(name) set ordering: ordered
+    Then entity(person) get owns(name) get ordering: ordered
+    When entity(person) get owns(email) set ordering: unordered
+    Then entity(person) get owns(email) get ordering: unordered
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get owns(name) get ordering: ordered
+    Then entity(person) get owns(email) get ordering: unordered
 
   Scenario Outline: Entity types can redeclare ordered ownership
     When create attribute type: name
@@ -909,6 +926,8 @@ Feature: Concept Owns
     Then relation(parentship) get owns(name) get ordering: unordered
 
   Scenario: Ownership cannot change ordering if it has role instances for relation type
+    When create attribute type: id
+    When attribute(id) set value type: long
     When create attribute type: name
     When attribute(name) set value type: string
     When create attribute type: email
@@ -918,12 +937,16 @@ Feature: Concept Owns
     When relation(parentship) set owns: name
     When relation(parentship) set owns: email
     When relation(parentship) get owns(email) set ordering: ordered
+    When relation(parentship) set owns: id
+    When relation(parentship) get owns(id) set annotation: @key
     When create entity type: person
     When entity(person) set plays: parentship:parent
+    When entity(person) set owns: id
+    When entity(person) get owns(id) set annotation: @key
     When transaction commits
     When connection open write transaction for database: typedb
-    When $e = entity(person) create new instance
-    When $r = relation(parentship) create new instance
+    When $e = entity(person) create new instance with key(id): 1
+    When $r = relation(parentship) create new instance with key(id): 1
     When relation $r add player for role(parent): $e
     When $a1 = attribute(name) create new instance
     When $a2 = attribute(name) create new instance
@@ -935,6 +958,21 @@ Feature: Concept Owns
     Then relation(parentship) get owns(name) set ordering: ordered; fails
     Then relation(parentship) get owns(email) set ordering: unordered; fails
     Then relation(parentship) get owns(email) set ordering: ordered; fails
+    When connection open write transaction for database: typedb
+    When $r = relation(parentship) get instance with key(id): 1
+    When $a = entity(person) get instance with key(id): 1
+    When delete entity: $a
+    When delete relation: $r
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When relation(parentship) get owns(name) set ordering: ordered
+    Then relation(parentship) get owns(name) get ordering: ordered
+    When relation(parentship) get owns(email) set ordering: unordered
+    Then relation(parentship) get owns(email) get ordering: unordered
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get owns(name) get ordering: ordered
+    Then relation(parentship) get owns(email) get ordering: unordered
 
   Scenario Outline: Relation types can redeclare ordered ownership
     When create attribute type: name
