@@ -818,29 +818,29 @@ Feature: Concept Attribute Type
     When attribute(name) set value type: string
     When create attribute type: first-name
     When attribute(name) set annotation: @regex("\S+")
-    Then attribute(name) get annotations contains: @regex("\S+")
+    Then attribute(name) get annotations contain: @regex("\S+")
     Then attribute(first-name) get annotations is empty
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations contains: @regex("\S+")
+    Then attribute(name) get annotations contain: @regex("\S+")
     Then attribute(first-name) get annotations is empty
     When attribute(first-name) set supertype: name
-    Then attribute(first-name) get annotations contains: @regex("\S+")
+    Then attribute(first-name) get annotations contain: @regex("\S+")
     Then attribute(first-name) set annotation: @regex("\S+"); fails
     Then attribute(first-name) set annotation: @regex("test"); fails
     When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations contains: @regex("\S+")
+    Then attribute(name) get annotations contain: @regex("\S+")
     Then attribute(first-name) get annotations is empty
     When attribute(first-name) set annotation: @regex("\S+")
-    Then attribute(first-name) get annotation contains: @regex("\S+")
+    Then attribute(first-name) get annotation contain: @regex("\S+")
     Then attribute(first-name) set supertype: name; fails
     When attribute(first-name) unset annotation: @regex("\S+")
     When attribute(first-name) set supertype: name
-    Then attribute(first-name) get annotation contains: @regex("\S+")
+    Then attribute(first-name) get annotation contain: @regex("\S+")
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(name) get annotation contains: @regex("\S+")
-    Then attribute(first-name) get annotation contains: @regex("\S+")
+    Then attribute(name) get annotation contain: @regex("\S+")
+    Then attribute(first-name) get annotation contain: @regex("\S+")
 
   Scenario: Attribute type cannot reset inherited @regex annotation
     When create attribute type: name

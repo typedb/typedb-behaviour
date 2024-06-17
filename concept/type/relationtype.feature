@@ -1605,14 +1605,14 @@ Feature: Concept Relation Type and Role Type
     When relation(parentship) create role: parent
     Then relation(parentship) get role(parent) set ordering: ordered
     When relation(parentship) get role(parent) set annotation: @distinct
-    Then relation(parentship) get role(parent) get annotations contains: @distinct
+    Then relation(parentship) get role(parent) get annotations contain: @distinct
     Then relation(parentship) get role(parent) get ordering: ordered
     Then relation(parentship) get role(parent) set ordering: unordered; fails
     Then relation(parentship) get role(parent) get ordering: ordered
     When transaction commits
     When connection open schema transaction for database: typedb
     Then relation(parentship) get role(parent) get ordering: ordered
-    Then relation(parentship) get role(parent) get annotations contains: @distinct
+    Then relation(parentship) get role(parent) get annotations contain: @distinct
     Then relation(parentship) get role(parent) set ordering: unordered; fails
     When relation(parentship) get role(parent) unset annotation: @distinct
     Then relation(parentship) get role(parent) get annotations is empty

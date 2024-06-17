@@ -4526,29 +4526,29 @@ Feature: Concept Owns
     When attribute(custom-attribute) set value type: string
     When entity(person) set owns: custom-attribute
     When entity(person) get owns(custom-attribute) set annotation: @regex("\S+")
-    Then entity(person) get owns(custom-attribute) get annotations contains: @regex("\S+")
-    Then entity(customer) get owns(custom-attribute) get annotations contains: @regex("\S+")
+    Then entity(person) get owns(custom-attribute) get annotations contain: @regex("\S+")
+    Then entity(customer) get owns(custom-attribute) get annotations contain: @regex("\S+")
     When create attribute type: custom-attribute-2
     When attribute(custom-attribute-2) set value type: string
     When entity(customer) set owns: custom-attribute-2
     Then entity(customer) get owns(custom-attribute-2) get annotations is empty
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get owns(custom-attribute) get annotations contains: @regex("\S+")
-    Then entity(customer) get owns(custom-attribute) get annotations contains: @regex("\S+")
+    Then entity(person) get owns(custom-attribute) get annotations contain: @regex("\S+")
+    Then entity(customer) get owns(custom-attribute) get annotations contain: @regex("\S+")
     Then entity(customer) get owns(custom-attribute-2) get annotations is empty
     When entity(customer) get owns(custom-attribute-2) set override: custom-attribute
     Then entity(customer) get owns(custom-attribute-2) set annotation: @regex("test"); fails
     When connection open schema transaction for database: typedb
-    Then entity(person) get owns(custom-attribute) get annotations contains: @regex("\S+")
-    Then entity(customer) get owns(custom-attribute) get annotations contains: @regex("\S+")
+    Then entity(person) get owns(custom-attribute) get annotations contain: @regex("\S+")
+    Then entity(customer) get owns(custom-attribute) get annotations contain: @regex("\S+")
     Then entity(customer) get owns(custom-attribute-2) get annotations is empty
     When entity(customer) get owns(custom-attribute-2) set override: custom-attribute
     When entity(customer) get owns(custom-attribute-2) set annotation: @regex("\S+")
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    Then entity(person) get owns(custom-attribute) get annotations contains: @regex("\S+")
-    Then entity(customer) get owns(custom-attribute) get annotations contains: @regex("\S+")
+    Then entity(person) get owns(custom-attribute) get annotations contain: @regex("\S+")
+    Then entity(customer) get owns(custom-attribute) get annotations contain: @regex("\S+")
     Then entity(customer) get owns(custom-attribute-2) get annotations is empty
     When entity(customer) get owns(custom-attribute-2) set annotation: @regex("\S+")
     Then entity(customer) get owns(custom-attribute-2) set override: custom-attribute; fails
