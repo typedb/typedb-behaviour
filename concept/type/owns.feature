@@ -2889,9 +2889,9 @@ Feature: Concept Owns
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: long
     When entity(person) set owns: custom-attribute
-    # TODO: Move the case to successful cases if it should work!
-    Then entity(person) get owns(custom-attribute) set annotation: @subkey; fails
-    Then entity(person) get owns(custom-attribute) set annotation: @subkey(); fails
+    #  TODO: Make it only for typeql
+#    Then entity(person) get owns(custom-attribute) set annotation: @subkey; fails
+#    Then entity(person) get owns(custom-attribute) set annotation: @subkey(); fails
     Then entity(person) get owns(custom-attribute) set annotation: @subkey("LABEL"); fails
     Then entity(person) get owns(custom-attribute) set annotation: @subkey(福); fails
     Then entity(person) get owns(custom-attribute) set annotation: @subkey(d./';;p480909!208923r09zlmk*((*£*()(@£Q**&$@)); fails
@@ -3900,16 +3900,17 @@ Feature: Concept Owns
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
     When entity(person) set owns: custom-attribute
-    Then entity(person) get owns(custom-attribute) set annotation: @card; fails
-    Then entity(person) get owns(custom-attribute) set annotation: @card(); fails
-    Then entity(person) get owns(custom-attribute) set annotation: @card(1); fails
-    Then entity(person) get owns(custom-attribute) set annotation: @card(*); fails
+    #  TODO: Make it only for typeql
+#    Then entity(person) get owns(custom-attribute) set annotation: @card; fails
+#    Then entity(person) get owns(custom-attribute) set annotation: @card(); fails
+#    Then entity(person) get owns(custom-attribute) set annotation: @card(1); fails
+#    Then entity(person) get owns(custom-attribute) set annotation: @card(*); fails
+#    Then entity(person) get owns(custom-attribute) set annotation: @card(1, 2, 3); fails
     Then entity(person) get owns(custom-attribute) set annotation: @card(-1, 1); fails
     Then entity(person) get owns(custom-attribute) set annotation: @card(0, 0.1); fails
     Then entity(person) get owns(custom-attribute) set annotation: @card(0, 1.5); fails
     Then entity(person) get owns(custom-attribute) set annotation: @card(*, *); fails
     Then entity(person) get owns(custom-attribute) set annotation: @card(0, **); fails
-    Then entity(person) get owns(custom-attribute) set annotation: @card(1, 2, 3); fails
     Then entity(person) get owns(custom-attribute) set annotation: @card(1, "2"); fails
     Then entity(person) get owns(custom-attribute) set annotation: @card("1", 2); fails
     Then entity(person) get owns(custom-attribute) set annotation: @card(2, 1); fails

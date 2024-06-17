@@ -699,17 +699,17 @@ Feature: Concept Attribute Type
     Then attribute(first-name) set supertype: name; fails
     When connection open schema transaction for database: typedb
     Then attribute(last-name) set supertype: name; fails
-
-  Scenario: Attribute type cannot set @abstract annotation with arguments
-    When create attribute type: name
-    When attribute(name) set value type: string
-    Then attribute(name) set annotation: @abstract(); fails
-    Then attribute(name) set annotation: @abstract(1); fails
-    Then attribute(name) set annotation: @abstract(1, 2); fails
-    Then attribute(name) get annotations is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then attribute(name) get annotations is empty
+#  TODO: Make it only for typeql
+#  Scenario: Attribute type cannot set @abstract annotation with arguments
+#    When create attribute type: name
+#    When attribute(name) set value type: string
+#    Then attribute(name) set annotation: @abstract(); fails
+#    Then attribute(name) set annotation: @abstract(1); fails
+#    Then attribute(name) set annotation: @abstract(1, 2); fails
+#    Then attribute(name) get annotations is empty
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then attribute(name) get annotations is empty
 
 ########################
 # @regex
@@ -969,18 +969,18 @@ Feature: Concept Attribute Type
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(first-name) get annotations do not contain: @independent
-
-  Scenario: Attribute type cannot set @independent annotation with arguments
-    When create attribute type: name
-    When attribute(name) set value type: string
-    Then attribute(name) set annotation: @independent(); fails
-    Then attribute(name) set annotation: @independent(1); fails
-    Then attribute(name) set annotation: @independent(1, 2); fails
-    Then attribute(name) set annotation: @independent("val1"); fails
-    Then attribute(name) get annotations is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then attribute(name) get annotations is empty
+#  TODO: Make it only for typeql
+#  Scenario: Attribute type cannot set @independent annotation with arguments
+#    When create attribute type: name
+#    When attribute(name) set value type: string
+#    Then attribute(name) set annotation: @independent(); fails
+#    Then attribute(name) set annotation: @independent(1); fails
+#    Then attribute(name) set annotation: @independent(1, 2); fails
+#    Then attribute(name) set annotation: @independent("val1"); fails
+#    Then attribute(name) get annotations is empty
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then attribute(name) get annotations is empty
 
 ########################
 # @values
@@ -1612,13 +1612,10 @@ Feature: Concept Attribute Type
     Then attribute(email) set annotation: @distinct; fails
     Then attribute(email) set annotation: @key; fails
     Then attribute(email) set annotation: @unique; fails
-    Then attribute(email) set annotation: @subkey; fails
     Then attribute(email) set annotation: @subkey(LABEL); fails
-    Then attribute(email) set annotation: @card; fails
     Then attribute(email) set annotation: @card(1, 2); fails
     Then attribute(email) set annotation: @cascade; fails
     Then attribute(email) set annotation: @replace; fails
-    Then attribute(email) set annotation: @does-not-exist; fails
     Then attribute(email) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb

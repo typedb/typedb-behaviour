@@ -1929,16 +1929,17 @@ Feature: Concept Plays
     When create relation type: marriage
     When relation(marriage) create role: spouse
     When entity(person) set plays: marriage:spouse
-    Then entity(person) get plays(marriage:spouse) set annotation: @card; fails
-    Then entity(person) get plays(marriage:spouse) set annotation: @card(); fails
-    Then entity(person) get plays(marriage:spouse) set annotation: @card(1); fails
-    Then entity(person) get plays(marriage:spouse) set annotation: @card(*); fails
+    #  TODO: Make it only for typeql
+#    Then entity(person) get plays(marriage:spouse) set annotation: @card; fails
+#    Then entity(person) get plays(marriage:spouse) set annotation: @card(); fails
+#    Then entity(person) get plays(marriage:spouse) set annotation: @card(1); fails
+#    Then entity(person) get plays(marriage:spouse) set annotation: @card(*); fails
+#    Then entity(person) get plays(marriage:spouse) set annotation: @card(1, 2, 3); fails
     Then entity(person) get plays(marriage:spouse) set annotation: @card(-1, 1); fails
     Then entity(person) get plays(marriage:spouse) set annotation: @card(0, 0.1); fails
     Then entity(person) get plays(marriage:spouse) set annotation: @card(0, 1.5); fails
     Then entity(person) get plays(marriage:spouse) set annotation: @card(*, *); fails
     Then entity(person) get plays(marriage:spouse) set annotation: @card(0, **); fails
-    Then entity(person) get plays(marriage:spouse) set annotation: @card(1, 2, 3); fails
     Then entity(person) get plays(marriage:spouse) set annotation: @card(1, "2"); fails
     Then entity(person) get plays(marriage:spouse) set annotation: @card("1", 2); fails
     Then entity(person) get plays(marriage:spouse) set annotation: @card(2, 1); fails

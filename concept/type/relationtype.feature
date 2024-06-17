@@ -517,16 +517,16 @@ Feature: Concept Relation Type and Role Type
     Then transaction commits
     When connection open read transaction for database: typedb
     Then relation(parentship) get annotations contain: @abstract
-
-  Scenario: Relation type cannot set @abstract annotation with arguments
-    When create relation type: parentship
-    Then relation(parentship) set annotation: @abstract(); fails
-    Then relation(parentship) set annotation: @abstract(1); fails
-    Then relation(parentship) set annotation: @abstract(1, 2); fails
-    Then relation(parentship) get annotations is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then relation(parentship) get annotations is empty
+# TODO: Make it only for typeql
+#  Scenario: Relation type cannot set @abstract annotation with arguments
+#    When create relation type: parentship
+#    Then relation(parentship) set annotation: @abstract(); fails
+#    Then relation(parentship) set annotation: @abstract(1); fails
+#    Then relation(parentship) set annotation: @abstract(1, 2); fails
+#    Then relation(parentship) get annotations is empty
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then relation(parentship) get annotations is empty
 
   Scenario: Relation types must have at least one role in order to commit, unless they are abstract
     When create relation type: connection
@@ -574,10 +574,12 @@ Feature: Concept Relation Type and Role Type
     When connection open schema transaction for database: typedb
     Then relation(parentship) get annotations do not contain: @abstract
     When relation(fathership) set supertype: parentship
-    Then relation(fathership) get supertypes contain: parentship
+    Then relation(fathership) get supertypes contain:
+      | parentship |
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(fathership) get supertypes contain: parentship
+    Then relation(fathership) get supertypes contain:
+      | parentship |
 
   Scenario: Relation type cannot inherit @abstract annotation, but can set it being a subtype
     When create relation type: parentship
@@ -690,19 +692,13 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) set annotation: @distinct; fails
     Then relation(parentship) set annotation: @key; fails
     Then relation(parentship) set annotation: @unique; fails
-    Then relation(parentship) set annotation: @subkey; fails
     Then relation(parentship) set annotation: @subkey(LABEL); fails
-    Then relation(parentship) set annotation: @values; fails
     Then relation(parentship) set annotation: @values(1, 2); fails
-    Then relation(parentship) set annotation: @range; fails
     Then relation(parentship) set annotation: @range(1, 2); fails
-    Then relation(parentship) set annotation: @card; fails
     Then relation(parentship) set annotation: @card(1, 2); fails
     Then relation(parentship) set annotation: @independent; fails
     Then relation(parentship) set annotation: @replace; fails
-    Then relation(parentship) set annotation: @regex; fails
     Then relation(parentship) set annotation: @regex("val"); fails
-    Then relation(parentship) set annotation: @does-not-exist; fails
     Then relation(parentship) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
