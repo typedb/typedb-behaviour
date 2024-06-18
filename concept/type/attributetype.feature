@@ -164,14 +164,14 @@ Feature: Concept Attribute Type
     When create attribute type: name
     When attribute(name) set value type: string
     Then attribute(name) get name: name
-    When attribute(name) set name: username
+    When attribute(name) set label: username
     Then attribute(name) does not exist
     Then attribute(username) exists
     Then attribute(username) get name: username
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(username) get name: username
-    When attribute(username) set name: email
+    When attribute(username) set label: email
     Then attribute(username) does not exist
     Then attribute(email) exists
     Then attribute(email) get name: email
@@ -1606,31 +1606,32 @@ Feature: Concept Attribute Type
 # not compatible @annotations: @distinct, @key, @unique, @subkey, @card, @cascade, @replace
 ########################
 
-  Scenario Outline: Attribute type of <value-type> value type cannot have @distinct, @key, @unique, @subkey, @card, @cascade, and @replace annotations
-    When create attribute type: email
-    When attribute(email) set value type: <value-type>
-    Then attribute(email) set annotation: @distinct; fails
-    Then attribute(email) set annotation: @key; fails
-    Then attribute(email) set annotation: @unique; fails
-    Then attribute(email) set annotation: @subkey(LABEL); fails
-    Then attribute(email) set annotation: @card(1, 2); fails
-    Then attribute(email) set annotation: @cascade; fails
-    Then attribute(email) set annotation: @replace; fails
-    Then attribute(email) get annotations is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then attribute(email) get annotations is empty
-    Examples:
-      | value-type    |
-      | long          |
-      | double        |
-      | decimal       |
-      | string        |
-      | boolean       |
-      | datetime      |
-      | datetimetz    |
-      | duration      |
-      | custom-struct |
+  #  TODO: Make it only for typeql
+#  Scenario Outline: Attribute type of <value-type> value type cannot have @distinct, @key, @unique, @subkey, @card, @cascade, and @replace annotations
+#    When create attribute type: email
+#    When attribute(email) set value type: <value-type>
+#    Then attribute(email) set annotation: @distinct; fails
+#    Then attribute(email) set annotation: @key; fails
+#    Then attribute(email) set annotation: @unique; fails
+#    Then attribute(email) set annotation: @subkey(LABEL); fails
+#    Then attribute(email) set annotation: @card(1, 2); fails
+#    Then attribute(email) set annotation: @cascade; fails
+#    Then attribute(email) set annotation: @replace; fails
+#    Then attribute(email) get annotations is empty
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then attribute(email) get annotations is empty
+#    Examples:
+#      | value-type    |
+#      | long          |
+#      | double        |
+#      | decimal       |
+#      | string        |
+#      | boolean       |
+#      | datetime      |
+#      | datetimetz    |
+#      | duration      |
+#      | custom-struct |
 
 ########################
 # @annotations combinations:

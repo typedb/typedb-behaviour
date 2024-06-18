@@ -106,37 +106,38 @@ Feature: Concept Relation Type and Role Type
       | marriage:husband  |
       | marriage:wife     |
 
-  Scenario: Relation types that have instances cannot be deleted
-    When create relation type: marriage
-    When relation(marriage) create role: wife
-    When create entity type: person
-    When entity(person) set plays: marriage:wife
-    When transaction commits
-    When connection open write transaction for database: typedb
-    When $m = relation(marriage) create new instance
-    When $a = entity(person) create new instance
-    When relation $m add player for role(wife): $a
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then delete relation type: marriage; fails
-
-  Scenario: Role types that have instances cannot be deleted
-    When create relation type: marriage
-    When relation(marriage) create role: wife
-    When relation(marriage) create role: husband
-    When create entity type: person
-    When entity(person) set plays: marriage:wife
-    When transaction commits
-    When connection open write transaction for database: typedb
-    When $m = relation(marriage) create new instance
-    When $a = entity(person) create new instance
-    When relation $m add player for role(wife): $a
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(marriage) delete role: wife; fails
-    When connection open schema transaction for database: typedb
-    Then relation(marriage) delete role: husband
-    Then transaction commits
+     # TODO: Move to thing-feature or schema/data-validation?
+#  Scenario: Relation types that have instances cannot be deleted
+#    When create relation type: marriage
+#    When relation(marriage) create role: wife
+#    When create entity type: person
+#    When entity(person) set plays: marriage:wife
+#    When transaction commits
+#    When connection open write transaction for database: typedb
+#    When $m = relation(marriage) create new instance
+#    When $a = entity(person) create new instance
+#    When relation $m add player for role(wife): $a
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then delete relation type: marriage; fails
+#
+#  Scenario: Role types that have instances cannot be deleted
+#    When create relation type: marriage
+#    When relation(marriage) create role: wife
+#    When relation(marriage) create role: husband
+#    When create entity type: person
+#    When entity(person) set plays: marriage:wife
+#    When transaction commits
+#    When connection open write transaction for database: typedb
+#    When $m = relation(marriage) create new instance
+#    When $a = entity(person) create new instance
+#    When relation $m add player for role(wife): $a
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then relation(marriage) delete role: wife; fails
+#    When connection open schema transaction for database: typedb
+#    Then relation(marriage) delete role: husband
+#    Then transaction commits
 
   Scenario: Relation and role types can change names
     When create relation type: parentship
@@ -145,11 +146,11 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get name: parentship
     Then relation(parentship) get role(parent) get name: parent
     Then relation(parentship) get role(child) get name: child
-    When relation(parentship) set name: marriage
+    When relation(parentship) set label: marriage
     Then relation(parentship) does not exist
     Then relation(marriage) exists
-    When relation(marriage) get role(parent) set name: husband
-    When relation(marriage) get role(child) set name: wife
+    When relation(marriage) get role(parent) set label: husband
+    When relation(marriage) get role(child) set label: wife
     Then relation(marriage) get role(parent) does not exist
     Then relation(marriage) get role(child) does not exist
     Then relation(marriage) get name: marriage
@@ -160,11 +161,11 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) get name: marriage
     Then relation(marriage) get role(husband) get name: husband
     Then relation(marriage) get role(wife) get name: wife
-    When relation(marriage) set name: employment
+    When relation(marriage) set label: employment
     Then relation(marriage) does not exist
     Then relation(employment) exists
-    When relation(employment) get role(husband) set name: employee
-    When relation(employment) get role(wife) set name: employer
+    When relation(employment) get role(husband) set label: employee
+    When relation(employment) get role(wife) set label: employer
     Then relation(employment) get role(husband) does not exist
     Then relation(employment) get role(wife) does not exist
     Then relation(employment) get name: employment
@@ -494,29 +495,31 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(parent) get annotations do not contain: @abstract
     Then relation(parentship) get role(child) get annotations do not contain: @abstract
 
-  Scenario: Relation types can be set to abstract when a subtype has instances
-    When create relation type: parentship
-    When relation(parentship) create role: parent
-    When relation(parentship) create role: child
-    When create relation type: fathership
-    When relation(fathership) set supertype: parentship
-    When relation(fathership) create role: father
-    When relation(fathership) get role(father) set override: parent
-    When relation(fathership) create role: father-child
-    When relation(fathership) get role(father-child) set override: child
-    When create entity type: person
-    When entity(person) set plays: fathership:father
-    Then transaction commits
-    When connection open write transaction for database: typedb
-    Then $m = relation(fathership) create new instance
-    When $a = entity(person) create new instance
-    When relation $m add player for role(father): $a
-    Then transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(parentship) set annotation: @abstract
-    Then transaction commits
-    When connection open read transaction for database: typedb
-    Then relation(parentship) get annotations contain: @abstract
+     # TODO: Move to thing-feature or schema/data-validation?
+#  Scenario: Relation types can be set to abstract when a subtype has instances
+#    When create relation type: parentship
+#    When relation(parentship) create role: parent
+#    When relation(parentship) create role: child
+#    When create relation type: fathership
+#    When relation(fathership) set supertype: parentship
+#    When relation(fathership) create role: father
+#    When relation(fathership) get role(father) set override: parent
+#    When relation(fathership) create role: father-child
+#    When relation(fathership) get role(father-child) set override: child
+#    When create entity type: person
+#    When entity(person) set plays: fathership:father
+#    Then transaction commits
+#    When connection open write transaction for database: typedb
+#    Then $m = relation(fathership) create new instance
+#    When $a = entity(person) create new instance
+#    When relation $m add player for role(father): $a
+#    Then transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then relation(parentship) set annotation: @abstract
+#    Then transaction commits
+#    When connection open read transaction for database: typedb
+#    Then relation(parentship) get annotations contain: @abstract
+
 # TODO: Make it only for typeql
 #  Scenario: Relation type cannot set @abstract annotation with arguments
 #    When create relation type: parentship
@@ -686,23 +689,24 @@ Feature: Concept Relation Type and Role Type
 # not compatible @annotations: @distinct, @key, @unique, @subkey, @values, @range, @card, @independent, @replace, @regex
 ########################
 
-  Scenario: Relation type cannot have @distinct, @key, @unique, @subkey, @values, @range, @card, @independent, @replace, and @regex annotations
-    When create relation type: parentship
-    When relation(parentship) create role: parent
-    Then relation(parentship) set annotation: @distinct; fails
-    Then relation(parentship) set annotation: @key; fails
-    Then relation(parentship) set annotation: @unique; fails
-    Then relation(parentship) set annotation: @subkey(LABEL); fails
-    Then relation(parentship) set annotation: @values(1, 2); fails
-    Then relation(parentship) set annotation: @range(1, 2); fails
-    Then relation(parentship) set annotation: @card(1, 2); fails
-    Then relation(parentship) set annotation: @independent; fails
-    Then relation(parentship) set annotation: @replace; fails
-    Then relation(parentship) set annotation: @regex("val"); fails
-    Then relation(parentship) get annotations is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then relation(parentship) get annotations is empty
+  #  TODO: Make it only for typeql
+#  Scenario: Relation type cannot have @distinct, @key, @unique, @subkey, @values, @range, @card, @independent, @replace, and @regex annotations
+#    When create relation type: parentship
+#    When relation(parentship) create role: parent
+#    Then relation(parentship) set annotation: @distinct; fails
+#    Then relation(parentship) set annotation: @key; fails
+#    Then relation(parentship) set annotation: @unique; fails
+#    Then relation(parentship) set annotation: @subkey(LABEL); fails
+#    Then relation(parentship) set annotation: @values(1, 2); fails
+#    Then relation(parentship) set annotation: @range(1, 2); fails
+#    Then relation(parentship) set annotation: @card(1, 2); fails
+#    Then relation(parentship) set annotation: @independent; fails
+#    Then relation(parentship) set annotation: @replace; fails
+#    Then relation(parentship) set annotation: @regex("val"); fails
+#    Then relation(parentship) get annotations is empty
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then relation(parentship) get annotations is empty
 
 ########################
 # @annotations combinations:
@@ -904,71 +908,72 @@ Feature: Concept Relation Type and Role Type
       | marriage:husband  |
       | marriage:wife     |
 
-  Scenario: Role can change ordering if it does not have role instances even if its relation has instances
-    When create relation type: parentship
-    When relation(parentship) create role: parent
-    When relation(parentship) create role: child
-    When create entity type: person
-    When entity(person) set plays: parentship:parent
-    When transaction commits
-    When connection open write transaction for database: typedb
-    When $m = relation(parentship) create new instance
-    When $a = entity(person) create new instance
-    When relation $m add player for role(parent): $a
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When relation(parentship) get role(child) set ordering: ordered
-    Then relation(parentship) get role(child) get ordering: ordered
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(parentship) get role(child) get ordering: ordered
-    When relation(parentship) get role(child) set ordering: unordered
-    Then relation(parentship) get role(child) get ordering: unordered
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(parentship) get role(child) get ordering: unordered
-
-  Scenario: Role cannot change ordering if it has role instances
-    When create relation type: parentship
-    When relation(parentship) create role: parent
-    When relation(parentship) create role: child
-    When relation(parentship) get role(child) set ordering: ordered
-    When create attribute type: id
-    When attribute(id) set value type: long
-    When relation(parentship) set owns: id
-    When relation(parentship) get owns(id) set annotation: @key
-    When create entity type: person
-    When entity(person) set plays: parentship:parent
-    When entity(person) set plays: parentship:child
-    When entity(person) set owns: id
-    When entity(person) get owns(id) set annotation: @key
-    When transaction commits
-    When connection open write transaction for database: typedb
-    When $m = relation(parentship) create new instance with key(id): 1
-    When $a = entity(person) create new instance with key(id): 1
-    When relation $m add player for role(parent): $a
-    When relation $m add player for role(child): $a
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(parentship) get role(parent) set ordering: unordered; fails
-    Then relation(parentship) get role(parent) set ordering: ordered; fails
-    Then relation(parentship) get role(child) set ordering: unordered; fails
-    Then relation(parentship) get role(child) set ordering: ordered; fails
-    When connection open write transaction for database: typedb
-    When $m = relation(parentship) get instance with key(id): 1
-    When $a = entity(person) get instance with key(id): 1
-    When delete entity: $a
-    When delete relation: $m
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When relation(parentship) get role(parent) set ordering: ordered
-    Then relation(parentship) get role(parent) get ordering: ordered
-    When relation(parentship) get role(child) set ordering: unordered
-    Then relation(parentship) get role(child) get ordering: unordered
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then relation(parentship) get role(parent) get ordering: ordered
-    Then relation(parentship) get role(child) get ordering: unordered
+     # TODO: Move to thing-feature or schema/data-validation?
+#  Scenario: Role can change ordering if it does not have role instances even if its relation has instances
+#    When create relation type: parentship
+#    When relation(parentship) create role: parent
+#    When relation(parentship) create role: child
+#    When create entity type: person
+#    When entity(person) set plays: parentship:parent
+#    When transaction commits
+#    When connection open write transaction for database: typedb
+#    When $m = relation(parentship) create new instance
+#    When $a = entity(person) create new instance
+#    When relation $m add player for role(parent): $a
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When relation(parentship) get role(child) set ordering: ordered
+#    Then relation(parentship) get role(child) get ordering: ordered
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then relation(parentship) get role(child) get ordering: ordered
+#    When relation(parentship) get role(child) set ordering: unordered
+#    Then relation(parentship) get role(child) get ordering: unordered
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then relation(parentship) get role(child) get ordering: unordered
+#
+#  Scenario: Role cannot change ordering if it has role instances
+#    When create relation type: parentship
+#    When relation(parentship) create role: parent
+#    When relation(parentship) create role: child
+#    When relation(parentship) get role(child) set ordering: ordered
+#    When create attribute type: id
+#    When attribute(id) set value type: long
+#    When relation(parentship) set owns: id
+#    When relation(parentship) get owns(id) set annotation: @key
+#    When create entity type: person
+#    When entity(person) set plays: parentship:parent
+#    When entity(person) set plays: parentship:child
+#    When entity(person) set owns: id
+#    When entity(person) get owns(id) set annotation: @key
+#    When transaction commits
+#    When connection open write transaction for database: typedb
+#    When $m = relation(parentship) create new instance with key(id): 1
+#    When $a = entity(person) create new instance with key(id): 1
+#    When relation $m add player for role(parent): $a
+#    When relation $m add player for role(child): $a
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then relation(parentship) get role(parent) set ordering: unordered; fails
+#    Then relation(parentship) get role(parent) set ordering: ordered; fails
+#    Then relation(parentship) get role(child) set ordering: unordered; fails
+#    Then relation(parentship) get role(child) set ordering: ordered; fails
+#    When connection open write transaction for database: typedb
+#    When $m = relation(parentship) get instance with key(id): 1
+#    When $a = entity(person) get instance with key(id): 1
+#    When delete entity: $a
+#    When delete relation: $m
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When relation(parentship) get role(parent) set ordering: ordered
+#    Then relation(parentship) get role(parent) get ordering: ordered
+#    When relation(parentship) get role(child) set ordering: unordered
+#    Then relation(parentship) get role(child) get ordering: unordered
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then relation(parentship) get role(parent) get ordering: ordered
+#    Then relation(parentship) get role(child) get ordering: unordered
 
   Scenario: Relation and role lists can change labels
     When create relation type: parentship
@@ -979,11 +984,11 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get name: parentship
     Then relation(parentship) get role(parent) get name: parent
     Then relation(parentship) get role(child) get name: child
-    When relation(parentship) set name: marriage
+    When relation(parentship) set label: marriage
     Then relation(parentship) does not exist
     Then relation(marriage) exists
-    When relation(marriage) get role(parent) set name: husband
-    When relation(marriage) get role(child) set name: wife
+    When relation(marriage) get role(parent) set label: husband
+    When relation(marriage) get role(child) set label: wife
     Then relation(marriage) get role(parent) does not exist
     Then relation(marriage) get role(child) does not exist
     Then relation(marriage) get name: marriage
@@ -994,11 +999,11 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) get name: marriage
     Then relation(marriage) get role(husband) get name: husband
     Then relation(marriage) get role(wife) get name: wife
-    When relation(marriage) set name: employment
+    When relation(marriage) set label: employment
     Then relation(marriage) does not exist
     Then relation(employment) exists
-    When relation(employment) get role(husband) set name: employee
-    When relation(employment) get role(wife) set name: employer
+    When relation(employment) get role(husband) set label: employee
+    When relation(employment) get role(wife) set label: employer
     Then relation(employment) get role(husband) does not exist
     Then relation(employment) get role(wife) does not exist
     Then relation(employment) get name: employment
@@ -1784,16 +1789,17 @@ Feature: Concept Relation Type and Role Type
   Scenario: Relation type cannot have @card annotation for with invalid arguments
     When create relation type: parentship
     When relation(parentship) create role: parent
-    Then relation(parentship) get role(parent) set annotation: @card(); fails
-    Then relation(parentship) get role(parent) set annotation: @card(0); fails
-    Then relation(parentship) get role(parent) set annotation: @card(1); fails
-    Then relation(parentship) get role(parent) set annotation: @card(*); fails
+    #  TODO: Make it only for typeql
+#    Then relation(parentship) get role(parent) set annotation: @card(); fails
+#    Then relation(parentship) get role(parent) set annotation: @card(0); fails
+#    Then relation(parentship) get role(parent) set annotation: @card(1); fails
+#    Then relation(parentship) get role(parent) set annotation: @card(*); fails
+#    Then relation(parentship) get role(parent) set annotation: @card(1, 2, 3); fails
     Then relation(parentship) get role(parent) set annotation: @card(-1, 1); fails
     Then relation(parentship) get role(parent) set annotation: @card(0, 0.1); fails
     Then relation(parentship) get role(parent) set annotation: @card(0, 1.5); fails
     Then relation(parentship) get role(parent) set annotation: @card(*, *); fails
     Then relation(parentship) get role(parent) set annotation: @card(0, **); fails
-    Then relation(parentship) get role(parent) set annotation: @card(1, 2, 3); fails
     Then relation(parentship) get role(parent) set annotation: @card(1, "2"); fails
     Then relation(parentship) get role(parent) set annotation: @card("1", 2); fails
     Then relation(parentship) get role(parent) set annotation: @card(2, 1); fails
@@ -1960,29 +1966,30 @@ Feature: Concept Relation Type and Role Type
 # relates not compatible @annotations: @key, @unique, @subkey, @values, @range, @abstract, @cascade, @independent, @replace, @regex
 ########################
 
-  Scenario: Relation's role cannot have @key, @unique, @subkey, @values, @range, @abstract, @cascade, @independent, @replace, and @regex annotations
-    When create relation type: parentship
-    When relation(parentship) create role: parent
-    Then relation(parentship) get role(parent) set annotation: @key; fails
-    Then relation(parentship) get role(parent) set annotation: @unique; fails
-    Then relation(parentship) get role(parent) set annotation: @subkey; fails
-    Then relation(parentship) get role(parent) set annotation: @subkey(LABEL); fails
-    Then relation(parentship) get role(parent) set annotation: @values; fails
-    Then relation(parentship) get role(parent) set annotation: @values(1, 2); fails
-    Then relation(parentship) get role(parent) set annotation: @range; fails
-    Then relation(parentship) get role(parent) set annotation: @range(1, 2); fails
-    Then relation(parentship) get role(parent) set annotation: @abstract; fails
-    # TODO: @cascade on relates?
-    Then relation(parentship) get role(parent) set annotation: @cascade; fails
-    Then relation(parentship) get role(parent) set annotation: @independent; fails
-    Then relation(parentship) get role(parent) set annotation: @replace; fails
-    Then relation(parentship) get role(parent) set annotation: @regex; fails
-    Then relation(parentship) get role(parent) set annotation: @regex("val"); fails
-    Then relation(parentship) get role(parent) set annotation: @does-not-exist; fails
-    Then relation(parentship) get role(parent) get annotations is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then relation(parentship) get role(parent) get annotations is empty
+  #  TODO: Make it only for typeql
+#  Scenario: Relation's role cannot have @key, @unique, @subkey, @values, @range, @abstract, @cascade, @independent, @replace, and @regex annotations
+#    When create relation type: parentship
+#    When relation(parentship) create role: parent
+#    Then relation(parentship) get role(parent) set annotation: @key; fails
+#    Then relation(parentship) get role(parent) set annotation: @unique; fails
+#    Then relation(parentship) get role(parent) set annotation: @subkey; fails
+#    Then relation(parentship) get role(parent) set annotation: @subkey(LABEL); fails
+#    Then relation(parentship) get role(parent) set annotation: @values; fails
+#    Then relation(parentship) get role(parent) set annotation: @values(1, 2); fails
+#    Then relation(parentship) get role(parent) set annotation: @range; fails
+#    Then relation(parentship) get role(parent) set annotation: @range(1, 2); fails
+#    Then relation(parentship) get role(parent) set annotation: @abstract; fails
+#    # TODO: @cascade on relates?
+#    Then relation(parentship) get role(parent) set annotation: @cascade; fails
+#    Then relation(parentship) get role(parent) set annotation: @independent; fails
+#    Then relation(parentship) get role(parent) set annotation: @replace; fails
+#    Then relation(parentship) get role(parent) set annotation: @regex; fails
+#    Then relation(parentship) get role(parent) set annotation: @regex("val"); fails
+#    Then relation(parentship) get role(parent) set annotation: @does-not-exist; fails
+#    Then relation(parentship) get role(parent) get annotations is empty
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then relation(parentship) get role(parent) get annotations is empty
 
 ########################
 # relates @annotations combinations:

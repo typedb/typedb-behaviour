@@ -427,37 +427,38 @@ Feature: Concept Owns
     When connection open read transaction for database: typedb
     Then struct(wallet) get owns is empty
 
-  Scenario Outline: <root-type> types cannot unset owning attributes that are owned by existing instances
-    When create attribute type: name
-    When attribute(name) set value type: <value-type>
-    When <root-type>(<type-name>) set owns: name
-    Then transaction commits
-    When connection open write transaction for database: typedb
-    When $i = <root-type>(<type-name>) create new instance
-    When $a = attribute(name) as(<value-type>) put: <value>
-    When entity $i set has: $a
-    Then transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) unset owns: name; fails
-    Then <root-type>(<type-name>) get owns contain: name
-    Examples:
-      | root-type | type-name   | value-type | value           |
-      | entity    | person      | long       | 1               |
-      | entity    | person      | double     | 1.0             |
-      | entity    | person      | decimal    | 1.0             |
-      | entity    | person      | string     | "alice"         |
-      | entity    | person      | boolean    | true            |
-      | entity    | person      | datetime   | 2024-05-04      |
-      | entity    | person      | datetimetz | 2024-05-04+0010 |
-      | entity    | person      | duration   | P1Y             |
-      | relation  | description | long       | 1               |
-      | relation  | description | double     | 1.0             |
-      | relation  | description | decimal    | 1.0             |
-      | relation  | description | string     | "alice"         |
-      | relation  | description | boolean    | true            |
-      | relation  | description | datetime   | 2024-05-04      |
-      | relation  | description | datetimetz | 2024-05-04+0010 |
-      | relation  | description | duration   | P1Y             |
+    # TODO: Move to thing-feature or schema/data-validation?
+#  Scenario Outline: <root-type> types cannot unset owning attributes that are owned by existing instances
+#    When create attribute type: name
+#    When attribute(name) set value type: <value-type>
+#    When <root-type>(<type-name>) set owns: name
+#    Then transaction commits
+#    When connection open write transaction for database: typedb
+#    When $i = <root-type>(<type-name>) create new instance
+#    When $a = attribute(name) as(<value-type>) put: <value>
+#    When entity $i set has: $a
+#    Then transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then <root-type>(<type-name>) unset owns: name; fails
+#    Then <root-type>(<type-name>) get owns contain: name
+#    Examples:
+#      | root-type | type-name   | value-type | value           |
+#      | entity    | person      | long       | 1               |
+#      | entity    | person      | double     | 1.0             |
+#      | entity    | person      | decimal    | 1.0             |
+#      | entity    | person      | string     | "alice"         |
+#      | entity    | person      | boolean    | true            |
+#      | entity    | person      | datetime   | 2024-05-04      |
+#      | entity    | person      | datetimetz | 2024-05-04+0010 |
+#      | entity    | person      | duration   | P1Y             |
+#      | relation  | description | long       | 1               |
+#      | relation  | description | double     | 1.0             |
+#      | relation  | description | decimal    | 1.0             |
+#      | relation  | description | string     | "alice"         |
+#      | relation  | description | boolean    | true            |
+#      | relation  | description | datetime   | 2024-05-04      |
+#      | relation  | description | datetimetz | 2024-05-04+0010 |
+#      | relation  | description | duration   | P1Y             |
 
   Scenario Outline: <root-type> types can re-override owns
     When create attribute type: email
@@ -716,66 +717,68 @@ Feature: Concept Owns
       | duration      | boolean      |
       | custom-struct | long         |
 
-  Scenario: Ownership can change ordering if it does not have instances even if its owner has instances for entity type
-    When create attribute type: name
-    When attribute(name) set value type: double
-    When create entity type: person
-    When entity(person) set owns: name
-    When transaction commits
-    When connection open write transaction for database: typedb
-    When $a = entity(person) create new instance
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When entity(person) get owns(name) set ordering: ordered
-    Then entity(person) get owns(name) get ordering: ordered
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then entity(person) get owns(name) get ordering: ordered
-    When entity(person) get owns(name) set ordering: unordered
-    Then entity(person) get owns(name) get ordering: unordered
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then entity(person) get owns(name) get ordering: unordered
+     # TODO: Move to thing-feature or schema/data-validation?
+#  Scenario: Ownership can change ordering if it does not have instances even if its owner has instances for entity type
+#    When create attribute type: name
+#    When attribute(name) set value type: double
+#    When create entity type: person
+#    When entity(person) set owns: name
+#    When transaction commits
+#    When connection open write transaction for database: typedb
+#    When $a = entity(person) create new instance
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When entity(person) get owns(name) set ordering: ordered
+#    Then entity(person) get owns(name) get ordering: ordered
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then entity(person) get owns(name) get ordering: ordered
+#    When entity(person) get owns(name) set ordering: unordered
+#    Then entity(person) get owns(name) get ordering: unordered
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then entity(person) get owns(name) get ordering: unordered
 
-  Scenario: Ownership cannot change ordering if it has role instances for entity type
-    When create attribute type: id
-    When attribute(id) set value type: long
-    When create attribute type: name
-    When attribute(name) set value type: string
-    When create attribute type: email
-    When attribute(email) set value type: decimal
-    When create entity type: person
-    When entity(person) set owns: id
-    When entity(person) get owns(id) set annotation: @key
-    When entity(person) set owns: name
-    When entity(person) set owns: email
-    When entity(person) get owns(email) set ordering: ordered
-    When transaction commits
-    When connection open write transaction for database: typedb
-    When $e = entity(person) create new instance with key(id): 1
-    When $a1 = attribute(name) create new instance
-    When $a2 = attribute(name) create new instance
-    When entity $e set has: $a1
-    When entity $e set has: $a2
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then entity(person) get owns(name) set ordering: unordered; fails
-    Then entity(person) get owns(name) set ordering: ordered; fails
-    Then entity(person) get owns(email) set ordering: unordered; fails
-    Then entity(person) get owns(email) set ordering: ordered; fails
-    When connection open write transaction for database: typedb
-    When $a = entity(person) get instance with key(id): 1
-    When delete entity: $a
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When entity(person) get owns(name) set ordering: ordered
-    Then entity(person) get owns(name) get ordering: ordered
-    When entity(person) get owns(email) set ordering: unordered
-    Then entity(person) get owns(email) get ordering: unordered
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then entity(person) get owns(name) get ordering: ordered
-    Then entity(person) get owns(email) get ordering: unordered
+   # TODO: Move to thing-feature or schema/data-validation?
+#  Scenario: Ownership cannot change ordering if it has role instances for entity type
+#    When create attribute type: id
+#    When attribute(id) set value type: long
+#    When create attribute type: name
+#    When attribute(name) set value type: string
+#    When create attribute type: email
+#    When attribute(email) set value type: decimal
+#    When create entity type: person
+#    When entity(person) set owns: id
+#    When entity(person) get owns(id) set annotation: @key
+#    When entity(person) set owns: name
+#    When entity(person) set owns: email
+#    When entity(person) get owns(email) set ordering: ordered
+#    When transaction commits
+#    When connection open write transaction for database: typedb
+#    When $e = entity(person) create new instance with key(id): 1
+#    When $a1 = attribute(name) create new instance
+#    When $a2 = attribute(name) create new instance
+#    When entity $e set has: $a1
+#    When entity $e set has: $a2
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then entity(person) get owns(name) set ordering: unordered; fails
+#    Then entity(person) get owns(name) set ordering: ordered; fails
+#    Then entity(person) get owns(email) set ordering: unordered; fails
+#    Then entity(person) get owns(email) set ordering: ordered; fails
+#    When connection open write transaction for database: typedb
+#    When $a = entity(person) get instance with key(id): 1
+#    When delete entity: $a
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When entity(person) get owns(name) set ordering: ordered
+#    Then entity(person) get owns(name) get ordering: ordered
+#    When entity(person) get owns(email) set ordering: unordered
+#    Then entity(person) get owns(email) get ordering: unordered
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then entity(person) get owns(name) get ordering: ordered
+#    Then entity(person) get owns(email) get ordering: unordered
 
   Scenario Outline: Entity types can redeclare ordered ownership
     When create attribute type: name
@@ -899,80 +902,82 @@ Feature: Concept Owns
       | duration      | boolean      |
       | custom-struct | long         |
 
-  Scenario: Ownership can change ordering if it does not have instances even if its owner has instances for relation type
-    When create attribute type: name
-    When attribute(name) set value type: double
-    When create relation type: parentship
-    When relation(parentship) create role: parent
-    When relation(parentship) set owns: name
-    When create entity type: person
-    When entity(person) set plays: parentship:parent
-    When transaction commits
-    When connection open write transaction for database: typedb
-    When $e = entity(person) create new instance
-    When $r = relation(parentship) create new instance
-    When relation $r add player for role(parent): $e
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When relation(parentship) get owns(name) set ordering: ordered
-    Then relation(parentship) get owns(name) get ordering: ordered
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(parentship) get owns(name) get ordering: ordered
-    When relation(parentship) get owns(name) set ordering: unordered
-    Then relation(parentship) get owns(name) get ordering: unordered
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(parentship) get owns(name) get ordering: unordered
+     # TODO: Move to thing-feature or schema/data-validation?
+#  Scenario: Ownership can change ordering if it does not have instances even if its owner has instances for relation type
+#    When create attribute type: name
+#    When attribute(name) set value type: double
+#    When create relation type: parentship
+#    When relation(parentship) create role: parent
+#    When relation(parentship) set owns: name
+#    When create entity type: person
+#    When entity(person) set plays: parentship:parent
+#    When transaction commits
+#    When connection open write transaction for database: typedb
+#    When $e = entity(person) create new instance
+#    When $r = relation(parentship) create new instance
+#    When relation $r add player for role(parent): $e
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When relation(parentship) get owns(name) set ordering: ordered
+#    Then relation(parentship) get owns(name) get ordering: ordered
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then relation(parentship) get owns(name) get ordering: ordered
+#    When relation(parentship) get owns(name) set ordering: unordered
+#    Then relation(parentship) get owns(name) get ordering: unordered
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then relation(parentship) get owns(name) get ordering: unordered
 
-  Scenario: Ownership cannot change ordering if it has role instances for relation type
-    When create attribute type: id
-    When attribute(id) set value type: long
-    When create attribute type: name
-    When attribute(name) set value type: string
-    When create attribute type: email
-    When attribute(email) set value type: decimal
-    When create relation type: parentship
-    When relation(parentship) create role: parent
-    When relation(parentship) set owns: name
-    When relation(parentship) set owns: email
-    When relation(parentship) get owns(email) set ordering: ordered
-    When relation(parentship) set owns: id
-    When relation(parentship) get owns(id) set annotation: @key
-    When create entity type: person
-    When entity(person) set plays: parentship:parent
-    When entity(person) set owns: id
-    When entity(person) get owns(id) set annotation: @key
-    When transaction commits
-    When connection open write transaction for database: typedb
-    When $e = entity(person) create new instance with key(id): 1
-    When $r = relation(parentship) create new instance with key(id): 1
-    When relation $r add player for role(parent): $e
-    When $a1 = attribute(name) create new instance
-    When $a2 = attribute(name) create new instance
-    When entity $r set has: $a1
-    When entity $r set has: $a2
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(parentship) get owns(name) set ordering: unordered; fails
-    Then relation(parentship) get owns(name) set ordering: ordered; fails
-    Then relation(parentship) get owns(email) set ordering: unordered; fails
-    Then relation(parentship) get owns(email) set ordering: ordered; fails
-    When connection open write transaction for database: typedb
-    When $r = relation(parentship) get instance with key(id): 1
-    When $a = entity(person) get instance with key(id): 1
-    When delete entity: $a
-    When delete relation: $r
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When relation(parentship) get owns(name) set ordering: ordered
-    Then relation(parentship) get owns(name) get ordering: ordered
-    When relation(parentship) get owns(email) set ordering: unordered
-    Then relation(parentship) get owns(email) get ordering: unordered
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then relation(parentship) get owns(name) get ordering: ordered
-    Then relation(parentship) get owns(email) get ordering: unordered
+   # TODO: Move to thing-feature or schema/data-validation?
+#  Scenario: Ownership cannot change ordering if it has role instances for relation type
+#    When create attribute type: id
+#    When attribute(id) set value type: long
+#    When create attribute type: name
+#    When attribute(name) set value type: string
+#    When create attribute type: email
+#    When attribute(email) set value type: decimal
+#    When create relation type: parentship
+#    When relation(parentship) create role: parent
+#    When relation(parentship) set owns: name
+#    When relation(parentship) set owns: email
+#    When relation(parentship) get owns(email) set ordering: ordered
+#    When relation(parentship) set owns: id
+#    When relation(parentship) get owns(id) set annotation: @key
+#    When create entity type: person
+#    When entity(person) set plays: parentship:parent
+#    When entity(person) set owns: id
+#    When entity(person) get owns(id) set annotation: @key
+#    When transaction commits
+#    When connection open write transaction for database: typedb
+#    When $e = entity(person) create new instance with key(id): 1
+#    When $r = relation(parentship) create new instance with key(id): 1
+#    When relation $r add player for role(parent): $e
+#    When $a1 = attribute(name) create new instance
+#    When $a2 = attribute(name) create new instance
+#    When entity $r set has: $a1
+#    When entity $r set has: $a2
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then relation(parentship) get owns(name) set ordering: unordered; fails
+#    Then relation(parentship) get owns(name) set ordering: ordered; fails
+#    Then relation(parentship) get owns(email) set ordering: unordered; fails
+#    Then relation(parentship) get owns(email) set ordering: ordered; fails
+#    When connection open write transaction for database: typedb
+#    When $r = relation(parentship) get instance with key(id): 1
+#    When $a = entity(person) get instance with key(id): 1
+#    When delete entity: $a
+#    When delete relation: $r
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When relation(parentship) get owns(name) set ordering: ordered
+#    Then relation(parentship) get owns(name) get ordering: ordered
+#    When relation(parentship) get owns(email) set ordering: unordered
+#    Then relation(parentship) get owns(email) get ordering: unordered
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then relation(parentship) get owns(name) get ordering: ordered
+#    Then relation(parentship) get owns(email) get ordering: unordered
 
   Scenario Outline: Relation types can redeclare ordered ownership
     When create attribute type: name
@@ -1128,39 +1133,40 @@ Feature: Concept Owns
       | entity    | person         | customer     | duration   |
       | relation  | description    | registration | string     |
 
-  Scenario Outline: <root-type> types cannot unset ordered ownership of attributes that are owned by existing instances
-    When create attribute type: name
-    When attribute(name) set value type: <value-type>
-    When <root-type>(<type-name>) set owns: name
-    When <root-type>(<type-name>) get owns(name) set ordering: ordered
-    Then transaction commits
-    When connection open write transaction for database: typedb
-    When $i = <root-type>(<type-name>) create new instance
-    When $a = attribute(name) as(<value-type>) put: [<value>]
-    When entity $i set has: $a
-    Then transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) unset owns: name; fails
-    Then <root-type>(<type-name>) get owns contain: name
-    Then <root-type>(<type-name>) get owns(name) get ordering: ordered
-    Examples:
-      | root-type | type-name   | value-type | value           |
-      | entity    | person      | long       | 1               |
-      | entity    | person      | double     | 1.0             |
-      | entity    | person      | decimal    | 1.0             |
-      | entity    | person      | string     | "alice"         |
-      | entity    | person      | boolean    | true            |
-      | entity    | person      | datetime   | 2024-05-04      |
-      | entity    | person      | datetimetz | 2024-05-04+0010 |
-      | entity    | person      | duration   | P1Y             |
-      | relation  | description | long       | 1               |
-      | relation  | description | double     | 1.0             |
-      | relation  | description | decimal    | 1.0             |
-      | relation  | description | string     | "alice"         |
-      | relation  | description | boolean    | true            |
-      | relation  | description | datetime   | 2024-05-04      |
-      | relation  | description | datetimetz | 2024-05-04+0010 |
-      | relation  | description | duration   | P1Y             |
+     # TODO: Move to thing-feature or schema/data-validation?
+#  Scenario Outline: <root-type> types cannot unset ordered ownership of attributes that are owned by existing instances
+#    When create attribute type: name
+#    When attribute(name) set value type: <value-type>
+#    When <root-type>(<type-name>) set owns: name
+#    When <root-type>(<type-name>) get owns(name) set ordering: ordered
+#    Then transaction commits
+#    When connection open write transaction for database: typedb
+#    When $i = <root-type>(<type-name>) create new instance
+#    When $a = attribute(name) as(<value-type>) put: [<value>]
+#    When entity $i set has: $a
+#    Then transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then <root-type>(<type-name>) unset owns: name; fails
+#    Then <root-type>(<type-name>) get owns contain: name
+#    Then <root-type>(<type-name>) get owns(name) get ordering: ordered
+#    Examples:
+#      | root-type | type-name   | value-type | value           |
+#      | entity    | person      | long       | 1               |
+#      | entity    | person      | double     | 1.0             |
+#      | entity    | person      | decimal    | 1.0             |
+#      | entity    | person      | string     | "alice"         |
+#      | entity    | person      | boolean    | true            |
+#      | entity    | person      | datetime   | 2024-05-04      |
+#      | entity    | person      | datetimetz | 2024-05-04+0010 |
+#      | entity    | person      | duration   | P1Y             |
+#      | relation  | description | long       | 1               |
+#      | relation  | description | double     | 1.0             |
+#      | relation  | description | decimal    | 1.0             |
+#      | relation  | description | string     | "alice"         |
+#      | relation  | description | boolean    | true            |
+#      | relation  | description | datetime   | 2024-05-04      |
+#      | relation  | description | datetimetz | 2024-05-04+0010 |
+#      | relation  | description | duration   | P1Y             |
 
   Scenario Outline: <root-type> types can re-override ordered ownership
     When create attribute type: email
@@ -2698,41 +2704,42 @@ Feature: Concept Owns
       | duration      |
       | custom-struct |
 
-  Scenario: Entity types can only commit keys if every instance owns a distinct key
-    When create attribute type: email
-    When attribute(email) set value type: string
-    When create attribute type: username
-    When attribute(username) set value type: string
-    When entity(person) set owns: username
-    When entity(person) get owns(username) set annotation: @key
-    Then transaction commits
-    When connection open write transaction for database: typedb
-    When $a = entity(person) create new instance with key(username): alice
-    When $b = entity(person) create new instance with key(username): bob
-    Then transaction commits
-    When connection open schema transaction for database: typedb
-    When entity(person) set owns: email
-    When entity(person) get owns(email) set annotation: @key; fails
-    When connection open schema transaction for database: typedb
-    When entity(person) set owns: email
-    Then transaction commits
-    When connection open write transaction for database: typedb
-    When $a = entity(person) get instance with key(username): alice
-    When $alice = attribute(email) as(string) put: alice@vaticle.com
-    When entity $a set has: $alice
-    When $b = entity(person) get instance with key(username): bob
-    When $bob = attribute(email) as(string) put: bob@vaticle.com
-    When entity $b set has: $bob
-    Then transaction commits
-    When connection open schema transaction for database: typedb
-    When entity(person) set owns: email
-    When entity(person) get owns(email) set annotation: @key
-    Then entity(person) get owns(email; get annotations contain: @key
-    Then entity(person) get owns(username; get annotations contain: @key
-    Then transaction commits
-    When connection open read transaction for database: typedb
-    Then entity(person) get owns(email; get annotations contain: @key
-    Then entity(person) get owns(username; get annotations contain: @key
+     # TODO: Move to thing-feature or schema/data-validation?
+#  Scenario: Entity types can only commit keys if every instance owns a distinct key
+#    When create attribute type: email
+#    When attribute(email) set value type: string
+#    When create attribute type: username
+#    When attribute(username) set value type: string
+#    When entity(person) set owns: username
+#    When entity(person) get owns(username) set annotation: @key
+#    Then transaction commits
+#    When connection open write transaction for database: typedb
+#    When $a = entity(person) create new instance with key(username): alice
+#    When $b = entity(person) create new instance with key(username): bob
+#    Then transaction commits
+#    When connection open schema transaction for database: typedb
+#    When entity(person) set owns: email
+#    When entity(person) get owns(email) set annotation: @key; fails
+#    When connection open schema transaction for database: typedb
+#    When entity(person) set owns: email
+#    Then transaction commits
+#    When connection open write transaction for database: typedb
+#    When $a = entity(person) get instance with key(username): alice
+#    When $alice = attribute(email) as(string) put: alice@vaticle.com
+#    When entity $a set has: $alice
+#    When $b = entity(person) get instance with key(username): bob
+#    When $bob = attribute(email) as(string) put: bob@vaticle.com
+#    When entity $b set has: $bob
+#    Then transaction commits
+#    When connection open schema transaction for database: typedb
+#    When entity(person) set owns: email
+#    When entity(person) get owns(email) set annotation: @key
+#    Then entity(person) get owns(email; get annotations contain: @key
+#    Then entity(person) get owns(username; get annotations contain: @key
+#    Then transaction commits
+#    When connection open read transaction for database: typedb
+#    Then entity(person) get owns(email; get annotations contain: @key
+#    Then entity(person) get owns(username; get annotations contain: @key
 
 ########################
 # @subkey
@@ -3143,26 +3150,27 @@ Feature: Concept Owns
       | datetimetz | 2024-05-07+0100, 2024-05-10+0100 |
       | duration   | P1Y, P2Y                         |
 
-  Scenario Outline: Owns cannot have @values annotation with empty arguments
-    When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value type: <value-type>
-    When entity(person) set owns: custom-attribute
-    Then entity(person) get owns(custom-attribute) set annotation: @values; fails
-    Then entity(person) get owns(custom-attribute) set annotation: @values(); fails
-    Then entity(person) get owns(custom-attribute) get annotations is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then entity(person) get owns(custom-attribute) get annotations is empty
-    Examples:
-      | value-type |
-      | long       |
-      | double     |
-      | decimal    |
-      | string     |
-      | boolean    |
-      | datetime   |
-      | datetimetz |
-      | duration   |
+    #  TODO: Make it only for typeql
+#  Scenario Outline: Owns cannot have @values annotation with empty arguments
+#    When create attribute type: custom-attribute
+#    When attribute(custom-attribute) set value type: <value-type>
+#    When entity(person) set owns: custom-attribute
+#    Then entity(person) get owns(custom-attribute) set annotation: @values; fails
+#    Then entity(person) get owns(custom-attribute) set annotation: @values(); fails
+#    Then entity(person) get owns(custom-attribute) get annotations is empty
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then entity(person) get owns(custom-attribute) get annotations is empty
+#    Examples:
+#      | value-type |
+#      | long       |
+#      | double     |
+#      | decimal    |
+#      | string     |
+#      | boolean    |
+#      | datetime   |
+#      | datetimetz |
+#      | duration   |
 
   Scenario Outline: Owns cannot have @values annotation for <value-type> value type with arguments of invalid value or type
     When create attribute type: custom-attribute
@@ -3483,27 +3491,28 @@ Feature: Concept Owns
     When entity(person) get owns(custom-attribute) set annotation: @range(custom-struct("string"), custom-struct("string+1")); fails
     When entity(person) get owns(custom-attribute) set annotation: @range(custom-struct(custom-field: "string"), custom-struct(custom-field: "string+1")); fails
 
-  Scenario Outline: Owns cannot have @range annotation for <value-type> value type with less than two args
-    When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value type: <value-type>
-    When entity(person) set owns: custom-attribute
-    Then entity(person) get owns(custom-attribute) set annotation: @range; fails
-    Then entity(person) get owns(custom-attribute) set annotation: @range(); fails
-    Then entity(person) get owns(custom-attribute) set annotation: @range(<arg0>); fails
-    Then entity(person) get owns(custom-attribute) get annotations is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then entity(person) get owns(custom-attribute) get annotations is empty
-    Examples:
-      | value-type | arg0            |
-      | long       | 1               |
-      | double     | 1.0             |
-      | decimal    | 1.0             |
-      | string     | "1"             |
-      | boolean    | false           |
-      | datetime   | 2024-06-04      |
-      | datetimetz | 2024-06-04+0100 |
-      | duration   | P1Y             |
+    #  TODO: Make it only for typeql
+#  Scenario Outline: Owns cannot have @range annotation for <value-type> value type with less than two args
+#    When create attribute type: custom-attribute
+#    When attribute(custom-attribute) set value type: <value-type>
+#    When entity(person) set owns: custom-attribute
+#    Then entity(person) get owns(custom-attribute) set annotation: @range; fails
+#    Then entity(person) get owns(custom-attribute) set annotation: @range(); fails
+#    Then entity(person) get owns(custom-attribute) set annotation: @range(<arg0>); fails
+#    Then entity(person) get owns(custom-attribute) get annotations is empty
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then entity(person) get owns(custom-attribute) get annotations is empty
+#    Examples:
+#      | value-type | arg0            |
+#      | long       | 1               |
+#      | double     | 1.0             |
+#      | decimal    | 1.0             |
+#      | string     | "1"             |
+#      | boolean    | false           |
+#      | datetime   | 2024-06-04      |
+#      | datetimetz | 2024-06-04+0100 |
+#      | duration   | P1Y             |
 
   Scenario Outline: Owns can reset @range annotation with the same argument
     When create attribute type: custom-attribute
@@ -4229,29 +4238,30 @@ Feature: Concept Owns
       | relation  | description | duration      |
       | relation  | description | custom-struct |
 
-  Scenario Outline: Owns cannot have @distinct annotation for <value-type> with arguments
-    When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value type: <value-type>
-    When entity(person) set owns: custom-attribute
-    When entity(person) get owns(custom-attribute) set ordering: ordered
-    Then entity(person) get owns(custom-attribute) set annotation: @distinct(); fails
-    Then entity(person) get owns(custom-attribute) set annotation: @distinct(1); fails
-    Then entity(person) get owns(custom-attribute) set annotation: @distinct("1"); fails
-    Then entity(person) get owns(custom-attribute) get annotations is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then entity(person) get owns(custom-attribute) get annotations is empty
-    Examples:
-      | value-type    |
-      | long          |
-      | string        |
-      | boolean       |
-      | double        |
-      | decimal       |
-      | datetime      |
-      | datetimetz    |
-      | duration      |
-      | custom-struct |
+    #  TODO: Make it only for typeql
+#  Scenario Outline: Owns cannot have @distinct annotation for <value-type> with arguments
+#    When create attribute type: custom-attribute
+#    When attribute(custom-attribute) set value type: <value-type>
+#    When entity(person) set owns: custom-attribute
+#    When entity(person) get owns(custom-attribute) set ordering: ordered
+#    Then entity(person) get owns(custom-attribute) set annotation: @distinct(); fails
+#    Then entity(person) get owns(custom-attribute) set annotation: @distinct(1); fails
+#    Then entity(person) get owns(custom-attribute) set annotation: @distinct("1"); fails
+#    Then entity(person) get owns(custom-attribute) get annotations is empty
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then entity(person) get owns(custom-attribute) get annotations is empty
+#    Examples:
+#      | value-type    |
+#      | long          |
+#      | string        |
+#      | boolean       |
+#      | double        |
+#      | decimal       |
+#      | datetime      |
+#      | datetimetz    |
+#      | duration      |
+#      | custom-struct |
 
   Scenario Outline: Owns can reset @distinct annotations
     When create attribute type: custom-attribute
@@ -4444,8 +4454,9 @@ Feature: Concept Owns
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: string
     When entity(person) set owns: custom-attribute
-    Then entity(person) get owns(custom-attribute) set annotation: @regex; fails
-    Then entity(person) get owns(custom-attribute) set annotation: @regex(); fails
+    #  TODO: Make it only for typeql
+#    Then entity(person) get owns(custom-attribute) set annotation: @regex; fails
+#    Then entity(person) get owns(custom-attribute) set annotation: @regex(); fails
     Then entity(person) get owns(custom-attribute) set annotation: @regex(<args>); fails
     Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits

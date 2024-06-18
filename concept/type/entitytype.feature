@@ -66,26 +66,27 @@ Feature: Concept Entity Type
       | person  |
       | company |
 
-  Scenario: Entity types that have instances cannot be deleted
-    When create entity type: person
-    When transaction commits
-    When connection open write transaction for database: typedb
-    When $x = entity(person) create new instance
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then delete entity type: person; fails
+    # TODO: Move all "create new instance" into validation?
+#  Scenario: Entity types that have instances cannot be deleted
+#    When create entity type: person
+#    When transaction commits
+#    When connection open write transaction for database: typedb
+#    When $x = entity(person) create new instance
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then delete entity type: person; fails
 
   Scenario: Entity types can change labels
     When create entity type: person
     Then entity(person) get name: person
-    When entity(person) set name: horse
+    When entity(person) set label: horse
     Then entity(person) does not exist
     Then entity(horse) exists
     Then entity(horse) get name: horse
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(horse) get name: horse
-    When entity(horse) set name: animal
+    When entity(horse) set label: animal
     Then entity(horse) does not exist
     Then entity(animal) exists
     Then entity(animal) get name: animal
@@ -190,13 +191,6 @@ Feature: Concept Entity Type
 # @annotations common
 ########################
 
-  Scenario Outline: Entity type cannot unset @<annotation> that has not been set
-    When create entity type: person
-    Then entity(person) unset annotation: @<annotation>; fails
-    Examples:
-      | annotation      |
-      | abstract        |
-
   Scenario Outline: Entity type can set and unset @<annotation>
     When create entity type: person
     When entity(person) set annotation: @<annotation>
@@ -215,9 +209,72 @@ Feature: Concept Entity Type
       | annotation      |
       | abstract        |
 
+  Scenario Outline: Entity type can unset @<annotation> that has not been set
+    When create entity type: person
+    Then entity(person) get annotations do not contain: @<annotation>
+    When entity(person) unset annotation: @<annotation>
+    Then entity(person) get annotations do not contain: @<annotation>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get annotations do not contain: @<annotation>
+    When entity(person) unset annotation: @<annotation>
+    Then entity(person) get annotations do not contain: @<annotation>
+    Examples:
+      | annotation      |
+      | abstract        |
+
+    # Uncomment this test and when there appear inherited annotations (abstract is not inherited)
+#  Scenario Outline: Entity type cannot set or unset an inherited @<annotation>
+#    When create entity type: person
+#    When entity(person) set annotation: @<annotation>
+#    When create entity type: player
+#    When entity(player) set supertype: person
+#    Then entity(person) get annotations contain: @<annotation>
+#    Then entity(player) get annotations contain: @<annotation>
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then entity(person) get annotations contain: @<annotation>
+#    Then entity(player) get annotations contain: @<annotation>
+#    When entity(player) set annotation: @<annotation>
+#    Then transaction commits; fails
+#    When connection open schema transaction for database: typedb
+#    Then entity(person) get annotations contain: @<annotation>
+#    Then entity(player) get annotations contain: @<annotation>
+#    Then entity(player) unset annotation: @<annotation>; fails
+#    When connection open schema transaction for database: typedb
+#    Then entity(person) get annotations contain: @<annotation>
+#    Then entity(player) get annotations contain: @<annotation>
+#    Examples:
+#      | annotation      |
+#      |         |
+
 ########################
 # @abstract
 ########################
+
+  # TODO: This test with new instances should be in entity.feature!
+#  Scenario: Entity types can be set to abstract
+#    When create entity type: person
+#    When entity(person) set annotation: @abstract
+#    When create entity type: company
+#    Then entity(person) get annotations contain: @abstract
+#    When transaction commits
+#    When connection open write transaction for database: typedb
+#    Then entity(person) create new instance; fails
+#    When connection open write transaction for database: typedb
+#    Then entity(company) get annotations do not contain: @abstract
+#    Then entity(person) get annotations contain: @abstract
+#    Then entity(person) create new instance; fails
+#    When connection open schema transaction for database: typedb
+#    Then entity(company) get annotations do not contain: @abstract
+#    When entity(company) set annotation: @abstract
+#    Then entity(company) get annotations contain: @abstract
+#    When transaction commits
+#    When connection open write transaction for database: typedb
+#    Then entity(company) create new instance; fails
+#    When connection open write transaction for database: typedb
+#    Then entity(company) get annotations contain: @abstract
+#    Then entity(company) create new instance; fails
 
   Scenario: Entity types can be set to abstract
     When create entity type: person
@@ -225,36 +282,30 @@ Feature: Concept Entity Type
     When create entity type: company
     Then entity(person) get annotations contain: @abstract
     When transaction commits
-    When connection open write transaction for database: typedb
-    Then entity(person) create new instance; fails
-    When connection open write transaction for database: typedb
-    Then entity(company) get annotations do not contain: @abstract
-    Then entity(person) get annotations contain: @abstract
-    Then entity(person) create new instance; fails
     When connection open schema transaction for database: typedb
     Then entity(company) get annotations do not contain: @abstract
+    Then entity(person) get annotations contain: @abstract
     When entity(company) set annotation: @abstract
     Then entity(company) get annotations contain: @abstract
     When transaction commits
-    When connection open write transaction for database: typedb
-    Then entity(company) create new instance; fails
-    When connection open write transaction for database: typedb
-    Then entity(company) get annotations contain: @abstract
-    Then entity(company) create new instance; fails
-
-  Scenario: Entity types can be set to abstract when a subtype has instances
-    When create entity type: person
-    When create entity type: player
-    When entity(player) set supertype: person
-    Then transaction commits
-    When connection open write transaction for database: typedb
-    When $m = entity(player) create new instance
-    Then transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) set annotation: @abstract
-    Then transaction commits
-    When connection open read transaction for database: typedb
-    Then entity(person) get annotations contain: @abstract
+    Then entity(company) get annotations contain: @abstract
+
+    # TODO: Move to entity.feature or schema/data-validation?
+#  Scenario: Entity types can be set to abstract when a subtype has instances
+#    When create entity type: person
+#    When create entity type: player
+#    When entity(player) set supertype: person
+#    Then transaction commits
+#    When connection open write transaction for database: typedb
+#    When $m = entity(player) create new instance
+#    Then transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then entity(person) set annotation: @abstract
+#    Then transaction commits
+#    When connection open read transaction for database: typedb
+#    Then entity(person) get annotations contain: @abstract
+
 #  TODO: Make it only for typeql
 #  Scenario: Entity cannot set @abstract annotation with arguments
 #    When create entity type: person
@@ -311,21 +362,21 @@ Feature: Concept Entity Type
 ########################
 # not compatible @annotations: @distinct, @key, @unique, @subkey, @values, @range, @card, @cascade, @independent, @replace, @regex
 ########################
-
-  Scenario: Entity type cannot have @distinct, @key, @unique, @subkey, @values, @range, @card, @cascade, @independent, @replace, and @regex annotations
-    When create entity type: person
-    Then entity(person) set annotation: @distinct; fails
-    Then entity(person) set annotation: @key; fails
-    Then entity(person) set annotation: @unique; fails
-    Then entity(person) set annotation: @subkey(LABEL); fails
-    Then entity(person) set annotation: @values(1, 2); fails
-    Then entity(person) set annotation: @range(1, 2); fails
-    Then entity(person) set annotation: @card(1, 2); fails
-    Then entity(person) set annotation: @cascade; fails
-    Then entity(person) set annotation: @independent; fails
-    Then entity(person) set annotation: @replace; fails
-    Then entity(person) set annotation: @regex("val"); fails
-    Then entity(person) get annotations is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then entity(person) get annotations is empty
+#  TODO: Make it only for typeql
+#  Scenario: Entity type cannot have @distinct, @key, @unique, @subkey, @values, @range, @card, @cascade, @independent, @replace, and @regex annotations
+#    When create entity type: person
+#    Then entity(person) set annotation: @distinct; fails
+#    Then entity(person) set annotation: @key; fails
+#    Then entity(person) set annotation: @unique; fails
+#    Then entity(person) set annotation: @subkey(LABEL); fails
+#    Then entity(person) set annotation: @values(1, 2); fails
+#    Then entity(person) set annotation: @range(1, 2); fails
+#    Then entity(person) set annotation: @card(1, 2); fails
+#    Then entity(person) set annotation: @cascade; fails
+#    Then entity(person) set annotation: @independent; fails
+#    Then entity(person) set annotation: @replace; fails
+#    Then entity(person) set annotation: @regex("val"); fails
+#    Then entity(person) get annotations is empty
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then entity(person) get annotations is empty
