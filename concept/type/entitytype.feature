@@ -224,7 +224,7 @@ Feature: Concept Entity Type
       | abstract        |
 
     # Uncomment this test and when there appear inherited annotations (abstract is not inherited)
-#  Scenario Outline: Entity type cannot set or unset an inherited @<annotation>
+#  Scenario Outline: Entity type cannot set or unset inherited @<annotation>
 #    When create entity type: person
 #    When entity(person) set annotation: @<annotation>
 #    When create entity type: player

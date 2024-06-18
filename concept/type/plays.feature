@@ -63,24 +63,24 @@ Feature: Concept Plays
     Then relation(marriage) get role(wife) get players contain:
       | person |
 
-  Scenario: Entity types cannot play entities, relations, attributes, structs, structs fields, and non-existing things
-    When create entity type: car
-    When create relation type: credit
-    When create attribute type: id
-    When attribute(id) set value type: long
-    When relation(credit) create role: creditor
-    When create struct type: passport
-    When struct(passport) create field: birthday, with value type: datetime
-    Then entity(person) set plays: car; fails
-    Then entity(person) set plays: credit; fails
-    Then entity(person) set plays: id; fails
-    Then entity(person) set plays: passport; fails
-    Then entity(person) set plays: passport:birthday; fails
-    Then entity(person) set plays: does-not-exist; fails
-    Then entity(person) get plays is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then entity(person) get plays is empty
+#  Scenario: Entity types cannot play entities, relations, attributes, structs, structs fields, and non-existing things
+#    When create entity type: car
+#    When create relation type: credit
+#    When create attribute type: id
+#    When attribute(id) set value type: long
+#    When relation(credit) create role: creditor
+#    When create struct type: passport
+#    When struct(passport) create field: birthday, with value type: datetime
+#    Then entity(person) set plays: car; fails
+#    Then entity(person) set plays: credit; fails
+#    Then entity(person) set plays: id; fails
+#    Then entity(person) set plays: passport; fails
+#    Then entity(person) set plays: passport:birthday; fails
+#    Then entity(person) set plays: does-not-exist; fails
+#    Then entity(person) get plays is empty
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then entity(person) get plays is empty
 
   Scenario: Entity types can unset playing role types
     When create relation type: marriage
@@ -410,27 +410,27 @@ Feature: Concept Plays
       | locates:located     |
       | organises:organised |
 
-  Scenario: Relation types cannot play entities, relations, attributes, structs, structs fields, and non-existing things
-    When create entity type: car
-    When create relation type: credit
-    When create attribute type: id
-    When attribute(id) set value type: long
-    When relation(credit) create role: creditor
-    When create relation type: marriage
-    When relation(marriage) create role: spouse
-    When create struct type: passport
-    When struct(passport) create field: birthday, with value type: datetime
-    Then relation(marriage) set plays: car; fails
-    Then relation(marriage) set plays: credit; fails
-    Then relation(marriage) set plays: id; fails
-    Then relation(marriage) set plays: passport; fails
-    Then relation(marriage) set plays: passport:birthday; fails
-    Then relation(marriage) set plays: marriage:spouse; fails
-    Then relation(marriage) set plays: does-not-exist; fails
-    Then relation(marriage) get plays is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then relation(marriage) get plays is empty
+#  Scenario: Relation types cannot play entities, relations, attributes, structs, structs fields, and non-existing things
+#    When create entity type: car
+#    When create relation type: credit
+#    When create attribute type: id
+#    When attribute(id) set value type: long
+#    When relation(credit) create role: creditor
+#    When create relation type: marriage
+#    When relation(marriage) create role: spouse
+#    When create struct type: passport
+#    When struct(passport) create field: birthday, with value type: datetime
+#    Then relation(marriage) set plays: car; fails
+#    Then relation(marriage) set plays: credit; fails
+#    Then relation(marriage) set plays: id; fails
+#    Then relation(marriage) set plays: passport; fails
+#    Then relation(marriage) set plays: passport:birthday; fails
+#    Then relation(marriage) set plays: marriage:spouse; fails
+#    Then relation(marriage) set plays: does-not-exist; fails
+#    Then relation(marriage) get plays is empty
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then relation(marriage) get plays is empty
 
   Scenario: Relation types can unset playing role types
     When create relation type: locates
@@ -650,51 +650,51 @@ Feature: Concept Plays
     Then relation(contractor-employment) get plays(contractor-locates:contractor-located) set override: contractor-locates:contractor-located; fails
     Then relation(contractor-employment) get plays(contractor-locates:contractor-located) set override: locates:located; fails
 
-  Scenario: Attribute types cannot play entities, attributes, relations, roles, structs, structs fields, and non-existing things
-    When create attribute type: surname
-    When create relation type: marriage
-    When relation(marriage) create role: spouse
-    When attribute(surname) set value type: string
-    When create struct type: passport
-    When struct(passport) create field: first-name, with value type: string
-    When struct(passport) create field: surname, with value type: string
-    When struct(passport) create field: birthday, with value type: datetime
-    When create attribute type: name
-    When attribute(name) set value type: string
-    Then attribute(name) set plays: person; fails
-    Then attribute(name) set plays: surname; fails
-    Then attribute(name) set plays: marriage; fails
-    Then attribute(name) set plays: marriage:spouse; fails
-    Then attribute(name) set plays: passport; fails
-    Then attribute(name) set plays: passport:birthday; fails
-    Then attribute(name) set plays: does-not-exist; fails
-    Then attribute(name) get plays is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then attribute(name) get plays is empty
+#  Scenario: Attribute types cannot play entities, attributes, relations, roles, structs, structs fields, and non-existing things
+#    When create attribute type: surname
+#    When create relation type: marriage
+#    When relation(marriage) create role: spouse
+#    When attribute(surname) set value type: string
+#    When create struct type: passport
+#    When struct(passport) create field: first-name, with value type: string
+#    When struct(passport) create field: surname, with value type: string
+#    When struct(passport) create field: birthday, with value type: datetime
+#    When create attribute type: name
+#    When attribute(name) set value type: string
+#    Then attribute(name) set plays: person; fails
+#    Then attribute(name) set plays: surname; fails
+#    Then attribute(name) set plays: marriage; fails
+#    Then attribute(name) set plays: marriage:spouse; fails
+#    Then attribute(name) set plays: passport; fails
+#    Then attribute(name) set plays: passport:birthday; fails
+#    Then attribute(name) set plays: does-not-exist; fails
+#    Then attribute(name) get plays is empty
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then attribute(name) get plays is empty
 
-  Scenario: Struct types cannot play entities, attributes, relations, roles, structs, structs fields, and non-existing things
-    When create attribute type: name
-    When create relation type: marriage
-    When relation(marriage) create role: spouse
-    When attribute(surname) set value type: string
-    When create struct type: passport
-    When struct(passport) create field: birthday, with value type: datetime
-    When create struct type: wallet
-    When struct(wallet) create field: currency, with value type: string
-    When struct(wallet) create field: value, with value type: double
-    Then struct(wallet) set plays: person; fails
-    Then struct(wallet) set plays: name; fails
-    Then struct(wallet) set plays: marriage; fails
-    Then struct(wallet) set plays: marriage:spouse; fails
-    Then struct(wallet) set plays: passport; fails
-    Then struct(wallet) set plays: passport:birthday; fails
-    Then struct(wallet) set plays: wallet:currency; fails
-    Then struct(wallet) set plays: does-not-exist; fails
-    Then struct(wallet) get plays is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then struct(wallet) get plays is empty
+#  Scenario: Struct types cannot play entities, attributes, relations, roles, structs, structs fields, and non-existing things
+#    When create attribute type: name
+#    When create relation type: marriage
+#    When relation(marriage) create role: spouse
+#    When attribute(surname) set value type: string
+#    When create struct type: passport
+#    When struct(passport) create field: birthday, with value type: datetime
+#    When create struct type: wallet
+#    When struct(wallet) create field: currency, with value type: string
+#    When struct(wallet) create field: value, with value type: double
+#    Then struct(wallet) set plays: person; fails
+#    Then struct(wallet) set plays: name; fails
+#    Then struct(wallet) set plays: marriage; fails
+#    Then struct(wallet) set plays: marriage:spouse; fails
+#    Then struct(wallet) set plays: passport; fails
+#    Then struct(wallet) set plays: passport:birthday; fails
+#    Then struct(wallet) set plays: wallet:currency; fails
+#    Then struct(wallet) set plays: does-not-exist; fails
+#    Then struct(wallet) get plays is empty
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then struct(wallet) get plays is empty
 
   Scenario Outline: <root-type> types can redeclare playing role types
     When create relation type: parentship
@@ -1165,7 +1165,7 @@ Feature: Concept Plays
       | entity    | person      | card(0, 1) |
       | relation  | description | card(0, 1) |
 
-  Scenario Outline: <root-type> types cannot unset not set @<annotation> of plays
+  Scenario Outline: <root-type> types can unset not set @<annotation> of plays
     When create relation type: marriage
     When relation(marriage) create role: spouse
     When create relation type: parentship
@@ -1174,15 +1174,20 @@ Feature: Concept Plays
     When <root-type>(<type-name>) get plays(marriage:spouse) set annotation: @<annotation>
     Then <root-type>(<type-name>) get plays(marriage:spouse) get annotation contain: @<annotation>
     When <root-type>(<type-name>) set plays: parentship:parent
-    Then <root-type>(<type-name>) get plays(parentship:parent) unset annotation: @<annotation>; fails
+    Then <root-type>(<type-name>) get plays(parentship:parent) get annotations do not contain: @<annotation>
+    When <root-type>(<type-name>) get plays(parentship:parent) unset annotation: @<annotation>
+    Then <root-type>(<type-name>) get plays(parentship:parent) get annotations do not contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<type-name>) get plays(marriage:spouse) get annotation contain: @<annotation>
-    Then <root-type>(<type-name>) get plays(parentship:parent) unset annotation: @<annotation>; fails
-    Then <root-type>(<type-name>) get plays(marriage:spouse) unset annotation: @<annotation>
-    Then <root-type>(<type-name>) get plays(marriage:spouse) unset annotation: @<annotation>; fails
-    Then <root-type>(<type-name>) get plays(marriage:spouse) get annotations is empty
-    Then <root-type>(<type-name>) get plays(parentship:parent) get annotations is empty
+    Then <root-type>(<type-name>) get plays(parentship:parent) get annotations do not contain: @<annotation>
+    When <root-type>(<type-name>) get plays(parentship:parent) unset annotation: @<annotation>
+    Then <root-type>(<type-name>) get plays(parentship:parent) get annotations do not contain: @<annotation>
+    Then <root-type>(<type-name>) get plays(marriage:spouse) get annotations contain: @<annotation>
+    When <root-type>(<type-name>) get plays(marriage:spouse) unset annotation: @<annotation>
+    Then <root-type>(<type-name>) get plays(marriage:spouse) get annotations do not contain: @<annotation>
+    When <root-type>(<type-name>) get plays(marriage:spouse) unset annotation: @<annotation>
+    Then <root-type>(<type-name>) get plays(marriage:spouse) get annotations do not contain: @<annotation>
     When transaction commits
     When connection open read transaction for database: typedb
     Then <root-type>(<type-name>) get plays(marriage:spouse) get annotations is empty

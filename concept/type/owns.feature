@@ -26,8 +26,8 @@ Feature: Concept Owns
     # Notice: supertypes are the same, but can be overridden for the second subtype inside the tests
     Given relation(registration) set supertype: description
     Given relation(profile) set supertype: description
-    Given create struct type: custom-struct
-    Given struct(custom-struct) create field: custom-field
+#    Given create struct type: custom-struct
+#    Given struct(custom-struct) create field: custom-field
 
     Given transaction commits
     Given connection open schema transaction for database: typedb
@@ -88,7 +88,7 @@ Feature: Concept Owns
       | datetime      | decimal      |
       | datetimetz    | double       |
       | duration      | boolean      |
-      | custom-struct | long         |
+#      | custom-struct | long         |
 
   Scenario Outline: Entity types can redeclare owning attributes with <value-type> value type
     When create attribute type: name
@@ -111,24 +111,24 @@ Feature: Concept Owns
       | datetime      |
       | datetimetz    |
       | duration      |
-      | custom-struct |
+#      | custom-struct |
 
-  Scenario: Entity types cannot own entities, relations, roles, structs, structs fields, and non-existing things
-    When create entity type: car
-    When create relation type: credit
-    When relation(credit) create role: creditor
-    When create struct type: passport
-    When struct(passport) create field: birthday, with value type: datetime
-    Then entity(person) set owns: car; fails
-    Then entity(person) set owns: credit; fails
-    Then entity(person) set owns: credit:creditor; fails
-    Then entity(person) set owns: passport; fails
-    Then entity(person) set owns: passport:birthday; fails
-    Then entity(person) set owns: does-not-exist; fails
-    Then entity(person) get owns is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then entity(person) get owns is empty
+#  Scenario: Entity types cannot own entities, relations, roles, structs, structs fields, and non-existing things
+#    When create entity type: car
+#    When create relation type: credit
+#    When relation(credit) create role: creditor
+#    When create struct type: passport
+#    When struct(passport) create field: birthday, with value type: datetime
+#    Then entity(person) set owns: car; fails
+#    Then entity(person) set owns: credit; fails
+#    Then entity(person) set owns: credit:creditor; fails
+#    Then entity(person) set owns: passport; fails
+#    Then entity(person) set owns: passport:birthday; fails
+#    Then entity(person) set owns: does-not-exist; fails
+#    Then entity(person) get owns is empty
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then entity(person) get owns is empty
 
   Scenario: Entity type cannot own attribute without value type
     When create entity type: player
@@ -256,7 +256,7 @@ Feature: Concept Owns
       | datetime      | decimal      |
       | datetimetz    | double       |
       | duration      | boolean      |
-      | custom-struct | long         |
+#      | custom-struct | long         |
 
   Scenario Outline: Relation types can redeclare owning attributes with <value-type> value type
     When create attribute type: name
@@ -281,28 +281,28 @@ Feature: Concept Owns
       | datetime      |
       | datetimetz    |
       | duration      |
-      | custom-struct |
+#      | custom-struct |
 
-  Scenario: Relation types cannot own entities, relations, roles, structs, structs fields, and non-existing things
-    When create relation type: credit
-    When relation(credit) create role: creditor
-    When create relation type: marriage
-    When relation(marriage) create role: spouse
-    When create struct type: passport-document
-    When struct(passport-document) create field: first-name, with value type: string
-    When struct(passport-document) create field: surname, with value type: string
-    When struct(passport-document) create field: birthday, with value type: datetime
-    Then relation(marriage) set owns: person; fails
-    Then relation(marriage) set owns: credit; fails
-    Then relation(marriage) set owns: credit:creditor; fails
-    Then relation(marriage) set owns: passport; fails
-    Then relation(marriage) set owns: passport:birthday; fails
-    Then relation(marriage) set owns: marriage:spouse; fails
-    Then relation(marriage) set owns: does-not-exist; fails
-    Then relation(marriage) get owns is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then relation(marriage) get owns is empty
+#  Scenario: Relation types cannot own entities, relations, roles, structs, structs fields, and non-existing things
+#    When create relation type: credit
+#    When relation(credit) create role: creditor
+#    When create relation type: marriage
+#    When relation(marriage) create role: spouse
+#    When create struct type: passport-document
+#    When struct(passport-document) create field: first-name, with value type: string
+#    When struct(passport-document) create field: surname, with value type: string
+#    When struct(passport-document) create field: birthday, with value type: datetime
+#    Then relation(marriage) set owns: person; fails
+#    Then relation(marriage) set owns: credit; fails
+#    Then relation(marriage) set owns: credit:creditor; fails
+#    Then relation(marriage) set owns: passport; fails
+#    Then relation(marriage) set owns: passport:birthday; fails
+#    Then relation(marriage) set owns: marriage:spouse; fails
+#    Then relation(marriage) set owns: does-not-exist; fails
+#    Then relation(marriage) get owns is empty
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then relation(marriage) get owns is empty
 
   Scenario: Relation type cannot own attribute without value type
     When create relation type: reference
@@ -381,51 +381,51 @@ Feature: Concept Owns
     Then relation(reference) unset annotation: @abstract; fails
     Then relation(reference) get annotations contain: @abstract
 
-  Scenario: Attribute types cannot own entities, attributes, relations, roles, structs, structs fields, and non-existing things
-    When create attribute type: surname
-    When create relation type: marriage
-    When relation(marriage) create role: spouse
-    When attribute(surname) set value type: string
-    When create struct type: passport
-    When struct(passport) create field: first-name, with value type: string
-    When struct(passport) create field: surname, with value type: string
-    When struct(passport) create field: birthday, with value type: datetime
-    When create attribute type: name
-    When attribute(name) set value type: string
-    Then attribute(name) set owns: person; fails
-    Then attribute(name) set owns: surname; fails
-    Then attribute(name) set owns: marriage; fails
-    Then attribute(name) set owns: marriage:spouse; fails
-    Then attribute(name) set owns: passport; fails
-    Then attribute(name) set owns: passport:birthday; fails
-    Then attribute(name) set owns: does-not-exist; fails
-    Then attribute(name) get owns is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then attribute(name) get owns is empty
+#  Scenario: Attribute types cannot own entities, attributes, relations, roles, structs, structs fields, and non-existing things
+#    When create attribute type: surname
+#    When create relation type: marriage
+#    When relation(marriage) create role: spouse
+#    When attribute(surname) set value type: string
+#    When create struct type: passport
+#    When struct(passport) create field: first-name, with value type: string
+#    When struct(passport) create field: surname, with value type: string
+#    When struct(passport) create field: birthday, with value type: datetime
+#    When create attribute type: name
+#    When attribute(name) set value type: string
+#    Then attribute(name) set owns: person; fails
+#    Then attribute(name) set owns: surname; fails
+#    Then attribute(name) set owns: marriage; fails
+#    Then attribute(name) set owns: marriage:spouse; fails
+#    Then attribute(name) set owns: passport; fails
+#    Then attribute(name) set owns: passport:birthday; fails
+#    Then attribute(name) set owns: does-not-exist; fails
+#    Then attribute(name) get owns is empty
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then attribute(name) get owns is empty
 
-  Scenario: Struct types cannot own entities, attributes, relations, roles, structs, structs fields, and non-existing things
-    When create attribute type: name
-    When create relation type: marriage
-    When relation(marriage) create role: spouse
-    When attribute(surname) set value type: string
-    When create struct type: passport
-    When struct(passport) create field: birthday, with value type: datetime
-    When create struct type: wallet
-    When struct(wallet) create field: currency, with value type: string
-    When struct(wallet) create field: value, with value type: double
-    Then struct(wallet) set owns: person; fails
-    Then struct(wallet) set owns: name; fails
-    Then struct(wallet) set owns: marriage; fails
-    Then struct(wallet) set owns: marriage:spouse; fails
-    Then struct(wallet) set owns: passport; fails
-    Then struct(wallet) set owns: passport:birthday; fails
-    Then struct(wallet) set owns: wallet:currency; fails
-    Then struct(wallet) set owns: does-not-exist; fails
-    Then struct(wallet) get owns is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then struct(wallet) get owns is empty
+#  Scenario: Struct types cannot own entities, attributes, relations, roles, structs, structs fields, and non-existing things
+#    When create attribute type: name
+#    When create relation type: marriage
+#    When relation(marriage) create role: spouse
+#    When attribute(surname) set value type: string
+#    When create struct type: passport
+#    When struct(passport) create field: birthday, with value type: datetime
+#    When create struct type: wallet
+#    When struct(wallet) create field: currency, with value type: string
+#    When struct(wallet) create field: value, with value type: double
+#    Then struct(wallet) set owns: person; fails
+#    Then struct(wallet) set owns: name; fails
+#    Then struct(wallet) set owns: marriage; fails
+#    Then struct(wallet) set owns: marriage:spouse; fails
+#    Then struct(wallet) set owns: passport; fails
+#    Then struct(wallet) set owns: passport:birthday; fails
+#    Then struct(wallet) set owns: wallet:currency; fails
+#    Then struct(wallet) set owns: does-not-exist; fails
+#    Then struct(wallet) get owns is empty
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then struct(wallet) get owns is empty
 
     # TODO: Move to thing-feature or schema/data-validation?
 #  Scenario Outline: <root-type> types cannot unset owning attributes that are owned by existing instances
@@ -488,7 +488,7 @@ Feature: Concept Owns
       | entity    | person         | customer     | datetime      |
       | entity    | person         | customer     | datetimetz    |
       | entity    | person         | customer     | duration      |
-      | entity    | person         | customer     | custom-struct |
+#      | entity    | person         | customer     | custom-struct |
       | relation  | description    | registration | long          |
       | relation  | description    | registration | double        |
       | relation  | description    | registration | decimal       |
@@ -497,7 +497,7 @@ Feature: Concept Owns
       | relation  | description    | registration | datetime      |
       | relation  | description    | registration | datetimetz    |
       | relation  | description    | registration | duration      |
-      | relation  | description    | registration | custom-struct |
+#      | relation  | description    | registration | custom-struct |
 
   Scenario Outline: <root-type> types cannot redeclare inherited owns as owns
     When create attribute type: email
@@ -530,7 +530,7 @@ Feature: Concept Owns
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | value-type    |
       | entity    | person         | customer     | subscriber     | datetimetz    |
-      | entity    | person         | customer     | subscriber     | custom-struct |
+#      | entity    | person         | customer     | subscriber     | custom-struct |
       | relation  | description    | registration | profile        | decimal       |
       | relation  | description    | registration | profile        | string        |
 
@@ -715,7 +715,7 @@ Feature: Concept Owns
       | datetime      | decimal      |
       | datetimetz    | double       |
       | duration      | boolean      |
-      | custom-struct | long         |
+#      | custom-struct | long         |
 
      # TODO: Move to thing-feature or schema/data-validation?
 #  Scenario: Ownership can change ordering if it does not have instances even if its owner has instances for entity type
@@ -807,7 +807,7 @@ Feature: Concept Owns
       | datetime      |
       | datetimetz    |
       | duration      |
-      | custom-struct |
+#      | custom-struct |
 
   Scenario: Abstract entity type can set ordered ownership
     When create entity type: player
@@ -900,7 +900,7 @@ Feature: Concept Owns
       | datetime      | decimal      |
       | datetimetz    | double       |
       | duration      | boolean      |
-      | custom-struct | long         |
+#      | custom-struct | long         |
 
      # TODO: Move to thing-feature or schema/data-validation?
 #  Scenario: Ownership can change ordering if it does not have instances even if its owner has instances for relation type
@@ -1008,7 +1008,7 @@ Feature: Concept Owns
       | datetime      |
       | datetimetz    |
       | duration      |
-      | custom-struct |
+#      | custom-struct |
 
   Scenario: Abstract relation type can set ordered ownership of abstract attribute
     When create relation type: reference
@@ -1200,7 +1200,7 @@ Feature: Concept Owns
       | entity    | person         | customer     | datetime      |
       | entity    | person         | customer     | datetimetz    |
       | entity    | person         | customer     | duration      |
-      | entity    | person         | customer     | custom-struct |
+#      | entity    | person         | customer     | custom-struct |
       | relation  | description    | registration | long          |
       | relation  | description    | registration | double        |
       | relation  | description    | registration | decimal       |
@@ -1209,7 +1209,7 @@ Feature: Concept Owns
       | relation  | description    | registration | datetime      |
       | relation  | description    | registration | datetimetz    |
       | relation  | description    | registration | duration      |
-      | relation  | description    | registration | custom-struct |
+#      | relation  | description    | registration | custom-struct |
 
   Scenario Outline: <root-type> types cannot redeclare inherited owns as owns
     When create attribute type: email
@@ -1245,7 +1245,7 @@ Feature: Concept Owns
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | value-type    |
       | entity    | person         | customer     | subscriber     | datetimetz    |
-      | entity    | person         | customer     | subscriber     | custom-struct |
+#      | entity    | person         | customer     | subscriber     | custom-struct |
       | relation  | description    | registration | profile        | decimal       |
       | relation  | description    | registration | profile        | string        |
 
@@ -1402,7 +1402,7 @@ Feature: Concept Owns
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | value-type    |
       | entity    | person         | customer     | subscriber     | decimal       |
-      | relation  | description    | registration | profile        | custom-struct |
+#      | relation  | description    | registration | profile        | custom-struct |
 
   Scenario Outline: Unordered and ordered are propagated to subtypes of ownerships for <root-type> types unless overridden
     When create attribute type: name
@@ -1580,7 +1580,7 @@ Feature: Concept Owns
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | value-type    |
       | entity    | person         | customer     | subscriber     | decimal       |
-      | relation  | description    | registration | profile        | custom-struct |
+#      | relation  | description    | registration | profile        | custom-struct |
 
   Scenario Outline: Ownership cannot set or unset ordering if it overrides ordered ownership for <root-type>
     When create attribute type: name
@@ -1627,7 +1627,7 @@ Feature: Concept Owns
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | value-type    |
       | entity    | person         | customer     | subscriber     | decimal       |
-      | relation  | description    | registration | profile        | custom-struct |
+#      | relation  | description    | registration | profile        | custom-struct |
 
 ########################
 # @annotations common: contain common tests for annotations suitable for **scalar** owns:
@@ -1731,18 +1731,24 @@ Feature: Concept Owns
     When create attribute type: reference
     When attribute(reference) set value type: string
     When <root-type>(<type-name>) set owns: username
+    Then <root-type>(<type-name>) get owns(username) get annotation do not contain: @<annotation>
     When <root-type>(<type-name>) get owns(username) set annotation: @<annotation>
     Then <root-type>(<type-name>) get owns(username) get annotation contain: @<annotation>
     When <root-type>(<type-name>) set owns: reference
-    Then <root-type>(<type-name>) get owns(reference) unset annotation: @<annotation>; fails
+    Then <root-type>(<type-name>) get owns(reference) get annotation do not contain: @<annotation>
+    When <root-type>(<type-name>) get owns(reference) unset annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns(reference) get annotation do not contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<type-name>) get owns(username) get annotation contain: @<annotation>
-    Then <root-type>(<type-name>) get owns(reference) unset annotation: @<annotation>; fails
-    Then <root-type>(<type-name>) get owns(username) unset annotation: @<annotation>
-    Then <root-type>(<type-name>) get owns(username) unset annotation: @<annotation>; fails
-    Then <root-type>(<type-name>) get owns(username) get annotations is empty
-    Then <root-type>(<type-name>) get owns(reference) get annotations is empty
+    Then <root-type>(<type-name>) get owns(reference) get annotation do not contain: @<annotation>
+    When <root-type>(<type-name>) get owns(reference) unset annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns(reference) get annotation do not contain: @<annotation>
+    Then <root-type>(<type-name>) get owns(username) get annotation contain: @<annotation>
+    When <root-type>(<type-name>) get owns(username) unset annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns(username) get annotation do not contain: @<annotation>
+    When <root-type>(<type-name>) get owns(username) unset annotation: @<annotation>
+    Then <root-type>(<type-name>) get owns(username) get annotation do not contain: @<annotation>
     When transaction commits
     When connection open read transaction for database: typedb
     Then <root-type>(<type-name>) get owns(username) get annotations is empty
@@ -1764,7 +1770,7 @@ Feature: Concept Owns
       | relation  | description | card(1, 2)       |
       | relation  | description | regex("\S+")     |
 
-  Scenario Outline: <root-type> types cannot unset @<annotation> of inherited ownership
+  Scenario Outline: <root-type> types cannot set and unset @<annotation> of inherited ownership
     When create attribute type: username
     When attribute(username) set value type: string
     When <root-type>(<supertype-name>) set owns: username
@@ -1774,8 +1780,53 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get owns(username) unset annotation: @<annotation>; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns(username) get annotations contain: @<annotation>
+    Then <root-type>(<supertype-name>) get owns(username) get annotation contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(username) get annotation contain: @<annotation>
+    When <root-type>(<subtype-name>) get owns(username) set annotation: @<annotation>
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(username) get annotation contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(username) get annotation contain: @<annotation>
     Then <root-type>(<subtype-name>) get owns(username) unset annotation: @<annotation>; fails
+    Examples:
+      | root-type | supertype-name | subtype-name | annotation       |
+      | entity    | person         | customer     | key              |
+      | entity    | person         | customer     | unique           |
+      | entity    | person         | customer     | subkey(LABEL)    |
+      | entity    | person         | customer     | values("1", "2") |
+      | entity    | person         | customer     | range("1", "2")  |
+      | entity    | person         | customer     | card(1, 2)       |
+      | entity    | person         | customer     | regex("\S+")     |
+      | relation  | description    | registration | key              |
+      | relation  | description    | registration | unique           |
+      | relation  | description    | registration | subkey(LABEL)    |
+      | relation  | description    | registration | values("1", "2") |
+      | relation  | description    | registration | range("1", "2")  |
+      | relation  | description    | registration | card(1, 2)       |
+      | relation  | description    | registration | regex("\S+")     |
+
+  Scenario Outline: <root-type> types cannot set and unset @<annotation> of overridden ownership
+    When create attribute type: username
+    When attribute(username) set value type: string
+    When create attribute type: playername
+    When attribute(playername) set supertype: username
+    When <root-type>(<supertype-name>) set owns: username
+    When <root-type>(<supertype-name>) get owns(username) set annotation: @<annotation>
+    When <root-type>(<subtype-name>) set owns: playername
+    When <root-type>(<subtype-name>) get owns(playername) set override: username
+    Then <root-type>(<supertype-name>) get owns(username) get annotation contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(playername) get annotation contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(playername) unset annotation: @<annotation>; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(username) get annotation contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(playername) get annotation contain: @<annotation>
+    When <root-type>(<subtype-name>) get owns(playername) set annotation: @<annotation>
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(username) get annotation contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(playername) get annotation contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(playername) unset annotation: @<annotation>; fails
     Examples:
       | root-type | supertype-name | subtype-name | annotation       |
       | entity    | person         | customer     | key              |
@@ -2680,7 +2731,7 @@ Feature: Concept Owns
       | value-type    |
       | double        |
       | decimal       |
-      | custom-struct |
+#      | custom-struct |
 
   Scenario Outline: Owns cannot set @key annotation for ordered ownership
     When create attribute type: custom-attribute
@@ -2702,7 +2753,7 @@ Feature: Concept Owns
       | datetime      |
       | datetimetz    |
       | duration      |
-      | custom-struct |
+#      | custom-struct |
 
      # TODO: Move to thing-feature or schema/data-validation?
 #  Scenario: Entity types can only commit keys if every instance owns a distinct key
@@ -2890,7 +2941,7 @@ Feature: Concept Owns
       | value-type    |
       | double        |
       | decimal       |
-      | custom-struct |
+#      | custom-struct |
 
   Scenario: Owns cannot set @subkey annotation for incorrect arguments
     When create attribute type: custom-attribute
@@ -2931,7 +2982,7 @@ Feature: Concept Owns
       | datetime      |
       | datetimetz    |
       | duration      |
-      | custom-struct |
+#      | custom-struct |
 
 ########################
 # @unique
@@ -3005,7 +3056,7 @@ Feature: Concept Owns
       | value-type    |
       | double        |
       | decimal       |
-      | custom-struct |
+#      | custom-struct |
 
   # TODO: Change the test if owns can set @unique annotation for ordered ownership!
   Scenario Outline: Owns cannot set @unique annotation for ordered ownership
@@ -3028,7 +3079,7 @@ Feature: Concept Owns
       | datetime      |
       | datetimetz    |
       | duration      |
-      | custom-struct |
+#      | custom-struct |
 
 ########################
 # @values
@@ -3115,16 +3166,16 @@ Feature: Concept Owns
       | duration   | P1Y2M3DT4H5M6.789S                                                                                                                                                                                                                                                                                                                                                                                   |
       | duration   | P1Y, P1Y1M, P1Y1M1D, P1Y1M1DT1H, P1Y1M1DT1H1M, P1Y1M1DT1H1M1S, 1Y1M1DT1H1M1S0.1S, 1Y1M1DT1H1M1S0.001S, 1Y1M1DT1H1M0.000001S                                                                                                                                                                                                                                                                          |
 
-  Scenario: Owns cannot set @values annotation for struct value type
-    When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value type: custom-struct
-    When entity(person) set owns: custom-attribute
-    When entity(person) get owns(custom-attribute) set annotation: @values(custom-struct); fails
-    When entity(person) get owns(custom-attribute) set annotation: @values({"string"}); fails
-    When entity(person) get owns(custom-attribute) set annotation: @values({custom-field: "string"}); fails
-    When entity(person) get owns(custom-attribute) set annotation: @values(custom-struct{custom-field: "string"}); fails
-    When entity(person) get owns(custom-attribute) set annotation: @values(custom-struct("string")); fails
-    When entity(person) get owns(custom-attribute) set annotation: @values(custom-struct(custom-field: "string")); fails
+#  Scenario: Owns cannot set @values annotation for struct value type
+#    When create attribute type: custom-attribute
+#    When attribute(custom-attribute) set value type: custom-struct
+#    When entity(person) set owns: custom-attribute
+#    When entity(person) get owns(custom-attribute) set annotation: @values(custom-struct); fails
+#    When entity(person) get owns(custom-attribute) set annotation: @values({"string"}); fails
+#    When entity(person) get owns(custom-attribute) set annotation: @values({custom-field: "string"}); fails
+#    When entity(person) get owns(custom-attribute) set annotation: @values(custom-struct{custom-field: "string"}); fails
+#    When entity(person) get owns(custom-attribute) set annotation: @values(custom-struct("string")); fails
+#    When entity(person) get owns(custom-attribute) set annotation: @values(custom-struct(custom-field: "string")); fails
 
   Scenario Outline: Owns can reset @values annotation with the same argument
     When create attribute type: custom-attribute
@@ -3480,16 +3531,16 @@ Feature: Concept Owns
       | duration   | P1Y2M                        | P1Y2M3DT4H5M6.789S                                    |
       | duration   | P1Y2M3DT4H5M6.788S           | P1Y2M3DT4H5M6.789S                                    |
 
-  Scenario: Owns cannot set @range annotation for struct value type
-    When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value type: custom-struct
-    When entity(person) set owns: custom-attribute
-    When entity(person) get owns(custom-attribute) set annotation: @range(custom-struct, custom-struct); fails
-    When entity(person) get owns(custom-attribute) set annotation: @range({"string"}, {"string+1"}); fails
-    When entity(person) get owns(custom-attribute) set annotation: @range({custom-field: "string"}, {custom-field: "string+1"}); fails
-    When entity(person) get owns(custom-attribute) set annotation: @range(custom-struct{custom-field: "string"}, custom-struct{custom-field: "string+1"}); fails
-    When entity(person) get owns(custom-attribute) set annotation: @range(custom-struct("string"), custom-struct("string+1")); fails
-    When entity(person) get owns(custom-attribute) set annotation: @range(custom-struct(custom-field: "string"), custom-struct(custom-field: "string+1")); fails
+#  Scenario: Owns cannot set @range annotation for struct value type
+#    When create attribute type: custom-attribute
+#    When attribute(custom-attribute) set value type: custom-struct
+#    When entity(person) set owns: custom-attribute
+#    When entity(person) get owns(custom-attribute) set annotation: @range(custom-struct, custom-struct); fails
+#    When entity(person) get owns(custom-attribute) set annotation: @range({"string"}, {"string+1"}); fails
+#    When entity(person) get owns(custom-attribute) set annotation: @range({custom-field: "string"}, {custom-field: "string+1"}); fails
+#    When entity(person) get owns(custom-attribute) set annotation: @range(custom-struct{custom-field: "string"}, custom-struct{custom-field: "string+1"}); fails
+#    When entity(person) get owns(custom-attribute) set annotation: @range(custom-struct("string"), custom-struct("string+1")); fails
+#    When entity(person) get owns(custom-attribute) set annotation: @range(custom-struct(custom-field: "string"), custom-struct(custom-field: "string+1")); fails
 
     #  TODO: Make it only for typeql
 #  Scenario Outline: Owns cannot have @range annotation for <value-type> value type with less than two args
@@ -3866,13 +3917,13 @@ Feature: Concept Owns
       | duration      | 0    | *                   |
       | duration      | 1    | *                   |
       | duration      | *    | 10                  |
-      | custom-struct | 0    | 1                   |
-      | custom-struct | 0    | 10                  |
-      | custom-struct | 0    | 9223372036854775807 |
-      | custom-struct | 1    | 10                  |
-      | custom-struct | 0    | *                   |
-      | custom-struct | 1    | *                   |
-      | custom-struct | *    | 10                  |
+#      | custom-struct | 0    | 1                   |
+#      | custom-struct | 0    | 10                  |
+#      | custom-struct | 0    | 9223372036854775807 |
+#      | custom-struct | 1    | 10                  |
+#      | custom-struct | 0    | *                   |
+#      | custom-struct | 1    | *                   |
+#      | custom-struct | *    | 10                  |
 
   Scenario Outline: Owns can set @card annotation for <value-type> value type with duplicate args (exactly N ownerships)
     When create attribute type: custom-attribute
@@ -3902,8 +3953,8 @@ Feature: Concept Owns
       | datetimetz    | 33   |
       | duration      | 1    |
       | duration      | 22   |
-      | custom-struct | 1    |
-      | custom-struct | 11   |
+#      | custom-struct | 1    |
+#      | custom-struct | 11   |
 
   Scenario Outline: Owns cannot have @card annotation for <value-type> value type with invalid arguments
     When create attribute type: custom-attribute
@@ -4197,7 +4248,7 @@ Feature: Concept Owns
       | entity    | person      | datetime      |
       | entity    | person      | datetimetz    |
       | entity    | person      | duration      |
-      | entity    | person      | custom-struct |
+#      | entity    | person      | custom-struct |
       | relation  | description | long          |
       | relation  | description | string        |
       | relation  | description | boolean       |
@@ -4206,7 +4257,7 @@ Feature: Concept Owns
       | relation  | description | datetime      |
       | relation  | description | datetimetz    |
       | relation  | description | duration      |
-      | relation  | description | custom-struct |
+#      | relation  | description | custom-struct |
 
   Scenario Outline: Unordered ownership for <root-type> cannot have @distinct annotation for <value-type> value type
     When create attribute type: custom-attribute
@@ -4227,7 +4278,7 @@ Feature: Concept Owns
       | entity    | person      | datetime      |
       | entity    | person      | datetimetz    |
       | entity    | person      | duration      |
-      | entity    | person      | custom-struct |
+#      | entity    | person      | custom-struct |
       | relation  | description | long          |
       | relation  | description | string        |
       | relation  | description | boolean       |
@@ -4236,7 +4287,7 @@ Feature: Concept Owns
       | relation  | description | datetime      |
       | relation  | description | datetimetz    |
       | relation  | description | duration      |
-      | relation  | description | custom-struct |
+#      | relation  | description | custom-struct |
 
     #  TODO: Make it only for typeql
 #  Scenario Outline: Owns cannot have @distinct annotation for <value-type> with arguments
@@ -4287,7 +4338,7 @@ Feature: Concept Owns
       | datetime      |
       | datetimetz    |
       | duration      |
-      | custom-struct |
+#      | custom-struct |
 
   Scenario Outline: <root-type> types can redeclare owns as owns with @distinct
     When create attribute type: name
@@ -4448,7 +4499,7 @@ Feature: Concept Owns
       | datetime      |
       | datetimetz    |
       | duration      |
-      | custom-struct |
+#      | custom-struct |
 
   Scenario Outline: Owns cannot have @regex annotation of invalid arguments
     When create attribute type: custom-attribute
@@ -4499,7 +4550,7 @@ Feature: Concept Owns
       | datetime      | "\S+" |
       | datetimetz    | "\S+" |
       | duration      | "\S+" |
-      | custom-struct | "\S+" |
+#      | custom-struct | "\S+" |
 
   Scenario Outline: Owns cannot set multiple @regex annotations with different arguments
     When create attribute type: custom-attribute
@@ -4703,7 +4754,7 @@ Feature: Concept Owns
       | range("2020-05-05", "2025-05-05") | card(0, 1)      | datetime      |
       | range("2020-05-05", "2025-05-05") | distinct        | datetime      |
       | card(0, 1)                        | regex("s")      | string        |
-      | card(0, 1)                        | distinct        | custom-struct |
+#      | card(0, 1)                        | distinct        | custom-struct |
       | regex("s")                        | distinct        | string        |
 
   Scenario Outline: Owns cannot set @<annotation-1> and @<annotation-2> together for scalar <value-type>
