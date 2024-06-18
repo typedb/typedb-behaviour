@@ -87,7 +87,7 @@ Feature: Concept Attribute Type
   Scenario: Attribute types cannot be created without value types
     When create attribute type: name
     Then attribute(name) exists
-    Then attribute(name) value type is null
+    Then attribute(name) get value type is null
     Then transaction commits; fails
 
   Scenario Outline: Attribute types can be deleted
@@ -473,12 +473,12 @@ Feature: Concept Attribute Type
     Then attribute(name) exists
     When attribute(name) set annotation: @abstract
     Then attribute(name) exists
-    Then attribute(name) value type is null
+    Then attribute(name) get value type is null
     Then attribute(name) get annotations contain: @abstract
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(name) exists
-    Then attribute(name) value type is null
+    Then attribute(name) get value type is null
     Then attribute(name) get annotations contain: @abstract
 
   Scenario: Inherited attribute types without @abstract cannot be created without value type
@@ -486,7 +486,7 @@ Feature: Concept Attribute Type
     When attribute(name) set annotation: @abstract
     When create attribute type: first-name
     When attribute(first-name) set supertype: name
-    Then attribute(first-name) value type is null
+    Then attribute(first-name) get value type is null
     Then transaction commits; fails
 
   Scenario: Attribute type can reset @abstract annotation
@@ -506,13 +506,13 @@ Feature: Concept Attribute Type
     When create attribute type: first-name
     When attribute(first-name) set supertype: name
     When attribute(first-name) set value type: <value-type>
-    Then attribute(name) value type is null
+    Then attribute(name) get value type is null
     Then attribute(first-name) get value type: <value-type>
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(first-name) exists
     Then attribute(first-name) get value type: <value-type>
-    Then attribute(name) value type is null
+    Then attribute(name) get value type is null
     Examples:
       | value-type    |
       | long          |
@@ -580,11 +580,11 @@ Feature: Concept Attribute Type
   Scenario: Attribute types cannot unset @abstract annotation if it does not have value type
     When create attribute type: name
     When attribute(name) set annotation: @abstract
-    Then attribute(name) value type is null
+    Then attribute(name) get value type is null
     Then attribute(name) unset annotation: @abstract; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) value type is null
+    Then attribute(name) get value type is null
     Then attribute(name) unset annotation: @abstract; fails
 
   Scenario: Attribute types can unset @abstract annotation if it gets value type after setting annotation
