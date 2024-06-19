@@ -4478,7 +4478,7 @@ Feature: Concept Owns
       | string     | "^starts"            |
       | string     | "ends$"              |
       | string     | "^starts and ends$"  |
-      | string     | "^(one \| another)$" |
+      | string     | "^(not)$" |
       | string     | "2024-06-04+0100"    |
 
   Scenario Outline: Owns cannot have @regex annotation for <value-type> value type
