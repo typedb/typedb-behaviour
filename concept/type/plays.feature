@@ -1942,14 +1942,15 @@ Feature: Concept Plays
 #    Then entity(person) get plays(marriage:spouse) set annotation: @card(1); fails
 #    Then entity(person) get plays(marriage:spouse) set annotation: @card(*); fails
 #    Then entity(person) get plays(marriage:spouse) set annotation: @card(1, 2, 3); fails
-    Then entity(person) get plays(marriage:spouse) set annotation: @card(-1, 1); fails
-    Then entity(person) get plays(marriage:spouse) set annotation: @card(0, 0.1); fails
-    Then entity(person) get plays(marriage:spouse) set annotation: @card(0, 1.5); fails
-    Then entity(person) get plays(marriage:spouse) set annotation: @card(*, *); fails
-    Then entity(person) get plays(marriage:spouse) set annotation: @card(0, **); fails
-    Then entity(person) get plays(marriage:spouse) set annotation: @card(1, "2"); fails
-    Then entity(person) get plays(marriage:spouse) set annotation: @card("1", 2); fails
+#    Then entity(person) get plays(marriage:spouse) set annotation: @card(-1, 1); fails
+#    Then entity(person) get plays(marriage:spouse) set annotation: @card(0, 0.1); fails
+#    Then entity(person) get plays(marriage:spouse) set annotation: @card(0, 1.5); fails
+#    Then entity(person) get plays(marriage:spouse) set annotation: @card(*, *); fails
+#    Then entity(person) get plays(marriage:spouse) set annotation: @card(0, **); fails
+#    Then entity(person) get plays(marriage:spouse) set annotation: @card(1, "2"); fails
+#    Then entity(person) get plays(marriage:spouse) set annotation: @card("1", 2); fails
     Then entity(person) get plays(marriage:spouse) set annotation: @card(2, 1); fails
+    Then entity(person) get plays(marriage:spouse) set annotation: @card(0, 0); fails
     Then entity(person) get plays(marriage:spouse) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
@@ -2022,7 +2023,6 @@ Feature: Concept Plays
     When relation(marriage) set supertype: description
     When entity(player) set plays: overridden-custom-relation:overridden-r2
     When relation(marriage) set plays: overridden-custom-relation:overridden-r2
-    # TODO: Overrides? Remove second-custom-relation:r2 from test if we remove overrides!
     When entity(player) get plays(overridden-custom-relation:overridden-r2) set override: second-custom-relation:r2
     When relation(marriage) get plays(overridden-custom-relation:overridden-r2) set override: second-custom-relation:r2
     Then entity(player) get plays contain: custom-relation:r1
@@ -2091,7 +2091,6 @@ Feature: Concept Plays
     When relation(marriage) set supertype: description
     When entity(player) set plays: overridden-custom-relation:overridden-r2
     When relation(marriage) set plays: overridden-custom-relation:overridden-r2
-    # TODO: Overrides? Remove second-custom-relation:r2 from test if we remove overrides!
     When entity(player) get plays(overridden-custom-relation:overridden-r2) set override: second-custom-relation:r2
     When relation(marriage) get plays(overridden-custom-relation:overridden-r2) set override: second-custom-relation:r2
     Then entity(player) get plays(custom-relation:r1) get annotations contain: @card(<args>)

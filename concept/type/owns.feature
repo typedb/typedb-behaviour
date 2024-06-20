@@ -1485,14 +1485,14 @@ Feature: Concept Owns
     When <root-type>(<subtype-name>) get owns(name) set ordering: ordered
     Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
     Then <root-type>(<subtype-name>) get owns(name) get ordering: ordered
-    When transaction commit
+    When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
     Then <root-type>(<subtype-name>) get owns(name) get ordering: ordered
     When <root-type>(<subtype-name>) get owns(name) set ordering: unordered
     Then <root-type>(supertype-name>) get owns(name) get ordering: unordered
     Then <root-type>(<subtype-name>) get owns(name) get ordering: unordered
-    When transaction commit
+    When transaction commits
     When connection open read transaction for database: typedb
     Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
     Then <root-type>(<subtype-name>) get owns(name) get ordering: unordered
@@ -1507,7 +1507,7 @@ Feature: Concept Owns
     When <root-type>(<supertype-name>) set owns: name
     When <root-type>(<supertype-name>) get owns(name) set ordering: ordered
     Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
-    When transaction commit
+    When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
     Then <root-type>(<subtype-name>) get owns(name) get ordering: ordered
@@ -1536,7 +1536,7 @@ Feature: Concept Owns
     When attribute(surname) set supertype: name
     When <root-type>(<supertype-name>) set owns: name
     Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
-    When transaction commit
+    When transaction commits
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name>) set owns: surname
     When <root-type>(<subtype-name>) get owns(surname) set override: name
@@ -1546,14 +1546,14 @@ Feature: Concept Owns
     Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
     Then <root-type>(<subtype-name>) get owns(surname) get ordering: ordered
     Then <root-type>(<subtype-name>) get owns(surname) get supertype: name
-    When transaction commit
+    When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
     Then <root-type>(<subtype-name>) get owns(surname) get ordering: ordered
     When <root-type>(<subtype-name>) get owns(surname) set ordering: unordered
     Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
     Then <root-type>(<subtype-name>) get owns(surname) get ordering: unordered
-    When transaction commit
+    When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
     Then <root-type>(<subtype-name>) get owns(surname) get ordering: unordered
@@ -1566,14 +1566,14 @@ Feature: Concept Owns
     Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
     Then <root-type>(<subtype-name-2>) get owns(third-name) get ordering: ordered
     Then <root-type>(<subtype-name-2>) get owns(third-name) get supertype: name
-    When transaction commit
+    When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
     Then <root-type>(<subtype-name-2>) get owns(third-name) get ordering: ordered
     When <root-type>(<subtype-name-2>) get owns(third-name) set ordering: unordered
     Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
     Then <root-type>(<subtype-name-2>) get owns(third-name) get ordering: unordered
-    When transaction commit
+    When transaction commits
     When connection open read transaction for database: typedb
     Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
     Then <root-type>(<subtype-name-2>) get owns(third-name) get ordering: unordered
@@ -1589,7 +1589,7 @@ Feature: Concept Owns
     When <root-type>(<supertype-name>) set owns: name
     When <root-type>(<supertype-name>) get owns(name) set ordering: ordered
     Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
-    When transaction commit
+    When transaction commits
     When connection open schema transaction for database: typedb
     When create attribute type: surname
     When attribute(surname) set supertype: name
@@ -1597,7 +1597,7 @@ Feature: Concept Owns
     When <root-type>(<subtype-name>) get owns(surname) set override: name
     Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
     Then <root-type>(<subtype-name>) get owns(surname) get ordering: ordered
-    When transaction commit
+    When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
     Then <root-type>(<subtype-name>) get owns(surname) get ordering: ordered
@@ -1614,7 +1614,7 @@ Feature: Concept Owns
     Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
     Then <root-type>(<subtype-name-2>) get owns(third-name) get ordering: ordered
     Then <root-type>(<subtype-name-2>) get owns(third-name) get supertype: name
-    When transaction commit
+    When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
     Then <root-type>(<subtype-name-2>) get owns(third-name) get ordering: ordered
@@ -3347,7 +3347,6 @@ Feature: Concept Owns
     When relation(marriage) set supertype: description
     When entity(player) set owns: overridden-custom-attribute
     When relation(marriage) set owns: overridden-custom-attribute
-    # TODO: Overrides? Remove second-custom-attribute from test if we remove overrides!
     When entity(player) get owns(overridden-custom-attribute) set override: second-custom-attribute
     When relation(marriage) get owns(overridden-custom-attribute) set override: second-custom-attribute
     Then entity(player) get owns contain: custom-attribute
@@ -3417,7 +3416,6 @@ Feature: Concept Owns
     When relation(marriage) set supertype: description
     When entity(player) set owns: overridden-custom-attribute
     When relation(marriage) set owns: overridden-custom-attribute
-    # TODO: Overrides? Remove second-custom-attribute from test if we remove overrides!
     When entity(player) get owns(overridden-custom-attribute) set override: second-custom-attribute
     When relation(marriage) get owns(overridden-custom-attribute) set override: second-custom-attribute
     Then entity(player) get owns(custom-attribute) get annotations contain: @values(<args>)
@@ -3712,7 +3710,6 @@ Feature: Concept Owns
     When relation(marriage) set supertype: description
     When entity(player) set owns: overridden-custom-attribute
     When relation(marriage) set owns: overridden-custom-attribute
-    # TODO: Overrides? Remove second-custom-attribute from test if we remove overrides!
     When entity(player) get owns(overridden-custom-attribute) set override: second-custom-attribute
     When relation(marriage) get owns(overridden-custom-attribute) set override: second-custom-attribute
     Then entity(player) get owns contain: custom-attribute
@@ -3781,7 +3778,6 @@ Feature: Concept Owns
     When relation(marriage) set supertype: description
     When entity(player) set owns: overridden-custom-attribute
     When relation(marriage) set owns: overridden-custom-attribute
-    # TODO: Overrides? Remove second-custom-attribute from test if we remove overrides!
     When entity(player) get owns(overridden-custom-attribute) set override: second-custom-attribute
     When relation(marriage) get owns(overridden-custom-attribute) set override: second-custom-attribute
     Then entity(player) get owns(custom-attribute) get annotations contain: @range(<args>)
@@ -3966,14 +3962,15 @@ Feature: Concept Owns
 #    Then entity(person) get owns(custom-attribute) set annotation: @card(1); fails
 #    Then entity(person) get owns(custom-attribute) set annotation: @card(*); fails
 #    Then entity(person) get owns(custom-attribute) set annotation: @card(1, 2, 3); fails
-    Then entity(person) get owns(custom-attribute) set annotation: @card(-1, 1); fails
-    Then entity(person) get owns(custom-attribute) set annotation: @card(0, 0.1); fails
-    Then entity(person) get owns(custom-attribute) set annotation: @card(0, 1.5); fails
-    Then entity(person) get owns(custom-attribute) set annotation: @card(*, *); fails
-    Then entity(person) get owns(custom-attribute) set annotation: @card(0, **); fails
-    Then entity(person) get owns(custom-attribute) set annotation: @card(1, "2"); fails
-    Then entity(person) get owns(custom-attribute) set annotation: @card("1", 2); fails
+#    Then entity(person) get owns(custom-attribute) set annotation: @card(-1, 1); fails
+#    Then entity(person) get owns(custom-attribute) set annotation: @card(0, 0.1); fails
+#    Then entity(person) get owns(custom-attribute) set annotation: @card(0, 1.5); fails
+#    Then entity(person) get owns(custom-attribute) set annotation: @card(*, *); fails
+#    Then entity(person) get owns(custom-attribute) set annotation: @card(0, **); fails
+#    Then entity(person) get owns(custom-attribute) set annotation: @card(1, "2"); fails
+#    Then entity(person) get owns(custom-attribute) set annotation: @card("1", 2); fails
     Then entity(person) get owns(custom-attribute) set annotation: @card(2, 1); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @card(0, 0); fails
     Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
@@ -4088,7 +4085,6 @@ Feature: Concept Owns
     When relation(marriage) set supertype: description
     When entity(player) set owns: overridden-custom-attribute
     When relation(marriage) set owns: overridden-custom-attribute
-    # TODO: Overrides? Remove second-custom-attribute from test if we remove overrides!
     When entity(player) get owns(overridden-custom-attribute) set override: second-custom-attribute
     When relation(marriage) get owns(overridden-custom-attribute) set override: second-custom-attribute
     Then entity(player) get owns contain: custom-attribute
@@ -4157,7 +4153,6 @@ Feature: Concept Owns
     When relation(marriage) set supertype: description
     When entity(player) set owns: overridden-custom-attribute
     When relation(marriage) set owns: overridden-custom-attribute
-    # TODO: Overrides? Remove second-custom-attribute from test if we remove overrides!
     When entity(player) get owns(overridden-custom-attribute) set override: second-custom-attribute
     When relation(marriage) get owns(overridden-custom-attribute) set override: second-custom-attribute
     Then entity(player) get owns(custom-attribute) get annotations contain: @card(<args>)

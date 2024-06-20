@@ -1922,3 +1922,54 @@ Feature: Concept Attribute Type
 #      | values("str")    | regex("s")      | string     |
       # TODO: If we allow range + regex, write a test to check args compatibility!
 #      | range("1", "2")  | regex("s")      | string     |
+
+########################
+# structs common
+########################
+
+  Scenario Outline: Struct can be created with one field, including another struct
+    When create struct type: passport
+    Then struct(passport) exists
+    Then struct(passport) get fields do not contain: name
+    When struct(passport) create field: name, with value type: <value-type>
+    Then struct(passport) get fields contain: name
+    Then struct(passport) get field(name) get value type: <value-type>
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then struct(passport) get fields contain: name
+    Then struct(passport) get field(name) get value type: <value-type>
+    Examples:
+      | value-type    |
+      | long          |
+      | string        |
+      | boolean       |
+      | double        |
+      | decimal       |
+      | datetime      |
+      | datetimetz    |
+      | duration      |
+      | custom-struct |
+
+  Scenario Outline: Struct can be created with multiple fields, including another struct
+    When create struct type: passport
+    Then struct(passport) exists
+    When struct(passport) create field: id, with value type: <value-type-1>
+    When struct(passport) create field: name, with value type: <value-type-2>
+    Then struct(passport) get fields contain: name
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then struct(passport) get fields contain: id
+    Then struct(passport) get field(id) get value type: <value-type-1>
+    Then struct(passport) get fields contain: name
+    Then struct(passport) get field(name) get value type: <value-type-2>
+    Examples:
+      | value-type-1  | value-type-2  |
+      | long          | string        |
+      | string        | boolean       |
+      | boolean       | double        |
+      | double        | decimal       |
+      | decimal       | datetime      |
+      | datetime      | datetimetz    |
+      | datetimetz    | duration      |
+      | duration      | custom-struct |
+      | custom-struct | long          |

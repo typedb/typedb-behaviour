@@ -223,7 +223,7 @@ Feature: Concept Entity Type
       | annotation      |
       | abstract        |
 
-    # Uncomment this test and when there appear inherited annotations (abstract is not inherited)
+    # TODO: Uncomment this test and when there appear inherited annotations (abstract is not inherited)
 #  Scenario Outline: Entity type cannot set or unset inherited @<annotation>
 #    When create entity type: person
 #    When entity(person) set annotation: @<annotation>
