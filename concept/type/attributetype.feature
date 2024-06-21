@@ -24,7 +24,7 @@ Feature: Concept Attribute Type
 ########################
 # attribute type common
 ########################
-  # TODO: More struct tests?
+  # TODO: Test how to set None value type
 
   Scenario: Root attribute type cannot be deleted
     Then delete attribute type: attribute; fails
