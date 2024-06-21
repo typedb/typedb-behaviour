@@ -153,7 +153,7 @@ Feature: TypeQL Get Query with Expressions
     Given transaction commits
 
     Given session opens transaction of type: read
-    Then typeql get; throws exception containing "The variable(s) named 'y' cannot be used for both concept variables and a value variables"
+    Then typeql get; throws exception containing "The variable(s) named 'y' cannot be used for both a concept variable and a value variable"
       """
       match
         $z isa person, has age $y;
