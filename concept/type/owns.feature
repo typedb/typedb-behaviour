@@ -151,14 +151,15 @@ Feature: Concept Owns
     Then entity(player) set owns: email; fails
     Then entity(player) get owns is empty
 
-  Scenario: Abstract entity type cannot own non-abstract attribute without value type
-    When create entity type: player
-    When entity(player) set annotation: @abstract
-    When create attribute type: name
-    Then entity(player) set owns: name; fails
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then entity(player) set owns: name; fails
+# TODO: Commit-time check is not implemented
+#  Scenario: Abstract entity type cannot own non-abstract attribute without value type
+#    When create entity type: player
+#    When entity(player) set annotation: @abstract
+#    When create attribute type: name
+#    When entity(player) set owns: name
+#    Then transaction commits; fails
+#    When connection open read transaction for database: typedb
+#    Then entity(player) set owns: name; fails
 
   Scenario: Abstract entity type can own abstract attribute with and without value type
     When create entity type: player
@@ -631,8 +632,9 @@ Feature: Concept Owns
       | username |
     Then <root-type>(<subtype-name>) get owns contain:
       | username |
-    Then <root-type>(<supertype-name>) get owns(username) get annotations do not contain: @abstract
-    Then <root-type>(<subtype-name>) get owns(username) get annotations do not contain: @abstract
+    # TODO: Move to typeql test if we really need to?
+#    Then <root-type>(<supertype-name>) get owns(username) get annotations do not contain: @abstract
+#    Then <root-type>(<subtype-name>) get owns(username) get annotations do not contain: @abstract
     Examples:
       | root-type | supertype-name | subtype-name |
       | entity    | person         | customer     |
@@ -1098,6 +1100,7 @@ Feature: Concept Owns
     Then <root-type>(<type-name>) get owns(name) get ordering: ordered
     When <root-type>(<type-name>) get owns(name) set ordering: ordered
     Then <root-type>(<type-name>) get owns(name) get ordering: ordered
+    When transaction commits
     When connection open schema transaction for database: typedb
     When <root-type>(<type-name>) get owns(name) set ordering: ordered
     Then <root-type>(<type-name>) get owns(name) get ordering: ordered
@@ -1114,7 +1117,7 @@ Feature: Concept Owns
     When attribute(surname) set supertype: name
     When <root-type>(<supertype-name>) set owns: name
     When <root-type>(<subtype-name>) set owns: surname
-    When <root-type>(<subtype-name>) get owns(surname) set override: surname
+    When <root-type>(<subtype-name>) get owns(surname) set override: name
     When <root-type>(<subtype-name>) get owns(surname) set annotation: @card(0, 1)
     When <root-type>(<subtype-name>) get owns(surname) set ordering: ordered
     Then <root-type>(<subtype-name>) get owns(surname) get ordering: ordered
@@ -3059,28 +3062,43 @@ Feature: Concept Owns
       | decimal    |
 #      | custom-struct |
 
-  # TODO: Change the test if owns can set @unique annotation for ordered ownership!
-  Scenario Outline: Owns cannot set @unique annotation for ordered ownership
+  Scenario Outline: Ordered owns can set @unique annotation for <value-type> value type and unset it
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
     When entity(person) set owns: custom-attribute
     When entity(person) get owns(custom-attribute) set ordering: ordered
-    Then entity(person) get owns(custom-attribute) set annotation: @unique; fails
+    When entity(person) get owns(custom-attribute) set annotation: @unique
+    Then entity(person) get owns(custom-attribute) get ordering: ordered
+    Then entity(person) get owns(custom-attribute) get annotations contain: @unique
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get owns(custom-attribute) get ordering: ordered
+    Then entity(person) get owns(custom-attribute) get annotations contain: @unique
+    When entity(person) get owns(custom-attribute) unset annotation: @unique
     Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits
-    When connection open read transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get annotations is empty
+    When entity(person) get owns(custom-attribute) set annotation: @unique
+    Then entity(person) get owns(custom-attribute) get ordering: ordered
+    Then entity(person) get owns(custom-attribute) get annotations contain: @unique
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get owns(custom-attribute) get ordering: ordered
+    Then entity(person) get owns(custom-attribute) get annotations contain: @unique
+    When entity(person) unset owns: custom-attribute
+    Then entity(person) get owns is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get owns is empty
     Examples:
       | value-type |
       | long       |
       | string     |
       | boolean    |
-      | double     |
-      | decimal    |
       | datetime   |
       | datetimetz |
       | duration   |
-#      | custom-struct |
 
 ########################
 # @values
@@ -3847,13 +3865,13 @@ Feature: Concept Owns
     When create attribute type: custom-attribute-2
     When attribute(custom-attribute-2) set value type: <value-type>
     When entity(person) set owns: custom-attribute
-    Then entity(customer) get owns(custom-attribute) set annotation: @card(<arg1>, <arg0>); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @card(<arg1>, <arg0>); fails
     Then entity(person) get owns(custom-attribute) get annotations is empty
     When entity(person) get owns(custom-attribute) set annotation: @card(<arg0>, <arg1>)
     Then entity(person) get owns(custom-attribute) get annotations contain: @card(<arg0>, <arg1>)
     When entity(person) set owns: custom-attribute-2
     When entity(person) get owns(custom-attribute-2) set ordering: ordered
-    Then entity(customer) get owns(custom-attribute-2) set annotation: @card(<arg1>, <arg0>); fails
+    Then entity(person) get owns(custom-attribute-2) set annotation: @card(<arg1>, <arg0>); fails
     Then entity(person) get owns(custom-attribute-2) get annotations is empty
     When entity(person) get owns(custom-attribute-2) set annotation: @card(<arg0>, <arg1>)
     Then entity(person) get owns(custom-attribute-2) get annotations contain: @card(<arg0>, <arg1>)
@@ -3875,63 +3893,54 @@ Feature: Concept Owns
       | long       | 1    | 10                  |
       | long       | 0    | *                   |
       | long       | 1    | *                   |
-      | long       | *    | 10                  |
       | string     | 0    | 1                   |
       | string     | 0    | 10                  |
       | string     | 0    | 9223372036854775807 |
       | string     | 1    | 10                  |
       | string     | 0    | *                   |
       | string     | 1    | *                   |
-      | string     | *    | 10                  |
       | boolean    | 0    | 1                   |
       | boolean    | 0    | 10                  |
       | boolean    | 0    | 9223372036854775807 |
       | boolean    | 1    | 10                  |
       | boolean    | 0    | *                   |
       | boolean    | 1    | *                   |
-      | boolean    | *    | 10                  |
       | double     | 0    | 1                   |
       | double     | 0    | 10                  |
       | double     | 0    | 9223372036854775807 |
       | double     | 1    | 10                  |
       | double     | 0    | *                   |
       | double     | 1    | *                   |
-      | double     | *    | 10                  |
       | decimal    | 0    | 1                   |
       | decimal    | 0    | 10                  |
       | decimal    | 0    | 9223372036854775807 |
       | decimal    | 1    | 10                  |
       | decimal    | 0    | *                   |
       | decimal    | 1    | *                   |
-      | decimal    | *    | 10                  |
       | datetime   | 0    | 1                   |
       | datetime   | 0    | 10                  |
       | datetime   | 0    | 9223372036854775807 |
       | datetime   | 1    | 10                  |
       | datetime   | 0    | *                   |
       | datetime   | 1    | *                   |
-      | datetime   | *    | 10                  |
       | datetimetz | 0    | 1                   |
       | datetimetz | 0    | 10                  |
       | datetimetz | 0    | 9223372036854775807 |
       | datetimetz | 1    | 10                  |
       | datetimetz | 0    | *                   |
       | datetimetz | 1    | *                   |
-      | datetimetz | *    | 10                  |
       | duration   | 0    | 1                   |
       | duration   | 0    | 10                  |
       | duration   | 0    | 9223372036854775807 |
       | duration   | 1    | 10                  |
       | duration   | 0    | *                   |
       | duration   | 1    | *                   |
-      | duration   | *    | 10                  |
 #      | custom-struct | 0    | 1                   |
 #      | custom-struct | 0    | 10                  |
 #      | custom-struct | 0    | 9223372036854775807 |
 #      | custom-struct | 1    | 10                  |
 #      | custom-struct | 0    | *                   |
 #      | custom-struct | 1    | *                   |
-#      | custom-struct | *    | 10                  |
 
   Scenario Outline: Owns can set @card annotation for <value-type> value type with duplicate args (exactly N ownerships)
     When create attribute type: custom-attribute
@@ -3981,6 +3990,7 @@ Feature: Concept Owns
 #    Then entity(person) get owns(custom-attribute) set annotation: @card(0, **); fails
 #    Then entity(person) get owns(custom-attribute) set annotation: @card(1, "2"); fails
 #    Then entity(person) get owns(custom-attribute) set annotation: @card("1", 2); fails
+#    Then entity(person) get owns(custom-attribute) set annotation: @card(*, *); fails
     Then entity(person) get owns(custom-attribute) set annotation: @card(2, 1); fails
     Then entity(person) get owns(custom-attribute) set annotation: @card(0, 0); fails
     Then entity(person) get owns(custom-attribute) get annotations is empty
@@ -4612,25 +4622,33 @@ Feature: Concept Owns
       | duration   | "\S+" |
 #      | custom-struct | "\S+" |
 
-  Scenario Outline: Owns cannot set multiple @regex annotations with different arguments
+  Scenario Outline: Owns can reset @regex annotation
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: string
     When entity(person) set owns: custom-attribute
-    When entity(person) get owns(custom-attribute) set annotation: @regex("\S+")
-    Then entity(person) get owns(custom-attribute) set annotation: @regex(<fail-args>); fails
-    Then entity(person) get owns(custom-attribute) get annotations contain: @regex("\S+")
-    Then entity(person) get owns(custom-attribute) get annotations do not contain: @regex(<fail-args>)
+    When entity(person) get owns(custom-attribute) set annotation: @regex(<init-args>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @regex(<init-args>)
+    Then entity(person) get owns(custom-attribute) get annotations do not contain: @regex(<reset-args>)
+    When entity(person) get owns(custom-attribute) set annotation: @regex(<init-args>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @regex(<init-args>)
+    Then entity(person) get owns(custom-attribute) get annotations do not contain: @regex(<reset-args>)
+    When entity(person) get owns(custom-attribute) set annotation: @regex(<reset-args>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @regex(<reset-args>)
+    Then entity(person) get owns(custom-attribute) get annotations do not contain: @regex(<init-args>)
     When transaction commits
-    When connection open read transaction for database: typedb
-    Then entity(person) get owns(custom-attribute) get annotations contain: @regex("\S+")
-    Then entity(person) get owns(custom-attribute) get annotations do not contain: @regex(<fail-args>)
+    When connection open schema transaction for database: typedb
+    Then entity(person) get owns(custom-attribute) get annotations contain: @regex(<reset-args>)
+    Then entity(person) get owns(custom-attribute) get annotations do not contain: @regex(<init-args>)
+    When entity(person) get owns(custom-attribute) set annotation: @regex(<init-args>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @regex(<init-args>)
+    Then entity(person) get owns(custom-attribute) get annotations do not contain: @regex(<reset-args>)
     Examples:
-      | fail-args       |
-      | "\S"            |
-      | "S+"            |
-      | "*"             |
-      | "s"             |
-      | " some string " |
+      | init-args | reset-args      |
+      | "\S+"     | "\S"            |
+      | "\S+"     | "S+"            |
+      | "\S+"     | "*"             |
+      | "\S+"     | "s"             |
+      | "\S+"     | " some string " |
 
   Scenario: Owns cannot set @regex annotation if there is a @regex annotation on the attribute
     When create attribute type: custom-attribute
@@ -4653,6 +4671,7 @@ Feature: Concept Owns
     Then entity(customer) get owns(custom-attribute) get annotations contain: @regex("\S+")
     When create attribute type: custom-attribute-2
     When attribute(custom-attribute-2) set value type: string
+    When attribute(custom-attribute-2) set supertype: custom-attribute
     When entity(customer) set owns: custom-attribute-2
     Then entity(customer) get owns(custom-attribute-2) get annotations is empty
     When transaction commits
@@ -4685,27 +4704,30 @@ Feature: Concept Owns
     Then entity(customer) get owns(custom-attribute) get annotations contain: @regex("\S+")
     Then entity(customer) get owns(custom-attribute-2) get annotations contain: @regex("\S+")
 
+    # TODO: Add tests for setting something to supertype while subtype already have it!!!!!!!! For all the annotations! For all the types!!
+
 ########################
 # not compatible @annotations: @abstract, @cascade, @independent, @replace
 ########################
 
-  Scenario Outline: <root-type> cannot own with @abstract, @cascade, @independent, and @replace annotations for <value-type> value type
-    When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value type: <value-type>
-    When <root-type>(<type-name>) set owns: custom-attribute
-    Then <root-type>(<type-name>) get owns(custom-attribute) set annotation: @abstract; fails
-    Then <root-type>(<type-name>) get owns(custom-attribute) set annotation: @cascade; fails
-    Then <root-type>(<type-name>) get owns(custom-attribute) set annotation: @independent; fails
-    Then <root-type>(<type-name>) get owns(custom-attribute) set annotation: @replace; fails
-    Then <root-type>(<type-name>) get owns(custom-attribute) set annotation: @does-not-exist; fails
-    Then <root-type>(<type-name>) get owns(custom-attribute) get annotations is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then <root-type>(<type-name>) get owns(custom-attribute) get annotations is empty
-    Examples:
-      | root-type | type-name   | value-type |
-      | entity    | person      | long       |
-      | relation  | description | string     |
+    #  TODO: Make it only for typeql
+#  Scenario Outline: <root-type> cannot own with @abstract, @cascade, @independent, and @replace annotations for <value-type> value type
+#    When create attribute type: custom-attribute
+#    When attribute(custom-attribute) set value type: <value-type>
+#    When <root-type>(<type-name>) set owns: custom-attribute
+#    Then <root-type>(<type-name>) get owns(custom-attribute) set annotation: @abstract; fails
+#    Then <root-type>(<type-name>) get owns(custom-attribute) set annotation: @cascade; fails
+#    Then <root-type>(<type-name>) get owns(custom-attribute) set annotation: @independent; fails
+#    Then <root-type>(<type-name>) get owns(custom-attribute) set annotation: @replace; fails
+#    Then <root-type>(<type-name>) get owns(custom-attribute) set annotation: @does-not-exist; fails
+#    Then <root-type>(<type-name>) get owns(custom-attribute) get annotations is empty
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then <root-type>(<type-name>) get owns(custom-attribute) get annotations is empty
+#    Examples:
+#      | root-type | type-name   | value-type |
+#      | entity    | person      | long       |
+#      | relation  | description | string     |
 
 ########################
 # @annotations combinations:

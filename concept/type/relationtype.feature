@@ -2156,6 +2156,7 @@ Feature: Concept Relation Type and Role Type
 #    Then relation(parentship) get role(parent) set annotation: @card(0, **); fails
 #    Then relation(parentship) get role(parent) set annotation: @card(1, "2"); fails
 #    Then relation(parentship) get role(parent) set annotation: @card("1", 2); fails
+#    Then relation(parentship) get role(parent) set annotation: @card(*, *); fails
     Then relation(parentship) get role(parent) set annotation: @card(2, 1); fails
     Then relation(parentship) get role(parent) set annotation: @card(0, 0); fails
     Then relation(parentship) get role(parent) get annotations is empty

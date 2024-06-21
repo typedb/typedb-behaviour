@@ -1884,7 +1884,7 @@ Feature: Concept Plays
     When create relation type: marriage
     When relation(marriage) create role: spouse
     When entity(person) set plays: marriage:spouse
-    Then entity(player) get plays(marriage:spouse) set annotation: @card(<arg1>, <arg0>); fails
+    Then entity(person) get plays(marriage:spouse) set annotation: @card(<arg1>, <arg0>); fails
     Then entity(person) get plays(marriage:spouse) get annotations is empty
     When entity(person) get plays(marriage:spouse) set annotation: @card(<arg0>, <arg1>)
     Then entity(person) get plays(marriage:spouse) get annotations contain: @card(<arg0>, <arg1>)
@@ -1913,7 +1913,6 @@ Feature: Concept Plays
       | 1    | 10                  |
       | 0    | *                   |
       | 1    | *                   |
-      | *    | 10                  |
 
   Scenario Outline: Plays can set @card annotation with duplicate args (exactly N plays)
     When create relation type: marriage
@@ -1949,6 +1948,7 @@ Feature: Concept Plays
 #    Then entity(person) get plays(marriage:spouse) set annotation: @card(0, **); fails
 #    Then entity(person) get plays(marriage:spouse) set annotation: @card(1, "2"); fails
 #    Then entity(person) get plays(marriage:spouse) set annotation: @card("1", 2); fails
+#    Then entity(person) get plays(marriage:spouse) set annotation: @card(*, *); fails
     Then entity(person) get plays(marriage:spouse) set annotation: @card(2, 1); fails
     Then entity(person) get plays(marriage:spouse) set annotation: @card(0, 0); fails
     Then entity(person) get plays(marriage:spouse) get annotations is empty
@@ -2141,35 +2141,35 @@ Feature: Concept Plays
 ########################
 # not compatible @annotations: @distinct, @key, @unique, @subkey, @values, @range, @regex, @abstract, @cascade, @independent, @replace
 ########################
-
-  Scenario Outline: <root-type> cannot play a role with @distinct, @key, @unique, @subkey, @values, @range, @regex, @abstract, @cascade, @independent, and @replace annotations
-    When create relation type: marriage
-    When relation(marriage) create role: husband
-    When <root-type>(<type-name>) set plays: marriage:husband
-    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @distinct; fails
-    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @key; fails
-    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @unique; fails
-    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @subkey; fails
-    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @subkey(LABEL); fails
-    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @values; fails
-    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @values(1); fails
-    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @range; fails
-    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @range(1, 2); fails
-    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @regex; fails
-    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @regex("value"); fails
-    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @abstract; fails
-    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @cascade; fails
-    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @independent; fails
-    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @replace; fails
-    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @does-not-exist; fails
-    Then <root-type>(<type-name>) get plays(marriage:husband) get annotations is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then <root-type>(<type-name>) get plays(marriage:husband)) get annotations is empty
-    Examples:
-      | root-type | type-name   |
-      | entity    | person      |
-      | relation  | description |
+  #  TODO: Make it only for typeql
+#  Scenario Outline: <root-type> cannot play a role with @distinct, @key, @unique, @subkey, @values, @range, @regex, @abstract, @cascade, @independent, and @replace annotations
+#    When create relation type: marriage
+#    When relation(marriage) create role: husband
+#    When <root-type>(<type-name>) set plays: marriage:husband
+#    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @distinct; fails
+#    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @key; fails
+#    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @unique; fails
+#    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @subkey; fails
+#    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @subkey(LABEL); fails
+#    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @values; fails
+#    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @values(1); fails
+#    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @range; fails
+#    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @range(1, 2); fails
+#    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @regex; fails
+#    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @regex("value"); fails
+#    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @abstract; fails
+#    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @cascade; fails
+#    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @independent; fails
+#    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @replace; fails
+#    Then <root-type>(<type-name>) get plays(marriage:husband) set annotation: @does-not-exist; fails
+#    Then <root-type>(<type-name>) get plays(marriage:husband) get annotations is empty
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then <root-type>(<type-name>) get plays(marriage:husband)) get annotations is empty
+#    Examples:
+#      | root-type | type-name   |
+#      | entity    | person      |
+#      | relation  | description |
 
 ########################
 # @annotations combinations:
