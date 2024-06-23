@@ -1431,7 +1431,8 @@ Feature: Concept Plays
     When <root-type>(<supertype-name>) set plays: parentship:parent
     When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @<annotation>
     When <root-type>(<subtype-name>) set annotation: @abstract
-    Then <root-type>(<subtype-name>) get plays contain: parentship:parent
+    Then <root-type>(<subtype-name>) get plays contain:
+      | parentship:parent |
     Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations contain: @<annotation>
     When <root-type>(<subtype-name>) set plays: fathership:father
     When <root-type>(<subtype-name>) get plays(fathership:father) set override: parentship:parent
@@ -2025,14 +2026,18 @@ Feature: Concept Plays
     When relation(marriage) set plays: overridden-custom-relation:overridden-r2
     When entity(player) get plays(overridden-custom-relation:overridden-r2) set override: second-custom-relation:r2
     When relation(marriage) get plays(overridden-custom-relation:overridden-r2) set override: second-custom-relation:r2
-    Then entity(player) get plays contain: custom-relation:r1
-    Then relation(marriage) get plays contain: custom-relation:r1
+    Then entity(player) get plays contain:
+      | custom-relation:r1 |
+    Then relation(marriage) get plays contain:
+      | custom-relation:r1 |
     Then entity(player) get plays(custom-relation:r1) get annotations contain: @card(<args>)
     Then relation(marriage) get plays(custom-relation:r1) get annotations contain: @card(<args>)
     Then entity(player) get plays do not contain: second-custom-relation:r2
     Then relation(marriage) get plays do not contain: second-custom-relation:r2
-    Then entity(player) get plays contain: overridden-custom-relation:overridden-r2
-    Then relation(marriage) get plays contain: overridden-custom-relation:overridden-r2
+    Then entity(player) get plays contain:
+      | overridden-custom-relation:overridden-r2 |
+    Then relation(marriage) get plays contain:
+      | overridden-custom-relation:overridden-r2 |
     Then entity(player) get plays(overridden-custom-relation:overridden-r2) get annotations contain: @card(<args>)
     Then relation(marriage) get plays(overridden-custom-relation:overridden-r2) get annotations contain: @card(<args>)
     When transaction commits
