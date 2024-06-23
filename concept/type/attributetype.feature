@@ -1034,15 +1034,15 @@ Feature: Concept Attribute Type
 #    Then attribute(name) get annotations contain: @regex("\S+")
 #    Then attribute(first-name) get annotations is empty
 #    When attribute(first-name) set annotation: @regex("\S+")
-#    Then attribute(first-name) get annotation contain: @regex("\S+")
+#    Then attribute(first-name) get annotations contain    : @regex("\S+")
 #    Then attribute(first-name) set supertype: name; fails
 #    When attribute(first-name) unset annotation: @regex("\S+")
 #    When attribute(first-name) set supertype: name
-#    Then attribute(first-name) get annotation contain: @regex("\S+")
+#    Then attribute(first-name) get annotations contain    : @regex("\S+")
 #    When transaction commits
 #    When connection open read transaction for database: typedb
-#    Then attribute(name) get annotation contain: @regex("\S+")
-#    Then attribute(first-name) get annotation contain: @regex("\S+")
+#    Then attribute(name) get annotations contain    : @regex("\S+")
+#    Then attribute(first-name) get annotations contain    : @regex("\S+")
 #
 #  Scenario: Attribute type cannot reset inherited @regex annotation
 #    When create attribute type: name
@@ -1367,10 +1367,10 @@ Feature: Concept Attribute Type
 #    When create attribute type: name
 #    When attribute(name) set value type: <value-type>
 #    When attribute(name) set annotation: @values(<init-args>)
-#    Then attribute(name) get annotation contain: @values(<init-args>)
+#    Then attribute(name) get annotations contain    : @values(<init-args>)
 #    Then attribute(name) get annotation do not contain: @values(<reset-args>)
 #    When attribute(name) set annotation: @values(<init-args>)
-#    Then attribute(name) get annotation contain: @values(<init-args>)
+#    Then attribute(name) get annotations contain    : @values(<init-args>)
 #    Then attribute(name) get annotation do not contain: @values(<reset-args>)
 #    When attribute(name) set annotation: @values(<reset-args>)
 #    Then attribute(name) get annotations contain: @values(<reset-args>)
@@ -1380,7 +1380,7 @@ Feature: Concept Attribute Type
 #    Then attribute(name) get annotations contain: @values(<reset-args>)
 #    Then attribute(name) get annotations do not contain: @values(<init-args>)
 #    When attribute(name) set annotation: @values(<init-args>)
-#    Then attribute(name) get annotation contain: @values(<init-args>)
+#    Then attribute(name) get annotations contain    : @values(<init-args>)
 #    Then attribute(name) get annotation do not contain: @values(<reset-args>)
 #    Examples:
 #      | value-type | init-args       | reset-args      |
@@ -1911,7 +1911,7 @@ Feature: Concept Attribute Type
     Then attribute(name) set annotation: @<annotation-1>; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) get annotation contain: @<annotation-2>
+    Then attribute(name) get annotations contain    : @<annotation-2>
     Then attribute(name) get annotation do not contain: @<annotation-1>
     Examples:
     # TODO: Move to "can" test if something is wrong here.

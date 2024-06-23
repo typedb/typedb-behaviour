@@ -1172,14 +1172,14 @@ Feature: Concept Plays
     When relation(parentship) create role: parent
     When <root-type>(<type-name>) set plays: marriage:spouse
     When <root-type>(<type-name>) get plays(marriage:spouse) set annotation: @<annotation>
-    Then <root-type>(<type-name>) get plays(marriage:spouse) get annotation contain: @<annotation>
+    Then <root-type>(<type-name>) get plays(marriage:spouse) get annotations contain    : @<annotation>
     When <root-type>(<type-name>) set plays: parentship:parent
     Then <root-type>(<type-name>) get plays(parentship:parent) get annotations do not contain: @<annotation>
     When <root-type>(<type-name>) get plays(parentship:parent) unset annotation: @<annotation>
     Then <root-type>(<type-name>) get plays(parentship:parent) get annotations do not contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) get plays(marriage:spouse) get annotation contain: @<annotation>
+    Then <root-type>(<type-name>) get plays(marriage:spouse) get annotations contain    : @<annotation>
     Then <root-type>(<type-name>) get plays(parentship:parent) get annotations do not contain: @<annotation>
     When <root-type>(<type-name>) get plays(parentship:parent) unset annotation: @<annotation>
     Then <root-type>(<type-name>) get plays(parentship:parent) get annotations do not contain: @<annotation>
@@ -1202,8 +1202,8 @@ Feature: Concept Plays
     When relation(marriage) create role: spouse
     When <root-type>(<supertype-name>) set plays: marriage:spouse
     When <root-type>(<supertype-name>) get plays(marriage:spouse) set annotation: @<annotation>
-    Then <root-type>(<supertype-name>) get plays(marriage:spouse) get annotation contain: @<annotation>
-    Then <root-type>(<subtype-name>) get plays(marriage:spouse) get annotation contain: @<annotation>
+    Then <root-type>(<supertype-name>) get plays(marriage:spouse) get annotations contain    : @<annotation>
+    Then <root-type>(<subtype-name>) get plays(marriage:spouse) get annotations contain    : @<annotation>
     Then <root-type>(<subtype-name>) get plays(marriage:spouse) unset annotation: @<annotation>; fails
     When transaction commits
     When connection open schema transaction for database: typedb
@@ -1310,22 +1310,22 @@ Feature: Concept Plays
     When relation(parentship) create role: parent
     When <root-type>(<type-name>) set plays: contract:contractor
     When <root-type>(<type-name>) get plays(contract:contractor) set annotation: @<annotation>
-    Then <root-type>(<type-name>) get plays(contract:contractor) get annotation contain: @<annotation>
+    Then <root-type>(<type-name>) get plays(contract:contractor) get annotations contain    : @<annotation>
     When <root-type>(<type-name>) set plays: parentship:parent
     When <root-type>(<type-name>) get plays(parentship:parent) set annotation: @<annotation>
-    Then <root-type>(<type-name>) get plays(parentship:parent) get annotation contain: @<annotation>
+    Then <root-type>(<type-name>) get plays(parentship:parent) get annotations contain    : @<annotation>
     Then <root-type>(<type-name>) set plays: contract:contractor
     Then <root-type>(<type-name>) get plays(contract:contractor) set annotation: @<annotation>
-    Then <root-type>(<type-name>) get plays(contract:contractor) get annotation contain: @<annotation>
+    Then <root-type>(<type-name>) get plays(contract:contractor) get annotations contain    : @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) get plays(contract:contractor) get annotation contain: @<annotation>
+    Then <root-type>(<type-name>) get plays(contract:contractor) get annotations contain    : @<annotation>
     Then <root-type>(<type-name>) set plays: parentship:parent
     Then <root-type>(<type-name>) get plays(parentship:parent) set annotation: @<annotation>
-    Then <root-type>(<type-name>) get plays(parentship:parent) get annotation contain: @<annotation>
+    Then <root-type>(<type-name>) get plays(parentship:parent) get annotations contain    : @<annotation>
     When transaction commits
     When connection open read transaction for database: typedb
-    Then <root-type>(<type-name>) get plays(parentship:parent) get annotation contain: @<annotation>
+    Then <root-type>(<type-name>) get plays(parentship:parent) get annotations contain    : @<annotation>
     Examples:
       | root-type | type-name   | annotation |
       | entity    | person      | card(1, 2) |
@@ -1570,24 +1570,24 @@ Feature: Concept Plays
     When relation(marriage) set supertype: contract
     When <root-type>(<type-name>) set plays: contract:contractor
     When <root-type>(<type-name>) get plays(contract:contractor) set annotation: @<annotation>
-    Then <root-type>(<type-name>) get plays(contract:contractor) get annotation contain: @<annotation>
+    Then <root-type>(<type-name>) get plays(contract:contractor) get annotations contain    : @<annotation>
     When <root-type>(<type-name>) set plays: marriage:contractor
-    Then <root-type>(<type-name>) get plays(marriage:contractor) get annotation contain: @<annotation>
+    Then <root-type>(<type-name>) get plays(marriage:contractor) get annotations contain    : @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) get plays(contract:contractor) get annotation contain: @<annotation>
-    Then <root-type>(<type-name>) get plays(marriage:contractor) get annotation contain: @<annotation>
+    Then <root-type>(<type-name>) get plays(contract:contractor) get annotations contain    : @<annotation>
+    Then <root-type>(<type-name>) get plays(marriage:contractor) get annotations contain    : @<annotation>
     Then <root-type>(<type-name>) get plays(marriage:contractor) set annotation: @<annotation>; fails
     When <root-type>(<type-name>) get plays(contract:contractor) unset annotation: @<annotation>
     Then <root-type>(<type-name>) get plays(contract:contractor) get annotation is empty
     Then <root-type>(<type-name>) get plays(marriage:contractor) get annotation is empty
     Then <root-type>(<type-name>) get plays(marriage:contractor) set annotation: @<annotation>
     Then <root-type>(<type-name>) get plays(contract:contractor) get annotation is empty
-    Then <root-type>(<type-name>) get plays(marriage:contractor) get annotation contain: @<annotation>
+    Then <root-type>(<type-name>) get plays(marriage:contractor) get annotations contain    : @<annotation>
     When transaction commits
     When connection open read transaction for database: typedb
     Then <root-type>(<type-name>) get plays(contract:contractor) get annotation is empty
-    Then <root-type>(<type-name>) get plays(marriage:contractor) get annotation contain: @<annotation>
+    Then <root-type>(<type-name>) get plays(marriage:contractor) get annotations contain    : @<annotation>
     Examples:
       | root-type | type-name   | annotation |
       | entity    | person      | card(1, 2) |

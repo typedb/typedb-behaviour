@@ -887,7 +887,7 @@ Feature: Concept Relation Type and Role Type
 #    When relation(parentship) set annotation: @<annotation-1>; fails
 #    When transaction commits
 #    When connection open read transaction for database: typedb
-#    Then relation(parentship) get annotation contain: @<annotation-2>
+#    Then relation(parentship) get annotations contain    : @<annotation-2>
 #    Then relation(parentship) get annotation do not contain: @<annotation-1>
 #    Examples:
 #      | annotation-1 | annotation-2 |
@@ -2444,7 +2444,7 @@ Feature: Concept Relation Type and Role Type
 #    When relation(parentship) get role(parent) set annotation: @<annotation-1>; fails
 #    When transaction commits
 #    When connection open schema transaction for database: typedb
-#    Then relation(parentship) get role(parent) get annotation contain: @<annotation-2>
+#    Then relation(parentship) get role(parent) get annotations contain    : @<annotation-2>
 #    Then relation(parentship) get role(parent) get annotation do not contain: @<annotation-1>
 #    Examples:
 #      | annotation-1 | annotation-2 |
