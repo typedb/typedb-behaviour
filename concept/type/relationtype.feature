@@ -456,12 +456,38 @@ Feature: Concept Relation Type and Role Type
       | parentship:child  |
       | fathership:spouse |
 
-    # TODO: Some strange logic in the implementation, skip for now
-#  Scenario: Relation types cannot override declared related role types
-#    When create relation type: parentship
-#    When relation(parentship) create role: parent
-#    Then relation(parentship) create role: father
-#    Then relation(parentship) get role(father) set supertype: parent; fails
+  Scenario: Relation types cannot override declared related role types
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    Then relation(parentship) create role: father
+    Then relation(parentship) get role(father) set supertype: parent; fails
+
+  Scenario: Role cannot set supertype role if it's not a part of its relation type's supertype
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When create relation type: fathership
+    When relation(fathership) create role: father
+    Then relation(fathership) get role(father) set supertype: parent; fails
+
+  Scenario: Relation types cannot redeclare inherited role without changes
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When create relation type: fathership
+    When relation(fathership) create role: father
+    When relation(fathership) set supertype: parentship
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) create role parent; fails
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) create role father; fails
+    When connection open schema transaction for database: typedb
+    When relation(fathership) get role(father) set supertype: parent
+    Then relation(parentship) get role(father) get supertype: parent
+    Then relation(fathership) create role parent; fails
+    When connection open schema transaction for database: typedb
+    When relation(fathership) get role(father) set supertype: parent
+    Then relation(parentship) get role(father) get supertype: parent
+    Then relation(fathership) create role father; fails
 
   Scenario: Relation types can update existing roles override a newly defined role it inherits
     When create relation type: parentship
@@ -1637,11 +1663,6 @@ Feature: Concept Relation Type and Role Type
 ########################
 # relates @annotations common
 ########################
-
-      #TODO: Parent owns name, child sub parent. (DO THE SAME FOR OWNS, PLAYS, RELATES)
-  # Child get owns name exists, child get owns set annotation ERROR
-  # Child set owns name set annotation commit ERROR
-  # Child set owns name set annotation set override name commit FINE!
 
   Scenario Outline: Role can unset @<annotation> that has not been set
     When create relation type: marriage

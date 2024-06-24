@@ -1821,6 +1821,7 @@ Feature: Concept Plays
     When create relation type: marriage
     When relation(marriage) create role: spouse
     When relation(marriage) set supertype: contract
+    When relation(marriage) get role(spouse) set supertype: contractor:contract
     When create relation type: celebration
     When relation(celebration) create role: cause
     When relation(celebration) set annotation: @abstract
