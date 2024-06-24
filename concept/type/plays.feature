@@ -69,7 +69,7 @@ Feature: Concept Plays
 #    When create attribute type: id
 #    When attribute(id) set value type: long
 #    When relation(credit) create role: creditor
-#    When create struct definition: passport
+#    When create struct: passport
 #    When struct(passport) create field: birthday, with value type: datetime
 #    Then entity(person) set plays: car; fails
 #    Then entity(person) set plays: credit; fails
@@ -434,7 +434,7 @@ Feature: Concept Plays
 #    When relation(credit) create role: creditor
 #    When create relation type: marriage
 #    When relation(marriage) create role: spouse
-#    When create struct definition: passport
+#    When create struct: passport
 #    When struct(passport) create field: birthday, with value type: datetime
 #    Then relation(marriage) set plays: car; fails
 #    Then relation(marriage) set plays: credit; fails
@@ -687,7 +687,7 @@ Feature: Concept Plays
 #    When create relation type: marriage
 #    When relation(marriage) create role: spouse
 #    When attribute(surname) set value type: string
-#    When create struct definition: passport
+#    When create struct: passport
 #    When struct(passport) create field: first-name, with value type: string
 #    When struct(passport) create field: surname, with value type: string
 #    When struct(passport) create field: birthday, with value type: datetime
@@ -705,14 +705,14 @@ Feature: Concept Plays
 #    When connection open read transaction for database: typedb
 #    Then attribute(name) get plays is empty
 
-#  Scenario: struct definitions cannot play entities, attributes, relations, roles, structs, structs fields, and non-existing things
+#  Scenario: structs cannot play entities, attributes, relations, roles, structs, structs fields, and non-existing things
 #    When create attribute type: name
 #    When create relation type: marriage
 #    When relation(marriage) create role: spouse
 #    When attribute(surname) set value type: string
-#    When create struct definition: passport
+#    When create struct: passport
 #    When struct(passport) create field: birthday, with value type: datetime
-#    When create struct definition: wallet
+#    When create struct: wallet
 #    When struct(wallet) create field: currency, with value type: string
 #    When struct(wallet) create field: value, with value type: double
 #    Then struct(wallet) set plays: person; fails

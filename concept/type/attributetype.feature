@@ -13,9 +13,9 @@ Feature: Concept Attribute Type
     Given connection create database: typedb
     Given connection open schema transaction for database: typedb
 
-    Given create struct definition: custom-struct
+    Given create struct: custom-struct
     Given struct(custom-struct) create field: custom-field, with value type: string
-    Given create struct definition: custom-struct-2
+    Given create struct: custom-struct-2
     Given struct(custom-struct-2) create field: custom-field-2, with value type: string
 
     Given transaction commits
@@ -54,7 +54,7 @@ Feature: Concept Attribute Type
       | duration   |
 
 #  Scenario: Attribute types can be created with a struct as value type
-#    When create struct definition: multi-name
+#    When create struct: multi-name
 #    When struct(multi-name) create field: first-name, with value type: string
 #    When struct(multi-name) create field: second-name, with value type: string
 #    When create attribute type: full-name
@@ -1930,10 +1930,10 @@ Feature: Concept Attribute Type
 ########################
 
   Scenario: Struct that doesn't exist cannot be deleted
-    Then delete struct definition: passport; fails
+    Then delete struct: passport; fails
 
   Scenario Outline: Struct can be created with one field, including another struct
-    When create struct definition: passport
+    When create struct: passport
     Then struct(passport) exists
     Then struct(passport) get fields do not contain:
       | name |
@@ -1961,7 +1961,7 @@ Feature: Concept Attribute Type
 #      | custom-struct |
 
   Scenario Outline: Struct can be created with multiple fields, including another struct
-    When create struct definition: passport
+    When create struct: passport
     Then struct(passport) exists
     When struct(passport) create field: id, with value type: <value-type-1>
     When struct(passport) create field: name, with value type: <value-type-2>
@@ -1994,7 +1994,7 @@ Feature: Concept Attribute Type
 #      | custom-struct | long          |
 
   Scenario Outline: Struct can be created with one optional field, including another struct
-    When create struct definition: passport
+    When create struct: passport
     Then struct(passport) exists
     Then struct(passport) get fields do not contain:
       | name |
@@ -2022,7 +2022,7 @@ Feature: Concept Attribute Type
 #      | custom-struct |
 
   Scenario Outline: Struct can be created with multiple optional fields, including another struct
-    When create struct definition: passport
+    When create struct: passport
     Then struct(passport) exists
     When struct(passport) create field: id, with value type: <value-type-1>
     When struct(passport) create field: surname, with value type: <value-type-2>?
@@ -2069,27 +2069,27 @@ Feature: Concept Attribute Type
 #      | custom-struct | long          |
 
   Scenario: Struct without fields can be deleted
-    When create struct definition: passport
+    When create struct: passport
     Then struct(passport) exists
-    When delete struct definition: passport
+    When delete struct: passport
     Then struct(passport) does not exist
-    When create struct definition: passport
+    When create struct: passport
     Then struct(passport) exists
     When transaction commits
     When connection open schema transaction for database: typedb
     Then struct(passport) exists
-    When delete struct definition: passport
+    When delete struct: passport
     Then struct(passport) does not exist
     When transaction commits
     When connection open schema transaction for database: typedb
     Then struct(passport) does not exist
 
   Scenario: Struct with fields can be deleted
-    When create struct definition: passport
+    When create struct: passport
     When struct(passport) create field: name, with value type: string
-    When delete struct definition: passport
+    When delete struct: passport
     Then struct(passport) does not exist
-    When create struct definition: passport
+    When create struct: passport
     When struct(passport) create field: name, with value type: string
     When struct(passport) create field: birthday, with value type: datetime
     When transaction commits
@@ -2098,14 +2098,14 @@ Feature: Concept Attribute Type
     Then struct(passport) get fields contain:
       | name     |
       | birthday |
-    When delete struct definition: passport
+    When delete struct: passport
     Then struct(passport) does not exist
     When transaction commits
     When connection open schema transaction for database: typedb
     Then struct(passport) does not exist
 
   Scenario Outline: Struct can delete fields of type <value-type>
-    When create struct definition: passport
+    When create struct: passport
     When struct(passport) create field: name, with value type: <value-type>
     Then struct(passport) get fields contain:
       | name |
@@ -2143,9 +2143,9 @@ Feature: Concept Attribute Type
 
     # TODO: Maybe only for typeql!
   Scenario Outline: Struct cannot delete fields of type <value-type> if it doesn't exist
-    When create struct definition: passport
+    When create struct: passport
     When struct(passport) create field: name, with value type: <value-type>
-    When create struct definition: table
+    When create struct: table
     Then struct(table) delete field: name; fails
     When transaction commits
     When connection open schema transaction for database: typedb
@@ -2163,17 +2163,17 @@ Feature: Concept Attribute Type
 #      | custom-struct |
 
   Scenario: Struct cannot be redefined
-    When create struct definition: passport
-    Then create struct definition: passport; fails
+    When create struct: passport
+    Then create struct: passport; fails
     When struct(passport) create field: name, with value type: string
-    Then create struct definition: passport; fails
+    Then create struct: passport; fails
     When transaction commits
     When connection open schema transaction for database: typedb
     Then struct(passport) exists
-    Then create struct definition: passport; fails
+    Then create struct: passport; fails
 
   Scenario: Struct fields cannot be redefined
-    When create struct definition: passport
+    When create struct: passport
     When struct(passport) create field: name, with value type: string
     When struct(passport) create field: birthday, with value type: datetime
     Then struct(passport) create field: name, with value type: string; fails
@@ -2192,7 +2192,7 @@ Feature: Concept Attribute Type
 
   # TODO: No commit time checks for now
 #  Scenario: Struct cannot be commited without fields
-#    When create struct definition: passport
+#    When create struct: passport
 #    Then transaction commits; fails
 #    When connection open read transaction for database: typedb
 #    Then struct(passport) does not exist
