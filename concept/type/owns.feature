@@ -32,7 +32,7 @@ Feature: Concept Owns
     Given relation(description) set annotation: @abstract
     Given relation(registration) set annotation: @abstract
     Given relation(profile) set annotation: @abstract
-#    Given create struct type: custom-struct
+#    Given create struct definition: custom-struct
 #    Given struct(custom-struct) create field: custom-field
 
     Given transaction commits
@@ -123,7 +123,7 @@ Feature: Concept Owns
 #    When create entity type: car
 #    When create relation type: credit
 #    When relation(credit) create role: creditor
-#    When create struct type: passport
+#    When create struct definition: passport
 #    When struct(passport) create field: birthday, with value type: datetime
 #    Then entity(person) set owns: car; fails
 #    Then entity(person) set owns: credit; fails
@@ -284,7 +284,7 @@ Feature: Concept Owns
 #    When relation(credit) create role: creditor
 #    When create relation type: marriage
 #    When relation(marriage) create role: spouse
-#    When create struct type: passport-document
+#    When create struct definition: passport-document
 #    When struct(passport-document) create field: first-name, with value type: string
 #    When struct(passport-document) create field: surname, with value type: string
 #    When struct(passport-document) create field: birthday, with value type: datetime
@@ -368,7 +368,7 @@ Feature: Concept Owns
 #    When create relation type: marriage
 #    When relation(marriage) create role: spouse
 #    When attribute(surname) set value type: string
-#    When create struct type: passport
+#    When create struct definition: passport
 #    When struct(passport) create field: first-name, with value type: string
 #    When struct(passport) create field: surname, with value type: string
 #    When struct(passport) create field: birthday, with value type: datetime
@@ -386,14 +386,14 @@ Feature: Concept Owns
 #    When connection open read transaction for database: typedb
 #    Then attribute(name) get owns is empty
 
-#  Scenario: Struct types cannot own entities, attributes, relations, roles, structs, structs fields, and non-existing things
+#  Scenario: struct definitions cannot own entities, attributes, relations, roles, structs, structs fields, and non-existing things
 #    When create attribute type: name
 #    When create relation type: marriage
 #    When relation(marriage) create role: spouse
 #    When attribute(surname) set value type: string
-#    When create struct type: passport
+#    When create struct definition: passport
 #    When struct(passport) create field: birthday, with value type: datetime
-#    When create struct type: wallet
+#    When create struct definition: wallet
 #    When struct(wallet) create field: currency, with value type: string
 #    When struct(wallet) create field: value, with value type: double
 #    Then struct(wallet) set owns: person; fails

@@ -13,10 +13,10 @@ Feature: Concept Attribute Type
     Given connection create database: typedb
     Given connection open schema transaction for database: typedb
 
-#    Given create struct type: custom-struct
-#    Given struct(custom-struct) create field: custom-field, with value type: string
-#    Given create struct type: custom-struct-2
-#    Given struct(custom-struct-2) create field: custom-field-2, with value type: string
+    Given create struct definition: custom-struct
+    Given struct(custom-struct) create field: custom-field, with value type: string
+    Given create struct definition: custom-struct-2
+    Given struct(custom-struct-2) create field: custom-field-2, with value type: string
 
     Given transaction commits
     Given connection open schema transaction for database: typedb
@@ -54,7 +54,7 @@ Feature: Concept Attribute Type
       | duration   |
 
 #  Scenario: Attribute types can be created with a struct as value type
-#    When create struct type: multi-name
+#    When create struct definition: multi-name
 #    When struct(multi-name) create field: first-name, with value type: string
 #    When struct(multi-name) create field: second-name, with value type: string
 #    When create attribute type: full-name
@@ -1929,49 +1929,270 @@ Feature: Concept Attribute Type
 # structs common
 ########################
 
+  Scenario: Struct that doesn't exist cannot be deleted
+    Then delete struct definition: passport; fails
+
   Scenario Outline: Struct can be created with one field, including another struct
-    When create struct type: passport
+    When create struct definition: passport
     Then struct(passport) exists
-    Then struct(passport) get fields do not contain: name
+    Then struct(passport) get fields do not contain:
+      | name |
     When struct(passport) create field: name, with value type: <value-type>
-    Then struct(passport) get fields contain: name
+    Then struct(passport) get fields contain:
+      | name |
     Then struct(passport) get field(name) get value type: <value-type>
+    Then struct(passport) get field(name) is optional: false
     When transaction commits
     When connection open read transaction for database: typedb
-    Then struct(passport) get fields contain: name
+    Then struct(passport) get fields contain:
+      | name |
     Then struct(passport) get field(name) get value type: <value-type>
+    Then struct(passport) get field(name) is optional: false
     Examples:
-      | value-type    |
-      | long          |
-      | string        |
-      | boolean       |
-      | double        |
-      | decimal       |
-      | datetime      |
-      | datetimetz    |
-      | duration      |
-      | custom-struct |
+      | value-type |
+      | long       |
+      | string     |
+      | boolean    |
+      | double     |
+      | decimal    |
+      | datetime   |
+      | datetimetz |
+      | duration   |
+#      | custom-struct |
 
   Scenario Outline: Struct can be created with multiple fields, including another struct
-    When create struct type: passport
+    When create struct definition: passport
     Then struct(passport) exists
     When struct(passport) create field: id, with value type: <value-type-1>
     When struct(passport) create field: name, with value type: <value-type-2>
-    Then struct(passport) get fields contain: name
+    Then struct(passport) get fields contain:
+      | id   |
+      | name |
+    Then struct(passport) get field(id) get value type: <value-type-1>
+    Then struct(passport) get field(id) is optional: false
+    Then struct(passport) get field(name) get value type: <value-type-2>
+    Then struct(passport) get field(name) is optional: false
     When transaction commits
     When connection open read transaction for database: typedb
-    Then struct(passport) get fields contain: id
+    Then struct(passport) get fields contain:
+      | id   |
+      | name |
     Then struct(passport) get field(id) get value type: <value-type-1>
-    Then struct(passport) get fields contain: name
+    Then struct(passport) get field(id) is optional: false
     Then struct(passport) get field(name) get value type: <value-type-2>
+    Then struct(passport) get field(name) is optional: false
     Examples:
-      | value-type-1  | value-type-2  |
-      | long          | string        |
-      | string        | boolean       |
-      | boolean       | double        |
-      | double        | decimal       |
-      | decimal       | datetime      |
-      | datetime      | datetimetz    |
-      | datetimetz    | duration      |
-      | duration      | custom-struct |
-      | custom-struct | long          |
+      | value-type-1 | value-type-2 |
+      | long         | string       |
+      | string       | boolean      |
+      | boolean      | double       |
+      | double       | decimal      |
+      | decimal      | datetime     |
+      | datetime     | datetimetz   |
+      | datetimetz   | duration     |
+#      | duration      | custom-struct |
+#      | custom-struct | long          |
+
+  Scenario Outline: Struct can be created with one optional field, including another struct
+    When create struct definition: passport
+    Then struct(passport) exists
+    Then struct(passport) get fields do not contain:
+      | name |
+    When struct(passport) create field: name, with value type: <value-type>?
+    Then struct(passport) get fields contain:
+      | name |
+    Then struct(passport) get field(name) get value type: <value-type>
+    Then struct(passport) get field(name) is optional: true
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then struct(passport) get fields contain:
+      | name |
+    Then struct(passport) get field(name) get value type: <value-type>
+    Then struct(passport) get field(name) is optional: true
+    Examples:
+      | value-type |
+      | long       |
+      | string     |
+      | boolean    |
+      | double     |
+      | decimal    |
+      | datetime   |
+      | datetimetz |
+      | duration   |
+#      | custom-struct |
+
+  Scenario Outline: Struct can be created with multiple optional fields, including another struct
+    When create struct definition: passport
+    Then struct(passport) exists
+    When struct(passport) create field: id, with value type: <value-type-1>
+    When struct(passport) create field: surname, with value type: <value-type-2>?
+    When struct(passport) create field: name, with value type: <value-type-2>
+    When struct(passport) create field: middle-name, with value type: <value-type-2>?
+    Then struct(passport) get fields contain:
+      | id          |
+      | name        |
+      | surname     |
+      | middle-name |
+    Then struct(passport) get field(id) get value type: <value-type-1>
+    Then struct(passport) get field(id) is optional: false
+    Then struct(passport) get field(surname) get value type: <value-type-2>
+    Then struct(passport) get field(surname) is optional: true
+    Then struct(passport) get field(name) get value type: <value-type-2>
+    Then struct(passport) get field(name) is optional: false
+    Then struct(passport) get field(middle-name) get value type: <value-type-2>
+    Then struct(passport) get field(middle-name) is optional: true
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then struct(passport) get fields contain:
+      | id          |
+      | name        |
+      | surname     |
+      | middle-name |
+    Then struct(passport) get field(id) get value type: <value-type-1>
+    Then struct(passport) get field(id) is optional: false
+    Then struct(passport) get field(surname) get value type: <value-type-2>
+    Then struct(passport) get field(surname) is optional: true
+    Then struct(passport) get field(name) get value type: <value-type-2>
+    Then struct(passport) get field(name) is optional: false
+    Then struct(passport) get field(middle-name) get value type: <value-type-2>
+    Then struct(passport) get field(middle-name) is optional: true
+    Examples:
+      | value-type-1 | value-type-2 |
+      | long         | string       |
+      | string       | boolean      |
+      | boolean      | double       |
+      | double       | decimal      |
+      | decimal      | datetime     |
+      | datetime     | datetimetz   |
+      | datetimetz   | duration     |
+#      | duration      | custom-struct |
+#      | custom-struct | long          |
+
+  Scenario: Struct without fields can be deleted
+    When create struct definition: passport
+    Then struct(passport) exists
+    When delete struct definition: passport
+    Then struct(passport) does not exist
+    When create struct definition: passport
+    Then struct(passport) exists
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then struct(passport) exists
+    When delete struct definition: passport
+    Then struct(passport) does not exist
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then struct(passport) does not exist
+
+  Scenario: Struct with fields can be deleted
+    When create struct definition: passport
+    When struct(passport) create field: name, with value type: string
+    When delete struct definition: passport
+    Then struct(passport) does not exist
+    When create struct definition: passport
+    When struct(passport) create field: name, with value type: string
+    When struct(passport) create field: birthday, with value type: datetime
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then struct(passport) exists
+    Then struct(passport) get fields contain:
+      | name     |
+      | birthday |
+    When delete struct definition: passport
+    Then struct(passport) does not exist
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then struct(passport) does not exist
+
+  Scenario Outline: Struct can delete fields of type <value-type>
+    When create struct definition: passport
+    When struct(passport) create field: name, with value type: <value-type>
+    Then struct(passport) get fields contain:
+      | name |
+    Then struct(passport) get field(name) get value type: <value-type>
+    When struct(passport) delete field: name
+    Then struct(passport) get fields do not contain:
+      | name |
+    When struct(passport) create field: name, with value type: <value-type>
+    Then struct(passport) get fields contain:
+      | name |
+    Then struct(passport) get field(name) get value type: <value-type>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then struct(passport) get fields contain:
+      | name |
+    Then struct(passport) get field(name) get value type: <value-type>
+    When struct(passport) delete field: name
+    Then struct(passport) get fields do not contain:
+      | name |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then struct(passport) get fields do not contain:
+      | name |
+    Examples:
+      | value-type |
+      | long       |
+      | string     |
+      | boolean    |
+      | double     |
+      | decimal    |
+      | datetime   |
+      | datetimetz |
+      | duration   |
+#      | custom-struct |
+
+    # TODO: Maybe only for typeql!
+  Scenario Outline: Struct cannot delete fields of type <value-type> if it doesn't exist
+    When create struct definition: passport
+    When struct(passport) create field: name, with value type: <value-type>
+    When create struct definition: table
+    Then struct(table) delete field: name; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then struct(table) delete field: name; fails
+    Examples:
+      | value-type |
+      | long       |
+      | string     |
+      | boolean    |
+      | double     |
+      | decimal    |
+      | datetime   |
+      | datetimetz |
+      | duration   |
+#      | custom-struct |
+
+  Scenario: Struct cannot be redefined
+    When create struct definition: passport
+    Then create struct definition: passport; fails
+    When struct(passport) create field: name, with value type: string
+    Then create struct definition: passport; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then struct(passport) exists
+    Then create struct definition: passport; fails
+
+  Scenario: Struct fields cannot be redefined
+    When create struct definition: passport
+    When struct(passport) create field: name, with value type: string
+    When struct(passport) create field: birthday, with value type: datetime
+    Then struct(passport) create field: name, with value type: string; fails
+    Then struct(passport) create field: birthday, with value type: datetime; fails
+    Then struct(passport) create field: name, with value type: datetime; fails
+    Then struct(passport) create field: birthday, with value type: long; fails
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then struct(passport) exists
+    Then struct(passport) get fields contain:
+      | name |
+    Then struct(passport) get field(name) get value type: string
+    Then struct(passport) get fields contain:
+      | birthday |
+    Then struct(passport) get field(birthday) get value type: datetime
+
+  # TODO: No commit time checks for now
+#  Scenario: Struct cannot be commited without fields
+#    When create struct definition: passport
+#    Then transaction commits; fails
+#    When connection open read transaction for database: typedb
+#    Then struct(passport) does not exist
