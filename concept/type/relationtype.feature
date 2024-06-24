@@ -187,7 +187,7 @@ Feature: Concept Relation Type and Role Type
     When create relation type: fathership
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: father
-    When relation(fathership) get role(father) set override: parent
+    When relation(fathership) get role(father) set supertype: parent
     Then relation(fathership) get supertype: parentship
     Then relation(fathership) get role(father) get supertype: parentship:parent
     Then relation(fathership) get role(child) get supertype: relation:role
@@ -239,7 +239,7 @@ Feature: Concept Relation Type and Role Type
     When create relation type: father-son
     When relation(father-son) set supertype: fathership
     When relation(father-son) create role: son
-    When relation(father-son) get role(son) set override: child
+    When relation(father-son) get role(son) set supertype: child
     Then relation(father-son) get supertype: fathership
     Then relation(father-son) get role(father) get supertype: parentship:parent
     Then relation(father-son) get role(son) get supertype: parentship:child
@@ -328,7 +328,7 @@ Feature: Concept Relation Type and Role Type
     When create relation type: fathership
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: father
-    When relation(fathership) get role(father) set override: parent
+    When relation(fathership) get role(father) set supertype: parent
     Then relation(fathership) get roles contain:
       | fathership:father |
       | parentship:child  |
@@ -341,7 +341,7 @@ Feature: Concept Relation Type and Role Type
     When create relation type: mothership
     When relation(mothership) set supertype: parentship
     When relation(mothership) create role: mother
-    When relation(mothership) get role(mother) set override: parent
+    When relation(mothership) get role(mother) set supertype: parent
     Then relation(mothership) get roles contain:
       | mothership:mother |
       | parentship:child  |
@@ -373,7 +373,7 @@ Feature: Concept Relation Type and Role Type
     When create relation type: fathership
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: father
-    When relation(fathership) get role(father) set override: parent
+    When relation(fathership) get role(father) set supertype: parent
     Then relation(fathership) get overridden role(father) exists
     Then relation(fathership) get role(father) get supertype: parentship:parent
     Then relation(fathership) get roles do not contain:
@@ -383,7 +383,7 @@ Feature: Concept Relation Type and Role Type
     When create relation type: mothership
     When relation(mothership) set supertype: parentship
     When relation(mothership) create role: mother
-    When relation(mothership) get role(mother) set override: parent
+    When relation(mothership) get role(mother) set supertype: parent
     Then relation(mothership) get roles do not contain:
       | parentship:parent |
     When transaction commits
@@ -403,7 +403,7 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) set supertype: parentship
     Then relation(fathership) create role: parent; fails
     When relation(fathership) create role: father
-    When relation(fathership) get role(father) set override: parent
+    When relation(fathership) get role(father) set supertype: parent
     When relation(fathership) create role: spouse
     Then relation(fathership) get roles contain:
       | fathership:father |
@@ -461,7 +461,7 @@ Feature: Concept Relation Type and Role Type
 #    When create relation type: parentship
 #    When relation(parentship) create role: parent
 #    Then relation(parentship) create role: father
-#    Then relation(parentship) get role(father) set override: parent; fails
+#    Then relation(parentship) get role(father) set supertype: parent; fails
 
   Scenario: Relation types can update existing roles override a newly defined role it inherits
     When create relation type: parentship
@@ -472,7 +472,7 @@ Feature: Concept Relation Type and Role Type
     When transaction commits
     When connection open schema transaction for database: typedb
     When relation(parentship) create role: parent
-    When relation(fathership) get role(father) set override: parent
+    When relation(fathership) get role(father) set supertype: parent
     Then relation(fathership) get role(father) get supertype: parentship:parent
     When transaction commits
     When connection open read transaction for database: typedb
@@ -621,9 +621,9 @@ Feature: Concept Relation Type and Role Type
 #    When create relation type: fathership
 #    When relation(fathership) set supertype: parentship
 #    When relation(fathership) create role: father
-#    When relation(fathership) get role(father) set override: parent
+#    When relation(fathership) get role(father) set supertype: parent
 #    When relation(fathership) create role: father-child
-#    When relation(fathership) get role(father-child) set override: child
+#    When relation(fathership) get role(father-child) set supertype: child
 #    When create entity type: person
 #    When entity(person) set plays: fathership:father
 #    Then transaction commits
@@ -955,7 +955,7 @@ Feature: Concept Relation Type and Role Type
     When create relation type: fathership
     When relation(fathership) create role: father
     When relation(fathership) set supertype: parentship
-    When relation(fathership) get role(father) set override: parent
+    When relation(fathership) get role(father) set supertype: parent
     When relation(fathership) get role(father) set annotation: @card(0, 1)
     When relation(fathership) get role(father) set ordering: ordered
     Then relation(fathership) get role(father) get ordering: ordered
@@ -1152,7 +1152,7 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: father
     When relation(fathership) get role(father) set ordering: ordered
-    When relation(fathership) get role(father) set override: parent
+    When relation(fathership) get role(father) set supertype: parent
     Then relation(fathership) get supertype: parentship
     Then relation(fathership) get role(father) get supertype: parentship:parent
     Then relation(fathership) get role(child) get supertype: relation:role
@@ -1205,7 +1205,7 @@ Feature: Concept Relation Type and Role Type
     When relation(father-son) set supertype: fathership
     When relation(father-son) create role: son
     When relation(father-son) get role(son) set ordering: ordered
-    When relation(father-son) get role(son) set override: child
+    When relation(father-son) get role(son) set supertype: child
     Then relation(father-son) get supertype: fathership
     Then relation(father-son) get role(father) get supertype: parentship:parent
     Then relation(father-son) get role(son) get supertype: parentship:child
@@ -1290,7 +1290,7 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: father
     When relation(fathership) get role(father) set ordering: ordered
-    When relation(fathership) get role(father) set override: parent
+    When relation(fathership) get role(father) set supertype: parent
     Then relation(fathership) get roles contain:
       | fathership:father |
       | parentship:child  |
@@ -1304,7 +1304,7 @@ Feature: Concept Relation Type and Role Type
     When relation(mothership) set supertype: parentship
     When relation(mothership) create role: mother
     When relation(mothership) get role(mother) set ordering: ordered
-    When relation(mothership) get role(mother) set override: parent
+    When relation(mothership) get role(mother) set supertype: parent
     Then relation(mothership) get roles contain:
       | mothership:mother |
       | parentship:child  |
@@ -1339,7 +1339,7 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: father
     When relation(fathership) get role(father) set ordering: ordered
-    When relation(fathership) get role(father) set override: parent
+    When relation(fathership) get role(father) set supertype: parent
     Then relation(fathership) get overridden role(father) exists
     Then relation(fathership) get role(father) get supertype: parentship:parent
     Then relation(fathership) get roles do not contain:
@@ -1350,7 +1350,7 @@ Feature: Concept Relation Type and Role Type
     When relation(mothership) set supertype: parentship
     When relation(mothership) create role: mother
     When relation(mothership) get role(mother) set ordering: ordered
-    When relation(mothership) get role(mother) set override: parent
+    When relation(mothership) get role(mother) set supertype: parent
     Then relation(mothership) get roles do not contain:
       | parentship:parent |
     When transaction commits
@@ -1375,7 +1375,7 @@ Feature: Concept Relation Type and Role Type
 #    When relation(parentship) get role(parent) set ordering: ordered
 #    Then relation(parentship) create role: father
 #    When relation(parentship) get role(father) set ordering: ordered
-#    Then relation(parentship) get role(father) set override: parent; fails
+#    Then relation(parentship) get role(father) set supertype: parent; fails
 
   Scenario: Relation types can update existing ordered roles override a newly defined role it inherits
     When create relation type: parentship
@@ -1389,7 +1389,7 @@ Feature: Concept Relation Type and Role Type
     When connection open schema transaction for database: typedb
     When relation(parentship) create role: parent
     When relation(parentship) get role(parent) set ordering: ordered
-    When relation(fathership) get role(father) set override: parent
+    When relation(fathership) get role(father) set supertype: parent
     Then relation(fathership) get role(father) get supertype: parentship:parent
     When transaction commits
     When connection open read transaction for database: typedb
@@ -1411,8 +1411,8 @@ Feature: Concept Relation Type and Role Type
     When transaction commits
     When connection open schema transaction for database: typedb
     When relation(fathership) get role(father) set ordering: ordered
-    When relation(fathership) get role(father) set override: parent
-    When relation(mothership) get role(mother) set override: parent
+    When relation(fathership) get role(father) set supertype: parent
+    When relation(mothership) get role(mother) set supertype: parent
     Then relation(fathership) get role(father) get supertype: parentship:parent
     Then relation(mothership) get role(mother) get supertype: parentship:parent
     When relation(mothership) get role(mother) set ordering: ordered
@@ -1458,13 +1458,13 @@ Feature: Concept Relation Type and Role Type
 #    Then relation(mothership) get role(mother) get ordering: unordered
 #    Then relation(fathership) get role(father-child) get ordering: unordered
 #    Then relation(mothership) get role(mother-child) get ordering: unordered
-#    When relation(fathership) get role(father) set override: parent
+#    When relation(fathership) get role(father) set supertype: parent
 #    Then relation(fathership) get role(father) get ordering: unordered
-#    When relation(mothership) get role(mother) set override: parent
+#    When relation(mothership) get role(mother) set supertype: parent
 #    Then relation(mothership) get role(mother) get ordering: unordered
-#    When relation(fathership) get role(father-child) set override: child
+#    When relation(fathership) get role(father-child) set supertype: child
 #    Then relation(fathership) get role(father-child) get ordering: ordered
-#    When relation(mothership) get role(mother-child) set override: child
+#    When relation(mothership) get role(mother-child) set supertype: child
 #    Then relation(mothership) get role(mother-child) get ordering: ordered
 #    When transaction commits
 #    When connection open schema transaction for database: typedb
@@ -1552,7 +1552,7 @@ Feature: Concept Relation Type and Role Type
 #    When create relation type: fathership
 #    When relation(fathership) set supertype: parentship
 #    When relation(fathership) create role: father
-#    When relation(fathership) get role(father) set override: parent
+#    When relation(fathership) get role(father) set supertype: parent
 #    Then relation(parentship) get role(parent) get ordering: unordered
 #    Then relation(fathership) get role(father) get ordering: unordered
 #    When relation(fathership) get role(father) set ordering: ordered
@@ -1575,7 +1575,7 @@ Feature: Concept Relation Type and Role Type
 #    When relation(mothership) set supertype: parentship
 #    When relation(mothership) create role: mother
 #    When relation(mothership) get role(mother) set ordering: ordered
-#    When relation(mothership) get role(mother) set override: parent
+#    When relation(mothership) get role(mother) set supertype: parent
 #    Then relation(parentship) get role(parent) get ordering: unordered
 #    Then relation(mothership) get role(mother) get ordering: ordered
 #    Then relation(mothership) get role(mother) get supertype: parent
@@ -1601,7 +1601,7 @@ Feature: Concept Relation Type and Role Type
 #    When create relation type: fathership
 #    When relation(fathership) set supertype: parentship
 #    When relation(fathership) create role: father
-#    When relation(fathership) get role(father) set override: parent
+#    When relation(fathership) get role(father) set supertype: parent
 #    Then relation(parentship) get role(parent) get ordering: ordered
 #    Then relation(fathership) get role(father) get ordering: ordered
 #    When transaction commits
@@ -1619,7 +1619,7 @@ Feature: Concept Relation Type and Role Type
 #    When relation(mothership) set supertype: parentship
 #    When relation(mothership) create role: mother
 #    When relation(mothership) get role(mother) set ordering: ordered
-#    When relation(mothership) get role(mother) set override: parent
+#    When relation(mothership) get role(mother) set supertype: parent
 #    Then relation(parentship) get role(parent) get ordering: ordered
 #    Then relation(mothership) get role(mother) get ordering: ordered
 #    Then relation(mothership) get role(mother) get supertype: parent
@@ -1637,6 +1637,11 @@ Feature: Concept Relation Type and Role Type
 ########################
 # relates @annotations common
 ########################
+
+      #TODO: Parent owns name, child sub parent. (DO THE SAME FOR OWNS, PLAYS, RELATES)
+  # Child get owns name exists, child get owns set annotation ERROR
+  # Child set owns name set annotation commit ERROR
+  # Child set owns name set annotation set override name commit FINE!
 
   Scenario Outline: Role can unset @<annotation> that has not been set
     When create relation type: marriage
@@ -1748,7 +1753,7 @@ Feature: Concept Relation Type and Role Type
 #    When create relation type: fathership
 #    When relation(fathership) set supertype: parentship
 #    When relation(fathership) create role: father
-#    When relation(fathership) get role(father) set override: parent
+#    When relation(fathership) get role(father) set supertype: parent
 #    Then relation(parentship) get role(parent) get annotations contain: @<annotation>
 #    Then relation(fathership) get role(father) get annotations contain: @<annotation>
 #    When transaction commits
@@ -1853,7 +1858,7 @@ Feature: Concept Relation Type and Role Type
     When create relation type: fathership
     When relation(fathership) create role: father
     When relation(fathership) set supertype: parentship
-    When relation(fathership) get role(father) set override: parent
+    When relation(fathership) get role(father) set supertype: parent
     Then relation(fathership) get role(father) get annotations do not contain: @abstract
     When transaction commits
     When connection open schema transaction for database: typedb
@@ -1896,7 +1901,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(parent) get annotations contain: @abstract
     Then relation(fathership) get role(parent) get annotations contain: @abstract
     Then relation(fathership) get role(father) get annotations do not contain: @abstract
-    When relation(fathership) get role(father) set override: parent
+    When relation(fathership) get role(father) set supertype: parent
     Then relation(fathership) get role(father) get annotations do not contain: @abstract
     Then relation(fathership) get role(father) set annotation: @abstract
     Then relation(fathership) get role(father) get annotations contain: @abstract
@@ -2015,7 +2020,7 @@ Feature: Concept Relation Type and Role Type
 #    When create relation type: fathership
 #    When relation(fathership) create role: father
 #    When relation(fathership) set supertype: parentship
-#    When relation(fathership) get role(father) set override: parent
+#    When relation(fathership) get role(father) set supertype: parent
 #    Then relation(fathership) get role(father) get annotations contain: @distinct
 #    When transaction commits
 #    When connection open read transaction for database: typedb
@@ -2067,7 +2072,7 @@ Feature: Concept Relation Type and Role Type
 #    When create relation type: fathership
 #    When relation(fathership) create role: father
 #    When relation(fathership) set supertype: parentship
-#    When relation(fathership) get role(father) set override: parent
+#    When relation(fathership) get role(father) set supertype: parent
 #    Then relation(fathership) get role(father) get annotations contain: @distinct
 #    When transaction commits
 #    When connection open schema transaction for database: typedb
@@ -2085,7 +2090,7 @@ Feature: Concept Relation Type and Role Type
 #    When relation(fathership) create role: father
 #    When relation(fathership) set supertype: parentship
 #    When relation(parentship) get role(father) get ordering: unordered
-#    When relation(fathership) get role(father) set override: parent
+#    When relation(fathership) get role(father) set supertype: parent
 #    When relation(parentship) get role(father) get ordering: ordered
 #    Then relation(fathership) get role(father) get annotations contain: @distinct
 #    When transaction commits
@@ -2253,7 +2258,7 @@ Feature: Concept Relation Type and Role Type
 #    When create relation type: fathership
 #    When relation(fathership) set supertype: parentship
 #    When relation(fathership) create role: overridden-custom-role
-#    When relation(fathership) get role(overridden-custom-role) set override: second-custom-role
+#    When relation(fathership) get role(overridden-custom-role) set supertype: second-custom-role
 #    Then relation(fathership) get roles contain:
 #    |custom-role|
 #    Then relation(fathership) get role(custom-role) get annotations contain: @card(<args>)
@@ -2295,7 +2300,7 @@ Feature: Concept Relation Type and Role Type
 #    When create relation type: fathership
 #    When relation(fathership) set supertype: parentship
 #    When relation(fathership) create role: overridden-custom-role
-#    When relation(fathership) get role(overridden-custom-role) set override: second-custom-role
+#    When relation(fathership) get role(overridden-custom-role) set supertype: second-custom-role
 #    Then relation(fathership) get role(custom-role) get annotations contain: @card(<args>)
 #    Then relation(fathership) get role(overridden-custom-role) get annotations contain: @card(<args>)
 #    Then relation(fathership) get role(custom-role) set annotation: @card(<args-override>); fails

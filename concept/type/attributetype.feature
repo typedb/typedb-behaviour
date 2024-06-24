@@ -25,6 +25,8 @@ Feature: Concept Attribute Type
 # attribute type common
 ########################
   # TODO: Test how to set None value type
+  # TODO: "date" type?
+  # TODO: "datetimetz" -> "datetime-tz"
 
   Scenario: Root attribute type cannot be deleted
     Then delete attribute type: attribute; fails
