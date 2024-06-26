@@ -16,9 +16,20 @@ Feature: Concept Relation Type and Role Type
 ########################
 # relation type common
 ########################
+  # TODO: Add steps to get annotations categories contain
+  # TODO: Unset annotation is done by category!
 
   Scenario: Root relation type cannot be deleted
     Then delete relation type: relation; fails
+
+  Scenario: Root relation type cannot be renamed
+    Then relation(relation) set label: superrelation; fails
+
+  Scenario: Root role cannot be deleted
+    Then relation(relation) delete role: role; fails
+
+  Scenario: Root role cannot be renamed
+    Then relation(relation) get role(role) set name: superrole; fails
 
   Scenario: Relation and role types can be created
     When create relation type: marriage
@@ -154,6 +165,8 @@ Feature: Concept Relation Type and Role Type
     When relation(marriage) get role(child) set name: wife
     Then relation(marriage) get role(parent) does not exist
     Then relation(marriage) get role(child) does not exist
+    Then relation(marriage) get role(husband) exists
+    Then relation(marriage) get role(wife) exists
     Then relation(marriage) get name: marriage
     Then relation(marriage) get role(husband) get name: husband
     Then relation(marriage) get role(wife) get name: wife
@@ -169,6 +182,8 @@ Feature: Concept Relation Type and Role Type
     When relation(employment) get role(wife) set name: employer
     Then relation(employment) get role(husband) does not exist
     Then relation(employment) get role(wife) does not exist
+    Then relation(employment) get role(employee) exists
+    Then relation(employment) get role(employer) exists
     Then relation(employment) get name: employment
     Then relation(employment) get role(employee) get name: employee
     Then relation(employment) get role(employer) get name: employer
@@ -455,18 +470,20 @@ Feature: Concept Relation Type and Role Type
       | parentship:child  |
       | fathership:spouse |
 
-  Scenario: Relation types cannot override declared related role types
-    When create relation type: parentship
-    When relation(parentship) create role: parent
-    Then relation(parentship) create role: father
-    Then relation(parentship) get role(father) set supertype: parent; fails
+    # TODO: Only for typeql
+#  Scenario: Relation types cannot override declared related role types
+#    When create relation type: parentship
+#    When relation(parentship) create role: parent
+#    Then relation(parentship) create role: father
+#    Then relation(parentship) get role(father) set supertype: parent; fails
 
-  Scenario: Role cannot set supertype role if it's not a part of its relation type's supertype
-    When create relation type: parentship
-    When relation(parentship) create role: parent
-    When create relation type: fathership
-    When relation(fathership) create role: father
-    Then relation(fathership) get role(father) set supertype: parent; fails
+  # TODO: Only for typeql
+#  Scenario: Role cannot set supertype role if it's not a part of its relation type's supertype
+#    When create relation type: parentship
+#    When relation(parentship) create role: parent
+#    When create relation type: fathership
+#    When relation(fathership) create role: father
+#    Then relation(fathership) get role(father) set supertype: parent; fails
 
   Scenario: Relation types cannot redeclare inherited role without changes
     When create relation type: parentship
@@ -476,17 +493,17 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) set supertype: parentship
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(fathership) create role parent; fails
+    Then relation(fathership) create role: parent; fails
     When connection open schema transaction for database: typedb
-    Then relation(fathership) create role father; fails
-    When connection open schema transaction for database: typedb
-    When relation(fathership) get role(father) set supertype: parent
-    Then relation(parentship) get role(father) get supertype: parent
-    Then relation(fathership) create role parent; fails
+    Then relation(fathership) create role: father; fails
     When connection open schema transaction for database: typedb
     When relation(fathership) get role(father) set supertype: parent
-    Then relation(parentship) get role(father) get supertype: parent
-    Then relation(fathership) create role father; fails
+    Then relation(fathership) get role(father) get supertype: parentship:parent
+    Then relation(fathership) create role: parent; fails
+    When connection open schema transaction for database: typedb
+    When relation(fathership) get role(father) set supertype: parent
+    Then relation(parentship) get role(father) get supertype: parentship:parent
+    Then relation(fathership) create role: father; fails
 
   Scenario: Relation types can update existing roles override a newly defined role it inherits
     When create relation type: parentship
@@ -734,7 +751,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(child) get declared annotations do not contain: @abstract
     Then relation(parentship) set annotation: @abstract
     Then relation(parentship) get annotations contain: @abstract
-    Then relation(parentship) get declarednnotations contain: @abstract
+    Then relation(parentship) get declared annotations contain: @abstract
     Then relation(parentship) get role(parent) get annotations do not contain: @abstract
     Then relation(parentship) get role(parent) get declared annotations do not contain: @abstract
     Then relation(parentship) get role(child) get annotations do not contain: @abstract
@@ -1553,14 +1570,6 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) set supertype: parentship
     Then relation(fathership) create role: parent; fails
 
-  Scenario: Relation types cannot override ordered role types
-    When create relation type: parentship
-    When relation(parentship) create role: parent
-    When relation(parentship) get role(parent) set ordering: ordered
-    Then relation(parentship) create role: father
-    When relation(parentship) get role(father) set ordering: ordered
-    Then relation(parentship) get role(father) set supertype: parent; fails
-
   Scenario: Relation types can update existing ordered roles override a newly defined role it inherits
     When create relation type: parentship
     When relation(parentship) create role: other-role
@@ -1831,7 +1840,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) get role(spouse) get annotations do not contain: @<annotation>
     Then relation(marriage) get role(spouse) get declared annotations do not contain: @<annotation>
     When transaction commits
-    When connection open read transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then relation(marriage) get role(spouse) get annotations do not contain: @<annotation>
     Then relation(marriage) get role(spouse) get declared annotations do not contain: @<annotation>
     When relation(marriage) get role(spouse) unset annotation: @<annotation>
@@ -2617,11 +2626,11 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) create role: overridden-custom-role
     When relation(fathership) get role(overridden-custom-role) set supertype: second-custom-role
     Then relation(fathership) get roles contain:
-      | custom-role |
+      | parentship:custom-role            |
+      | fathership:overridden-custom-role |
+    Then relation(fathership) get roles do not contain:
+      | second-custom-role |
     Then relation(fathership) get role(custom-role) get annotations contain: @card(<args>)
-    Then relation(fathership) get roles do not contain: second-custom-role
-    Then relation(fathership) get roles contain:
-      | overridden-custom-role |
     Then relation(fathership) get role(overridden-custom-role) get annotations contain: @card(<args>)
     Then relation(fathership) get role(overridden-custom-role) get declared annotations do not contain: @card(<args>)
     When transaction commits

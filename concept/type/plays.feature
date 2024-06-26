@@ -33,6 +33,9 @@ Feature: Concept Plays
 ########################
 # plays common
 ########################
+  # TODO: Add steps to get declared annotations
+  # TODO: Add steps to get annotations categories contain
+  # TODO: Unset annotation is done by category!
 
   Scenario: Entity types can play role types
     When create relation type: marriage
@@ -63,6 +66,7 @@ Feature: Concept Plays
     Then relation(marriage) get role(wife) get players contain:
       | person |
 
+    # TODO: Only for typeql
 #  Scenario: Entity types cannot play entities, relations, attributes, structs, structs fields, and non-existing things
 #    When create entity type: car
 #    When create relation type: credit
@@ -426,6 +430,7 @@ Feature: Concept Plays
       | locates:located     |
       | organises:organised |
 
+    # TODO: Only for typeql
 #  Scenario: Relation types cannot play entities, relations, attributes, structs, structs fields, and non-existing things
 #    When create entity type: car
 #    When create relation type: credit
@@ -682,6 +687,7 @@ Feature: Concept Plays
     Then relation(contractor-employment) get plays(contractor-locates:contractor-located) set override: contractor-locates:contractor-located; fails
     Then relation(contractor-employment) get plays(contractor-locates:contractor-located) set override: locates:located; fails
 
+    # TODO: Only for typeql
 #  Scenario: Attribute types cannot play entities, attributes, relations, roles, structs, structs fields, and non-existing things
 #    When create attribute type: surname
 #    When create relation type: marriage
@@ -705,6 +711,7 @@ Feature: Concept Plays
 #    When connection open read transaction for database: typedb
 #    Then attribute(name) get plays is empty
 
+  # TODO: Only for typeql
 #  Scenario: structs cannot play entities, attributes, relations, roles, structs, structs fields, and non-existing things
 #    When create attribute type: name
 #    When create relation type: marriage

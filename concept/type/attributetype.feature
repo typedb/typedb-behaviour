@@ -24,12 +24,17 @@ Feature: Concept Attribute Type
 ########################
 # attribute type common
 ########################
+  # TODO: Add steps to get annotations categories contain
+  # TODO: Unset annotation is done by category!
   # TODO: Test how to set None value type
   # TODO: "date" type?
   # TODO: "datetimetz" -> "datetime-tz"
 
   Scenario: Root attribute type cannot be deleted
     Then delete attribute type: attribute; fails
+
+  Scenario: Root attribute type cannot be renamed
+    Then attribute(attribute) set label: superattribute; fails
 
   Scenario Outline: Attribute types can be created with <value-type> value type
     When create attribute type: name

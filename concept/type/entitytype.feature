@@ -16,9 +16,14 @@ Feature: Concept Entity Type
 ########################
 # entity type common
 ########################
+  # TODO: Add steps to get annotations categories contain
+  # TODO: Unset annotation is done by category!
 
   Scenario: Root entity type cannot be deleted
     Then delete entity type: entity; fails
+
+  Scenario: Root entity type cannot be renamed
+    Then entity(entity) set label: superentity; fails
 
   Scenario: Entity types can be created
     When create entity type: person
@@ -94,7 +99,6 @@ Feature: Concept Entity Type
     When connection open read transaction for database: typedb
     Then entity(animal) exists
     Then entity(animal) get name: animal
-
 
   Scenario: Entity types can be subtypes of other entity types
     When create entity type: man
