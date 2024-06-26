@@ -406,16 +406,21 @@ Feature: Concept Attribute Type
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @<annotation>
     Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get declared annotations contain: @<annotation>
     When attribute(name) unset annotation: @<annotation>
     Then attribute(name) get annotations do not contain: @<annotation>
+    Then attribute(name) get declared annotations do not contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(name) get annotations do not contain: @<annotation>
+    Then attribute(name) get declared annotations do not contain: @<annotation>
     When attribute(name) set annotation: @<annotation>
     Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get declared annotations contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get declared annotations contain: @<annotation>
     Examples:
       | value-type | annotation   |
       | long       | abstract     |
@@ -452,38 +457,139 @@ Feature: Concept Attribute Type
 #      | duration   | values(P1Y)                             |
 #      | duration   | range(P1Y, P5Y)                         |
 
-    # TODO: Inheritance of annotations is not implemented yet
-#  Scenario Outline: Attribute type cannot set or unset inherited @<annotation>
-#    When create attribute type: name
-#    When attribute(name) set value type: <value-type>
-#    When attribute(name) set annotation: @abstract
-#    When attribute(name) set annotation: @<annotation>
-#    When create attribute type: surname
-#    When attribute(surname) set value type: <value-type>
-#    When attribute(surname) set supertype: name
-#    Then attribute(name) get annotations contain: @<annotation>
-#    Then attribute(surname) get annotations contain: @<annotation>
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then attribute(name) get annotations contain: @<annotation>
-#    Then attribute(surname) get annotations contain: @<annotation>
-#    When attribute(surname) set annotation: @<annotation>
-#    Then transaction commits; fails
-#    When connection open schema transaction for database: typedb
-#    Then attribute(name) get annotations contain: @<annotation>
-#    Then attribute(surname) get annotations contain: @<annotation>
-#    Then attribute(surname) unset annotation: @<annotation>; fails
-#    When connection open schema transaction for database: typedb
-#    Then attribute(name) get annotations contain: @<annotation>
-#    Then attribute(surname) get annotations contain: @<annotation>
-#    Examples:
-#      | value-type | annotation   |
-#      # abstract is not inherited
-#      | decimal    | independent  |
-#      | string     | regex("\S+") |
-##      | string     | values("1")                             |
-##      | long     | range(1, 3)                         |
+  Scenario Outline: Attribute type cannot set or unset inherited @<annotation>
+    When create attribute type: name
+    When attribute(name) set value type: <value-type>
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set annotation: @<annotation>
+    When create attribute type: surname
+    When attribute(surname) set value type: <value-type>
+    When attribute(surname) set supertype: name
+    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get declared annotations contain: @<annotation>
+    Then attribute(surname) get annotations contain: @<annotation>
+    Then attribute(surname) get declared annotations do not contain: @<annotation>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get declared annotations contain: @<annotation>
+    Then attribute(surname) get annotations contain: @<annotation>
+    Then attribute(surname) get declared annotations do not contain: @<annotation>
+    When attribute(surname) set annotation: @<annotation>
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get declared annotations contain: @<annotation>
+    Then attribute(surname) get annotations contain: @<annotation>
+    Then attribute(surname) get declared annotations do not contain: @<annotation>
+    Then attribute(surname) unset annotation: @<annotation>; fails
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get declared annotations contain: @<annotation>
+    Then attribute(surname) get annotations contain: @<annotation>
+    Then attribute(surname) get declared annotations do not contain: @<annotation>
+    Examples:
+      | value-type | annotation   |
+      # abstract is not inherited
+      | decimal    | independent  |
+      | string     | regex("\S+") |
+#      | string     | values("1")                             |
+#      | long     | range(1, 3)                         |
 
+  Scenario Outline: Attribute type cannot set supertype with the same @<annotation> until it is explicitly unset from type
+    When create attribute type: name
+    When attribute(name) set value type: <value-type>
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set annotation: @<annotation>
+    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get declared annotations contain: @<annotation>
+    When create attribute type: surname
+    When attribute(surname) set value type: <value-type>
+    When attribute(surname) set annotation: @<annotation>
+    Then attribute(surname) get annotations contain: @<annotation>
+    Then attribute(surname) get declared annotations contain: @<annotation>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get declared annotations contain: @<annotation>
+    Then attribute(surname) get annotations contain: @<annotation>
+    Then attribute(surname) get declared annotations contain: @<annotation>
+    When attribute(surname) set supertype: name
+    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get declared annotations contain: @<annotation>
+    Then attribute(surname) get annotations contain: @<annotation>
+    Then attribute(surname) get declared annotations contain: @<annotation>
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get declared annotations contain: @<annotation>
+    Then attribute(surname) get annotations contain: @<annotation>
+    Then attribute(surname) get declared annotations contain: @<annotation>
+    When attribute(surname) set supertype: name
+    When attribute(surname) unset annotation: @<annotation>
+    Then attribute(surname) get annotations contain: @<annotation>
+    Then attribute(surname) get declared annotations do not contain: @<annotation>
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get declared annotations contain: @<annotation>
+    Then attribute(surname) get annotations contain: @<annotation>
+    Then attribute(surname) get declared annotations do not contain: @<annotation>
+    Examples:
+      | value-type | annotation   |
+      # abstract is not inherited
+      | decimal    | independent  |
+      | string     | regex("\S+") |
+#      | string     | values("1")                             |
+#      | long     | range(1, 3)                         |
+
+  Scenario Outline: Attribute type loses inherited @<annotation> if supertype is unset
+    When create attribute type: name
+    When attribute(name) set value type: <value-type>
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set annotation: @<annotation>
+    When create attribute type: surname
+    When attribute(surname) set value type: <value-type>
+    When attribute(surname) set supertype: name
+    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get declared annotations contain: @<annotation>
+    Then attribute(surname) get annotations contain: @<annotation>
+    Then attribute(surname) get declared annotations do not contain: @<annotation>
+    When attribute(surname) unset supertype: name
+    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get declared annotations contain: @<annotation>
+    Then attribute(surname) get annotations do not contain: @<annotation>
+    Then attribute(surname) get declared annotations do not contain: @<annotation>
+    When attribute(surname) set supertype: name
+    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get declared annotations contain: @<annotation>
+    Then attribute(surname) get annotations contain: @<annotation>
+    Then attribute(surname) get declared annotations do not contain: @<annotation>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get declared annotations contain: @<annotation>
+    Then attribute(surname) get annotations contain: @<annotation>
+    Then attribute(surname) get declared annotations do not contain: @<annotation>
+    When attribute(surname) unset supertype: name
+    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get declared annotations contain: @<annotation>
+    Then attribute(surname) get annotations do not contain: @<annotation>
+    Then attribute(surname) get declared annotations do not contain: @<annotation>
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get declared annotations contain: @<annotation>
+    Then attribute(surname) get annotations do not contain: @<annotation>
+    Then attribute(surname) get declared annotations do not contain: @<annotation>
+    Examples:
+      | value-type | annotation   |
+      # abstract is not inherited
+      | decimal    | independent  |
+      | string     | regex("\S+") |
+#      | string     | values("1")                             |
+#      | long     | range(1, 3)                         |
+  
   # TODO: Write a test (and for other types!) that if supertype has @annotation and subtype has @annotation we need to explicitly remove @annotation from subtype before commit othewise we'll get an error!
 
 ########################
@@ -495,17 +601,22 @@ Feature: Concept Attribute Type
     When attribute(name) set value type: string
     When attribute(name) set annotation: @abstract
     Then attribute(name) get annotations contain: @abstract
+    Then attribute(name) get declared annotations contain: @abstract
     When transaction commits
     When connection open schema transaction for database: typedb
     When create attribute type: email
     Then attribute(email) get annotations do not contain: @abstract
+    Then attribute(email) get declared annotations do not contain: @abstract
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(name) get annotations contain: @abstract
+    Then attribute(name) get declared annotations contain: @abstract
     When connection open schema transaction for database: typedb
     Then attribute(email) get annotations do not contain: @abstract
+    Then attribute(email) get declared annotations do not contain: @abstract
     When attribute(email) set annotation: @abstract
     Then attribute(email) get annotations contain: @abstract
+    Then attribute(email) get declared annotations contain: @abstract
     When transaction commits
     When connection open schema transaction for database: typedb
     When create attribute type: company-email
@@ -520,11 +631,13 @@ Feature: Concept Attribute Type
     Then attribute(name) exists
     Then attribute(name) get value type is none
     Then attribute(name) get annotations contain: @abstract
+    Then attribute(name) get declared annotations contain: @abstract
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(name) exists
     Then attribute(name) get value type is none
     Then attribute(name) get annotations contain: @abstract
+    Then attribute(name) get declared annotations contain: @abstract
 
     # TODO: Inherit value types
 #  Scenario: Attribute type cannot set value type if it already inherits it
@@ -674,15 +787,15 @@ Feature: Concept Attribute Type
     Then attribute(first-name) get value type: <value-type>
     Then attribute(name) get value type is none
     Examples:
-      | value-type |
-      | long       |
-      | string     |
-      | boolean    |
-      | double     |
-      | decimal    |
-      | datetime   |
-      | datetimetz |
-      | duration   |
+      | value-type    |
+      | long          |
+      | string        |
+      | boolean       |
+      | double        |
+      | decimal       |
+      | datetime      |
+      | datetimetz    |
+      | duration      |
       | custom-struct
 
   Scenario Outline: Attribute types can set <value-type> value type before inheriting from an abstract attribute type without value type
@@ -740,21 +853,28 @@ Feature: Concept Attribute Type
     When create attribute type: name
     When attribute(name) set annotation: @abstract
     Then attribute(name) get annotations contain: @abstract
+    Then attribute(name) get declared annotations contain: @abstract
     When attribute(name) set value type: <value-type>
     When create attribute type: first-name
     When attribute(first-name) set value type: <value-type>
     When attribute(first-name) set supertype: name
     Then attribute(name) get annotations contain: @abstract
+    Then attribute(name) get declared annotations contain: @abstract
     Then attribute(first-name) get annotations do not contain: @abstract
+    Then attribute(first-name) get declared annotations do not contain: @abstract
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(name) get annotations contain: @abstract
+    Then attribute(name) get declared annotations contain: @abstract
     Then attribute(first-name) get annotations do not contain: @abstract
+    Then attribute(first-name) get declared annotations do not contain: @abstract
     When attribute(first-name) set annotation: @abstract
     Then attribute(first-name) get annotations contain: @abstract
+    Then attribute(first-name) get declared annotations contain: @abstract
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(first-name) get annotations contain: @abstract
+    Then attribute(first-name) get declared annotations contain: @abstract
     Examples:
       | value-type    |
       | long          |
@@ -919,14 +1039,18 @@ Feature: Concept Attribute Type
     When attribute(email) set value type: <value-type>
     When attribute(email) set annotation: @regex(<arg>)
     Then attribute(email) get annotations contain: @regex(<arg>)
+    Then attribute(email) get declared annotations contain: @regex(<arg>)
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(email) get annotations contain: @regex(<arg>)
+    Then attribute(email) get declared annotations contain: @regex(<arg>)
     Then attribute(email) unset annotation: @regex(<arg>)
     Then attribute(email) get annotations do not contain: @regex(<arg>)
+    Then attribute(email) get declared annotations do not contain: @regex(<arg>)
     Then transaction commits
     When connection open read transaction for database: typedb
     Then attribute(email) get annotations do not contain: @regex(<arg>)
+    Then attribute(email) get declared annotations do not contain: @regex(<arg>)
     Examples:
       | value-type | arg                 |
       | string     | "value"             |
@@ -944,10 +1068,12 @@ Feature: Concept Attribute Type
     When attribute(email) set value type: <value-type>
     Then attribute(email) set annotation: @regex(<arg>); fails
     Then attribute(email) get annotations is empty
+    Then attribute(email) get declared annotations is empty
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(email) set annotation: @regex(<arg>); fails
     Then attribute(email) get annotations is empty
+    Then attribute(email) get declared annotations is empty
     Examples:
       | value-type    | arg     |
       | long          | "value" |
@@ -959,19 +1085,20 @@ Feature: Concept Attribute Type
       | duration      | "value" |
       | custom-struct | "value" |
 
-    # TODO: Inheritance of annotations is not implemented yet
-#  Scenario: Attribute types' @regex annotation can be inherited
-#    When create attribute type: name
-#    When attribute(name) set value type: string
-#    When attribute(name) set annotation: @abstract
-#    When attribute(name) set annotation: @regex("value")
-#    When create attribute type: first-name
-#    When attribute(first-name) set value type: string
-#    When attribute(first-name) set supertype: name
-#    Then attribute(first-name) get annotations contain: @regex("value")
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then attribute(first-name) get annotations contain: @regex("value")
+  Scenario: Attribute types' @regex annotation can be inherited
+    When create attribute type: name
+    When attribute(name) set value type: string
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set annotation: @regex("value")
+    When create attribute type: first-name
+    When attribute(first-name) set value type: string
+    When attribute(first-name) set supertype: name
+    Then attribute(first-name) get annotations contain: @regex("value")
+    Then attribute(first-name) get declared annotations do not contain: @regex("value")
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(first-name) get annotations contain: @regex("value")
+    Then attribute(first-name) get declared annotations do not contain: @regex("value")
 
   #  TODO: Make it only for typeql
 #  Scenario: Attribute type cannot set @regex annotation with wrong arguments
@@ -992,20 +1119,30 @@ Feature: Concept Attribute Type
     When attribute(name) set value type: string
     When attribute(name) set annotation: @regex(<init-args>)
     Then attribute(name) get annotations contain: @regex(<init-args>)
+    Then attribute(name) get declared annotations contain: @regex(<init-args>)
     Then attribute(name) get annotations do not contain: @regex(<reset-args>)
+    Then attribute(name) get declared annotations do not contain: @regex(<reset-args>)
     When attribute(name) set annotation: @regex(<init-args>)
     Then attribute(name) get annotations contain: @regex(<init-args>)
+    Then attribute(name) get declared annotations contain: @regex(<init-args>)
     Then attribute(name) get annotations do not contain: @regex(<reset-args>)
+    Then attribute(name) get declared annotations do not contain: @regex(<reset-args>)
     When attribute(name) set annotation: @regex(<reset-args>)
     Then attribute(name) get annotations contain: @regex(<reset-args>)
+    Then attribute(name) get declared annotations contain: @regex(<reset-args>)
     Then attribute(name) get annotations do not contain: @regex(<init-args>)
+    Then attribute(name) get declared annotations do not contain: @regex(<init-args>)
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(name) get annotations contain: @regex(<reset-args>)
+    Then attribute(name) get declared annotations contain: @regex(<reset-args>)
     Then attribute(name) get annotations do not contain: @regex(<init-args>)
+    Then attribute(name) get declared annotations do not contain: @regex(<init-args>)
     When attribute(name) set annotation: @regex(<init-args>)
     Then attribute(name) get annotations contain: @regex(<init-args>)
+    Then attribute(name) get declared annotations contain: @regex(<init-args>)
     Then attribute(name) get annotations do not contain: @regex(<reset-args>)
+    Then attribute(name) get declared annotations do not contain: @regex(<reset-args>)
     Examples:
       | init-args | reset-args      |
       | "\S+"     | "\S"            |
@@ -1014,75 +1151,91 @@ Feature: Concept Attribute Type
       | "\S+"     | "s"             |
       | "\S+"     | " some string " |
 
-    # TODO: Inheritance of annotations is not implemented yet
-#  Scenario: Attribute type cannot override inherited @regex annotation
-#    When create attribute type: name
-#    When attribute(name) set value type: string
-#    When create attribute type: first-name
-#    When attribute(first-name) set value type: string
-#    When attribute(name) set annotation: @regex("\S+")
-#    Then attribute(name) get annotations contain: @regex("\S+")
-#    Then attribute(first-name) get annotations is empty
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then attribute(name) get annotations contain: @regex("\S+")
-#    Then attribute(first-name) get annotations is empty
-#    When attribute(first-name) set supertype: name
-#    Then attribute(first-name) get annotations contain: @regex("\S+")
-#    Then attribute(first-name) set annotation: @regex("\S+"); fails
-#    Then attribute(first-name) set annotation: @regex("test"); fails
-#    When connection open schema transaction for database: typedb
-#    Then attribute(name) get annotations contain: @regex("\S+")
-#    Then attribute(first-name) get annotations is empty
-#    When attribute(first-name) set annotation: @regex("\S+")
-#    Then attribute(first-name) get annotations contain    : @regex("\S+")
-#    Then attribute(first-name) set supertype: name; fails
-#    When attribute(first-name) unset annotation: @regex("\S+")
-#    When attribute(first-name) set supertype: name
-#    Then attribute(first-name) get annotations contain    : @regex("\S+")
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then attribute(name) get annotations contain    : @regex("\S+")
-#    Then attribute(first-name) get annotations contain    : @regex("\S+")
-#
-#  Scenario: Attribute type cannot reset inherited @regex annotation
-#    When create attribute type: name
-#    When attribute(name) set annotation: @abstract
-#    When attribute(name) set annotation: @regex("value")
-#    When attribute(name) set value type: string
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    When create attribute type: first-name
-#    When attribute(first-name) set value type: string
-#    When attribute(first-name) set supertype: name
-#    Then attribute(first-name) get annotations contain: @regex("value")
-#    Then attribute(first-name) set annotation: @regex("another value"); fails
-#    Then attribute(first-name) get annotations contain: @regex("value")
-#    When attribute(first-name) set annotation: @regex("value")
-#    Then transaction commits; fails
-#    When connection open schema transaction for database: typedb
-#    When attribute(first-name) set annotation: @regex("value")
-#    Then transaction commits; fails
-#
-#  Scenario: Attribute type cannot unset inherited @regex annotation
-#    When create attribute type: name
-#    When attribute(name) set annotation: @abstract
-#    When attribute(name) set annotation: @regex("value")
-#    When attribute(name) set value type: string
-#    When create attribute type: first-name
-#    When attribute(first-name) set value type: string
-#    When attribute(first-name) set supertype: name
-#    Then attribute(first-name) get annotations contain: @regex("value")
-#    Then attribute(first-name) unset annotation: @regex("another value"); fails
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then attribute(first-name) get annotations contain: @regex("value")
-#    Then attribute(first-name) unset annotation: @regex("another value"); fails
-#    When attribute(first-name) unset supertype: name
-#    Then attribute(first-name) get annotations do not contain: @regex("value")
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then attribute(first-name) get annotations do not contain: @regex("value")
+  Scenario: Attribute type cannot override inherited @regex annotation
+    When create attribute type: name
+    When attribute(name) set value type: string
+    When create attribute type: first-name
+    When attribute(first-name) set value type: string
+    When attribute(name) set annotation: @regex("\S+")
+    Then attribute(name) get annotations contain: @regex("\S+")
+    Then attribute(name) get declared annotations contain: @regex("\S+")
+    Then attribute(first-name) get annotations is empty
+    Then attribute(first-name) get declared annotations is empty
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotations contain: @regex("\S+")
+    Then attribute(name) get declared annotations contain: @regex("\S+")
+    Then attribute(first-name) get annotations is empty
+    Then attribute(first-name) get declared annotations is empty
+    When attribute(first-name) set supertype: name
+    Then attribute(first-name) get annotations contain: @regex("\S+")
+    Then attribute(first-name) get declared annotations do not contain: @regex("\S+")
+    Then attribute(first-name) set annotation: @regex("\S+"); fails
+    Then attribute(first-name) set annotation: @regex("test"); fails
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotations contain: @regex("\S+")
+    Then attribute(name) get declared annotations contain: @regex("\S+")
+    Then attribute(first-name) get annotations is empty
+    Then attribute(first-name) get declared annotations is empty
+    When attribute(first-name) set annotation: @regex("\S+")
+    Then attribute(first-name) get annotations contain: @regex("\S+")
+    Then attribute(first-name) get declared annotations do not contain: @regex("\S+")
+    Then attribute(first-name) set supertype: name; fails
+    When attribute(first-name) unset annotation: @regex("\S+")
+    When attribute(first-name) set supertype: name
+    Then attribute(first-name) get annotations contain: @regex("\S+")
+    Then attribute(first-name) get declared annotations do not contain: @regex("\S+")
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get annotations contain: @regex("\S+")
+    Then attribute(name) get declared annotations contain: @regex("\S+")
+    Then attribute(first-name) get annotations contain: @regex("\S+")
+    Then attribute(first-name) get declared annotations do not contain: @regex("\S+")
+
+  Scenario: Attribute type cannot reset inherited @regex annotation
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set annotation: @regex("value")
+    When attribute(name) set value type: string
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When create attribute type: first-name
+    When attribute(first-name) set value type: string
+    When attribute(first-name) set supertype: name
+    Then attribute(first-name) get annotations contain: @regex("value")
+    Then attribute(first-name) get declared annotations do not contain: @regex("value")
+    Then attribute(first-name) set annotation: @regex("another value"); fails
+    Then attribute(first-name) get annotations contain: @regex("value")
+    Then attribute(first-name) get declared annotations do not contain: @regex("value")
+    When attribute(first-name) set annotation: @regex("value")
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When attribute(first-name) set annotation: @regex("value")
+    Then transaction commits; fails
+
+  Scenario: Attribute type cannot unset inherited @regex annotation
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set annotation: @regex("value")
+    When attribute(name) set value type: string
+    When create attribute type: first-name
+    When attribute(first-name) set value type: string
+    When attribute(first-name) set supertype: name
+    Then attribute(first-name) get annotations contain: @regex("value")
+    Then attribute(first-name) get declared annotations do not contain: @regex("value")
+    Then attribute(first-name) unset annotation: @regex("another value"); fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(first-name) get annotations contain: @regex("value")
+    Then attribute(first-name) get declared annotations do not contain: @regex("value")
+    Then attribute(first-name) unset annotation: @regex("another value"); fails
+    When attribute(first-name) unset supertype: name
+    Then attribute(first-name) get annotations do not contain: @regex("value")
+    Then attribute(first-name) get declared annotations do not contain: @regex("value")
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(first-name) get annotations do not contain: @regex("value")
+    Then attribute(first-name) get declared annotations do not contain: @regex("value")
 
 ########################
 # @independent
@@ -1093,14 +1246,18 @@ Feature: Concept Attribute Type
     When attribute(email) set value type: <value-type>
     When attribute(email) set annotation: @independent
     Then attribute(email) get annotations contain: @independent
+    Then attribute(email) get declared annotations contain: @independent
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(email) get annotations contain: @independent
+    Then attribute(email) get declared annotations contain: @independent
     Then attribute(email) unset annotation: @independent
     Then attribute(email) get annotations do not contain: @independent
+    Then attribute(email) get declared annotations do not contain: @independent
     Then transaction commits
     When connection open read transaction for database: typedb
     Then attribute(email) get annotations do not contain: @independent
+    Then attribute(email) get declared annotations do not contain: @independent
     Examples:
       | value-type    |
       | long          |
@@ -1118,27 +1275,31 @@ Feature: Concept Attribute Type
     When attribute(name) set value type: string
     When attribute(name) set annotation: @independent
     Then attribute(name) get annotations contain: @independent
+    Then attribute(name) get declared annotations contain: @independent
     When attribute(name) set annotation: @independent
     Then attribute(name) get annotations contain: @independent
+    Then attribute(name) get declared annotations contain: @independent
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(name) get annotations contain: @independent
+    Then attribute(name) get declared annotations contain: @independent
 
-    # TODO: Inheritance of annotations is not implemented yet
-#  Scenario: Attribute types' @independent annotation can be inherited
-#    When create attribute type: name
-#    When attribute(name) set value type: string
-#    When attribute(name) set annotation: @abstract
-#    When attribute(name) set annotation: @independent
-#    When create attribute type: first-name
-#    When attribute(first-name) set value type: string
-#    When attribute(first-name) set supertype: name
-#    Then attribute(first-name) get annotations contain: @independent
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then attribute(first-name) get annotations contain: @independent
+  Scenario: Attribute types' @independent annotation can be inherited
+    When create attribute type: name
+    When attribute(name) set value type: string
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set annotation: @independent
+    When create attribute type: first-name
+    When attribute(first-name) set value type: string
+    When attribute(first-name) set supertype: name
+    Then attribute(first-name) get annotations contain: @independent
+    Then attribute(first-name) get declared annotations do not contain: @independent
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(first-name) get annotations contain: @independent
+    Then attribute(first-name) get declared annotations do not contain: @independent
 
-    # TODO: Inheritance of annotations is not implemented yet
+    # TODO: Commit-time validation
 #  Scenario: Attribute type cannot reset inherited @independent annotation
 #    When create attribute type: name
 #    When attribute(name) set annotation: @abstract
@@ -1160,26 +1321,29 @@ Feature: Concept Attribute Type
 #    When attribute(second-name) set annotation: @independent
 #    Then transaction commits; fails
 
-    # TODO: Inheritance of annotations is not implemented yet
-#  Scenario: Attribute type cannot unset inherited @independent annotation
-#    When create attribute type: name
-#    When attribute(name) set annotation: @abstract
-#    When attribute(name) set annotation: @independent
-#    When attribute(name) set value type: string
-#    When create attribute type: first-name
-#    When attribute(first-name) set value type: string
-#    When attribute(first-name) set supertype: name
-#    Then attribute(first-name) get annotations contain: @independent
-#    Then attribute(first-name) unset annotation: @independent; fails
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then attribute(first-name) get annotations contain: @independent
-#    Then attribute(first-name) unset annotation: @independent; fails
-#    When attribute(first-name) unset supertype: name
-#    Then attribute(first-name) get annotations do not contain: @independent
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then attribute(first-name) get annotations do not contain: @independent
+  Scenario: Attribute type cannot unset inherited @independent annotation
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set annotation: @independent
+    When attribute(name) set value type: string
+    When create attribute type: first-name
+    When attribute(first-name) set value type: string
+    When attribute(first-name) set supertype: name
+    Then attribute(first-name) get annotations contain: @independent
+    Then attribute(first-name) get declared annotations do not contain: @independent
+    Then attribute(first-name) unset annotation: @independent; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(first-name) get annotations contain: @independent
+    Then attribute(first-name) get declared annotations do not contain: @independent
+    Then attribute(first-name) unset annotation: @independent; fails
+    When attribute(first-name) unset supertype: name
+    Then attribute(first-name) get annotations do not contain: @independent
+    Then attribute(first-name) get declared annotations do not contain: @independent
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(first-name) get annotations do not contain: @independent
+    Then attribute(first-name) get declared annotations do not contain: @independent
 
 #  TODO: Make it only for typeql
 #  Scenario: Attribute type cannot set @independent annotation with arguments
@@ -1197,20 +1361,24 @@ Feature: Concept Attribute Type
 ########################
 # @values
 ########################
-
+# TODO: Not implemented
 #  Scenario Outline: Attribute types with <value-type> value type can set @values annotation and unset it
 #    When create attribute type: email
 #    When attribute(email) set value type: <value-type>
 #    When attribute(email) set annotation: @values(<args>)
 #    Then attribute(email) get annotations contain: @values(<args>)
+#    Then attribute(email) get declared annotations contain: @values(<args>)
 #    When transaction commits
 #    When connection open schema transaction for database: typedb
 #    Then attribute(email) get annotations contain: @values(<args>)
+#    Then attribute(email) get declared annotations contain: @values(<args>)
 #    Then attribute(email) unset annotation: @values(<args>)
 #    Then attribute(email) get annotations do not contain: @values(<args>)
+#    Then attribute(email) get declared annotations do not contain: @values(<args>)
 #    Then transaction commits
 #    When connection open read transaction for database: typedb
 #    Then attribute(email) get annotations do not contain: @values(<args>)
+#    Then attribute(email) get declared annotations do not contain: @values(<args>)
 #    Examples:
 #      | value-type | args                                                                                                                                                                                                                                                                                                                                                                                                 |
 #      | long       | 0                                                                                                                                                                                                                                                                                                                                                                                                    |
@@ -1289,29 +1457,34 @@ Feature: Concept Attribute Type
 #    When attribute(first-name) set value type: string
 #    When attribute(first-name) set supertype: name
 #    Then attribute(first-name) get annotations contain: @values("value", "value2")
+#    Then attribute(first-name) get declared annotations do not contain: @values("value", "value2")
 #    When transaction commits
 #    When connection open read transaction for database: typedb
 #    Then attribute(first-name) get annotations contain: @values("value", "value2")
+#    Then attribute(first-name) get declared annotations do not contain: @values("value", "value2")
 #
-#  Scenario Outline: Attribute type with <value-type> value type cannot set @values with empty arguments
-#    When create attribute type: name
-#    When attribute(name) set value type: <value-type>
-#    Then attribute(name) set annotation: @values; fails
-#    Then attribute(name) set annotation: @values(); fails
-#    Then attribute(name) get annotations is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then attribute(name) get annotations is empty
-#    Examples:
-#      | value-type |
-#      | long       |
-#      | double     |
-#      | decimal    |
-#      | string     |
-#      | boolean    |
-#      | datetime   |
-#      | datetimetz |
-#      | duration   |
+##   TODO: Only for typeql
+##  Scenario Outline: Attribute type with <value-type> value type cannot set @values with empty arguments
+##    When create attribute type: name
+##    When attribute(name) set value type: <value-type>
+##    Then attribute(name) set annotation: @values; fails
+##    Then attribute(name) set annotation: @values(); fails
+##    Then attribute(name) get annotations is empty
+##    Then attribute(name) get declared annotations is empty
+##    When transaction commits
+##    When connection open read transaction for database: typedb
+##    Then attribute(name) get annotations is empty
+##    Then attribute(name) get declared annotations is empty
+##    Examples:
+##      | value-type |
+##      | long       |
+##      | double     |
+##      | decimal    |
+##      | string     |
+##      | boolean    |
+##      | datetime   |
+##      | datetimetz |
+##      | duration   |
 #
 #  Scenario Outline: Attribute type with <value-type> value type cannot set @values with incorrect arguments
 #    When create attribute type: name
@@ -1368,10 +1541,10 @@ Feature: Concept Attribute Type
 #    When create attribute type: name
 #    When attribute(name) set value type: <value-type>
 #    When attribute(name) set annotation: @values(<init-args>)
-#    Then attribute(name) get annotations contain    : @values(<init-args>)
+#    Then attribute(name) get annotations contain: @values(<init-args>)
 #    Then attribute(name) get annotation do not contain: @values(<reset-args>)
 #    When attribute(name) set annotation: @values(<init-args>)
-#    Then attribute(name) get annotations contain    : @values(<init-args>)
+#    Then attribute(name) get annotations contain: @values(<init-args>)
 #    Then attribute(name) get annotation do not contain: @values(<reset-args>)
 #    When attribute(name) set annotation: @values(<reset-args>)
 #    Then attribute(name) get annotations contain: @values(<reset-args>)
@@ -1381,7 +1554,7 @@ Feature: Concept Attribute Type
 #    Then attribute(name) get annotations contain: @values(<reset-args>)
 #    Then attribute(name) get annotations do not contain: @values(<init-args>)
 #    When attribute(name) set annotation: @values(<init-args>)
-#    Then attribute(name) get annotations contain    : @values(<init-args>)
+#    Then attribute(name) get annotations contain: @values(<init-args>)
 #    Then attribute(name) get annotation do not contain: @values(<reset-args>)
 #    Examples:
 #      | value-type | init-args       | reset-args      |
@@ -1448,16 +1621,20 @@ Feature: Concept Attribute Type
 #    When attribute(first-name) set value type: string
 #    When attribute(first-name) set supertype: name
 #    Then attribute(first-name) get annotations contain: @values("value")
+#    Then attribute(first-name) get declared annotations do not contain: @values("value")
 #    Then attribute(first-name) unset annotation: @values("value"); fails
 #    When transaction commits
 #    When connection open schema transaction for database: typedb
 #    Then attribute(first-name) get annotations contain: @values("value")
+#    Then attribute(first-name) get declared annotations do not contain: @values("value")
 #    Then attribute(first-name) unset annotation: @values("value"); fails
 #    When attribute(first-name) unset supertype: name
 #    Then attribute(first-name) get annotations do not contain: @values("value")
+#    Then attribute(first-name) get declared annotations do not contain: @values("value")
 #    When transaction commits
 #    When connection open read transaction for database: typedb
 #    Then attribute(first-name) get annotations do not contain: @values("value")
+#    Then attribute(first-name) get declared annotations do not contain: @values("value")
 #
 #  Scenario Outline: Attribute types' @values annotation for <value-type> value type can be inherited and overridden by a subset of arguments
 #    When create attribute type: name
@@ -1467,18 +1644,30 @@ Feature: Concept Attribute Type
 #    When attribute(overridden-name) set supertype: name
 #    When attribute(name) set annotation: @values(<args>)
 #    Then attribute(name) get annotations contain: @values(<args>)
+#    Then attribute(name) get declared nnotations contain: @values(<args>)
 #    Then attribute(overridden-name) get annotations contain: @values(<args>)
+#    Then attribute(overridden-name) get declared annotations do not contain: @values(<args>)
 #    When transaction commits
 #    When connection open schema transaction for database: typedb
 #    Then attribute(name) get annotations contain: @values(<args>)
+#    Then attribute(name) get declared annotations contain: @values(<args>)
 #    Then attribute(overridden-name) get annotations contain: @values(<args>)
+#    Then attribute(overridden-name) get declared annotations do not contain: @values(<args>)
 #    When attribute(overridden-name) set annotation: @values(<args-override>)
 #    Then attribute(name) get annotations contain: @values(<args>)
+#    Then attribute(name) get declared annotations contain: @values(<args>)
+#    Then attribute(name) get annotations do not contain: @values(<args-override>)
 #    Then attribute(overridden-name) get annotations contain: @values(<args-override>)
+#    Then attribute(overridden-name) get declared annotations contain: @values(<args-override>)
+#    Then attribute(overridden-name) get declared annotations do not contain: @values(<args>)
 #    When transaction commits
 #    When connection open read transaction for database: typedb
 #    Then attribute(name) get annotations contain: @values(<args>)
+#    Then attribute(name) get declared annotations contain: @values(<args>)
+#    Then attribute(name) get annotations do not contain: @values(<args-override>)
 #    Then attribute(overridden-name) get annotations contain: @values(<args-override>)
+#    Then attribute(overridden-name) get declared annotations contain: @values(<args-override>)
+#    Then attribute(overridden-name) get declared annotations do not contain: @values(<args>)
 #    Examples:
 #      | value-type | args                                                                         | args-override                              |
 #      | long       | 1, 10, 20, 30                                                                | 10, 30                                     |
@@ -1498,18 +1687,20 @@ Feature: Concept Attribute Type
 #    When attribute(overridden-name) set supertype: name
 #    When attribute(name) set annotation: @values(<args>)
 #    Then attribute(name) get annotations contain: @values(<args>)
+#    Then attribute(name) get declared annotations contain: @values(<args>)
 #    Then attribute(overridden-name) get annotations contain: @values(<args>)
+#    Then attribute(overridden-name) get declared annotations do not contain: @values(<args>)
 #    When transaction commits
 #    When connection open schema transaction for database: typedb
 #    Then attribute(name) get annotations contain: @values(<args>)
+#    Then attribute(name) get declared annotations contain: @values(<args>)
 #    Then attribute(overridden-name) get annotations contain: @values(<args>)
+#    Then attribute(overridden-name) get declared annotations do not contain: @values(<args>)
 #    Then attribute(overridden-name) set annotation: @values(<args-override>); fails
 #    Then attribute(name) get annotations contain: @values(<args>)
+#    Then attribute(name) get declared annotations contain: @values(<args>)
 #    Then attribute(overridden-name) get annotations contain: @values(<args>)
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then attribute(name) get annotations contain: @values(<args>)
-#    Then attribute(overridden-name) get annotations contain: @values(<args>)
+#    Then attribute(overridden-name) get declared annotations do not contain: @values(<args>)
 #    Examples:
 #      | value-type | args                                                                         | args-override            |
 #      | long       | 1, 10, 20, 30                                                                | 10, 31                   |
@@ -1524,20 +1715,24 @@ Feature: Concept Attribute Type
 ########################
 # @range
 ########################
-
+# TODO: Not implemented
 #  Scenario Outline: Attribute types with <value-type> value type can set @range annotation and unset it
 #    When create attribute type: email
 #    When attribute(email) set value type: <value-type>
 #    When attribute(email) set annotation: @range(<arg0>, <arg1>)
 #    Then attribute(email) get annotations contain: @range(<arg0>, <arg1>)
+#    Then attribute(email) get declared annotations contain: @range(<arg0>, <arg1>)
 #    When transaction commits
 #    When connection open schema transaction for database: typedb
 #    Then attribute(email) get annotations contain: @range(<arg0>, <arg1>)
+#    Then attribute(email) get declared annotations contain: @range(<arg0>, <arg1>)
 #    Then attribute(email) unset annotation: @range(<arg0>, <arg1>)
 #    Then attribute(email) get annotations do not contain: @range(<arg0>, <arg1>)
+#    Then attribute(email) get declared annotations do not contain: @range(<arg0>, <arg1>)
 #    Then transaction commits
 #    When connection open read transaction for database: typedb
 #    Then attribute(email) get annotations do not contain: @range(<arg0>, <arg1>)
+#    Then attribute(email) get declared annotations do not contain: @range(<arg0>, <arg1>)
 #    Examples:
 #      | value-type | arg0                         | arg1                                                  |
 #      | long       | 0                            | 1                                                     |
@@ -1592,9 +1787,11 @@ Feature: Concept Attribute Type
 #    When attribute(first-name) set value type: string
 #    When attribute(first-name) set supertype: name
 #    Then attribute(first-name) get annotations contain: @range(3, 5)
+#    Then attribute(first-name) get declared annotations do not contain: @range(3, 5)
 #    When transaction commits
 #    When connection open read transaction for database: typedb
 #    Then attribute(first-name) get annotations contain: @range(3, 5)
+#    Then attribute(first-name) get declared annotations do not contain: @range(3, 5)
 #
 #  Scenario Outline: Attribute type with <value-type> value type cannot set @range with empty arguments
 #    When create attribute type: name
@@ -1602,9 +1799,11 @@ Feature: Concept Attribute Type
 #    Then attribute(name) set annotation: @range; fails
 #    Then attribute(name) set annotation: @range(); fails
 #    Then attribute(name) get annotations is empty
+#    Then attribute(name) get declared annotations is empty
 #    When transaction commits
 #    When connection open read transaction for database: typedb
 #    Then attribute(name) get annotations is empty
+#    Then attribute(name) get declared annotations is empty
 #    Examples:
 #      | value-type |
 #      | long       |
@@ -1621,9 +1820,11 @@ Feature: Concept Attribute Type
 #    When attribute(name) set value type: <value-type>
 #    Then attribute(name) set annotation: @range(<arg0>, <args>); fails
 #    Then attribute(name) get annotations is empty
+#    Then attribute(name) get declared annotations is empty
 #    When transaction commits
 #    When connection open read transaction for database: typedb
 #    Then attribute(name) get annotations is empty
+#    Then attribute(name) get declared annotations is empty
 #    Examples:
 #      | value-type | arg0                            | args                                               |
 #      | long       | 1                               | 1                                                  |
@@ -1697,20 +1898,30 @@ Feature: Concept Attribute Type
 #    When attribute(name) set value type: <value-type>
 #    When attribute(name) set annotation: @range(<init-args>)
 #    Then attribute(name) get annotations contain: @range(<init-args>)
+#    Then attribute(name) get declared annotations contain: @range(<init-args>)
 #    Then attribute(name) get annotations do not contain: @range(<reset-args>)
+#    Then attribute(name) get declared annotations do not contain: @range(<reset-args>)
 #    When attribute(name) set annotation: @range(<init-args>)
 #    Then attribute(name) get annotations contain: @range(<init-args>)
+#    Then attribute(name) get declared annotations contain: @range(<init-args>)
 #    Then attribute(name) get annotations do not contain: @range(<reset-args>)
+#    Then attribute(name) get declared annotations do not contain: @range(<reset-args>)
 #    When attribute(name) set annotation: @range(<reset-args>)
 #    Then attribute(name) get annotations contain: @range(<reset-args>)
+#    Then attribute(name) get declared annotations contain: @range(<reset-args>)
 #    Then attribute(name) get annotations do not contain: @range(<init-args>)
+#    Then attribute(name) get declared annotations do not contain: @range(<init-args>)
 #    When transaction commits
 #    When connection open schema transaction for database: typedb
 #    Then attribute(name) get annotations contain: @range(<reset-args>)
+#    Then attribute(name) get declared annotations contain: @range(<reset-args>)
 #    Then attribute(name) get annotations do not contain: @range(<init-args>)
+#    Then attribute(name) get declared annotations do not contain: @range(<init-args>)
 #    When attribute(name) set annotation: @range(<init-args>)
 #    Then attribute(name) get annotations contain: @range(<init-args>)
+#    Then attribute(name) get declared annotations contain: @range(<init-args>)
 #    Then attribute(name) get annotations do not contain: @range(<reset-args>)
+#    Then attribute(name) get declared annotations do not contain: @range(<reset-args>)
 #    Examples:
 #      | value-type | init-args                        | reset-args                       |
 #      | long       | 1, 5                             | 7, 9                             |
@@ -1730,6 +1941,7 @@ Feature: Concept Attribute Type
 #    When attribute(first-name) set value type: string
 #    When attribute(first-name) set supertype: name
 #    Then attribute(first-name) get annotations contain: @range("value", "value+1")
+#    Then attribute(first-name) get declared annotations do not contain: @range("value", "value+1")
 #    When transaction commits
 #    When connection open schema transaction for database: typedb
 #    When attribute(first-name) set annotation: @range("value", "value+1")
@@ -1739,6 +1951,7 @@ Feature: Concept Attribute Type
 #    When attribute(second-name) set value type: string
 #    When attribute(second-name) set supertype: name
 #    Then attribute(second-name) get annotations contain: @range("value", "value+1")
+#    Then attribute(second-name) get declared annotations do not contain: @range("value", "value+1")
 #    When attribute(second-name) set annotation: @range("value", "value+1")
 #    Then transaction commits; fails
 #
@@ -1751,16 +1964,20 @@ Feature: Concept Attribute Type
 #    When attribute(first-name) set value type: string
 #    When attribute(first-name) set supertype: name
 #    Then attribute(first-name) get annotations contain: @range("value", "value+1")
+#    Then attribute(first-name) get declared annotations do not contain: @range("value", "value+1")
 #    Then attribute(first-name) unset annotation: @range("value", "value+1"); fail
 #    When transaction commits
 #    When connection open schema transaction for database: typedb
 #    Then attribute(first-name) get annotations contain: @range("value", "value+1")
+#    Then attribute(first-name) get declared annotations do not contain: @range("value", "value+1")
 #    Then attribute(first-name) unset annotation: @range("value", "value+1"); fail
 #    Then attribute(first-name) unset supertype: name
 #    Then attribute(first-name) get annotations do not contain: @range("value", "value+1")
+#    Then attribute(first-name) get declared annotations do not contain: @range("value", "value+1")
 #    When transaction commits
 #    When connection open read transaction for database: typedb
 #    Then attribute(first-name) get annotations do not contain: @range("value", "value+1")
+#    Then attribute(first-name) get declared annotations do not contain: @range("value", "value+1")
 #
 #  Scenario Outline: Attribute types' @range annotation for <value-type> value type can be inherited and overridden by a subset of arguments
 #    When create attribute type: name
@@ -1770,18 +1987,32 @@ Feature: Concept Attribute Type
 #    When attribute(overridden-name) set supertype: name
 #    When attribute(name) set annotation: @range(<args>)
 #    Then attribute(name) get annotations contain: @range(<args>)
+#    Then attribute(name) get declared annotations contain: @range(<args>)
 #    Then attribute(overridden-name) get annotations contain: @range(<args>)
+#    Then attribute(overridden-name) get declared annotations do not contain: @range(<args>)
 #    When transaction commits
 #    When connection open schema transaction for database: typedb
 #    Then attribute(name) get annotations contain: @range(<args>)
+#    Then attribute(name) get declared annotations contain: @range(<args>)
 #    Then attribute(overridden-name) get annotations contain: @range(<args>)
+#    Then attribute(overridden-name) get declared annotations do not contain: @range(<args>)
 #    When attribute(overridden-name) set annotation: @range(<args-override>)
 #    Then attribute(name) get annotations contain: @range(<args>)
+#    Then attribute(name) get annotations do not contain: @range(<args-override>)
+#    Then attribute(name) get declared annotations contain: @range(<args>)
 #    Then attribute(overridden-name) get annotations contain: @range(<args-override>)
+#    Then attribute(overridden-name) get annotations do not contain: @range(<args>)
+#    Then attribute(overridden-name) get declared annotations contain: @range(<args-override>)
+#    Then attribute(overridden-name) get declared annotations do not contain: @range(<args>)
 #    When transaction commits
 #    When connection open read transaction for database: typedb
 #    Then attribute(name) get annotations contain: @range(<args>)
+#    Then attribute(name) get annotations do not contain: @range(<args-override>)
+#    Then attribute(name) get declared annotations contain: @range(<args>)
 #    Then attribute(overridden-name) get annotations contain: @range(<args-override>)
+#    Then attribute(overridden-name) get annotations do not contain: @range(<args>)
+#    Then attribute(overridden-name) get declared annotations contain: @range(<args-override>)
+#    Then attribute(overridden-name) get declared annotations do not contain: @range(<args>)
 #    Examples:
 #      | value-type | args                             | args-override                             |
 #      | long       | 1, 10                            | 1, 5                                      |
@@ -1800,18 +2031,20 @@ Feature: Concept Attribute Type
 #    When attribute(overridden-name) set supertype: name
 #    When attribute(name) set annotation: @range(<args>)
 #    Then attribute(name) get annotations contain: @range(<args>)
+#    Then attribute(name) get declared annotations contain: @range(<args>)
 #    Then attribute(overridden-name) get annotations contain: @range(<args>)
+#    Then attribute(overridden-name) get declared annotations do not contain: @range(<args>)
 #    When transaction commits
 #    When connection open schema transaction for database: typedb
 #    Then attribute(name) get annotations contain: @range(<args>)
+#    Then attribute(name) get declared annotations contain: @range(<args>)
 #    Then attribute(overridden-name) get annotations contain: @range(<args>)
+#    Then attribute(overridden-name) get declared annotations do not contain: @range(<args>)
 #    Then attribute(overridden-name) set annotation: @range(<args-override>); fails
 #    Then attribute(name) get annotations contain: @range(<args>)
+#    Then attribute(name) get declared annotations contain: @range(<args>)
 #    Then attribute(overridden-name) get annotations contain: @range(<args>)
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then attribute(name) get annotations contain: @range(<args>)
-#    Then attribute(overridden-name) get annotations contain: @range(<args>)
+#    Then attribute(overridden-name) get declared annotations do not contain: @range(<args>)
 #    Examples:
 #      | value-type | args                             | args-override                             |
 #      | long       | 1, 10                            | -1, 5                                     |
@@ -1865,30 +2098,44 @@ Feature: Concept Attribute Type
     When attribute(name) set annotation: @<annotation-2>
     When attribute(name) get annotations contain: @<annotation-1>
     When attribute(name) get annotations contain: @<annotation-2>
+    When attribute(name) get declared annotations contain: @<annotation-1>
+    When attribute(name) get declared annotations contain: @<annotation-2>
     When transaction commits
     When connection open schema transaction for database: typedb
     When attribute(name) get annotations contain: @<annotation-1>
     When attribute(name) get annotations contain: @<annotation-2>
+    When attribute(name) get declared annotations contain: @<annotation-1>
+    When attribute(name) get declared annotations contain: @<annotation-2>
     When attribute(name) unset annotation: @<annotation-1>
     Then attribute(name) get annotations do not contain: @<annotation-1>
     Then attribute(name) get annotations contain: @<annotation-2>
+    Then attribute(name) get declared annotations do not contain: @<annotation-1>
+    Then attribute(name) get declared annotations contain: @<annotation-2>
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(name) get annotations do not contain: @<annotation-1>
     Then attribute(name) get annotations contain: @<annotation-2>
+    Then attribute(name) get declared annotations do not contain: @<annotation-1>
+    Then attribute(name) get declared annotations contain: @<annotation-2>
     When attribute(name) set annotation: @<annotation-1>
     When attribute(name) unset annotation: @<annotation-2>
     Then attribute(name) get annotations do not contain: @<annotation-2>
     Then attribute(name) get annotations contain: @<annotation-1>
+    Then attribute(name) get declared annotations do not contain: @<annotation-2>
+    Then attribute(name) get declared annotations contain: @<annotation-1>
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(name) get annotations do not contain: @<annotation-2>
     Then attribute(name) get annotations contain: @<annotation-1>
+    Then attribute(name) get declared annotations do not contain: @<annotation-2>
+    Then attribute(name) get declared annotations contain: @<annotation-1>
     When attribute(name) unset annotation: @<annotation-1>
     Then attribute(name) get annotations is empty
+    Then attribute(name) get declared annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(name) get annotations is empty
+    Then attribute(name) get declared annotations is empty
     Examples:
     # TODO: Move to "cannot" test if something is wrong here.
       | annotation-1 | annotation-2 | value-type |
@@ -1912,8 +2159,10 @@ Feature: Concept Attribute Type
     Then attribute(name) set annotation: @<annotation-1>; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations contain    : @<annotation-2>
+    Then attribute(name) get annotations contain: @<annotation-2>
     Then attribute(name) get annotation do not contain: @<annotation-1>
+    Then attribute(name) get declared annotations contain: @<annotation-2>
+    Then attribute(name) get declared annotation do not contain: @<annotation-1>
     Examples:
     # TODO: Move to "can" test if something is wrong here.
       | annotation-1 | annotation-2 | value-type |
