@@ -16,7 +16,6 @@ Feature: Concept Entity Type
 ########################
 # entity type common
 ########################
-  # TODO: Unset annotation is done by category!
 
   Scenario: Root entity type cannot be deleted
     Then delete entity type: entity; fails
@@ -200,7 +199,7 @@ Feature: Concept Entity Type
     Then entity(person) get annotations contain: @<annotation>
     Then entity(person) get annotation categories contain: @<annotation-category>
     Then entity(person) get declared annotations contain: @<annotation>
-    When entity(person) unset annotation: @<annotation>
+    When entity(person) unset annotation: @<annotation-category>
     Then entity(person) get annotations do not contain: @<annotation>
     Then entity(person) get annotation categories do not contain: @<annotation-category>
     Then entity(person) get declared annotations do not contain: @<annotation>
@@ -226,19 +225,19 @@ Feature: Concept Entity Type
     When create entity type: person
     Then entity(person) get annotations do not contain: @<annotation>
     Then entity(person) get declared annotations do not contain: @<annotation>
-    When entity(person) unset annotation: @<annotation>
+    When entity(person) unset annotation: @<annotation-category>
     Then entity(person) get annotations do not contain: @<annotation>
     Then entity(person) get declared annotations do not contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) get annotations do not contain: @<annotation>
     Then entity(person) get declared annotations do not contain: @<annotation>
-    When entity(person) unset annotation: @<annotation>
+    When entity(person) unset annotation: @<annotation-category>
     Then entity(person) get annotations do not contain: @<annotation>
     Then entity(person) get declared annotations do not contain: @<annotation>
     Examples:
-      | annotation |
-      | abstract   |
+      | annotation | annotation-category |
+      | abstract   | abstract            |
 
     # TODO: Uncomment this test and when there appear inherited annotations (abstract is not inherited)
 #  Scenario Outline: Entity type cannot set or unset inherited @<annotation>
@@ -263,15 +262,15 @@ Feature: Concept Entity Type
 #    Then entity(person) get declared annotations contain: @<annotation>
 #    Then entity(player) get annotations contain: @<annotation>
 #    Then entity(player) get declared annotations do not contain: @<annotation>
-#    Then entity(player) unset annotation: @<annotation>; fails
+#    Then entity(player) unset annotation: @<annotation-category>; fails
 #    When connection open schema transaction for database: typedb
 #    Then entity(person) get annotations contain: @<annotation>
 #    Then entity(person) get declared annotations contain: @<annotation>
 #    Then entity(player) get annotations contain: @<annotation>
 #    Then entity(player) get declared annotations do not contain: @<annotation>
 #    Examples:
-#      | annotation      |
-#      |         |
+#      | annotation | annotation-category |
+#      |            |                     |
 
     # TODO: Uncomment this test and when there appear inherited annotations (abstract is not inherited)
 #  Scenario Outline: Entity type cannot set supertype with the same @<annotation> until it is explicitly unset from type
@@ -301,7 +300,7 @@ Feature: Concept Entity Type
 #    Then entity(player) get annotations contain: @<annotation>
 #    Then entity(player) get declared annotations contain: @<annotation>
 #    When entity(player) set supertype: person
-#    When entity(player) unset annotation: @<annotation>
+#    When entity(player) unset annotation: @<annotation-category>
 #    Then entity(player) get annotations contain: @<annotation>
 #    Then entity(player) get declared annotations do not contain: @<annotation>
 #    When transaction commits
@@ -311,8 +310,8 @@ Feature: Concept Entity Type
 #    Then entity(player) get annotations contain: @<annotation>
 #    Then entity(player) get declared annotations do not contain: @<annotation>
 #    Examples:
-#      | annotation |
-#      |            |
+#      | annotation | annotation-category |
+#      |            |                     |
 
     # TODO: Uncomment this test and when there appear inherited annotations (abstract is not inherited)
 #  Scenario Outline: Entity type loses inherited @<annotation> if supertype is unset

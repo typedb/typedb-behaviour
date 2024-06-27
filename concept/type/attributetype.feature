@@ -25,7 +25,6 @@ Feature: Concept Attribute Type
 # attribute type common
 ########################
   # TODO: Unset annotation is done by category!
-  # TODO: Unset value type
   # TODO: "date" type
   # TODO: "datetimetz" -> "datetime-tz"
 
@@ -72,7 +71,7 @@ Feature: Concept Attribute Type
     Then attribute(full-name) get supertype: attribute
     Then attribute(full-name) get value type: multi-name
 
-  Scenario Outline: Attribute types cannot be resetared with <value-type> value type
+  Scenario Outline: Attribute types cannot be recreated with <value-type> value type
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     Then attribute(name) exists
@@ -212,59 +211,6 @@ Feature: Concept Attribute Type
     Then attribute(name) set supertype: name; fails
     When connection open schema transaction for database: typedb
     Then attribute(timestamp) set supertype: timestamp; fails
-
-  Scenario: Attribute types cannot subtype another attribute type of different value type
-    When create attribute type: is-open
-    When attribute(is-open) set value type: boolean
-    When create attribute type: age
-    When attribute(age) set value type: long
-    When create attribute type: rating
-    When attribute(rating) set value type: double
-    When create attribute type: name
-    When attribute(name) set value type: string
-    When create attribute type: timestamp
-    When attribute(timestamp) set value type: datetime
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then attribute(is-open) set supertype: age; fails
-    When connection open schema transaction for database: typedb
-    Then attribute(is-open) set supertype: rating; fails
-    When connection open schema transaction for database: typedb
-    Then attribute(is-open) set supertype: name; fails
-    When connection open schema transaction for database: typedb
-    Then attribute(is-open) set supertype: timestamp; fails
-    When connection open schema transaction for database: typedb
-    Then attribute(age) set supertype: is-open; fails
-    When connection open schema transaction for database: typedb
-    Then attribute(age) set supertype: rating; fails
-    When connection open schema transaction for database: typedb
-    Then attribute(age) set supertype: name; fails
-    When connection open schema transaction for database: typedb
-    Then attribute(age) set supertype: timestamp; fails
-    When connection open schema transaction for database: typedb
-    Then attribute(rating) set supertype: is-open; fails
-    When connection open schema transaction for database: typedb
-    Then attribute(rating) set supertype: age; fails
-    When connection open schema transaction for database: typedb
-    Then attribute(rating) set supertype: name; fails
-    When connection open schema transaction for database: typedb
-    Then attribute(rating) set supertype: timestamp; fails
-    When connection open schema transaction for database: typedb
-    Then attribute(name) set supertype: is-open; fails
-    When connection open schema transaction for database: typedb
-    Then attribute(name) set supertype: age; fails
-    When connection open schema transaction for database: typedb
-    Then attribute(name) set supertype: rating; fails
-    When connection open schema transaction for database: typedb
-    Then attribute(name) set supertype: timestamp; fails
-    When connection open schema transaction for database: typedb
-    Then attribute(timestamp) set supertype: is-open; fails
-    When connection open schema transaction for database: typedb
-    Then attribute(timestamp) set supertype: age; fails
-    When connection open schema transaction for database: typedb
-    Then attribute(timestamp) set supertype: rating; fails
-    When connection open schema transaction for database: typedb
-    Then attribute(timestamp) set supertype: name; fails
 
   # Revisit if this is still valid
 #  # TODO: Doesn't need to be tied to the root since we can have abstract non-valued attribute types.
@@ -633,7 +579,7 @@ Feature: Concept Attribute Type
     When attribute(company-email) set supertype: email
     Then attribute(email) unset annotation: @abstract; fails
 
-  Scenario: Attribute types can be created without value types with @abstract value type
+  Scenario: Attribute types can be created without value types with @abstract annotation
     When create attribute type: name
     Then attribute(name) exists
     When attribute(name) set annotation: @abstract
@@ -648,30 +594,93 @@ Feature: Concept Attribute Type
     Then attribute(name) get annotations contain: @abstract
     Then attribute(name) get declared annotations contain: @abstract
 
-    # TODO: Inherit value types
-#  Scenario: Attribute type cannot set value type if it already inherits it
-#    When create attribute type: name
-#    When attribute(name) set value type: string
-#    When attribute(name) set annotation: @abstract
-#    Then attribute(name) get annotations contain: @abstract
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    When create attribute type: email
-#    When attribute(email) set supertype: name
-#    When attribute(email) set value type: string
-#    Then transaction commits; fails
-#    When connection open schema transaction for database: typedb
-#    When create attribute type: email
-#    When attribute(email) set value type: string
-#    When attribute(email) set supertype: name
-#    Then transaction commits; fails
-#    When connection open schema transaction for database: typedb
-#    When create attribute type: email
-#    When attribute(email) set supertype: name
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then attribute(name) get value type: string
-#    Then attribute(email) get value type: string
+  Scenario: Attribute types cannot unset value type without @abstract annotation
+    When create attribute type: email
+    When attribute(email) set value type: string
+    Then attribute(email) get value type is string
+    Then attribute(email) get annotations do not contain: @abstract
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(email) get value type is string
+    Then attribute(email) unset value type; fails
+    Then attribute(email) get value type is string
+
+  Scenario: Attribute types cannot unset @abstract annotation without value type
+    When create attribute type: email
+    Then attribute(email) get value type is none
+    Then attribute(email) get annotations contain: @abstract
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(email) get value type is none
+    Then attribute(email) get annotations contain: @abstract
+    Then attribute(email) unset annotation: @abstract; fails
+    Then attribute(email) get value type is none
+    Then attribute(email) get annotations contain: @abstract
+    When attribute(email) set value type: string
+    When attribute(email) unset annotation: @abstract
+    Then attribute(email) get value type is string
+    Then attribute(email) get annotations do not contain: @abstract
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(email) get value type is string
+    Then attribute(email) get annotations do not contain: @abstract
+
+  Scenario: Attribute types can unset value type (even not set) if it has @abstract annotation
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When create attribute type: email
+    When attribute(email) set annotation: @abstract
+    When attribute(email) set value type: string
+    When create attribute type: birthday
+    When attribute(birthday) set value type: datetime
+    Then attribute(name) get value type is none
+    Then attribute(email) get value type is string
+    Then attribute(birthday) get value type is datetime
+    Then attribute(name) get annotations contain: @abstract
+    Then attribute(email) get annotations contain: @abstract
+    Then attribute(birthday) get annotations do not contain: @abstract
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get value type is none
+    Then attribute(email) get value type is string
+    Then attribute(birthday) get value type is datetime
+    When attribute(name) unset value type
+    When attribute(email) unset value type
+    Then attribute(birthday) unset value type; fails
+    When attribute(birthday) set annotation: @abstract
+    When attribute(birthday) unset value type
+    Then attribute(name) get value type is none
+    Then attribute(email) get value type is none
+    Then attribute(birthday) get value type is none
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get value type is none
+    Then attribute(email) get value type is none
+    Then attribute(birthday) get value type is none
+
+  Scenario: Attribute type cannot set value type if it already inherits it
+    When create attribute type: name
+    When attribute(name) set value type: string
+    When attribute(name) set annotation: @abstract
+    Then attribute(name) get annotations contain: @abstract
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When create attribute type: surname
+    When attribute(surname) set supertype: name
+    When attribute(surname) set value type: string
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When create attribute type: surname
+    When attribute(surname) set value type: string
+    When attribute(surname) set supertype: name
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When create attribute type: surname
+    When attribute(surname) set supertype: name
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get value type: string
+    Then attribute(surname) get value type: string
 
   Scenario: Inherited attribute types without @abstract cannot be created without value type
     When create attribute type: name
@@ -692,7 +701,7 @@ Feature: Concept Attribute Type
     When connection open read transaction for database: typedb
     Then attribute(name) get annotations contain: @abstract
 
-  Scenario Outline: Attribute type cannot subtype an attribute type with different value type
+  Scenario Outline: Attribute type with value type <value-type-2> cannot subtype an attribute type with different value type <value-type-1>
     When create attribute type: name
     When attribute(name) set annotation: @abstract
     Then attribute(name) get annotations contain: @abstract
@@ -704,7 +713,6 @@ Feature: Concept Attribute Type
     Then attribute(first-name) get value type: <value-type-2>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations contain: @abstract
     Then attribute(name) get value type: <value-type-1>
     Then attribute(first-name) get value type: <value-type-2>
     Then attribute(first-name) set supertype: name; fails
@@ -783,7 +791,284 @@ Feature: Concept Attribute Type
       | custom-struct | datetimetz      |
       | custom-struct | custom-struct-2 |
 
-  Scenario Outline: Attribute types can set <value-type> value type after inheriting from an abstract attribute type without value type
+  Scenario Outline: Attribute type subtyping an attribute type with value type <value-type-1> cannot set value type <value-type-2>
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    Then attribute(name) get annotations contain: @abstract
+    When attribute(name) set value type: <value-type-1>
+    When create attribute type: first-name
+    When attribute(first-name) set supertype: name
+    Then attribute(first-name) get supertype: name
+    Then attribute(first-name) set value type: <value-type-2>; fails
+    Then attribute(name) get value type: <value-type-1>
+    Then attribute(first-name) get value type: <value-type-1>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get value type: <value-type-1>
+    Then attribute(first-name) get value type: <value-type-1>
+    Then attribute(first-name) set value type: <value-type-2>; fails
+    When attribute(name) set value type: <value-type-2>
+    Then attribute(name) get value type: <value-type-2>
+    Then attribute(first-name) get value type: <value-type-2>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get value type: <value-type-2>
+    Then attribute(first-name) get value type: <value-type-2>
+    Examples:
+      | value-type-1  | value-type-2    |
+      | long          | string          |
+      | long          | boolean         |
+      | long          | double          |
+      | long          | decimal         |
+      | long          | datetime        |
+      | long          | datetimetz      |
+      | long          | duration        |
+      | long          | custom-struct   |
+      | string        | long            |
+      | string        | boolean         |
+      | string        | double          |
+      | string        | decimal         |
+      | string        | datetime        |
+      | string        | datetimetz      |
+      | string        | duration        |
+      | string        | custom-struct   |
+      | boolean       | long            |
+      | boolean       | string          |
+      | boolean       | double          |
+      | boolean       | decimal         |
+      | boolean       | datetime        |
+      | boolean       | datetimetz      |
+      | boolean       | duration        |
+      | boolean       | custom-struct   |
+      | double        | long            |
+      | double        | string          |
+      | double        | boolean         |
+      | double        | decimal         |
+      | double        | datetime        |
+      | double        | datetimetz      |
+      | double        | duration        |
+      | double        | custom-struct   |
+      | decimal       | long            |
+      | decimal       | string          |
+      | decimal       | boolean         |
+      | decimal       | double          |
+      | decimal       | datetime        |
+      | decimal       | datetimetz      |
+      | decimal       | duration        |
+      | decimal       | custom-struct   |
+      | datetime      | long            |
+      | datetime      | string          |
+      | datetime      | boolean         |
+      | datetime      | double          |
+      | datetime      | decimal         |
+      | datetime      | datetimetz      |
+      | datetime      | duration        |
+      | datetime      | custom-struct   |
+      | datetimetz    | long            |
+      | datetimetz    | string          |
+      | datetimetz    | boolean         |
+      | datetimetz    | double          |
+      | datetimetz    | decimal         |
+      | datetimetz    | datetime        |
+      | datetimetz    | duration        |
+      | datetimetz    | custom-struct   |
+      | duration      | long            |
+      | duration      | string          |
+      | duration      | boolean         |
+      | duration      | double          |
+      | duration      | decimal         |
+      | duration      | datetime        |
+      | duration      | datetimetz      |
+      | duration      | custom-struct   |
+      | custom-struct | long            |
+      | custom-struct | string          |
+      | custom-struct | boolean         |
+      | custom-struct | double          |
+      | custom-struct | decimal         |
+      | custom-struct | datetime        |
+      | custom-struct | datetimetz      |
+      | custom-struct | custom-struct-2 |
+
+  Scenario Outline: Supertype attribute type cannot set <value-type-2> conflicting with <value-type-1> set for one of subtypes
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    Then attribute(name) get annotations contain: @abstract
+    When create attribute type: first-name
+    When attribute(first-name) set annotation: @abstract
+    When attribute(first-name) set supertype: name
+    When create attribute type: second-name
+    When attribute(second-name) set annotation: @abstract
+    When attribute(second-name) set supertype: name
+    When create attribute type: sub-first-name
+    When attribute(sub-first-name) set annotation: @abstract
+    When attribute(sub-first-name) set supertype: first-name
+    Then attribute(name) get value type: none
+    Then attribute(first-name) get value type: none
+    Then attribute(second-name) get value type: none
+    Then attribute(sub-first-name) get value type: none
+    When attribute(first-name) set value type: <value-type-1>
+    Then attribute(name) set value type: <value-type-2>; fails
+    When attribute(first-name) unset value type
+    When attribute(second-name) set value type <value-type-1>
+    Then attribute(name) set value type: <value-type-2>; fails
+    When attribute(second-name) unset value type
+    When attribute(sub-first-name) set value type <value-type-1>
+    Then attribute(name) set value type: <value-type-2>; fails
+    When attribute(sub-first-name) unset value type
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When attribute(first-name) set value type: <value-type-1>
+    Then attribute(name) set value type: <value-type-2>; fails
+    When attribute(first-name) unset value type
+    When attribute(second-name) set value type <value-type-1>
+    Then attribute(name) set value type: <value-type-2>; fails
+    When attribute(second-name) unset value type
+    When attribute(sub-first-name) set value type <value-type-1>
+    Then attribute(name) set value type: <value-type-2>; fails
+    When attribute(sub-first-name) unset value type
+    When attribute(name) set value type: <value-type-2>
+    Then attribute(name) get value type: <value-type-2>
+    Then attribute(first-name) get value type: <value-type-2>
+    Then attribute(second-name) get value type: <value-type-2>
+    Then attribute(sub-first-name) get value type: <value-type-2>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When attribute(name) set value type: <value-type-1>
+    Then attribute(name) get value type: <value-type-1>
+    Then attribute(first-name) get value type: <value-type-1>
+    Then attribute(second-name) get value type: <value-type-1>
+    Then attribute(sub-first-name) get value type: <value-type-1>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When attribute(name) unset value type
+    Then attribute(name) get value type: none
+    Then attribute(first-name) get value type: none
+    Then attribute(second-name) get value type: none
+    Then attribute(sub-first-name) get value type: none
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get value type: none
+    Then attribute(first-name) get value type: none
+    Then attribute(second-name) get value type: none
+    Then attribute(sub-first-name) get value type: none
+    Examples:
+      | value-type-1  | value-type-2    |
+      | long          | string          |
+      | long          | boolean         |
+      | long          | double          |
+      | long          | decimal         |
+      | long          | datetime        |
+      | long          | datetimetz      |
+      | long          | duration        |
+      | long          | custom-struct   |
+      | string        | long            |
+      | string        | boolean         |
+      | string        | double          |
+      | string        | decimal         |
+      | string        | datetime        |
+      | string        | datetimetz      |
+      | string        | duration        |
+      | string        | custom-struct   |
+      | boolean       | long            |
+      | boolean       | string          |
+      | boolean       | double          |
+      | boolean       | decimal         |
+      | boolean       | datetime        |
+      | boolean       | datetimetz      |
+      | boolean       | duration        |
+      | boolean       | custom-struct   |
+      | double        | long            |
+      | double        | string          |
+      | double        | boolean         |
+      | double        | decimal         |
+      | double        | datetime        |
+      | double        | datetimetz      |
+      | double        | duration        |
+      | double        | custom-struct   |
+      | decimal       | long            |
+      | decimal       | string          |
+      | decimal       | boolean         |
+      | decimal       | double          |
+      | decimal       | datetime        |
+      | decimal       | datetimetz      |
+      | decimal       | duration        |
+      | decimal       | custom-struct   |
+      | datetime      | long            |
+      | datetime      | string          |
+      | datetime      | boolean         |
+      | datetime      | double          |
+      | datetime      | decimal         |
+      | datetime      | datetimetz      |
+      | datetime      | duration        |
+      | datetime      | custom-struct   |
+      | datetimetz    | long            |
+      | datetimetz    | string          |
+      | datetimetz    | boolean         |
+      | datetimetz    | double          |
+      | datetimetz    | decimal         |
+      | datetimetz    | datetime        |
+      | datetimetz    | duration        |
+      | datetimetz    | custom-struct   |
+      | duration      | long            |
+      | duration      | string          |
+      | duration      | boolean         |
+      | duration      | double          |
+      | duration      | decimal         |
+      | duration      | datetime        |
+      | duration      | datetimetz      |
+      | duration      | custom-struct   |
+      | custom-struct | long            |
+      | custom-struct | string          |
+      | custom-struct | boolean         |
+      | custom-struct | double          |
+      | custom-struct | decimal         |
+      | custom-struct | datetime        |
+      | custom-struct | datetimetz      |
+      | custom-struct | custom-struct-2 |
+
+  Scenario Outline: Supertype attribute type can set <value-type> set for subtype, but subtype needs to explicitly unset it before commit
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    Then attribute(name) get annotations contain: @abstract
+    When create attribute type: first-name
+    When attribute(first-name) set supertype: name
+    When attribute(first-name) set value type: <value-type>
+    Then attribute(name) get value type: none
+    Then attribute(first-name) get value type: <value-type>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get value type: none
+    Then attribute(first-name) get value type: <value-type>
+    When attribute(name) set value type: <value-type>
+    Then attribute(name) get value type: <value-type>
+    Then attribute(first-name) get value type: <value-type>
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get value type: none
+    Then attribute(first-name) get value type: <value-type>
+    When attribute(name) set value type: <value-type>
+    Then attribute(name) get value type: <value-type>
+    Then attribute(first-name) get value type: <value-type>
+    When attribute(first-name) unset value type
+    Then attribute(name) get value type: <value-type>
+    Then attribute(first-name) get value type: <value-type>
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get value type: <value-type>
+    Then attribute(first-name) get value type: <value-type>
+    Examples:
+      | value-type    |
+      | long          |
+      | string        |
+      | boolean       |
+      | double        |
+      | decimal       |
+      | datetime      |
+      | datetimetz    |
+      | duration      |
+      | custom-struct |
+
+  Scenario Outline: Attribute types can set <value-type> value type after subtyping attribute type without value type
     When create attribute type: name
     When attribute(name) set annotation: @abstract
     When create attribute type: first-name
@@ -805,7 +1090,7 @@ Feature: Concept Attribute Type
       | datetime      |
       | datetimetz    |
       | duration      |
-      | custom-struct
+      | custom-struct |
 
   Scenario Outline: Attribute types can set <value-type> value type before inheriting from an abstract attribute type without value type
     When create attribute type: name
@@ -1038,6 +1323,8 @@ Feature: Concept Attribute Type
 #    When transaction commits
 #    When connection open read transaction for database: typedb
 #    Then attribute(name) get annotations is empty
+
+
 
 ########################
 # @regex
