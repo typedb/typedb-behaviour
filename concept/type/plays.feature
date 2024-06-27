@@ -746,14 +746,20 @@ Feature: Concept Plays
       | entity    | person      |
       | relation  | description |
 
-  Scenario Outline: <root-type> types cannot unset not played role
+  Scenario Outline: <root-type> types can unset not played role
     When create relation type: marriage
     When relation(marriage) create role: husband
     When relation(marriage) create role: wife
     When <root-type>(<type-name>) set plays: marriage:wife
     Then <root-type>(<type-name>) get plays do not contain:
       | marriage:husband |
-    Then <root-type>(<type-name>) unset plays: marriage:husband; fails
+    Then <root-type>(<type-name>) unset plays: marriage:husband
+    Then <root-type>(<type-name>) get plays do not contain:
+      | marriage:husband |
+    When transaction commit
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<type-name>) get plays do not contain:
+      | marriage:husband |
     Examples:
       | root-type | type-name   |
       | entity    | person      |

@@ -189,6 +189,12 @@ Feature: Concept Entity Type
     When connection open schema transaction for database: typedb
     Then entity(person) set supertype: person; fails
 
+  Scenario: Entity types cannot change root's supertype
+    When create entity type: person
+    Then entity(entity) set supertype: person; fails
+    Then entity(entity) set supertype: entity; fails
+    Then entity(entity) get supertypes is empty
+
 ########################
 # @annotations common
 ########################
@@ -221,7 +227,7 @@ Feature: Concept Entity Type
       | annotation | annotation-category |
       | abstract   | abstract            |
 
-  Scenario Outline: Entity type can unset @<annotation> that has not been set
+  Scenario Outline: Entity type can unset not set @<annotation>
     When create entity type: person
     Then entity(person) get annotations do not contain: @<annotation>
     Then entity(person) get declared annotations do not contain: @<annotation>
@@ -321,17 +327,19 @@ Feature: Concept Entity Type
 #    When entity(player) set supertype: person
 #    Then entity(person) get annotations contain: @<annotation>
 #    Then entity(player) get annotations contain: @<annotation>
-#    When entity(player) unset supertype: person
+#    When entity(player) set supertype: entity
 #    Then entity(person) get annotations contain: @<annotation>
 #    Then entity(player) get annotations do not contain: @<annotation>
 #    When entity(player) set supertype: person
 #    Then entity(person) get annotations contain: @<annotation>
 #    Then entity(player) get annotations contain: @<annotation>
+#    Then entity(player) get declared annotations do not contain: @<annotation>
 #    When transaction commits
 #    When connection open schema transaction for database: typedb
 #    Then entity(person) get annotations contain: @<annotation>
 #    Then entity(player) get annotations contain: @<annotation>
-#    When entity(player) unset supertype: person
+#    Then entity(player) get declared annotations do not contain: @<annotation>
+#    When entity(player) set supertype: entity
 #    Then entity(person) get annotations contain: @<annotation>
 #    Then entity(player) get annotations do not contain: @<annotation>
 #    When transaction commits

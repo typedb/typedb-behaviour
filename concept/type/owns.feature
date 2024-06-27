@@ -499,6 +499,26 @@ Feature: Concept Owns
       | relation  | description    | registration | duration      |
       | relation  | description    | registration | custom-struct |
 
+  Scenario Outline: <root-type> types can unset not set owns
+    When create attribute type: email
+    When attribute(email) set value type: <value-type>
+    Then <root-type>(<type-name>) get owns do not contain:
+      | email |
+    When <root-type>(<type-name>) unset owns: email
+    Then <root-type>(<type-name>) get owns do not contain:
+      | email |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<type-name>) get owns do not contain:
+      | email |
+    When <root-type>(<type-name>) unset owns: email
+    Then <root-type>(<type-name>) get owns do not contain:
+      | email |
+    Examples:
+      | root-type | type-name   |
+      | entity    | person      |
+      | relation  | description |
+
   Scenario Outline: <root-type> types cannot redeclare inherited owns as owns
     When create attribute type: email
     When attribute(email) set value type: <value-type>
