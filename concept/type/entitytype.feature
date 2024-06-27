@@ -16,7 +16,6 @@ Feature: Concept Entity Type
 ########################
 # entity type common
 ########################
-  # TODO: Add steps to get annotations categories contain
   # TODO: Unset annotation is done by category!
 
   Scenario: Root entity type cannot be deleted
@@ -199,24 +198,29 @@ Feature: Concept Entity Type
     When create entity type: person
     When entity(person) set annotation: @<annotation>
     Then entity(person) get annotations contain: @<annotation>
+    Then entity(person) get annotation categories contain: @<annotation-category>
     Then entity(person) get declared annotations contain: @<annotation>
     When entity(person) unset annotation: @<annotation>
     Then entity(person) get annotations do not contain: @<annotation>
+    Then entity(person) get annotation categories do not contain: @<annotation-category>
     Then entity(person) get declared annotations do not contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) get annotations do not contain: @<annotation>
+    Then entity(person) get annotation categories do not contain: @<annotation-category>
     Then entity(person) get declared annotations do not contain: @<annotation>
     When entity(person) set annotation: @<annotation>
     Then entity(person) get annotations contain: @<annotation>
+    Then entity(person) get annotation categories contain: @<annotation-category>
     Then entity(person) get declared annotations contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) get annotations contain: @<annotation>
+    Then entity(person) get annotation categories contain: @<annotation-category>
     Then entity(person) get declared annotations contain: @<annotation>
     Examples:
-      | annotation |
-      | abstract   |
+      | annotation | annotation-category |
+      | abstract   | abstract            |
 
   Scenario Outline: Entity type can unset @<annotation> that has not been set
     When create entity type: person

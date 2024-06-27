@@ -16,7 +16,6 @@ Feature: Concept Relation Type and Role Type
 ########################
 # relation type common
 ########################
-  # TODO: Add steps to get annotations categories contain
   # TODO: Unset annotation is done by category!
 
   Scenario: Root relation type cannot be deleted
@@ -551,6 +550,37 @@ Feature: Concept Relation Type and Role Type
 # @annotations common
 ########################
 
+  Scenario Outline: Relation type can set and unset @<annotation>
+    When create relation type: marriage
+    When relation(marriage) create role: husband
+    When relation(marriage) create role: wife
+    When relation(marriage) set annotation: @<annotation>
+    Then relation(marriage) get annotations contain: @<annotation>
+    Then relation(marriage) get annotation categories contain: @<annotation-category>
+    Then relation(marriage) get declared annotations contain: @<annotation>
+    When relation(marriage) unset annotation: @<annotation>
+    Then relation(marriage) get annotations do not contain: @<annotation>
+    Then relation(marriage) get annotation categories do not contain: @<annotation-category>
+    Then relation(marriage) get declared annotations do not contain: @<annotation>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(marriage) get annotations do not contain: @<annotation>
+    Then relation(marriage) get annotation categories do not contain: @<annotation-category>
+    Then relation(marriage) get declared annotations do not contain: @<annotation>
+    When relation(marriage) set annotation: @<annotation>
+    Then relation(marriage) get annotations contain: @<annotation>
+    Then relation(marriage) get annotation categories contain: @<annotation-category>
+    Then relation(marriage) get declared annotations contain: @<annotation>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(marriage) get annotations contain: @<annotation>
+    Then relation(marriage) get annotation categories contain: @<annotation-category>
+    Then relation(marriage) get declared annotations contain: @<annotation>
+    Examples:
+      | annotation | annotation-category |
+      | abstract   | abstract            |
+      | cascade    | cascade             |
+
   Scenario Outline: Relation type can unset @<annotation> that has not been set
     When create relation type: marriage
     When relation(marriage) create role: husband
@@ -571,32 +601,6 @@ Feature: Concept Relation Type and Role Type
       | annotation |
       | abstract   |
 #      | cascade    |
-
-  Scenario Outline: Relation type can set and unset @<annotation>
-    When create relation type: marriage
-    When relation(marriage) create role: husband
-    When relation(marriage) create role: wife
-    When relation(marriage) set annotation: @<annotation>
-    Then relation(marriage) get annotations contain: @<annotation>
-    Then relation(marriage) get declared annotations contain: @<annotation>
-    When relation(marriage) unset annotation: @<annotation>
-    Then relation(marriage) get annotations do not contain: @<annotation>
-    Then relation(marriage) get declared annotations do not contain: @<annotation>
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(marriage) get annotations do not contain: @<annotation>
-    Then relation(marriage) get declared annotations do not contain: @<annotation>
-    When relation(marriage) set annotation: @<annotation>
-    Then relation(marriage) get annotations contain: @<annotation>
-    Then relation(marriage) get declared annotations contain: @<annotation>
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(marriage) get annotations contain: @<annotation>
-    Then relation(marriage) get declared annotations contain: @<annotation>
-    Examples:
-      | annotation |
-      | abstract   |
-      | cascade    |
 
   Scenario Outline: Relation type cannot set or unset inherited @<annotation>
     When create relation type: parentship
@@ -1091,7 +1095,7 @@ Feature: Concept Relation Type and Role Type
 #    When transaction commits
 #    When connection open read transaction for database: typedb
 #    Then relation(parentship) get annotations contain: @<annotation-2>
-#    Then relation(parentship) get annotation do not contain: @<annotation-1>
+#    Then relation(parentship) get annotations do not contain: @<annotation-1>
 #    Examples:
 #      | annotation-1 | annotation-2 |
 
@@ -1856,25 +1860,30 @@ Feature: Concept Relation Type and Role Type
     When relation(marriage) create role: spouse
     When relation(marriage) get role(spouse) set annotation: @<annotation>
     Then relation(marriage) get role(spouse) get annotations contain: @<annotation>
+    Then relation(marriage) get role(spouse) get annotation categories contain: @<annotation-category>
     Then relation(marriage) get role(spouse) get declared annotations contain: @<annotation>
     When relation(marriage) get role(spouse) unset annotation: @<annotation>
     Then relation(marriage) get role(spouse) get annotations do not contain: @<annotation>
+    Then relation(marriage) get role(spouse) get annotation categories do not contain: @<annotation-category>
     Then relation(marriage) get role(spouse) get declared annotations do not contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
     Then relation(marriage) get role(spouse) get annotations do not contain: @<annotation>
+    Then relation(marriage) get role(spouse) get annotation categories do not contain: @<annotation-category>
     Then relation(marriage) get role(spouse) get declared annotations do not contain: @<annotation>
     When relation(marriage) get role(spouse) set annotation: @<annotation>
     Then relation(marriage) get role(spouse) get annotations contain: @<annotation>
+    Then relation(marriage) get role(spouse) get annotation categories contain: @<annotation-category>
     Then relation(marriage) get role(spouse) get declared annotations contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
     Then relation(marriage) get role(spouse) get annotations contain: @<annotation>
+    Then relation(marriage) get role(spouse) get annotation categories contain: @<annotation-category>
     Then relation(marriage) get role(spouse) get declared annotations contain: @<annotation>
     Examples:
-      | annotation |
-      | abstract   |
-      | card(1, 2) |
+      | annotation | annotation-category |
+      | abstract   | abstract            |
+      | card(1, 2) | card                |
 
   Scenario Outline: Ordered role can unset @<annotation> that has not been set
     When create relation type: marriage
@@ -1904,26 +1913,31 @@ Feature: Concept Relation Type and Role Type
     When relation(marriage) get role(spouse) set ordering: ordered
     When relation(marriage) get role(spouse) set annotation: @<annotation>
     Then relation(marriage) get role(spouse) get annotations contain: @<annotation>
+    Then relation(marriage) get role(spouse) get annotation categories contain: @<annotation-category>
     Then relation(marriage) get role(spouse) get declared annotations contain: @<annotation>
     When relation(marriage) get role(spouse) unset annotation: @<annotation>
     Then relation(marriage) get role(spouse) get annotations do not contain: @<annotation>
+    Then relation(marriage) get role(spouse) get annotation categories do not contain: @<annotation-category>
     Then relation(marriage) get role(spouse) get declared annotations do not contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
     Then relation(marriage) get role(spouse) get annotations do not contain: @<annotation>
+    Then relation(marriage) get role(spouse) get annotation categories do not contain: @<annotation-category>
     Then relation(marriage) get role(spouse) get declared annotations do not contain: @<annotation>
     When relation(marriage) get role(spouse) set annotation: @<annotation>
     Then relation(marriage) get role(spouse) get annotations contain: @<annotation>
+    Then relation(marriage) get role(spouse) get annotation categories contain: @<annotation-category>
     Then relation(marriage) get role(spouse) get declared annotations contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
     Then relation(marriage) get role(spouse) get annotations contain: @<annotation>
+    Then relation(marriage) get role(spouse) get annotation categories contain: @<annotation-category>
     Then relation(marriage) get role(spouse) get declared annotations contain: @<annotation>
     Examples:
-      | annotation |
-      | abstract   |
-      | distinct   |
-      | card(1, 2) |
+      | annotation | annotation-category |
+      | abstract   | abstract            |
+      | distinct   | distinct            |
+      | card(1, 2) | card                |
 
   Scenario Outline: Role cannot set or unset inherited @<annotation> of inherited role
     When create relation type: parentship
@@ -2571,7 +2585,7 @@ Feature: Concept Relation Type and Role Type
       | 2, 5      | 5, *       |
       | 2, 5      | 6, *       |
 
-  Scenario: Role can reset inherited @card annotation
+  Scenario: Relation type's inherited role can reset @card annotation
     When create relation type: parentship
     When relation(parentship) create role: parent
     When relation(parentship) get role(parent) set annotation: @card(0, 1)
@@ -2586,8 +2600,8 @@ Feature: Concept Relation Type and Role Type
     When connection open schema transaction for database: typedb
     When create attribute type: mothership
     When relation(mothership) set supertype: parentship
-    Then relation(mothership) get role(parent) get annotations contain: @@card(0, 1)
-    Then relation(mothership) get role(parent) get declared annotations contain: @@card(0, 1)
+    Then relation(mothership) get role(parent) get annotations contain: @card(0, 1)
+    Then relation(mothership) get role(parent) get declared annotations contain: @card(0, 1)
     When relation(mothership) get role(parent) set annotation: @card(0, 1)
     Then transaction commits; fails
 
@@ -2853,6 +2867,6 @@ Feature: Concept Relation Type and Role Type
 #    When transaction commits
 #    When connection open schema transaction for database: typedb
 #    Then relation(parentship) get role(parent) get annotations contain: @<annotation-2>
-#    Then relation(parentship) get role(parent) get annotation do not contain: @<annotation-1>
+#    Then relation(parentship) get role(parent) get annotations do not contain: @<annotation-1>
 #    Examples:
 #      | annotation-1 | annotation-2 |

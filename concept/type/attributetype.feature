@@ -24,10 +24,9 @@ Feature: Concept Attribute Type
 ########################
 # attribute type common
 ########################
-  # TODO: Add steps to get annotations categories contain
   # TODO: Unset annotation is done by category!
-  # TODO: Test how to set None value type
-  # TODO: "date" type?
+  # TODO: Unset value type
+  # TODO: "date" type
   # TODO: "datetimetz" -> "datetime-tz"
 
   Scenario: Root attribute type cannot be deleted
@@ -387,6 +386,67 @@ Feature: Concept Attribute Type
 # @annotations common
 ########################
 
+  Scenario Outline: Attribute type can set and unset @<annotation>
+    When create attribute type: name
+    When attribute(name) set value type: <value-type>
+    When attribute(name) set annotation: @<annotation>
+    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get annotation categories contain: @<annotation-category>
+    Then attribute(name) get declared annotations contain: @<annotation>
+    When attribute(name) unset annotation: @<annotation>
+    Then attribute(name) get annotations do not contain: @<annotation>
+    Then attribute(name) get annotation categories do not contain: @<annotation-category>
+    Then attribute(name) get declared annotations do not contain: @<annotation>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotations do not contain: @<annotation>
+    Then attribute(name) get annotation categories do not contain: @<annotation-category>
+    Then attribute(name) get declared annotations do not contain: @<annotation>
+    When attribute(name) set annotation: @<annotation>
+    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get annotation categories contain: @<annotation-category>
+    Then attribute(name) get declared annotations contain: @<annotation>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get annotation categories contain: @<annotation-category>
+    Then attribute(name) get declared annotations contain: @<annotation>
+    Examples:
+      | value-type | annotation   | annotation-category |
+      | long       | abstract     | abstract            |
+      | long       | independent  | independent         |
+#      | long       | values(1)                               | values |
+#      | long       | range(1, 3)                             | range |
+      | string     | abstract     | abstract            |
+      | string     | independent  | independent         |
+      | string     | regex("\S+") | regex               |
+#      | string     | values("1")                             | values |
+#      | string     | range("1", "3")                         | range |
+      | boolean    | abstract     | abstract            |
+      | boolean    | independent  | independent         |
+#      | boolean    | values(true)                            | values |
+#      | boolean    | range(false, true)                      | range |
+      | double     | abstract     | abstract            |
+      | double     | independent  | independent         |
+#      | double     | values(1.0)                             | values |
+#      | double     | range(1.0, 3.0)                         | range |
+      | decimal    | abstract     | abstract            |
+      | decimal    | independent  | independent         |
+#      | decimal    | values(1.0)                             | values |
+#      | decimal    | range(1.0, 3.0)                         | range |
+      | datetime   | abstract     | abstract            |
+      | datetime   | independent  | independent         |
+#      | datetime   | values(2024-05-06)                      | values |
+#      | datetime   | range(2024-05-06, 2024-05-07)           | range |
+      | datetimetz | abstract     | abstract            |
+      | datetimetz | independent  | independent         |
+#      | datetimetz | values(2024-05-06+0010)                 | values |
+#      | datetimetz | range(2024-05-06+0100, 2024-05-07+0100) | range |
+      | duration   | abstract     | abstract            |
+      | duration   | independent  | independent         |
+#      | duration   | values(P1Y)                             | values |
+#      | duration   | range(P1Y, P5Y)                         | range |
+
   Scenario Outline: Attribute type can unset @<annotation> that has not been set
     When create attribute type: name
     When attribute(name) set value type: string
@@ -405,62 +465,6 @@ Feature: Concept Attribute Type
       | regex("\S+") |
 #      | values("1")     |
 #      | range("1", "3") |
-
-  Scenario Outline: Attribute type can set and unset @<annotation>
-    When create attribute type: name
-    When attribute(name) set value type: <value-type>
-    When attribute(name) set annotation: @<annotation>
-    Then attribute(name) get annotations contain: @<annotation>
-    Then attribute(name) get declared annotations contain: @<annotation>
-    When attribute(name) unset annotation: @<annotation>
-    Then attribute(name) get annotations do not contain: @<annotation>
-    Then attribute(name) get declared annotations do not contain: @<annotation>
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations do not contain: @<annotation>
-    Then attribute(name) get declared annotations do not contain: @<annotation>
-    When attribute(name) set annotation: @<annotation>
-    Then attribute(name) get annotations contain: @<annotation>
-    Then attribute(name) get declared annotations contain: @<annotation>
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations contain: @<annotation>
-    Then attribute(name) get declared annotations contain: @<annotation>
-    Examples:
-      | value-type | annotation   |
-      | long       | abstract     |
-      | long       | independent  |
-#      | long       | values(1)                               |
-#      | long       | range(1, 3)                             |
-      | string     | abstract     |
-      | string     | independent  |
-      | string     | regex("\S+") |
-#      | string     | values("1")                             |
-#      | string     | range("1", "3")                         |
-      | boolean    | abstract     |
-      | boolean    | independent  |
-#      | boolean    | values(true)                            |
-#      | boolean    | range(false, true)                      |
-      | double     | abstract     |
-      | double     | independent  |
-#      | double     | values(1.0)                             |
-#      | double     | range(1.0, 3.0)                         |
-      | decimal    | abstract     |
-      | decimal    | independent  |
-#      | decimal    | values(1.0)                             |
-#      | decimal    | range(1.0, 3.0)                         |
-      | datetime   | abstract     |
-      | datetime   | independent  |
-#      | datetime   | values(2024-05-06)                      |
-#      | datetime   | range(2024-05-06, 2024-05-07)           |
-      | datetimetz | abstract     |
-      | datetimetz | independent  |
-#      | datetimetz | values(2024-05-06+0010)                 |
-#      | datetimetz | range(2024-05-06+0100, 2024-05-07+0100) |
-      | duration   | abstract     |
-      | duration   | independent  |
-#      | duration   | values(P1Y)                             |
-#      | duration   | range(P1Y, P5Y)                         |
 
   Scenario Outline: Attribute type cannot set or unset inherited @<annotation>
     When create attribute type: name
@@ -1547,10 +1551,10 @@ Feature: Concept Attribute Type
 #    When attribute(name) set value type: <value-type>
 #    When attribute(name) set annotation: @values(<init-args>)
 #    Then attribute(name) get annotations contain: @values(<init-args>)
-#    Then attribute(name) get annotation do not contain: @values(<reset-args>)
+#    Then attribute(name) get annotations do not contain: @values(<reset-args>)
 #    When attribute(name) set annotation: @values(<init-args>)
 #    Then attribute(name) get annotations contain: @values(<init-args>)
-#    Then attribute(name) get annotation do not contain: @values(<reset-args>)
+#    Then attribute(name) get annotations do not contain: @values(<reset-args>)
 #    When attribute(name) set annotation: @values(<reset-args>)
 #    Then attribute(name) get annotations contain: @values(<reset-args>)
 #    Then attribute(name) get annotations do not contain: @values(<init-args>)
@@ -1560,7 +1564,7 @@ Feature: Concept Attribute Type
 #    Then attribute(name) get annotations do not contain: @values(<init-args>)
 #    When attribute(name) set annotation: @values(<init-args>)
 #    Then attribute(name) get annotations contain: @values(<init-args>)
-#    Then attribute(name) get annotation do not contain: @values(<reset-args>)
+#    Then attribute(name) get annotations do not contain: @values(<reset-args>)
 #    Examples:
 #      | value-type | init-args       | reset-args      |
 #      | long       | 1, 5            | 7, 9            |
@@ -2165,7 +2169,7 @@ Feature: Concept Attribute Type
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(name) get annotations contain: @<annotation-2>
-    Then attribute(name) get annotation do not contain: @<annotation-1>
+    Then attribute(name) get annotations do not contain: @<annotation-1>
     Then attribute(name) get declared annotations contain: @<annotation-2>
     Then attribute(name) get declared annotation do not contain: @<annotation-1>
     Examples:
