@@ -17,6 +17,8 @@ Feature: Concept Relation Type and Role Type
 # relation type common
 ########################
 
+  # TODO: Unset override tests, unset supertype for relations while having overrides on its roles
+
   Scenario: Root relation type cannot be deleted
     Then delete relation type: relation; fails
 
@@ -199,7 +201,7 @@ Feature: Concept Relation Type and Role Type
     When create relation type: fathership
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: father
-    When relation(fathership) get role(father) set supertype: parent
+    When relation(fathership) get role(father) set override: parent
     Then relation(fathership) get supertype: parentship
     Then relation(fathership) get role(father) get supertype: parentship:parent
     Then relation(fathership) get role(child) get supertype: relation:role
@@ -249,7 +251,7 @@ Feature: Concept Relation Type and Role Type
       | parentship:child  |
       | fathership:father |
     When create relation type: father-son
-    When relation(father-son) set override: fathership
+    When relation(father-son) set supertype: fathership
     When relation(father-son) create role: son
     When relation(father-son) get role(son) set override: child
     Then relation(father-son) get supertype: fathership
@@ -453,7 +455,7 @@ Feature: Concept Relation Type and Role Type
       | biological-fathership:spouse |
     When connection open schema transaction for database: typedb
     When create relation type: biological-fathership
-    When relation(biological-fathership) set override: fathership
+    When relation(biological-fathership) set supertype: fathership
     Then relation(biological-fathership) create role: father; fails
     Then relation(biological-fathership) create role: parent; fails
     Then relation(biological-fathership) create role: child; fails
@@ -1590,7 +1592,7 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) set supertype: parentship
     Then relation(fathership) create role: parent; fails
 
-  Scenario: Relation types can update existing ordered roles override a newly defined role it inherits
+  Scenario: Roles can set supertype only if ordering matches
     When create relation type: parentship
     When relation(parentship) create role: other-role
     When relation(parentship) get role(other-role) set ordering: ordered
@@ -1598,254 +1600,124 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: father
     When relation(fathership) get role(father) set ordering: ordered
+    When relation(fathership) get role(father) set override: other-role
+    Then relation(fathership) get role(father) get supertype: parentship:other-role
     When transaction commits
     When connection open schema transaction for database: typedb
     When relation(parentship) create role: parent
+    Then relation(fathership) get role(father) get supertype: parentship:other-role
     When relation(parentship) get role(parent) set ordering: ordered
     When relation(fathership) get role(father) set override: parent
     Then relation(fathership) get role(father) get supertype: parentship:parent
     When transaction commits
-    When connection open read transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then relation(fathership) get role(father) get supertype: parentship:parent
+    When relation(fathership) get role(father) set override: other-role
+    Then relation(fathership) get role(father) get supertype: parentship:other-role
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) get role(father) get supertype: parentship:other-role
+    When relation(parentship) get role(parent) set ordering: unordered
+    Then relation(fathership) get role(father) set override: parent; fails
+    Then relation(fathership) get role(father) get supertype: parentship:other-role
+    When relation(fathership) get role(father) set ordering: unordered
+    When relation(fathership) get role(father) set override: parent
+    Then relation(fathership) get role(father) get supertype: parentship:parent
+    Then relation(fathership) get role(father) get ordering: unordered
+    Then relation(parentship) get role(parent) get ordering: unordered
+    Then relation(parentship) get role(other-role) get ordering: ordered
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) get role(father) get ordering: unordered
+    Then relation(parentship) get role(parent) get ordering: unordered
+    Then relation(parentship) get role(other-role) get ordering: ordered
+    Then relation(fathership) get role(father) get supertype: parentship:parent
+    Then relation(fathership) get role(father) set override: other-role; fails
+    When relation(parentship) get role(other-role) set ordering: unordered
+    When relation(fathership) get role(father) set override: other-role
+    Then relation(fathership) get role(father) get ordering: unordered
+    Then relation(parentship) get role(parent) get ordering: unordered
+    Then relation(parentship) get role(other-role) get ordering: unordered
+    Then relation(fathership) get role(father) get supertype: parentship:other-role
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) get role(father) get ordering: unordered
+    Then relation(parentship) get role(parent) get ordering: unordered
+    Then relation(parentship) get role(other-role) get ordering: unordered
+    Then relation(fathership) get role(father) get supertype: parentship:other-role
 
-  Scenario: Relation type can set ordered for inherited unordered roles
+  Scenario: Roles with subtypes and supertypes can change ordering only together
+    When create relation type: connection
+    When relation(connection) create role: part
     When create relation type: parentship
-    When relation(parentship) set annotation: @abstract
     When relation(parentship) create role: parent
+    When relation(parentship) set supertype: connection
+    When relation(parentship) get role(parent) set override: part
     When create relation type: fathership
     When relation(fathership) create role: father
     When relation(fathership) set supertype: parentship
-    When create relation type: mothership
-    When relation(mothership) create role: mother
-    When relation(mothership) set supertype: parentship
-    Then relation(parentship) get role(parent) get ordering: unordered
-    Then relation(fathership) get role(father) get ordering: unordered
-    Then relation(mothership) get role(mother) get ordering: unordered
+    When relation(fathership) get role(father) set override: parent
     When transaction commits
+    When connection open schema transaction for database: typedb
+    When relation(connection) get role(part) set ordering: ordered
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(parentship) get role(parent) set ordering: ordered
+    Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When relation(fathership) get role(father) set ordering: ordered
-    When relation(fathership) get role(father) set override: parent
-    When relation(mothership) get role(mother) set override: parent
-    Then relation(fathership) get role(father) get supertype: parentship:parent
-    Then relation(mothership) get role(mother) get supertype: parentship:parent
-    When relation(mothership) get role(mother) set ordering: ordered
-    Then relation(parentship) get role(parent) get ordering: unordered
-    Then relation(fathership) get role(father) get ordering: ordered
-    Then relation(mothership) get role(mother) get ordering: ordered
-    When transaction commits
+    Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    Then relation(parentship) get role(parent) get ordering: unordered
-    Then relation(fathership) get role(father) get ordering: ordered
-    Then relation(mothership) get role(mother) get ordering: ordered
-    When relation(fathership) get role(father) set ordering: unordered
-    When relation(mothership) get role(mother) set ordering: unordered
-    Then relation(parentship) get role(parent) get ordering: unordered
-    Then relation(fathership) get role(father) get ordering: unordered
-    Then relation(mothership) get role(mother) get ordering: unordered
+    When relation(connection) get role(part) set ordering: ordered
+    When relation(parentship) get role(parent) set ordering: ordered
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(connection) get role(part) set ordering: ordered
+    When relation(fathership) get role(father) set ordering: ordered
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(parentship) get role(parent) set ordering: ordered
+    When relation(fathership) get role(father) set ordering: ordered
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(connection) get role(part) set ordering: ordered
+    When relation(parentship) get role(parent) set ordering: ordered
+    When relation(fathership) get role(father) set ordering: ordered
     When transaction commits
     When connection open read transaction for database: typedb
-    Then relation(parentship) get role(parent) get ordering: unordered
-    Then relation(fathership) get role(father) get ordering: unordered
-    Then relation(mothership) get role(mother) get ordering: unordered
-
-    # TODO: Ordering is not inherited now // TODO: We should explicitly set ordering before inheritrance! We should reject if subtype is not ordered!
-#  Scenario: Unordered and ordered are propagated to subtypes of roles unless overridden
-#    When create relation type: parentship
-#    When relation(parentship) set annotation: @abstract
-#    When relation(parentship) create role: parent
-#    Then relation(parentship) get role(parent) get ordering: unordered
-#    When relation(parentship) create role: child
-#    When relation(parentship) get role(child) set ordering: ordered
-#    Then relation(parentship) get role(child) get ordering: ordered
-#    When create relation type: fathership
-#    When relation(fathership) create role: father
-#    When relation(fathership) create role: father-child
-#    When relation(fathership) set supertype: parentship
-#    When create relation type: mothership
-#    When relation(mothership) create role: mother
-#    When relation(mothership) create role: mother-child
-#    When relation(mothership) set supertype: parentship
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then relation(fathership) get role(father) get ordering: unordered
-#    Then relation(mothership) get role(mother) get ordering: unordered
-#    Then relation(fathership) get role(father-child) get ordering: unordered
-#    Then relation(mothership) get role(mother-child) get ordering: unordered
-#    When relation(fathership) get role(father) set override: parent
-#    Then relation(fathership) get role(father) get ordering: unordered
-#    When relation(mothership) get role(mother) set override: parent
-#    Then relation(mothership) get role(mother) get ordering: unordered
-#    When relation(fathership) get role(father-child) set override: child
-#    Then relation(fathership) get role(father-child) get ordering: ordered
-#    When relation(mothership) get role(mother-child) set override: child
-#    Then relation(mothership) get role(mother-child) get ordering: ordered
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then relation(fathership) get role(father) get ordering: unordered
-#    Then relation(mothership) get role(mother) get ordering: unordered
-#    Then relation(fathership) get role(father-child) get ordering: ordered
-#    Then relation(mothership) get role(mother-child) get ordering: ordered
-#    When <root-type>(mothership) get role(mother) set ordering: ordered
-#    Then <root-type>(mothership) get role(mother) get ordering: ordered
-#    When <root-type>(mothership) get role(mother-child) set ordering: ordered
-#    Then <root-type>(mothership) get role(mother-child) get ordering: ordered
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then relation(fathership) get role(father) get ordering: unordered
-#    Then relation(mothership) get role(mother) get ordering: unordered
-#    Then relation(fathership) get role(father-child) get ordering: ordered
-#    Then relation(mothership) get role(mother-child) get ordering: ordered
-#    When relation(parenship) get owns(name) set ordering: ordered
-#    Then relation(fathership) get role(father) get ordering: ordered
-#    Then relation(mothership) get role(mother) get ordering: ordered
-#    When relation(parenship) get owns(email) set ordering: unordered
-#    Then relation(fathership) get role(father) get ordering: unordered
-#    Then relation(mothership) get role(mother) get ordering: ordered
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then relation(fathership) get role(father) get ordering: ordered
-#    Then relation(mothership) get role(mother) get ordering: ordered
-#    Then relation(fathership) get role(father) get ordering: unordered
-#    Then relation(mothership) get role(mother) get ordering: ordered
-#
-#  Scenario: Relation can set and unset ordering if it inherits unordered roles
-#    When create relation type: parentship
-#    When relation(parentship) create role: parent
-#    When create relation type: fathership
-#    When relation(fathership) set supertype: parentship
-#    Then relation(parentship) get role(parent) get ordering: unordered
-#    Then relation(fathership) get role(parent) get ordering: unordered
-#    When relation(fathership) get role(parent) set ordering: ordered
-#    Then relation(parentship) get role(parent) get ordering: unordered
-#    Then relation(fathership) get role(parent) get ordering: ordered
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then relation(parentship) get role(parent) get ordering: unordered
-#    Then relation(fathership) get role(parent) get ordering: ordered
-#    When relation(fathership) get role(parent) set ordering: unordered
-#    Then relation(parentship) get role(parent) get ordering: unordered
-#    Then relation(fathership) get role(parent) get ordering: unordered
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then relation(parentship) get role(parent) get ordering: unordered
-#    Then relation(fathership) get role(parent) get ordering: unordered
-#
-#  Scenario: Relation cannot set or unset ordering if it inherits ordered roles
-#    When create relation type: parentship
-#    When relation(parentship) create role: parent
-#    When relation(parentship) get role(parent) set ordering: ordered
-#    Then relation(parentship) get role(parent) get ordering: ordered
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    When create relation type: fathership
-#    When relation(fathership) set supertype: parentship
-#    Then relation(parentship) get role(parent) get ordering: ordered
-#    Then relation(fathership) get role(parent) get ordering: ordered
-#    When relation(fathership) get role(parent) set ordering: ordered
-#    Then transaction commit; fails
-#    When connection open schema transaction for database: typedb
-#    When create relation type: fathership
-#    When relation(fathership) set supertype: parentship
-#    Then relation(parentship) get role(parent) get ordering: ordered
-#    Then relation(fathership) get role(parent) get ordering: ordered
-#    Then relation(fathership) get role(parent) set ordering: unordered; fails
-#    Then relation(parentship) get role(parent) get ordering: ordered
-#    Then relation(fathership) get role(parent) get ordering: ordered
-#    Then transaction commit
-#    When connection open read transaction for database: typedb
-#    Then relation(parentship) get role(parent) get ordering: ordered
-#    Then relation(fathership) get role(parent) get ordering: ordered
-#
-#  Scenario: Relation can set and unset ordering if it overrides unordered roles
-#    When create relation type: parentship
-#    When relation(parentship) create role: parent
-#    Then relation(parentship) get role(parent) get ordering: unordered
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    When create relation type: fathership
-#    When relation(fathership) set supertype: parentship
-#    When relation(fathership) create role: father
-#    When relation(fathership) get role(father) set override: parent
-#    Then relation(parentship) get role(parent) get ordering: unordered
-#    Then relation(fathership) get role(father) get ordering: unordered
-#    When relation(fathership) get role(father) set ordering: ordered
-#    Then relation(parentship) get role(parent) get ordering: unordered
-#    Then relation(fathership) get role(father) get ordering: ordered
-#    Then relation(fathership) get role(father) get supertype: parent
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then relation(parentship) get role(parent) get ordering: unordered
-#    Then relation(fathership) get role(father) get ordering: ordered
-#    When relation(fathership) get role(father) set ordering: unordered
-#    Then relation(parentship) get role(parent) get ordering: unordered
-#    Then relation(fathership) get role(father) get ordering: unordered
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then relation(parentship) get role(parent) get ordering: unordered
-#    Then relation(fathership) get role(father) get ordering: unordered
-#    When connection open schema transaction for database: typedb
-#    When create relation type: mothership
-#    When relation(mothership) set supertype: parentship
-#    When relation(mothership) create role: mother
-#    When relation(mothership) get role(mother) set ordering: ordered
-#    When relation(mothership) get role(mother) set override: parent
-#    Then relation(parentship) get role(parent) get ordering: unordered
-#    Then relation(mothership) get role(mother) get ordering: ordered
-#    Then relation(mothership) get role(mother) get supertype: parent
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then relation(parentship) get role(parent) get ordering: unordered
-#    Then relation(mothership) get role(mother) get ordering: ordered
-#    When relation(mothership) get role(mother) set ordering: unordered
-#    Then relation(parentship) get role(parent) get ordering: unordered
-#    Then relation(mothership) get role(mother) get ordering: unordered
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then relation(parentship) get role(parent) get ordering: unordered
-#    Then relation(mothership) get role(mother) get ordering: unordered
-#
-#  Scenario: Relation cannot set or unset ordering if it overrides ordered roles
-#    When create relation type: parentship
-#    When relation(parentship) create role: parent
-#    When relation(parentship) get role(parent) set ordering: ordered
-#    Then relation(parentship) get role(parent) get ordering: ordered
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    When create relation type: fathership
-#    When relation(fathership) set supertype: parentship
-#    When relation(fathership) create role: father
-#    When relation(fathership) get role(father) set override: parent
-#    Then relation(parentship) get role(parent) get ordering: ordered
-#    Then relation(fathership) get role(father) get ordering: ordered
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then relation(parentship) get role(parent) get ordering: ordered
-#    Then relation(fathership) get role(father) get ordering: ordered
-#    When relation(fathership) get role(father) set ordering: ordered
-#    Then transaction commit; fails
-#    When connection open schema transaction for database: typedb
-#    Then relation(parentship) get role(parent) get ordering: ordered
-#    Then relation(fathership) get role(father) get ordering: ordered
-#    Then relation(fathership) get role(father) set ordering: unordered; fails
-#    When connection open schema transaction for database: typedb
-#    When create relation type: mothership
-#    When relation(mothership) set supertype: parentship
-#    When relation(mothership) create role: mother
-#    When relation(mothership) get role(mother) set ordering: ordered
-#    When relation(mothership) get role(mother) set override: parent
-#    Then relation(parentship) get role(parent) get ordering: ordered
-#    Then relation(mothership) get role(mother) get ordering: ordered
-#    Then relation(mothership) get role(mother) get supertype: parent
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then relation(parentship) get role(parent) get ordering: ordered
-#    Then relation(mothership) get role(mother) get ordering: ordered
-#    When relation(mothership) get role(mother) set ordering: ordered
-#    Then transaction commit; fails
-#    When connection open schema transaction for database: typedb
-#    Then relation(parentship) get role(parent) get ordering: ordered
-#    Then relation(mothership) get role(mother) get ordering: ordered
-#    Then relation(mothership) get role(mother) set ordering: unordered; fails
+    When relation(connection) get role(part) get ordering: ordered
+    When relation(parentship) get role(parent) get ordering: ordered
+    When relation(fathership) get role(father) get ordering: ordered
+    When connection open schema transaction for database: typedb
+    When relation(connection) get role(part) set ordering: unordered
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(parentship) get role(parent) set ordering: unordered
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(fathership) get role(father) set ordering: unordered
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(connection) get role(part) set ordering: unordered
+    When relation(parentship) get role(parent) set ordering: unordered
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(connection) get role(part) set ordering: unordered
+    When relation(fathership) get role(father) set ordering: unordered
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(parentship) get role(parent) set ordering: unordered
+    When relation(fathership) get role(father) set ordering: unordered
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(connection) get role(part) set ordering: unordered
+    When relation(parentship) get role(parent) set ordering: unordered
+    When relation(fathership) get role(father) set ordering: unordered
+    When transaction commits
+    When connection open read transaction for database: typedb
+    When relation(connection) get role(part) get ordering: unordered
+    When relation(parentship) get role(parent) get ordering: unordered
+    When relation(fathership) get role(father) get ordering: unordered
 
 ########################
 # relates @annotations common
@@ -1869,6 +1741,7 @@ Feature: Concept Relation Type and Role Type
     Examples:
       | annotation | annotation-category |
       | abstract   | abstract            |
+      | distinct   | distinct            |
       | card(1, 2) | card                |
 
   Scenario Outline: Role can set and unset @<annotation>
@@ -1955,9 +1828,10 @@ Feature: Concept Relation Type and Role Type
       | distinct   | distinct            |
       | card(1, 2) | card                |
 
-  Scenario Outline: Role cannot set or unset inherited @<annotation> of inherited role
+  Scenario Outline: Role can set or unset inherited @<annotation> of inherited role
     When create relation type: parentship
     When relation(parentship) create role: parent
+    When relation(parentship) get role(parent) set ordering: ordered
     When relation(parentship) get role(parent) set annotation: @<annotation>
     When relation(parentship) get role(parent) set ordering: ordered
     When relation(parentship) get role(parent) get ordering: ordered
@@ -1975,18 +1849,27 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get role(parent) get annotations contain: @<annotation>
     Then relation(fathership) get role(parent) get declared annotations contain: @<annotation>
     When relation(fathership) get role(parent) set annotation: @<annotation>
+    Then relation(parentship) get role(parent) get annotations contain: @<annotation>
+    Then relation(parentship) get role(parent) get declared annotations contain: @<annotation>
+    Then relation(fathership) get role(parent) get annotations contain: @<annotation>
+    Then relation(fathership) get role(parent) get declared annotations contain: @<annotation>
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     Then relation(parentship) get role(parent) get annotations contain: @<annotation>
     Then relation(parentship) get role(parent) get declared annotations contain: @<annotation>
     Then relation(fathership) get role(parent) get annotations contain: @<annotation>
     Then relation(fathership) get role(parent) get declared annotations contain: @<annotation>
-    Then relation(fathership) get role(parent) unset annotation: @<annotation-category>; fails
+    Then relation(fathership) get role(parent) unset annotation: @<annotation-category>
+    Then relation(parentship) get role(parent) get annotations do not contain: @<annotation>
+    Then relation(parentship) get role(parent) get declared annotations do not contain: @<annotation>
+    Then relation(fathership) get role(parent) get annotations do not contain: @<annotation>
+    Then relation(fathership) get role(parent) get declared annotations do not contain: @<annotation>
+    When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(parentship) get role(parent) get annotations contain: @<annotation>
-    Then relation(parentship) get role(parent) get declared annotations contain: @<annotation>
-    Then relation(fathership) get role(parent) get annotations contain: @<annotation>
-    Then relation(fathership) get role(parent) get declared annotations contain: @<annotation>
+    Then relation(parentship) get role(parent) get annotations do not contain: @<annotation>
+    Then relation(parentship) get role(parent) get declared annotations do not contain: @<annotation>
+    Then relation(fathership) get role(parent) get annotations do not contain: @<annotation>
+    Then relation(fathership) get role(parent) get declared annotations do not contain: @<annotation>
     Examples:
       | annotation | annotation-category |
       | distinct   | distinct            |
@@ -1995,8 +1878,8 @@ Feature: Concept Relation Type and Role Type
   Scenario Outline: Role cannot set or unset inherited @<annotation> of overridden role
     When create relation type: parentship
     When relation(parentship) create role: parent
-    When relation(parentship) get role(parent) set annotation: @<annotation>
     When relation(parentship) get role(parent) set ordering: ordered
+    When relation(parentship) get role(parent) set annotation: @<annotation>
     When create relation type: fathership
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: father
@@ -2080,8 +1963,8 @@ Feature: Concept Relation Type and Role Type
   Scenario Outline: Role type loses inherited @<annotation> if supertype is unset
     When create relation type: parentship
     When relation(parentship) create role: parent
-    When relation(parentship) get role(parent) set annotation: @<annotation>
     When relation(parentship) get role(parent) set ordering: ordered
+    When relation(parentship) get role(parent) set annotation: @<annotation>
     When create relation type: fathership
     When relation(fathership) create role: father
     When relation(fathership) set supertype: parentship
@@ -2089,10 +1972,12 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) get role(father) set override: parent
     Then relation(parentship) get role(parent) get annotations contain: @<annotation>
     Then relation(fathership) get role(father) get annotations contain: @<annotation>
-    When relation(fathership) get role(father) set override: relation:role
+    When relation(fathership) get role(father) unset override
+    When relation(fathership) get role(father) get supertype: relation:role
     Then relation(parentship) get role(parent) get annotations contain: @<annotation>
     Then relation(fathership) get role(father) get annotations do not contain: @<annotation>
     When relation(fathership) get role(father) set override: parent
+    When relation(fathership) get role(father) get supertype: parentship:parent
     Then relation(parentship) get role(parent) get annotations contain: @<annotation>
     Then relation(fathership) get role(father) get annotations contain: @<annotation>
     Then relation(fathership) get role(father) get declared annotations do not contain: @<annotation>
@@ -2101,7 +1986,8 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(parent) get annotations contain: @<annotation>
     Then relation(fathership) get role(father) get annotations contain: @<annotation>
     Then relation(fathership) get role(father) get declared annotations do not contain: @<annotation>
-    When relation(fathership) get role(father) set override: relation:role
+    When relation(fathership) get role(father) unset override
+    When relation(fathership) get role(father) get supertype: relation:role
     Then relation(parentship) get role(parent) get annotations contain: @<annotation>
     Then relation(fathership) get role(father) get annotations do not contain: @<annotation>
     When transaction commits
@@ -2341,7 +2227,35 @@ Feature: Concept Relation Type and Role Type
     When relation(parentship) get role(parent) set ordering: unordered
     Then relation(parentship) get role(parent) get ordering: unordered
     When transaction commits
-    When connection open Read transaction for database: typedb
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get role(parent) get annotations is empty
+    Then relation(parentship) get role(parent) get declared annotations is empty
+    Then relation(parentship) get role(parent) get ordering: unordered
+
+  Scenario: Relation type cannot unset ordering if @distinct annotation is set
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    Then relation(parentship) get role(parent) set ordering: ordered
+    When relation(parentship) get role(parent) set annotation: @distinct
+    Then relation(parentship) get role(parent) get annotations contain: @distinct
+    Then relation(parentship) get role(parent) get declared annotations contain: @distinct
+    Then relation(parentship) get role(parent) get ordering: ordered
+    Then relation(parentship) get role(parent) set ordering: unordered; fails
+    Then relation(parentship) get role(parent) get ordering: ordered
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) get ordering: ordered
+    Then relation(parentship) get role(parent) get annotations contain: @distinct
+    Then relation(parentship) get role(parent) get declared annotations contain: @distinct
+    Then relation(parentship) get role(parent) set ordering: unordered; fails
+    When relation(parentship) get role(parent) unset annotation: @distinct
+    Then relation(parentship) get role(parent) get annotations is empty
+    Then relation(parentship) get role(parent) get declared annotations is empty
+    Then relation(parentship) get role(parent) get ordering: ordered
+    When relation(parentship) get role(parent) set ordering: unordered
+    Then relation(parentship) get role(parent) get ordering: unordered
+    When transaction commits
+    When connection open read transaction for database: typedb
     Then relation(parentship) get role(parent) get annotations is empty
     Then relation(parentship) get role(parent) get declared annotations is empty
     Then relation(parentship) get role(parent) get ordering: unordered
@@ -2374,21 +2288,10 @@ Feature: Concept Relation Type and Role Type
 #    When connection open read transaction for database: typedb
 #    Then relation(parentship) get role(parent) get annotations is empty
 
-  Scenario: Ordered roles cannot unset not set @distinct
-    When create relation type: parentship
-    When relation(parentship) create role: parent
-    When relation(parentship) get role(parent) set ordering: ordered
-    Then relation(parentship) get role(parent) unset annotation: @distinct; fails
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(parentship) get role(parent) get annotations is empty
-    Then relation(parentship) get role(parent) get declared annotations is empty
-    Then relation(parentship) get role(parent) unset annotation: @distinct; fails
-
   Scenario: Inherited ordered roles' @distinct annotation is persistent
     When create relation type: parentship
     When relation(parentship) create role: parent
-    When relation(parentship) set ordering: ordered
+    When relation(parentship) get role(parent) set ordering: ordered
     When relation(parentship) get role(parent) set annotation: @distinct
     When create relation type: fathership
     When relation(fathership) set supertype: parentship
@@ -2402,11 +2305,12 @@ Feature: Concept Relation Type and Role Type
   Scenario: Ordered roles' @distinct annotation is inherited
     When create relation type: parentship
     When relation(parentship) create role: parent
-    When relation(parentship) set ordering: ordered
+    When relation(parentship) get role(parent) set ordering: ordered
     When relation(parentship) get role(parent) set annotation: @distinct
     When create relation type: fathership
     When relation(fathership) create role: father
     When relation(fathership) set supertype: parentship
+    When relation(fathership) get role(father) set ordering: ordered
     When relation(fathership) get role(father) set override: parent
     Then relation(fathership) get role(father) get annotations contain: @distinct
     Then relation(fathership) get role(father) get declared annotations do not contain: @distinct
@@ -2438,7 +2342,7 @@ Feature: Concept Relation Type and Role Type
     When relation(mothership) get role(parent) set annotation: @distinct
     Then transaction commits; fails
 
-  Scenario: Ordered roles cannot unset inherited @distinct annotation
+  Scenario: Ordered roles can unset @distinct annotation of inherited role
     When create relation type: parentship
     When relation(parentship) create role: parent
     When relation(parentship) get role(parent) set ordering: ordered
@@ -2449,14 +2353,17 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(parent) get declared annotations contain: @distinct
     Then relation(fathership) get role(parent) get annotations contain: @distinct
     Then relation(fathership) get role(parent) get declared annotations contain: @distinct
-    Then relation(fathership) get role(parent) unset annotation: @distinct; fails
+    When relation(fathership) get role(parent) unset annotation: @distinct
+    Then relation(parentship) get role(parent) get annotations do not contain: @distinct
+    Then relation(parentship) get role(parent) get declared annotations do not contain: @distinct
+    Then relation(fathership) get role(parent) get annotations do not contain: @distinct
+    Then relation(fathership) get role(parent) get declared annotations do not contain: @distinct
     When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(parentship) get role(parent) get annotations contain: @distinct
-    Then relation(parentship) get role(parent) get declared annotations contain: @distinct
-    Then relation(fathership) get role(parent) get annotations contain: @distinct
-    Then relation(fathership) get role(parent) get declared annotations contain: @distinct
-    Then relation(fathership) get role(parent) unset annotation: @distinct; fails
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get role(parent) get annotations do not contain: @distinct
+    Then relation(parentship) get role(parent) get declared annotations do not contain: @distinct
+    Then relation(fathership) get role(parent) get annotations do not contain: @distinct
+    Then relation(fathership) get role(parent) get declared annotations do not contain: @distinct
 
   Scenario: Ordered roles can reset inherited @distinct annotation from an overridden role
     When create relation type: parentship
@@ -2466,13 +2373,14 @@ Feature: Concept Relation Type and Role Type
     When create relation type: fathership
     When relation(fathership) create role: father
     When relation(fathership) set supertype: parentship
+    When relation(fathership) get role(father) set ordering: ordered
     When relation(fathership) get role(father) set override: parent
     Then relation(fathership) get role(father) get annotations contain: @distinct
-    Then relation(fathership) get role(father) get declared annotations contain: @distinct
+    Then relation(fathership) get role(father) get declared annotations do not contain: @distinct
     When transaction commits
     When connection open schema transaction for database: typedb
-    When relation(fathership) get role(father) get ordering: ordered
     When relation(fathership) get role(father) set annotation: @distinct
+    Then relation(fathership) get role(father) get declared annotations contain: @distinct
     Then transaction commits; fails
 
   Scenario: Ordered roles cannot unset inherited @distinct annotation from an overridden role
@@ -2483,9 +2391,8 @@ Feature: Concept Relation Type and Role Type
     When create relation type: fathership
     When relation(fathership) create role: father
     When relation(fathership) set supertype: parentship
-    When relation(parentship) get role(father) get ordering: unordered
+    When relation(fathership) get role(father) set ordering: ordered
     When relation(fathership) get role(father) set override: parent
-    When relation(parentship) get role(father) get ordering: ordered
     Then relation(fathership) get role(father) get annotations contain: @distinct
     Then relation(fathership) get role(father) get declared annotations do not contain: @distinct
     When transaction commits
@@ -2522,9 +2429,9 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(child) get declared annotations contain: @card(0, *)
     When relation(parentship) get role(parent) unset annotation: @card
     Then relation(parentship) get role(parent) get annotations is empty
-    Then relation(parentship) get role(child) get annotation categories do not contain: @card
+    Then relation(parentship) get role(parent) get annotation categories do not contain: @card
     Then relation(parentship) get role(parent) get declared annotations is empty
-    When relation(parentship) get role(child) unset annotation: @card(0, *)
+    When relation(parentship) get role(child) unset annotation: @card
     Then relation(parentship) get role(child) get annotations is empty
     Then relation(parentship) get role(child) get annotation categories do not contain: @card
     Then relation(parentship) get role(child) get declared annotations is empty
@@ -2613,7 +2520,6 @@ Feature: Concept Relation Type and Role Type
       | 2, 5      | 0, 5       |
       | 2, 5      | 0, *       |
       | 2, 5      | 2, 3       |
-      | 2, 5      | 2, 5       |
       | 2, 5      | 2, *       |
       | 2, 5      | 3, 4       |
       | 2, 5      | 3, 5       |
@@ -2625,7 +2531,7 @@ Feature: Concept Relation Type and Role Type
     When create relation type: parentship
     When relation(parentship) create role: parent
     When relation(parentship) get role(parent) set annotation: @card(0, 1)
-    When create attribute type: fathership
+    When create relation type: fathership
     When relation(fathership) set supertype: parentship
     Then relation(fathership) get role(parent) get annotations contain: @card(0, 1)
     Then relation(fathership) get role(parent) get declared annotations contain: @card(0, 1)
@@ -2634,34 +2540,76 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) get role(parent) set annotation: @card(0, 1)
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When create attribute type: mothership
+    When create relation type: mothership
     When relation(mothership) set supertype: parentship
     Then relation(mothership) get role(parent) get annotations contain: @card(0, 1)
     Then relation(mothership) get role(parent) get declared annotations contain: @card(0, 1)
     When relation(mothership) get role(parent) set annotation: @card(0, 1)
     Then transaction commits; fails
 
-  Scenario: Role cannot unset inherited @card annotation
+  Scenario: Relation type's inherited role can unset @card annotation
     When create relation type: parentship
     When relation(parentship) create role: parent
     When relation(parentship) get role(parent) set annotation: @card(0, 1)
-    When create attribute type: fathership
+    When create relation type: fathership
     When relation(fathership) set supertype: parentship
     Then relation(fathership) get role(parent) get annotations contain: @card(0, 1)
     Then relation(fathership) get role(parent) get declared annotations contain: @card(0, 1)
-    Then relation(fathership) get role(parent) unset annotation: @card; fail
+    When relation(fathership) get role(parent) unset annotation: @card
+    Then relation(parentship) get role(parent) get annotation categories do not contain: @card
+    Then relation(fathership) get role(parent) get annotation categories do not contain: @card
+    Then relation(fathership) get role(parent) get declared annotations do not contain: @card(0, 1)
     When transaction commits
     When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) get annotation categories do not contain: @card
+    Then relation(fathership) get role(parent) get annotation categories do not contain: @card
+    Then relation(fathership) get role(parent) get declared annotations do not contain: @card(0, 1)
+    When relation(fathership) get role(parent) set annotation: @card(0, 1)
+    Then relation(parentship) get role(parent) get annotation categories contain: @card
+    Then relation(fathership) get role(parent) get annotation categories contain: @card
+    Then relation(parentship) get role(parent) get annotations contain: @card(0, 1)
+    Then relation(parentship) get role(parent) get declared annotations contain: @card(0, 1)
     Then relation(fathership) get role(parent) get annotations contain: @card(0, 1)
     Then relation(fathership) get role(parent) get declared annotations contain: @card(0, 1)
-    Then relation(fathership) get role(parent) unset annotation: @card; fail
-    Then relation(fathership) set supertype: relation
-    Then relation(fathership) get role(parent) get annotations do not contain: @card(0, 1)
-    Then relation(fathership) get role(parent) get declared annotations do not contain: @card(0, 1)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) get annotation categories contain: @card
+    Then relation(fathership) get role(parent) get annotation categories contain: @card
+    Then relation(parentship) get role(parent) get annotations contain: @card(0, 1)
+    Then relation(parentship) get role(parent) get declared annotations contain: @card(0, 1)
+    Then relation(fathership) get role(parent) get annotations contain: @card(0, 1)
+    Then relation(fathership) get role(parent) get declared annotations contain: @card(0, 1)
+    When relation(fathership) get role(parent) unset annotation: @card
+    Then relation(parentship) get role(parent) get annotation categories do not contain: @card
+    Then relation(fathership) get role(parent) get annotation categories do not contain: @card
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) get annotation categories do not contain: @card
+    Then relation(fathership) get role(parent) get annotation categories do not contain: @card
+
+  Scenario: Role cannot unset inherited @card annotation from an overridden role
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) get role(parent) set annotation: @card(0, 1)
+    When create relation type: fathership
+    When relation(fathership) create role: father
+    When relation(fathership) set supertype: parentship
+    Then relation(fathership) get role(father) set override: parent
+    Then relation(fathership) get role(father) get annotations contain: @card(0, 1)
+    Then relation(fathership) get role(father) get declared annotations do not contain: @card(0, 1)
+    Then relation(fathership) get role(father) unset annotation: @card; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) get role(father) get annotations contain: @card(0, 1)
+    Then relation(fathership) get role(father) get declared annotations do not contain: @card(0, 1)
+    Then relation(fathership) get role(father) unset annotation: @card; fails
+    Then relation(fathership) get role(father) unset override
+    Then relation(fathership) get role(father) get annotations do not contain: @card(0, 1)
+    Then relation(fathership) get role(father) get declared annotations do not contain: @card(0, 1)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then relation(fathership) get role(parent) get annotations do not contain: @card(0, 1)
-    Then relation(fathership) get role(parent) get declared annotations do not contain: @card(0, 1)
+    Then relation(fathership) get role(father) get annotations do not contain: @card(0, 1)
+    Then relation(fathership) get role(father) get declared annotations do not contain: @card(0, 1)
 
   Scenario Outline: Role's @card annotation can be inherited and overridden by a subset of arguments
     When create relation type: parentship
@@ -2729,26 +2677,31 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) get role(overridden-custom-role) set override: second-custom-role
     Then relation(fathership) get role(custom-role) get annotations contain: @card(<args>)
     Then relation(fathership) get role(overridden-custom-role) get annotations contain: @card(<args>)
-    Then relation(fathership) get role(custom-role) set annotation: @card(<args-override>); fails
+    When relation(fathership) get role(custom-role) set annotation: @card(<args-override>)
     Then relation(fathership) get role(overridden-custom-role) set annotation: @card(<args-override>); fails
-    Then relation(fathership) get role(custom-role) get annotations contain: @card(<args>)
+    Then relation(fathership) get role(custom-role) get annotations contain: @card(<args-override>)
+    Then relation(parentship) get role(custom-role) get annotations contain: @card(<args-override>)
+    Then relation(parentship) get role(second-custom-role) get annotations contain: @card(<args>)
     Then relation(fathership) get role(overridden-custom-role) get annotations contain: @card(<args>)
+    Then relation(fathership) get role(overridden-custom-role) get declared annotations do not contain: @card(<args>)
+    Then relation(fathership) get role(overridden-custom-role) get declared annotations do not contain: @card(<args-override>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(fathership) get role(custom-role) get annotations contain: @card(<args>)
+    Then relation(fathership) get role(custom-role) get annotations contain: @card(<args-override>)
+    Then relation(parentship) get role(custom-role) get annotations contain: @card(<args-override>)
+    Then relation(parentship) get role(second-custom-role) get annotations contain: @card(<args>)
     Then relation(fathership) get role(overridden-custom-role) get annotations contain: @card(<args>)
-    When relation(fathership) get role(custom-role) set annotation: @card(<args>)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then relation(fathership) get role(overridden-custom-role) get declared annotations do not contain: @card(<args>)
+    Then relation(fathership) get role(overridden-custom-role) get declared annotations do not contain: @card(<args-override>)
     When relation(fathership) get role(overridden-custom-role) set annotation: @card(<args>)
     Then transaction commits; fails
     Examples:
       | args       | args-override |
       | 0, 10000   | 0, 10001      |
       | 0, 10      | 1, 11         |
-      | 0, 2       | 0, 0          |
       | 1, *       | 0, 2          |
       | 1, 5       | 6, 10         |
+      | 2, 2       | 1, 1          |
       | 38, 111    | 37, 111       |
       | 1000, 1100 | 1000, 1199    |
 

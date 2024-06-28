@@ -33,7 +33,8 @@ Feature: Concept Plays
 ########################
 # plays common
 ########################
-  # TODO: Unset annotation is done by category!
+  # TODO: Unset override tests
+  # TODO: Change override tests (We need to allow changing supertypes while having overrides, but fail at commit time if overrides are not changed)
 
   Scenario: Entity types can play role types
     When create relation type: marriage
@@ -1156,7 +1157,7 @@ Feature: Concept Plays
     Then <root-type>(<type-name>) get plays(parentship:parent) get annotations contain: @<annotation>
     Then <root-type>(<type-name>) get plays(parentship:parent) get annotation categories contain: @<annotation-category>
     Then <root-type>(<type-name>) get plays(parentship:parent) get declared annotations contain: @<annotation>
-    When <root-type>(<type-name>) get plays(parentship:parent) unset annotation: @<annotation>
+    When <root-type>(<type-name>) get plays(parentship:parent) unset annotation: @<annotation-category>
     Then <root-type>(<type-name>) get plays(parentship:parent) get annotations do not contain: @<annotation>
     Then <root-type>(<type-name>) get plays(parentship:parent) get annotation categories do not contain: @<annotation-category>
     Then <root-type>(<type-name>) get plays(parentship:parent) get declared annotations do not contain: @<annotation>
@@ -1180,9 +1181,9 @@ Feature: Concept Plays
     When connection open read transaction for database: typedb
     Then <root-type>(<type-name>) get plays is empty
     Examples:
-      | root-type | type-name   | annotation |
-      | entity    | person      | card(0, 1) |
-      | relation  | description | card(0, 1) |
+      | root-type | type-name   | annotation | annotation-category |
+      | entity    | person      | card(0, 1) | card                |
+      | relation  | description | card(0, 1) | card                |
 
   Scenario Outline: <root-type> types can have plays with @<annotation> alongside pure plays
     When create relation type: parentship
@@ -1236,7 +1237,7 @@ Feature: Concept Plays
     When <root-type>(<type-name>) set plays: parentship:parent
     Then <root-type>(<type-name>) get plays(parentship:parent) get annotations do not contain: @<annotation>
     Then <root-type>(<type-name>) get plays(parentship:parent) get declared annotations do not contain: @<annotation>
-    When <root-type>(<type-name>) get plays(parentship:parent) unset annotation: @<annotation>
+    When <root-type>(<type-name>) get plays(parentship:parent) unset annotation: @<annotation-category>
     Then <root-type>(<type-name>) get plays(parentship:parent) get annotations do not contain: @<annotation>
     Then <root-type>(<type-name>) get plays(parentship:parent) get declared annotations do not contain: @<annotation>
     When transaction commits
@@ -1245,15 +1246,15 @@ Feature: Concept Plays
     Then <root-type>(<type-name>) get plays(marriage:spouse) get declared annotations contain: @<annotation>
     Then <root-type>(<type-name>) get plays(parentship:parent) get annotations do not contain: @<annotation>
     Then <root-type>(<type-name>) get plays(parentship:parent) get declared annotations do not contain: @<annotation>
-    When <root-type>(<type-name>) get plays(parentship:parent) unset annotation: @<annotation>
+    When <root-type>(<type-name>) get plays(parentship:parent) unset annotation: @<annotation-category>
     Then <root-type>(<type-name>) get plays(parentship:parent) get annotations do not contain: @<annotation>
     Then <root-type>(<type-name>) get plays(parentship:parent) get declared annotations do not contain: @<annotation>
     Then <root-type>(<type-name>) get plays(marriage:spouse) get annotations contain: @<annotation>
     Then <root-type>(<type-name>) get plays(marriage:spouse) get declared annotations contain: @<annotation>
-    When <root-type>(<type-name>) get plays(marriage:spouse) unset annotation: @<annotation>
+    When <root-type>(<type-name>) get plays(marriage:spouse) unset annotation: @<annotation-category>
     Then <root-type>(<type-name>) get plays(marriage:spouse) get annotations do not contain: @<annotation>
     Then <root-type>(<type-name>) get plays(marriage:spouse) get declared annotations do not contain: @<annotation>
-    When <root-type>(<type-name>) get plays(marriage:spouse) unset annotation: @<annotation>
+    When <root-type>(<type-name>) get plays(marriage:spouse) unset annotation: @<annotation-category>
     Then <root-type>(<type-name>) get plays(marriage:spouse) get annotations do not contain: @<annotation>
     Then <root-type>(<type-name>) get plays(marriage:spouse) get declared annotations do not contain: @<annotation>
     When transaction commits
@@ -1263,9 +1264,9 @@ Feature: Concept Plays
     Then <root-type>(<type-name>) get plays(parentship:parent) get annotations is empty
     Then <root-type>(<type-name>) get plays(parentship:parent) get declared annotations is empty
     Examples:
-      | root-type | type-name   | annotation |
-      | entity    | person      | card(0, 1) |
-      | relation  | description | card(0, 1) |
+      | root-type | type-name   | annotation | annotation-category |
+      | entity    | person      | card(0, 1) | card                |
+      | relation  | description | card(0, 1) | card                |
 
   Scenario Outline: <root-type> types can unset @<annotation> of inherited plays
     When create relation type: marriage
@@ -1276,12 +1277,12 @@ Feature: Concept Plays
     Then <root-type>(<supertype-name>) get plays(marriage:spouse) get declared annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get plays(marriage:spouse) get annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get plays(marriage:spouse) get declared annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get plays(marriage:spouse) unset annotation: @<annotation>; fails
+    Then <root-type>(<subtype-name>) get plays(marriage:spouse) unset annotation: @<annotation-category>; fails
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get plays(marriage:spouse) get annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get plays(marriage:spouse) get declared annotations contain: @<annotation>
-    When <root-type>(<subtype-name>) get plays(marriage:spouse) unset annotation: @<annotation>
+    When <root-type>(<subtype-name>) get plays(marriage:spouse) unset annotation: @<annotation-category>
     Then <root-type>(<subtype-name>) get plays(marriage:spouse) get annotations do not contain: @<annotation>
     Then <root-type>(<subtype-name>) get plays(marriage:spouse) get declared annotations do not contain: @<annotation>
     Then <root-type>(<supertype-name>) get plays(marriage:spouse) get annotations do not contain: @<annotation>
@@ -1293,9 +1294,9 @@ Feature: Concept Plays
     Then <root-type>(<supertype-name>) get plays(marriage:spouse) get annotations do not contain: @<annotation>
     Then <root-type>(<supertype-name>) get plays(marriage:spouse) get declared annotations do not contain: @<annotation>
     Examples:
-      | root-type | supertype-name | subtype-name | annotation |
-      | entity    | person         | customer     | card(1, 2) |
-      | relation  | description    | registration | card(1, 2) |
+      | root-type | supertype-name | subtype-name | annotation | annotation-category |
+      | entity    | person         | customer     | card(1, 2) | card                |
+      | relation  | description    | registration | card(1, 2) | card                |
 
   Scenario Outline: <root-type> types cannot unset inherited @<annotation> of overridden plays
     When create relation type: marriage
@@ -1315,7 +1316,7 @@ Feature: Concept Plays
     Then <root-type>(<subtype-name>) get plays(marriage:spouse) get annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get plays(marriage:spouse) get declared annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get plays(marriage:spouse) set override: marriage:spouse
-    When <root-type>(<subtype-name>) get plays(marriage:spouse) unset annotation: @<annotation>
+    When <root-type>(<subtype-name>) get plays(marriage:spouse) unset annotation: @<annotation-category>
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get plays(marriage:spouse) get annotations contain: @<annotation>
@@ -1324,15 +1325,15 @@ Feature: Concept Plays
     When <root-type>(<subtype-name>) get plays(concrete-marriage:husband) set override: marriage:spouse
     Then <root-type>(<subtype-name>) get plays(concrete-marriage:husband) get annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get plays(concrete-marriage:husband) get declared annotations do not contain: @<annotation>
-    When <root-type>(<subtype-name>) get plays(concrete-marriage:husband) unset annotation: @<annotation>; fails
+    When <root-type>(<subtype-name>) get plays(concrete-marriage:husband) unset annotation: @<annotation-category>; fails
     When transaction commits
     When connection open read transaction for database: typedb
     Then <root-type>(<subtype-name>) get plays(concrete-marriage:husband) get annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get plays(concrete-marriage:husband) get declared annotations do not contain: @<annotation>
     Examples:
-      | root-type | supertype-name | subtype-name | annotation |
-      | entity    | person         | customer     | card(1, 2) |
-      | relation  | description    | registration | card(1, 2) |
+      | root-type | supertype-name | subtype-name | annotation | annotation-category |
+      | entity    | person         | customer     | card(1, 2) | card                |
+      | relation  | description    | registration | card(1, 2) | card                |
 
   Scenario Outline: <root-type> types can inherit plays with @<annotation>s alongside pure plays
     When create relation type: parentship
@@ -1745,21 +1746,21 @@ Feature: Concept Plays
     When connection open schema transaction for database: typedb
     Then <root-type>(<type-name>) get plays(contract:contractor) get annotations contain: @<annotation>
     Then <root-type>(<type-name>) get plays(marriage:contractor) get annotations do not contain: @<annotation>
-#    Then <root-type>(<type-name>) get plays(marriage:contractor) set annotation: @<annotation>; fails
-#    When <root-type>(<type-name>) get plays(contract:contractor) unset annotation: @<annotation>
-#    Then <root-type>(<type-name>) get plays(contract:contractor) get annotations is empty
-#    Then <root-type>(<type-name>) get plays(marriage:contractor) get annotations is empty
-#    Then <root-type>(<type-name>) get plays(marriage:contractor) set annotation: @<annotation>
-#    Then <root-type>(<type-name>) get plays(contract:contractor) get annotations is empty
-#    Then <root-type>(<type-name>) get plays(marriage:contractor) get annotations contain: @<annotation>
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then <root-type>(<type-name>) get plays(contract:contractor) get annotations is empty
-#    Then <root-type>(<type-name>) get plays(marriage:contractor) get annotations contain: @<annotation>
+    Then <root-type>(<type-name>) get plays(marriage:contractor) set annotation: @<annotation>; fails
+    When <root-type>(<type-name>) get plays(contract:contractor) unset annotation: @<annotation-category>
+    Then <root-type>(<type-name>) get plays(contract:contractor) get annotations is empty
+    Then <root-type>(<type-name>) get plays(marriage:contractor) get annotations is empty
+    Then <root-type>(<type-name>) get plays(marriage:contractor) set annotation: @<annotation>
+    Then <root-type>(<type-name>) get plays(contract:contractor) get annotations is empty
+    Then <root-type>(<type-name>) get plays(marriage:contractor) get annotations contain: @<annotation>
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then <root-type>(<type-name>) get plays(contract:contractor) get annotations is empty
+    Then <root-type>(<type-name>) get plays(marriage:contractor) get annotations contain: @<annotation>
     Examples:
-      | root-type | type-name   | annotation |
-      | entity    | person      | card(1, 2) |
-      | relation  | description | card(1, 2) |
+      | root-type | type-name   | annotation | annotation-category |
+      | entity    | person      | card(1, 2) | card                |
+      | relation  | description | card(1, 2) | card                |
 
   Scenario Outline: <root-type> types can inherit plays with @<annotation>s and pure plays that are subtypes of each other
     When create relation type: contract
@@ -2060,7 +2061,7 @@ Feature: Concept Plays
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) get plays(marriage:spouse) get annotations contain: @card(<arg0>, <arg1>)
-    Then entity(person) get plays(marriage:spouse) unset annotation: @card(<arg0>, <arg1>)
+    Then entity(person) get plays(marriage:spouse) unset annotation: @card
     Then entity(person) get plays(marriage:spouse) get annotations is empty
     When transaction commits
     When connection open schema transaction for database: typedb
@@ -2308,32 +2309,32 @@ Feature: Concept Plays
     Then relation(marriage) get plays(custom-relation:r1) get annotations contain: @card(<args>)
     Then entity(player) get plays(overridden-custom-relation:overridden-r2) get annotations contain: @card(<args>)
     Then relation(marriage) get plays(overridden-custom-relation:overridden-r2) get annotations contain: @card(<args>)
-    Then entity(player) get plays(custom-relation:r1) set annotation: @card(<args-override>); fails
-    Then relation(marriage) get plays(custom-relation:r1) set annotation: @card(<args-override>); fails
+    When entity(player) get plays(custom-relation:r1) set annotation: @card(<args-override>)
+    When relation(marriage) get plays(custom-relation:r1) set annotation: @card(<args-override>)
     Then entity(player) get plays(overridden-custom-relation:overridden-r2) set annotation: @card(<args-override>); fails
     Then relation(marriage) get plays(overridden-custom-relation:overridden-r2) set annotation: @card(<args-override>); fails
-    Then entity(player) get plays(custom-relation:r1) get annotations contain: @card(<args>)
-    Then relation(marriage) get plays(custom-relation:r1) get annotations contain: @card(<args>)
+    Then entity(player) get plays(custom-relation:r1) get annotations contain: @card(<args-override>)
+    Then entity(person) get plays(custom-relation:r1) get annotations contain: @card(<args-override>)
+    Then relation(marriage) get plays(custom-relation:r1) get annotations contain: @card(<args-override>)
+    Then relation(description) get plays(custom-relation:r1) get annotations contain: @card(<args-override>)
     Then entity(player) get plays(overridden-custom-relation:overridden-r2) get annotations contain: @card(<args>)
     Then relation(marriage) get plays(overridden-custom-relation:overridden-r2) get annotations contain: @card(<args>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(player) get plays(custom-relation:r1) get annotations contain: @card(<args>)
-    Then relation(marriage) get plays(custom-relation:r1) get annotations contain: @card(<args>)
+    Then entity(player) get plays(custom-relation:r1) get annotations contain: @card(<args-override>)
+    Then entity(person) get plays(custom-relation:r1) get annotations contain: @card(<args-override>)
+    Then relation(marriage) get plays(custom-relation:r1) get annotations contain: @card(<args-override>)
+    Then relation(description) get plays(custom-relation:r1) get annotations contain: @card(<args-override>)
     Then entity(player) get plays(overridden-custom-relation:overridden-r2) get annotations contain: @card(<args>)
     Then relation(marriage) get plays(overridden-custom-relation:overridden-r2) get annotations contain: @card(<args>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(player) get plays(custom-relation:r1) get annotations contain: @card(<args>)
-    Then relation(marriage) get plays(custom-relation:r1) get annotations contain: @card(<args>)
+    Then entity(player) get plays(custom-relation:r1) get annotations contain: @card(<args-override>)
+    Then entity(person) get plays(custom-relation:r1) get annotations contain: @card(<args-override>)
+    Then relation(marriage) get plays(custom-relation:r1) get annotations contain: @card(<args-override>)
+    Then relation(description) get plays(custom-relation:r1) get annotations contain: @card(<args-override>)
     Then entity(player) get plays(overridden-custom-relation:overridden-r2) get annotations contain: @card(<args>)
     Then relation(marriage) get plays(overridden-custom-relation:overridden-r2) get annotations contain: @card(<args>)
-    When entity(player) get plays(custom-relation:r1) set annotation: @card(<args>)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When relation(marriage) get plays(custom-relation:r1) set annotation: @card(<args>)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
     When entity(player) get plays(overridden-custom-relation:overridden-r2) set annotation: @card(<args>)
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
@@ -2343,9 +2344,9 @@ Feature: Concept Plays
       | args       | args-override |
       | 0, 10000   | 0, 10001      |
       | 0, 10      | 1, 11         |
-      | 0, 2       | 0, 0          |
       | 1, *       | 0, 2          |
       | 1, 5       | 6, 10         |
+      | 2, 2       | 1, 1          |
       | 38, 111    | 37, 111       |
       | 1000, 1100 | 1000, 1199    |
 
