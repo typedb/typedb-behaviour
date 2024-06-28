@@ -1447,6 +1447,7 @@ Feature: Concept Attribute Type
 
   Scenario: Attribute type cannot set @regex annotation for none value type, cannot unset value type with @regex annotation
     When create attribute type: name
+    When attribute(name) set annotation: @abstract
     Then attribute(name) set annotation: @regex("value"); fails
     When attribute(name) set value type: string
     When attribute(name) set annotation: @regex("value")

@@ -195,7 +195,7 @@ Feature: Concept Plays
     When create relation type: fathership
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: father
-    When relation(fathership) get role(father) set supertype: parent
+    When relation(fathership) get role(father) set override: parent
     When entity(person) set plays: parentship:parent
     When entity(person) set plays: parentship:child
     When create entity type: man
@@ -224,7 +224,7 @@ Feature: Concept Plays
     When create relation type: mothership
     When relation(mothership) set supertype: parentship
     When relation(mothership) create role: mother
-    When relation(mothership) get role(mother) set supertype: parent
+    When relation(mothership) get role(mother) set override: parent
     When create entity type: woman
     When entity(woman) set supertype: person
     When entity(woman) set plays: mothership:mother
@@ -268,7 +268,7 @@ Feature: Concept Plays
     When create relation type: fathership
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: father
-    When relation(fathership) get role(father) set supertype: parent
+    When relation(fathership) get role(father) set override: parent
     When entity(person) set plays: parentship:parent
     When entity(person) set plays: parentship:child
     When create entity type: man
@@ -300,7 +300,7 @@ Feature: Concept Plays
     When create relation type: mothership
     When relation(mothership) set supertype: parentship
     When relation(mothership) create role: mother
-    When relation(mothership) get role(mother) set supertype: parent
+    When relation(mothership) get role(mother) set override: parent
     When create entity type: woman
     When entity(woman) set supertype: person
     When entity(woman) set plays: mothership:mother
@@ -347,12 +347,13 @@ Feature: Concept Plays
     When create relation type: fathership
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: father
-    When relation(fathership) get role(father) set supertype: parent
+    When relation(fathership) get role(father) set override: parent
     When entity(person) set plays: parentship:parent
     When create entity type: man
     When entity(man) set supertype: person
     When entity(man) set plays: fathership:father
-    Then entity(man) get plays(parentship:parent) set override: fathership:father; fails
+    # TODO: Make it only for typeql
+#    Then entity(man) get plays(parentship:parent) set override: fathership:father; fails
     When entity(man) get plays(fathership:father) set override: parentship:parent
     When create entity type: boy
     When entity(boy) set supertype: man
@@ -384,7 +385,7 @@ Feature: Concept Plays
     When create relation type: fathership
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: father
-    When relation(fathership) get role(father) set supertype: parent
+    When relation(fathership) get role(father) set override: parent
     When entity(person) set plays: parentship:parent
     Then entity(person) set plays: fathership:father
     Then entity(person) get plays(fathership:father) set override: fathership:father; fails
@@ -527,9 +528,9 @@ Feature: Concept Plays
     When create relation type: contractor-locates
     When relation(contractor-locates) set supertype: locates
     When relation(contractor-locates) create role: contractor-locating
-    When relation(contractor-locates) get role(contractor-locating) set supertype: locating
+    When relation(contractor-locates) get role(contractor-locating) set override: locating
     When relation(contractor-locates) create role: contractor-located
-    When relation(contractor-locates) get role(contractor-located) set supertype: located
+    When relation(contractor-locates) get role(contractor-located) set override: located
     When create relation type: employment
     When relation(employment) create role: employer
     When relation(employment) create role: employee
@@ -545,9 +546,9 @@ Feature: Concept Plays
     When create relation type: parttime-locates
     When relation(parttime-locates) set supertype: contractor-locates
     When relation(parttime-locates) create role: parttime-locating
-    When relation(parttime-locates) get role(parttime-locating) set supertype: contractor-locating
+    When relation(parttime-locates) get role(parttime-locating) set override: contractor-locating
     When relation(parttime-locates) create role: parttime-located
-    When relation(parttime-locates) get role(parttime-located) set supertype: contractor-located
+    When relation(parttime-locates) get role(parttime-located) set override: contractor-located
     When create relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
     When relation(parttime-employment) create role: parttime-employer
@@ -574,9 +575,9 @@ Feature: Concept Plays
     When create relation type: contractor-locates
     When relation(contractor-locates) set supertype: locates
     When relation(contractor-locates) create role: contractor-locating
-    When relation(contractor-locates) get role(contractor-locating) set supertype: locating
+    When relation(contractor-locates) get role(contractor-locating) set override: locating
     When relation(contractor-locates) create role: contractor-located
-    When relation(contractor-locates) get role(contractor-located) set supertype: located
+    When relation(contractor-locates) get role(contractor-located) set override: located
     When create relation type: employment
     When relation(employment) create role: employer
     When relation(employment) create role: employee
@@ -584,7 +585,8 @@ Feature: Concept Plays
     When create relation type: contractor-employment
     When relation(contractor-employment) set supertype: employment
     When relation(contractor-employment) set plays: contractor-locates:contractor-located
-    Then relation(contractor-employment) get plays(locates:located) set override: contractor-locates:contractor-located; fails
+    # TODO: Make it only for typeql
+#    Then relation(contractor-employment) get plays(locates:located) set override: contractor-locates:contractor-located; fails
     When relation(contractor-employment) get plays(contractor-locates:contractor-located) set override: locates:located
     Then relation(contractor-employment) get plays do not contain:
       | locates:located |
@@ -593,9 +595,9 @@ Feature: Concept Plays
     When create relation type: parttime-locates
     When relation(parttime-locates) set supertype: contractor-locates
     When relation(parttime-locates) create role: parttime-locating
-    When relation(parttime-locates) get role(parttime-locating) set supertype: contractor-locating
+    When relation(parttime-locates) get role(parttime-locating) set override: contractor-locating
     When relation(parttime-locates) create role: parttime-located
-    When relation(parttime-locates) get role(parttime-located) set supertype: contractor-located
+    When relation(parttime-locates) get role(parttime-located) set override: contractor-located
     When create relation type: parttime-employment
     When relation(parttime-employment) set supertype: contractor-employment
     When relation(parttime-employment) create role: parttime-employer
@@ -619,7 +621,7 @@ Feature: Concept Plays
     When create relation type: contractor-locates
     When relation(contractor-locates) set supertype: locates
     When relation(contractor-locates) create role: contractor-located
-    When relation(contractor-locates) get role(contractor-located) set supertype: located
+    When relation(contractor-locates) get role(contractor-located) set override: located
     When create relation type: employment
     When relation(employment) create role: employee
     When relation(employment) set plays: locates:located
@@ -658,9 +660,9 @@ Feature: Concept Plays
     When create relation type: employment-locates
     When relation(employment-locates) set supertype: locates
     When relation(employment-locates) create role: employment-locating
-    When relation(employment-locates) get role(employment-locating) set supertype: locating
+    When relation(employment-locates) get role(employment-locating) set override: locating
     When relation(employment-locates) create role: employment-located
-    When relation(employment-locates) get role(employment-located) set supertype: located
+    When relation(employment-locates) get role(employment-located) set override: located
     When create relation type: employment
     When relation(employment) create role: employer
     When relation(employment) create role: employee
@@ -791,7 +793,7 @@ Feature: Concept Plays
     When create relation type: fathership
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: father
-    When relation(fathership) get role(father) set supertype: parent
+    When relation(fathership) get role(father) set override: parent
     When <root-type>(<supertype-name>) set plays: parentship:parent
     When <root-type>(<subtype-name>) set plays: fathership:father
     When <root-type>(<subtype-name>) get plays(fathership:father) set override: parentship:parent
@@ -1121,7 +1123,7 @@ Feature: Concept Plays
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: father
     When relation(fathership) get role(father) set ordering: ordered
-    When relation(fathership) get role(father) set supertype: parent
+    When relation(fathership) get role(father) set override: parent
     When <root-type>(<supertype-name>) set plays: parentship:parent
     When <root-type>(<subtype-name>) set plays: fathership:father
     When <root-type>(<subtype-name>) get plays(fathership:father) set override: parentship:parent
@@ -1277,22 +1279,28 @@ Feature: Concept Plays
     Then <root-type>(<supertype-name>) get plays(marriage:spouse) get declared annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get plays(marriage:spouse) get annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get plays(marriage:spouse) get declared annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get plays(marriage:spouse) unset annotation: @<annotation-category>; fails
+    When <root-type>(<subtype-name>) get plays(marriage:spouse) unset annotation: @<annotation-category>
+    Then <root-type>(<supertype-name>) get plays(marriage:spouse) get annotations do not contain: @<annotation>
+    Then <root-type>(<supertype-name>) get plays(marriage:spouse) get declared annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name>) get plays(marriage:spouse) get annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name>) get plays(marriage:spouse) get declared annotations do not contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get plays(marriage:spouse) get annotations do not contain: @<annotation>
+    Then <root-type>(<supertype-name>) get plays(marriage:spouse) get declared annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name>) get plays(marriage:spouse) get annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name>) get plays(marriage:spouse) get declared annotations do not contain: @<annotation>
+    When <root-type>(<subtype-name>) get plays(marriage:spouse) set annotation: @<annotation-category>
+    Then <root-type>(<supertype-name>) get plays(marriage:spouse) get annotations contain: @<annotation>
+    Then <root-type>(<supertype-name>) get plays(marriage:spouse) get declared annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get plays(marriage:spouse) get annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get plays(marriage:spouse) get declared annotations contain: @<annotation>
-    When <root-type>(<subtype-name>) get plays(marriage:spouse) unset annotation: @<annotation-category>
-    Then <root-type>(<subtype-name>) get plays(marriage:spouse) get annotations do not contain: @<annotation>
-    Then <root-type>(<subtype-name>) get plays(marriage:spouse) get declared annotations do not contain: @<annotation>
-    Then <root-type>(<supertype-name>) get plays(marriage:spouse) get annotations do not contain: @<annotation>
-    Then <root-type>(<supertype-name>) get plays(marriage:spouse) get declared annotations do not contain: @<annotation>
     When transaction commits
     When connection open read transaction for database: typedb
-    Then <root-type>(<subtype-name>) get plays(marriage:spouse) get annotations do not contain: @<annotation>
-    Then <root-type>(<subtype-name>) get plays(marriage:spouse) get declared annotations do not contain: @<annotation>
-    Then <root-type>(<supertype-name>) get plays(marriage:spouse) get annotations do not contain: @<annotation>
-    Then <root-type>(<supertype-name>) get plays(marriage:spouse) get declared annotations do not contain: @<annotation>
+    Then <root-type>(<supertype-name>) get plays(marriage:spouse) get annotations contain: @<annotation>
+    Then <root-type>(<supertype-name>) get plays(marriage:spouse) get declared annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get plays(marriage:spouse) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get plays(marriage:spouse) get declared annotations contain: @<annotation>
     Examples:
       | root-type | supertype-name | subtype-name | annotation | annotation-category |
       | entity    | person         | customer     | card(1, 2) | card                |
@@ -1304,7 +1312,7 @@ Feature: Concept Plays
     When create relation type: concrete-marriage
     When relation(concrete-marriage) create role: husband
     When relation(concrete-marriage) set supertype: marriage
-    When relation(concrete-marriage) get role(husband) set supertype: spouse
+    When relation(concrete-marriage) get role(husband) set override: spouse
     When <root-type>(<supertype-name>) set plays: marriage:spouse
     When <root-type>(<supertype-name>) get plays(marriage:spouse) set annotation: @<annotation>
     Then <root-type>(<supertype-name>) get plays(marriage:spouse) get annotations contain: @<annotation>
@@ -1529,7 +1537,7 @@ Feature: Concept Plays
     When create relation type: marriage
     When relation(marriage) create role: spouse
     When relation(marriage) set supertype: contract
-    When relation(marriage) get role(spouse) set supertype: contractor:contract
+    When relation(marriage) get role(spouse) set override: contract
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set plays: contract:contractor
     When <root-type>(<subtype-name>) set plays: marriage:spouse
@@ -1567,7 +1575,7 @@ Feature: Concept Plays
     When create relation type: fathership
     When relation(fathership) create role: father
     When relation(fathership) set supertype: parentship
-    When relation(fathership) get role(father) set supertype: parent
+    When relation(fathership) get role(father) set override: parent
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set plays: parentship:parent
     When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @<annotation>
@@ -1691,7 +1699,7 @@ Feature: Concept Plays
     When create relation type: fathership
     When relation(fathership) create role: father
     When relation(fathership) set supertype: parentship
-    When relation(fathership) get role(father) set supertype: parent
+    When relation(fathership) get role(father) set override: parent
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set plays: parentship:parent
     When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @<annotation>
@@ -1712,8 +1720,8 @@ Feature: Concept Plays
     When relation(parentship) set annotation: @abstract
     When create relation type: fathership
     When relation(fathership) create role: father
-    When relation(fathership) set supertype: parentship=
-    When relation(fathership) get role(father) set supertype: parent
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) get role(father) set override: parent
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set plays: parentship:parent
     When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @<annotation>
@@ -1902,7 +1910,7 @@ Feature: Concept Plays
     When create relation type: fathership
     When relation(fathership) create role: father
     When relation(fathership) set supertype: parentship
-    When relation(fathership) get role(father) set supertype: parent
+    When relation(fathership) get role(father) set override: parent
     When create relation type: marriage
     When relation(marriage) create role: spouse
     When relation(marriage) set supertype: contract
@@ -2175,7 +2183,7 @@ Feature: Concept Plays
     When create relation type: overridden-custom-relation
     When relation(overridden-custom-relation) create role: overridden-r2
     When relation(overridden-custom-relation) set supertype: second-custom-relation
-    When relation(overridden-custom-relation) get role(overridden-r2) set supertype: r2
+    When relation(overridden-custom-relation) get role(overridden-r2) set override: r2
     When entity(person) set plays: custom-relation:r1
     When relation(description) set plays: custom-relation:r1
     When entity(person) set plays: second-custom-relation:r2
@@ -2284,7 +2292,7 @@ Feature: Concept Plays
     When create relation type: overridden-custom-relation
     When relation(overridden-custom-relation) create role: overridden-r2
     When relation(overridden-custom-relation) set supertype: second-custom-relation
-    When relation(overridden-custom-relation) get role(overridden-r2) set supertype: r2
+    When relation(overridden-custom-relation) get role(overridden-r2) set override: r2
     When entity(person) set plays: custom-relation:r1
     When relation(description) set plays: custom-relation:r1
     When entity(person) set plays: second-custom-relation:r2
