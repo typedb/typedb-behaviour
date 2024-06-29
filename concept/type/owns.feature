@@ -33,7 +33,7 @@ Feature: Concept Owns
     Given relation(registration) set annotation: @abstract
     Given relation(profile) set annotation: @abstract
     Given create struct: custom-struct
-    Given struct(custom-struct) create field: custom-field
+    Given struct(custom-struct) create field: custom-field, with value type: string
 
     Given transaction commits
     Given connection open schema transaction for database: typedb
@@ -502,7 +502,7 @@ Feature: Concept Owns
 
   Scenario Outline: <root-type> types can unset not set owns
     When create attribute type: email
-    When attribute(email) set value type: <value-type>
+    When attribute(email) set value type: string
     Then <root-type>(<type-name>) get owns do not contain:
       | email |
     When <root-type>(<type-name>) unset owns: email
@@ -1521,7 +1521,7 @@ Feature: Concept Owns
     Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
     Then <root-type>(<subtype-name>) get owns(name) get ordering: ordered
     When <root-type>(<subtype-name>) get owns(name) set ordering: ordered
-    Then transaction commit; fails
+    Then transaction commits; fails
     When connection open schema transaction for database: typedb
     Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
     Then <root-type>(<subtype-name>) get owns(name) get ordering: ordered
@@ -1611,7 +1611,7 @@ Feature: Concept Owns
     Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
     Then <root-type>(<subtype-name>) get owns(surname) get ordering: ordered
     When <root-type>(<subtype-name>) get owns(surname) set ordering: ordered
-    Then transaction commit; fails
+    Then transaction commits; fails
     When connection open schema transaction for database: typedb
     Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
     Then <root-type>(<subtype-name>) get owns(surname) get ordering: ordered
@@ -1628,7 +1628,7 @@ Feature: Concept Owns
     Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
     Then <root-type>(<subtype-name-2>) get owns(third-name) get ordering: ordered
     When <root-type>(<subtype-name-2>) get owns(third-name) set ordering: ordered
-    Then transaction commit; fails
+    Then transaction commits; fails
     When connection open schema transaction for database: typedb
     Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
     Then <root-type>(<subtype-name-2>) get owns(third-name) get ordering: ordered

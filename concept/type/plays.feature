@@ -668,8 +668,9 @@ Feature: Concept Plays
     When relation(employment) create role: employee
     When relation(employment) set plays: locates:located
     Then relation(employment) set plays: employment-locates:employment-located
-    Then relation(contractor-employment) get plays(contractor-locates:contractor-located) set override: contractor-locates:contractor-located; fails
-    Then relation(employment) get plays(employment-locates:employment-located) set override: locates:located; fails
+    # TODO: Make it only for typeql
+#    Then relation(contractor-employment) get plays(contractor-locates:contractor-located) set override: contractor-locates:contractor-located; fails
+#    Then relation(employment) get plays(employment-locates:employment-located) set override: locates:located; fails
 
   Scenario: Relation types cannot override inherited playing role types other than with their subtypes
     When create relation type: locates
@@ -759,7 +760,7 @@ Feature: Concept Plays
     Then <root-type>(<type-name>) unset plays: marriage:husband
     Then <root-type>(<type-name>) get plays do not contain:
       | marriage:husband |
-    When transaction commit
+    When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<type-name>) get plays do not contain:
       | marriage:husband |
@@ -1389,7 +1390,7 @@ Feature: Concept Plays
     When create relation type: license
     When relation(license) create role: object
     When create relation type: report
-    When relation(object) create role: object
+    When relation(report) create role: object
     When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
     When <root-type>(<subtype-name-2>) set plays: license:object
     When <root-type>(<subtype-name-2>) get plays(license:object) set annotation: @<annotation>
@@ -2194,7 +2195,7 @@ Feature: Concept Plays
     Then entity(person) get plays(custom-relation:r1) get declared annotations contain: @card(<args>)
     Then relation(description) get plays(custom-relation:r1) get annotations contain: @card(<args>)
     Then relation(description) get plays(custom-relation:r1) get declared annotations contain: @card(<args>)
-    When entity(person) get plays(second-custom-relation:r1-2) set annotation: @card(<args>)
+    When entity(person) get plays(second-custom-relation:r2) set annotation: @card(<args>)
     When relation(description) get plays(second-custom-relation:r2) set annotation: @card(<args>)
     Then entity(person) get plays(second-custom-relation:r2) get annotations contain: @card(<args>)
     Then entity(person) get plays(second-custom-relation:r2) get declared annotations contain: @card(<args>)
