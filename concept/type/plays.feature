@@ -884,7 +884,6 @@ Feature: Concept Plays
       | parentship:child |
     Then <root-type>(<subtype-name>) get plays do not contain:
       | parentship:parent |
-      | parentship:child  |
     When <root-type>(<subtype-name>) get plays(fathership:father) unset override: parentship:parent
     Then <root-type>(<subtype-name>) get plays contain:
       | fathership:father |
@@ -905,7 +904,6 @@ Feature: Concept Plays
       | parentship:child |
     Then <root-type>(<subtype-name>) get plays do not contain:
       | parentship:parent |
-      | parentship:child  |
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get plays contain:
@@ -917,7 +915,6 @@ Feature: Concept Plays
       | parentship:child |
     Then <root-type>(<subtype-name>) get plays do not contain:
       | parentship:parent |
-      | parentship:child  |
     When <root-type>(<subtype-name>) get plays(fathership:father) unset override: parentship:parent
     Then <root-type>(<subtype-name>) get plays contain:
       | fathership:father |

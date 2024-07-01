@@ -415,7 +415,6 @@ Feature: Concept Relation Type and Role Type
       | parentship:child |
     Then relation(fathership) get roles do not contain:
       | parentship:parent |
-      | parentship:child  |
     When relation(fathership) get role(father) unset override: parent
     Then relation(fathership) get roles contain:
       | fathership:father |
@@ -436,7 +435,6 @@ Feature: Concept Relation Type and Role Type
       | parentship:child |
     Then relation(fathership) get roles do not contain:
       | parentship:parent |
-      | parentship:child  |
     When transaction commits
     When connection open schema transaction for database: typedb
     Then relation(fathership) get roles contain:
@@ -448,7 +446,6 @@ Feature: Concept Relation Type and Role Type
       | parentship:child |
     Then relation(fathership) get roles do not contain:
       | parentship:parent |
-      | parentship:child  |
     When relation(fathership) get role(father) unset override: parent
     Then relation(fathership) get roles contain:
       | fathership:father |
@@ -1760,62 +1757,59 @@ Feature: Concept Relation Type and Role Type
     When relation(connection) get role(part) set ordering: ordered
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When relation(parentship) get role(parent) set ordering: ordered
-    Then transaction commits; fails
+    Then relation(parentship) get role(parent) set ordering: ordered; fails
     When connection open schema transaction for database: typedb
-    When relation(fathership) get role(father) set ordering: ordered
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When relation(connection) get role(part) set ordering: ordered
-    When relation(parentship) get role(parent) set ordering: ordered
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When relation(connection) get role(part) set ordering: ordered
-    When relation(fathership) get role(father) set ordering: ordered
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When relation(parentship) get role(parent) set ordering: ordered
-    When relation(fathership) get role(father) set ordering: ordered
+    Then relation(fathership) get role(father) set ordering: ordered; fails
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When relation(connection) get role(part) set ordering: ordered
     When relation(parentship) get role(parent) set ordering: ordered
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(connection) get role(part) set ordering: ordered
+    Then relation(fathership) get role(father) set ordering: ordered; fails
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) set ordering: ordered; fails
+    When connection open schema transaction for database: typedb
+    When relation(connection) get role(part) set ordering: ordered
+    When relation(parentship) get role(parent) set ordering: ordered
     When relation(fathership) get role(father) set ordering: ordered
+    Then relation(connection) get role(part) get ordering: ordered
+    Then relation(parentship) get role(parent) get ordering: ordered
+    Then relation(fathership) get role(father) get ordering: ordered
     When transaction commits
     When connection open read transaction for database: typedb
-    When relation(connection) get role(part) get ordering: ordered
-    When relation(parentship) get role(parent) get ordering: ordered
-    When relation(fathership) get role(father) get ordering: ordered
+    Then relation(connection) get role(part) get ordering: ordered
+    Then relation(parentship) get role(parent) get ordering: ordered
+    Then relation(fathership) get role(father) get ordering: ordered
     When connection open schema transaction for database: typedb
     When relation(connection) get role(part) set ordering: unordered
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When relation(parentship) get role(parent) set ordering: unordered
-    Then transaction commits; fails
+    Then relation(parentship) get role(parent) set ordering: unordered; fails
     When connection open schema transaction for database: typedb
-    When relation(fathership) get role(father) set ordering: unordered
-    Then transaction commits; fails
+    Then relation(fathership) get role(father) set ordering: unordered; fails
     When connection open schema transaction for database: typedb
     When relation(connection) get role(part) set ordering: unordered
     When relation(parentship) get role(parent) set ordering: unordered
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When relation(connection) get role(part) set ordering: unordered
-    When relation(fathership) get role(father) set ordering: unordered
-    Then transaction commits; fails
+    Then relation(fathership) get role(father) set ordering: unordered; fails
     When connection open schema transaction for database: typedb
-    When relation(parentship) get role(parent) set ordering: unordered
-    When relation(fathership) get role(father) set ordering: unordered
-    Then transaction commits; fails
+    Then relation(parentship) get role(parent) set ordering: unordered; fails
     When connection open schema transaction for database: typedb
     When relation(connection) get role(part) set ordering: unordered
     When relation(parentship) get role(parent) set ordering: unordered
     When relation(fathership) get role(father) set ordering: unordered
+    Then relation(connection) get role(part) get ordering: unordered
+    Then relation(parentship) get role(parent) get ordering: unordered
+    Then relation(fathership) get role(father) get ordering: unordered
     When transaction commits
     When connection open read transaction for database: typedb
-    When relation(connection) get role(part) get ordering: unordered
-    When relation(parentship) get role(parent) get ordering: unordered
-    When relation(fathership) get role(father) get ordering: unordered
+    Then relation(connection) get role(part) get ordering: unordered
+    Then relation(parentship) get role(parent) get ordering: unordered
+    Then relation(fathership) get role(father) get ordering: unordered
 
 ########################
 # relates @annotations common

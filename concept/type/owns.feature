@@ -525,7 +525,6 @@ Feature: Concept Owns
       | name |
     Then <root-type>(<subtype-name>) get owns do not contain:
       | email |
-      | name  |
     When <root-type>(<subtype-name>) get owns(work-email) unset override: email
     Then <root-type>(<subtype-name>) get owns contain:
       | work-email |
@@ -543,10 +542,10 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get declared owns contain:
       | work-email |
     Then <root-type>(<subtype-name>) get declared owns do not contain:
-      | name |
-    Then <root-type>(<subtype-name>) get owns do not contain:
       | email |
       | name  |
+    Then <root-type>(<subtype-name>) get owns do not contain:
+      | email |
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get owns contain:
@@ -558,7 +557,6 @@ Feature: Concept Owns
       | name |
     Then <root-type>(<subtype-name>) get owns do not contain:
       | email |
-      | name  |
     When <root-type>(<subtype-name>) get owns(work-email) unset override: email
     Then <root-type>(<subtype-name>) get owns contain:
       | work-email |
@@ -615,11 +613,11 @@ Feature: Concept Owns
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get owns contain:
       | name |
-    Then <root-type>(<subtype-name>) set owns: name
+    When <root-type>(<subtype-name>) set owns: name
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) set owns: name
-    Then <root-type>(<subtype-name>) get owns(name) override: name
+    When <root-type>(<subtype-name>) set owns: name
+    When <root-type>(<subtype-name>) get owns(name) set override: name
     Then transaction commits; fails
     Examples:
       | root-type | supertype-name | subtype-name | value-type |
@@ -1337,6 +1335,8 @@ Feature: Concept Owns
     When transaction commits
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name>) set owns: work-email
+    Then <root-type>(<subtype-name>) get owns(work-email) set override: email; fails
+    When <root-type>(<subtype-name>) get owns(work-email) set ordering: ordered
     When <root-type>(<subtype-name>) get owns(work-email) set override: email
     Then <root-type>(<subtype-name>) get owns overridden(work-email) get label: email
     Then <root-type>(<subtype-name>) get owns(work-email) get ordering: ordered
@@ -1587,62 +1587,59 @@ Feature: Concept Owns
     When <root-type>(<supertype-name>) get owns(literal) set ordering: ordered
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get owns(name) set ordering: ordered
-    Then transaction commits; fails
+    Then <root-type>(<subtype-name>) get owns(name) set ordering: ordered; fails
     When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name-2>) get owns(surname) set ordering: ordered
-    Then transaction commits; fails
+    Then <root-type>(<subtype-name-2>) get owns(surname) set ordering: ordered; fails
     When connection open schema transaction for database: typedb
     When <root-type>(<supertype-name>) get owns(literal) set ordering: ordered
     When <root-type>(<subtype-name>) get owns(name) set ordering: ordered
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When <root-type>(<supertype-name>) get owns(literal) set ordering: ordered
-    When <root-type>(<subtype-name-2>) get owns(surname) set ordering: ordered
-    Then transaction commits; fails
+    Then <root-type>(<subtype-name-2>) get owns(surname) set ordering: ordered; fails
     When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get owns(name) set ordering: ordered
-    When <root-type>(<subtype-name-2>) get owns(surname) set ordering: ordered
+    Then <root-type>(<subtype-name>) get owns(name) set ordering: ordered; fails
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When <root-type>(<supertype-name>) get owns(literal) set ordering: ordered
     When <root-type>(<subtype-name>) get owns(name) set ordering: ordered
     When <root-type>(<subtype-name-2>) get owns(surname) set ordering: ordered
+    Then <root-type>(<supertype-name>) get owns(literal) get ordering: ordered
+    Then <root-type>(<subtype-name>) get owns(name) get ordering: ordered
+    Then <root-type>(<subtype-name-2>) get owns(surname) get ordering: ordered
     When transaction commits
     When connection open read transaction for database: typedb
-    When <root-type>(<supertype-name>) get owns(literal) get ordering: ordered
-    When <root-type>(<subtype-name>) get owns(name) get ordering: ordered
-    When <root-type>(<subtype-name-2>) get owns(surname) get ordering: ordered
+    Then <root-type>(<supertype-name>) get owns(literal) get ordering: ordered
+    Then <root-type>(<subtype-name>) get owns(name) get ordering: ordered
+    Then <root-type>(<subtype-name-2>) get owns(surname) get ordering: ordered
     When connection open schema transaction for database: typedb
     When <root-type>(<supertype-name>) get owns(literal) set ordering: unordered
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get owns(name) set ordering: unordered
-    Then transaction commits; fails
+    Then <root-type>(<subtype-name>) get owns(name) set ordering: unordered; fails
     When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name-2>) get owns(surname) set ordering: unordered
-    Then transaction commits; fails
+    Then <root-type>(<subtype-name-2>) get owns(surname) set ordering: unordered; fails
     When connection open schema transaction for database: typedb
     When <root-type>(<supertype-name>) get owns(literal) set ordering: unordered
     When <root-type>(<subtype-name>) get owns(name) set ordering: unordered
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When <root-type>(<supertype-name>) get owns(literal) set ordering: unordered
-    When <root-type>(<subtype-name-2>) get owns(surname) set ordering: unordered
-    Then transaction commits; fails
+    Then <root-type>(<subtype-name-2>) get owns(surname) set ordering: unordered; fails
     When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get owns(name) set ordering: unordered
-    When <root-type>(<subtype-name-2>) get owns(surname) set ordering: unordered
-    Then transaction commits; fails
+    Then <root-type>(<subtype-name>) get owns(name) set ordering: unordered; fails
     When connection open schema transaction for database: typedb
     When <root-type>(<supertype-name>) get owns(literal) set ordering: unordered
     When <root-type>(<subtype-name>) get owns(name) set ordering: unordered
     When <root-type>(<subtype-name-2>) get owns(surname) set ordering: unordered
+    Then <root-type>(<supertype-name>) get owns(literal) get ordering: unordered
+    Then <root-type>(<subtype-name>) get owns(name) get ordering: unordered
+    Then <root-type>(<subtype-name-2>) get owns(surname) get ordering: unordered
     When transaction commits
     When connection open read transaction for database: typedb
-    When <root-type>(<supertype-name>) get owns(literal) get ordering: unordered
-    When <root-type>(<subtype-name>) get owns(name) get ordering: unordered
-    When <root-type>(<subtype-name-2>) get owns(surname) get ordering: unordered
+    Then <root-type>(<supertype-name>) get owns(literal) get ordering: unordered
+    Then <root-type>(<subtype-name>) get owns(name) get ordering: unordered
+    Then <root-type>(<subtype-name-2>) get owns(surname) get ordering: unordered
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | value-type    |
       | entity    | person         | customer     | subscriber     | decimal       |
@@ -1803,14 +1800,14 @@ Feature: Concept Owns
     Examples:
       | root-type | type-name   | annotation   | annotation-category |
       | entity    | person      | key          | key                 |
-      | entity    | person      | unique       | value               |
+      | entity    | person      | unique       | unique              |
 #      | entity    | person      | subkey(LABEL)    | subkey              |
 #      | entity    | person      | values("1", "2") | values              |
 #      | entity    | person      | range("1", "2")  | range               |
       | entity    | person      | card(1, 2)   | card                |
       | entity    | person      | regex("\S+") | regex               |
       | relation  | description | key          | key                 |
-      | relation  | description | unique       | value               |
+      | relation  | description | unique       | unique              |
 #      | relation  | description | subkey(LABEL)    | subkey              |
 #      | relation  | description | values("1", "2") | values              |
 #      | relation  | description | range("1", "2")  | range               |
@@ -1844,14 +1841,14 @@ Feature: Concept Owns
     Examples:
       | root-type | supertype-name | subtype-name | annotation   | annotation-category |
       | entity    | person         | customer     | key          | key                 |
-      | entity    | person         | customer     | unique       | value               |
+      | entity    | person         | customer     | unique       | unique              |
 #      | entity    | person         | customer     | subkey(LABEL)    | subkey              |
 #      | entity    | person         | customer     | values("1", "2") | values              |
 #      | entity    | person         | customer     | range("1", "2")  | range               |
       | entity    | person         | customer     | card(1, 2)   | card                |
       | entity    | person         | customer     | regex("\S+") | regex               |
       | relation  | description    | registration | key          | key                 |
-      | relation  | description    | registration | unique       | value               |
+      | relation  | description    | registration | unique       | unique              |
 #      | relation  | description    | registration | subkey(LABEL)    | subkey              |
 #      | relation  | description    | registration | values("1", "2") | values              |
 #      | relation  | description    | registration | range("1", "2")  | range               |
@@ -1897,14 +1894,14 @@ Feature: Concept Owns
     Examples:
       | root-type | supertype-name | subtype-name | annotation   | annotation-category |
       | entity    | person         | customer     | key          | key                 |
-      | entity    | person         | customer     | unique       | value               |
+      | entity    | person         | customer     | unique       | unique              |
 #      | entity    | person         | customer     | subkey(LABEL)    | subkey              |
 #      | entity    | person         | customer     | values("1", "2") | values              |
 #      | entity    | person         | customer     | range("1", "2")  | range               |
       | entity    | person         | customer     | card(1, 2)   | card                |
       | entity    | person         | customer     | regex("\S+") | regex               |
       | relation  | description    | registration | key          | key                 |
-      | relation  | description    | registration | unique       | value               |
+      | relation  | description    | registration | unique       | unique              |
 #      | relation  | description    | registration | subkey(LABEL)    | subkey              |
 #      | relation  | description    | registration | values("1", "2") | values              |
 #      | relation  | description    | registration | range("1", "2")  | range               |
@@ -1956,14 +1953,14 @@ Feature: Concept Owns
     Examples:
       | root-type | supertype-name | subtype-name | annotation   | annotation-category |
       | entity    | person         | customer     | key          | key                 |
-      | entity    | person         | customer     | unique       | value               |
+      | entity    | person         | customer     | unique       | unique              |
 #      | entity    | person         | customer     | subkey(LABEL)    | subkey              |
 #      | entity    | person         | customer     | values("1", "2") | values              |
 #      | entity    | person         | customer     | range("1", "2")  | range               |
       | entity    | person         | customer     | card(1, 2)   | card                |
       | entity    | person         | customer     | regex("\S+") | regex               |
       | relation  | description    | registration | key          | key                 |
-      | relation  | description    | registration | unique       | value               |
+      | relation  | description    | registration | unique       | unique              |
 #      | relation  | description    | registration | subkey(LABEL)    | subkey              |
 #      | relation  | description    | registration | values("1", "2") | values              |
 #      | relation  | description    | registration | range("1", "2")  | range               |
@@ -1997,7 +1994,7 @@ Feature: Concept Owns
     Then <root-type>(<supertype-name>) get owns(username) get annotations contain: @<annotation>
     Then <root-type>(<supertype-name>) get owns(username) get declared annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get owns(playername) get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns(playername) get declared annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(playername) get declared annotations do not contain: @<annotation>
     Then <root-type>(<subtype-name>) get owns(playername) unset annotation: @<annotation-category>; fails
     Then <root-type>(<supertype-name>) get owns(username) get annotations contain: @<annotation>
     Then <root-type>(<supertype-name>) get owns(username) get declared annotations contain: @<annotation>
@@ -2022,14 +2019,14 @@ Feature: Concept Owns
     Examples:
       | root-type | supertype-name | subtype-name | annotation   | annotation-category |
       | entity    | person         | customer     | key          | key                 |
-      | entity    | person         | customer     | unique       | value               |
+      | entity    | person         | customer     | unique       | unique              |
 #      | entity    | person         | customer     | subkey(LABEL)    | subkey              |
 #      | entity    | person         | customer     | values("1", "2") | values              |
 #      | entity    | person         | customer     | range("1", "2")  | range               |
       | entity    | person         | customer     | card(1, 2)   | card                |
       | entity    | person         | customer     | regex("\S+") | regex               |
       | relation  | description    | registration | key          | key                 |
-      | relation  | description    | registration | unique       | value               |
+      | relation  | description    | registration | unique       | unique              |
 #      | relation  | description    | registration | subkey(LABEL)    | subkey              |
 #      | relation  | description    | registration | values("1", "2") | values              |
 #      | relation  | description    | registration | range("1", "2")  | range               |
@@ -2121,21 +2118,21 @@ Feature: Concept Owns
       | name      |
       | rating    |
     Examples:
-      | root-type | supertype-name | subtype-name | subtype-name-2 | annotation       |
-      | entity    | person         | customer     | subscriber     | key              |
-      | entity    | person         | customer     | subscriber     | unique           |
-      | entity    | person         | customer     | subscriber     | subkey(LABEL)    |
-      | entity    | person         | customer     | subscriber     | values("1", "2") |
-      | entity    | person         | customer     | subscriber     | range("1", "2")  |
-      | entity    | person         | customer     | subscriber     | card(1, 2)       |
-      | entity    | person         | customer     | subscriber     | regex("\S+")     |
-      | relation  | description    | registration | profile        | key              |
-      | relation  | description    | registration | profile        | unique           |
-      | relation  | description    | registration | profile        | subkey(LABEL)    |
-      | relation  | description    | registration | profile        | values("1", "2") |
-      | relation  | description    | registration | profile        | range("1", "2")  |
-      | relation  | description    | registration | profile        | card(1, 2)       |
-      | relation  | description    | registration | profile        | regex("\S+")     |
+      | root-type | supertype-name | subtype-name | subtype-name-2 | annotation   |
+      | entity    | person         | customer     | subscriber     | key          |
+      | entity    | person         | customer     | subscriber     | unique       |
+#      | entity    | person         | customer     | subscriber     | subkey(LABEL)    |
+#      | entity    | person         | customer     | subscriber     | values("1", "2") |
+#      | entity    | person         | customer     | subscriber     | range("1", "2")  |
+      | entity    | person         | customer     | subscriber     | card(1, 2)   |
+      | entity    | person         | customer     | subscriber     | regex("\S+") |
+      | relation  | description    | registration | profile        | key          |
+      | relation  | description    | registration | profile        | unique       |
+#      | relation  | description    | registration | profile        | subkey(LABEL)    |
+#      | relation  | description    | registration | profile        | values("1", "2") |
+#      | relation  | description    | registration | profile        | range("1", "2")  |
+      | relation  | description    | registration | profile        | card(1, 2)   |
+      | relation  | description    | registration | profile        | regex("\S+") |
 
   Scenario Outline: <root-type> types can redeclare owns with @<annotation>s as owns with @<annotation>s
     When create attribute type: name
@@ -2351,8 +2348,8 @@ Feature: Concept Owns
       | relation  | description    | registration | regex("\S+") | string     |
 
   Scenario Outline: <root-type> types can redeclare inherited owns as owns with @<annotation>
-    When create attribute type: name
-    When attribute(name) set value type: <value-type>
+    When create attribute type: email
+    When attribute(email) set value type: <value-type>
     When <root-type>(<supertype-name>) set owns: email
     Then <root-type>(<supertype-name>) get owns overridden(email) does not exist
     When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
@@ -2417,7 +2414,6 @@ Feature: Concept Owns
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) set owns: email
     Then transaction commits; fails
-    Then transaction closes
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) set owns: email
     Then <root-type>(<subtype-name>) get owns(email) set annotation: @<annotation>
@@ -2542,8 +2538,10 @@ Feature: Concept Owns
   Scenario Outline: <root-type> subtypes can redeclare owns with @<annotation>s after it is unset from supertype
     When create attribute type: name
     When attribute(name) set value type: <value-type>
+    When attribute(name) set annotation: @abstract
     When create attribute type: surname
     When attribute(surname) set supertype: name
+    When <root-type>(<type-name>) set annotation: @abstract
     When <root-type>(<type-name>) set owns: name
     When <root-type>(<type-name>) get owns(name) set annotation: @<annotation>
     Then <root-type>(<type-name>) get owns(name) get annotations contain: @<annotation>
@@ -3062,13 +3060,17 @@ Feature: Concept Owns
 #    When connection open read transaction for database: typedb
 #    Then entity(person) get owns is empty
 #    Examples:
-#      | value-type | arg                   |
-#      | long       | LABEL                 |
-#      | string     | label                 |
-#      | boolean    | lAbEl_Of_FoRmaT       |
-#      | datetime   | l                     |
-#      | datetimetz | l2                    |
-#      | duration   | trydigits2723andafter |
+#      | value-type | arg                            |
+#      | long       | LABEL                          |
+#      | string     | label                          |
+#      | boolean    | lAbEl_Of_FoRmaT                |
+#      | datetime   | l                              |
+#      | datetimetz | l2                             |
+#      | duration   | trydigits2723andafter          |
+#      | long       | LABEL, LABEL2                  |
+#      | string     | label, label2                  |
+#      | boolean    | lAbEl_Of_FoRmaT, another_label |
+#      | datetime   | l, m, b, k, r, e2, ss, s, sss  |
 #
 #  Scenario Outline: Owns can set @subkey annotation for multiple attributes of <root-type> type
 #    When create attribute type: first-name
@@ -3298,6 +3300,24 @@ Feature: Concept Owns
       | double        |
       | decimal       |
       | custom-struct |
+
+  Scenario Outline: Owns cannot set @unique annotation for <value-type> as it is not keyable
+    When create attribute type: custom-attribute
+    When attribute(custom-attribute) set value type: <value-type>
+    When entity(person) set owns: custom-attribute
+    Then entity(person) get owns(custom-attribute) set annotation: @unique; fails
+    Then entity(person) get owns(custom-attribute) get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get owns(custom-attribute) get annotations is empty
+    Examples:
+      | value-type |
+      | long       |
+      | string     |
+      | boolean    |
+      | datetime   |
+      | datetimetz |
+      | duration   |
 
   Scenario Outline: Ordered owns can set @unique annotation for <value-type> value type and unset it
     When create attribute type: custom-attribute
@@ -4940,6 +4960,7 @@ Feature: Concept Owns
   Scenario: Owns cannot override inherited @regex annotation
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: string
+    When attribute(custom-attribute) set annotation: @abstract
     When entity(person) set owns: custom-attribute
     When entity(person) get owns(custom-attribute) set annotation: @regex("\S+")
     Then entity(person) get owns(custom-attribute) get annotations contain: @regex("\S+")
