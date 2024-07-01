@@ -17,7 +17,7 @@ Feature: Concept Relation Type and Role Type
 # relation type common
 ########################
 
-  # TODO: Unset override tests, unset supertype for relations while having overrides on its roles
+  # TODO: unset supertype for relations while having overrides on its roles -- schema validation
 
   Scenario: Root relation type cannot be deleted
     Then delete relation type: relation; fails
@@ -364,7 +364,10 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get declared roles contain:
       | fathership:father |
     Then relation(fathership) get declared roles do not contain:
-      | parentship:child |
+      | parentship:child  |
+      | parentship:parent |
+    Then relation(fathership) get roles do not contain:
+      | parentship:parent |
     When transaction commits
     When connection open schema transaction for database: typedb
     When create relation type: mothership
@@ -394,6 +397,79 @@ Feature: Concept Relation Type and Role Type
       | mothership:mother |
     Then relation(mothership) get declared roles do not contain:
       | parentship:child |
+
+  Scenario: Relation types can unset override of inherited role types
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: child
+    When create relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: father
+    When relation(fathership) get role(father) set override: parent
+    Then relation(fathership) get roles contain:
+      | fathership:father |
+      | parentship:child  |
+    Then relation(fathership) get declared roles contain:
+      | fathership:father |
+    Then relation(fathership) get declared roles do not contain:
+      | parentship:child |
+    Then relation(fathership) get roles do not contain:
+      | parentship:parent |
+      | parentship:child  |
+    When relation(fathership) get role(father) unset override: parent
+    Then relation(fathership) get roles contain:
+      | fathership:father |
+      | parentship:parent |
+      | parentship:child  |
+    Then relation(fathership) get declared roles contain:
+      | fathership:father |
+    Then relation(fathership) get declared roles do not contain:
+      | parentship:parent |
+      | parentship:child  |
+    When relation(fathership) get role(father) set override: parent
+    Then relation(fathership) get roles contain:
+      | fathership:father |
+      | parentship:child  |
+    Then relation(fathership) get declared roles contain:
+      | fathership:father |
+    Then relation(fathership) get declared roles do not contain:
+      | parentship:child |
+    Then relation(fathership) get roles do not contain:
+      | parentship:parent |
+      | parentship:child  |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) get roles contain:
+      | fathership:father |
+      | parentship:child  |
+    Then relation(fathership) get declared roles contain:
+      | fathership:father |
+    Then relation(fathership) get declared roles do not contain:
+      | parentship:child |
+    Then relation(fathership) get roles do not contain:
+      | parentship:parent |
+      | parentship:child  |
+    When relation(fathership) get role(father) unset override: parent
+    Then relation(fathership) get roles contain:
+      | fathership:father |
+      | parentship:parent |
+      | parentship:child  |
+    Then relation(fathership) get declared roles contain:
+      | fathership:father |
+    Then relation(fathership) get declared roles do not contain:
+      | parentship:parent |
+      | parentship:child  |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(fathership) get roles contain:
+      | fathership:father |
+      | parentship:parent |
+      | parentship:child  |
+    Then relation(fathership) get declared roles contain:
+      | fathership:father |
+    Then relation(fathership) get declared roles do not contain:
+      | parentship:parent |
+      | parentship:child  |
 
   Scenario: Relation types can override inherited related role types
     When create relation type: parentship
@@ -561,6 +637,28 @@ Feature: Concept Relation Type and Role Type
       | marriage:parentship |
       | marriage:person     |
       | marriage:name       |
+
+  Scenario: Relation types can override inherited roles multiple times
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When create relation type: split-parentship
+    When relation(split-parentship) set supertype: split-parentship
+    When relation(split-parentship) create role: father
+    When relation(split-parentship) get role(father) set override: parent
+    When relation(split-parentship) create role: mother
+    When relation(split-parentship) get role(mother) set override: parent
+    Then relation(split-parentship) get roles contain:
+      | split-parentship:father |
+      | split-parentship:mother |
+    Then relation(split-parentship) get roles do not contain:
+      | parentship:parent |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(split-parentship) get roles contain:
+      | split-parentship:father |
+      | split-parentship:mother |
+    Then relation(split-parentship) get roles do not contain:
+      | parentship:parent |
 
 ########################
 # @annotations common

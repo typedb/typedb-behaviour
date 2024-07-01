@@ -41,7 +41,7 @@ Feature: Concept Owns
 ########################
 # owns common
 ########################
-  # TODO: Unset override tests
+  # TODO: unset supertype for entity/relation while having overrides on its owns -- schema validation
   # TODO: Change override tests (We need to allow changing supertypes while having overrides, but fail at commit time if overrides are not changed)
   # TODO: Unset value type
   # TODO: "date" type
@@ -198,7 +198,7 @@ Feature: Concept Owns
     Then entity(player) get annotations contain: @abstract
     Then entity(player) get declared annotations contain: @abstract
     When transaction commits
-    When connection open read transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then entity(player) get owns contain:
       | name |
     Then entity(player) get annotations contain: @abstract
@@ -500,6 +500,91 @@ Feature: Concept Owns
       | relation  | description    | registration | duration      |
       | relation  | description    | registration | custom-struct |
 
+  Scenario Outline: <root-type> types can unset override of inherited owns
+    When create attribute type: email
+    When attribute(email) set value type: <value-type>
+    When attribute(email) set annotation: @abstract
+    When create attribute type: name
+    When attribute(name) set value type: <value-type>
+    When attribute(name) set annotation: @abstract
+    When create attribute type: work-email
+    When attribute(work-email) set value type: <value-type>
+    When attribute(work-email) set supertype: email
+    When <root-type>(<supertype-name>) set annotation: @abstract
+    When <root-type>(<supertype-name>) set owns: email
+    When <root-type>(<supertype-name>) set owns: name
+    When <root-type>(<subtype-name>) set owns: work-email
+    When <root-type>(<subtype-name>) get owns(work-email) set override: email
+    Then <root-type>(<subtype-name>) get owns overridden(work-email) get label: email
+    Then <root-type>(<subtype-name>) get owns contain:
+      | work-email |
+      | name       |
+    Then <root-type>(<subtype-name>) get declared owns contain:
+      | work-email |
+    Then <root-type>(<subtype-name>) get declared owns do not contain:
+      | name |
+    Then <root-type>(<subtype-name>) get owns do not contain:
+      | email |
+      | name  |
+    When <root-type>(<subtype-name>) get owns(work-email) unset override: email
+    Then <root-type>(<subtype-name>) get owns contain:
+      | work-email |
+      | email      |
+      | name       |
+    Then <root-type>(<subtype-name>) get declared owns contain:
+      | work-email |
+    Then <root-type>(<subtype-name>) get declared owns do not contain:
+      | email |
+      | name  |
+    When <root-type>(<subtype-name>) get owns(work-email) set override: email
+    Then <root-type>(<subtype-name>) get owns contain:
+      | work-email |
+      | name       |
+    Then <root-type>(<subtype-name>) get declared owns contain:
+      | work-email |
+    Then <root-type>(<subtype-name>) get declared owns do not contain:
+      | name |
+    Then <root-type>(<subtype-name>) get owns do not contain:
+      | email |
+      | name  |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<subtype-name>) get owns contain:
+      | work-email |
+      | name       |
+    Then <root-type>(<subtype-name>) get declared owns contain:
+      | work-email |
+    Then <root-type>(<subtype-name>) get declared owns do not contain:
+      | name |
+    Then <root-type>(<subtype-name>) get owns do not contain:
+      | email |
+      | name  |
+    When <root-type>(<subtype-name>) get owns(work-email) unset override: email
+    Then <root-type>(<subtype-name>) get owns contain:
+      | work-email |
+      | email      |
+      | name       |
+    Then <root-type>(<subtype-name>) get declared owns contain:
+      | work-email |
+    Then <root-type>(<subtype-name>) get declared owns do not contain:
+      | email |
+      | name  |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then <root-type>(<subtype-name>) get owns contain:
+      | work-email |
+      | email      |
+      | name       |
+    Then <root-type>(<subtype-name>) get declared owns contain:
+      | work-email |
+    Then <root-type>(<subtype-name>) get declared owns do not contain:
+      | email |
+      | name  |
+    Examples:
+      | root-type | supertype-name | subtype-name | value-type |
+      | entity    | person         | customer     | double     |
+      | relation  | description    | registration | long       |
+
   Scenario Outline: <root-type> types can unset not set owns
     When create attribute type: email
     When attribute(email) set value type: string
@@ -528,7 +613,8 @@ Feature: Concept Owns
     When <root-type>(<supertype-name>) set owns: name
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns(name) exists
+    Then <root-type>(<subtype-name>) get owns contain:
+      | name |
     Then <root-type>(<subtype-name>) set owns: name
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
@@ -581,11 +667,12 @@ Feature: Concept Owns
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name>) get owns(customer-name) set override: name
     Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get owns(customer-name) set override: name
-    When <root-type>(<subtype-name-2>) set owns: customer-name
-    When <root-type>(<subtype-name-2>) get owns(customer-name) set override: name
-    Then transaction commits; fails
+    # TODO: Make it only for typeql
+#    When connection open schema transaction for database: typedb
+#    When <root-type>(<subtype-name>) get owns(customer-name) set override: name
+#    When <root-type>(<subtype-name-2>) set owns: customer-name
+#    When <root-type>(<subtype-name-2>) get owns(customer-name) set override: name
+#    Then transaction commits; fails
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | value-type |
       | entity    | person         | customer     | subscriber     | boolean    |
@@ -644,6 +731,40 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get owns contain:
       | username |
     Then <root-type>(<subtype-name>) unset owns: username; fails
+    Examples:
+      | root-type | supertype-name | subtype-name | value-type |
+      | entity    | person         | customer     | string     |
+      | relation  | description    | registration | long       |
+
+  Scenario Outline: <root-type> types can override inherited owns multiple times
+    When create attribute type: name
+    When attribute(name) set value type: <value-type>
+    When attribute(name) set annotation: @abstract
+    When create attribute type: first-name
+    When attribute(first-name) set value type: <value-type>
+    When attribute(first-name) set supertype: name
+    When create attribute type: second-name
+    When attribute(second-name) set value type: <value-type>
+    When attribute(second-name) set supertype: name
+    When <root-type>(<supertype-name>) set owns: name
+    Then <root-type>(<supertype-name>) get owns contain:
+      | name |
+    When <root-type>(<subtype-name>) set owns: first-name
+    When <root-type>(<subtype-name>) set owns: second-name
+    When <root-type>(<subtype-name>) get owns(first-name) set override: name
+    When <root-type>(<subtype-name>) get owns(second-name) set override: name
+    Then <root-type>(<subtype-name>) get owns contain:
+      | first-name  |
+      | second-name |
+    Then <root-type>(<subtype-name>) get owns do not contain:
+      | name |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then <root-type>(<subtype-name>) get owns contain:
+      | first-name  |
+      | second-name |
+    Then <root-type>(<subtype-name>) get owns do not contain:
+      | name |
     Examples:
       | root-type | supertype-name | subtype-name | value-type |
       | entity    | person         | customer     | string     |
@@ -933,7 +1054,7 @@ Feature: Concept Owns
 #    When relation(parentship) create role: parent
 #    When relation(parentship) set owns: name
 #    When create entity type: person
-#    When entity(person) set plays: parentship:parent
+#    When entity(person) set plays: email
 #    When transaction commits
 #    When connection open write transaction for database: typedb
 #    When $e = entity(person) create new instance
@@ -968,7 +1089,7 @@ Feature: Concept Owns
 #    When relation(parentship) set owns: id
 #    When relation(parentship) get owns(id) set annotation: @key
 #    When create entity type: person
-#    When entity(person) set plays: parentship:parent
+#    When entity(person) set plays: email
 #    When entity(person) set owns: id
 #    When entity(person) get owns(id) set annotation: @key
 #    When transaction commits
@@ -1208,6 +1329,8 @@ Feature: Concept Owns
     Then <root-type>(<supertype-name>) get owns(email) get ordering: ordered
     When <root-type>(<subtype-name>) set annotation: @abstract
     When <root-type>(<subtype-name>) set owns: work-email
+    Then <root-type>(<subtype-name>) get owns(work-email) set override: email; fails
+    When <root-type>(<subtype-name>) get owns(work-email) set ordering: ordered
     When <root-type>(<subtype-name>) get owns(work-email) set override: email
     Then <root-type>(<subtype-name>) get owns overridden(work-email) get label: email
     Then <root-type>(<subtype-name>) get owns(work-email) get ordering: ordered
@@ -1364,279 +1487,6 @@ Feature: Concept Owns
       | root-type | supertype-name | subtype-name | value-type |
       | entity    | person         | customer     | string     |
       | relation  | description    | registration | long       |
-
-  Scenario Outline: <root-type> types can set ordered for inherited unordered ownerships
-    When create attribute type: email
-    When attribute(email) set value type: <value-type>
-    When attribute(email) set annotation: @abstract
-    When create attribute type: work-email
-    When attribute(work-email) set value type: <value-type>
-    When attribute(work-email) set supertype: email
-    When create attribute type: personal-email
-    When attribute(personal-email) set value type: <value-type>
-    When attribute(personal-email) set supertype: email
-    When <root-type>(<supertype-name>) set annotation: @abstract
-    When <root-type>(<supertype-name>) set owns: email
-    Then <root-type>(<supertype-name>) get owns(email) get ordering: unordered
-    When <root-type>(<subtype-name>) set owns: work-email
-    Then <root-type>(<subtype-name>) get owns(work-email) get ordering: unordered
-    When <root-type>(<subtype-name-2>) set owns: personal-email
-    Then <root-type>(<subtype-name-2>) get owns(personal-email) get ordering: unordered
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get owns(work-email) set ordering: ordered
-    When <root-type>(<subtype-name>) get owns(work-email) set override: email
-    When <root-type>(<subtype-name-2>) get owns(personal-email) set override: email
-    Then <root-type>(<subtype-name>) get owns(work-email) get supertype: email
-    Then <root-type>(<subtype-name-2>) get owns(personal-email) get supertype: email
-    When <root-type>(<subtype-name-2>) get owns(personal-email) set ordering: ordered
-    Then <root-type>(<supertype-name>) get owns(email) get ordering: unordered
-    Then <root-type>(<subtype-name>) get owns(work-email) get ordering: ordered
-    Then <root-type>(<subtype-name-2>) get owns(personal-email) get ordering: ordered
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(email) get ordering: unordered
-    Then <root-type>(<subtype-name>) get owns(work-email) get ordering: ordered
-    Then <root-type>(<subtype-name-2>) get owns(personal-email) get ordering: ordered
-    When <root-type>(<subtype-name>) get owns(work-email) set ordering: unordered
-    When <root-type>(<subtype-name-2>) get owns(personal-email) set ordering: unordered
-    Then <root-type>(<supertype-name>) get owns(email) get ordering: unordered
-    Then <root-type>(<subtype-name>) get owns(work-email) get ordering: unordered
-    Then <root-type>(<subtype-name-2>) get owns(personal-email) get ordering: unordered
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(email) get ordering: unordered
-    Then <root-type>(<subtype-name>) get owns(work-email) get ordering: unordered
-    Then <root-type>(<subtype-name-2>) get owns(personal-email) get ordering: unordered
-    Examples:
-      | root-type | supertype-name | subtype-name | subtype-name-2 | value-type    |
-      | entity    | person         | customer     | subscriber     | decimal       |
-      | relation  | description    | registration | profile        | custom-struct |
-
-  Scenario Outline: Unordered and ordered are propagated to subtypes of ownerships for <root-type> types unless overridden
-    When create attribute type: name
-    When attribute(name) set value type: <value-type>
-    When attribute(name) set annotation: @abstract
-    When create attribute type: email
-    When attribute(email) set value type: <value-type>
-    When attribute(email) set annotation: @abstract
-    When create attribute type: work-email
-    When attribute(work-email) set supertype: email
-    When create attribute type: first-name
-    When attribute(first-name) set supertype: name
-    When create attribute type: personal-email
-    When attribute(personal-email) set supertype: email
-    When create attribute type: surname
-    When attribute(surname) set supertype: name
-    When <root-type>(<supertype-name>) set annotation: @abstract
-    When <root-type>(<supertype-name>) set owns: name
-    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
-    When <root-type>(<supertype-name>) set owns: email
-    When <root-type>(<supertype-name>) get owns(email) set ordering: ordered
-    Then <root-type>(<supertype-name>) get owns(email) get ordering: ordered
-    When <root-type>(<subtype-name>) set owns: first-name
-    When <root-type>(<subtype-name-2>) set owns: surname
-    When <root-type>(<subtype-name>) set owns: work-email
-    When <root-type>(<subtype-name-2>) set owns: personal-email
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns(first-name) get ordering: unordered
-    Then <root-type>(<subtype-name-2>) get owns(surname) get ordering: unordered
-    Then <root-type>(<subtype-name>) get owns(work-email) get ordering: unordered
-    Then <root-type>(<subtype-name-2>) get owns(personal-email) get ordering: unordered
-    When <root-type>(<subtype-name>) get owns(first-name) set override: name
-    Then <root-type>(<subtype-name>) get owns(first-name) get ordering: unordered
-    When <root-type>(<subtype-name-2>) get owns(surname) set override: name
-    Then <root-type>(<subtype-name-2>) get owns(surname) get ordering: unordered
-    When <root-type>(<subtype-name>) get owns(work-email) set override: email
-    Then <root-type>(<subtype-name>) get owns(work-email) get ordering: ordered
-    When <root-type>(<subtype-name-2>) get owns(personal-email) set override: email
-    Then <root-type>(<subtype-name-2>) get owns(personal-email) get ordering: ordered
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns(first-name) get ordering: unordered
-    Then <root-type>(<subtype-name-2>) get owns(surname) get ordering: unordered
-    Then <root-type>(<subtype-name>) get owns(work-email) get ordering: ordered
-    Then <root-type>(<subtype-name-2>) get owns(personal-email) get ordering: ordered
-    When <root-type>(<subtype-name-2>) get owns(surname) set ordering: ordered
-    Then <root-type>(<subtype-name-2>) get owns(surname) get ordering: ordered
-    When <root-type>(<subtype-name-2>) get owns(personal-email) set ordering: ordered
-    Then <root-type>(<subtype-name-2>) get owns(personal-email) get ordering: ordered
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns(first-name) get ordering: unordered
-    Then <root-type>(<subtype-name-2>) get owns(surname) get ordering: unordered
-    Then <root-type>(<subtype-name>) get owns(work-email) get ordering: ordered
-    Then <root-type>(<subtype-name-2>) get owns(personal-email) get ordering: ordered
-    When <root-type>(<supertype-name>) get owns(name) set ordering: ordered
-    Then <root-type>(<subtype-name>) get owns(first-name) get ordering: ordered
-    Then <root-type>(<subtype-name-2>) get owns(surname) get ordering: ordered
-    When <root-type>(<supertype-name>) get owns(email) set ordering: unordered
-    Then <root-type>(<subtype-name>) get owns(first-name) get ordering: unordered
-    Then <root-type>(<subtype-name-2>) get owns(surname) get ordering: ordered
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns(first-name) get ordering: ordered
-    Then <root-type>(<subtype-name-2>) get owns(surname) get ordering: ordered
-    Then <root-type>(<subtype-name>) get owns(first-name) get ordering: unordered
-    Then <root-type>(<subtype-name-2>) get owns(surname) get ordering: ordered
-    Examples:
-      | root-type | supertype-name | subtype-name | subtype-name-2 | value-type |
-      | entity    | person         | customer     | subscriber     | datetime   |
-      | relation  | description    | registration | profile        | double     |
-
-  Scenario Outline: Ownership can set and unset ordering if it inherits unordered ownership for <root-type>
-    When create attribute type: name
-    When attribute(name) set value type: <value-type>
-    When <root-type>(<supertype-name>) set owns: name
-    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
-    Then <root-type>(<subtype-name>) get owns(name) get ordering: unordered
-    When <root-type>(<subtype-name>) get owns(name) set ordering: ordered
-    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
-    Then <root-type>(<subtype-name>) get owns(name) get ordering: ordered
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
-    Then <root-type>(<subtype-name>) get owns(name) get ordering: ordered
-    When <root-type>(<subtype-name>) get owns(name) set ordering: unordered
-    Then <root-type>(supertype-name>) get owns(name) get ordering: unordered
-    Then <root-type>(<subtype-name>) get owns(name) get ordering: unordered
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
-    Then <root-type>(<subtype-name>) get owns(name) get ordering: unordered
-    Examples:
-      | root-type | supertype-name | subtype-name | value-type |
-      | entity    | person         | customer     | decimal    |
-      | relation  | description    | registration | long       |
-
-  Scenario Outline: Ownership cannot set or unset ordering if it inherits ordered ownership for <root-type>
-    When create attribute type: name
-    When attribute(name) set value type: <value-type>
-    When <root-type>(<supertype-name>) set owns: name
-    When <root-type>(<supertype-name>) get owns(name) set ordering: ordered
-    Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
-    Then <root-type>(<subtype-name>) get owns(name) get ordering: ordered
-    When <root-type>(<subtype-name>) get owns(name) set ordering: ordered
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
-    Then <root-type>(<subtype-name>) get owns(name) get ordering: ordered
-    Then <root-type>(<subtype-name>) get owns(name) set ordering: unordered; fails
-    Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
-    Then <root-type>(<subtype-name>) get owns(name) get ordering: ordered
-    Then transaction commit
-    When connection open read transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
-    Then <root-type>(<subtype-name>) get owns(name) get ordering: ordered
-    Examples:
-      | root-type | supertype-name | subtype-name | value-type |
-      | entity    | person         | customer     | boolean    |
-      | relation  | description    | registration | datetimetz |
-
-  Scenario Outline: Ownership can set and unset ordering if it overrides unordered ownership for <root-type>
-    When create attribute type: name
-    When attribute(name) set value type: <value-type>
-    When attribute(name) set annotation: @abstract
-    When create attribute type: surname
-    When attribute(surname) set supertype: name
-    When <root-type>(<supertype-name>) set owns: name
-    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) set owns: surname
-    When <root-type>(<subtype-name>) get owns(surname) set override: name
-    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
-    Then <root-type>(<subtype-name>) get owns(surname) get ordering: unordered
-    When <root-type>(<subtype-name>) get owns(surname) set ordering: ordered
-    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
-    Then <root-type>(<subtype-name>) get owns(surname) get ordering: ordered
-    Then <root-type>(<subtype-name>) get owns(surname) get supertype: name
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
-    Then <root-type>(<subtype-name>) get owns(surname) get ordering: ordered
-    When <root-type>(<subtype-name>) get owns(surname) set ordering: unordered
-    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
-    Then <root-type>(<subtype-name>) get owns(surname) get ordering: unordered
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
-    Then <root-type>(<subtype-name>) get owns(surname) get ordering: unordered
-    When connection open schema transaction for database: typedb
-    When create attribute type: third-name
-    When attribute(third-name) set supertype: name
-    When <root-type>(<subtype-name-2>) set owns: third-name
-    When <root-type>(<subtype-name-2>) get owns(third-name) set ordering: ordered
-    When <root-type>(<subtype-name-2>) get owns(third-name) set override: name
-    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
-    Then <root-type>(<subtype-name-2>) get owns(third-name) get ordering: ordered
-    Then <root-type>(<subtype-name-2>) get owns(third-name) get supertype: name
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
-    Then <root-type>(<subtype-name-2>) get owns(third-name) get ordering: ordered
-    When <root-type>(<subtype-name-2>) get owns(third-name) set ordering: unordered
-    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
-    Then <root-type>(<subtype-name-2>) get owns(third-name) get ordering: unordered
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(name) get ordering: unordered
-    Then <root-type>(<subtype-name-2>) get owns(third-name) get ordering: unordered
-    Examples:
-      | root-type | supertype-name | subtype-name | subtype-name-2 | value-type    |
-      | entity    | person         | customer     | subscriber     | decimal       |
-      | relation  | description    | registration | profile        | custom-struct |
-
-  Scenario Outline: Ownership cannot set or unset ordering if it overrides ordered ownership for <root-type>
-    When create attribute type: name
-    When attribute(name) set value type: <value-type>
-    When attribute(name) set annotation: @abstract
-    When <root-type>(<supertype-name>) set owns: name
-    When <root-type>(<supertype-name>) get owns(name) set ordering: ordered
-    Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When create attribute type: surname
-    When attribute(surname) set supertype: name
-    When <root-type>(<subtype-name>) set owns: surname
-    When <root-type>(<subtype-name>) get owns(surname) set override: name
-    Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
-    Then <root-type>(<subtype-name>) get owns(surname) get ordering: ordered
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
-    Then <root-type>(<subtype-name>) get owns(surname) get ordering: ordered
-    When <root-type>(<subtype-name>) get owns(surname) set ordering: ordered
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
-    Then <root-type>(<subtype-name>) get owns(surname) get ordering: ordered
-    Then <root-type>(<subtype-name>) get owns(surname) set ordering: unordered; fails
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name-2>) set owns: third-name
-    When <root-type>(<subtype-name-2>) get owns(third-name) set ordering: ordered
-    When relation(third-nameship) get owns(third-name) set override: name
-    Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
-    Then <root-type>(<subtype-name-2>) get owns(third-name) get ordering: ordered
-    Then <root-type>(<subtype-name-2>) get owns(third-name) get supertype: name
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
-    Then <root-type>(<subtype-name-2>) get owns(third-name) get ordering: ordered
-    When <root-type>(<subtype-name-2>) get owns(third-name) set ordering: ordered
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
-    Then <root-type>(<subtype-name-2>) get owns(third-name) get ordering: ordered
-    Then <root-type>(<subtype-name-2>) get owns(third-name) set ordering: unordered; fails
-    Examples:
-      | root-type | supertype-name | subtype-name | subtype-name-2 | value-type    |
-      | entity    | person         | customer     | subscriber     | decimal       |
-      | relation  | description    | registration | profile        | custom-struct |
 
   Scenario Outline: Ownerships can set override only if ordering matches for <root-type>
     When create attribute type: other
@@ -5159,165 +5009,166 @@ Feature: Concept Owns
 # @key, @unique, @subkey, @values, @range, @card, @regex, @distinct
 ########################
 
-  Scenario Outline: Owns can set @<annotation-1> and @<annotation-2> together and unset it for scalar <value-type>
-    When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value type: <value-type>
-    When relation(description) set owns: custom-attribute
-    When relation(description) get owns(custom-attribute) set annotation: @<annotation-1>
-    When relation(description) get owns(custom-attribute) set annotation: @<annotation-2>
-    Then relation(description) get owns(custom-attribute) get annotations contain:
-      | @<annotation-1> |
-      | @<annotation-2> |
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(description) get owns(custom-attribute) get annotations contain:
-      | @<annotation-1> |
-      | @<annotation-2> |
-    When relation(description) get owns(custom-attribute) unset annotation: @<annotation-category-1>
-    Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-1>
-    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-2>
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-1>
-    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-2>
-    When relation(description) get owns(custom-attribute) set annotation: @<annotation-1>
-    When relation(description) get owns(custom-attribute) unset annotation: @<annotation-category-2>
-    Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-2>
-    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-1>
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-2>
-    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-1>
-    When relation(description) get owns(custom-attribute) unset annotation: @<annotation-category-1>
-    Then relation(description) get owns(custom-attribute) get annotations is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then relation(description) get owns(custom-attribute) get annotations is empty
-    Examples:
-    # TODO: Move to "cannot" test if something is wrong here.
-      | annotation-1                      | annotation-2       | annotation-category-1 | annotation-category-2 | value-type |
-      | key                               | subkey(L)          | key                   | subkey                | long       |
-      | key                               | values(1, 2)       | key                   | values                | double     |
-      | key                               | range(1.0, 2.0)    | key                   | range                 | decimal    |
-      | key                               | regex("s")         | key                   | regex                 | string     |
-      | subkey(L)                         | unique             | subkey                | unique                | duration   |
-      | subkey(L)                         | values(1, 2)       | subkey                | values                | long       |
-      | subkey(L)                         | range(false, true) | subkey                | range                 | boolean    |
-      | subkey(L)                         | card(0, 1)         | subkey                | card                  | long       |
-      | subkey(L)                         | regex("s")         | subkey                | regex                 | string     |
-      | unique                            | values(1, 2)       | unique                | values                | long       |
-      | unique                            | range(1.0, 2.0)    | unique                | range                 | decimal    |
-      | unique                            | card(0, 1)         | unique                | card                  | double     |
-      | unique                            | regex("s")         | unique                | regex                 | string     |
-      | values(2024-05-06+0100)           | card(0, 1)         | values                | card                  | datetimetz |
-      | range("2020-05-05", "2025-05-05") | card(0, 1)         | range                 | card                  | datetime   |
-      | card(0, 1)                        | regex("s")         | card                  | regex                 | string     |
-
-  Scenario Outline: Ordered ownership can set @<annotation-1> and @<annotation-2> together and unset it for <value-type> value type
-    When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value type: <value-type>
-    When relation(description) set owns: custom-attribute
-    When relation(description) get owns(custom-attribute) set ordering: ordered
-    When relation(description) get owns(custom-attribute) set annotation: @<annotation-1>
-    When relation(description) get owns(custom-attribute) set annotation: @<annotation-2>
-    Then relation(description) get owns(custom-attribute) get annotations contain:
-      | @<annotation-1> |
-      | @<annotation-2> |
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(description) get owns(custom-attribute) get annotations contain:
-      | @<annotation-1> |
-      | @<annotation-2> |
-    When relation(description) get owns(custom-attribute) unset annotation: @<annotation-category-1>
-    Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-1>
-    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-2>
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-1>
-    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-2>
-    When relation(description) get owns(custom-attribute) set annotation: @<annotation-1>
-    When relation(description) get owns(custom-attribute) unset annotation: @<annotation-category-2>
-    Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-2>
-    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-1>
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-2>
-    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-1>
-    When relation(description) get owns(custom-attribute) unset annotation: @<annotation-category-1>
-    Then relation(description) get owns(custom-attribute) get annotations is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then relation(description) get owns(custom-attribute) get annotations is empty
-    Examples:
-    # TODO: Move to "cannot" test if something is wrong here.
-      | annotation-1                      | annotation-2    | annotation-category-1 | annotation-category-2 | value-type    |
-      | unique                            | values(1, 2)    | unique                | values                | long          |
-      | unique                            | range(1.0, 2.0) | unique                | range                 | decimal       |
-      | unique                            | card(0, 1)      | unique                | card                  | double        |
-      | unique                            | regex("s")      | unique                | regex                 | string        |
-      | unique                            | distinct        | unique                | distinct              | string        |
-      | values(2024-05-06+0100)           | card(0, 1)      | values                | card                  | datetimetz    |
-      | values(1, 2)                      | distinct        | values                | distinct              | long          |
-      | range("2020-05-05", "2025-05-05") | card(0, 1)      | range                 | card                  | datetime      |
-      | range("2020-05-05", "2025-05-05") | distinct        | range                 | distinct              | datetime      |
-      | card(0, 1)                        | regex("s")      | card                  | regex                 | string        |
-      | card(0, 1)                        | distinct        | card                  | distinct              | custom-struct |
-      | regex("s")                        | distinct        | regex                 | distinct              | string        |
-
-  Scenario Outline: Owns cannot set @<annotation-1> and @<annotation-2> together for scalar <value-type>
-    When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value type: <value-type>
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When relation(description) set owns: custom-attribute
-    When relation(description) get owns(custom-attribute) set annotation: @<annotation-1>
-    Then relation(description) get owns(custom-attribute) set annotation: @<annotation-2>; fails
-    When connection open schema transaction for database: typedb
-    When relation(description) set owns: custom-attribute
-    When relation(description) get owns(custom-attribute) set annotation: @<annotation-2>
-    Then relation(description) get owns(custom-attribute) set annotation: @<annotation-1>; fails
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-2>
-    Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-1>
-    Examples:
-    # TODO: Move to "can" test if something is wrong here.
-      | annotation-1     | annotation-2    | value-type |
-      # TODO: Key + unique = key in 2.x, but it would be good to restrict it for explicitness.
-      | key              | unique          | long       |
-      # TODO: key + card is similar to key + unique. I'd just restrict it.
-      | key              | card(0, 1)      | long       |
-      # TODO: If we allow values + range, write a test to check args compatibility!
-      | values(1.0, 2.0) | range(1.0, 2.0) | double     |
-      # TODO: If we allow values + regex, write a test to check args compatibility!
-      | values("str")    | regex("s")      | string     |
-      # TODO: If we allow range + regex, write a test to check args compatibility!
-      | range("1", "2")  | regex("s")      | string     |
-
-  Scenario Outline: Ordered ownership cannot set @<annotation-1> and @<annotation-2> together for <value-type> value type
-    When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value type: <value-type>
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When relation(description) set owns: custom-attribute
-    When relation(description) get owns(custom-attribute) set ordering: ordered
-    When relation(description) get owns(custom-attribute) set annotation: @<annotation-1>
-    Then relation(description) get owns(custom-attribute) set annotation: @<annotation-2>; fails
-    When connection open schema transaction for database: typedb
-    When relation(description) set owns: custom-attribute
-    When relation(description) get owns(custom-attribute) set ordering: ordered
-    When relation(description) get owns(custom-attribute) set annotation: @<annotation-2>
-    Then relation(description) get owns(custom-attribute) set annotation: @<annotation-1>; fails
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-2>
-    Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-1>
-    Examples:
-    # TODO: Move to "can" test if something is wrong here.
-      | annotation-1     | annotation-2    | value-type |
-      # TODO: If we allow values + range, write a test to check args compatibility!
-      | values(1.0, 2.0) | range(1.0, 2.0) | double     |
-      # TODO: If we allow values + regex, write a test to check args compatibility!
-      | values("str")    | regex("s")      | string     |
-      # TODO: If we allow range + regex, write a test to check args compatibility!
-      | range("1", "2")  | regex("s")      | string     |
+  # TODO: @values and @range are not implemented, skip these tests for now
+#  Scenario Outline: Owns can set @<annotation-1> and @<annotation-2> together and unset it for scalar <value-type>
+#    When create attribute type: custom-attribute
+#    When attribute(custom-attribute) set value type: <value-type>
+#    When relation(description) set owns: custom-attribute
+#    When relation(description) get owns(custom-attribute) set annotation: @<annotation-1>
+#    When relation(description) get owns(custom-attribute) set annotation: @<annotation-2>
+#    Then relation(description) get owns(custom-attribute) get annotations contain:
+#      | @<annotation-1> |
+#      | @<annotation-2> |
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then relation(description) get owns(custom-attribute) get annotations contain:
+#      | @<annotation-1> |
+#      | @<annotation-2> |
+#    When relation(description) get owns(custom-attribute) unset annotation: @<annotation-category-1>
+#    Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-1>
+#    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-2>
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-1>
+#    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-2>
+#    When relation(description) get owns(custom-attribute) set annotation: @<annotation-1>
+#    When relation(description) get owns(custom-attribute) unset annotation: @<annotation-category-2>
+#    Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-2>
+#    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-1>
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-2>
+#    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-1>
+#    When relation(description) get owns(custom-attribute) unset annotation: @<annotation-category-1>
+#    Then relation(description) get owns(custom-attribute) get annotations is empty
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then relation(description) get owns(custom-attribute) get annotations is empty
+#    Examples:
+#    # TODO: Move to "cannot" test if something is wrong here.
+#      | annotation-1                      | annotation-2       | annotation-category-1 | annotation-category-2 | value-type |
+#      | key                               | subkey(L)          | key                   | subkey                | long       |
+#      | key                               | values(1, 2)       | key                   | values                | double     |
+#      | key                               | range(1.0, 2.0)    | key                   | range                 | decimal    |
+#      | key                               | regex("s")         | key                   | regex                 | string     |
+#      | subkey(L)                         | unique             | subkey                | unique                | duration   |
+#      | subkey(L)                         | values(1, 2)       | subkey                | values                | long       |
+#      | subkey(L)                         | range(false, true) | subkey                | range                 | boolean    |
+#      | subkey(L)                         | card(0, 1)         | subkey                | card                  | long       |
+#      | subkey(L)                         | regex("s")         | subkey                | regex                 | string     |
+#      | unique                            | values(1, 2)       | unique                | values                | long       |
+#      | unique                            | range(1.0, 2.0)    | unique                | range                 | decimal    |
+#      | unique                            | card(0, 1)         | unique                | card                  | double     |
+#      | unique                            | regex("s")         | unique                | regex                 | string     |
+#      | values(2024-05-06+0100)           | card(0, 1)         | values                | card                  | datetimetz |
+#      | range("2020-05-05", "2025-05-05") | card(0, 1)         | range                 | card                  | datetime   |
+#      | card(0, 1)                        | regex("s")         | card                  | regex                 | string     |
+#
+#  Scenario Outline: Ordered ownership can set @<annotation-1> and @<annotation-2> together and unset it for <value-type> value type
+#    When create attribute type: custom-attribute
+#    When attribute(custom-attribute) set value type: <value-type>
+#    When relation(description) set owns: custom-attribute
+#    When relation(description) get owns(custom-attribute) set ordering: ordered
+#    When relation(description) get owns(custom-attribute) set annotation: @<annotation-1>
+#    When relation(description) get owns(custom-attribute) set annotation: @<annotation-2>
+#    Then relation(description) get owns(custom-attribute) get annotations contain:
+#      | @<annotation-1> |
+#      | @<annotation-2> |
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then relation(description) get owns(custom-attribute) get annotations contain:
+#      | @<annotation-1> |
+#      | @<annotation-2> |
+#    When relation(description) get owns(custom-attribute) unset annotation: @<annotation-category-1>
+#    Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-1>
+#    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-2>
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-1>
+#    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-2>
+#    When relation(description) get owns(custom-attribute) set annotation: @<annotation-1>
+#    When relation(description) get owns(custom-attribute) unset annotation: @<annotation-category-2>
+#    Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-2>
+#    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-1>
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-2>
+#    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-1>
+#    When relation(description) get owns(custom-attribute) unset annotation: @<annotation-category-1>
+#    Then relation(description) get owns(custom-attribute) get annotations is empty
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then relation(description) get owns(custom-attribute) get annotations is empty
+#    Examples:
+#    # TODO: Move to "cannot" test if something is wrong here.
+#      | annotation-1                      | annotation-2    | annotation-category-1 | annotation-category-2 | value-type    |
+#      | unique                            | values(1, 2)    | unique                | values                | long          |
+#      | unique                            | range(1.0, 2.0) | unique                | range                 | decimal       |
+#      | unique                            | card(0, 1)      | unique                | card                  | double        |
+#      | unique                            | regex("s")      | unique                | regex                 | string        |
+#      | unique                            | distinct        | unique                | distinct              | string        |
+#      | values(2024-05-06+0100)           | card(0, 1)      | values                | card                  | datetimetz    |
+#      | values(1, 2)                      | distinct        | values                | distinct              | long          |
+#      | range("2020-05-05", "2025-05-05") | card(0, 1)      | range                 | card                  | datetime      |
+#      | range("2020-05-05", "2025-05-05") | distinct        | range                 | distinct              | datetime      |
+#      | card(0, 1)                        | regex("s")      | card                  | regex                 | string        |
+#      | card(0, 1)                        | distinct        | card                  | distinct              | custom-struct |
+#      | regex("s")                        | distinct        | regex                 | distinct              | string        |
+#
+#  Scenario Outline: Owns cannot set @<annotation-1> and @<annotation-2> together for scalar <value-type>
+#    When create attribute type: custom-attribute
+#    When attribute(custom-attribute) set value type: <value-type>
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When relation(description) set owns: custom-attribute
+#    When relation(description) get owns(custom-attribute) set annotation: @<annotation-1>
+#    Then relation(description) get owns(custom-attribute) set annotation: @<annotation-2>; fails
+#    When connection open schema transaction for database: typedb
+#    When relation(description) set owns: custom-attribute
+#    When relation(description) get owns(custom-attribute) set annotation: @<annotation-2>
+#    Then relation(description) get owns(custom-attribute) set annotation: @<annotation-1>; fails
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-2>
+#    Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-1>
+#    Examples:
+#    # TODO: Move to "can" test if something is wrong here.
+#      | annotation-1     | annotation-2    | value-type |
+#      # TODO: Key + unique = key in 2.x, but it would be good to restrict it for explicitness.
+#      | key              | unique          | long       |
+#      # TODO: key + card is similar to key + unique. I'd just restrict it.
+#      | key              | card(0, 1)      | long       |
+#      # TODO: If we allow values + range, write a test to check args compatibility!
+#      | values(1.0, 2.0) | range(1.0, 2.0) | double     |
+#      # TODO: If we allow values + regex, write a test to check args compatibility!
+#      | values("str")    | regex("s")      | string     |
+#      # TODO: If we allow range + regex, write a test to check args compatibility!
+#      | range("1", "2")  | regex("s")      | string     |
+#
+#  Scenario Outline: Ordered ownership cannot set @<annotation-1> and @<annotation-2> together for <value-type> value type
+#    When create attribute type: custom-attribute
+#    When attribute(custom-attribute) set value type: <value-type>
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When relation(description) set owns: custom-attribute
+#    When relation(description) get owns(custom-attribute) set ordering: ordered
+#    When relation(description) get owns(custom-attribute) set annotation: @<annotation-1>
+#    Then relation(description) get owns(custom-attribute) set annotation: @<annotation-2>; fails
+#    When connection open schema transaction for database: typedb
+#    When relation(description) set owns: custom-attribute
+#    When relation(description) get owns(custom-attribute) set ordering: ordered
+#    When relation(description) get owns(custom-attribute) set annotation: @<annotation-2>
+#    Then relation(description) get owns(custom-attribute) set annotation: @<annotation-1>; fails
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-2>
+#    Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-1>
+#    Examples:
+#    # TODO: Move to "can" test if something is wrong here.
+#      | annotation-1     | annotation-2    | value-type |
+#      # TODO: If we allow values + range, write a test to check args compatibility!
+#      | values(1.0, 2.0) | range(1.0, 2.0) | double     |
+#      # TODO: If we allow values + regex, write a test to check args compatibility!
+#      | values("str")    | regex("s")      | string     |
+#      # TODO: If we allow range + regex, write a test to check args compatibility!
+#      | range("1", "2")  | regex("s")      | string     |

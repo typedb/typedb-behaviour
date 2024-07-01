@@ -33,7 +33,7 @@ Feature: Concept Plays
 ########################
 # plays common
 ########################
-  # TODO: Unset override tests
+  # TODO: unset supertype for entity/relation while having overrides on its plays -- schema validation
   # TODO: Change override tests (We need to allow changing supertypes while having overrides, but fail at commit time if overrides are not changed)
 
   Scenario: Entity types can play role types
@@ -807,6 +807,143 @@ Feature: Concept Plays
       | entity    | person         | customer     |
       | relation  | description    | registration |
 
+  Scenario Outline: <root-type> types cannot unset inherited plays
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When <root-type>(<supertype-name>) set plays: parentship:parent
+    Then <root-type>(<supertype-name>) get plays contain:
+      | parentship:parent |
+    Then <root-type>(<subtype-name>) get plays contain:
+      | parentship:parent |
+    Then <root-type>(<subtype-name>) unset plays: parentship:parent; fails
+    Then <root-type>(<subtype-name>) get plays contain:
+      | parentship:parent |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<subtype-name>) get plays contain:
+      | parentship:parent |
+    Then <root-type>(<subtype-name>) unset plays: parentship:parent; fails
+    Examples:
+      | root-type | supertype-name | subtype-name |
+      | entity    | person         | customer     |
+      | relation  | description    | registration |
+
+  Scenario Outline: <root-type> types can override inherited plays multiple times
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When create relation type: fathership
+    When relation(fatherhsip) set supertype: parentship
+    When relation(fatherhsip) create role: father
+    When relation(fatherhsip) get role(father) set override: parent
+    When create relation type: mothership
+    When relation(mothership) set supertype: parentship
+    When relation(mothership) create role: mother
+    When relation(mothership) get role(mother) set override: parent
+    When <root-type>(<supertype-name>) set plays: parentship:parent
+    Then <root-type>(<supertype-name>) get plays contain:
+      | parentship:parent |
+    When <root-type>(<subtype-name>) set plays: fathership:father
+    When <root-type>(<subtype-name>) set plays: mothership:mother
+    When <root-type>(<subtype-name>) get plays(fathership:father) set override: parentship:parent
+    When <root-type>(<subtype-name>) get plays(mothership:mother) set override: parentship:parent
+    Then <root-type>(<subtype-name>) get plays contain:
+      | fathership:father |
+      | mothership:mother |
+    Then <root-type>(<subtype-name>) get plays do not contain:
+      | parentship:parent |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then <root-type>(<subtype-name>) get plays contain:
+      | fathership:father |
+      | mothership:mother |
+    Then <root-type>(<subtype-name>) get plays do not contain:
+      | parentship:parent |
+    Examples:
+      | root-type | supertype-name | subtype-name |
+      | entity    | person         | customer     |
+      | relation  | description    | registration |
+
+  Scenario Outline: <root-type> types can unset override of inherited plays
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: child
+    When create relation type: fathership
+    When relation(fatherhsip) set supertype: parentship
+    When relation(fatherhsip) create role: father
+    When relation(fatherhsip) get role(father) set override: parent
+    When <root-type>(<supertype-name>) set plays: parentship:parent
+    When <root-type>(<supertype-name>) set plays: parentship:child
+    When <root-type>(<subtype-name>) set plays: fathership:father
+    When <root-type>(<subtype-name>) get plays(fathership:father) set override: parentship:parent
+    Then <root-type>(<subtype-name>) get plays contain:
+      | fathership:father |
+      | parentship:child  |
+    Then <root-type>(<subtype-name>) get declared plays contain:
+      | fathership:father |
+    Then <root-type>(<subtype-name>) get declared plays do not contain:
+      | parentship:child |
+    Then <root-type>(<subtype-name>) get plays do not contain:
+      | parentship:parent |
+      | parentship:child  |
+    When <root-type>(<subtype-name>) get plays(fathership:father) unset override: parentship:parent
+    Then <root-type>(<subtype-name>) get plays contain:
+      | fathership:father |
+      | parentship:parent |
+      | parentship:child  |
+    Then <root-type>(<subtype-name>) get declared plays contain:
+      | fathership:father |
+    Then <root-type>(<subtype-name>) get declared plays do not contain:
+      | parentship:parent |
+      | parentship:child  |
+    When <root-type>(<subtype-name>) get plays(fathership:father) set override: parentship:parent
+    Then <root-type>(<subtype-name>) get plays contain:
+      | fathership:father |
+      | parentship:child  |
+    Then <root-type>(<subtype-name>) get declared plays contain:
+      | fathership:father |
+    Then <root-type>(<subtype-name>) get declared plays do not contain:
+      | parentship:child |
+    Then <root-type>(<subtype-name>) get plays do not contain:
+      | parentship:parent |
+      | parentship:child  |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<subtype-name>) get plays contain:
+      | fathership:father |
+      | parentship:child  |
+    Then <root-type>(<subtype-name>) get declared plays contain:
+      | fathership:father |
+    Then <root-type>(<subtype-name>) get declared plays do not contain:
+      | parentship:child |
+    Then <root-type>(<subtype-name>) get plays do not contain:
+      | parentship:parent |
+      | parentship:child  |
+    When <root-type>(<subtype-name>) get plays(fathership:father) unset override: parentship:parent
+    Then <root-type>(<subtype-name>) get plays contain:
+      | fathership:father |
+      | parentship:parent |
+      | parentship:child  |
+    Then <root-type>(<subtype-name>) get declared plays contain:
+      | fathership:father |
+    Then <root-type>(<subtype-name>) get declared plays do not contain:
+      | parentship:parent |
+      | parentship:child  |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then <root-type>(<subtype-name>) get plays contain:
+      | fathership:father |
+      | parentship:parent |
+      | parentship:child  |
+    Then <root-type>(<subtype-name>) get declared plays contain:
+      | fathership:father |
+    Then <root-type>(<subtype-name>) get declared plays do not contain:
+      | parentship:parent |
+      | parentship:child  |
+    Examples:
+      | root-type | supertype-name | subtype-name |
+      | entity    | person         | customer     |
+      | relation  | description    | registration |
+
 ########################
 # plays from a list
 ########################
@@ -1138,6 +1275,66 @@ Feature: Concept Plays
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name>) set plays: fathership:father
     When <root-type>(<subtype-name>) get plays(fathership:father) set override: parentship:parent
+    Examples:
+      | root-type | supertype-name | subtype-name |
+      | entity    | person         | customer     |
+      | relation  | description    | registration |
+
+  Scenario Outline: <root-type> types cannot unset inherited plays of ordered roles
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) get role(parent) set ordering: ordered
+    When <root-type>(<supertype-name>) set plays: parentship:parent
+    Then <root-type>(<supertype-name>) get plays contain:
+      | parentship:parent |
+    Then <root-type>(<subtype-name>) get plays contain:
+      | parentship:parent |
+    Then <root-type>(<subtype-name>) unset plays: parentship:parent; fails
+    Then <root-type>(<subtype-name>) get plays contain:
+      | parentship:parent |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<subtype-name>) get plays contain:
+      | parentship:parent |
+    Then <root-type>(<subtype-name>) unset plays: parentship:parent; fails
+    Examples:
+      | root-type | supertype-name | subtype-name |
+      | entity    | person         | customer     |
+      | relation  | description    | registration |
+
+  Scenario Outline: <root-type> types can override inherited plays multiple times of ordered role
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) get role(parent) set ordering: ordered
+    When create relation type: fathership
+    When relation(fatherhsip) set supertype: parentship
+    When relation(fatherhsip) create role: father
+    When relation(fathership) get role(father) set ordering: ordered
+    When relation(fatherhsip) get role(father) set override: parent
+    When create relation type: mothership
+    When relation(mothership) set supertype: parentship
+    When relation(mothership) create role: mother
+    When relation(mothership) get role(mother) set ordering: ordered
+    When relation(mothership) get role(mother) set override: parent
+    When <root-type>(<supertype-name>) set plays: parentship:parent
+    Then <root-type>(<supertype-name>) get plays contain:
+      | parentship:parent |
+    When <root-type>(<subtype-name>) set plays: fathership:father
+    When <root-type>(<subtype-name>) set plays: mothership:mother
+    When <root-type>(<subtype-name>) get plays(fathership:father) set override: parentship:parent
+    When <root-type>(<subtype-name>) get plays(mothership:mother) set override: parentship:parent
+    Then <root-type>(<subtype-name>) get plays contain:
+      | fathership:father |
+      | mothership:mother |
+    Then <root-type>(<subtype-name>) get plays do not contain:
+      | parentship:parent |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then <root-type>(<subtype-name>) get plays contain:
+      | fathership:father |
+      | mothership:mother |
+    Then <root-type>(<subtype-name>) get plays do not contain:
+      | parentship:parent |
     Examples:
       | root-type | supertype-name | subtype-name |
       | entity    | person         | customer     |
