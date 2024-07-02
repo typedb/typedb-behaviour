@@ -3969,6 +3969,99 @@ Feature: Concept Owns
 #      | datetime   | 2024-06-04, 2024-06-05, 2024-06-06                                           | 2020-06-04, 2020-06-06   |
 #      | datetimetz | 2024-06-04+0010, 2024-06-04 Asia/Kathmandu, 2024-06-05+0010, 2024-06-05+0100 | 2024-06-04 Europe/London |
 #      | duration   | P6M, P1Y, P1Y1M, P1Y2M, P1Y3M, P1Y4M, P1Y6M                                  | P3M, P1Y3M, P1Y4M, P1Y6M |
+#
+#  Scenario Outline: Values can be narrowed for the same attribute for <root-type>'s owns
+#    When create attribute type: name
+#    When attribute(name) set value type: long
+#    When <root-type>(<supertype-name>) set owns: name
+#    When <root-type>(<supertype-name>) get owns(name) set annotation: @values(0, 1, 2, 3, 4, 5)
+#    When <root-type>(<subtype-name>) set supertype: <supertype-name>
+#    When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
+#    When <root-type>(<subtype-name>) set owns: name
+#    When <root-type>(<subtype-name>) get owns(name) set override: name
+#    When <root-type>(<subtype-name-2>) set owns: name
+#    When <root-type>(<subtype-name-2>) get owns(name) set override: name
+#    Then <root-type>(<supertype-name>) get owns(name) get annotations contain: @values(0, 1, 2, 3, 4, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get annotations contain: @values(0, 1, 2, 3, 4, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @values(0, 1, 2, 3, 4, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @values(0, 1, 2, 3, 4, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @values(0, 1, 2, 3, 4, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @values(0, 1, 2, 3, 4, 5)
+#    When <root-type>(<subtype-name>) get owns(name) set annotation: @values(2, 3, 4, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get annotations contain: @values(0, 1, 2, 3, 4, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @values(0, 1, 2, 3, 4, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @values(0, 1, 2, 3, 4, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @values(0, 1, 2, 3, 4, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @values(0, 1, 2, 3, 4, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @values(0, 1, 2, 3, 4, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @values(2, 3, 4, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get annotations contain: @values(2, 3, 4, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @values(2, 3, 4, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @values(2, 3, 4, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @values(2, 3, 4, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @values(2, 3, 4, 5)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then <root-type>(<supertype-name>) get owns(name) get annotations contain: @values(0, 1, 2, 3, 4, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @values(0, 1, 2, 3, 4, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @values(0, 1, 2, 3, 4, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @values(0, 1, 2, 3, 4, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @values(0, 1, 2, 3, 4, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @values(0, 1, 2, 3, 4, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @values(2, 3, 4, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get annotations contain: @values(2, 3, 4, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @values(2, 3, 4, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @values(2, 3, 4, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @values(2, 3, 4, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @values(2, 3, 4, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @values(1, 2, 3); fails
+#    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @values(0, 2, 3); fails
+#    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @values(0, 1, 2, 3, 4, 5); fails
+#    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @values(2, 3, 4, 5, 6); fails
+#    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @values(1); fails
+#    When <root-type>(<subtype-name-2>) get owns(name) set annotation: @values(1, 3)
+#    Then <root-type>(<supertype-name>) get owns(name) get annotations contain: @values(0, 1, 2, 3, 4, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @values(0, 1, 2, 3, 4, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @values(0, 1, 2, 3, 4, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @values(0, 1, 2, 3, 4, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @values(0, 1, 2, 3, 4, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @values(0, 1, 2, 3, 4, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @values(2, 3, 4, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get annotations contain: @values(2, 3, 4, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @values(2, 3, 4, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @values(2, 3, 4, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @values(2, 3, 4, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @values(2, 3, 4, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @values(1, 3)
+#    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @values(1, 3)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @values(1, 3)
+#    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @values(1, 3)
+#    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @values(1, 3)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @values(1, 3)
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then <root-type>(<supertype-name>) get owns(name) get annotations contain: @values(0, 1, 2, 3, 4, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @values(0, 1, 2, 3, 4, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @values(0, 1, 2, 3, 4, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @values(0, 1, 2, 3, 4, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @values(0, 1, 2, 3, 4, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @values(0, 1, 2, 3, 4, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @values(2, 3, 4, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get annotations contain: @values(2, 3, 4, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @values(2, 3, 4, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @values(2, 3, 4, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @values(2, 3, 4, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @values(2, 3, 4, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @values(1, 3)
+#    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @values(1, 3)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @values(1, 3)
+#    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @values(1, 3)
+#    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @values(1, 3)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @values(1, 3)
+#    Examples:
+#      | root-type | supertype-name | subtype-name | subtype-name-2 |
+#      | entity    | person         | customer     | subscriber     |
+#      | relation  | description    | registration | profile        |
 
 ########################
 # @range
@@ -4349,6 +4442,99 @@ Feature: Concept Owns
 #      | datetime   | 2024-06-04, 2024-06-05           | 2023-06-04, 2024-06-04T12:00:00           |
 #      | datetimetz | 2024-06-04+0010, 2024-06-05+0010 | 2024-06-04+0010, 2024-06-05T01:00:00+0010 |
 #      | duration   | P6M, P1Y                         | P8M, P1Y1D                                |
+#
+#  Scenario Outline: Range can be narrowed for the same attribute for <root-type>'s owns
+#    When create attribute type: name
+#    When attribute(name) set value type: long
+#    When <root-type>(<supertype-name>) set owns: name
+#    When <root-type>(<supertype-name>) get owns(name) set annotation: @range(0, 5)
+#    When <root-type>(<subtype-name>) set supertype: <supertype-name>
+#    When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
+#    When <root-type>(<subtype-name>) set owns: name
+#    When <root-type>(<subtype-name>) get owns(name) set override: name
+#    When <root-type>(<subtype-name-2>) set owns: name
+#    When <root-type>(<subtype-name-2>) get owns(name) set override: name
+#    Then <root-type>(<supertype-name>) get owns(name) get annotations contain: @range(0, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get annotations contain: @range(0, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @range(0, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @range(0, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @range(0, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @range(0, 5)
+#    When <root-type>(<subtype-name>) get owns(name) set annotation: @values(2, 3, 4, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get annotations contain: @range(0, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @range(0, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @range(0, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @range(0, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @range(0, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @range(0, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @range(2, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get annotations contain: @range(2, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @range(2, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @range(2, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @range(2, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @range(2, 5)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then <root-type>(<supertype-name>) get owns(name) get annotations contain: @range(0, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @range(0, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @range(0, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @range(0, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @range(0, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @range(0, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @range(2, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get annotations contain: @range(2, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @range(2, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @range(2, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @range(2, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @range(2, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @range(1, 3); fails
+#    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @range(0, 3); fails
+#    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @range(0, 5); fails
+#    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @range(2, 6); fails
+#    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @range(0, 1); fails
+#    When <root-type>(<subtype-name-2>) get owns(name) set annotation: @range(1, 3)
+#    Then <root-type>(<supertype-name>) get owns(name) get annotations contain: @range(0, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @range(0, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @range(0, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @range(0, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @range(0, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @range(0, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @range(2, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get annotations contain: @range(2, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @range(2, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @range(2, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @range(2, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @range(2, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @range(1, 3)
+#    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @range(1, 3)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @range(1, 3)
+#    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @range(1, 3)
+#    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @range(1, 3)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @range(1, 3)
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then <root-type>(<supertype-name>) get owns(name) get annotations contain: @range(0, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @range(0, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @range(0, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @range(0, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @range(0, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @range(0, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @range(2, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get annotations contain: @range(2, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @range(2, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @range(2, 5)
+#    Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @range(2, 5)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @range(2, 5)
+#    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @range(1, 3)
+#    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @range(1, 3)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @range(1, 3)
+#    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @range(1, 3)
+#    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @range(1, 3)
+#    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @range(1, 3)
+#    Examples:
+#      | root-type | supertype-name | subtype-name | subtype-name-2 |
+#      | entity    | person         | customer     | subscriber     |
+#      | relation  | description    | registration | profile        |
 
 ########################
 # @card
@@ -4785,6 +4971,99 @@ Feature: Concept Owns
       | decimal    | 2, 2       | 1, 1          |
       | datetimetz | 38, 111    | 37, 111       |
       | duration   | 1000, 1100 | 1000, 1199    |
+
+  Scenario Outline: Cardinality can be narrowed for the same attribute for <root-type>'s owns
+    When create attribute type: name
+    When attribute(name) set value type: <value-type>
+    When <root-type>(<supertype-name>) set owns: name
+    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(0, *)
+    When <root-type>(<subtype-name>) set supertype: <supertype-name>
+    When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
+    When <root-type>(<subtype-name>) set owns: name
+    When <root-type>(<subtype-name>) get owns(name) set override: name
+    When <root-type>(<subtype-name-2>) set owns: name
+    When <root-type>(<subtype-name-2>) get owns(name) set override: name
+    Then <root-type>(<supertype-name>) get owns(name) get annotations contain: @card(0, *)
+    Then <root-type>(<subtype-name>) get owns(name) get annotations contain: @card(0, *)
+    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @card(0, *)
+    Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @card(0, *)
+    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @card(0, *)
+    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(0, *)
+    When <root-type>(<subtype-name>) get owns(name) set annotation: @card(3, *)
+    Then <root-type>(<supertype-name>) get owns(name) get annotations contain: @card(0, *)
+    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @card(0, *)
+    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @card(0, *)
+    Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @card(0, *)
+    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @card(0, *)
+    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(0, *)
+    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @card(3, *)
+    Then <root-type>(<subtype-name>) get owns(name) get annotations contain: @card(3, *)
+    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @card(3, *)
+    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @card(3, *)
+    Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @card(3, *)
+    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(3, *)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) get annotations contain: @card(0, *)
+    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @card(0, *)
+    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @card(0, *)
+    Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @card(0, *)
+    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @card(0, *)
+    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(0, *)
+    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @card(3, *)
+    Then <root-type>(<subtype-name>) get owns(name) get annotations contain: @card(3, *)
+    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @card(3, *)
+    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @card(3, *)
+    Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @card(3, *)
+    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(3, *)
+    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @card(2, *); fails
+    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @card(1, *); fails
+    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @card(0, *); fails
+    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @card(0, 6); fails
+    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @card(0, 2); fails
+    When <root-type>(<subtype-name-2>) get owns(name) set annotation: @card(3, 6)
+    Then <root-type>(<supertype-name>) get owns(name) get annotations contain: @card(0, *)
+    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @card(0, *)
+    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @card(0, *)
+    Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @card(0, *)
+    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @card(0, *)
+    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(0, *)
+    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @card(3, *)
+    Then <root-type>(<subtype-name>) get owns(name) get annotations contain: @card(3, *)
+    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @card(3, *)
+    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @card(3, *)
+    Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @card(3, *)
+    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(3, *)
+    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @card(3, 6)
+    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @card(3, 6)
+    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @card(3, 6)
+    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @card(3, 6)
+    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @card(3, 6)
+    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @card(3, 6)
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) get annotations contain: @card(0, *)
+    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @card(0, *)
+    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @card(0, *)
+    Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @card(0, *)
+    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @card(0, *)
+    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(0, *)
+    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @card(3, *)
+    Then <root-type>(<subtype-name>) get owns(name) get annotations contain: @card(3, *)
+    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @card(3, *)
+    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @card(3, *)
+    Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @card(3, *)
+    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(3, *)
+    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @card(3, 6)
+    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @card(3, 6)
+    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @card(3, 6)
+    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @card(3, 6)
+    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @card(3, 6)
+    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @card(3, 6)
+    Examples:
+      | root-type | supertype-name | subtype-name | subtype-name-2 | value-type |
+      | entity    | person         | customer     | subscriber     | decimal    |
+      | relation  | description    | registration | profile        | string     |
 
 ########################
 # @distinct

@@ -415,7 +415,7 @@ Feature: Concept Relation Type and Role Type
       | parentship:child |
     Then relation(fathership) get roles do not contain:
       | parentship:parent |
-    When relation(fathership) get role(father) unset override: parent
+    When relation(fathership) get role(father) unset override
     Then relation(fathership) get roles contain:
       | fathership:father |
       | parentship:parent |
@@ -446,7 +446,7 @@ Feature: Concept Relation Type and Role Type
       | parentship:child |
     Then relation(fathership) get roles do not contain:
       | parentship:parent |
-    When relation(fathership) get role(father) unset override: parent
+    When relation(fathership) get role(father) unset override
     Then relation(fathership) get roles contain:
       | fathership:father |
       | parentship:parent |
@@ -639,7 +639,8 @@ Feature: Concept Relation Type and Role Type
     When create relation type: parentship
     When relation(parentship) create role: parent
     When create relation type: split-parentship
-    When relation(split-parentship) set supertype: split-parentship
+    Then relation(split-parentship) set supertype: split-parentship; fails
+    When relation(split-parentship) set supertype: parentship
     When relation(split-parentship) create role: father
     When relation(split-parentship) get role(father) set override: parent
     When relation(split-parentship) create role: mother
@@ -1277,11 +1278,17 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) set supertype: parentship
     When relation(fathership) get role(father) set override: parent
     When relation(fathership) get role(father) set annotation: @card(0, 1)
+    When relation(fathership) get role(father) set ordering: unordered
+    Then relation(fathership) get role(father) get ordering: unordered
+    Then relation(fathership) get role(father) set ordering: ordered; fails
+    When relation(parentship) get role(parent) set ordering: ordered
     When relation(fathership) get role(father) set ordering: ordered
     Then relation(fathership) get role(father) get ordering: ordered
+    Then relation(parentship) get role(parent) get ordering: ordered
     When transaction commits
     When connection open read transaction for database: typedb
     Then relation(fathership) get role(father) get ordering: ordered
+    Then relation(parentship) get role(parent) get ordering: ordered
 
   Scenario: Relation type cannot redeclare ordered role types
     When create relation type: parentship
@@ -1715,6 +1722,7 @@ Feature: Concept Relation Type and Role Type
     When relation(parentship) get role(parent) set ordering: unordered
     Then relation(fathership) get role(father) set override: parent; fails
     Then relation(fathership) get role(father) get supertype: parentship:other-role
+    Then relation(fathership) get role(father) unset override
     When relation(fathership) get role(father) set ordering: unordered
     When relation(fathership) get role(father) set override: parent
     Then relation(fathership) get role(father) get supertype: parentship:parent
@@ -2796,6 +2804,96 @@ Feature: Concept Relation Type and Role Type
       | 2, 2       | 1, 1          |
       | 38, 111    | 37, 111       |
       | 1000, 1100 | 1000, 1199    |
+
+  Scenario: Cardinality can be narrowed for different roles
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) get role(parent) set annotation: @card(0, *)
+    When create relation type: single-parentship
+    When relation(single-parentship) set supertype: parentship
+    When create relation type: divorced-parentship
+    When relation(divorced-parentship) set supertype: single-parentship
+    When relation(single-parentship) create role: single-parent
+    When relation(single-parentship) get role(single-parent) set override: parent
+    When relation(divorced-parentship) create role: divorced-parent
+    When relation(divorced-parentship) get role(divorced-parent) set override: single-parent
+    Then relation(parentship) get role(parent) get annotations contain: @card(0, *)
+    Then relation(single-parentship) get role(single-parent) get annotations contain: @card(0, *)
+    Then relation(divorced-parentship) get role(divorced-parent) get annotations contain: @card(0, *)
+    Then relation(parentship) get role(parent) get declared annotations contain: @card(0, *)
+    Then relation(single-parentship) get role(single-parent) get declared annotations do not contain: @card(0, *)
+    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations do not contain: @card(0, *)
+    When relation(single-parentship) get role(single-parent) set annotation: @card(3, *)
+    Then relation(parentship) get role(parent) get annotations contain: @card(0, *)
+    Then relation(single-parentship) get role(single-parent) get annotations do not contain: @card(0, *)
+    Then relation(divorced-parentship) get role(divorced-parent) get annotations do not contain: @card(0, *)
+    Then relation(parentship) get role(parent) get declared annotations contain: @card(0, *)
+    Then relation(single-parentship) get role(single-parent) get declared annotations do not contain: @card(0, *)
+    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations do not contain: @card(0, *)
+    Then relation(parentship) get role(parent) get annotations do not contain: @card(3, *)
+    Then relation(single-parentship) get role(single-parent) get annotations contain: @card(3, *)
+    Then relation(divorced-parentship) get role(divorced-parent) get annotations contain: @card(3, *)
+    Then relation(parentship) get role(parent) get declared annotations do not contain: @card(3, *)
+    Then relation(single-parentship) get role(single-parent) get declared annotations contain: @card(3, *)
+    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations do not contain: @card(3, *)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) get annotations contain: @card(0, *)
+    Then relation(single-parentship) get role(single-parent) get annotations do not contain: @card(0, *)
+    Then relation(divorced-parentship) get role(divorced-parent) get annotations do not contain: @card(0, *)
+    Then relation(parentship) get role(parent) get declared annotations contain: @card(0, *)
+    Then relation(single-parentship) get role(single-parent) get declared annotations do not contain: @card(0, *)
+    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations do not contain: @card(0, *)
+    Then relation(parentship) get role(parent) get annotations do not contain: @card(3, *)
+    Then relation(single-parentship) get role(single-parent) get annotations contain: @card(3, *)
+    Then relation(divorced-parentship) get role(divorced-parent) get annotations contain: @card(3, *)
+    Then relation(parentship) get role(parent) get declared annotations do not contain: @card(3, *)
+    Then relation(single-parentship) get role(single-parent) get declared annotations contain: @card(3, *)
+    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations do not contain: @card(3, *)
+    Then relation(divorced-parentship) get role(divorced-parent) set annotation: @card(2, *); fails
+    Then relation(divorced-parentship) get role(divorced-parent) set annotation: @card(1, *); fails
+    Then relation(divorced-parentship) get role(divorced-parent) set annotation: @card(0, *); fails
+    Then relation(divorced-parentship) get role(divorced-parent) set annotation: @card(0, 6); fails
+    Then relation(divorced-parentship) get role(divorced-parent) set annotation: @card(0, 2); fails
+    When relation(divorced-parentship) get role(divorced-parent) set annotation: @card(3, 6)
+    Then relation(parentship) get role(parent) get annotations contain: @card(0, *)
+    Then relation(single-parentship) get role(single-parent) get annotations do not contain: @card(0, *)
+    Then relation(divorced-parentship) get role(divorced-parent) get annotations do not contain: @card(0, *)
+    Then relation(parentship) get role(parent) get declared annotations contain: @card(0, *)
+    Then relation(single-parentship) get role(single-parent) get declared annotations do not contain: @card(0, *)
+    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations do not contain: @card(0, *)
+    Then relation(parentship) get role(parent) get annotations do not contain: @card(3, *)
+    Then relation(single-parentship) get role(single-parent) get annotations contain: @card(3, *)
+    Then relation(divorced-parentship) get role(divorced-parent) get annotations do not contain: @card(3, *)
+    Then relation(parentship) get role(parent) get declared annotations do not contain: @card(3, *)
+    Then relation(single-parentship) get role(single-parent) get declared annotations contain: @card(3, *)
+    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations do not contain: @card(3, *)
+    Then relation(parentship) get role(parent) get annotations do not contain: @card(3, 6)
+    Then relation(single-parentship) get role(single-parent) get annotations do not contain: @card(3, 6)
+    Then relation(divorced-parentship) get role(divorced-parent) get annotations contain: @card(3, 6)
+    Then relation(parentship) get role(parent) get declared annotations do not contain: @card(3, 6)
+    Then relation(single-parentship) get role(single-parent) get declared annotations do not contain: @card(3, 6)
+    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations contain: @card(3, 6)
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get role(parent) get annotations contain: @card(0, *)
+    Then relation(single-parentship) get role(single-parent) get annotations do not contain: @card(0, *)
+    Then relation(divorced-parentship) get role(divorced-parent) get annotations do not contain: @card(0, *)
+    Then relation(parentship) get role(parent) get declared annotations contain: @card(0, *)
+    Then relation(single-parentship) get role(single-parent) get declared annotations do not contain: @card(0, *)
+    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations do not contain: @card(0, *)
+    Then relation(parentship) get role(parent) get annotations do not contain: @card(3, *)
+    Then relation(single-parentship) get role(single-parent) get annotations contain: @card(3, *)
+    Then relation(divorced-parentship) get role(divorced-parent) get annotations do not contain: @card(3, *)
+    Then relation(parentship) get role(parent) get declared annotations do not contain: @card(3, *)
+    Then relation(single-parentship) get role(single-parent) get declared annotations contain: @card(3, *)
+    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations do not contain: @card(3, *)
+    Then relation(parentship) get role(parent) get annotations do not contain: @card(3, 6)
+    Then relation(single-parentship) get role(single-parent) get annotations do not contain: @card(3, 6)
+    Then relation(divorced-parentship) get role(divorced-parent) get annotations contain: @card(3, 6)
+    Then relation(parentship) get role(parent) get declared annotations do not contain: @card(3, 6)
+    Then relation(single-parentship) get role(single-parent) get declared annotations do not contain: @card(3, 6)
+    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations contain: @card(3, 6)
 
 ########################
 # relates not compatible @annotations: @key, @unique, @subkey, @values, @range, @abstract, @cascade, @independent, @replace, @regex

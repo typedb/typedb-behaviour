@@ -1427,15 +1427,15 @@ Feature: Concept Attribute Type
     When create attribute type: email
     When attribute(email) set annotation: @abstract
     Then attribute(email) get value type is none
-    Then attribute(email) set annotation: @regex(<arg>); fails
-    Then attribute(email) get annotations do not contain: @regex(<arg>)
-    Then attribute(email) get declared annotations do not contain: @regex(<arg>)
+    Then attribute(email) set annotation: @regex("TEST"); fails
+    Then attribute(email) get annotations do not contain: @regex("TEST")
+    Then attribute(email) get declared annotations do not contain: @regex("TEST")
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(email) get value type is none
-    Then attribute(email) set annotation: @regex(<arg>); fails
-    Then attribute(email) get annotations do not contain: @regex(<arg>)
-    Then attribute(email) get declared annotations do not contain: @regex(<arg>)
+    Then attribute(email) set annotation: @regex("TEST"); fails
+    Then attribute(email) get annotations do not contain: @regex("TEST")
+    Then attribute(email) get declared annotations do not contain: @regex("TEST")
 
   Scenario Outline: Attribute types with incompatible value types can't have @regex annotation
     When create attribute type: email
@@ -1473,11 +1473,11 @@ Feature: Concept Attribute Type
     Then attribute(name) unset annotation: @regex
     When attribute(name) unset value type
     Then attribute(name) get value type is none
-    Then attribute(name) get annotations is empty
+    Then attribute(name) get annotations do not contain: @regex("value")
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(name) get value type is none
-    Then attribute(name) get annotations is empty
+    Then attribute(name) get annotations do not contain: @regex("value")
     Then attribute(name) set annotation: @regex("value"); fails
 
   Scenario: Attribute types' @regex annotation can be inherited
@@ -1566,8 +1566,11 @@ Feature: Concept Attribute Type
     When attribute(first-name) set supertype: name
     Then attribute(first-name) get annotations contain: @regex("\S+")
     Then attribute(first-name) get declared annotations do not contain: @regex("\S+")
-    Then attribute(first-name) set annotation: @regex("\S+"); fails
     Then attribute(first-name) set annotation: @regex("test"); fails
+    When attribute(first-name) set annotation: @regex("\S+")
+    Then attribute(first-name) get annotations contain: @regex("\S+")
+    Then attribute(first-name) get declared annotations contain: @regex("\S+")
+    Then transaction commits; fails
     When connection open schema transaction for database: typedb
     Then attribute(name) get annotations contain: @regex("\S+")
     Then attribute(name) get declared annotations contain: @regex("\S+")
@@ -1575,7 +1578,7 @@ Feature: Concept Attribute Type
     Then attribute(first-name) get declared annotations is empty
     When attribute(first-name) set annotation: @regex("\S+")
     Then attribute(first-name) get annotations contain: @regex("\S+")
-    Then attribute(first-name) get declared annotations do not contain: @regex("\S+")
+    Then attribute(first-name) get declared annotations contain: @regex("\S+")
     Then attribute(first-name) set supertype: name; fails
     When attribute(first-name) unset annotation: @regex
     When attribute(first-name) set supertype: name
@@ -1593,11 +1596,11 @@ Feature: Concept Attribute Type
     When attribute(name) set annotation: @abstract
     When attribute(name) set value type: string
     When attribute(name) set annotation: @regex("value")
-    When transaction commits
-    When connection open schema transaction for database: typedb
     When create attribute type: first-name
     When attribute(first-name) set value type: string
     When attribute(first-name) set supertype: name
+    When transaction commits
+    When connection open schema transaction for database: typedb
     Then attribute(first-name) get annotations contain: @regex("value")
     Then attribute(first-name) get declared annotations do not contain: @regex("value")
     Then attribute(first-name) set annotation: @regex("another value"); fails
@@ -1635,11 +1638,11 @@ Feature: Concept Attribute Type
 
   Scenario: Attribute type cannot unset value type if it has owns with @regex annotation
     When create attribute type: custom-attribute
+    When attribute(custom-attribute) set annotation: @abstract
     When attribute(custom-attribute) set value type: string
     When attribute(custom-attribute) set annotation: @regex("\S+")
     Then attribute(custom-attribute) unset value type; fails
     Then attribute(custom-attribute) set value type: long; fails
-    Then attribute(custom-attribute) set value type: string; fails
     Then attribute(custom-attribute) set value type: boolean; fails
     Then attribute(custom-attribute) set value type: double; fails
     Then attribute(custom-attribute) set value type: decimal; fails
@@ -1647,6 +1650,8 @@ Feature: Concept Attribute Type
     Then attribute(custom-attribute) set value type: datetimetz; fails
     Then attribute(custom-attribute) set value type: duration; fails
     Then attribute(custom-attribute) set value type: custom-struct; fails
+    When attribute(custom-attribute) set value type: string
+    Then attribute(custom-attribute) get value type: string
     When attribute(custom-attribute) unset annotation: @regex
     When attribute(custom-attribute) unset value type
     When attribute(custom-attribute) get value type is none
@@ -1658,7 +1663,6 @@ Feature: Concept Attribute Type
     Then attribute(custom-attribute) get annotations contain: @regex("\S+")
     Then attribute(custom-attribute) unset value type; fails
     Then attribute(custom-attribute) set value type: long; fails
-    Then attribute(custom-attribute) set value type: string; fails
     Then attribute(custom-attribute) set value type: boolean; fails
     Then attribute(custom-attribute) set value type: double; fails
     Then attribute(custom-attribute) set value type: decimal; fails
@@ -1666,6 +1670,7 @@ Feature: Concept Attribute Type
     Then attribute(custom-attribute) set value type: datetimetz; fails
     Then attribute(custom-attribute) set value type: duration; fails
     Then attribute(custom-attribute) set value type: custom-struct; fails
+    Then attribute(custom-attribute) get value type: string
 
 ########################
 # @independent
