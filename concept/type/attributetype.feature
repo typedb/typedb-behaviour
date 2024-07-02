@@ -1423,6 +1423,20 @@ Feature: Concept Attribute Type
       | string     | "^(not)$"           |
       | string     | "2024-06-04+0100"   |
 
+  Scenario: Attribute types with none value types can't have @regex annotation
+    When create attribute type: email
+    When attribute(email) set annotation: @abstract
+    Then attribute(email) get value type is none
+    Then attribute(email) set annotation: @regex(<arg>); fails
+    Then attribute(email) get annotations do not contain: @regex(<arg>)
+    Then attribute(email) get declared annotations do not contain: @regex(<arg>)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(email) get value type is none
+    Then attribute(email) set annotation: @regex(<arg>); fails
+    Then attribute(email) get annotations do not contain: @regex(<arg>)
+    Then attribute(email) get declared annotations do not contain: @regex(<arg>)
+
   Scenario Outline: Attribute types with incompatible value types can't have @regex annotation
     When create attribute type: email
     When attribute(email) set value type: <value-type>
@@ -1618,6 +1632,40 @@ Feature: Concept Attribute Type
     When connection open read transaction for database: typedb
     Then attribute(first-name) get annotations do not contain: @regex("value")
     Then attribute(first-name) get declared annotations do not contain: @regex("value")
+
+  Scenario: Attribute type cannot unset value type if it has owns with @regex annotation
+    When create attribute type: custom-attribute
+    When attribute(custom-attribute) set value type: string
+    When attribute(custom-attribute) set annotation: @regex("\S+")
+    Then attribute(custom-attribute) unset value type; fails
+    Then attribute(custom-attribute) set value type: long; fails
+    Then attribute(custom-attribute) set value type: string; fails
+    Then attribute(custom-attribute) set value type: boolean; fails
+    Then attribute(custom-attribute) set value type: double; fails
+    Then attribute(custom-attribute) set value type: decimal; fails
+    Then attribute(custom-attribute) set value type: datetime; fails
+    Then attribute(custom-attribute) set value type: datetimetz; fails
+    Then attribute(custom-attribute) set value type: duration; fails
+    Then attribute(custom-attribute) set value type: custom-struct; fails
+    When attribute(custom-attribute) unset annotation: @regex
+    When attribute(custom-attribute) unset value type
+    When attribute(custom-attribute) get value type is none
+    Then attribute(custom-attribute) set annotation: @regex("\S+"); fails
+    When attribute(custom-attribute) set value type: string
+    When attribute(custom-attribute) set annotation: @regex("\S+")
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(custom-attribute) get annotations contain: @regex("\S+")
+    Then attribute(custom-attribute) unset value type; fails
+    Then attribute(custom-attribute) set value type: long; fails
+    Then attribute(custom-attribute) set value type: string; fails
+    Then attribute(custom-attribute) set value type: boolean; fails
+    Then attribute(custom-attribute) set value type: double; fails
+    Then attribute(custom-attribute) set value type: decimal; fails
+    Then attribute(custom-attribute) set value type: datetime; fails
+    Then attribute(custom-attribute) set value type: datetimetz; fails
+    Then attribute(custom-attribute) set value type: duration; fails
+    Then attribute(custom-attribute) set value type: custom-struct; fails
 
 ########################
 # @independent
