@@ -42,8 +42,6 @@ Feature: Concept Owns
 # owns common
 ########################
   # TODO: unset supertype for entity/relation while having overrides on its owns -- schema validation
-  # TODO: Change override tests (We need to allow changing supertypes while having overrides, but fail at commit time if overrides are not changed)
-  # TODO: Unset value type
   # TODO: "date" type
   # TODO: "datetimetz" -> "datetime-tz"
 
@@ -2360,8 +2358,8 @@ Feature: Concept Owns
   Scenario Outline: <root-type> types can redeclare inherited owns as owns with @<annotation>
     When create attribute type: name
     When attribute(name) set value type: <value-type>
+    When attribute(name) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: name
-    Then <root-type>(<supertype-name>) get owns overridden(name) does not exist
     When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
     When transaction commits
     When connection open schema transaction for database: typedb
@@ -2372,31 +2370,37 @@ Feature: Concept Owns
     When <root-type>(<subtype-name>) get owns(name) set annotation: @<annotation>
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) set owns: name
-    When <root-type>(<subtype-name>) get owns(name) set annotation: @<annotation>
-    Then <root-type>(<subtype-name>) get owns overridden(name) does not exist
-    Then <root-type>(<subtype-name>) get owns(name) set override: name
-    Then <root-type>(<subtype-name>) get owns overridden(name) exists
-    Then <root-type>(<subtype-name>) get owns overridden(name) get label: name
-    Then <root-type>(<subtype-name>) get owns(name) get label: name
-    Then <root-type>(<subtype-name>) get owns(name) get annotations is empty
-    Then <root-type>(<subtype-name>) get owns(name) set annotation: @<annotation>
-    Then <root-type>(<subtype-name>) get owns(name) get annotations contain: @<annotation>
+    When create attribute type: surname
+    When attribute(surname) set supertype: name
+    When <root-type>(<subtype-name>) set owns: surname
+    When <root-type>(<subtype-name>) get owns(surname) set annotation: @<annotation>
+    Then <root-type>(<subtype-name>) get owns overridden(surname) does not exist
+    Then <root-type>(<subtype-name>) get owns(surname) set override: name
+    Then <root-type>(<subtype-name>) get owns overridden(surname) exists
+    Then <root-type>(<subtype-name>) get owns overridden(surname) get label: name
+    Then <root-type>(<subtype-name>) get owns(surname) get label: surname
     Then <root-type>(<supertype-name>) get owns(name) get annotations is empty
-    # TODO: Maybe it should fail?
+    Then <root-type>(<subtype-name>) get owns(surname) set annotation: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(surname) get annotations contain: @<annotation>
+    Then <root-type>(<supertype-name>) get owns(name) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns(name) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(surname) get annotations contain: @<annotation>
     Then <root-type>(<supertype-name>) get owns(name) get annotations is empty
     When connection open schema transaction for database: typedb
-    # TODO: Maybe it should not fail if the previous TODO should not?
     Then <root-type>(<subtype-name-2>) set owns: name; fails
-    When <root-type>(<subtype-name-2>) get owns(name) set annotation: @<annotation>
-    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns(name) get annotations contain: @<annotation>
+    When <root-type>(<subtype-name-2>) get owns(surname) set annotation: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns(surname) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(surname) get annotations contain: @<annotation>
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name-2>) set owns: name; fails
+    When <root-type>(<subtype-name-2>) set owns: surname
+    # TODO: Can we override one attribute multiple times down the inheritance line? Maybe we need to test it
+    Then <root-type>(<subtype-name-2>) get owns(surname) set override: surname
+    When <root-type>(<subtype-name-2>) get owns(surname) set annotation: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns(surname) get annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(surname) get annotations contain: @<annotation>
+    Then transaction commits; fails
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | annotation   | value-type |
       | entity    | person         | customer     | subscriber     | key          | string     |
@@ -3024,7 +3028,7 @@ Feature: Concept Owns
     Then attribute(unknown) set value type: double; fails
     Then attribute(unknown) set value type: decimal; fails
     Then attribute(unknown) set value type: custom-struct; fails
-    When entity(unknown-person) get owns(unknown) set annotation: @abstract
+    When entity(unknown-person) get owns(unknown) set annotation: @key
     When create entity type: bad-person
     When entity(bad-person) set supertype: person
     Then entity(bad-person) get owns(id) get annotations contain: @key
@@ -3033,13 +3037,13 @@ Feature: Concept Owns
     Then entity(bad-person) get owns(bad) get annotations do not contain: @key
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) get value type: name
+    Then attribute(name) get value type: string
     Then entity(named-person) get owns(name) get annotations contain: @key
     Then attribute(seq) get value type: long
     Then entity(seqed-person) get owns(seq) get annotations contain: @key
     Then attribute(unknown) get value type is none
     Then entity(unknown-person) get owns(unknown) get annotations contain: @key
-    Then attribute(bad) get value type double
+    Then attribute(bad) get value type: double
     Then entity(bad-person) get owns(bad) get annotations do not contain: @key
     Then attribute(unknown) set value type: double; fails
     Then attribute(unknown) set value type: decimal; fails
@@ -3052,6 +3056,34 @@ Feature: Concept Owns
     When connection open read transaction for database: typedb
     Then attribute(unknown) get value type: long
     Then entity(unknown-person) get owns(unknown) get annotations contain: @key
+
+  Scenario: Attribute type can unset value type if it has owns with @key annotation
+    When create attribute type: custom-attribute
+    When attribute(custom-attribute) set annotation: @abstract
+    When attribute(custom-attribute) set value type: string
+    When entity(person) set owns: custom-attribute
+    When entity(person) get owns(custom-attribute) set annotation: @key
+    When attribute(custom-attribute) unset value type
+    Then attribute(custom-attribute) get value type is none
+    Then attribute(custom-attribute) set value type: double; fails
+    Then attribute(custom-attribute) set value type: decimal; fails
+    Then attribute(custom-attribute) set value type: custom-struct; fails
+    When attribute(custom-attribute) set value type: string
+    When entity(person) get owns(custom-attribute) unset annotation: @key
+    When attribute(custom-attribute) unset value type
+    Then attribute(custom-attribute) get value type is none
+    When entity(person) get owns(custom-attribute) set annotation: @key
+    When attribute(custom-attribute) set value type: string
+    When entity(person) get owns(custom-attribute) set annotation: @key
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get owns(custom-attribute) get annotations contain: @key
+    Then attribute(custom-attribute) get value type: string
+    When attribute(custom-attribute) unset value type
+    Then attribute(custom-attribute) get value type is none
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(custom-attribute) get value type is none
 
   Scenario Outline: Owns can set @key annotation for ordered ownership
     When create attribute type: custom-attribute
@@ -3436,7 +3468,7 @@ Feature: Concept Owns
     Then attribute(unknown) set value type: double; fails
     Then attribute(unknown) set value type: decimal; fails
     Then attribute(unknown) set value type: custom-struct; fails
-    When entity(unknown-person) get owns(unknown) set annotation: @abstract
+    When entity(unknown-person) get owns(unknown) set annotation: @unique
     When create entity type: bad-person
     When entity(bad-person) set supertype: person
     Then entity(bad-person) get owns(id) get annotations contain: @unique
@@ -3445,13 +3477,13 @@ Feature: Concept Owns
     Then entity(bad-person) get owns(bad) get annotations do not contain: @unique
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) get value type: name
+    Then attribute(name) get value type: string
     Then entity(named-person) get owns(name) get annotations contain: @unique
     Then attribute(seq) get value type: long
     Then entity(seqed-person) get owns(seq) get annotations contain: @unique
     Then attribute(unknown) get value type is none
     Then entity(unknown-person) get owns(unknown) get annotations contain: @unique
-    Then attribute(bad) get value type double
+    Then attribute(bad) get value type: double
     Then entity(bad-person) get owns(bad) get annotations do not contain: @unique
     Then attribute(unknown) set value type: double; fails
     Then attribute(unknown) set value type: decimal; fails
@@ -3464,6 +3496,34 @@ Feature: Concept Owns
     When connection open read transaction for database: typedb
     Then attribute(unknown) get value type: long
     Then entity(unknown-person) get owns(unknown) get annotations contain: @unique
+
+  Scenario: Attribute type can unset value type if it has owns with @unique annotation
+    When create attribute type: custom-attribute
+    When attribute(custom-attribute) set annotation: @abstract
+    When attribute(custom-attribute) set value type: string
+    When entity(person) set owns: custom-attribute
+    When entity(person) get owns(custom-attribute) set annotation: @unique
+    When attribute(custom-attribute) unset value type
+    Then attribute(custom-attribute) get value type is none
+    Then attribute(custom-attribute) set value type: double; fails
+    Then attribute(custom-attribute) set value type: decimal; fails
+    Then attribute(custom-attribute) set value type: custom-struct; fails
+    When attribute(custom-attribute) set value type: string
+    When entity(person) get owns(custom-attribute) unset annotation: @unique
+    When attribute(custom-attribute) unset value type
+    Then attribute(custom-attribute) get value type is none
+    When entity(person) get owns(custom-attribute) set annotation: @unique
+    When attribute(custom-attribute) set value type: string
+    When entity(person) get owns(custom-attribute) set annotation: @unique
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get owns(custom-attribute) get annotations contain: @unique
+    Then attribute(custom-attribute) get value type: string
+    When attribute(custom-attribute) unset value type
+    Then attribute(custom-attribute) get value type is none
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(custom-attribute) get value type is none
 
   Scenario Outline: Ordered owns can set @unique annotation for <value-type> value type and unset it
     When create attribute type: custom-attribute
@@ -4449,11 +4509,11 @@ Feature: Concept Owns
     Then entity(person) get owns(custom-attribute) set ordering: ordered
     When entity(person) get owns(custom-attribute) set annotation: @card(0, 2)
     Then entity(person) get owns(custom-attribute) get annotations contain: @card(0, 2)
-    Then entity(person) get owns(custom-attribute) get value type is none
+    Then attribute(custom-attribute) get value type is none
     When transaction commits
     When connection open read transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get annotations contain: @card(0, 2)
-    Then entity(person) get owns(custom-attribute) get value type is none
+    Then attribute(custom-attribute) get value type is none
 
   Scenario Outline: Owns can reset @card annotation with the same argument
     When create attribute type: custom-attribute
@@ -4814,11 +4874,11 @@ Feature: Concept Owns
     Then entity(person) get owns(custom-attribute) set ordering: ordered
     When entity(person) get owns(custom-attribute) set annotation: @distinct
     Then entity(person) get owns(custom-attribute) get annotations contain: @distinct
-    Then entity(person) get owns(custom-attribute) get value type is none
+    Then attribute(custom-attribute) get value type is none
     When transaction commits
     When connection open read transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get annotations contain: @distinct
-    Then entity(person) get owns(custom-attribute) get value type is none
+    Then attribute(custom-attribute) get value type is none
 
     #  TODO: Make it only for typeql
 #  Scenario Outline: Owns cannot have @distinct annotation for <value-type> with arguments
@@ -4961,23 +5021,18 @@ Feature: Concept Owns
     When <root-type>(<supertype-name>) get owns(username) set annotation: @distinct
     Then <root-type>(<supertype-name>) get owns(username) get annotations contain: @distinct
     Then <root-type>(<subtype-name>) get owns(username) get annotations contain: @distinct
-    Then <root-type>(<subtype-name>) get owns(username) unset annotation: @distinct; fails
+    When <root-type>(<subtype-name>) get owns(username) unset annotation: @distinct
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns(username) get annotations contain: @distinct
-    When <root-type>(<subtype-name>) get owns(username) unset annotation: @distinct
     Then <root-type>(<subtype-name>) get owns(username) get annotations do not contain: @distinct
-    Then <root-type>(<supertype-name>) get owns(username) get annotations do not contain: @distinct
-    When transaction commits
-    When connection open read transaction for database: typedb
+    When <root-type>(<supertype-name>) get owns(username) unset annotation: @distinct
     Then <root-type>(<subtype-name>) get owns(username) get annotations do not contain: @distinct
-    Then <root-type>(<supertype-name>) get owns(username) get annotations do not contain: @distinct
     Examples:
       | root-type | supertype-name | subtype-name |
       | entity    | person         | customer     |
       | relation  | description    | registration |
 
-  Scenario Outline: <root-type> types can unset @distinct of overridden ownership
+  Scenario Outline: <root-type> types cannot unset @distinct of overridden ownership
     When create attribute type: username
     When attribute(username) set annotation: @abstract
     When attribute(username) set value type: string
@@ -4999,10 +5054,10 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get owns(subusername) unset annotation: @distinct; fails
     Then <root-type>(<subtype-name>) get owns(subusername) get annotations contain: @distinct
     Then <root-type>(<subtype-name>) get owns(subusername) get declared annotations do not contain: @distinct
-    Then <root-type>(<supertype-name>) get owns(subusername) get annotations contain: @distinct
+    Then <root-type>(<supertype-name>) get owns(username) get annotations contain: @distinct
     When transaction commits
     When connection open read transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns(username) get annotations contain: @distinct
+    Then <root-type>(<subtype-name>) get owns(subusername) get annotations contain: @distinct
     Then <root-type>(<subtype-name>) get owns(subusername) get declared annotations do not contain: @distinct
     Then <root-type>(<supertype-name>) get owns(username) get annotations contain: @distinct
     Examples:
@@ -5297,7 +5352,6 @@ Feature: Concept Owns
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set annotation: @abstract
     When attribute(custom-attribute) set value type: string
-#    When attribute(custom-attribute) set annotation: @regex("\S+")
     When entity(person) set owns: custom-attribute
     When entity(person) get owns(custom-attribute) set annotation: @regex("\S+")
     Then attribute(custom-attribute) unset value type; fails
