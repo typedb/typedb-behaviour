@@ -2946,6 +2946,7 @@ Feature: Concept Owns
     Examples:
       | value-type |
       | long       |
+      | decimal    |
       | string     |
       | boolean    |
       | datetime   |
@@ -2968,6 +2969,7 @@ Feature: Concept Owns
     Examples:
       | value-type |
       | long       |
+      | decimal    |
       | string     |
       | boolean    |
       | datetime   |
@@ -2986,7 +2988,6 @@ Feature: Concept Owns
     Examples:
       | value-type    |
       | double        |
-      | decimal       |
       | custom-struct |
 
   Scenario: Owns can set @key annotation for empty value type and override it with keyable value type
@@ -3026,7 +3027,6 @@ Feature: Concept Owns
     When entity(unknown-person) get owns(unknown) set override: id
     Then entity(unknown-person) get owns(unknown) get annotations contain: @key
     Then attribute(unknown) set value type: double; fails
-    Then attribute(unknown) set value type: decimal; fails
     Then attribute(unknown) set value type: custom-struct; fails
     When entity(unknown-person) get owns(unknown) set annotation: @key
     When create entity type: bad-person
@@ -3046,7 +3046,6 @@ Feature: Concept Owns
     Then attribute(bad) get value type: double
     Then entity(bad-person) get owns(bad) get annotations do not contain: @key
     Then attribute(unknown) set value type: double; fails
-    Then attribute(unknown) set value type: decimal; fails
     Then attribute(unknown) set value type: custom-struct; fails
     When attribute(unknown) set value type: long
     Then attribute(unknown) get value type: long
@@ -3066,7 +3065,6 @@ Feature: Concept Owns
     When attribute(custom-attribute) unset value type
     Then attribute(custom-attribute) get value type is none
     Then attribute(custom-attribute) set value type: double; fails
-    Then attribute(custom-attribute) set value type: decimal; fails
     Then attribute(custom-attribute) set value type: custom-struct; fails
     When attribute(custom-attribute) set value type: string
     When entity(person) get owns(custom-attribute) unset annotation: @key
@@ -3098,6 +3096,7 @@ Feature: Concept Owns
     Examples:
       | value-type |
       | long       |
+      | decimal    |
       | string     |
       | boolean    |
       | datetime   |
@@ -3117,7 +3116,6 @@ Feature: Concept Owns
     Examples:
       | value-type    |
       | double        |
-      | decimal       |
       | custom-struct |
 
      # TODO: Move to thing-feature or schema/data-validation?
@@ -3188,6 +3186,7 @@ Feature: Concept Owns
 #    Examples:
 #      | value-type | arg                            |
 #      | long       | LABEL                          |
+#      | decimal    | 1.5                            |
 #      | string     | label                          |
 #      | boolean    | lAbEl_Of_FoRmaT                |
 #      | datetime   | l                              |
@@ -3266,6 +3265,7 @@ Feature: Concept Owns
 #    Examples:
 #      | value-type |
 #      | long       |
+#      | decimal    |
 #      | string     |
 #      | boolean    |
 #      | datetime   |
@@ -3311,7 +3311,6 @@ Feature: Concept Owns
 #    Examples:
 #      | value-type |
 #      | double     |
-#      | decimal    |
 #      | custom-struct |
 #
 #  Scenario: Owns cannot set @subkey annotation for incorrect arguments
@@ -3348,12 +3347,10 @@ Feature: Concept Owns
 #      | long       |
 #      | string     |
 #      | boolean    |
-#      | double     |
 #      | decimal    |
 #      | datetime   |
 #      | datetimetz |
 #      | duration   |
-#      | custom-struct |
 
 ########################
 # @unique
@@ -3386,6 +3383,7 @@ Feature: Concept Owns
     Examples:
       | value-type |
       | long       |
+      | decimal    |
       | string     |
       | boolean    |
       | datetime   |
@@ -3408,6 +3406,7 @@ Feature: Concept Owns
     Examples:
       | value-type |
       | long       |
+      | decimal    |
       | string     |
       | boolean    |
       | datetime   |
@@ -3426,7 +3425,6 @@ Feature: Concept Owns
     Examples:
       | value-type    |
       | double        |
-      | decimal       |
       | custom-struct |
 
   Scenario: Owns can set @unique annotation for empty value type and override it with keyable value type
@@ -3466,7 +3464,6 @@ Feature: Concept Owns
     When entity(unknown-person) get owns(unknown) set override: id
     Then entity(unknown-person) get owns(unknown) get annotations contain: @unique
     Then attribute(unknown) set value type: double; fails
-    Then attribute(unknown) set value type: decimal; fails
     Then attribute(unknown) set value type: custom-struct; fails
     When entity(unknown-person) get owns(unknown) set annotation: @unique
     When create entity type: bad-person
@@ -3486,7 +3483,6 @@ Feature: Concept Owns
     Then attribute(bad) get value type: double
     Then entity(bad-person) get owns(bad) get annotations do not contain: @unique
     Then attribute(unknown) set value type: double; fails
-    Then attribute(unknown) set value type: decimal; fails
     Then attribute(unknown) set value type: custom-struct; fails
     When attribute(unknown) set value type: long
     Then attribute(unknown) get value type: long
@@ -3506,7 +3502,6 @@ Feature: Concept Owns
     When attribute(custom-attribute) unset value type
     Then attribute(custom-attribute) get value type is none
     Then attribute(custom-attribute) set value type: double; fails
-    Then attribute(custom-attribute) set value type: decimal; fails
     Then attribute(custom-attribute) set value type: custom-struct; fails
     When attribute(custom-attribute) set value type: string
     When entity(person) get owns(custom-attribute) unset annotation: @unique
@@ -3557,6 +3552,7 @@ Feature: Concept Owns
     Examples:
       | value-type |
       | long       |
+      | decimal    |
       | string     |
       | boolean    |
       | datetime   |
