@@ -5489,8 +5489,8 @@ Feature: Concept Owns
     When connection open read transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get annotations is empty
     Examples:
-      | args            |
-      | ""              |
+      | args |
+      | ""   |
       # TODO: Make it only for typeql
 #      | "\S+", "\S+"          |
 #      | "one", "two", "three" |
@@ -5517,8 +5517,8 @@ Feature: Concept Owns
     When entity(person) get owns(custom-attribute) set annotation: @regex(<args>)
     Then entity(person) get owns(custom-attribute) get annotations contain: @regex(<args>)
     Examples:
-      | args  |
-      | "\S+" |
+      | args                                 |
+      | "\S+"                                |
       | "another regex with specific string" |
 
   Scenario Outline: Owns can reset @regex annotation
@@ -5815,12 +5815,12 @@ Feature: Concept Owns
     Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-2>
     Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-1>
     Examples:
-      | annotation-1     | annotation-2    | value-type |
-      | key              | unique          | long       |
-      | key              | card(0, 1)      | long       |
-      | key              | card(0, *)      | long       |
-      | key              | card(1, 1)      | long       |
-      | key              | card(2, 5)      | long       |
+      | annotation-1 | annotation-2 | value-type |
+      | key          | unique       | long       |
+      | key          | card(0, 1)   | long       |
+      | key          | card(0, *)   | long       |
+      | key          | card(1, 1)   | long       |
+      | key          | card(2, 5)   | long       |
       # TODO: If we allow values + range, write a test to check args compatibility!
 #      | values(1.0, 2.0) | range(1.0, 2.0) | double     |
       # TODO: If we allow values + regex, write a test to check args compatibility!
@@ -5847,15 +5847,282 @@ Feature: Concept Owns
     Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-2>
     Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-1>
     Examples:
-      | annotation-1     | annotation-2    | value-type |
-      | key              | unique          | long       |
-      | key              | card(0, 1)      | long       |
-      | key              | card(0, *)      | long       |
-      | key              | card(1, 1)      | long       |
-      | key              | card(2, 5)      | long       |
+      | annotation-1 | annotation-2 | value-type |
+      | key          | unique       | long       |
+      | key          | card(0, 1)   | long       |
+      | key          | card(0, *)   | long       |
+      | key          | card(1, 1)   | long       |
+      | key          | card(2, 5)   | long       |
       # TODO: If we allow values + range, write a test to check args compatibility!
 #      | values(1.0, 2.0) | range(1.0, 2.0) | double     |
       # TODO: If we allow values + regex, write a test to check args compatibility!
 #      | values("str")    | regex("s")      | string     |
       # TODO: If we allow range + regex, write a test to check args compatibility!
 #      | range("1", "2")  | regex("s")      | string     |
+
+  Scenario Outline: Annotation @key cannot be set if type has not suitable cardinality
+    When create attribute type: name
+    When attribute(name) set value type: string
+    When attribute(name) set annotation: @abstract
+    When create attribute type: surname
+    When attribute(surname) set value type: string
+    When attribute(surname) set supertype: name
+    When create attribute type: non-card-name
+    When attribute(non-card-name) set value type: string
+    When attribute(non-card-name) set supertype: name
+    When attribute(non-card-name) set annotation: @abstract
+    When create attribute type: third-name
+    When attribute(third-name) set value type: string
+    When attribute(third-name) set supertype: non-card-name
+    When entity(person) set owns: name
+    When entity(person) get owns(name) set annotation: @card(<card-args>)
+    When entity(person) set owns: non-card-name
+    When entity(customer) set supertype: person
+    When entity(customer) set owns: surname
+    When entity(customer) get owns(surname) set override: name
+    When entity(subscriber) set supertype: person
+    When entity(subscriber) set owns: surname
+    When entity(subscriber) get owns(surname) set annotation: @key
+    When entity(subscriber) set owns: third-name
+    When entity(subscriber) get owns(third-name) set override: name
+    When entity(person) get owns(name) set annotation: @card(<card-args>)
+    Then entity(person) get owns(name) get annotations contain: @card(<card-args>)
+    Then entity(person) get owns(name) get declared annotations contain: @card(<card-args>)
+    Then entity(person) get owns(name) get annotations do not contain: @key
+    Then entity(customer) get owns(surname) get annotations contain: @card(<card-args>)
+    Then entity(customer) get owns(surname) get declared annotations do not contain: @card(<card-args>)
+    Then entity(customer) get owns(surname) get annotations do not contain: @key
+    Then entity(subscriber) get owns(surname) get annotations do not contain: @card(<card-args>)
+    Then entity(subscriber) get owns(surname) get annotations contain: @key
+    Then entity(person) get owns(name) set annotation: @key; fails
+    Then entity(customer) get owns(surname) set annotation: @key; fails
+    Then entity(subscriber) get owns(surname) set override: name; fails
+    Then entity(subscriber) get owns(third-name) set annotation: @key; fails
+    When entity(subscriber) get owns(third-name) set override: non-card-name
+    When entity(subscriber) get owns(third-name) set annotation: @key
+    Then entity(subscriber) get owns(third-name) get annotations contain: @key
+    Then entity(subscriber) get owns(third-name) get declared annotations contain: @key
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get owns(name) get annotations contain: @card(<card-args>)
+    Then entity(person) get owns(name) get declared annotations contain: @card(<card-args>)
+    Then entity(person) get owns(name) get annotations do not contain: @key
+    Then entity(customer) get owns(surname) get annotations contain: @card(<card-args>)
+    Then entity(customer) get owns(surname) get declared annotations do not contain: @card(<card-args>)
+    Then entity(customer) get owns(surname) get annotations do not contain: @key
+    Then entity(subscriber) get owns(surname) get annotations do not contain: @card(<card-args>)
+    Then entity(subscriber) get owns(surname) get annotations contain: @key
+    Then entity(subscriber) get owns(third-name) get annotations contain: @key
+    Then entity(subscriber) get owns(third-name) get declared annotations contain: @key
+    Then entity(person) get owns(name) set annotation: @key; fails
+    Then entity(customer) get owns(surname) set annotation: @key; fails
+    Then entity(subscriber) get owns(surname) set override: name; fails
+    Then entity(subscriber) get owns(third-name) set override: name; fails
+    When entity(customer) get owns(surname) unset override
+    When entity(subscriber) get owns(surname) unset annotation: @key
+    When entity(customer) get owns(surname) set annotation: @key
+    When entity(subscriber) get owns(surname) set override: name
+    Then entity(person) get owns(name) set annotation: @key; fails
+    Then entity(customer) get owns(surname) set override: name; fails
+    Then entity(subscriber) get owns(surname) set annotation: @key; fails
+    Then entity(person) get owns(name) get annotations contain: @card(<card-args>)
+    Then entity(person) get owns(name) get declared annotations contain: @card(<card-args>)
+    Then entity(person) get owns(name) get annotations do not contain: @key
+    Then entity(subscriber) get owns(surname) get annotations contain: @card(<card-args>)
+    Then entity(subscriber) get owns(surname) get declared annotations do not contain: @card(<card-args>)
+    Then entity(subscriber) get owns(surname) get annotations do not contain: @key
+    Then entity(customer) get owns(surname) get annotations do not contain: @card(<card-args>)
+    Then entity(customer) get owns(surname) get annotations contain: @key
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get owns(name) set annotation: @key; fails
+    Then entity(customer) get owns(surname) set override: name; fails
+    Then entity(subscriber) get owns(surname) set annotation: @key; fails
+    Then entity(person) get owns(name) get annotations contain: @card(<card-args>)
+    Then entity(person) get owns(name) get declared annotations contain: @card(<card-args>)
+    Then entity(person) get owns(name) get annotations do not contain: @key
+    Then entity(subscriber) get owns(surname) get annotations contain: @card(<card-args>)
+    Then entity(subscriber) get owns(surname) get declared annotations do not contain: @card(<card-args>)
+    Then entity(subscriber) get owns(surname) get annotations do not contain: @key
+    Then entity(customer) get owns(surname) get annotations do not contain: @card(<card-args>)
+    Then entity(customer) get owns(surname) get annotations contain: @key
+    When entity(person) get owns(name) unset annotation: @card
+    When entity(customer) get owns(surname) set override: name
+    When entity(subscriber) get owns(surname) set annotation: @key
+    Then entity(person) get owns(name) get annotations do not contain: @key
+    Then entity(person) get owns(name) get annotation categories do not contain: @card
+    Then entity(customer) get owns(surname) get annotations contain: @key
+    Then entity(customer) get owns(surname) get annotation categories do not contain: @card
+    Then entity(subscriber) get owns(surname) get annotations contain: @key
+    Then entity(subscriber) get owns(surname) get annotation categories do not contain: @card
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get owns(name) get annotations do not contain: @key
+    Then entity(person) get owns(name) get annotation categories do not contain: @card
+    Then entity(customer) get owns(surname) get annotations contain: @key
+    Then entity(customer) get owns(surname) get annotation categories do not contain: @card
+    Then entity(subscriber) get owns(surname) get annotations contain: @key
+    Then entity(subscriber) get owns(surname) get annotation categories do not contain: @card
+    Examples:
+      | card-args |
+      | 1, 1      |
+      | 1, *      |
+      | 2, 2      |
+
+  Scenario Outline: Annotation @unique is not inherited if @key is declared on a subtype for owns, cannot be declared having key
+    When create attribute type: name
+    When attribute(name) set value type: string
+    When attribute(name) set annotation: @abstract
+    When create attribute type: name2
+    When attribute(name2) set value type: string
+    When attribute(name2) set annotation: @abstract
+    When attribute(name2) set supertype: name
+    When create attribute type: subname2
+    When attribute(subname2) set value type: string
+    When attribute(subname2) set supertype: name2
+    When create attribute type: name3
+    When attribute(name3) set value type: string
+    When attribute(name3) set supertype: name
+    When create attribute type: name4
+    When attribute(name4) set value type: string
+    When attribute(name4) set supertype: name
+    When entity(person) set annotation: @abstract
+    When entity(person) set owns: name
+    When entity(person) get owns(name) set annotation: @unique
+    When create entity type: player
+    When entity(player) set supertype: person
+    When entity(player) set annotation: @abstract
+    When entity(player) set owns: name2
+    When entity(player) get owns(name2) set override: name
+    When entity(player) get owns(name2) set annotation: @key
+    Then entity(player) get owns(name2) set annotation: @unique; fails
+    When create entity type: subplayer
+    When entity(subplayer) set supertype: player
+    When entity(subplayer) set owns: subname2
+    When entity(subplayer) get owns(subname2) set override: name2
+    Then entity(subplayer) get owns(subname2) get annotations contain: @key
+    Then entity(subplayer) get owns(subname2) get annotation categories do not contain: @unique
+    Then entity(subplayer) get owns(subname2) set annotation: @unique; fails
+    When entity(subplayer) get owns(subname2) unset override
+    When entity(subplayer) get owns(subname2) set annotation: @unique
+    Then entity(subplayer) get owns(subname2) get annotations contain: @unique
+    Then entity(subplayer) get owns(subname2) set override: name2; fails
+    When create entity type: player2
+    When entity(player2) set supertype: person
+    When entity(player2) set owns: name3
+    When entity(player2) get owns(name3) set override: name
+    When entity(player2) get owns(name3) set annotation: @card(<card-args>)
+    When create entity type: player3
+    When entity(player3) set supertype: person
+    When entity(player3) set owns: name4
+    When entity(player3) get owns(name4) set override: name
+    Then entity(person) get owns(name) get annotations contain: @unique
+    Then entity(person) get owns(name) get declared annotations contain: @unique
+    Then entity(player) get owns(name2) get annotations contain: @key
+    Then entity(player) get owns(name2) get annotations do not contain: @unique
+    Then entity(player) get owns(name2) get declared annotations contain: @key
+    Then entity(player) get owns(name2) get declared annotations do not contain: @unique
+    Then entity(player2) get owns(name3) get annotations contain: @card(<card-args>)
+    Then entity(player2) get owns(name3) get annotations contain: @unique
+    Then entity(player2) get owns(name3) get declared annotations contain: @card(<card-args>)
+    Then entity(player2) get owns(name3) get declared annotations do not contain: @unique
+    Then entity(player3) get owns(name4) get annotations contain: @unique
+    Then entity(player3) get owns(name4) get declared annotations do not contain: @unique
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get owns(name) get annotations contain: @unique
+    Then entity(person) get owns(name) get declared annotations contain: @unique
+    Then entity(player) get owns(name2) get annotations contain: @key
+    Then entity(player) get owns(name2) get annotations do not contain: @unique
+    Then entity(player) get owns(name2) get declared annotations contain: @key
+    Then entity(player) get owns(name2) get declared annotations do not contain: @unique
+    Then entity(player2) get owns(name3) get annotations contain: @card(<card-args>)
+    Then entity(player2) get owns(name3) get annotations contain: @unique
+    Then entity(player2) get owns(name3) get declared annotations contain: @card(<card-args>)
+    Then entity(player2) get owns(name3) get declared annotations do not contain: @unique
+    Then entity(player3) get owns(name4) get annotations contain: @unique
+    Then entity(player3) get owns(name4) get declared annotations do not contain: @unique
+    Examples:
+      | card-args |
+      | 0, 1      |
+      | 0, 2      |
+      | 0, *      |
+
+  Scenario Outline: Annotation @card is not inherited if @key is declared on a subtype for owns, cannot be declared having key
+    When create attribute type: name
+    When attribute(name) set value type: string
+    When attribute(name) set annotation: @abstract
+    When create attribute type: name2
+    When attribute(name2) set value type: string
+    When attribute(name2) set annotation: @abstract
+    When attribute(name2) set supertype: name
+    When create attribute type: subname2
+    When attribute(subname2) set value type: string
+    When attribute(subname2) set supertype: name2
+    When create attribute type: name3
+    When attribute(name3) set value type: string
+    When attribute(name3) set supertype: name
+    When create attribute type: name4
+    When attribute(name4) set value type: string
+    When attribute(name4) set supertype: name
+    When entity(person) set annotation: @abstract
+    When entity(person) set owns: name
+    When entity(person) get owns(name) set annotation: @card(<card-args>)
+    When create entity type: player
+    When entity(player) set supertype: person
+    When entity(player) set annotation: @abstract
+    When entity(player) set owns: name2
+    When entity(player) get owns(name2) set override: name
+    When entity(player) get owns(name2) set annotation: @key
+    Then entity(player) get owns(name2) set annotation: @card(<card-args>); fails
+    When create entity type: subplayer
+    When entity(subplayer) set supertype: player
+    When entity(subplayer) set owns: subname2
+    When entity(subplayer) get owns(subname2) set override: name2
+    Then entity(subplayer) get owns(subname2) get annotations contain: @key
+    Then entity(subplayer) get owns(subname2) get annotation categories do not contain: @card
+    Then entity(subplayer) get owns(subname2) set annotation: @card(<card-args>); fails
+    When entity(subplayer) get owns(subname2) unset override
+    When entity(subplayer) get owns(subname2) set annotation: @card(<card-args>)
+    Then entity(subplayer) get owns(subname2) get annotations contain: @card(<card-args>)
+    Then entity(subplayer) get owns(subname2) set override: name2; fails
+    When create entity type: player2
+    When entity(player2) set supertype: person
+    When entity(player2) set owns: name3
+    When entity(player2) get owns(name3) set override: name
+    When entity(player2) get owns(name3) set annotation: @unique
+    When create entity type: player3
+    When entity(player3) set supertype: person
+    When entity(player3) set owns: name4
+    When entity(player3) get owns(name4) set override: name
+    Then entity(person) get owns(name) get annotations contain: @card(<card-args>)
+    Then entity(person) get owns(name) get declared annotations contain: @card(<card-args>)
+    Then entity(player) get owns(name2) get annotations contain: @key
+    Then entity(player) get owns(name2) get annotations do not contain: @card(<card-args>)
+    Then entity(player) get owns(name2) get declared annotations contain: @key
+    Then entity(player) get owns(name2) get declared annotations do not contain: @card(<card-args>)
+    Then entity(player2) get owns(name3) get annotations contain: @unique
+    Then entity(player2) get owns(name3) get annotations contain: @card(<card-args>)
+    Then entity(player2) get owns(name3) get declared annotations contain: @unique
+    Then entity(player2) get owns(name3) get declared annotations do not contain: @card(<card-args>)
+    Then entity(player3) get owns(name4) get annotations contain: @card(<card-args>)
+    Then entity(player3) get owns(name4) get declared annotations do not contain: @card(<card-args>)
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get owns(name) get annotations contain: @card(<card-args>)
+    Then entity(person) get owns(name) get declared annotations contain: @card(<card-args>)
+    Then entity(player) get owns(name2) get annotations contain: @key
+    Then entity(player) get owns(name2) get annotations do not contain: @card(<card-args>)
+    Then entity(player) get owns(name2) get declared annotations contain: @key
+    Then entity(player) get owns(name2) get declared annotations do not contain: @card(<card-args>)
+    Then entity(player2) get owns(name3) get annotations contain: @unique
+    Then entity(player2) get owns(name3) get annotations contain: @card(<card-args>)
+    Then entity(player2) get owns(name3) get declared annotations contain: @unique
+    Then entity(player2) get owns(name3) get declared annotations do not contain: @card(<card-args>)
+    Then entity(player3) get owns(name4) get annotations contain: @card(<card-args>)
+    Then entity(player3) get owns(name4) get declared annotations do not contain: @card(<card-args>)
+    Examples:
+      | card-args |
+      | 0, 1      |
+      | 0, 2      |
+      | 0, *      |

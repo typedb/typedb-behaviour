@@ -34,7 +34,6 @@ Feature: Concept Plays
 # plays common
 ########################
   # TODO: unset supertype for entity/relation while having overrides on its plays -- schema validation
-  # TODO: Change override tests (We need to allow changing supertypes while having overrides, but fail at commit time if overrides are not changed)
 
   Scenario: Entity types can play role types
     When create relation type: marriage
