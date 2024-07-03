@@ -186,6 +186,7 @@ Feature: Concept Entity Type
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) set supertype: person; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     Then entity(person) set supertype: person; fails
 
@@ -370,6 +371,7 @@ Feature: Concept Entity Type
 #    Then entity(person) get annotations contain: @abstract
 #    Then entity(person) get declared annotations contain: @abstract
 #    Then entity(person) create new instance; fails
+#    When transaction closes
 #    When connection open schema transaction for database: typedb
 #    Then entity(company) get annotations do not contain: @abstract
 #    Then entity(company) get declared annotations do not contain: @abstract

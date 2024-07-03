@@ -43,7 +43,7 @@ Feature: Concept Owns
 ########################
   # TODO: unset supertype for entity/relation while having overrides on its owns -- schema validation
   # TODO: "date" type
-  # TODO: "datetimetz" -> "datetime-tz"
+  # TODO: "datetime-tz" -> "datetime-tz"
 
   Scenario Outline: Entity types can own and unset attributes
     When create attribute type: name
@@ -90,12 +90,12 @@ Feature: Concept Owns
     Examples:
       | value-type    | value-type-2 |
       | long          | string       |
-      | double        | datetimetz   |
+      | double        | datetime-tz   |
       | decimal       | datetime     |
       | string        | duration     |
       | boolean       | long         |
       | datetime      | decimal      |
-      | datetimetz    | double       |
+      | datetime-tz    | double       |
       | duration      | boolean      |
       | custom-struct | long         |
 
@@ -118,7 +118,7 @@ Feature: Concept Owns
       | string        |
       | boolean       |
       | datetime      |
-      | datetimetz    |
+      | datetime-tz    |
       | duration      |
       | custom-struct |
 
@@ -252,12 +252,12 @@ Feature: Concept Owns
     Examples:
       | value-type    | value-type-2 |
       | long          | string       |
-      | double        | datetimetz   |
+      | double        | datetime-tz   |
       | decimal       | datetime     |
       | string        | duration     |
       | boolean       | long         |
       | datetime      | decimal      |
-      | datetimetz    | double       |
+      | datetime-tz    | double       |
       | duration      | boolean      |
       | custom-struct | long         |
 
@@ -282,7 +282,7 @@ Feature: Concept Owns
       | string        |
       | boolean       |
       | datetime      |
-      | datetimetz    |
+      | datetime-tz    |
       | duration      |
       | custom-struct |
 
@@ -445,7 +445,7 @@ Feature: Concept Owns
 #      | entity    | person      | string     | "alice"         |
 #      | entity    | person      | boolean    | true            |
 #      | entity    | person      | datetime   | 2024-05-04      |
-#      | entity    | person      | datetimetz | 2024-05-04+0010 |
+#      | entity    | person      | datetime-tz | 2024-05-04+0010 |
 #      | entity    | person      | duration   | P1Y             |
 #      | relation  | description | long       | 1               |
 #      | relation  | description | double     | 1.0             |
@@ -453,7 +453,7 @@ Feature: Concept Owns
 #      | relation  | description | string     | "alice"         |
 #      | relation  | description | boolean    | true            |
 #      | relation  | description | datetime   | 2024-05-04      |
-#      | relation  | description | datetimetz | 2024-05-04+0010 |
+#      | relation  | description | datetime-tz | 2024-05-04+0010 |
 #      | relation  | description | duration   | P1Y             |
 
   Scenario Outline: <root-type> types can re-override owns
@@ -485,7 +485,7 @@ Feature: Concept Owns
       | entity    | person         | customer     | string        |
       | entity    | person         | customer     | boolean       |
       | entity    | person         | customer     | datetime      |
-      | entity    | person         | customer     | datetimetz    |
+      | entity    | person         | customer     | datetime-tz    |
       | entity    | person         | customer     | duration      |
       | entity    | person         | customer     | custom-struct |
       | relation  | description    | registration | long          |
@@ -494,7 +494,7 @@ Feature: Concept Owns
       | relation  | description    | registration | string        |
       | relation  | description    | registration | boolean       |
       | relation  | description    | registration | datetime      |
-      | relation  | description    | registration | datetimetz    |
+      | relation  | description    | registration | datetime-tz    |
       | relation  | description    | registration | duration      |
       | relation  | description    | registration | custom-struct |
 
@@ -639,7 +639,7 @@ Feature: Concept Owns
     Then transaction commits; fails
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | value-type    |
-      | entity    | person         | customer     | subscriber     | datetimetz    |
+      | entity    | person         | customer     | subscriber     | datetime-tz    |
       | entity    | person         | customer     | subscriber     | custom-struct |
       | relation  | description    | registration | profile        | decimal       |
       | relation  | description    | registration | profile        | string        |
@@ -848,12 +848,12 @@ Feature: Concept Owns
     Examples:
       | value-type    | value-type-2 |
       | long          | string       |
-      | double        | datetimetz   |
+      | double        | datetime-tz   |
       | decimal       | datetime     |
       | string        | duration     |
       | boolean       | long         |
       | datetime      | decimal      |
-      | datetimetz    | double       |
+      | datetime-tz    | double       |
       | duration      | boolean      |
       | custom-struct | long         |
 
@@ -945,7 +945,7 @@ Feature: Concept Owns
       | string        |
       | boolean       |
       | datetime      |
-      | datetimetz    |
+      | datetime-tz    |
       | duration      |
       | custom-struct |
 
@@ -1033,12 +1033,12 @@ Feature: Concept Owns
     Examples:
       | value-type    | value-type-2 |
       | long          | string       |
-      | double        | datetimetz   |
+      | double        | datetime-tz   |
       | decimal       | datetime     |
       | string        | duration     |
       | boolean       | long         |
       | datetime      | decimal      |
-      | datetimetz    | double       |
+      | datetime-tz    | double       |
       | duration      | boolean      |
       | custom-struct | long         |
 
@@ -1146,7 +1146,7 @@ Feature: Concept Owns
       | string        |
       | boolean       |
       | datetime      |
-      | datetimetz    |
+      | datetime-tz    |
       | duration      |
       | custom-struct |
 
@@ -1228,7 +1228,7 @@ Feature: Concept Owns
       | entity    | person      | string     |
       | entity    | person      | boolean    |
       | entity    | person      | datetime   |
-      | entity    | person      | datetimetz |
+      | entity    | person      | datetime-tz |
       | entity    | person      | duration   |
       | relation  | description | long       |
       | relation  | description | double     |
@@ -1236,7 +1236,7 @@ Feature: Concept Owns
       | relation  | description | string     |
       | relation  | description | boolean    |
       | relation  | description | datetime   |
-      | relation  | description | datetimetz |
+      | relation  | description | datetime-tz |
       | relation  | description | duration   |
 
   Scenario Outline: Ordered owns can redeclare ordering
@@ -1304,7 +1304,7 @@ Feature: Concept Owns
 #      | entity    | person      | string     | "alice"         |
 #      | entity    | person      | boolean    | true            |
 #      | entity    | person      | datetime   | 2024-05-04      |
-#      | entity    | person      | datetimetz | 2024-05-04+0010 |
+#      | entity    | person      | datetime-tz | 2024-05-04+0010 |
 #      | entity    | person      | duration   | P1Y             |
 #      | relation  | description | long       | 1               |
 #      | relation  | description | double     | 1.0             |
@@ -1312,7 +1312,7 @@ Feature: Concept Owns
 #      | relation  | description | string     | "alice"         |
 #      | relation  | description | boolean    | true            |
 #      | relation  | description | datetime   | 2024-05-04      |
-#      | relation  | description | datetimetz | 2024-05-04+0010 |
+#      | relation  | description | datetime-tz | 2024-05-04+0010 |
 #      | relation  | description | duration   | P1Y             |
 
   Scenario Outline: <root-type> types can re-override ordered ownership
@@ -1349,7 +1349,7 @@ Feature: Concept Owns
       | entity    | person         | customer     | string        |
       | entity    | person         | customer     | boolean       |
       | entity    | person         | customer     | datetime      |
-      | entity    | person         | customer     | datetimetz    |
+      | entity    | person         | customer     | datetime-tz    |
       | entity    | person         | customer     | duration      |
       | entity    | person         | customer     | custom-struct |
       | relation  | description    | registration | long          |
@@ -1358,7 +1358,7 @@ Feature: Concept Owns
       | relation  | description    | registration | string        |
       | relation  | description    | registration | boolean       |
       | relation  | description    | registration | datetime      |
-      | relation  | description    | registration | datetimetz    |
+      | relation  | description    | registration | datetime-tz    |
       | relation  | description    | registration | duration      |
       | relation  | description    | registration | custom-struct |
 
@@ -1395,7 +1395,7 @@ Feature: Concept Owns
     Then transaction commits; fails
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | value-type    |
-      | entity    | person         | customer     | subscriber     | datetimetz    |
+      | entity    | person         | customer     | subscriber     | datetime-tz    |
       | entity    | person         | customer     | subscriber     | custom-struct |
       | relation  | description    | registration | profile        | decimal       |
       | relation  | description    | registration | profile        | string        |
@@ -1590,8 +1590,10 @@ Feature: Concept Owns
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get owns(name) set ordering: ordered; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name-2>) get owns(surname) set ordering: ordered; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     When <root-type>(<supertype-name>) get owns(literal) set ordering: ordered
     When <root-type>(<subtype-name>) get owns(name) set ordering: ordered
@@ -1599,6 +1601,7 @@ Feature: Concept Owns
     When connection open schema transaction for database: typedb
     When <root-type>(<supertype-name>) get owns(literal) set ordering: ordered
     Then <root-type>(<subtype-name-2>) get owns(surname) set ordering: ordered; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get owns(name) set ordering: ordered; fails
     Then transaction commits; fails
@@ -1614,13 +1617,16 @@ Feature: Concept Owns
     Then <root-type>(<supertype-name>) get owns(literal) get ordering: ordered
     Then <root-type>(<subtype-name>) get owns(name) get ordering: ordered
     Then <root-type>(<subtype-name-2>) get owns(surname) get ordering: ordered
+    When transaction closes
     When connection open schema transaction for database: typedb
     When <root-type>(<supertype-name>) get owns(literal) set ordering: unordered
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get owns(name) set ordering: unordered; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name-2>) get owns(surname) set ordering: unordered; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     When <root-type>(<supertype-name>) get owns(literal) set ordering: unordered
     When <root-type>(<subtype-name>) get owns(name) set ordering: unordered
@@ -1628,8 +1634,10 @@ Feature: Concept Owns
     When connection open schema transaction for database: typedb
     When <root-type>(<supertype-name>) get owns(literal) set ordering: unordered
     Then <root-type>(<subtype-name-2>) get owns(surname) set ordering: unordered; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get owns(name) set ordering: unordered; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     When <root-type>(<supertype-name>) get owns(literal) set ordering: unordered
     When <root-type>(<subtype-name>) get owns(name) set ordering: unordered
@@ -2384,10 +2392,9 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get owns(surname) get annotations contain: @<annotation>
     Then <root-type>(<supertype-name>) get owns(name) get annotations is empty
     When transaction commits
-    When connection open read transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get owns(surname) get annotations contain: @<annotation>
     Then <root-type>(<supertype-name>) get owns(name) get annotations is empty
-    When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name-2>) set owns: name; fails
     When <root-type>(<subtype-name-2>) get owns(surname) set annotation: @<annotation>
     Then <root-type>(<subtype-name-2>) get owns(surname) get annotations contain: @<annotation>
@@ -2950,7 +2957,7 @@ Feature: Concept Owns
       | string     |
       | boolean    |
       | datetime   |
-      | datetimetz |
+      | datetime-tz |
       | duration   |
 
   Scenario Outline: Owns can reset @key annotations
@@ -2973,7 +2980,7 @@ Feature: Concept Owns
       | string     |
       | boolean    |
       | datetime   |
-      | datetimetz |
+      | datetime-tz |
       | duration   |
 
   Scenario Outline: Owns cannot set @key annotation for <value-type> as it is not keyable
@@ -3100,7 +3107,7 @@ Feature: Concept Owns
       | string     |
       | boolean    |
       | datetime   |
-      | datetimetz |
+      | datetime-tz |
       | duration   |
 
   Scenario Outline: Owns cannot set @key annotation for <value-type> as it is not keyable for ordered ownership
@@ -3134,6 +3141,7 @@ Feature: Concept Owns
 #    When connection open schema transaction for database: typedb
 #    When entity(person) set owns: email
 #    When entity(person) get owns(email) set annotation: @key; fails
+#    When transaction closes
 #    When connection open schema transaction for database: typedb
 #    When entity(person) set owns: email
 #    Then transaction commits
@@ -3190,7 +3198,7 @@ Feature: Concept Owns
 #      | string     | label                          |
 #      | boolean    | lAbEl_Of_FoRmaT                |
 #      | datetime   | l                              |
-#      | datetimetz | l2                             |
+#      | datetime-tz | l2                             |
 #      | duration   | trydigits2723andafter          |
 #      | long       | LABEL, LABEL2                  |
 #      | string     | label, label2                  |
@@ -3269,7 +3277,7 @@ Feature: Concept Owns
 #      | string     |
 #      | boolean    |
 #      | datetime   |
-#      | datetimetz |
+#      | datetime-tz |
 #      | duration   |
 #
 #  Scenario: Owns can set multiple @subkey annotations with different arguments
@@ -3349,7 +3357,7 @@ Feature: Concept Owns
 #      | boolean    |
 #      | decimal    |
 #      | datetime   |
-#      | datetimetz |
+#      | datetime-tz |
 #      | duration   |
 
 ########################
@@ -3387,7 +3395,7 @@ Feature: Concept Owns
       | string     |
       | boolean    |
       | datetime   |
-      | datetimetz |
+      | datetime-tz |
       | duration   |
 
   Scenario Outline: Owns can reset @unique annotation
@@ -3410,7 +3418,7 @@ Feature: Concept Owns
       | string     |
       | boolean    |
       | datetime   |
-      | datetimetz |
+      | datetime-tz |
       | duration   |
 
   Scenario Outline: Owns cannot set @unique annotation for <value-type> as it is not keyable
@@ -3556,7 +3564,7 @@ Feature: Concept Owns
       | string     |
       | boolean    |
       | datetime   |
-      | datetimetz |
+      | datetime-tz |
       | duration   |
 
 ########################
@@ -3626,15 +3634,15 @@ Feature: Concept Owns
 #      | datetime   | 2024-06-04T16:35:02.10                                                                                                                                                                                                                                                                                                                                                                               |
 #      | datetime   | 2024-06-04T16:35:02.103                                                                                                                                                                                                                                                                                                                                                                              |
 #      | datetime   | 2024-06-04, 2024-06-04T16:35, 2024-06-04T16:35:02, 2024-06-04T16:35:02.1, 2024-06-04T16:35:02.10, 2024-06-04T16:35:02.103                                                                                                                                                                                                                                                                            |
-#      | datetimetz | 2024-06-04+0000                                                                                                                                                                                                                                                                                                                                                                                      |
-#      | datetimetz | 2024-06-04 Asia/Kathmandu                                                                                                                                                                                                                                                                                                                                                                            |
-#      | datetimetz | 2024-06-04+0100                                                                                                                                                                                                                                                                                                                                                                                      |
-#      | datetimetz | 2024-06-04T16:35+0100                                                                                                                                                                                                                                                                                                                                                                                |
-#      | datetimetz | 2024-06-04T16:35:02+0100                                                                                                                                                                                                                                                                                                                                                                             |
-#      | datetimetz | 2024-06-04T16:35:02.1+0100                                                                                                                                                                                                                                                                                                                                                                           |
-#      | datetimetz | 2024-06-04T16:35:02.10+0100                                                                                                                                                                                                                                                                                                                                                                          |
-#      | datetimetz | 2024-06-04T16:35:02.103+0100                                                                                                                                                                                                                                                                                                                                                                         |
-#      | datetimetz | 2024-06-04+0001, 2024-06-04 Asia/Kathmandu, 2024-06-04+0002, 2024-06-04+0010, 2024-06-04+0100, 2024-06-04-0100, 2024-06-04T16:35-0100, 2024-06-04T16:35:02+0200, 2024-06-04T16:35:02.1-0300, 2024-06-04T16:35:02.10+1000, 2024-06-04T16:35:02.103+0011                                                                                                                                               |
+#      | datetime-tz | 2024-06-04+0000                                                                                                                                                                                                                                                                                                                                                                                      |
+#      | datetime-tz | 2024-06-04 Asia/Kathmandu                                                                                                                                                                                                                                                                                                                                                                            |
+#      | datetime-tz | 2024-06-04+0100                                                                                                                                                                                                                                                                                                                                                                                      |
+#      | datetime-tz | 2024-06-04T16:35+0100                                                                                                                                                                                                                                                                                                                                                                                |
+#      | datetime-tz | 2024-06-04T16:35:02+0100                                                                                                                                                                                                                                                                                                                                                                             |
+#      | datetime-tz | 2024-06-04T16:35:02.1+0100                                                                                                                                                                                                                                                                                                                                                                           |
+#      | datetime-tz | 2024-06-04T16:35:02.10+0100                                                                                                                                                                                                                                                                                                                                                                          |
+#      | datetime-tz | 2024-06-04T16:35:02.103+0100                                                                                                                                                                                                                                                                                                                                                                         |
+#      | datetime-tz | 2024-06-04+0001, 2024-06-04 Asia/Kathmandu, 2024-06-04+0002, 2024-06-04+0010, 2024-06-04+0100, 2024-06-04-0100, 2024-06-04T16:35-0100, 2024-06-04T16:35:02+0200, 2024-06-04T16:35:02.1-0300, 2024-06-04T16:35:02.10+1000, 2024-06-04T16:35:02.103+0011                                                                                                                                               |
 #      | duration   | P1Y                                                                                                                                                                                                                                                                                                                                                                                                  |
 #      | duration   | P2M                                                                                                                                                                                                                                                                                                                                                                                                  |
 #      | duration   | P1Y2M                                                                                                                                                                                                                                                                                                                                                                                                |
@@ -3679,7 +3687,7 @@ Feature: Concept Owns
 #      | string     | "str", "str another"             |
 #      | boolean    | false, true                      |
 #      | datetime   | 2024-05-06, 2024-05-08           |
-#      | datetimetz | 2024-05-07+0100, 2024-05-10+0100 |
+#      | datetime-tz | 2024-05-07+0100, 2024-05-10+0100 |
 #      | duration   | P1Y, P2Y                         |
 #
 #    #  TODO: Make it only for typeql
@@ -3701,7 +3709,7 @@ Feature: Concept Owns
 ##      | string     |
 ##      | boolean    |
 ##      | datetime   |
-##      | datetimetz |
+##      | datetime-tz |
 ##      | duration   |
 #
 ##   TODO: Make it only for typeql
@@ -3744,11 +3752,11 @@ Feature: Concept Owns
 ##      | datetime   | "string"                        |
 ##      | datetime   | true                            |
 ##      | datetime   | 2024-06-04+0010                 |
-##      | datetimetz | 123                             |
-##      | datetimetz | "string"                        |
-##      | datetimetz | true                            |
-##      | datetimetz | 2024-06-04                      |
-##      | datetimetz | 2024-06-04 NotRealTimeZone/Zone |
+##      | datetime-tz | 123                             |
+##      | datetime-tz | "string"                        |
+##      | datetime-tz | true                            |
+##      | datetime-tz | 2024-06-04                      |
+##      | datetime-tz | 2024-06-04 NotRealTimeZone/Zone |
 ##      | duration   | 123                             |
 ##      | duration   | "string"                        |
 ##      | duration   | true                            |
@@ -3777,7 +3785,7 @@ Feature: Concept Owns
 #      | string     | "s"             | "not s"         |
 #      | boolean    | true            | false           |
 #      | datetime   | 2024-05-05      | 2024-06-05      |
-#      | datetimetz | 2024-05-05+0100 | 2024-05-05+0010 |
+#      | datetime-tz | 2024-05-05+0100 | 2024-05-05+0010 |
 #      | duration   | P1Y             | P2Y             |
 #
 #  # TODO: Make it only for typeql
@@ -3803,7 +3811,7 @@ Feature: Concept Owns
 ##      | boolean    | true                        | true                         | false                        |
 ##      | datetime   | 2024-06-04T16:35:02.101     | 2024-06-04T16:35:02.101      | 2024-06-04                   |
 ##      | datetime   | 2020-06-04T16:35:02.10      | 2025-06-05T16:35             | 2025-06-05T16:35             |
-##      | datetimetz | 2020-06-04T16:35:02.10+0100 | 2020-06-04T16:35:02.10+0000  | 2020-06-04T16:35:02.10+0100  |
+##      | datetime-tz | 2020-06-04T16:35:02.10+0100 | 2020-06-04T16:35:02.10+0000  | 2020-06-04T16:35:02.10+0100  |
 ##      | duration   | P1Y1M                       | P1Y1M                        | P1Y2M                        |
 #
 #  Scenario Outline: Owns-related @values annotation for <value-type> value type can be inherited and overridden by a subset of arguments
@@ -3895,7 +3903,7 @@ Feature: Concept Owns
 #      | string     | "john", "John", "Johnny", "johnny"                                           | "John", "Johnny"                           |
 #      | boolean    | true, false                                                                  | true                                       |
 #      | datetime   | 2024-06-04, 2024-06-05, 2024-06-06                                           | 2024-06-04, 2024-06-06                     |
-#      | datetimetz | 2024-06-04+0010, 2024-06-04 Asia/Kathmandu, 2024-06-05+0010, 2024-06-05+0100 | 2024-06-04 Asia/Kathmandu, 2024-06-05+0010 |
+#      | datetime-tz | 2024-06-04+0010, 2024-06-04 Asia/Kathmandu, 2024-06-05+0010, 2024-06-05+0100 | 2024-06-04 Asia/Kathmandu, 2024-06-05+0010 |
 #      | duration   | P6M, P1Y, P1Y1M, P1Y2M, P1Y3M, P1Y4M, P1Y6M                                  | P6M, P1Y3M, P1Y4M, P1Y6M                   |
 #
 #  Scenario Outline: Inherited @values annotation on owns for <value-type> value type cannot be reset or overridden by the @values of not a subset of arguments
@@ -3949,6 +3957,7 @@ Feature: Concept Owns
 #    Then relation(description) get owns(custom-attribute) get annotations contain: @values(<args-override>)
 #    Then entity(player) get owns(overridden-custom-attribute) get annotations contain: @values(<args>)
 #    Then relation(marriage) get owns(overridden-custom-attribute) get annotations contain: @values(<args>)
+#    When transaction closes
 #    When connection open schema transaction for database: typedb
 #    When entity(player) get owns(overridden-custom-attribute) set annotation: @values(<args>)
 #    Then transaction commits; fails
@@ -3963,7 +3972,7 @@ Feature: Concept Owns
 #      | string     | "john", "John", "Johnny", "johnny"                                           | "Jonathan"               |
 #      | boolean    | false                                                                        | true                     |
 #      | datetime   | 2024-06-04, 2024-06-05, 2024-06-06                                           | 2020-06-04, 2020-06-06   |
-#      | datetimetz | 2024-06-04+0010, 2024-06-04 Asia/Kathmandu, 2024-06-05+0010, 2024-06-05+0100 | 2024-06-04 Europe/London |
+#      | datetime-tz | 2024-06-04+0010, 2024-06-04 Asia/Kathmandu, 2024-06-05+0010, 2024-06-05+0100 | 2024-06-04 Europe/London |
 #      | duration   | P6M, P1Y, P1Y1M, P1Y2M, P1Y3M, P1Y4M, P1Y6M                                  | P3M, P1Y3M, P1Y4M, P1Y6M |
 #
 #  Scenario Outline: Values can be narrowed for the same attribute for <root-type>'s owns
@@ -4115,10 +4124,10 @@ Feature: Concept Owns
 #      | datetime   | 2024-06-04                   | 2025-01-01                                            |
 #      | datetime   | 1970-01-01                   | 9999-12-12                                            |
 #      | datetime   | 2024-06-04T16:35:02.10       | 2024-06-04T16:35:02.11                                |
-#      | datetimetz | 2024-06-04+0000              | 2024-06-05+0000                                       |
-#      | datetimetz | 2024-06-04+0100              | 2048-06-04+0100                                       |
-#      | datetimetz | 2024-06-04T16:35:02.103+0100 | 2024-06-04T16:35:02.104+0100                          |
-#      | datetimetz | 2024-06-04 Asia/Kathmandu    | 2024-06-05 Asia/Kathmandu                             |
+#      | datetime-tz | 2024-06-04+0000              | 2024-06-05+0000                                       |
+#      | datetime-tz | 2024-06-04+0100              | 2048-06-04+0100                                       |
+#      | datetime-tz | 2024-06-04T16:35:02.103+0100 | 2024-06-04T16:35:02.104+0100                          |
+#      | datetime-tz | 2024-06-04 Asia/Kathmandu    | 2024-06-05 Asia/Kathmandu                             |
 #      | duration   | P1Y                          | P2Y                                                   |
 #      | duration   | P2M                          | P1Y2M                                                 |
 #      | duration   | P1Y2M                        | P1Y2M3DT4H5M6.789S                                    |
@@ -4157,7 +4166,7 @@ Feature: Concept Owns
 ##      | string     | "1"             |
 ##      | boolean    | false           |
 ##      | datetime   | 2024-06-04      |
-##      | datetimetz | 2024-06-04+0100 |
+##      | datetime-tz | 2024-06-04+0100 |
 ##      | duration   | P1Y             |
 #
 #  Scenario Outline: Owns can reset @range annotation with the same argument
@@ -4181,7 +4190,7 @@ Feature: Concept Owns
 #      | string     | "str", "str another"             |
 #      | boolean    | false, true                      |
 #      | datetime   | 2024-05-06, 2024-05-08           |
-#      | datetimetz | 2024-05-07+0100, 2024-05-10+0100 |
+#      | datetime-tz | 2024-05-07+0100, 2024-05-10+0100 |
 #      | duration   | P1Y, P2Y                         |
 #
 #  Scenario Outline: Owns cannot set multiple @range annotation with different arguments
@@ -4201,7 +4210,7 @@ Feature: Concept Owns
 #      | decimal    | -8.0, 88.3                       | 1.1, 1.5                         |
 #      | string     | "S", "s"                         | "not s", "xxxxxxxxx"             |
 #      | datetime   | 2024-05-05, 2024-05-06           | 2024-06-05, 2024-06-06           |
-#      | datetimetz | 2024-05-05+0100, 2024-05-06+0100 | 2024-05-05+0100, 2024-05-07+0100 |
+#      | datetime-tz | 2024-05-05+0100, 2024-05-06+0100 | 2024-05-05+0100, 2024-05-07+0100 |
 #      | duration   | P1Y, P2Y                         | P1Y6M, P2Y                       |
 #
 #  Scenario Outline: Owns cannot have @range annotation for <value-type> value type with incorrect arguments
@@ -4262,14 +4271,14 @@ Feature: Concept Owns
 #      | datetime   | "string"                        | 2030-06-04                                         |
 #      | datetime   | true                            | 2030-06-04                                         |
 #      | datetime   | 2024-06-04+0010                 | 2030-06-04                                         |
-#      | datetimetz | 2030-06-04 Europe/London        | 2030-06-04 Europe/London                           |
-#      | datetimetz | 2030-06-04 Europe/London        | 2030-06-05 Europe/London, 2030-06-06 Europe/London |
-#      | datetimetz | 2030-06-05 Europe/London        | 123                                                |
-#      | datetimetz | 123                             | 2030-06-05 Europe/London                           |
-#      | datetimetz | "string"                        | 2030-06-05 Europe/London                           |
-#      | datetimetz | true                            | 2030-06-05 Europe/London                           |
-#      | datetimetz | 2024-06-04                      | 2030-06-05 Europe/London                           |
-#      | datetimetz | 2024-06-04 NotRealTimeZone/Zone | 2030-06-05 Europe/London                           |
+#      | datetime-tz | 2030-06-04 Europe/London        | 2030-06-04 Europe/London                           |
+#      | datetime-tz | 2030-06-04 Europe/London        | 2030-06-05 Europe/London, 2030-06-06 Europe/London |
+#      | datetime-tz | 2030-06-05 Europe/London        | 123                                                |
+#      | datetime-tz | 123                             | 2030-06-05 Europe/London                           |
+#      | datetime-tz | "string"                        | 2030-06-05 Europe/London                           |
+#      | datetime-tz | true                            | 2030-06-05 Europe/London                           |
+#      | datetime-tz | 2024-06-04                      | 2030-06-05 Europe/London                           |
+#      | datetime-tz | 2024-06-04 NotRealTimeZone/Zone | 2030-06-05 Europe/London                           |
 #      | duration   | P1Y                             | P1Y                                                |
 #      | duration   | P1Y                             | P2Y, P3Y                                           |
 #      | duration   | P1Y                             | 123                                                |
@@ -4369,7 +4378,7 @@ Feature: Concept Owns
 #      | decimal    | 0.0, 1.0                         | 0.0, 0.999999                             |
 #      | string     | "A", "Z"                         | "J", "Z"                                  |
 #      | datetime   | 2024-06-04, 2024-06-05           | 2024-06-04, 2024-06-04T12:00:00           |
-#      | datetimetz | 2024-06-04+0010, 2024-06-05+0010 | 2024-06-04+0010, 2024-06-04T12:00:00+0010 |
+#      | datetime-tz | 2024-06-04+0010, 2024-06-05+0010 | 2024-06-04+0010, 2024-06-04T12:00:00+0010 |
 #      | duration   | P6M, P1Y                         | P8M, P9M                                  |
 #
 #  Scenario Outline: Inherited @range annotation on owns for <value-type> value type cannot be reset or overridden by the @range of not a subset of arguments
@@ -4423,6 +4432,7 @@ Feature: Concept Owns
 #    Then relation(description) get owns(custom-attribute) get annotations contain: @range(<args-override>)
 #    Then entity(player) get owns(overridden-custom-attribute) get annotations contain: @range(<args>)
 #    Then relation(marriage) get owns(overridden-custom-attribute) get annotations contain: @range(<args>)
+#    When transaction closes
 #    When connection open schema transaction for database: typedb
 #    When entity(player) get owns(overridden-custom-attribute) set annotation: @range(<args>)
 #    Then transaction commits; fails
@@ -4436,7 +4446,7 @@ Feature: Concept Owns
 #      | decimal    | 0.0, 1.0                         | -0.0001, 0.999999                         |
 #      | string     | "A", "Z"                         | "A", "z"                                  |
 #      | datetime   | 2024-06-04, 2024-06-05           | 2023-06-04, 2024-06-04T12:00:00           |
-#      | datetimetz | 2024-06-04+0010, 2024-06-05+0010 | 2024-06-04+0010, 2024-06-05T01:00:00+0010 |
+#      | datetime-tz | 2024-06-04+0010, 2024-06-05+0010 | 2024-06-04+0010, 2024-06-05T01:00:00+0010 |
 #      | duration   | P6M, P1Y                         | P8M, P1Y1D                                |
 #
 #  Scenario Outline: Range can be narrowed for the same attribute for <root-type>'s owns
@@ -4598,12 +4608,12 @@ Feature: Concept Owns
       | datetime      | 1    | 10                  |
       | datetime      | 0    | *                   |
       | datetime      | 1    | *                   |
-      | datetimetz    | 0    | 1                   |
-      | datetimetz    | 0    | 10                  |
-      | datetimetz    | 0    | 9223372036854775807 |
-      | datetimetz    | 1    | 10                  |
-      | datetimetz    | 0    | *                   |
-      | datetimetz    | 1    | *                   |
+      | datetime-tz    | 0    | 1                   |
+      | datetime-tz    | 0    | 10                  |
+      | datetime-tz    | 0    | 9223372036854775807 |
+      | datetime-tz    | 1    | 10                  |
+      | datetime-tz    | 0    | *                   |
+      | datetime-tz    | 1    | *                   |
       | duration      | 0    | 1                   |
       | duration      | 0    | 10                  |
       | duration      | 0    | 9223372036854775807 |
@@ -4641,8 +4651,8 @@ Feature: Concept Owns
       | decimal       | 555  |
       | datetime      | 1    |
       | datetime      | 444  |
-      | datetimetz    | 1    |
-      | datetimetz    | 33   |
+      | datetime-tz    | 1    |
+      | datetime-tz    | 33   |
       | duration      | 1    |
       | duration      | 22   |
       | custom-struct | 1    |
@@ -4680,7 +4690,7 @@ Feature: Concept Owns
       | string     |
       | boolean    |
       | datetime   |
-      | datetimetz |
+      | datetime-tz |
       | duration   |
 
   Scenario: Owns can have @card annotation for none value type
@@ -4718,7 +4728,7 @@ Feature: Concept Owns
       | string     | 1, 5 |
       | boolean    | 1, 6 |
       | datetime   | 1, 7 |
-      | datetimetz | 1, 8 |
+      | datetime-tz | 1, 8 |
       | duration   | 0, 9 |
 
   Scenario Outline: Owns can reset @card annotations
@@ -4771,7 +4781,7 @@ Feature: Concept Owns
       | string     | 2, 5 | 4, *       |
       | boolean    | 2, 5 | 4, 5       |
       | datetime   | 2, 5 | 2, 6       |
-      | datetimetz | 2, 5 | 2, 4       |
+      | datetime-tz | 2, 5 | 2, 4       |
       | duration   | 2, 5 | 2, *       |
 
   Scenario Outline: Owns-related @card annotation for <value-type> value type can be inherited and overridden by a subset of arguments
@@ -4894,7 +4904,7 @@ Feature: Concept Owns
       | decimal    | 0, 2       | 1, 2          |
       | string     | 1, *       | 1, 1          |
       | datetime   | 1, 5       | 3, 4          |
-      | datetimetz | 38, 111    | 39, 111       |
+      | datetime-tz | 38, 111    | 39, 111       |
       | duration   | 1000, 1100 | 1000, 1099    |
 
   Scenario Outline: Inherited @card annotation on owns for <value-type> value type cannot be reset or overridden by the @card of not a subset of arguments
@@ -4952,6 +4962,7 @@ Feature: Concept Owns
     Then relation(description) get owns(custom-attribute) get annotations contain: @card(<args-override>)
     Then entity(player) get owns(overridden-custom-attribute) get annotations contain: @card(<args>)
     Then relation(marriage) get owns(overridden-custom-attribute) get annotations contain: @card(<args>)
+    When transaction closes
     When connection open schema transaction for database: typedb
     When entity(player) get owns(overridden-custom-attribute) set annotation: @card(<args>)
     Then transaction commits; fails
@@ -4965,7 +4976,7 @@ Feature: Concept Owns
       | string     | 1, *       | 0, 2          |
       | datetime   | 1, 5       | 6, 10         |
       | decimal    | 2, 2       | 1, 1          |
-      | datetimetz | 38, 111    | 37, 111       |
+      | datetime-tz | 38, 111    | 37, 111       |
       | duration   | 1000, 1100 | 1000, 1199    |
 
   Scenario Outline: Cardinality can be narrowed for the same attribute for <root-type>'s owns
@@ -5098,7 +5109,7 @@ Feature: Concept Owns
       | entity    | person      | double        |
       | entity    | person      | decimal       |
       | entity    | person      | datetime      |
-      | entity    | person      | datetimetz    |
+      | entity    | person      | datetime-tz    |
       | entity    | person      | duration      |
       | entity    | person      | custom-struct |
       | relation  | description | long          |
@@ -5107,7 +5118,7 @@ Feature: Concept Owns
       | relation  | description | double        |
       | relation  | description | decimal       |
       | relation  | description | datetime      |
-      | relation  | description | datetimetz    |
+      | relation  | description | datetime-tz    |
       | relation  | description | duration      |
       | relation  | description | custom-struct |
 
@@ -5128,7 +5139,7 @@ Feature: Concept Owns
       | entity    | person      | double        |
       | entity    | person      | decimal       |
       | entity    | person      | datetime      |
-      | entity    | person      | datetimetz    |
+      | entity    | person      | datetime-tz    |
       | entity    | person      | duration      |
       | entity    | person      | custom-struct |
       | relation  | description | long          |
@@ -5137,7 +5148,7 @@ Feature: Concept Owns
       | relation  | description | double        |
       | relation  | description | decimal       |
       | relation  | description | datetime      |
-      | relation  | description | datetimetz    |
+      | relation  | description | datetime-tz    |
       | relation  | description | duration      |
       | relation  | description | custom-struct |
 
@@ -5176,7 +5187,7 @@ Feature: Concept Owns
 #      | double        |
 #      | decimal       |
 #      | datetime      |
-#      | datetimetz    |
+#      | datetime-tz    |
 #      | duration      |
 #      | custom-struct |
 
@@ -5202,7 +5213,7 @@ Feature: Concept Owns
       | double        |
       | decimal       |
       | datetime      |
-      | datetimetz    |
+      | datetime-tz    |
       | duration      |
       | custom-struct |
 
@@ -5421,7 +5432,7 @@ Feature: Concept Owns
       | double        |
       | decimal       |
       | datetime      |
-      | datetimetz    |
+      | datetime-tz    |
       | duration      |
       | custom-struct |
 
@@ -5577,6 +5588,7 @@ Feature: Concept Owns
     Then entity(customer) get owns(custom-attribute-2) get annotations is empty
     When entity(customer) get owns(custom-attribute-2) set override: custom-attribute
     Then entity(customer) get owns(custom-attribute-2) set annotation: @regex("test"); fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get annotations contain: @regex("\S+")
     Then entity(customer) get owns(custom-attribute) get annotations contain: @regex("\S+")
@@ -5635,7 +5647,7 @@ Feature: Concept Owns
     Then attribute(custom-attribute) set value type: double; fails
     Then attribute(custom-attribute) set value type: decimal; fails
     Then attribute(custom-attribute) set value type: datetime; fails
-    Then attribute(custom-attribute) set value type: datetimetz; fails
+    Then attribute(custom-attribute) set value type: datetime-tz; fails
     Then attribute(custom-attribute) set value type: duration; fails
     Then attribute(custom-attribute) set value type: custom-struct; fails
     When attribute(custom-attribute) set value type: string
@@ -5654,7 +5666,7 @@ Feature: Concept Owns
     Then attribute(custom-attribute) set value type: double; fails
     Then attribute(custom-attribute) set value type: decimal; fails
     Then attribute(custom-attribute) set value type: datetime; fails
-    Then attribute(custom-attribute) set value type: datetimetz; fails
+    Then attribute(custom-attribute) set value type: datetime-tz; fails
     Then attribute(custom-attribute) set value type: duration; fails
     Then attribute(custom-attribute) set value type: custom-struct; fails
     When attribute(custom-attribute) set value type: string
@@ -5739,7 +5751,7 @@ Feature: Concept Owns
 #      | unique                            | range(1.0, 2.0)    | unique                | range                 | decimal    |
 #      | unique                            | card(0, 1)         | unique                | card                  | double     |
 #      | unique                            | regex("s")         | unique                | regex                 | string     |
-#      | values(2024-05-06+0100)           | card(0, 1)         | values                | card                  | datetimetz |
+#      | values(2024-05-06+0100)           | card(0, 1)         | values                | card                  | datetime-tz |
 #      | range("2020-05-05", "2025-05-05") | card(0, 1)         | range                 | card                  | datetime   |
 #      | card(0, 1)                        | regex("s")         | card                  | regex                 | string     |
 #
@@ -5786,7 +5798,7 @@ Feature: Concept Owns
 #      | unique                            | card(0, 1)      | unique                | card                  | double        |
 #      | unique                            | regex("s")      | unique                | regex                 | string        |
 #      | unique                            | distinct        | unique                | distinct              | string        |
-#      | values(2024-05-06+0100)           | card(0, 1)      | values                | card                  | datetimetz    |
+#      | values(2024-05-06+0100)           | card(0, 1)      | values                | card                  | datetime-tz    |
 #      | values(1, 2)                      | distinct        | values                | distinct              | long          |
 #      | range("2020-05-05", "2025-05-05") | card(0, 1)      | range                 | card                  | datetime      |
 #      | range("2020-05-05", "2025-05-05") | distinct        | range                 | distinct              | datetime      |
@@ -5802,6 +5814,7 @@ Feature: Concept Owns
     When relation(description) set owns: custom-attribute
     When relation(description) get owns(custom-attribute) set annotation: @<annotation-1>
     Then relation(description) get owns(custom-attribute) set annotation: @<annotation-2>; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     When relation(description) set owns: custom-attribute
     When relation(description) get owns(custom-attribute) set annotation: @<annotation-2>
@@ -5833,6 +5846,7 @@ Feature: Concept Owns
     When relation(description) get owns(custom-attribute) set ordering: ordered
     When relation(description) get owns(custom-attribute) set annotation: @<annotation-1>
     Then relation(description) get owns(custom-attribute) set annotation: @<annotation-2>; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     When relation(description) set owns: custom-attribute
     When relation(description) get owns(custom-attribute) set ordering: ordered

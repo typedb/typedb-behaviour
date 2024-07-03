@@ -147,6 +147,7 @@ Feature: Concept Relation Type and Role Type
 #    When transaction commits
 #    When connection open schema transaction for database: typedb
 #    Then relation(marriage) delete role: wife; fails
+#    When transaction closes
 #    When connection open schema transaction for database: typedb
 #    Then relation(marriage) delete role: husband
 #    Then transaction commits
@@ -526,6 +527,7 @@ Feature: Concept Relation Type and Role Type
       | biological-fathership:parent |
       | biological-fathership:child  |
       | biological-fathership:spouse |
+    When transaction closes
     When connection open schema transaction for database: typedb
     When create relation type: biological-fathership
     When relation(biological-fathership) set supertype: fathership
@@ -582,12 +584,15 @@ Feature: Concept Relation Type and Role Type
     When transaction commits
     When connection open schema transaction for database: typedb
     Then relation(fathership) create role: parent; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     Then relation(fathership) create role: father; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     When relation(fathership) get role(father) set override: parent
     Then relation(fathership) get role(father) get supertype: parentship:parent
     Then relation(fathership) create role: parent; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     When relation(fathership) get role(father) set override: parent
     Then relation(fathership) get role(father) get supertype: parentship:parent
@@ -740,6 +745,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get annotations contain: @<annotation>
     Then relation(fathership) get declared annotations do not contain: @<annotation>
     Then relation(fathership) unset annotation: @<annotation-category>; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     Then relation(parentship) get annotations contain: @<annotation>
     Then relation(parentship) get declared annotations contain: @<annotation>
@@ -771,8 +777,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get declared annotations contain: @<annotation>
     Then relation(fathership) get annotations contain: @<annotation>
     Then relation(fathership) get declared annotations contain: @<annotation>
-    # TODO: Uncomment this fail after schema validation is implemented!
-  #    Then transaction commits; fails
+    Then transaction commits; fails
     When connection open schema transaction for database: typedb
     Then relation(parentship) get annotations contain: @<annotation>
     Then relation(parentship) get declared annotations contain: @<annotation>
@@ -1201,6 +1206,7 @@ Feature: Concept Relation Type and Role Type
 #    When relation(parentship) create role: parent
 #    When relation(parentship) set annotation: @<annotation-1>
 #    When relation(parentship) set annotation: @<annotation-2>; fails
+#    When transaction closes
 #    When connection open schema transaction for database: typedb
 #    When create relation type: parentship
 #    When relation(parentship) create role: parent
@@ -1764,8 +1770,10 @@ Feature: Concept Relation Type and Role Type
     When connection open schema transaction for database: typedb
     When relation(connection) get role(part) set ordering: ordered
     Then transaction commits; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     Then relation(parentship) get role(parent) set ordering: ordered; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     Then relation(fathership) get role(father) set ordering: ordered; fails
     Then transaction commits; fails
@@ -1776,8 +1784,10 @@ Feature: Concept Relation Type and Role Type
     When connection open schema transaction for database: typedb
     When relation(connection) get role(part) set ordering: ordered
     Then relation(fathership) get role(father) set ordering: ordered; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     Then relation(parentship) get role(parent) set ordering: ordered; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     When relation(connection) get role(part) set ordering: ordered
     When relation(parentship) get role(parent) set ordering: ordered
@@ -1795,8 +1805,10 @@ Feature: Concept Relation Type and Role Type
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     Then relation(parentship) get role(parent) set ordering: unordered; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     Then relation(fathership) get role(father) set ordering: unordered; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     When relation(connection) get role(part) set ordering: unordered
     When relation(parentship) get role(parent) set ordering: unordered
@@ -1804,8 +1816,10 @@ Feature: Concept Relation Type and Role Type
     When connection open schema transaction for database: typedb
     When relation(connection) get role(part) set ordering: unordered
     Then relation(fathership) get role(father) set ordering: unordered; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     Then relation(parentship) get role(parent) set ordering: unordered; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     When relation(connection) get role(part) set ordering: unordered
     When relation(parentship) get role(parent) set ordering: unordered
@@ -2003,6 +2017,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get role(father) get annotations contain: @<annotation>
     Then relation(fathership) get role(father) get declared annotations do not contain: @<annotation>
     Then relation(fathership) get role(father) unset annotation: @<annotation-category>; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     Then relation(parentship) get role(parent) get annotations contain: @<annotation>
     Then relation(parentship) get role(parent) get declared annotations contain: @<annotation>
@@ -3041,6 +3056,7 @@ Feature: Concept Relation Type and Role Type
 #    When relation(parentship) get role(parent) set ordering: ordered
 #    When relation(parentship) get role(parent) set annotation: @<annotation-1>
 #    Then relation(parentship) get role(parent) set annotation: @<annotation-2>; fails
+#    When transaction closes
 #    When connection open schema transaction for database: typedb
 #    When create relation type: parentship
 #    When relation(parentship) create role: parent

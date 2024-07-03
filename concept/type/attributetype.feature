@@ -24,8 +24,6 @@ Feature: Concept Attribute Type
 ########################
 # attribute type common
 ########################
-  # TODO: "date" type
-  # TODO: "datetimetz" -> "datetime-tz"
 
   Scenario: Root attribute type cannot be deleted
     Then delete attribute type: attribute; fails
@@ -45,15 +43,16 @@ Feature: Concept Attribute Type
     Then attribute(name) get supertype: attribute
     Then attribute(name) get value type: <value-type>
     Examples:
-      | value-type |
-      | long       |
-      | string     |
-      | boolean    |
-      | double     |
-      | decimal    |
-      | datetime   |
-      | datetimetz |
-      | duration   |
+      | value-type  |
+      | long        |
+      | string      |
+      | boolean     |
+      | double      |
+      | decimal     |
+      | date        |
+      | datetime    |
+      | datetime-tz |
+      | duration    |
 
   Scenario: Attribute types can be created with a struct as value type
     When create struct: multi-name
@@ -86,8 +85,9 @@ Feature: Concept Attribute Type
       | boolean       |
       | double        |
       | decimal       |
+      | date          |
       | datetime      |
-      | datetimetz    |
+      | datetime-tz   |
       | duration      |
       | custom-struct |
 
@@ -130,7 +130,7 @@ Feature: Concept Attribute Type
       | value-type-1 | value-type-2 |
       | string       | long         |
       | boolean      | double       |
-      | decimal      | datetimetz   |
+      | decimal      | datetime-tz  |
       | datetime     | duration     |
 
   Scenario: Attribute types can get the root type
@@ -202,13 +202,9 @@ Feature: Concept Attribute Type
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(is-open) set supertype: is-open; fails
-    When connection open schema transaction for database: typedb
     Then attribute(age) set supertype: age; fails
-    When connection open schema transaction for database: typedb
     Then attribute(rating) set supertype: rating; fails
-    When connection open schema transaction for database: typedb
     Then attribute(name) set supertype: name; fails
-    When connection open schema transaction for database: typedb
     Then attribute(timestamp) set supertype: timestamp; fails
 
   Scenario: Attribute types cannot change root's supertype
@@ -364,38 +360,40 @@ Feature: Concept Attribute Type
     Then attribute(name) get annotation categories contain: @<annotation-category>
     Then attribute(name) get declared annotations contain: @<annotation>
     Examples:
-      | value-type | annotation   | annotation-category |
-      | long       | abstract     | abstract            |
-      | long       | independent  | independent         |
+      | value-type  | annotation   | annotation-category |
+      | long        | abstract     | abstract            |
+      | long        | independent  | independent         |
 #      | long       | values(1)                               | values |
 #      | long       | range(1, 3)                             | range |
-      | string     | abstract     | abstract            |
-      | string     | independent  | independent         |
-      | string     | regex("\S+") | regex               |
+      | string      | abstract     | abstract            |
+      | string      | independent  | independent         |
+      | string      | regex("\S+") | regex               |
 #      | string     | values("1")                             | values |
 #      | string     | range("1", "3")                         | range |
-      | boolean    | abstract     | abstract            |
-      | boolean    | independent  | independent         |
+      | boolean     | abstract     | abstract            |
+      | boolean     | independent  | independent         |
 #      | boolean    | values(true)                            | values |
 #      | boolean    | range(false, true)                      | range |
-      | double     | abstract     | abstract            |
-      | double     | independent  | independent         |
+      | double      | abstract     | abstract            |
+      | double      | independent  | independent         |
 #      | double     | values(1.0)                             | values |
 #      | double     | range(1.0, 3.0)                         | range |
-      | decimal    | abstract     | abstract            |
-      | decimal    | independent  | independent         |
+      | decimal     | abstract     | abstract            |
+      | decimal     | independent  | independent         |
 #      | decimal    | values(1.0)                             | values |
 #      | decimal    | range(1.0, 3.0)                         | range |
-      | datetime   | abstract     | abstract            |
-      | datetime   | independent  | independent         |
+      | date        | abstract     | abstract            |
+      | date        | independent  | independent         |
+      | datetime    | abstract     | abstract            |
+      | datetime    | independent  | independent         |
 #      | datetime   | values(2024-05-06)                      | values |
 #      | datetime   | range(2024-05-06, 2024-05-07)           | range |
-      | datetimetz | abstract     | abstract            |
-      | datetimetz | independent  | independent         |
-#      | datetimetz | values(2024-05-06+0010)                 | values |
-#      | datetimetz | range(2024-05-06+0100, 2024-05-07+0100) | range |
-      | duration   | abstract     | abstract            |
-      | duration   | independent  | independent         |
+      | datetime-tz | abstract     | abstract            |
+      | datetime-tz | independent  | independent         |
+#      | datetime-tz | values(2024-05-06+0010)                 | values |
+#      | datetime-tz | range(2024-05-06+0100, 2024-05-07+0100) | range |
+      | duration    | abstract     | abstract            |
+      | duration    | independent  | independent         |
 #      | duration   | values(P1Y)                             | values |
 #      | duration   | range(P1Y, P5Y)                         | range |
 
@@ -444,6 +442,7 @@ Feature: Concept Attribute Type
     Then attribute(surname) get annotations contain: @<annotation>
     Then attribute(surname) get declared annotations do not contain: @<annotation>
     Then attribute(surname) unset annotation: @<annotation-category>; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     Then attribute(name) get annotations contain: @<annotation>
     Then attribute(name) get declared annotations contain: @<annotation>
@@ -572,6 +571,7 @@ Feature: Concept Attribute Type
     When connection open read transaction for database: typedb
     Then attribute(name) get annotations contain: @abstract
     Then attribute(name) get declared annotations contain: @abstract
+    When transaction closes
     When connection open schema transaction for database: typedb
     Then attribute(email) get annotations do not contain: @abstract
     Then attribute(email) get declared annotations do not contain: @abstract
@@ -801,73 +801,91 @@ Feature: Concept Attribute Type
       | long          | boolean         |
       | long          | double          |
       | long          | decimal         |
+      | long          | date            |
       | long          | datetime        |
-      | long          | datetimetz      |
+      | long          | datetime-tz     |
       | long          | duration        |
       | long          | custom-struct   |
       | string        | long            |
       | string        | boolean         |
       | string        | double          |
       | string        | decimal         |
+      | string        | date            |
       | string        | datetime        |
-      | string        | datetimetz      |
+      | string        | datetime-tz     |
       | string        | duration        |
       | string        | custom-struct   |
       | boolean       | long            |
       | boolean       | string          |
       | boolean       | double          |
       | boolean       | decimal         |
+      | boolean       | date            |
       | boolean       | datetime        |
-      | boolean       | datetimetz      |
+      | boolean       | datetime-tz     |
       | boolean       | duration        |
       | boolean       | custom-struct   |
       | double        | long            |
       | double        | string          |
       | double        | boolean         |
       | double        | decimal         |
+      | double        | date            |
       | double        | datetime        |
-      | double        | datetimetz      |
+      | double        | datetime-tz     |
       | double        | duration        |
       | double        | custom-struct   |
       | decimal       | long            |
       | decimal       | string          |
       | decimal       | boolean         |
       | decimal       | double          |
+      | decimal       | date            |
       | decimal       | datetime        |
-      | decimal       | datetimetz      |
+      | decimal       | datetime-tz     |
       | decimal       | duration        |
       | decimal       | custom-struct   |
+      | date          | long            |
+      | date          | string          |
+      | date          | boolean         |
+      | date          | double          |
+      | date          | decimal         |
+      | date          | datetime        |
+      | date          | datetime-tz     |
+      | date          | duration        |
+      | date          | custom-struct   |
       | datetime      | long            |
       | datetime      | string          |
       | datetime      | boolean         |
       | datetime      | double          |
       | datetime      | decimal         |
-      | datetime      | datetimetz      |
+      | datetime      | date            |
+      | datetime      | datetime-tz     |
       | datetime      | duration        |
       | datetime      | custom-struct   |
-      | datetimetz    | long            |
-      | datetimetz    | string          |
-      | datetimetz    | boolean         |
-      | datetimetz    | double          |
-      | datetimetz    | decimal         |
-      | datetimetz    | datetime        |
-      | datetimetz    | duration        |
-      | datetimetz    | custom-struct   |
+      | datetime-tz   | long            |
+      | datetime-tz   | string          |
+      | datetime-tz   | boolean         |
+      | datetime-tz   | double          |
+      | datetime-tz   | decimal         |
+      | datetime-tz   | date            |
+      | datetime-tz   | datetime        |
+      | datetime-tz   | duration        |
+      | datetime-tz   | custom-struct   |
       | duration      | long            |
       | duration      | string          |
       | duration      | boolean         |
       | duration      | double          |
       | duration      | decimal         |
+      | duration      | date            |
       | duration      | datetime        |
-      | duration      | datetimetz      |
+      | duration      | datetime-tz     |
       | duration      | custom-struct   |
       | custom-struct | long            |
       | custom-struct | string          |
       | custom-struct | boolean         |
       | custom-struct | double          |
       | custom-struct | decimal         |
+      | custom-struct | date            |
       | custom-struct | datetime        |
-      | custom-struct | datetimetz      |
+      | custom-struct | datetime-tz     |
       | custom-struct | custom-struct-2 |
 
   Scenario Outline: Attribute type subtyping an attribute type with value type <value-type-1> cannot set value type <value-type-2>
@@ -894,73 +912,91 @@ Feature: Concept Attribute Type
       | long          | boolean         |
       | long          | double          |
       | long          | decimal         |
+      | long          | date            |
       | long          | datetime        |
-      | long          | datetimetz      |
+      | long          | datetime-tz     |
       | long          | duration        |
       | long          | custom-struct   |
       | string        | long            |
       | string        | boolean         |
       | string        | double          |
       | string        | decimal         |
+      | string        | date            |
       | string        | datetime        |
-      | string        | datetimetz      |
+      | string        | datetime-tz     |
       | string        | duration        |
       | string        | custom-struct   |
       | boolean       | long            |
       | boolean       | string          |
       | boolean       | double          |
       | boolean       | decimal         |
+      | boolean       | date            |
       | boolean       | datetime        |
-      | boolean       | datetimetz      |
+      | boolean       | datetime-tz     |
       | boolean       | duration        |
       | boolean       | custom-struct   |
       | double        | long            |
       | double        | string          |
       | double        | boolean         |
       | double        | decimal         |
+      | double        | date            |
       | double        | datetime        |
-      | double        | datetimetz      |
+      | double        | datetime-tz     |
       | double        | duration        |
       | double        | custom-struct   |
       | decimal       | long            |
       | decimal       | string          |
       | decimal       | boolean         |
       | decimal       | double          |
+      | decimal       | date            |
       | decimal       | datetime        |
-      | decimal       | datetimetz      |
+      | decimal       | datetime-tz     |
       | decimal       | duration        |
       | decimal       | custom-struct   |
+      | date          | long            |
+      | date          | string          |
+      | date          | boolean         |
+      | date          | double          |
+      | date          | decimal         |
+      | date          | datetime        |
+      | date          | datetime-tz     |
+      | date          | duration        |
+      | date          | custom-struct   |
       | datetime      | long            |
       | datetime      | string          |
       | datetime      | boolean         |
       | datetime      | double          |
       | datetime      | decimal         |
-      | datetime      | datetimetz      |
+      | datetime      | date            |
+      | datetime      | datetime-tz     |
       | datetime      | duration        |
       | datetime      | custom-struct   |
-      | datetimetz    | long            |
-      | datetimetz    | string          |
-      | datetimetz    | boolean         |
-      | datetimetz    | double          |
-      | datetimetz    | decimal         |
-      | datetimetz    | datetime        |
-      | datetimetz    | duration        |
-      | datetimetz    | custom-struct   |
+      | datetime-tz   | long            |
+      | datetime-tz   | string          |
+      | datetime-tz   | boolean         |
+      | datetime-tz   | double          |
+      | datetime-tz   | decimal         |
+      | datetime-tz   | date            |
+      | datetime-tz   | datetime        |
+      | datetime-tz   | duration        |
+      | datetime-tz   | custom-struct   |
       | duration      | long            |
       | duration      | string          |
       | duration      | boolean         |
       | duration      | double          |
       | duration      | decimal         |
+      | duration      | date            |
       | duration      | datetime        |
-      | duration      | datetimetz      |
+      | duration      | datetime-tz     |
       | duration      | custom-struct   |
       | custom-struct | long            |
       | custom-struct | string          |
       | custom-struct | boolean         |
       | custom-struct | double          |
       | custom-struct | decimal         |
+      | custom-struct | date            |
       | custom-struct | datetime        |
-      | custom-struct | datetimetz      |
+      | custom-struct | datetime-tz     |
       | custom-struct | custom-struct-2 |
 
   Scenario Outline: Supertype attribute type cannot set <value-type-2> conflicting with <value-type-1> set for one of subtypes
@@ -1028,73 +1064,91 @@ Feature: Concept Attribute Type
       | long          | boolean         |
       | long          | double          |
       | long          | decimal         |
+      | long          | date            |
       | long          | datetime        |
-      | long          | datetimetz      |
+      | long          | datetime-tz     |
       | long          | duration        |
       | long          | custom-struct   |
       | string        | long            |
       | string        | boolean         |
       | string        | double          |
       | string        | decimal         |
+      | string        | date            |
       | string        | datetime        |
-      | string        | datetimetz      |
+      | string        | datetime-tz     |
       | string        | duration        |
       | string        | custom-struct   |
       | boolean       | long            |
       | boolean       | string          |
       | boolean       | double          |
       | boolean       | decimal         |
+      | boolean       | date            |
       | boolean       | datetime        |
-      | boolean       | datetimetz      |
+      | boolean       | datetime-tz     |
       | boolean       | duration        |
       | boolean       | custom-struct   |
       | double        | long            |
       | double        | string          |
       | double        | boolean         |
       | double        | decimal         |
+      | double        | date            |
       | double        | datetime        |
-      | double        | datetimetz      |
+      | double        | datetime-tz     |
       | double        | duration        |
       | double        | custom-struct   |
       | decimal       | long            |
       | decimal       | string          |
       | decimal       | boolean         |
       | decimal       | double          |
+      | decimal       | date            |
       | decimal       | datetime        |
-      | decimal       | datetimetz      |
+      | decimal       | datetime-tz     |
       | decimal       | duration        |
       | decimal       | custom-struct   |
+      | date          | long            |
+      | date          | string          |
+      | date          | boolean         |
+      | date          | double          |
+      | date          | decimal         |
+      | date          | datetime        |
+      | date          | datetime-tz     |
+      | date          | duration        |
+      | date          | custom-struct   |
       | datetime      | long            |
       | datetime      | string          |
       | datetime      | boolean         |
       | datetime      | double          |
       | datetime      | decimal         |
-      | datetime      | datetimetz      |
+      | datetime      | date            |
+      | datetime      | datetime-tz     |
       | datetime      | duration        |
       | datetime      | custom-struct   |
-      | datetimetz    | long            |
-      | datetimetz    | string          |
-      | datetimetz    | boolean         |
-      | datetimetz    | double          |
-      | datetimetz    | decimal         |
-      | datetimetz    | datetime        |
-      | datetimetz    | duration        |
-      | datetimetz    | custom-struct   |
+      | datetime-tz   | long            |
+      | datetime-tz   | string          |
+      | datetime-tz   | boolean         |
+      | datetime-tz   | double          |
+      | datetime-tz   | decimal         |
+      | datetime-tz   | date            |
+      | datetime-tz   | datetime        |
+      | datetime-tz   | duration        |
+      | datetime-tz   | custom-struct   |
       | duration      | long            |
       | duration      | string          |
       | duration      | boolean         |
       | duration      | double          |
       | duration      | decimal         |
+      | duration      | date            |
       | duration      | datetime        |
-      | duration      | datetimetz      |
+      | duration      | datetime-tz     |
       | duration      | custom-struct   |
       | custom-struct | long            |
       | custom-struct | string          |
       | custom-struct | boolean         |
       | custom-struct | double          |
       | custom-struct | decimal         |
+      | custom-struct | date            |
       | custom-struct | datetime        |
-      | custom-struct | datetimetz      |
+      | custom-struct | datetime-tz     |
       | custom-struct | custom-struct-2 |
 
   Scenario Outline: Supertype attribute type can set <value-type> set for subtype, but subtype needs to explicitly unset it before commit
@@ -1134,8 +1188,9 @@ Feature: Concept Attribute Type
       | boolean       |
       | double        |
       | decimal       |
+      | date          |
       | datetime      |
-      | datetimetz    |
+      | datetime-tz   |
       | duration      |
       | custom-struct |
 
@@ -1158,8 +1213,9 @@ Feature: Concept Attribute Type
       | boolean       |
       | double        |
       | decimal       |
+      | date          |
       | datetime      |
-      | datetimetz    |
+      | datetime-tz   |
       | duration      |
       | custom-struct |
 
@@ -1182,8 +1238,9 @@ Feature: Concept Attribute Type
       | boolean       |
       | double        |
       | decimal       |
+      | date          |
       | datetime      |
-      | datetimetz    |
+      | datetime-tz   |
       | duration      |
       | custom-struct |
 
@@ -1209,8 +1266,9 @@ Feature: Concept Attribute Type
 #      | boolean    |
 #      | double     |
 #      | decimal    |
+#      | date       |
 #      | datetime   |
-#      | datetimetz |
+#      | datetime-tz |
 #      | duration   |
 #      | custom-struct |
 
@@ -1247,8 +1305,9 @@ Feature: Concept Attribute Type
       | boolean       |
       | double        |
       | decimal       |
+      | date          |
       | datetime      |
-      | datetimetz    |
+      | datetime-tz   |
       | duration      |
       | custom-struct |
 
@@ -1371,6 +1430,7 @@ Feature: Concept Attribute Type
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(first-name) set supertype: name; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     Then attribute(last-name) set supertype: name; fails
 #  TODO: Make it only for typeql
@@ -1454,8 +1514,9 @@ Feature: Concept Attribute Type
       | boolean       | "value" |
       | double        | "value" |
       | decimal       | "value" |
+      | date          | "value" |
       | datetime      | "value" |
-      | datetimetz    | "value" |
+      | datetime-tz   | "value" |
       | duration      | "value" |
       | custom-struct | "value" |
 
@@ -1646,8 +1707,9 @@ Feature: Concept Attribute Type
     Then attribute(custom-attribute) set value type: boolean; fails
     Then attribute(custom-attribute) set value type: double; fails
     Then attribute(custom-attribute) set value type: decimal; fails
+    Then attribute(custom-attribute) set value type: date; fails
     Then attribute(custom-attribute) set value type: datetime; fails
-    Then attribute(custom-attribute) set value type: datetimetz; fails
+    Then attribute(custom-attribute) set value type: datetime-tz; fails
     Then attribute(custom-attribute) set value type: duration; fails
     Then attribute(custom-attribute) set value type: custom-struct; fails
     When attribute(custom-attribute) set value type: string
@@ -1666,8 +1728,9 @@ Feature: Concept Attribute Type
     Then attribute(custom-attribute) set value type: boolean; fails
     Then attribute(custom-attribute) set value type: double; fails
     Then attribute(custom-attribute) set value type: decimal; fails
+    Then attribute(custom-attribute) set value type: date; fails
     Then attribute(custom-attribute) set value type: datetime; fails
-    Then attribute(custom-attribute) set value type: datetimetz; fails
+    Then attribute(custom-attribute) set value type: datetime-tz; fails
     Then attribute(custom-attribute) set value type: duration; fails
     Then attribute(custom-attribute) set value type: custom-struct; fails
     Then attribute(custom-attribute) get value type: string
@@ -1700,8 +1763,9 @@ Feature: Concept Attribute Type
       | boolean       |
       | double        |
       | decimal       |
+      | date          |
       | datetime      |
-      | datetimetz    |
+      | datetime-tz   |
       | duration      |
       | custom-struct |
 
@@ -1847,6 +1911,9 @@ Feature: Concept Attribute Type
 #      | decimal    | -3.444, 3.445                                                                                                                                                                                                                                                                                                                                                                                        |
 #      | decimal    | 0.00001, 0.0001, 0.001, 0.01                                                                                                                                                                                                                                                                                                                                                                         |
 #      | decimal    | -333.553, 33895, 98984.4555, 902394.44, 1000000000, 0.00001, 0.3, 3.14159265358979323                                                                                                                                                                                                                                                                                                                |
+#      | date   | 2024-06-04                                                                                                                                                                                                                                                                                                                                                                                           |
+#      | date   | 1970-01-01                                                                                                                                                                                                                                                                                                                                                                              |
+#      | date   | 1970-01-01, 1970-01-01, 0001-01-01, 2024-06-04, 2024-02-02                                                                                                                                                                                                                                                                            |
 #      | datetime   | 2024-06-04                                                                                                                                                                                                                                                                                                                                                                                           |
 #      | datetime   | 2024-06-04T16:35                                                                                                                                                                                                                                                                                                                                                                                     |
 #      | datetime   | 2024-06-04T16:35:02                                                                                                                                                                                                                                                                                                                                                                                  |
@@ -1854,15 +1921,15 @@ Feature: Concept Attribute Type
 #      | datetime   | 2024-06-04T16:35:02.10                                                                                                                                                                                                                                                                                                                                                                               |
 #      | datetime   | 2024-06-04T16:35:02.103                                                                                                                                                                                                                                                                                                                                                                              |
 #      | datetime   | 2024-06-04, 2024-06-04T16:35, 2024-06-04T16:35:02, 2024-06-04T16:35:02.1, 2024-06-04T16:35:02.10, 2024-06-04T16:35:02.103                                                                                                                                                                                                                                                                            |
-#      | datetimetz | 2024-06-04+0000                                                                                                                                                                                                                                                                                                                                                                                      |
-#      | datetimetz | 2024-06-04 Asia/Kathmandu                                                                                                                                                                                                                                                                                                                                                                            |
-#      | datetimetz | 2024-06-04+0100                                                                                                                                                                                                                                                                                                                                                                                      |
-#      | datetimetz | 2024-06-04T16:35+0100                                                                                                                                                                                                                                                                                                                                                                                |
-#      | datetimetz | 2024-06-04T16:35:02+0100                                                                                                                                                                                                                                                                                                                                                                             |
-#      | datetimetz | 2024-06-04T16:35:02.1+0100                                                                                                                                                                                                                                                                                                                                                                           |
-#      | datetimetz | 2024-06-04T16:35:02.10+0100                                                                                                                                                                                                                                                                                                                                                                          |
-#      | datetimetz | 2024-06-04T16:35:02.103+0100                                                                                                                                                                                                                                                                                                                                                                         |
-#      | datetimetz | 2024-06-04+0001, 2024-06-04 Asia/Kathmandu, 2024-06-04+0002, 2024-06-04+0010, 2024-06-04+0100, 2024-06-04-0100, 2024-06-04T16:35-0100, 2024-06-04T16:35:02+0200, 2024-06-04T16:35:02.1-0300, 2024-06-04T16:35:02.10+1000, 2024-06-04T16:35:02.103+0011                                                                                                                                               |
+#      | datetime-tz | 2024-06-04+0000                                                                                                                                                                                                                                                                                                                                                                                      |
+#      | datetime-tz | 2024-06-04 Asia/Kathmandu                                                                                                                                                                                                                                                                                                                                                                            |
+#      | datetime-tz | 2024-06-04+0100                                                                                                                                                                                                                                                                                                                                                                                      |
+#      | datetime-tz | 2024-06-04T16:35+0100                                                                                                                                                                                                                                                                                                                                                                                |
+#      | datetime-tz | 2024-06-04T16:35:02+0100                                                                                                                                                                                                                                                                                                                                                                             |
+#      | datetime-tz | 2024-06-04T16:35:02.1+0100                                                                                                                                                                                                                                                                                                                                                                           |
+#      | datetime-tz | 2024-06-04T16:35:02.10+0100                                                                                                                                                                                                                                                                                                                                                                          |
+#      | datetime-tz | 2024-06-04T16:35:02.103+0100                                                                                                                                                                                                                                                                                                                                                                         |
+#      | datetime-tz | 2024-06-04+0001, 2024-06-04 Asia/Kathmandu, 2024-06-04+0002, 2024-06-04+0010, 2024-06-04+0100, 2024-06-04-0100, 2024-06-04T16:35-0100, 2024-06-04T16:35:02+0200, 2024-06-04T16:35:02.1-0300, 2024-06-04T16:35:02.10+1000, 2024-06-04T16:35:02.103+0011                                                                                                                                               |
 #      | duration   | P1Y                                                                                                                                                                                                                                                                                                                                                                                                  |
 #      | duration   | P2M                                                                                                                                                                                                                                                                                                                                                                                                  |
 #      | duration   | P1Y2M                                                                                                                                                                                                                                                                                                                                                                                                |
@@ -1917,8 +1984,9 @@ Feature: Concept Attribute Type
 ##      | decimal    |
 ##      | string     |
 ##      | boolean    |
+##      | date       |
 ##      | datetime   |
-##      | datetimetz |
+##      | datetime-tz |
 ##      | duration   |
 #
 #  Scenario Outline: Attribute type with <value-type> value type cannot set @values with incorrect arguments
@@ -1955,15 +2023,20 @@ Feature: Concept Attribute Type
 #      | boolean    | 2024-06-04                      |
 #      | boolean    | 2024-06-04+0010                 |
 #      | boolean    | truefalse                       |
+#      | date       | 123                             |
+#      | date       | "string"                        |
+#      | date       | true                            |
+#      | date       | 2024-06-04+0010                 |
+#      | date       | 2024-06-04T16:35:02             |
 #      | datetime   | 123                             |
 #      | datetime   | "string"                        |
 #      | datetime   | true                            |
 #      | datetime   | 2024-06-04+0010                 |
-#      | datetimetz | 123                             |
-#      | datetimetz | "string"                        |
-#      | datetimetz | true                            |
-#      | datetimetz | 2024-06-04                      |
-#      | datetimetz | 2024-06-04 NotRealTimeZone/Zone |
+#      | datetime-tz | 123                             |
+#      | datetime-tz | "string"                        |
+#      | datetime-tz | true                            |
+#      | datetime-tz | 2024-06-04                      |
+#      | datetime-tz | 2024-06-04 NotRealTimeZone/Zone |
 #      | duration   | 123                             |
 #      | duration   | "string"                        |
 #      | duration   | true                            |
@@ -1998,8 +2071,9 @@ Feature: Concept Attribute Type
 #      | decimal    | -8.0, 88.3      | 1.1, 1.5        |
 #      | string     | "s"             | "not s"         |
 #      | boolean    | true            | false           |
+#      | date       | 2024-05-05      | 2024-06-05      |
 #      | datetime   | 2024-05-05      | 2024-06-05      |
-#      | datetimetz | 2024-05-05+0100 | 2024-05-05+0010 |
+#      | datetime-tz | 2024-05-05+0100 | 2024-05-05+0010 |
 #      | duration   | P1Y             | P2Y             |
 #
 #  Scenario Outline: Attribute type cannot have @values annotation for <value-type> value type with duplicated args
@@ -2021,9 +2095,10 @@ Feature: Concept Attribute Type
 #      | string     | "stringwithoutdifferences"  | "stringwithoutdifferences"   | "stringWITHdifferences"      |
 #      | string     | "stringwithoutdifferences " | "stringwithoutdifferences  " | "stringwithoutdifferences  " |
 #      | boolean    | true                        | true                         | false                        |
+#      | date       | 2024-06-04                  | 2024-06-05                   | 2024-06-04                   |
 #      | datetime   | 2024-06-04T16:35:02.101     | 2024-06-04T16:35:02.101      | 2024-06-04                   |
 #      | datetime   | 2020-06-04T16:35:02.10      | 2025-06-05T16:35             | 2025-06-05T16:35             |
-#      | datetimetz | 2020-06-04T16:35:02.10+0100 | 2020-06-04T16:35:02.10+0000  | 2020-06-04T16:35:02.10+0100  |
+#      | datetime-tz | 2020-06-04T16:35:02.10+0100 | 2020-06-04T16:35:02.10+0000  | 2020-06-04T16:35:02.10+0100  |
 #      | duration   | P1Y1M                       | P1Y1M                        | P1Y2M                        |
 #
 #  Scenario: Attribute type cannot reset inherited @values annotation
@@ -2110,8 +2185,9 @@ Feature: Concept Attribute Type
 #      | decimal    | 0.0, 1.0                                                                     | 0.0                                        |
 #      | string     | "john", "John", "Johnny", "johnny"                                           | "John", "Johnny"                           |
 #      | boolean    | true, false                                                                  | true                                       |
+#      | date       | 2024-06-04, 2024-06-05, 2024-06-06                                           | 2024-06-04, 2024-06-06                     |
 #      | datetime   | 2024-06-04, 2024-06-05, 2024-06-06                                           | 2024-06-04, 2024-06-06                     |
-#      | datetimetz | 2024-06-04+0010, 2024-06-04 Asia/Kathmandu, 2024-06-05+0010, 2024-06-05+0100 | 2024-06-04 Asia/Kathmandu, 2024-06-05+0010 |
+#      | datetime-tz | 2024-06-04+0010, 2024-06-04 Asia/Kathmandu, 2024-06-05+0010, 2024-06-05+0100 | 2024-06-04 Asia/Kathmandu, 2024-06-05+0010 |
 #      | duration   | P6M, P1Y, P1Y1M, P1Y2M, P1Y3M, P1Y4M, P1Y6M                                  | P6M, P1Y3M, P1Y4M, P1Y6M                   |
 #
 #  Scenario Outline: Inherited @values annotation on attribute types for <value-type> value type cannot be overridden by the @values of not a subset of arguments
@@ -2143,8 +2219,9 @@ Feature: Concept Attribute Type
 #      | decimal    | 0.0, 1.0                                                                     | 0.01                     |
 #      | string     | "john", "John", "Johnny", "johnny"                                           | "Jonathan"               |
 #      | boolean    | false                                                                        | true                     |
+#      | date       | 2024-06-04, 2024-06-05, 2024-06-06                                           | 2020-06-04, 2020-06-06   |
 #      | datetime   | 2024-06-04, 2024-06-05, 2024-06-06                                           | 2020-06-04, 2020-06-06   |
-#      | datetimetz | 2024-06-04+0010, 2024-06-04 Asia/Kathmandu, 2024-06-05+0010, 2024-06-05+0100 | 2024-06-04 Europe/London |
+#      | datetime-tz | 2024-06-04+0010, 2024-06-04 Asia/Kathmandu, 2024-06-05+0010, 2024-06-05+0100 | 2024-06-04 Europe/London |
 #      | duration   | P6M, P1Y, P1Y1M, P1Y2M, P1Y3M, P1Y4M, P1Y6M                                  | P3M, P1Y3M, P1Y4M, P1Y6M |
 
 ########################
@@ -2189,15 +2266,19 @@ Feature: Concept Attribute Type
 #      | decimal    | 0.01                         | 1.0                                                   |
 #      | decimal    | 123.123                      | 123123123123.122                                      |
 #      | decimal    | -2.45                        | 2.45                                                  |
-#      | datetime   | 2024-06-04                   | 2024-06-05                                            |
-#      | datetime   | 2024-06-04                   | 2024-07-03                                            |
-#      | datetime   | 2024-06-04                   | 2025-01-01                                            |
-#      | datetime   | 1970-01-01                   | 9999-12-12                                            |
+#      | date       | 2024-06-04                   | 2024-06-05                                            |
+#      | date       | 2024-06-04                   | 2024-07-03                                            |
+#      | date       | 2024-06-04                   | 2025-01-01                                            |
+#      | date       | 1970-01-01                   | 9999-12-12                                            |
+#      | date       | 2024-06-04                   | 2024-06-05                                            |
+#      | date       | 2024-06-04                   | 2024-07-03                                            |
+#      | date       | 2024-06-04                   | 2025-01-01                                            |
+#      | date       | 1970-01-01                   | 9999-12-12                                            |
 #      | datetime   | 2024-06-04T16:35:02.10       | 2024-06-04T16:35:02.11                                |
-#      | datetimetz | 2024-06-04+0000              | 2024-06-05+0000                                       |
-#      | datetimetz | 2024-06-04+0100              | 2048-06-04+0100                                       |
-#      | datetimetz | 2024-06-04T16:35:02.103+0100 | 2024-06-04T16:35:02.104+0100                          |
-#      | datetimetz | 2024-06-04 Asia/Kathmandu    | 2024-06-05 Asia/Kathmandu                             |
+#      | datetime-tz | 2024-06-04+0000              | 2024-06-05+0000                                       |
+#      | datetime-tz | 2024-06-04+0100              | 2048-06-04+0100                                       |
+#      | datetime-tz | 2024-06-04T16:35:02.103+0100 | 2024-06-04T16:35:02.104+0100                          |
+#      | datetime-tz | 2024-06-04 Asia/Kathmandu    | 2024-06-05 Asia/Kathmandu                             |
 #      | duration   | P1Y                          | P2Y                                                   |
 #      | duration   | P2M                          | P1Y2M                                                 |
 #      | duration   | P1Y2M                        | P1Y2M3DT4H5M6.789S                                    |
@@ -2246,8 +2327,9 @@ Feature: Concept Attribute Type
 #      | decimal    |
 #      | string     |
 #      | boolean    |
+#      | date       |
 #      | datetime   |
-#      | datetimetz |
+#      | datetime-tz |
 #      | duration   |
 #
 #  Scenario Outline: Attribute type with <value-type> value type cannot set @range with incorrect arguments
@@ -2302,6 +2384,13 @@ Feature: Concept Attribute Type
 #      | boolean    | 2024-06-04                      | true                                               |
 #      | boolean    | 2024-06-04+0010                 | true                                               |
 #      | boolean    | truefalse                       | true                                               |
+#      | date       | 2030-06-04                      | 2030-06-04                                         |
+#      | date       | 2030-06-04                      | 2030-06-05, 2030-06-06                             |
+#      | date       | 2030-06-04                      | 123                                                |
+#      | date       | 123                             | 2030-06-04                                         |
+#      | date       | "string"                        | 2030-06-04                                         |
+#      | date       | true                            | 2030-06-04                                         |
+#      | date       | 2024-06-04+0010                 | 2030-06-04                                         |
 #      | datetime   | 2030-06-04                      | 2030-06-04                                         |
 #      | datetime   | 2030-06-04                      | 2030-06-05, 2030-06-06                             |
 #      | datetime   | 2030-06-04                      | 123                                                |
@@ -2309,14 +2398,14 @@ Feature: Concept Attribute Type
 #      | datetime   | "string"                        | 2030-06-04                                         |
 #      | datetime   | true                            | 2030-06-04                                         |
 #      | datetime   | 2024-06-04+0010                 | 2030-06-04                                         |
-#      | datetimetz | 2030-06-04 Europe/London        | 2030-06-04 Europe/London                           |
-#      | datetimetz | 2030-06-04 Europe/London        | 2030-06-05 Europe/London, 2030-06-06 Europe/London |
-#      | datetimetz | 2030-06-05 Europe/London        | 123                                                |
-#      | datetimetz | 123                             | 2030-06-05 Europe/London                           |
-#      | datetimetz | "string"                        | 2030-06-05 Europe/London                           |
-#      | datetimetz | true                            | 2030-06-05 Europe/London                           |
-#      | datetimetz | 2024-06-04                      | 2030-06-05 Europe/London                           |
-#      | datetimetz | 2024-06-04 NotRealTimeZone/Zone | 2030-06-05 Europe/London                           |
+#      | datetime-tz | 2030-06-04 Europe/London        | 2030-06-04 Europe/London                           |
+#      | datetime-tz | 2030-06-04 Europe/London        | 2030-06-05 Europe/London, 2030-06-06 Europe/London |
+#      | datetime-tz | 2030-06-05 Europe/London        | 123                                                |
+#      | datetime-tz | 123                             | 2030-06-05 Europe/London                           |
+#      | datetime-tz | "string"                        | 2030-06-05 Europe/London                           |
+#      | datetime-tz | true                            | 2030-06-05 Europe/London                           |
+#      | datetime-tz | 2024-06-04                      | 2030-06-05 Europe/London                           |
+#      | datetime-tz | 2024-06-04 NotRealTimeZone/Zone | 2030-06-05 Europe/London                           |
 #      | duration   | P1Y                             | P1Y                                                |
 #      | duration   | P1Y                             | P2Y, P3Y                                           |
 #      | duration   | P1Y                             | 123                                                |
@@ -2363,8 +2452,9 @@ Feature: Concept Attribute Type
 #      | double     | 1.1, 1.5                         | -8.0, 88.3                       |
 #      | decimal    | -8.0, 88.3                       | 1.1, 1.5                         |
 #      | string     | "S", "s"                         | "not s", "xxxxxxxxx"             |
+#      | date       | 2024-05-05, 2024-05-06           | 2024-06-05, 2024-06-06           |
 #      | datetime   | 2024-05-05, 2024-05-06           | 2024-06-05, 2024-06-06           |
-#      | datetimetz | 2024-05-05+0100, 2024-05-06+0100 | 2024-05-05+0100, 2024-05-07+0100 |
+#      | datetime-tz | 2024-05-05+0100, 2024-05-06+0100 | 2024-05-05+0100, 2024-05-07+0100 |
 #      | duration   | P1Y, P2Y                         | P1Y6M, P2Y                       |
 #
 #  Scenario: Attribute type cannot reset inherited @range annotation
@@ -2454,8 +2544,9 @@ Feature: Concept Attribute Type
 #      | double     | 1.0, 10.0                        | 2.0, 10.0                                 |
 #      | decimal    | 0.0, 1.0                         | 0.0, 0.999999                             |
 #      | string     | "A", "Z"                         | "J", "Z"                                  |
+#      | date       | 2024-06-04, 2024-06-06           | 2024-06-04, 2024-06-05                    |
 #      | datetime   | 2024-06-04, 2024-06-05           | 2024-06-04, 2024-06-04T12:00:00           |
-#      | datetimetz | 2024-06-04+0010, 2024-06-05+0010 | 2024-06-04+0010, 2024-06-04T12:00:00+0010 |
+#      | datetime-tz | 2024-06-04+0010, 2024-06-05+0010 | 2024-06-04+0010, 2024-06-04T12:00:00+0010 |
 #      | duration   | P6M, P1Y                         | P8M, P9M                                  |
 #
 #  Scenario Outline: Inherited @range annotation on attribute types for <value-type> value type cannot be overridden by the @range of not a subset of arguments
@@ -2486,8 +2577,9 @@ Feature: Concept Attribute Type
 #      | double     | 1.0, 10.0                        | 0.0, 150.0                                |
 #      | decimal    | 0.0, 1.0                         | -0.0001, 0.999999                         |
 #      | string     | "A", "Z"                         | "A", "z"                                  |
+#      | date       | 2024-06-04, 2024-06-05           | 2023-06-04, 2024-06-04                    |
 #      | datetime   | 2024-06-04, 2024-06-05           | 2023-06-04, 2024-06-04T12:00:00           |
-#      | datetimetz | 2024-06-04+0010, 2024-06-05+0010 | 2024-06-04+0010, 2024-06-05T01:00:00+0010 |
+#      | datetime-tz | 2024-06-04+0010, 2024-06-05+0010 | 2024-06-04+0010, 2024-06-05T01:00:00+0010 |
 #      | duration   | P6M, P1Y                         | P8M, P1Y1D                                |
 
 ########################
@@ -2516,8 +2608,9 @@ Feature: Concept Attribute Type
 #      | decimal       |
 #      | string        |
 #      | boolean       |
+#      | date          |
 #      | datetime      |
-#      | datetimetz    |
+#      | datetime-tz    |
 #      | duration      |
 #      | custom-struct |
 
@@ -2573,14 +2666,14 @@ Feature: Concept Attribute Type
     Then attribute(name) get declared annotations is empty
     Examples:
     # TODO: Move to "cannot" test if something is wrong here.
-      | annotation-1 | annotation-2       | annotation-category-1 | annotation-category-2 | value-type |
-      | abstract     | independent        | abstract              | independent           | datetimetz |
+      | annotation-1 | annotation-2 | annotation-category-1 | annotation-category-2 | value-type  |
+      | abstract     | independent  | abstract              | independent           | datetime-tz |
 #      | abstract     | values(1, 2)       | abstract              | values                | double     |
 #      | abstract     | range(1.0, 2.0)    | abstract              | range                 | decimal    |
-      | abstract     | regex("s")         | abstract              | regex                 | string     |
+      | abstract     | regex("s")   | abstract              | regex                 | string      |
 #      | independent  | values(1, 2)       | independent           | values                | long       |
 #      | independent  | range(false, true) | independent           | range                 | boolean    |
-      | independent  | regex("s")         | independent           | regex                 | string     |
+      | independent  | regex("s")   | independent           | regex                 | string      |
 
   Scenario Outline: Owns cannot set @<annotation-1> and @<annotation-2> together for <value-type> value type
     When create attribute type: name
@@ -2589,6 +2682,7 @@ Feature: Concept Attribute Type
     When connection open schema transaction for database: typedb
     When attribute(name) set annotation: @<annotation-1>
     Then attribute(name) set annotation: @<annotation-2>; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     When attribute(name) set annotation: @<annotation-2>
     Then attribute(name) set annotation: @<annotation-1>; fails
@@ -2639,8 +2733,9 @@ Feature: Concept Attribute Type
       | boolean       |
       | double        |
       | decimal       |
+      | date          |
       | datetime      |
-      | datetimetz    |
+      | datetime-tz   |
       | duration      |
       | custom-struct |
 
@@ -2671,9 +2766,10 @@ Feature: Concept Attribute Type
       | string        | boolean       |
       | boolean       | double        |
       | double        | decimal       |
-      | decimal       | datetime      |
-      | datetime      | datetimetz    |
-      | datetimetz    | duration      |
+      | decimal       | date          |
+      | date          | datetime      |
+      | datetime      | datetime-tz   |
+      | datetime-tz   | duration      |
       | duration      | custom-struct |
       | custom-struct | long          |
 
@@ -2700,8 +2796,9 @@ Feature: Concept Attribute Type
       | boolean       |
       | double        |
       | decimal       |
+      | date          |
       | datetime      |
-      | datetimetz    |
+      | datetime-tz   |
       | duration      |
       | custom-struct |
 
@@ -2746,9 +2843,10 @@ Feature: Concept Attribute Type
       | string        | boolean       |
       | boolean       | double        |
       | double        | decimal       |
-      | decimal       | datetime      |
-      | datetime      | datetimetz    |
-      | datetimetz    | duration      |
+      | decimal       | date          |
+      | date          | datetime      |
+      | datetime      | datetime-tz   |
+      | datetime-tz   | duration      |
       | duration      | custom-struct |
       | custom-struct | long          |
 
@@ -2820,8 +2918,9 @@ Feature: Concept Attribute Type
       | boolean       |
       | double        |
       | decimal       |
+      | date          |
       | datetime      |
-      | datetimetz    |
+      | datetime-tz   |
       | duration      |
       | custom-struct |
 
@@ -2841,8 +2940,9 @@ Feature: Concept Attribute Type
       | boolean       |
       | double        |
       | decimal       |
+      | date          |
       | datetime      |
-      | datetimetz    |
+      | datetime-tz   |
       | duration      |
       | custom-struct |
 

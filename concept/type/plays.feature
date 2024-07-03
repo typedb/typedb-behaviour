@@ -359,6 +359,7 @@ Feature: Concept Plays
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(boy) set plays: parentship:parent; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     Then entity(boy) set plays: fathership:father
     Then transaction commits; fails
@@ -366,6 +367,7 @@ Feature: Concept Plays
     When create entity type: woman
     When entity(woman) set supertype: person
     Then entity(woman) get plays(parentship:parent) set override: parentship:parent; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     When create entity type: woman
     When entity(woman) set supertype: person
@@ -633,6 +635,7 @@ Feature: Concept Plays
     When transaction commits
     When connection open schema transaction for database: typedb
     When relation(parttime-employment) set plays: locates:located; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     Then relation(parttime-employment) set plays: contractor-locates:contractor-located
     Then transaction commits; fails
@@ -640,6 +643,7 @@ Feature: Concept Plays
     When create relation type: internship
     When relation(internship) set supertype: employment
     Then relation(internship) get plays(locates:located) set override: locates:located; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     When create relation type: internship
     When relation(internship) set supertype: employment
@@ -1532,6 +1536,7 @@ Feature: Concept Plays
     Then <root-type>(<subtype-name>) set plays: marriage:spouse
     Then <root-type>(<subtype-name>) get plays(marriage:spouse) set override: marriage:spouse
     When <root-type>(<subtype-name>) get plays(marriage:spouse) unset annotation: @<annotation-category>; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get plays(marriage:spouse) get annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get plays(marriage:spouse) get declared annotations contain: @<annotation>
@@ -1836,10 +1841,9 @@ Feature: Concept Plays
     Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations contain: @<annotation>
     Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations is empty
     When transaction commits
-    When connection open read transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations contain: @<annotation>
     Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations is empty
-    When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name-2>) set plays: parentship:parent; fails
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | annotation |
