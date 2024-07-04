@@ -1311,16 +1311,14 @@ Feature: Concept Attribute Type
       | duration      |
       | custom-struct |
 
-      # TODO: Move to schema/data-validation?
-#  Scenario: Attribute types cannot unset @abstract annotation if it does not have value type
-#    When create attribute type: name
-#    When attribute(name) set annotation: @abstract
-#    Then attribute(name) get value type is none
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then attribute(name) get value type is none
-#    When attribute(name) unset annotation: @abstract
-#    Then transaction commits; fails
+  Scenario: Attribute types cannot unset @abstract annotation if it does not have value type
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    Then attribute(name) get value type is none
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get value type is none
+    Then attribute(name) unset annotation: @abstract; fails
 
   Scenario: Attribute types cannot unset @abstract annotation without value type, but can unset it with value type
     When create attribute type: name
@@ -1637,9 +1635,9 @@ Feature: Concept Attribute Type
     Then attribute(name) get declared annotations contain: @regex("\S+")
     Then attribute(first-name) get annotations is empty
     Then attribute(first-name) get declared annotations is empty
-    When attribute(first-name) set annotation: @regex("\S+")
-    Then attribute(first-name) get annotations contain: @regex("\S+")
-    Then attribute(first-name) get declared annotations contain: @regex("\S+")
+    When attribute(first-name) set annotation: @regex("\S++")
+    Then attribute(first-name) get annotations contain: @regex("\S++")
+    Then attribute(first-name) get declared annotations contain: @regex("\S++")
     Then attribute(first-name) set supertype: name; fails
     When attribute(first-name) unset annotation: @regex
     When attribute(first-name) set supertype: name

@@ -1770,7 +1770,6 @@ Feature: Concept Relation Type and Role Type
     When connection open schema transaction for database: typedb
     When relation(connection) get role(part) set ordering: ordered
     Then transaction commits; fails
-    When transaction closes
     When connection open schema transaction for database: typedb
     Then relation(parentship) get role(parent) set ordering: ordered; fails
     When transaction closes

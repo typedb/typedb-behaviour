@@ -887,7 +887,7 @@ Feature: Concept Plays
       | parentship:child |
     Then <root-type>(<subtype-name>) get plays do not contain:
       | parentship:parent |
-    When <root-type>(<subtype-name>) get plays(fathership:father) unset override: parentship:parent
+    When <root-type>(<subtype-name>) get plays(fathership:father) unset override
     Then <root-type>(<subtype-name>) get plays contain:
       | fathership:father |
       | parentship:parent |
@@ -918,7 +918,7 @@ Feature: Concept Plays
       | parentship:child |
     Then <root-type>(<subtype-name>) get plays do not contain:
       | parentship:parent |
-    When <root-type>(<subtype-name>) get plays(fathership:father) unset override: parentship:parent
+    When <root-type>(<subtype-name>) get plays(fathership:father) unset override
     Then <root-type>(<subtype-name>) get plays contain:
       | fathership:father |
       | parentship:parent |
@@ -1817,7 +1817,7 @@ Feature: Concept Plays
       | entity    | person         | customer     | card(1, 2) |
       | relation  | description    | registration | card(1, 2) |
 
-  Scenario Outline: <root-type> types cannot redeclare inherited plays as plays with @<annotation>
+  Scenario Outline: <root-type> types cannot redeclare inherited plays as plays with @<annotation> without override
     When create relation type: parentship
     When relation(parentship) create role: parent
     When <root-type>(<supertype-name>) set plays: parentship:parent
@@ -1843,8 +1843,16 @@ Feature: Concept Plays
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations contain: @<annotation>
+    When <root-type>(<subtype-name>) get plays(parentship:parent) get declared annotations contain: @<annotation>
+    When <root-type>(<subtype-name-2>) get plays(parentship:parent) get annotations contain: @<annotation>
+    When <root-type>(<subtype-name-2>) get plays(parentship:parent) get declared annotations contain: @<annotation>
     Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations is empty
-    When <root-type>(<subtype-name-2>) set plays: parentship:parent; fails
+    When <root-type>(<subtype-name-2>) set plays: parentship:parent
+    When <root-type>(<subtype-name-2>) get plays(parentship:parent) get annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) set annotation: @<annotation>
+    When <root-type>(<subtype-name-2>) get plays(parentship:parent) get annotations contain: @<annotation>
+    When <root-type>(<subtype-name-2>) get plays(parentship:parent) get declared annotations contain: @<annotation>
+    Then transaction commits; fails
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | annotation |
       | entity    | person         | customer     | subscriber     | card(1, 2) |
