@@ -11,35 +11,36 @@ Feature: Concept Ordered Role Players
     Given connection has been opened
     Given connection does not have any database
     Given connection create database: typedb
-    Given connection opens schema transaction for database: typedb
+    Given connection open schema transaction for database: typedb
 
     # Write schema for the test scenarios
-    Given put attribute type: name
-    Given attribute(name) set value-type: string
-    Given put attribute type: company-name
-    Given attribute(company-name) set value-type: string
-    Given put attribute type: date
-    Given attribute(date) set value-type: datetime
+    Given create attribute type: name
+    Given attribute(name) set value type: string
+    Given create attribute type: company-name
+    Given attribute(company-name) set value type: string
+    Given create attribute type: date
+    Given attribute(date) set value type: datetime
 
-    Given put relation type: employment
+    Given create relation type: employment
     Given relation(employment) set owns: date
 
     Given relation(employment) create role: employer
-    Given relation(employment) create role: employee[]
+    Given relation(employment) create role: employee
+    Given relation(employment) get role(employee) set ordering: ordered
 
-    Given put entity type: company
+    Given create entity type: company
     Given entity(company) set owns: company-name
-    Given entity(company) get owns: company-name, set annotation: @key
-    Given entity(company) set plays role: employment:employer
+    Given entity(company) get owns(company-name) set annotation: @key
+    Given entity(company) set plays: employment:employer
 
-    Given put entity type: person
+    Given create entity type: person
     Given entity(person) set owns: name
-    Given entity(person) get owns: name, set annotation: @key
-    Given entity(person) set plays role: employment:employee
+    Given entity(person) get owns(name) set annotation: @key
+    Given entity(person) set plays: employment:employee
 
     Given transaction commits
 
-    Given connection opens write transaction for database: typedb
+    Given connection open write transaction for database: typedb
 
   Scenario: Role players can be ordered
     When $alice = entity(person) create new instance with key(name): alice
@@ -109,4 +110,3 @@ Feature: Concept Ordered Role Players
     Then roleplayer $employees[2] is $alice
     Then roleplayer $employees[3] is $alice
     Then roleplayer $employees[4] is $bob
-

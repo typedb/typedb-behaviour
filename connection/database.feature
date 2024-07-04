@@ -126,7 +126,7 @@ Feature: Connection Database
   @ignore
   Scenario: delete a database causes open transactions to fail
     When connection create database: typedb
-    When connection opens write transaction for database: typedb
+    When connection open write transaction for database: typedb
     When connection delete database: typedb
     Then connection does not have database: typedb
     Then typeql define; throws exception containing "transaction has been closed"

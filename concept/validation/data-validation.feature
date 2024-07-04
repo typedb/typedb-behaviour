@@ -16,7 +16,7 @@ Feature: Data validation
 
 
   Scenario: Instances of a type not in the schema must not exist
-    Given put entity type: ent0
+    Given create entity type: ent0
     Given transaction commits
     Given connection close all sessions
     Given connection open data session for database: typedb
@@ -31,9 +31,9 @@ Feature: Data validation
 
 
   Scenario: Instances of abstract types must not exist
-    Given put entity type: ent0a
+    Given create entity type: ent0a
     Given entity(ent0a) set abstract: true
-    Given put entity type: ent0c
+    Given create entity type: ent0c
     Given transaction commits
 
     Given connection close all sessions
@@ -54,12 +54,12 @@ Feature: Data validation
 
 
   Scenario: Instances of ownerships not in the schema must not exist
-    Given put entity type: ent00
-    Given put attribute type: attr00, with value type: string
+    Given create entity type: ent00
+    Given create attribute type: attr00, with value type: string
     Given entity(ent00) set owns attribute type: attr00
-    Given put entity type: ent1
+    Given create entity type: ent1
     Given entity(ent1) set supertype: ent00
-    Given put entity type: ent01
+    Given create entity type: ent01
     Given transaction commits
     Given connection close all sessions
     Given connection open data session for database: typedb
@@ -87,14 +87,14 @@ Feature: Data validation
 
 
   Scenario: Instances of roles not in the schema must not exist
-    Given put relation type: rel00
+    Given create relation type: rel00
     Given relation(rel00) set relates role: role00
-    Given put relation type: rel01
+    Given create relation type: rel01
     Given relation(rel01) set relates role: role01
-    Given put relation type: rel1
+    Given create relation type: rel1
     Given relation(rel1) set supertype: rel00
-    Given put entity type: ent0
-    Given entity(ent0) set plays role: rel00:role00
+    Given create entity type: ent0
+    Given entity(ent0) set plays: rel00:role00
     Given transaction commits
     Given connection close all sessions
     Given connection open data session for database: typedb
@@ -119,16 +119,16 @@ Feature: Data validation
   # If we ever introduce abstract roles, we need a scenario here
 
   Scenario: Instances of role-playing not in the schema must not exist
-    Given put relation type: rel0
+    Given create relation type: rel0
     Given relation(rel0) set relates role: role0
-    Given put relation type: rel1
+    Given create relation type: rel1
     Given relation(rel1) set supertype: rel0
     Given relation(rel1) set relates role: role1 as role0
-    Given put entity type: ent00
-    Given entity(ent00) set plays role: rel0:role0
-    Given put entity type: ent1
+    Given create entity type: ent00
+    Given entity(ent00) set plays: rel0:role0
+    Given create entity type: ent1
     Given entity(ent1) set supertype: ent00
-    Given put entity type: ent01
+    Given create entity type: ent01
     Given transaction commits
     Given connection close all sessions
     Given connection open data session for database: typedb
@@ -147,10 +147,10 @@ Feature: Data validation
     Given connection open schema session for database: typedb
 
     When session opens transaction of type: write
-    Then entity(ent00) unset plays role: rel0:role0; throws exception
+    Then entity(ent00) unset plays: rel0:role0; throws exception
 
     When session opens transaction of type: write
-    Then entity(ent1) set plays role: rel1:role1 as rel0:role0; throws exception
+    Then entity(ent1) set plays: rel1:role1 as rel0:role0; throws exception
 
     When session opens transaction of type: write
     Then entity(ent1) set supertype: ent01; throws exception
@@ -159,14 +159,14 @@ Feature: Data validation
   # If we ever introduce abstract roles, we need a scenario here
 
   Scenario: Instances of role-playing hidden by a relates override must not exist
-    Given put relation type: rel0
+    Given create relation type: rel0
     Given relation(rel0) set relates role: role0
-    Given put relation type: rel1
+    Given create relation type: rel1
     Given relation(rel1) set supertype: rel0
     Given relation(rel1) set relates role: role1 as role0
-    Given put entity type: ent00
-    Given entity(ent00) set plays role: rel0:role0
-    Given entity(ent00) set plays role: rel1:role1
+    Given create entity type: ent00
+    Given entity(ent00) set plays: rel0:role0
+    Given entity(ent00) set plays: rel1:role1
     Given transaction commits
 
     Given connection close all sessions
@@ -193,16 +193,16 @@ Feature: Data validation
 
 
   Scenario: Instances of role-playing hidden by a plays override must not exist
-    Given put relation type: rel0
+    Given create relation type: rel0
     Given relation(rel0) set relates role: role0
-    Given put relation type: rel1
+    Given create relation type: rel1
     Given relation(rel1) set supertype: rel0
     Given relation(rel1) set relates role: role1 as role0
-    Given put entity type: ent00
-    Given entity(ent00) set plays role: rel0:role0
-    Given put entity type: ent1
+    Given create entity type: ent00
+    Given entity(ent00) set plays: rel0:role0
+    Given create entity type: ent1
     Given entity(ent1) set supertype: ent00
-    Given entity(ent1) set plays role: rel1:role1 as rel0:role0
+    Given entity(ent1) set plays: rel1:role1 as rel0:role0
     Given transaction commits
 
     Given connection close all sessions
@@ -221,17 +221,17 @@ Feature: Data validation
 
 
   Scenario: A type may not override a role it plays through inheritance if instances of that type playing that role exist
-    Given put relation type: rel0
+    Given create relation type: rel0
     Given relation(rel0) set relates role: role0
-    Given put relation type: rel1
+    Given create relation type: rel1
     Given relation(rel1) set supertype: rel0
     Given relation(rel1) set relates role: role1 as role0
-    Given put entity type: ent00
-    Given entity(ent00) set plays role: rel0:role0
-    Given put entity type: ent1
+    Given create entity type: ent00
+    Given entity(ent00) set plays: rel0:role0
+    Given create entity type: ent1
     Given entity(ent1) set supertype: ent00
     # Without the override
-    Given entity(ent1) set plays role: rel1:role1
+    Given entity(ent1) set plays: rel1:role1
     Given transaction commits
 
     Given connection close all sessions
@@ -246,24 +246,24 @@ Feature: Data validation
     Given connection open schema session for database: typedb
 
     When session opens transaction of type: write
-    Then entity(ent1) set plays role: rel1:role1 as rel0:role0; throws exception
+    Then entity(ent1) set plays: rel1:role1 as rel0:role0; throws exception
 
 
   Scenario: A type may not be moved if it has instances of it playing a role which would be hidden as a result of that move
-    Given put relation type: rel0
+    Given create relation type: rel0
     Given relation(rel0) set relates role: role0
-    Given put relation type: rel1
+    Given create relation type: rel1
     Given relation(rel1) set supertype: rel0
     Given relation(rel1) set relates role: role1 as role0
-    Given put entity type: ent0
-    Given entity(ent0) set plays role: rel0:role0
-    Given put entity type: ent10
+    Given create entity type: ent0
+    Given entity(ent0) set plays: rel0:role0
+    Given create entity type: ent10
     Given entity(ent10) set supertype: ent0
-    Given put entity type: ent2
+    Given create entity type: ent2
     Given entity(ent2) set supertype: ent10
-    Given put entity type: ent11
+    Given create entity type: ent11
     Given entity(ent11) set supertype: ent0
-    Given entity(ent11) set plays role: rel1:role1 as rel0:role0
+    Given entity(ent11) set plays: rel1:role1 as rel0:role0
     Given transaction commits
     Given connection close all sessions
     Given connection open data session for database: typedb
@@ -280,12 +280,12 @@ Feature: Data validation
 
 
   Scenario: When annotations on an ownership change, data is revalidated
-    Given put attribute type: attr0, with value type: string
-    Given put entity type: ent0n
-    Given put entity type: ent0u
+    Given create attribute type: attr0, with value type: string
+    Given create entity type: ent0n
+    Given create entity type: ent0u
     Given entity(ent0n) set owns attribute type: attr0
     Given entity(ent0u) set owns attribute type: attr0, with annotations: unique
-    Given put attribute type: ref, with value type: string
+    Given create attribute type: ref, with value type: string
     Given entity(ent0n) set owns attribute type: ref, with annotations: key
     Given entity(ent0u) set owns attribute type: ref, with annotations: key
     Given transaction commits
@@ -329,14 +329,14 @@ Feature: Data validation
     Then transaction commits
 
   Scenario: When the super-type of a type is changed, the data is consistent with the annotations on ownerships
-    Given put attribute type: attr0, with value type: string
-    Given put entity type: ent0k
-    Given put entity type: ent0n
-    Given put entity type: ent1n
+    Given create attribute type: attr0, with value type: string
+    Given create entity type: ent0k
+    Given create entity type: ent0n
+    Given create entity type: ent1n
     Given entity(ent1n) set supertype: ent0n
     Given entity(ent0n) set owns attribute type: attr0
     Given entity(ent0k) set owns attribute type: attr0, with annotations: key
-    Given put attribute type: ref, with value type: string
+    Given create attribute type: ref, with value type: string
     Given entity(ent0n) set owns attribute type: ref, with annotations: key
     Given entity(ent0k) set owns attribute type: ref, with annotations: key
     Given transaction commits

@@ -11,31 +11,47 @@ Feature: Concept Entity Type
     Given connection has been opened
     Given connection does not have any database
     Given connection create database: typedb
-    Given connection opens schema transaction for database: typedb
+    Given connection open schema transaction for database: typedb
+
+########################
+# entity type common
+########################
 
   Scenario: Root entity type cannot be deleted
     Then delete entity type: entity; fails
 
+  Scenario: Root entity type cannot be renamed
+    Then entity(entity) set label: superentity; fails
+
   Scenario: Entity types can be created
-    When put entity type: person
+    When create entity type: person
     Then entity(person) exists
     Then entity(person) get supertype: entity
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then entity(person) exists
     Then entity(person) get supertype: entity
 
-  Scenario: Entity types can be deleted
-    When put entity type: person
+  Scenario: Entity types cannot be redeclared
+    When create entity type: person
     Then entity(person) exists
-    When put entity type: company
+    Then create entity type: person; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) exists
+    Then create entity type: person; fails
+
+  Scenario: Entity types can be deleted
+    When create entity type: person
+    Then entity(person) exists
+    When create entity type: company
     Then entity(company) exists
     When delete entity type: company
     Then entity(company) does not exist
     Then entity(entity) get subtypes do not contain:
       | company |
     When transaction commits
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then entity(person) exists
     Then entity(company) does not exist
     Then entity(entity) get subtypes do not contain:
@@ -46,70 +62,48 @@ Feature: Concept Entity Type
       | person  |
       | company |
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then entity(person) does not exist
     Then entity(company) does not exist
     Then entity(entity) get subtypes do not contain:
       | person  |
       | company |
 
-  Scenario: Entity types that have instances cannot be deleted
-    When put entity type: person
-    When transaction commits
-    When connection opens write transaction for database: typedb
-    When $x = entity(person) create new instance
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    Then delete entity type: person; fails
+    # TODO: Move all "create new instance" into validation?
+#  Scenario: Entity types that have instances cannot be deleted
+#    When create entity type: person
+#    When transaction commits
+#    When connection open write transaction for database: typedb
+#    When $x = entity(person) create new instance
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then delete entity type: person; fails
 
   Scenario: Entity types can change labels
-    When put entity type: person
-    Then entity(person) get label: person
+    When create entity type: person
+    Then entity(person) get name: person
     When entity(person) set label: horse
     Then entity(person) does not exist
     Then entity(horse) exists
-    Then entity(horse) get label: horse
+    Then entity(horse) get name: horse
     When transaction commits
-    When connection opens schema transaction for database: typedb
-    Then entity(horse) get label: horse
+    When connection open schema transaction for database: typedb
+    Then entity(horse) get name: horse
     When entity(horse) set label: animal
     Then entity(horse) does not exist
     Then entity(animal) exists
-    Then entity(animal) get label: animal
+    Then entity(animal) get name: animal
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then entity(animal) exists
-    Then entity(animal) get label: animal
-
-  Scenario: Entity types can be set to abstract
-    When put entity type: person
-    When entity(person) set annotation: @abstract
-    When put entity type: company
-    Then entity(person) get annotations contain: @abstract
-    When transaction commits
-    When connection opens write transaction for database: typedb
-    Then entity(person) create new instance; fails
-    When connection opens write transaction for database: typedb
-    Then entity(company) get annotations do not contain: @abstract
-    Then entity(person) get annotations contain: @abstract
-    Then entity(person) create new instance; fails
-    When connection opens schema transaction for database: typedb
-    Then entity(company) get annotations do not contain: @abstract
-    When entity(company) set annotation: @abstract
-    Then entity(company) get annotations contain: @abstract
-    When transaction commits
-    When connection opens write transaction for database: typedb
-    Then entity(company) create new instance; fails
-    When connection opens write transaction for database: typedb
-    Then entity(company) get annotations contain: @abstract
-    Then entity(company) create new instance; fails
+    Then entity(animal) get name: animal
 
   Scenario: Entity types can be subtypes of other entity types
-    When put entity type: man
-    When put entity type: woman
-    When put entity type: person
-    When put entity type: cat
-    When put entity type: animal
+    When create entity type: man
+    When create entity type: woman
+    When create entity type: person
+    When create entity type: cat
+    When create entity type: animal
     When entity(man) set supertype: person
     When entity(woman) set supertype: person
     When entity(person) set supertype: animal
@@ -135,8 +129,8 @@ Feature: Concept Entity Type
     Then entity(man) get subtypes is empty
     Then entity(woman) get subtypes is empty
     Then entity(person) get subtypes contain:
-      | man    |
-      | woman  |
+      | man   |
+      | woman |
     Then entity(cat) get subtypes is empty
     Then entity(animal) get subtypes contain:
       | cat    |
@@ -150,7 +144,7 @@ Feature: Concept Entity Type
       | man    |
       | woman  |
     When transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then entity(man) get supertype: person
     Then entity(woman) get supertype: person
     Then entity(person) get supertype: animal
@@ -172,8 +166,8 @@ Feature: Concept Entity Type
     Then entity(man) get subtypes is empty
     Then entity(woman) get subtypes is empty
     Then entity(person) get subtypes contain:
-      | man    |
-      | woman  |
+      | man   |
+      | woman |
     Then entity(cat) get subtypes is empty
     Then entity(animal) get subtypes contain:
       | cat    |
@@ -188,1256 +182,372 @@ Feature: Concept Entity Type
       | woman  |
 
   Scenario: Entity types cannot subtype itself
-    When put entity type: person
+    When create entity type: person
     When transaction commits
-    When connection opens schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then entity(person) set supertype: person; fails
-    When connection opens schema transaction for database: typedb
+    When transaction closes
+    When connection open schema transaction for database: typedb
     Then entity(person) set supertype: person; fails
 
-  Scenario: Entity types can have keys
-    When put attribute type: email
-    When attribute(email) set value-type: string
-    When put attribute type: username
-    When attribute(username) set value-type: string
-    When put entity type: person
-    When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: @key
-    When entity(person) set owns: username
-    When entity(person) get owns: username, set annotation: @key
-    Then entity(person) get owns: email; get annotations contain: @key
-    Then entity(person) get owns: username; get annotations contain: @key
+  Scenario: Entity types cannot change root's supertype
+    When create entity type: person
+    Then entity(entity) set supertype: person; fails
+    Then entity(entity) set supertype: entity; fails
+    Then entity(entity) get supertypes is empty
+
+########################
+# @annotations common
+########################
+
+  Scenario Outline: Entity type can set and unset @<annotation>
+    When create entity type: person
+    When entity(person) set annotation: @<annotation>
+    Then entity(person) get annotations contain: @<annotation>
+    Then entity(person) get annotation categories contain: @<annotation-category>
+    Then entity(person) get declared annotations contain: @<annotation>
+    When entity(person) unset annotation: @<annotation-category>
+    Then entity(person) get annotations do not contain: @<annotation>
+    Then entity(person) get annotation categories do not contain: @<annotation-category>
+    Then entity(person) get declared annotations do not contain: @<annotation>
     When transaction commits
-    When connection opens read transaction for database: typedb
-    Then entity(person) get owns: email; get annotations contain: @key
-    Then entity(person) get owns: username; get annotations contain: @key
-
-  Scenario: Entity types can only commit keys if every instance owns a distinct key
-    When put attribute type: email
-    When attribute(email) set value-type: string
-    When put attribute type: username
-    When attribute(username) set value-type: string
-    When put entity type: person
-    When entity(person) set owns: username
-    When entity(person) get owns: username, set annotation: @key
-    Then transaction commits
-    When connection opens write transaction for database: typedb
-    When $a = entity(person) create new instance with key(username): alice
-    When $b = entity(person) create new instance with key(username): bob
-    Then transaction commits
-    When connection opens schema transaction for database: typedb
-    When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: @key; fails
-    When connection opens schema transaction for database: typedb
-    When entity(person) set owns: email
-    Then transaction commits
-    When connection opens write transaction for database: typedb
-    When $a = entity(person) get instance with key(username): alice
-    When $alice = attribute(email) as(string) put: alice@vaticle.com
-    When entity $a set has: $alice
-    When $b = entity(person) get instance with key(username): bob
-    When $bob = attribute(email) as(string) put: bob@vaticle.com
-    When entity $b set has: $bob
-    Then transaction commits
-    When connection opens schema transaction for database: typedb
-    When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: @key
-    Then entity(person) get owns: email; get annotations contain: @key
-    Then entity(person) get owns: username; get annotations contain: @key
-    Then transaction commits
-    When connection opens read transaction for database: typedb
-    Then entity(person) get owns: email; get annotations contain: @key
-    Then entity(person) get owns: username; get annotations contain: @key
-
-  Scenario: Entity types can unset keys
-    When put attribute type: email
-    When attribute(email) set value-type: string
-    When put attribute type: username
-    When attribute(username) set value-type: string
-    When put entity type: person
-    When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: @key
-    When entity(person) set owns: username
-    When entity(person) get owns: username, set annotation: @key
-    When entity(person) unset owns: email
-    Then entity(person) get owns do not contain:
-      | email |
+    When connection open schema transaction for database: typedb
+    Then entity(person) get annotations do not contain: @<annotation>
+    Then entity(person) get annotation categories do not contain: @<annotation-category>
+    Then entity(person) get declared annotations do not contain: @<annotation>
+    When entity(person) set annotation: @<annotation>
+    Then entity(person) get annotations contain: @<annotation>
+    Then entity(person) get annotation categories contain: @<annotation-category>
+    Then entity(person) get declared annotations contain: @<annotation>
     When transaction commits
-    When connection opens schema transaction for database: typedb
-    When entity(person) unset owns: username
-    Then entity(person) get owns do not contain:
-      | email    |
-      | username |
+    When connection open schema transaction for database: typedb
+    Then entity(person) get annotations contain: @<annotation>
+    Then entity(person) get annotation categories contain: @<annotation-category>
+    Then entity(person) get declared annotations contain: @<annotation>
+    Examples:
+      | annotation | annotation-category |
+      | abstract   | abstract            |
 
-  Scenario: Entity types cannot have keys of attributes that are not keyable
-    When put attribute type: is-open
-    When attribute(is-open) set value-type: boolean
-    When put attribute type: age
-    When attribute(age) set value-type: long
-    When put attribute type: rating
-    When attribute(rating) set value-type: double
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When put attribute type: timestamp
-    When attribute(timestamp) set value-type: datetime
-    When put entity type: person
-    When entity(person) set owns: age
-    When entity(person) get owns: age, set annotation: @key
-    When entity(person) set owns: name
-    When entity(person) get owns: name, set annotation: @key
-    When entity(person) set owns: timestamp
-    When entity(person) get owns: timestamp, set annotation: @key
-    Then entity(person) set owns: is-open
-    Then entity(person) get owns: is-open, set annotation: @key
+  Scenario Outline: Entity type can unset not set @<annotation>
+    When create entity type: person
+    Then entity(person) get annotations do not contain: @<annotation>
+    Then entity(person) get declared annotations do not contain: @<annotation>
+    When entity(person) unset annotation: @<annotation-category>
+    Then entity(person) get annotations do not contain: @<annotation>
+    Then entity(person) get declared annotations do not contain: @<annotation>
     When transaction commits
-    When connection opens schema transaction for database: typedb
-    Then entity(person) set owns: rating
-    Then entity(person) get owns: rating, set annotation: @key; fails
+    When connection open schema transaction for database: typedb
+    Then entity(person) get annotations do not contain: @<annotation>
+    Then entity(person) get declared annotations do not contain: @<annotation>
+    When entity(person) unset annotation: @<annotation-category>
+    Then entity(person) get annotations do not contain: @<annotation>
+    Then entity(person) get declared annotations do not contain: @<annotation>
+    Examples:
+      | annotation | annotation-category |
+      | abstract   | abstract            |
 
-  Scenario: Entity types can have attributes
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When put attribute type: age
-    When attribute(age) set value-type: long
-    When put entity type: person
-    When entity(person) set owns: name
-    When entity(person) set owns: age
-    Then entity(person) get owns contain:
-      | name |
-      | age  |
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    Then entity(person) get owns contain:
-      | name |
-      | age  |
+    # TODO: Uncomment this test and when there appear inherited annotations (abstract is not inherited)
+#  Scenario Outline: Entity type cannot set or unset inherited @<annotation>
+#    When create entity type: person
+#    When entity(person) set annotation: @<annotation>
+#    When create entity type: player
+#    When entity(player) set supertype: person
+#    Then entity(person) get annotations contain: @<annotation>
+#    Then entity(person) get declared annotations contain: @<annotation>
+#    Then entity(player) get annotations contain: @<annotation>
+#    Then entity(player) get declared annotations do not contain: @<annotation>
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then entity(person) get annotations contain: @<annotation>
+#    Then entity(person) get declared annotations contain: @<annotation>
+#    Then entity(player) get annotations contain: @<annotation>
+#    Then entity(player) get declared annotations do not contain: @<annotation>
+#    When entity(player) set annotation: @<annotation>
+#    Then transaction commits; fails
+#    When connection open schema transaction for database: typedb
+#    Then entity(person) get annotations contain: @<annotation>
+#    Then entity(person) get declared annotations contain: @<annotation>
+#    Then entity(player) get annotations contain: @<annotation>
+#    Then entity(player) get declared annotations do not contain: @<annotation>
+#    Then entity(player) unset annotation: @<annotation-category>; fails
+#    When connection open schema transaction for database: typedb
+#    Then entity(person) get annotations contain: @<annotation>
+#    Then entity(person) get declared annotations contain: @<annotation>
+#    Then entity(player) get annotations contain: @<annotation>
+#    Then entity(player) get declared annotations do not contain: @<annotation>
+#    Examples:
+#      | annotation | annotation-category |
+#      |            |                     |
 
-  Scenario: Entity types can unset owning attributes
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When put attribute type: age
-    When attribute(age) set value-type: long
-    When put entity type: person
-    When entity(person) set owns: name
-    When entity(person) set owns: age
-    When entity(person) unset owns: age
-    Then entity(person) get owns do not contain:
-      | age |
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    When entity(person) unset owns: name
-    Then entity(person) get owns do not contain:
-      | name |
-      | age  |
+    # TODO: Uncomment this test and when there appear inherited annotations (abstract is not inherited)
+#  Scenario Outline: Entity type cannot set supertype with the same @<annotation> until it is explicitly unset from type
+#    When create entity type: person
+#    When entity(person) set annotation: @<annotation>
+#    Then entity(person) get annotations contain: @<annotation>
+#    Then entity(person) get declared annotations contain: @<annotation>
+#    When create entity type: player
+#    When entity(player) set annotation: @<annotation>
+#    Then entity(player) get annotations contain: @<annotation>
+#    Then entity(player) get declared annotations contain: @<annotation>
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then entity(person) get annotations contain: @<annotation>
+#    Then entity(person) get declared annotations contain: @<annotation>
+#    Then entity(player) get annotations contain: @<annotation>
+#    Then entity(player) get declared annotations contain: @<annotation>
+#    When entity(player) set supertype: person
+#    Then entity(person) get annotations contain: @<annotation>
+#    Then entity(person) get declared annotations contain: @<annotation>
+#    Then entity(player) get annotations contain: @<annotation>
+#    Then entity(player) get declared annotations contain: @<annotation>
+#    Then transaction commits; fails
+#    When connection open schema transaction for database: typedb
+#    Then entity(person) get annotations contain: @<annotation>
+#    Then entity(person) get declared annotations contain: @<annotation>
+#    Then entity(player) get annotations contain: @<annotation>
+#    Then entity(player) get declared annotations contain: @<annotation>
+#    When entity(player) set supertype: person
+#    When entity(player) unset annotation: @<annotation-category>
+#    Then entity(player) get annotations contain: @<annotation>
+#    Then entity(player) get declared annotations do not contain: @<annotation>
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then entity(person) get annotations contain: @<annotation>
+#    Then entity(person) get declared annotations contain: @<annotation>
+#    Then entity(player) get annotations contain: @<annotation>
+#    Then entity(player) get declared annotations do not contain: @<annotation>
+#    Examples:
+#      | annotation | annotation-category |
+#      |            |                     |
 
-  Scenario: Entity types cannot unset owning attributes that are owned by existing instances
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When put entity type: person
-    When entity(person) set owns: name
-    Then transaction commits
-    When connection opens write transaction for database: typedb
-    When $a = entity(person) create new instance
-    When $alice = attribute(name) as(string) put: alice
-    When entity $a set has: $alice
-    Then transaction commits
-    When connection opens schema transaction for database: typedb
-    Then entity(person) unset owns: name; fails
+    # TODO: Uncomment this test and when there appear inherited annotations (abstract is not inherited)
+#  Scenario Outline: Entity type loses inherited @<annotation> if supertype is unset
+#    When create entity type: person
+#    When entity(person) set annotation: @<annotation>
+#    When create entity type: player
+#    When entity(player) set supertype: person
+#    Then entity(person) get annotations contain: @<annotation>
+#    Then entity(player) get annotations contain: @<annotation>
+#    When entity(player) set supertype: entity
+#    Then entity(person) get annotations contain: @<annotation>
+#    Then entity(player) get annotations do not contain: @<annotation>
+#    When entity(player) set supertype: person
+#    Then entity(person) get annotations contain: @<annotation>
+#    Then entity(player) get annotations contain: @<annotation>
+#    Then entity(player) get declared annotations do not contain: @<annotation>
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then entity(person) get annotations contain: @<annotation>
+#    Then entity(player) get annotations contain: @<annotation>
+#    Then entity(player) get declared annotations do not contain: @<annotation>
+#    When entity(player) set supertype: entity
+#    Then entity(person) get annotations contain: @<annotation>
+#    Then entity(player) get annotations do not contain: @<annotation>
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then entity(person) get annotations contain: @<annotation>
+#    Then entity(player) get annotations do not contain: @<annotation>
+#    Examples:
+#      | annotation |
+#      |     |
 
-  Scenario: Entity types can have keys and attributes
-    When put attribute type: email
-    When attribute(email) set value-type: string
-    When put attribute type: username
-    When attribute(username) set value-type: string
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When put attribute type: age
-    When attribute(age) set value-type: long
-    When put entity type: person
-    When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: @key
-    When entity(person) set owns: username
-    When entity(person) get owns: username, set annotation: @key
-    When entity(person) set owns: name
-    When entity(person) set owns: age
-    Then entity(person) get owns: email; get annotations contain: @key
-    Then entity(person) get owns: username; get annotations contain: @key
-    Then entity(person) get owns contain:
-      | email    |
-      | username |
-      | name     |
-      | age      |
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    Then entity(person) get owns: email; get annotations contain: @key
-    Then entity(person) get owns: username; get annotations contain: @key
-    Then entity(person) get owns contain:
-      | email    |
-      | username |
-      | name     |
-      | age      |
+########################
+# @abstract
+########################
 
-  Scenario: Entity types can inherit keys and attributes
-    When put attribute type: email
-    When attribute(email) set value-type: string
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When put attribute type: reference
-    When attribute(reference) set value-type: string
-    When put attribute type: rating
-    When attribute(rating) set value-type: double
-    When put entity type: person
-    When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: @key
-    When entity(person) set owns: name
-    When put entity type: customer
-    When entity(customer) set supertype: person
-    When entity(customer) set owns: reference
-    When entity(customer) get owns: reference, set annotation: @key
-    When entity(customer) set owns: rating
-    Then entity(customer) get owns contain:
-      | email     |
-      | reference |
-      | name      |
-      | rating    |
-    Then entity(customer) get declared owns contain:
-      | reference |
-      | rating    |
-    Then entity(customer) get declared owns do not contain:
-      | email     |
-      | name      |
-    Then entity(customer) get owns: email; get annotations contain: @key
-    Then entity(customer) get owns: reference; get annotations contain: @key
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    Then entity(customer) get owns contain:
-      | email     |
-      | reference |
-      | name      |
-      | rating    |
-    Then entity(customer) get declared owns contain:
-      | reference |
-      | rating    |
-    Then entity(customer) get declared owns do not contain:
-      | email     |
-      | name      |
-    Then entity(customer) get owns: email; get annotations contain: @key
-    Then entity(customer) get owns: reference; get annotations contain: @key
-    When put attribute type: license
-    When attribute(license) set value-type: string
-    When put attribute type: points
-    When attribute(points) set value-type: double
-    When put entity type: subscriber
-    When entity(subscriber) set supertype: customer
-    When entity(subscriber) set owns: license
-    When entity(subscriber) get owns: license, set annotation: @key
-    When entity(subscriber) set owns: points
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    Then entity(customer) get owns contain:
-      | email     |
-      | reference |
-      | name      |
-      | rating    |
-    Then entity(customer) get declared owns contain:
-      | reference |
-      | rating    |
-    Then entity(customer) get declared owns do not contain:
-      | email     |
-      | name      |
-    Then entity(customer) get owns: email; get annotations contain: @key
-    Then entity(customer) get owns: reference; get annotations contain: @key
-    Then entity(subscriber) get owns: email; get annotations contain: @key
-    Then entity(subscriber) get owns: reference; get annotations contain: @key
-    Then entity(subscriber) get owns: license; get annotations contain: @key
-    Then entity(subscriber) get owns contain:
-      | email     |
-      | reference |
-      | license   |
-      | name      |
-      | rating    |
-      | points    |
-    Then entity(subscriber) get declared owns contain:
-      | license   |
-      | points    |
-    Then entity(subscriber) get declared owns do not contain:
-      | email     |
-      | reference |
-      | name      |
-      | rating    |
+  # TODO: This test with new instances should be in entity.feature!
+#  Scenario: Entity types can be set to abstract
+#    When create entity type: person
+#    When entity(person) set annotation: @abstract
+#    When create entity type: company
+#    Then entity(person) get annotations contain: @abstract
+#    Then entity(person) get declared annotations contain: @abstract
+#    When transaction commits
+#    When connection open write transaction for database: typedb
+#    Then entity(person) create new instance; fails
+#    When connection open write transaction for database: typedb
+#    Then entity(company) get annotations do not contain: @abstract
+#    Then entity(company) get declared annotations do not contain: @abstract
+#    Then entity(person) get annotations contain: @abstract
+#    Then entity(person) get declared annotations contain: @abstract
+#    Then entity(person) create new instance; fails
+#    When transaction closes
+#    When connection open schema transaction for database: typedb
+#    Then entity(company) get annotations do not contain: @abstract
+#    Then entity(company) get declared annotations do not contain: @abstract
+#    When entity(company) set annotation: @abstract
+#    Then entity(company) get annotations contain: @abstract
+#    Then entity(company) get declared annotations contain: @abstract
+#    When transaction commits
+#    When connection open write transaction for database: typedb
+#    Then entity(company) create new instance; fails
+#    When connection open write transaction for database: typedb
+#    Then entity(company) get annotations contain: @abstract
+#    Then entity(company) create new instance; fails
 
-  Scenario: Entity types can inherit keys and attributes that are subtypes of each other
-    When put attribute type: username
-    When attribute(username) set value-type: string
-    When attribute(username) set annotation: @abstract
-    When put attribute type: score
-    When attribute(score) set value-type: double
-    When attribute(score) set annotation: @abstract
-    When put attribute type: reference
-    When attribute(reference) set value-type: string
-    When attribute(reference) set annotation: @abstract
-    When attribute(reference) set supertype: username
-    When put attribute type: rating
-    When attribute(rating) set value-type: double
-    When attribute(rating) set annotation: @abstract
-    When attribute(rating) set supertype: score
-    When put entity type: person
+  Scenario: Entity types can be set to abstract
+    When create entity type: person
     When entity(person) set annotation: @abstract
-    When entity(person) set owns: username
-    When entity(person) get owns: username, set annotation: @key
-    When entity(person) set owns: score
-    When put entity type: customer
-    When entity(customer) set annotation: @abstract
-    When entity(customer) set supertype: person
-    When entity(customer) set owns: reference
-    When entity(customer) get owns: reference, set annotation: @key
-    When entity(customer) set owns: rating
-    Then entity(customer) get owns contain:
-      | username  |
-      | reference |
-      | score     |
-      | rating    |
-    Then entity(customer) get declared owns contain:
-      | reference |
-      | rating    |
-    Then entity(customer) get declared owns do not contain:
-      | username  |
-      | score     |
-    Then entity(customer) get owns: username; get annotations contain: @key
-    Then entity(customer) get owns: reference; get annotations contain: @key
+    When create entity type: company
+    Then entity(person) get annotations contain: @abstract
+    Then entity(person) get declared annotations contain: @abstract
     When transaction commits
-    When connection opens schema transaction for database: typedb
-    Then entity(customer) get owns contain:
-      | username  |
-      | reference |
-      | score     |
-      | rating    |
-    Then entity(customer) get declared owns contain:
-      | reference |
-      | rating    |
-    Then entity(customer) get declared owns do not contain:
-      | username  |
-      | score     |
-    Then entity(customer) get owns: username; get annotations contain: @key
-    Then entity(customer) get owns: reference; get annotations contain: @key
-    When put attribute type: license
-    When attribute(license) set value-type: string
-    When attribute(license) set supertype: reference
-    When put attribute type: points
-    When attribute(points) set value-type: double
-    When attribute(points) set supertype: rating
-    When put entity type: subscriber
-    When entity(subscriber) set annotation: @abstract
-    When entity(subscriber) set supertype: customer
-    When entity(subscriber) set owns: license
-    When entity(subscriber) get owns: license, set annotation: @key
-    When entity(subscriber) set owns: points
+    When connection open schema transaction for database: typedb
+    Then entity(company) get annotations do not contain: @abstract
+    Then entity(person) get annotations contain: @abstract
+    Then entity(company) get declared annotations do not contain: @abstract
+    Then entity(person) get declared annotations contain: @abstract
+    When entity(company) set annotation: @abstract
+    Then entity(company) get annotations contain: @abstract
+    Then entity(company) get declared annotations contain: @abstract
     When transaction commits
-    When connection opens read transaction for database: typedb
-    Then entity(customer) get owns contain:
-      | username  |
-      | reference |
-      | score     |
-      | rating    |
-    Then entity(customer) get declared owns contain:
-      | reference |
-      | rating    |
-    Then entity(customer) get declared owns do not contain:
-      | username  |
-      | score     |
-    Then entity(customer) get owns: username; get annotations contain: @key
-    Then entity(customer) get owns: reference; get annotations contain: @key
-    Then entity(subscriber) get owns contain:
-      | username  |
-      | reference |
-      | license   |
-      | score     |
-      | rating    |
-      | points    |
-    Then entity(subscriber) get declared owns contain:
-      | license   |
-      | points    |
-    Then entity(subscriber) get declared owns do not contain:
-      | username  |
-      | reference |
-      | score     |
-      | rating    |
-    Then entity(subscriber) get owns: username; get annotations contain: @key
-    Then entity(subscriber) get owns: reference; get annotations contain: @key
-    Then entity(subscriber) get owns: license; get annotations contain: @key
+    When connection open read transaction for database: typedb
+    Then entity(company) get annotations contain: @abstract
+    Then entity(company) get declared annotations contain: @abstract
 
-  Scenario: Entity types can override inherited keys and attributes
-    When put attribute type: username
-    When attribute(username) set value-type: string
-    When put attribute type: email
-    When attribute(email) set value-type: string
-    When attribute(email) set annotation: @abstract
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When attribute(name) set annotation: @abstract
-    When put attribute type: age
-    When attribute(age) set value-type: long
-    When put attribute type: reference
-    When attribute(reference) set value-type: string
-    When attribute(reference) set annotation: @abstract
-    When put attribute type: work-email
-    When attribute(work-email) set value-type: string
-    When attribute(work-email) set supertype: email
-    When put attribute type: nick-name
-    When attribute(nick-name) set value-type: string
-    When attribute(nick-name) set supertype: name
-    When put attribute type: rating
-    When attribute(rating) set value-type: double
-    When attribute(rating) set annotation: @abstract
-    When put entity type: person
+    # TODO: Move to entity.feature or schema/data-validation?
+#  Scenario: Entity types can be set to abstract when a subtype has instances
+#    When create entity type: person
+#    When create entity type: player
+#    When entity(player) set supertype: person
+#    Then transaction commits
+#    When connection open write transaction for database: typedb
+#    When $m = entity(player) create new instance
+#    Then transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then entity(person) set annotation: @abstract
+#    Then transaction commits
+#    When connection open read transaction for database: typedb
+#    Then entity(person) get annotations contain: @abstract
+#    Then entity(person) get declared annotations contain: @abstract
+#    Then entity(player) get annotations do not contain: @abstract
+#    Then entity(player) get declared annotations do not contain: @abstract
+
+#  TODO: Make it only for typeql
+#  Scenario: Entity cannot set @abstract annotation with arguments
+#    When create entity type: person
+#    Then entity(person) set annotation: @abstract(); fails
+#    Then entity(person) set annotation: @abstract(1); fails
+#    Then entity(person) set annotation: @abstract(1, 2); fails
+#    Then entity(person) get annotations is empty
+#    Then entity(person) get declared annotations is empty
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then entity(person) get annotations is empty
+#    Then entity(person) get declared annotations is empty
+
+  Scenario: Entity type can reset @abstract annotation
+    When create entity type: person
     When entity(person) set annotation: @abstract
-    When entity(person) set owns: username
-    When entity(person) get owns: username, set annotation: @key
-    When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: @key
-    When entity(person) set owns: name
-    When entity(person) set owns: age
-    When put entity type: customer
-    When entity(customer) set annotation: @abstract
-    When entity(customer) set supertype: person
-    When entity(customer) set owns: reference
-    When entity(customer) get owns: reference, set annotation: @key
-    When entity(customer) set owns: work-email
-    When entity(customer) get owns: work-email; set override: email
-    When entity(customer) set owns: rating
-    When entity(customer) set owns: nick-name
-    When entity(customer) get owns: nick-name; set override: name
-    Then entity(customer) get owns overridden(work-email) get label: email
-    Then entity(customer) get owns overridden(nick-name) get label: name
-    Then entity(customer) get owns contain:
-      | username   |
-      | reference  |
-      | work-email |
-      | age        |
-      | rating     |
-      | nick-name  |
-    Then entity(customer) get owns do not contain:
-      | email |
-      | name  |
-    Then entity(customer) get declared owns contain:
-      | reference  |
-      | work-email |
-      | rating     |
-      | nick-name  |
-    Then entity(customer) get declared owns do not contain:
-      | username   |
-      | age        |
-      | email      |
-      | name       |
-    Then entity(customer) get owns: username; get annotations contain: @key
-    Then entity(customer) get owns: reference; get annotations contain: @key
-    Then entity(customer) get owns: work-email; get annotations contain: @key
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    Then entity(customer) get owns overridden(work-email) get label: email
-    Then entity(customer) get owns overridden(nick-name) get label: name
-    Then entity(customer) get owns contain:
-      | username   |
-      | reference  |
-      | work-email |
-      | age        |
-      | rating     |
-      | nick-name  |
-    Then entity(customer) get owns do not contain:
-      | email |
-      | name  |
-    Then entity(customer) get declared owns contain:
-      | reference  |
-      | work-email |
-      | rating     |
-      | nick-name  |
-    Then entity(customer) get declared owns do not contain:
-      | username   |
-      | age        |
-      | email      |
-      | name       |
-    Then entity(customer) get owns: username; get annotations contain: @key
-    Then entity(customer) get owns: reference; get annotations contain: @key
-    Then entity(customer) get owns: work-email; get annotations contain: @key
-    When put attribute type: license
-    When attribute(license) set value-type: string
-    When attribute(license) set supertype: reference
-    When put attribute type: points
-    When attribute(points) set value-type: double
-    When attribute(points) set supertype: rating
-    When put entity type: subscriber
-    When entity(subscriber) set supertype: customer
-    When entity(subscriber) set owns: license
-    When entity(subscriber) get owns: license; set override: reference
-    When entity(subscriber) set owns: points
-    When entity(subscriber) get owns: points; set override: rating
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    Then entity(customer) get owns contain:
-      | username   |
-      | reference  |
-      | work-email |
-      | age        |
-      | rating     |
-      | nick-name  |
-    Then entity(customer) get owns do not contain:
-      | email |
-      | name  |
-    Then entity(customer) get declared owns contain:
-      | reference  |
-      | work-email |
-      | rating     |
-      | nick-name  |
-    Then entity(customer) get declared owns do not contain:
-      | username   |
-      | age        |
-      | email      |
-      | name       |
-    Then entity(customer) get owns: username; get annotations contain: @key
-    Then entity(customer) get owns: reference; get annotations contain: @key
-    Then entity(customer) get owns: work-email; get annotations contain: @key
-    Then entity(subscriber) get owns overridden(license) get label: reference
-    Then entity(subscriber) get owns overridden(points) get label: rating
-    Then entity(subscriber) get owns contain:
-      | username   |
-      | license    |
-      | work-email |
-      | age        |
-      | points     |
-      | nick-name  |
-    Then entity(subscriber) get owns do not contain:
-      | email      |
-      | reference  |
-      | name       |
-      | rating     |
-    Then entity(subscriber) get declared owns contain:
-      | license    |
-      | points     |
-    Then entity(subscriber) get declared owns do not contain:
-      | username   |
-      | work-email |
-      | age        |
-      | nick-name  |
-      | email      |
-      | reference  |
-      | name       |
-      | rating     |
-    Then entity(subscriber) get owns: username; get annotations contain: @key
-    Then entity(subscriber) get owns: license; get annotations contain: @key
-    Then entity(subscriber) get owns: work-email; get annotations contain: @key
-
-  Scenario: Entity types can override inherited attributes as keys
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When attribute(name) set annotation: @abstract
-    When put attribute type: username
-    When attribute(username) set value-type: string
-    When attribute(username) set supertype: name
-    When put entity type: person
+    Then entity(person) get annotations contain: @abstract
+    Then entity(person) get declared annotations contain: @abstract
     When entity(person) set annotation: @abstract
-    When entity(person) set owns: name
-    When put entity type: customer
-    When entity(customer) set supertype: person
-    When entity(customer) set owns: username
-    When entity(customer) get owns: username; set override: name
-    When entity(customer) get owns: username, set annotation: @key
-    Then entity(customer) get owns overridden(username) get label: name
-    Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
-      | username |
-    Then entity(customer) get owns, with annotations (DEPRECATED): key; do not contain:
-      | name |
-    Then entity(customer) get owns contain:
-      | username |
-    Then entity(customer) get owns do not contain:
-      | name |
+    Then entity(person) get annotations contain: @abstract
+    Then entity(person) get declared annotations contain: @abstract
     When transaction commits
-    When connection opens read transaction for database: typedb
-    Then entity(customer) get owns overridden(username) get label: name
-    Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
-      | username |
-    Then entity(customer) get owns, with annotations (DEPRECATED): key; do not contain:
-      | name |
-    Then entity(customer) get owns contain:
-      | username |
-    Then entity(customer) get owns do not contain:
-      | name |
+    When connection open read transaction for database: typedb
+    Then entity(person) get annotations contain: @abstract
+    Then entity(person) get declared annotations contain: @abstract
 
-  Scenario: Entity types can redeclare keys as keys
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When put attribute type: email
-    When attribute(email) set value-type: string
-    When put entity type: person
-    When entity(person) set owns: name
-    When entity(person) get owns: name, set annotation: @key
-    When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: @key
-    Then entity(person) set owns: name
-    Then entity(person) get owns: name, set annotation: @key
+  Scenario: Entity types can subtype non abstract entity types
+    When create entity type: person
+    When create entity type: player
     When transaction commits
-    When connection opens schema transaction for database: typedb
-    Then entity(person) set owns: email
-    Then entity(person) get owns: email, set annotation: @key
-
-  Scenario: Entity types can redeclare attributes as attributes
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When put attribute type: email
-    When attribute(email) set value-type: string
-    When put entity type: person
-    When entity(person) set owns: name
-    When entity(person) set owns: email
-    Then entity(person) set owns: name
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    Then entity(person) set owns: email
-
-  Scenario: Entity types can re-override keys
-    When put attribute type: email
-    When attribute(email) set value-type: string
-    When attribute(email) set annotation: @abstract
-    When put attribute type: work-email
-    When attribute(work-email) set value-type: string
-    When attribute(work-email) set supertype: email
-    When put entity type: person
-    When entity(person) set annotation: @abstract
-    When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: @key
-    When put entity type: customer
-    When entity(customer) set annotation: @abstract
-    When entity(customer) set supertype: person
-    When entity(customer) set owns: work-email
-    When entity(customer) get owns: work-email; set override: email
-    Then entity(customer) get owns overridden(work-email) get label: email
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    When entity(customer) set owns: work-email
-    When entity(customer) get owns: work-email; set override: email
-    Then entity(customer) get owns overridden(work-email) get label: email
-
-  Scenario: Entity types can re-override attributes as attributes
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When attribute(name) set annotation: @abstract
-    When put attribute type: nick-name
-    When attribute(nick-name) set value-type: string
-    When attribute(nick-name) set supertype: name
-    When put entity type: person
-    When entity(person) set annotation: @abstract
-    When entity(person) set owns: name
-    When put entity type: customer
-    When entity(customer) set annotation: @abstract
-    When entity(customer) set supertype: person
-    When entity(customer) set owns: nick-name
-    When entity(customer) get owns: nick-name; set override: name
-    Then entity(customer) get owns overridden(nick-name) get label: name
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    When entity(customer) set owns: nick-name
-    When entity(customer) get owns: nick-name; set override: name
-    Then entity(customer) get owns overridden(nick-name) get label: name
-
-  Scenario: Entity types can redeclare keys as attributes
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When put attribute type: email
-    When attribute(email) set value-type: string
-    When put entity type: person
-    When entity(person) set owns: name
-    When entity(person) get owns: name, set annotation: @key
-    When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: @key
-    Then entity(person) set owns: name
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    Then entity(person) set owns: email
-
-  Scenario: Entity types can redeclare attributes as keys
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When put attribute type: email
-    When attribute(email) set value-type: string
-    When put entity type: person
-    When entity(person) set owns: name
-    When entity(person) set owns: email
-    Then entity(person) set owns: name
-    Then entity(person) get owns: name, set annotation: @key
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    Then entity(person) set owns: email
-    Then entity(person) get owns: email, set annotation: @key
-
-  Scenario: Entity types can redeclare inherited attributes as keys (which will override)
-    When put attribute type: email
-    When attribute(email) set value-type: string
-    When put entity type: person
-    When entity(person) set owns: email
-    Then entity(person) get owns overridden(email) does not exist
-    When put entity type: customer
-    When entity(customer) set supertype: person
-    Then entity(customer) set owns: email
-    Then entity(customer) get owns: email, set annotation: @key
-    Then entity(customer) get owns overridden(email) exists
-    Then entity(customer) get owns overridden(email) get label: email
-    Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
-      | email |
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    Then entity(customer) get owns, with annotations (DEPRECATED): key; contain:
-      | email |
-    When put entity type: subscriber
-    When entity(subscriber) set supertype: person
-    Then entity(subscriber) set owns: email
-    Then entity(subscriber) get owns: email, set annotation: @key
-    Then entity(subscriber) get owns, with annotations (DEPRECATED): key; contain:
-      | email |
-
-  Scenario: Entity types cannot redeclare inherited attributes as attributes
-    When put attribute type: email
-    When attribute(email) set value-type: string
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When put entity type: person
-    When entity(person) set owns: name
-    When put entity type: customer
-    When entity(customer) set supertype: person
-    Then entity(customer) set owns: name
-    Then transaction commits; fails
-
-  Scenario: Entity types cannot redeclare inherited keys as keys or attributes
-    When put attribute type: email
-    When attribute(email) set value-type: string
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When put entity type: person
-    When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: @key
-    When put entity type: customer
-    When entity(customer) set supertype: person
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    Then entity(customer) set owns: email
-    Then transaction commits; fails
-    Then transaction closes
-    When connection opens schema transaction for database: typedb
-    Then entity(customer) set owns: email
-    Then entity(customer) get owns: email, set annotation: @key
-    Then transaction commits; fails
-
-  Scenario: Entity types cannot redeclare inherited key attribute types
-    When put attribute type: email
-    When attribute(email) set value-type: string
-    When attribute(email) set annotation: @abstract
-    When put attribute type: customer-email
-    When attribute(customer-email) set value-type: string
-    When attribute(customer-email) set supertype: email
-    When put entity type: person
-    When entity(person) set annotation: @abstract
-    When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: @key
-    When put entity type: customer
-    When entity(customer) set supertype: person
-    When entity(customer) set owns: customer-email
-    When entity(customer) get owns: customer-email, set annotation: @key
-    When put entity type: subscriber
-    When entity(subscriber) set supertype: customer
-    Then entity(subscriber) set owns: email
-    Then entity(subscriber) get owns: email, set annotation: @key
-    Then transaction commits; fails
-
-  Scenario: Entity types cannot redeclare overridden key attribute types
-    When put attribute type: email
-    When attribute(email) set value-type: string
-    When attribute(email) set annotation: @abstract
-    When put attribute type: customer-email
-    When attribute(customer-email) set value-type: string
-    When attribute(customer-email) set supertype: email
-    When put entity type: person
-    When entity(person) set annotation: @abstract
-    When entity(person) set owns: email
-    When entity(person) get owns: email, set annotation: @key
-    When put entity type: customer
-    When entity(customer) set supertype: person
-    When entity(customer) set owns: customer-email
-    When entity(customer) get owns: customer-email, set annotation: @key
-    When put entity type: subscriber
-    When entity(subscriber) set supertype: customer
-    Then entity(subscriber) set owns: customer-email
-    Then entity(subscriber) get owns: customer-email, set annotation: @key
-    Then transaction commits; fails
-
-  Scenario: Entity types cannot redeclare inherited owns attribute types
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When attribute(name) set annotation: @abstract
-    When put attribute type: customer-name
-    When attribute(customer-name) set value-type: string
-    When attribute(customer-name) set supertype: name
-    When put entity type: person
-    When entity(person) set annotation: @abstract
-    When entity(person) set owns: name
-    When put entity type: customer
-    When entity(customer) set supertype: person
-    When entity(customer) set owns: customer-name
-    When put entity type: subscriber
-    When entity(subscriber) set supertype: customer
-    Then entity(subscriber) set owns: name
-    Then transaction commits; fails
-
-  Scenario: Entity types cannot redeclare overridden owns attribute types
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When attribute(name) set annotation: @abstract
-    When put attribute type: customer-name
-    When attribute(customer-name) set value-type: string
-    When attribute(customer-name) set supertype: name
-    When put entity type: person
-    When entity(person) set annotation: @abstract
-    When entity(person) set owns: name
-    When put entity type: customer
-    When entity(customer) set supertype: person
-    When entity(customer) set owns: customer-name
-    When put entity type: subscriber
-    When entity(subscriber) set supertype: customer
-    Then entity(subscriber) set owns: customer-name
-    Then transaction commits; fails
-
-  Scenario: Entity types cannot override declared keys and attributes
-    When put attribute type: username
-    When attribute(username) set value-type: string
-    When attribute(username) set annotation: @abstract
-    When put attribute type: email
-    When attribute(email) set value-type: string
-    When attribute(email) set supertype: username
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When attribute(name) set annotation: @abstract
-    When put attribute type: first-name
-    When attribute(first-name) set value-type: string
-    When attribute(first-name) set supertype: name
-    When put entity type: person
-    When entity(person) set annotation: @abstract
-    When entity(person) set owns: username
-    When entity(person) get owns: username, set annotation: @key
-    When entity(person) set owns: name
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    Then entity(person) set owns: email
-    Then entity(person) get owns: email; set override: username
-    Then entity(person) get owns: email, set annotation: @key; fails
-    When connection opens schema transaction for database: typedb
-    Then entity(person) set owns: first-name
-    Then entity(person) get owns: first-name; set override: name
-
-  Scenario: Entity types cannot override inherited keys and attributes other than with their subtypes
-    When put attribute type: username
-    When attribute(username) set value-type: string
-    When put attribute type: name
-    When attribute(name) set value-type: string
-    When put attribute type: reference
-    When attribute(reference) set value-type: string
-    When put attribute type: rating
-    When attribute(rating) set value-type: double
-    When put entity type: person
-    When entity(person) set owns: username
-    When entity(person) get owns: username, set annotation: @key
-    When entity(person) set owns: name
-    When put entity type: customer
-    When entity(customer) set supertype: person
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    Then entity(customer) set owns: reference
-    Then entity(customer) get owns: reference, set annotation: @key
-    Then entity(customer) get owns: reference; set override: username; fails
-    When connection opens schema transaction for database: typedb
-    Then entity(customer) set owns: rating
-    Then entity(customer) get owns: rating; set override: name
-
-  Scenario: Entity types can play role types
-    When put relation type: marriage
-    When relation(marriage) create role: husband
-    When put entity type: person
-    When entity(person) set plays role: marriage:husband
-    Then entity(person) get plays roles contain:
-      | marriage:husband |
-    Then relation(marriage) get role(husband) get players contain:
+    When connection open schema transaction for database: typedb
+    Then entity(person) get annotations do not contain: @abstract
+    Then entity(person) get declared annotations do not contain: @abstract
+    When entity(player) set supertype: person
+    Then entity(player) get supertypes contain:
       | person |
     When transaction commits
-    When connection opens schema transaction for database: typedb
-    When relation(marriage) create role: wife
-    When entity(person) set plays role: marriage:wife
-    Then entity(person) get plays roles contain:
-      | marriage:husband |
-      | marriage:wife    |
-    Then relation(marriage) get role(husband) get players contain:
-      | person |
-    Then relation(marriage) get role(wife) get players contain:
-      | person |
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    Then entity(person) get plays roles contain:
-      | marriage:husband |
-      | marriage:wife    |
-    Then relation(marriage) get role(husband) get players contain:
-      | person |
-    Then relation(marriage) get role(wife) get players contain:
+    When connection open schema transaction for database: typedb
+    Then entity(player) get supertypes contain:
       | person |
 
-  Scenario: Entity types can unset playing role types
-    When put relation type: marriage
-    When relation(marriage) create role: husband
-    When relation(marriage) create role: wife
-    When put entity type: person
-    When entity(person) set plays role: marriage:husband
-    When entity(person) set plays role: marriage:wife
-    Then entity(person) unset plays role: marriage:husband
-    Then entity(person) get plays roles do not contain:
-      | marriage:husband |
-    Then relation(marriage) get role(husband) get players do not contain:
+  Scenario: Entity type cannot inherit @abstract annotation, but can set it being a subtype
+    When create entity type: person
+    When entity(person) set annotation: @abstract
+    Then entity(person) get annotations contain: @abstract
+    Then entity(person) get declared annotations contain: @abstract
+    When create entity type: player
+    When entity(player) set supertype: person
+    Then entity(person) get annotations contain: @abstract
+    Then entity(person) get declared annotations contain: @abstract
+    Then entity(player) get annotations do not contain: @abstract
+    Then entity(player) get declared annotations do not contain: @abstract
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get annotations contain: @abstract
+    Then entity(person) get declared annotations contain: @abstract
+    Then entity(player) get annotations do not contain: @abstract
+    Then entity(player) get declared annotations do not contain: @abstract
+    When entity(player) set annotation: @abstract
+    Then entity(player) get annotations contain: @abstract
+    Then entity(player) get declared annotations contain: @abstract
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(player) get annotations contain: @abstract
+    Then entity(player) get declared annotations contain: @abstract
+
+  Scenario: Entity type can set @abstract annotation and then set abstract supertype
+    When create entity type: person
+    When entity(person) set annotation: @abstract
+    Then entity(person) get annotations contain: @abstract
+    Then entity(person) get declared annotations contain: @abstract
+    When create entity type: player
+    When entity(player) set annotation: @abstract
+    Then entity(player) get annotations contain: @abstract
+    Then entity(player) get declared annotations contain: @abstract
+    When entity(player) set supertype: person
+    Then entity(person) get annotations contain: @abstract
+    Then entity(person) get declared annotations contain: @abstract
+    Then entity(player) get annotations contain: @abstract
+    Then entity(player) get declared annotations contain: @abstract
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get annotations contain: @abstract
+    Then entity(person) get declared annotations contain: @abstract
+    Then entity(player) get annotations contain: @abstract
+    Then entity(player) get declared annotations contain: @abstract
+    Then entity(player) get supertype: person
+
+  Scenario: Abstract entity type cannot set non-abstract supertype
+    When create entity type: person
+    Then entity(person) get annotations do not contain: @abstract
+    When create entity type: player
+    When entity(player) set annotation: @abstract
+    Then entity(player) get annotations contain: @abstract
+    Then entity(player) set supertype: person; fails
+    Then entity(person) get annotations do not contain: @abstract
+    Then entity(player) get annotations contain: @abstract
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get annotations do not contain: @abstract
+    Then entity(player) get annotations contain: @abstract
+    Then entity(player) get supertypes do not contain:
       | person |
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    Then entity(person) unset plays role: marriage:wife
-    Then entity(person) get plays roles do not contain:
-      | marriage:husband |
-      | marriage:wife    |
-    Then relation(marriage) get role(husband) get players do not contain:
-      | person |
-    Then relation(marriage) get role(wife) get players do not contain:
-      | person |
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    Then entity(person) get plays roles do not contain:
-      | marriage:husband |
-      | marriage:wife    |
-    Then relation(marriage) get role(husband) get players do not contain:
-      | person |
-    Then relation(marriage) get role(wife) get players do not contain:
-      | person |
+    Then entity(player) set supertype: person; fails
 
-  Scenario: Attempting to unset playing a role type that an entity type cannot actually play throws
-    When put relation type: marriage
-    When relation(marriage) create role: husband
-    When relation(marriage) create role: wife
-    When put entity type: person
-    When entity(person) set plays role: marriage:wife
-    Then entity(person) get plays roles do not contain:
-      | marriage:husband |
-    Then entity(person) unset plays role: marriage:husband; fails
-
-  Scenario: Entity types cannot unset playing role types that are currently played by existing instances
-    When put relation type: marriage
-    When relation(marriage) create role: husband
-    When relation(marriage) create role: wife
-    When put entity type: person
-    When entity(person) set plays role: marriage:wife
-    Then transaction commits
-    When connection opens write transaction for database: typedb
-    When $m = relation(marriage) create new instance
-    When $a = entity(person) create new instance
-    When relation $m add player for role(wife): $a
-    Then transaction commits
-    When connection opens schema transaction for database: typedb
-    Then entity(person) unset plays role: marriage:wife; fails
-
-  Scenario: Entity types can inherit playing role types
-    When put relation type: parentship
-    When relation(parentship) create role: parent
-    When relation(parentship) create role: child
-    When put relation type: marriage
-    When relation(marriage) create role: husband
-    When relation(marriage) create role: wife
-    When put entity type: animal
-    When entity(animal) set plays role: parentship:parent
-    When entity(animal) set plays role: parentship:child
-    When put entity type: person
-    When entity(person) set supertype: animal
-    When entity(person) set plays role: marriage:husband
-    When entity(person) set plays role: marriage:wife
-    Then entity(person) get plays roles contain:
-      | parentship:parent |
-      | parentship:child  |
-      | marriage:husband  |
-      | marriage:wife     |
-    Then entity(person) get plays roles explicit contain:
-      | marriage:husband  |
-      | marriage:wife     |
-    Then entity(person) get plays roles explicit do not contain:
-      | parentship:parent |
-      | parentship:child  |
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    Then entity(person) get plays roles contain:
-      | parentship:parent |
-      | parentship:child  |
-      | marriage:husband  |
-      | marriage:wife     |
-    Then entity(person) get plays roles explicit contain:
-      | marriage:husband  |
-      | marriage:wife     |
-    Then entity(person) get plays roles explicit do not contain:
-      | parentship:parent |
-      | parentship:child  |
-    When put relation type: sales
-    When relation(sales) create role: buyer
-    When put entity type: customer
-    When entity(customer) set supertype: person
-    When entity(customer) set plays role: sales:buyer
-    Then entity(customer) get plays roles contain:
-      | parentship:parent |
-      | parentship:child  |
-      | marriage:husband  |
-      | marriage:wife     |
-      | sales:buyer       |
-    Then entity(customer) get plays roles explicit contain:
-      | sales:buyer       |
-    Then entity(customer) get plays roles explicit do not contain:
-      | parentship:parent |
-      | parentship:child  |
-      | marriage:husband  |
-      | marriage:wife     |
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    Then entity(animal) get plays roles contain:
-      | parentship:parent |
-      | parentship:child  |
-    Then entity(person) get plays roles contain:
-      | parentship:parent |
-      | parentship:child  |
-      | marriage:husband  |
-      | marriage:wife     |
-    Then entity(customer) get plays roles contain:
-      | parentship:parent |
-      | parentship:child  |
-      | marriage:husband  |
-      | marriage:wife     |
-      | sales:buyer       |
-
-  Scenario: Entity types can inherit playing role types that are subtypes of each other
-    When put relation type: parentship
-    When relation(parentship) create role: parent
-    When relation(parentship) create role: child
-    When put relation type: fathership
-    When relation(fathership) set supertype: parentship
-    When relation(fathership) create role: father
-    When relation(fathership) get role(father); set override: parent
-    When put entity type: person
-    When entity(person) set plays role: parentship:parent
-    When entity(person) set plays role: parentship:child
-    When put entity type: man
-    When entity(man) set supertype: person
-    When entity(man) set plays role: fathership:father
-    Then entity(man) get plays roles contain:
-      | parentship:parent |
-      | fathership:father |
-      | parentship:child  |
-    Then entity(man) get plays roles explicit contain:
-      | fathership:father |
-    Then entity(man) get plays roles explicit do not contain:
-      | parentship:parent |
-      | parentship:child  |
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    Then entity(man) get plays roles contain:
-      | parentship:parent |
-      | fathership:father |
-      | parentship:child  |
-    Then entity(man) get plays roles explicit contain:
-      | fathership:father |
-    Then entity(man) get plays roles explicit do not contain:
-      | parentship:parent |
-      | parentship:child  |
-    When put relation type: mothership
-    When relation(mothership) set supertype: parentship
-    When relation(mothership) create role: mother
-    When relation(mothership) get role(mother); set override: parent
-    When put entity type: woman
-    When entity(woman) set supertype: person
-    When entity(woman) set plays role: mothership:mother
-    Then entity(woman) get plays roles contain:
-      | parentship:parent |
-      | mothership:mother |
-      | parentship:child  |
-    Then entity(woman) get plays roles explicit contain:
-      | mothership:mother |
-    Then entity(woman) get plays roles explicit do not contain:
-      | parentship:parent |
-      | parentship:child  |
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    Then entity(person) get plays roles contain:
-      | parentship:parent |
-      | parentship:child  |
-    Then entity(man) get plays roles contain:
-      | parentship:parent |
-      | fathership:father |
-      | parentship:child  |
-    Then entity(man) get plays roles explicit contain:
-      | fathership:father |
-    Then entity(man) get plays roles explicit do not contain:
-      | parentship:parent |
-      | parentship:child  |
-    Then entity(woman) get plays roles contain:
-      | parentship:parent |
-      | mothership:mother |
-      | parentship:child  |
-    Then entity(woman) get plays roles explicit contain:
-      | mothership:mother |
-    Then entity(woman) get plays roles explicit do not contain:
-      | parentship:parent |
-      | parentship:child  |
-
-  Scenario: Entity types can override inherited playing role types
-    When put relation type: parentship
-    When relation(parentship) create role: parent
-    When relation(parentship) create role: child
-    When put relation type: fathership
-    When relation(fathership) set supertype: parentship
-    When relation(fathership) create role: father
-    When relation(fathership) get role(father); set override: parent
-    When put entity type: person
-    When entity(person) set plays role: parentship:parent
-    When entity(person) set plays role: parentship:child
-    When put entity type: man
-    When entity(man) set supertype: person
-    When entity(man) set plays role: fathership:father
-    When entity(man) get plays role: fathership:father; set override: parentship:parent
-    Then entity(man) get plays roles contain:
-      | fathership:father |
-      | parentship:child  |
-    Then entity(man) get plays roles do not contain:
-      | parentship:parent |
-    Then entity(man) get plays roles explicit contain:
-      | fathership:father |
-    Then entity(man) get plays roles explicit do not contain:
-      | parentship:child  |
-      | parentship:parent |
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    Then entity(man) get plays roles contain:
-      | fathership:father |
-      | parentship:child  |
-    Then entity(man) get plays roles do not contain:
-      | parentship:parent |
-    Then entity(man) get plays roles explicit contain:
-      | fathership:father |
-    Then entity(man) get plays roles explicit do not contain:
-      | parentship:child  |
-      | parentship:parent |
-    When put relation type: mothership
-    When relation(mothership) set supertype: parentship
-    When relation(mothership) create role: mother
-    When relation(mothership) get role(mother); set override: parent
-    When put entity type: woman
-    When entity(woman) set supertype: person
-    When entity(woman) set plays role: mothership:mother
-    When entity(woman) get plays role: mothership:mother; set override: parentship:parent
-    Then entity(woman) get plays roles contain:
-      | mothership:mother |
-      | parentship:child  |
-    Then entity(woman) get plays roles do not contain:
-      | parentship:parent |
-    Then entity(woman) get plays roles explicit contain:
-      | mothership:mother |
-    Then entity(woman) get plays roles explicit do not contain:
-      | parentship:child  |
-      | parentship:parent |
-    When transaction commits
-    When connection opens read transaction for database: typedb
-    Then entity(person) get plays roles contain:
-      | parentship:parent |
-      | parentship:child  |
-    Then entity(man) get plays roles contain:
-      | fathership:father |
-      | parentship:child  |
-    Then entity(man) get plays roles do not contain:
-      | parentship:parent |
-    Then entity(man) get plays roles explicit contain:
-      | fathership:father |
-    Then entity(man) get plays roles explicit do not contain:
-      | parentship:child  |
-      | parentship:parent |
-    Then entity(woman) get plays roles contain:
-      | mothership:mother |
-      | parentship:child  |
-    Then entity(woman) get plays roles do not contain:
-      | parentship:parent |
-    Then entity(woman) get plays roles explicit contain:
-      | mothership:mother |
-    Then entity(woman) get plays roles explicit do not contain:
-      | parentship:child  |
-      | parentship:parent |
-
-  Scenario: Entity types can redeclare playing role types
-    When put relation type: parentship
-    When relation(parentship) create role: parent
-    When put entity type: person
-    When entity(person) set plays role: parentship:parent
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    When entity(person) set plays role: parentship:parent
-
-  Scenario: Entity types can re-override inherited playing role types
-    When put relation type: parentship
-    When relation(parentship) create role: parent
-    When put relation type: fathership
-    When relation(fathership) set supertype: parentship
-    When relation(fathership) create role: father
-    When relation(fathership) get role(father); set override: parent
-    When put entity type: person
-    When entity(person) set plays role: parentship:parent
-    When put entity type: man
-    When entity(man) set supertype: person
-    When entity(man) set plays role: fathership:father
-    When entity(man) get plays role: fathership:father; set override: parentship:parent
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    When entity(man) set plays role: fathership:father
-    When entity(man) get plays role: fathership:father; set override: parentship:parent
-
-  Scenario: Entity types cannot redeclare inherited/overridden playing role types
-    When put relation type: parentship
-    When relation(parentship) create role: parent
-    When put relation type: fathership
-    When relation(fathership) set supertype: parentship
-    When relation(fathership) create role: father
-    When relation(fathership) get role(father); set override: parent
-    When put entity type: person
-    When entity(person) set plays role: parentship:parent
-    When put entity type: man
-    When entity(man) set supertype: person
-    When entity(man) set plays role: fathership:father
-    When entity(man) get plays role: fathership:father; set override: parentship:parent
-    When put entity type: boy
-    When entity(boy) set supertype: man
-    When transaction commits
-    When connection opens schema transaction for database: typedb
-    Then entity(boy) set plays role: parentship:parent; fails
-    When connection opens schema transaction for database: typedb
-    Then entity(boy) set plays role: fathership:father
-    Then transaction commits; fails
-
-  Scenario: Entity types cannot override declared playing role types
-    When put relation type: parentship
-    When relation(parentship) create role: parent
-    When put relation type: fathership
-    When relation(fathership) set supertype: parentship
-    When relation(fathership) create role: father
-    When relation(fathership) get role(father); set override: parent
-    When put entity type: person
-    When entity(person) set plays role: parentship:parent
-    Then entity(person) set plays role: fathership:father
-    Then entity(person) get plays role: fathership:father; set override: parentship:parent; fails
-
-  Scenario: Entity types cannot override inherited playing role types other than with their subtypes
-    When put relation type: parentship
-    When relation(parentship) create role: parent
-    When relation(parentship) create role: child
-    When put relation type: fathership
-    When relation(fathership) create role: father
-    When put entity type: person
-    When entity(person) set plays role: parentship:parent
-    When entity(person) set plays role: parentship:child
-    When put entity type: man
-    When entity(man) set supertype: person
-    Then entity(man) set plays role: fathership:father
-    Then entity(man) get plays role: fathership:father; set override: parentship:parent; fails
+########################
+# not compatible @annotations: @distinct, @key, @unique, @subkey, @values, @range, @card, @cascade, @independent, @replace, @regex
+########################
+#  TODO: Make it only for typeql
+#  Scenario: Entity type cannot have @distinct, @key, @unique, @subkey, @values, @range, @card, @cascade, @independent, @replace, and @regex annotations
+#    When create entity type: person
+#    Then entity(person) set annotation: @distinct; fails
+#    Then entity(person) set annotation: @key; fails
+#    Then entity(person) set annotation: @unique; fails
+#    Then entity(person) set annotation: @subkey(LABEL); fails
+#    Then entity(person) set annotation: @values(1, 2); fails
+#    Then entity(person) set annotation: @range(1, 2); fails
+#    Then entity(person) set annotation: @card(1, 2); fails
+#    Then entity(person) set annotation: @cascade; fails
+#    Then entity(person) set annotation: @independent; fails
+#    Then entity(person) set annotation: @replace; fails
+#    Then entity(person) set annotation: @regex("val"); fails
+#    Then entity(person) get annotations is empty
+#    Then entity(person) get declared annotations is empty
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then entity(person) get annotations is empty
+#    Then entity(person) get declared annotations is empty

@@ -16,10 +16,10 @@ Feature: Schema migration
 
 
   Scenario: An ownership can be moved down one type, with data in place at the lower levels
-    Given put attribute type: attr0, with value type: string
-    Given put entity type: ent0
+    Given create attribute type: attr0, with value type: string
+    Given create entity type: ent0
     Given entity(ent0) set owns attribute type: attr0, with annotations: key
-    Given put entity type: ent1
+    Given create entity type: ent1
     Given entity(ent1) set supertype: ent0
     Given transaction commits
 
@@ -53,9 +53,9 @@ Feature: Schema migration
 
 
   Scenario: An ownership can be moved up one type, with data in place
-    Given put attribute type: attr0, with value type: string
-    Given put entity type: ent0
-    Given put entity type: ent1
+    Given create attribute type: attr0, with value type: string
+    Given create entity type: ent0
+    Given create entity type: ent1
     Given entity(ent1) set supertype: ent0
     Given entity(ent1) set owns attribute type: attr0, with annotations: key
     Given transaction commits
@@ -83,11 +83,11 @@ Feature: Schema migration
 
 
   Scenario: A played role can be moved down one type, with data in place at the lower levels
-    Given put relation type: rel0
+    Given create relation type: rel0
     Given relation(rel0) set relates role: role0
-    Given put entity type: ent0
-    Given entity(ent0) set plays role: rel0:role0
-    Given put entity type: ent1
+    Given create entity type: ent0
+    Given entity(ent0) set plays: rel0:role0
+    Given create entity type: ent1
     Given entity(ent1) set supertype: ent0
     Given transaction commits
 
@@ -103,21 +103,21 @@ Feature: Schema migration
     Given connection open schema session for database: typedb
 
     When session opens transaction of type: write
-    Then entity(ent0) unset plays role: rel0:role0; throws exception
+    Then entity(ent0) unset plays: rel0:role0; throws exception
 
     When session opens transaction of type: write
-    Then entity(ent1) set plays role: rel0:role0
-    Then entity(ent0) unset plays role: rel0:role0
+    Then entity(ent1) set plays: rel0:role0
+    Then entity(ent0) unset plays: rel0:role0
     Then transaction commits
 
 
   Scenario: A played role can be moved up one type, with data in place
-    Given put relation type: rel0
+    Given create relation type: rel0
     Given relation(rel0) set relates role: role0
-    Given put entity type: ent0
-    Given put entity type: ent1
+    Given create entity type: ent0
+    Given create entity type: ent1
     Given entity(ent1) set supertype: ent0
-    Given entity(ent1) set plays role: rel0:role0
+    Given entity(ent1) set plays: rel0:role0
     Given transaction commits
 
     Given connection close all sessions
@@ -132,16 +132,16 @@ Feature: Schema migration
     Given connection open schema session for database: typedb
 
     When session opens transaction of type: write
-    Then entity(ent0) set plays role: rel0:role0
-    Then entity(ent1) unset plays role: rel0:role0
+    Then entity(ent0) set plays: rel0:role0
+    Then entity(ent1) unset plays: rel0:role0
     Then transaction commits
 
 
   Scenario: A type moved with ownership instances in-place by re-declaring ownerships
-    Given put attribute type: attr0, with value type: string
-    Given put entity type: ent0
+    Given create attribute type: attr0, with value type: string
+    Given create entity type: ent0
     Given entity(ent0) set owns attribute type: attr0, with annotations: key
-    Given put entity type: ent1
+    Given create entity type: ent1
     Given entity(ent1) set supertype: ent0
     Given transaction commits
 
@@ -168,11 +168,11 @@ Feature: Schema migration
 
 
   Scenario: A type moved with plays instances in-place by re-declaring played roles
-    Given put relation type: rel0
+    Given create relation type: rel0
     Given relation(rel0) set relates role: role0
-    Given put entity type: ent0
-    Given entity(ent0) set plays role: rel0:role0
-    Given put entity type: ent1
+    Given create entity type: ent0
+    Given entity(ent0) set plays: rel0:role0
+    Given create entity type: ent1
     Given entity(ent1) set supertype: ent0
     Given transaction commits
 
@@ -191,18 +191,18 @@ Feature: Schema migration
     Then entity(ent1) set supertype: entity; throws exception
 
     When session opens transaction of type: write
-    Then entity(ent1) set plays role: rel0:role0
+    Then entity(ent1) set plays: rel0:role0
     Then entity(ent1) set supertype: entity
     Then transaction commits
 
   Scenario: A type can be inserted into an existing hierarchy which has data in place
-    Given put relation type: rel
+    Given create relation type: rel
     Given relation(rel) set relates role: role0
-    Given put attribute type: attr, with value type: string
-    Given put entity type: ent0
-    Given entity(ent0) set plays role: rel:role0
+    Given create attribute type: attr, with value type: string
+    Given create entity type: ent0
+    Given entity(ent0) set plays: rel:role0
     Given entity(ent0) set owns attribute type: attr, with annotations: key
-    Given put entity type: ent1
+    Given create entity type: ent1
     Given entity(ent1) set supertype: ent0
     Given transaction commits
 
@@ -217,22 +217,22 @@ Feature: Schema migration
     Given connection close all sessions
     Given connection open schema session for database: typedb
     When session opens transaction of type: write
-    Then put entity type: ent05
+    Then create entity type: ent05
     Then entity(ent05) set supertype: ent0
     Then entity(ent1) set supertype: ent05
     Then transaction commits
 
 
   Scenario: A type can be removed from an existing hierarchy which has data in place
-    Given put relation type: rel
+    Given create relation type: rel
     Given relation(rel) set relates role: role0
-    Given put attribute type: attr, with value type: string
-    Given put entity type: ent0
-    Given entity(ent0) set plays role: rel:role0
+    Given create attribute type: attr, with value type: string
+    Given create entity type: ent0
+    Given entity(ent0) set plays: rel:role0
     Given entity(ent0) set owns attribute type: attr, with annotations: key
-    Given put entity type: ent05
+    Given create entity type: ent05
     Given entity(ent05) set supertype: ent0
-    Given put entity type: ent1
+    Given create entity type: ent1
     Given entity(ent1) set supertype: ent05
     Given transaction commits
 
@@ -276,8 +276,8 @@ Feature: Schema migration
 
     When connection open schema session for database: typedb
     When session opens transaction of type: write
-    When put attribute type: dog-name, with value type: string
-    When put attribute type: person-name, with value type: string
+    When create attribute type: dog-name, with value type: string
+    When create attribute type: person-name, with value type: string
     When entity(person) set owns attribute type: person-name
     When entity(dog) set owns attribute type: dog-name
     Then transaction commits
