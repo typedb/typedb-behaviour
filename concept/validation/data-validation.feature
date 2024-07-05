@@ -32,14 +32,12 @@ Feature: Data validation
     Given transaction commits
 
     Given connection open write transaction for database: typedb
-
     Then entity(ent0a) create new instance; fails
 
+    When transaction closes
     Given connection open write transaction for database: typedb
     Then $a = entity(ent0c) create new instance
     Then transaction commits
-
-    Given connection open schema transaction for database: typedb
 
     Given connection open write transaction for database: typedb
     Then entity(ent0c) set annotation: @abstract; fails
@@ -59,7 +57,6 @@ Feature: Data validation
     Given $attr00 = attribute(attr00) as(string) put: "attr00"
     Given entity $ent1 set has: $attr00
     Given transaction commits
-
     Given connection open write transaction for database: typedb
 
     When $ent01 = entity(ent01) create new instance
@@ -92,9 +89,11 @@ Feature: Data validation
 
     Then relation(rel00) delete role: role00; fails
 
+    When transaction closes
     Given connection open schema transaction for database: typedb
     Then relation(rel1) set supertype: rel01; fails
 
+    When transaction closes
     Given connection open schema transaction for database: typedb
     Then relation(rel1) create role: role1
     Then relation(rel1) get role(role1) set override: role00; fails
@@ -126,13 +125,16 @@ Feature: Data validation
     When $r1 = relation(rel1) create new instance
     Then relation $r1 add player for role(role1): $e1; fails
 
+    When transaction closes
     Given connection open schema transaction for database: typedb
     Then entity(ent00) unset plays: rel0:role0; fails
 
+    When transaction closes
     Given connection open schema transaction for database: typedb
     When entity(ent1) set plays: rel1:role1
     Then entity(ent1) get plays(rel1:role1) set override: rel0:role0; fails
 
+    When transaction closes
     Given connection open schema transaction for database: typedb
     Then entity(ent1) set supertype: ent01; fails
 
@@ -157,6 +159,7 @@ Feature: Data validation
     # a NullPointerException in the steps because role0 is not related by rel1.
     When relation $rel1 add player for role(role0): $ent00; fails
 
+    When transaction closes
     Given connection open write transaction for database: typedb
     When $ent00 = entity(ent00) create new instance
     When $rel1 = relation(rel1) create new instance
@@ -187,11 +190,11 @@ Feature: Data validation
     Given transaction commits
 
     Given connection open write transaction for database: typedb
-
     When $ent1 = entity(ent1) create new instance
     When $rel0 = relation(rel0) create new instance
     When relation $rel0 add player for role(role0): $ent1; fails
 
+    When transaction closes
     Given connection open write transaction for database: typedb
     When $ent1 = entity(ent1) create new instance
     When $rel1 = relation(rel1) create new instance
@@ -285,6 +288,7 @@ Feature: Data validation
     When entity(ent0n) set owns: attr0
     Then entity(ent0n) get owns(attr0) set annotation: @unique; fails
 
+    When transaction closes
     Given connection open schema transaction for database: typedb
     # TODO: Either of set owns or set annotation could fail, not sure yet
     When entity(ent0u) set owns: attr0

@@ -35,18 +35,23 @@ Feature: Schema validation
     When connection open schema transaction for database: typedb
     Then attribute(attr1) set supertype: attr1; fails
 
+    When transaction closes
     When connection open schema transaction for database: typedb
     Then attribute(attr0) set supertype: attr1; fails
 
+    When transaction closes
     When connection open schema transaction for database: typedb
     Then entity(ent1) set supertype: ent1; fails
 
+    When transaction closes
     When connection open schema transaction for database: typedb
     Then entity(ent0) set supertype: ent1; fails
 
+    When transaction closes
     When connection open schema transaction for database: typedb
     Then relation(rel1) set supertype: rel1; fails
 
+    When transaction closes
     When connection open schema transaction for database: typedb
     Then relation(rel0) set supertype: rel1; fails
 
@@ -66,6 +71,7 @@ Feature: Schema validation
     When attribute(attr1) set supertype: attr0s
     Then transaction commits
 
+    When transaction closes
     When connection open schema transaction for database: typedb
     Then attribute(attr1) set supertype: attr0d; fails
 
@@ -83,19 +89,22 @@ Feature: Schema validation
     When attribute(attr1) set value type: string
     When attribute(attr1) set supertype: attr0c; fails
 
+    When transaction closes
     When connection open schema transaction for database: typedb
     When create attribute type: attr1
     When attribute(attr1) set value type: string
     When attribute(attr1) set supertype: attr0a
     Then transaction commits
 
+    When transaction closes
     When connection open schema transaction for database: typedb
     When attribute(attr0a) unset annotation: @abstract; fails
 
+    When transaction closes
     When connection open schema transaction for database: typedb
     When attribute(attr1) set supertype: attr0c; fails
 
-
+    When transaction closes
     When connection open schema transaction for database: typedb
     When attribute(attr0c) set annotation: @abstract
     When attribute(attr1) set supertype: attr0c
@@ -166,9 +175,11 @@ Feature: Schema validation
     When connection open schema transaction for database: typedb
     When relation(rel1) create role: role00; fails
 
+    When transaction closes
     When connection open schema transaction for database: typedb
     When relation(rel00) create role: role01; fails
 
+    When transaction closes
     When connection open schema transaction for database: typedb
     When relation(rel1) set supertype: rel01; fails
 
@@ -216,9 +227,11 @@ Feature: Schema validation
     When connection open schema transaction for database: typedb
     Then relation(rel00) delete role: role00; fails
 
+    When transaction closes
     When connection open schema transaction for database: typedb
     Then relation(rel2) set supertype: rel01; fails
 
+    When transaction closes
     When connection open schema transaction for database: typedb
     When relation(rel1) create role: role1
     Then relation(rel1) get role(role1) set override: role00; fails
@@ -271,6 +284,7 @@ Feature: Schema validation
     Then entity(ent1) set owns: attr0
     Then transaction commits; fails
 
+    When transaction closes
     When connection open schema transaction for database: typedb
     When entity(ent1) set supertype: ent01
     When entity(ent1) set owns: attr0
@@ -317,6 +331,7 @@ Feature: Schema validation
     When relation(rel1) create role: role1
     Then relation(rel1) get role(role1) set override: role00; fails
 
+    When transaction closes
     When connection open schema transaction for database: typedb
     When create relation type: rel1
     When relation(rel1) set supertype: rel00
@@ -331,6 +346,7 @@ Feature: Schema validation
     When connection open schema transaction for database: typedb
     Then relation(rel1) set supertype: rel01; fails
 
+    When transaction closes
     When connection open schema transaction for database: typedb
     Then relation(rel00) delete role: role00; fails
 
@@ -354,6 +370,7 @@ Feature: Schema validation
     When entity(ent1) set owns: attr1
     Then entity(ent1) get owns(attr1) set override: attr0; fails
 
+    When transaction closes
     When connection open schema transaction for database: typedb
     When create entity type: ent1
     When entity(ent1) set supertype: ent00
@@ -399,7 +416,7 @@ Feature: Schema validation
     Then entity(ent2) set owns: attr2
     Then entity(ent2) get owns(attr2) set override: attr0; fails
 
-
+    When transaction closes
     When connection open schema transaction for database: typedb
     When create entity type: ent2
     When entity(ent2) set supertype: ent1
@@ -419,6 +436,7 @@ Feature: Schema validation
     When entity(ent3) set annotation: @abstract
     When entity(ent3) set owns: attr0
     Then transaction commits
+
     When connection open schema transaction for database: typedb
     When entity(ent3) set supertype: ent2; fails
 
@@ -461,6 +479,7 @@ Feature: Schema validation
     When entity(ent1) set plays: rel1:role1
     Then entity(ent1) get plays(rel1:role1) set override: rel0:role0; fails
 
+    When transaction closes
     When connection open schema transaction for database: typedb
     When relation(rel1) create role: role1
     When relation(rel1) get role(role1) set override: role0
@@ -472,6 +491,7 @@ Feature: Schema validation
     When entity(ent1) set plays: rel1:role1
     Then entity(ent1) get plays(rel1:role1) set override: rel0:role0; fails
 
+    When transaction closes
     When connection open schema transaction for database: typedb
     When create entity type: ent1
     When entity(ent1) set supertype: ent00
@@ -577,12 +597,12 @@ Feature: Schema validation
     Given create entity type: ent22
     Given entity(ent22) set supertype: ent0
     Given entity(ent1) set plays: rel10:role10
-
     Given transaction commits
 
     When connection open schema transaction for database: typedb
     Then entity(ent20) set supertype: ent1; fails
 
+    When transaction closes
     When connection open schema transaction for database: typedb
     When entity(ent21) set supertype: ent1
     Then transaction commits; fails
@@ -686,17 +706,19 @@ Feature: Schema validation
 #    """
 #    Given transaction commits
 #
-#
 #    When connection open schema transaction for database: typedb
 #    Then delete relation type: rel01; fails
 #
+#    When transaction closes
 #    When connection open schema transaction for database: typedb
 #    Then delete relation type: rel1; fails
 #
+#    When transaction closes
 #    When connection open schema transaction for database: typedb
 #    Then relation(rel01) delete role: role01; fails
 #
 #    # We currently can't do this at operation time, so we check at commit-time
+#    When transaction closes
 #    When connection open schema transaction for database: typedb
 #    Then relation(rel00) delete role: role00
 #    Then transaction commits; fails
@@ -760,6 +782,7 @@ Feature: Schema validation
     When entity(ent1u) get owns(attr1) set override: attr0
     Then entity(ent1u) get owns(attr1) set annotation: @unique; fails
 
+    When transaction closes
     When connection open schema transaction for database: typedb
     When create entity type: ent1u
     When entity(ent1u) set supertype: ent0k
@@ -767,6 +790,7 @@ Feature: Schema validation
     When entity(ent1u) get owns(attr1) set annotation: @unique
     Then entity(ent1u) get owns(attr1) set override: attr0; fails
 
+    When transaction closes
     When connection open schema transaction for database: typedb
     When create entity type: ent1u
     When entity(ent1u) set supertype: ent0n
@@ -778,6 +802,7 @@ Feature: Schema validation
     When connection open schema transaction for database: typedb
     Then entity(ent1u) set supertype: ent0k; fails
 
+    When transaction closes
     When connection open schema transaction for database: typedb
     # TODO: Either of set owns or set annotation could fail, not sure yet
     When entity(ent0n) set owns: attr0
@@ -807,6 +832,7 @@ Feature: Schema validation
     When entity(ent0u) set owns: attr0
     Then entity(ent0u) get owns(attr0) set annotation: @unique; fails
 
+    When transaction closes
     When connection open schema transaction for database: typedb
     When create entity type: ent1u
     When entity(ent1u) set supertype: ent0u
@@ -825,8 +851,8 @@ Feature: Schema validation
     When connection open schema transaction for database: typedb
     Then entity(ent1u) set supertype: ent0k; fails
 
+    When transaction closes
     When connection open schema transaction for database: typedb
     # TODO: Either of set owns or set annotation could fail, not sure yet
     When entity(ent0n) set owns: attr0
     Then entity(ent0n) get owns(attr0) set annotation: @key; fails
-
