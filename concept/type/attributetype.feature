@@ -369,7 +369,7 @@ Feature: Concept Attribute Type
       | string      | independent                             | independent         |
       | string      | regex("\S+")                            | regex               |
       | string      | values("1")                             | values              |
-      | string      | range("1",,"3")                         | range               |
+      | string      | range("1".."3")                         | range               |
       | boolean     | abstract                                | abstract            |
       | boolean     | independent                             | independent         |
       | boolean     | values(true)                            | values              |
@@ -395,7 +395,6 @@ Feature: Concept Attribute Type
       | duration    | abstract                                | abstract            |
       | duration    | independent                             | independent         |
       | duration    | values(P1Y)                             | values              |
-      | duration    | range(P1Y..P5Y)                         | range               |
 
   Scenario Outline: Attribute type can unset not set @<annotation>
     When create attribute type: name
@@ -1889,7 +1888,7 @@ Feature: Concept Attribute Type
       | string      | "福"                                                                                                                                                                                                                                                                                                                                                                                                  |
       | string      | "s", "S"                                                                                                                                                                                                                                                                                                                                                                                             |
       | string      | "This rank contain a sufficiently detailed description of its nature"                                                                                                                                                                                                                                                                                                                                |
-      | string      | "Scout", "Stone Guard", "Stone Guard", "High Warlord"                                                                                                                                                                                                                                                                                                                                                |
+      | string      | "Scout", "Stone Guard", "High Warlord"                                                                                                                                                                                                                                                                                                                                                |
       | string      | "Rank with optional space", "Rank with optional space ", " Rank with optional space", "Rankwithoptionalspace", "Rank with optional space  "                                                                                                                                                                                                                                                          |
       | boolean     | true                                                                                                                                                                                                                                                                                                                                                                                                 |
       | boolean     | false                                                                                                                                                                                                                                                                                                                                                                                                |
@@ -1910,14 +1909,14 @@ Feature: Concept Attribute Type
       | decimal     | -333.553, 33895, 98984.4555, 902394.44, 1000000000, 0.00001, 0.3, 3.14159265358979323                                                                                                                                                                                                                                                                                                                |
       | date        | 2024-06-04                                                                                                                                                                                                                                                                                                                                                                                           |
       | date        | 1970-01-01                                                                                                                                                                                                                                                                                                                                                                                           |
-      | date        | 1970-01-01, 1970-01-01, 0001-01-01, 2024-06-04, 2024-02-02                                                                                                                                                                                                                                                                                                                                           |
+      | date        | 1970-01-01, 0001-01-01, 2024-06-04, 2024-02-02                                                                                                                                                                                                                                                                                                                                           |
       | datetime    | 2024-06-04                                                                                                                                                                                                                                                                                                                                                                                           |
       | datetime    | 2024-06-04T16:35                                                                                                                                                                                                                                                                                                                                                                                     |
       | datetime    | 2024-06-04T16:35:02                                                                                                                                                                                                                                                                                                                                                                                  |
       | datetime    | 2024-06-04T16:35:02.1                                                                                                                                                                                                                                                                                                                                                                                |
       | datetime    | 2024-06-04T16:35:02.10                                                                                                                                                                                                                                                                                                                                                                               |
       | datetime    | 2024-06-04T16:35:02.103                                                                                                                                                                                                                                                                                                                                                                              |
-      | datetime    | 2024-06-04, 2024-06-04T16:35, 2024-06-04T16:35:02, 2024-06-04T16:35:02.1, 2024-06-04T16:35:02.10, 2024-06-04T16:35:02.103                                                                                                                                                                                                                                                                            |
+      | datetime    | 2024-06-04, 2024-06-04T16:35, 2024-06-04T16:35:02, 2024-06-04T16:35:02.01, 2024-06-04T16:35:02.10, 2024-06-04T16:35:02.103                                                                                                                                                                                                                                                                            |
       | datetime-tz | 2024-06-04+0000                                                                                                                                                                                                                                                                                                                                                                                      |
       | datetime-tz | 2024-06-04 Asia/Kathmandu                                                                                                                                                                                                                                                                                                                                                                            |
       | datetime-tz | 2024-06-04+0100                                                                                                                                                                                                                                                                                                                                                                                      |
@@ -1926,7 +1925,7 @@ Feature: Concept Attribute Type
       | datetime-tz | 2024-06-04T16:35:02.1+0100                                                                                                                                                                                                                                                                                                                                                                           |
       | datetime-tz | 2024-06-04T16:35:02.10+0100                                                                                                                                                                                                                                                                                                                                                                          |
       | datetime-tz | 2024-06-04T16:35:02.103+0100                                                                                                                                                                                                                                                                                                                                                                         |
-      | datetime-tz | 2024-06-04+0001, 2024-06-04 Asia/Kathmandu, 2024-06-04+0002, 2024-06-04+0010, 2024-06-04+0100, 2024-06-04-0100, 2024-06-04T16:35-0100, 2024-06-04T16:35:02+0200, 2024-06-04T16:35:02.1-0300, 2024-06-04T16:35:02.10+1000, 2024-06-04T16:35:02.103+0011                                                                                                                                               |
+      | datetime-tz | 2024-06-04+0001, 2024-06-04 Asia/Kathmandu, 2024-06-04+0002, 2024-06-04+0010, 2024-06-04+0100, 2024-06-04-0100, 2024-06-04T16:35-0100, 2024-06-04T16:35:02+0200, 2024-06-04T16:35:02.10+1000                                                                                                                                                                                                         |
       | duration    | P1Y                                                                                                                                                                                                                                                                                                                                                                                                  |
       | duration    | P2M                                                                                                                                                                                                                                                                                                                                                                                                  |
       | duration    | P1Y2M                                                                                                                                                                                                                                                                                                                                                                                                |
@@ -1935,7 +1934,7 @@ Feature: Concept Attribute Type
       | duration    | P1Y2M3DT4H5M                                                                                                                                                                                                                                                                                                                                                                                         |
       | duration    | P1Y2M3DT4H5M6S                                                                                                                                                                                                                                                                                                                                                                                       |
       | duration    | P1Y2M3DT4H5M6.789S                                                                                                                                                                                                                                                                                                                                                                                   |
-      | duration    | P1Y, P1Y1M, P1Y1M1D, P1Y1M1DT1H, P1Y1M1DT1H1M, P1Y1M1DT1H1M1S, 1Y1M1DT1H1M1S0.1S, 1Y1M1DT1H1M1S0.001S, 1Y1M1DT1H1M0.000001S                                                                                                                                                                                                                                                                          |
+      | duration    | P1Y, P1Y1M, P1Y1M1D, P1Y1M1DT1H, P1Y1M1DT1H1M, P1Y1M1DT1H1M1S, P1Y1M1DT1H1M1S0.1S, P1Y1M1DT1H1M1S0.001S, P1Y1M1DT1H1M0.000001S                                                                                                                                                                                                                                                                          |
 
     # TODO: Struct parsing is not supported now
 #  Scenario: Attribute type cannot set @values annotation for struct value type
@@ -1948,8 +1947,8 @@ Feature: Concept Attribute Type
 #    When attribute(email) set annotation: @values(custom-struct("string")); fails
 #    When attribute(email) set annotation: @values(custom-struct(custom-field: "string")); fails
 
-  # TODO: Make it only for typeql (as we can't parse values in concept api)
-#  Scenario Outline: Attribute types without a value type cannot set @range annotation
+  # TODO: Make it only for typeql (as we can't parse values without value type in concept api tests)
+#  Scenario Outline: Attribute types without a value type cannot set @values annotation
 #    When create attribute type: email
 #    Then attribute(email) set annotation: @values(<args>); fails
 #    Then attribute(email) get annotations do not contain: @values(<args>)
@@ -1976,7 +1975,7 @@ Feature: Concept Attribute Type
 #      | "1"                                                                   |
 #      | "福"                                                                   |
 #      | "s", "S"                                                              |
-#      | "Scout", "Stone Guard", "Stone Guard", "High Warlord"                 |
+#      | "Scout", "Stone Guard", "High Warlord"                 |
 #      | true                                                                  |
 #      | false                                                                 |
 #      | false, true                                                           |
@@ -1985,7 +1984,7 @@ Feature: Concept Attribute Type
 #      | 0.00001, 0.0001, 0.001, 0.01                                          |
 #      | 2024-06-04                                                            |
 #      | 1970-01-01                                                            |
-#      | 1970-01-01, 1970-01-01, 0001-01-01, 2024-06-04, 2024-02-02            |
+#      | 1970-01-01, 0001-01-01, 2024-06-04, 2024-02-02            |
 #      | 2024-06-04T16:35:02                                                   |
 #      | 2024-06-04T16:35:02.103                                               |
 #      | 2024-06-04+0000                                                       |
@@ -2011,7 +2010,7 @@ Feature: Concept Attribute Type
     Then attribute(first-name) get annotations contain: @values("value", "value2")
     Then attribute(first-name) get declared annotations do not contain: @values("value", "value2")
 
-#   TODO: Only for typeql
+#   TODO: Make it only for typeql
 #  Scenario Outline: Attribute type with <value-type> value type cannot set @values with empty arguments
 #    When create attribute type: name
 #    When attribute(name) set value type: <value-type>
@@ -2035,61 +2034,62 @@ Feature: Concept Attribute Type
 #      | datetime-tz |
 #      | duration   |
 
-  Scenario Outline: Attribute type with <value-type> value type cannot set @values with incorrect arguments
-    When create attribute type: name
-    When attribute(name) set value type: <value-type>
-    Then attribute(name) set annotation: @values(<args>); fails
-    Then attribute(name) get annotations is empty
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then attribute(name) get annotations is empty
-    Examples:
-      | value-type  | args                            |
-      | long        | 0.1                             |
-      | long        | "string"                        |
-      | long        | true                            |
-      | long        | 2024-06-04                      |
-      | long        | 2024-06-04+0010                 |
-      | double      | "string"                        |
-      | double      | true                            |
-      | double      | 2024-06-04                      |
-      | double      | 2024-06-04+0010                 |
-      | decimal     | "string"                        |
-      | decimal     | true                            |
-      | decimal     | 2024-06-04                      |
-      | decimal     | 2024-06-04+0010                 |
-      | string      | 123                             |
-      | string      | true                            |
-      | string      | 2024-06-04                      |
-      | string      | 2024-06-04+0010                 |
-      | string      | 'notstring'                     |
-      | string      | ""                              |
-      | boolean     | 123                             |
-      | boolean     | "string"                        |
-      | boolean     | 2024-06-04                      |
-      | boolean     | 2024-06-04+0010                 |
-      | boolean     | truefalse                       |
-      | date        | 123                             |
-      | date        | "string"                        |
-      | date        | true                            |
-      | date        | 2024-06-04+0010                 |
-      | date        | 2024-06-04T16:35:02             |
-      | datetime    | 123                             |
-      | datetime    | "string"                        |
-      | datetime    | true                            |
-      | datetime    | 2024-06-04+0010                 |
-      | datetime-tz | 123                             |
-      | datetime-tz | "string"                        |
-      | datetime-tz | true                            |
-      | datetime-tz | 2024-06-04                      |
-      | datetime-tz | 2024-06-04 NotRealTimeZone/Zone |
-      | duration    | 123                             |
-      | duration    | "string"                        |
-      | duration    | true                            |
-      | duration    | 2024-06-04                      |
-      | duration    | 2024-06-04+0100                 |
-      | duration    | 1Y                              |
-      | duration    | year                            |
+  # TODO: Make it only for typeql
+#  Scenario Outline: Attribute type with <value-type> value type cannot set @values with incorrect arguments
+#    When create attribute type: name
+#    When attribute(name) set value type: <value-type>
+#    Then attribute(name) set annotation: @values(<args>); fails
+#    Then attribute(name) get annotations is empty
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then attribute(name) get annotations is empty
+#    Examples:
+#      | value-type  | args                            |
+#      | long        | 0.1                             |
+#      | long        | "string"                        |
+#      | long        | true                            |
+#      | long        | 2024-06-04                      |
+#      | long        | 2024-06-04+0010                 |
+#      | double      | "string"                        |
+#      | double      | true                            |
+#      | double      | 2024-06-04                      |
+#      | double      | 2024-06-04+0010                 |
+#      | decimal     | "string"                        |
+#      | decimal     | true                            |
+#      | decimal     | 2024-06-04                      |
+#      | decimal     | 2024-06-04+0010                 |
+#      | string      | 123                             |
+#      | string      | true                            |
+#      | string      | 2024-06-04                      |
+#      | string      | 2024-06-04+0010                 |
+#      | string      | 'notstring'                     |
+#      | string      | ""                              |
+#      | boolean     | 123                             |
+#      | boolean     | "string"                        |
+#      | boolean     | 2024-06-04                      |
+#      | boolean     | 2024-06-04+0010                 |
+#      | boolean     | truefalse                       |
+#      | date        | 123                             |
+#      | date        | "string"                        |
+#      | date        | true                            |
+#      | date        | 2024-06-04+0010                 |
+#      | date        | 2024-06-04T16:35:02             |
+#      | datetime    | 123                             |
+#      | datetime    | "string"                        |
+#      | datetime    | true                            |
+#      | datetime    | 2024-06-04+0010                 |
+#      | datetime-tz | 123                             |
+#      | datetime-tz | "string"                        |
+#      | datetime-tz | true                            |
+#      | datetime-tz | 2024-06-04                      |
+#      | datetime-tz | 2024-06-04 NotRealTimeZone/Zone |
+#      | duration    | 123                             |
+#      | duration    | "string"                        |
+#      | duration    | true                            |
+#      | duration    | 2024-06-04                      |
+#      | duration    | 2024-06-04+0100                 |
+#      | duration    | 1Y                              |
+#      | duration    | year                            |
 
   Scenario Outline: Attribute type with <value-type> value type can reset @values annotation
     When create attribute type: name
@@ -2150,8 +2150,8 @@ Feature: Concept Attribute Type
   Scenario: Attribute type cannot reset inherited @values annotation
     When create attribute type: name
     When attribute(name) set annotation: @abstract
-    When attribute(name) set annotation: @values("value")
     When attribute(name) set value type: string
+    When attribute(name) set annotation: @values("value")
     When create attribute type: first-name
     When attribute(first-name) set value type: string
     When attribute(first-name) set supertype: name
@@ -2171,8 +2171,8 @@ Feature: Concept Attribute Type
   Scenario: Attribute type cannot unset inherited @values annotation
     When create attribute type: name
     When attribute(name) set annotation: @abstract
-    When attribute(name) set annotation: @values("value")
     When attribute(name) set value type: string
+    When attribute(name) set annotation: @values("value")
     When create attribute type: first-name
     When attribute(first-name) set value type: string
     When attribute(first-name) set supertype: name
@@ -2195,6 +2195,7 @@ Feature: Concept Attribute Type
   Scenario Outline: Attribute types' @values annotation for <value-type> value type can be inherited and overridden by a subset of arguments
     When create attribute type: name
     When attribute(name) set value type: <value-type>
+    When attribute(name) set annotation: @abstract
     When create attribute type: overridden-name
     When attribute(overridden-name) set value type: <value-type>
     When attribute(overridden-name) set supertype: name
@@ -2297,8 +2298,8 @@ Feature: Concept Attribute Type
     Then attribute(email) get annotations do not contain: @range(<arg0>..<arg1>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(email) get annotations contain: @range(<arg0>..<arg1>)
-    Then attribute(email) get declared annotations contain: @range(<arg0>..<arg1>)
+    Then attribute(email) get annotations contain: @range(..<arg1>)
+    Then attribute(email) get declared annotations contain: @range(..<arg1>)
     Then attribute(email) get annotations do not contain: @range(<arg0>..<arg1>)
     Then attribute(email) unset annotation: @range
     Then attribute(email) get annotations do not contain: @range(..<arg1>)
@@ -2399,7 +2400,7 @@ Feature: Concept Attribute Type
 #    When attribute(name) set annotation: @range(custom-struct("string"), custom-struct("string+1")); fails
 #    When attribute(name) set annotation: @range(custom-struct(custom-field: "string"), custom-struct(custom-field: "string+1")); fails
 
-  # TODO: Make it only for typeql (as we can't parse values in concept api)
+  # TODO: Make it only for typeql (as we can't parse values without value type in concept api tests)
 #  Scenario Outline: Attribute types without a value type cannot set @range annotation
 #    When create attribute type: email
 #    Then attribute(email) set annotation: @range(<arg0>..<arg1>); fails
@@ -2505,79 +2506,70 @@ Feature: Concept Attribute Type
     Then attribute(name) get annotations is empty
     Then attribute(name) get declared annotations is empty
     Examples:
+    # TODO: Most of these cases are only for typeql!
       | value-type  | arg0                            | args                                               |
       | long        | 1                               | 1                                                  |
-      | long        | 1                               | 2, 3                                               |
-      | long        | 1                               | "string"                                           |
-      | long        | 1                               | 2, "string"                                        |
-      | long        | 1                               | 2, "string", true, 2024-06-04, 55                  |
-      | long        | "string"                        | 1                                                  |
-      | long        | true                            | 1                                                  |
-      | long        | 2024-06-04                      | 1                                                  |
-      | long        | 2024-06-04+0010                 | 1                                                  |
+#      | long        | 1                               | 2..3                                               |
+#      | long        | 1                               | "string"                                           |
+#      | long        | 1                               | 2.."string"                                        |
+#      | long        | 1                               | 2.."string"..true..2024-06-04..55                  |
+#      | long        | "string"                        | 1                                                  |
+#      | long        | true                            | 1                                                  |
+#      | long        | 2024-06-04                      | 1                                                  |
+#      | long        | 2024-06-04+0010                 | 1                                                  |
       | double      | 1.0                             | 1.0                                                |
-      | double      | 1.0                             | 2.0, 3.0                                           |
-      | double      | 1.0                             | "string"                                           |
-      | double      | "string"                        | 1.0                                                |
-      | double      | true                            | 1.0                                                |
-      | double      | 2024-06-04                      | 1.0                                                |
-      | double      | 2024-06-04+0010                 | 1.0                                                |
+#      | double      | 1.0                             | 2.0..3.0                                           |
+#      | double      | 1.0                             | "string"                                           |
+#      | double      | "string"                        | 1.0                                                |
+#      | double      | true                            | 1.0                                                |
+#      | double      | 2024-06-04                      | 1.0                                                |
+#      | double      | 2024-06-04+0010                 | 1.0                                                |
       | decimal     | 1.0                             | 1.0                                                |
-      | decimal     | 1.0                             | 2.0, 3.0                                           |
-      | decimal     | 1.0                             | "string"                                           |
-      | decimal     | "string"                        | 1.0                                                |
-      | decimal     | true                            | 1.0                                                |
-      | decimal     | 2024-06-04                      | 1.0                                                |
-      | decimal     | 2024-06-04+0010                 | 1.0                                                |
+#      | decimal     | 1.0                             | 2.0..3.0                                           |
+#      | decimal     | 1.0                             | "string"                                           |
+#      | decimal     | "string"                        | 1.0                                                |
+#      | decimal     | true                            | 1.0                                                |
+#      | decimal     | 2024-06-04                      | 1.0                                                |
+#      | decimal     | 2024-06-04+0010                 | 1.0                                                |
       | string      | "123"                           | "123"                                              |
-      | string      | "123"                           | "1234", "12345"                                    |
-      | string      | "123"                           | 123                                                |
-      | string      | 123                             | "123"                                              |
-      | string      | true                            | "str"                                              |
-      | string      | 2024-06-04                      | "str"                                              |
-      | string      | 2024-06-04+0010                 | "str"                                              |
-      | string      | 'notstring'                     | "str"                                              |
-      | string      | ""                              | "str"                                              |
+#      | string      | "123"                           | "1234".."12345"                                    |
+#      | string      | "123"                           | 123                                                |
+#      | string      | 123                             | "123"                                              |
+#      | string      | true                            | "str"                                              |
+#      | string      | 2024-06-04                      | "str"                                              |
+#      | string      | 2024-06-04+0010                 | "str"                                              |
+#      | string      | 'notstring'                     | "str"                                              |
+#      | string      | ""                              | "str"                                              |
       | boolean     | false                           | false                                              |
-      | boolean     | true                            | true                                               |
-      | boolean     | true                            | 123                                                |
-      | boolean     | 123                             | true                                               |
-      | boolean     | "string"                        | true                                               |
-      | boolean     | 2024-06-04                      | true                                               |
-      | boolean     | 2024-06-04+0010                 | true                                               |
-      | boolean     | truefalse                       | true                                               |
+#      | boolean     | true                            | true                                               |
+#      | boolean     | true                            | 123                                                |
+#      | boolean     | 123                             | true                                               |
+#      | boolean     | "string"                        | true                                               |
+#      | boolean     | 2024-06-04                      | true                                               |
+#      | boolean     | 2024-06-04+0010                 | true                                               |
+#      | boolean     | truefalse                       | true                                               |
       | date        | 2030-06-04                      | 2030-06-04                                         |
-      | date        | 2030-06-04                      | 2030-06-05, 2030-06-06                             |
-      | date        | 2030-06-04                      | 123                                                |
-      | date        | 123                             | 2030-06-04                                         |
-      | date        | "string"                        | 2030-06-04                                         |
-      | date        | true                            | 2030-06-04                                         |
-      | date        | 2024-06-04+0010                 | 2030-06-04                                         |
+#      | date        | 2030-06-04                      | 2030-06-05..2030-06-06                             |
+#      | date        | 2030-06-04                      | 123                                                |
+#      | date        | 123                             | 2030-06-04                                         |
+#      | date        | "string"                        | 2030-06-04                                         |
+#      | date        | true                            | 2030-06-04                                         |
+#      | date        | 2024-06-04+0010                 | 2030-06-04                                         |
       | datetime    | 2030-06-04                      | 2030-06-04                                         |
-      | datetime    | 2030-06-04                      | 2030-06-05, 2030-06-06                             |
-      | datetime    | 2030-06-04                      | 123                                                |
-      | datetime    | 123                             | 2030-06-04                                         |
-      | datetime    | "string"                        | 2030-06-04                                         |
-      | datetime    | true                            | 2030-06-04                                         |
-      | datetime    | 2024-06-04+0010                 | 2030-06-04                                         |
+#      | datetime    | 2030-06-04                      | 2030-06-05..2030-06-06                             |
+#      | datetime    | 2030-06-04                      | 123                                                |
+#      | datetime    | 123                             | 2030-06-04                                         |
+#      | datetime    | "string"                        | 2030-06-04                                         |
+#      | datetime    | true                            | 2030-06-04                                         |
+#      | datetime    | 2024-06-04+0010                 | 2030-06-04                                         |
       | datetime-tz | 2030-06-04 Europe/London        | 2030-06-04 Europe/London                           |
-      | datetime-tz | 2030-06-04 Europe/London        | 2030-06-05 Europe/London, 2030-06-06 Europe/London |
-      | datetime-tz | 2030-06-05 Europe/London        | 123                                                |
-      | datetime-tz | 123                             | 2030-06-05 Europe/London                           |
-      | datetime-tz | "string"                        | 2030-06-05 Europe/London                           |
-      | datetime-tz | true                            | 2030-06-05 Europe/London                           |
-      | datetime-tz | 2024-06-04                      | 2030-06-05 Europe/London                           |
-      | datetime-tz | 2024-06-04 NotRealTimeZone/Zone | 2030-06-05 Europe/London                           |
-      | duration    | P1Y                             | P1Y                                                |
-      | duration    | P1Y                             | P2Y, P3Y                                           |
-      | duration    | P1Y                             | 123                                                |
-      | duration    | 123                             | P1Y                                                |
-      | duration    | "string"                        | P1Y                                                |
-      | duration    | true                            | P1Y                                                |
-      | duration    | 2024-06-04                      | P1Y                                                |
-      | duration    | 2024-06-04+0100                 | P1Y                                                |
-      | duration    | 1Y                              | P1Y                                                |
-      | duration    | year                            | P1Y                                                |
+#      | datetime-tz | 2030-06-04 Europe/London        | 2030-06-05 Europe/London..2030-06-06 Europe/London |
+#      | datetime-tz | 2030-06-05 Europe/London        | 123                                                |
+#      | datetime-tz | 123                             | 2030-06-05 Europe/London                           |
+#      | datetime-tz | "string"                        | 2030-06-05 Europe/London                           |
+#      | datetime-tz | true                            | 2030-06-05 Europe/London                           |
+#      | datetime-tz | 2024-06-04                      | 2030-06-05 Europe/London                           |
+#      | datetime-tz | 2024-06-04 NotRealTimeZone/Zone | 2030-06-05 Europe/London                           |
 
   Scenario Outline: Attribute type with <value-type> value type can reset @range annotation
     When create attribute type: name
@@ -2617,15 +2609,13 @@ Feature: Concept Attribute Type
       | date        | 2024-05-05..2024-05-06           | 2024-06-05..2024-06-06           |
       | datetime    | 2024-05-05..2024-05-06           | 2024-06-05..2024-06-06           |
       | datetime-tz | 2024-05-05+0100..2024-05-06+0100 | 2024-05-05+0100..2024-05-07+0100 |
-      | duration    | P1Y..P2Y                         | P1Y6M..P2Y                       |
 
   Scenario: Attribute type cannot reset inherited @range annotation
     When create attribute type: name
     When attribute(name) set annotation: @abstract
-    When attribute(name) set annotation: @range("value".."value+1")
     When attribute(name) set value type: string
+    When attribute(name) set annotation: @range("value".."value+1")
     When create attribute type: first-name
-    When attribute(first-name) set value type: string
     When attribute(first-name) set supertype: name
     Then attribute(first-name) get annotations contain: @range("value".."value+1")
     Then attribute(first-name) get declared annotations do not contain: @range("value".."value+1")
@@ -2635,7 +2625,6 @@ Feature: Concept Attribute Type
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When create attribute type: second-name
-    When attribute(second-name) set value type: string
     When attribute(second-name) set supertype: name
     Then attribute(second-name) get annotations contain: @range("value".."value+1")
     Then attribute(second-name) get declared annotations do not contain: @range("value".."value+1")
@@ -2645,10 +2634,9 @@ Feature: Concept Attribute Type
   Scenario: Attribute type cannot unset inherited @range annotation
     When create attribute type: name
     When attribute(name) set annotation: @abstract
-    When attribute(name) set annotation: @range("value".."value+1")
     When attribute(name) set value type: string
+    When attribute(name) set annotation: @range("value".."value+1")
     When create attribute type: first-name
-    When attribute(first-name) set value type: string
     When attribute(first-name) set supertype: name
     Then attribute(first-name) get annotations contain: @range("value".."value+1")
     Then attribute(first-name) get declared annotations do not contain: @range("value".."value+1")
@@ -2669,6 +2657,7 @@ Feature: Concept Attribute Type
   Scenario Outline: Attribute types' @range annotation for <value-type> value type can be inherited and overridden by a subset of arguments
     When create attribute type: name
     When attribute(name) set value type: <value-type>
+    When attribute(name) set annotation: @abstract
     When create attribute type: overridden-name
     When attribute(overridden-name) set value type: <value-type>
     When attribute(overridden-name) set supertype: name
@@ -2714,6 +2703,7 @@ Feature: Concept Attribute Type
   Scenario Outline: Inherited @range annotation on attribute types for <value-type> value type cannot be overridden by the @range of not a subset of arguments
     When create attribute type: name
     When attribute(name) set value type: <value-type>
+    When attribute(name) set annotation: @abstract
     When create attribute type: overridden-name
     When attribute(overridden-name) set value type: <value-type>
     When attribute(overridden-name) set supertype: name

@@ -1096,24 +1096,23 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get annotations contain: @cascade
     Then relation(fathership) get declared annotations do not contain: @cascade
 
-      # TODO: Transaction fails is not implemented: move to validation?
-#  Scenario: Relation type can reset inherited @cascade annotation
-#    When create relation type: parentship
-#    When relation(parentship) create role: parent
-#    When relation(parentship) set annotation: @cascade
-#    When create relation type: fathership
-#    When relation(fathership) set supertype: parentship
-#    Then relation(fathership) get annotations contain: @cascade
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    When relation(fathership) set annotation: @cascade
-#    Then transaction commits; fails
-#    When connection open schema transaction for database: typedb
-#    When create relation type: mothership
-#    When relation(mothership) set supertype: parentship
-#    Then relation(mothership) get annotations contain: @cascade
-#    When relation(mothership) set annotation: @cascade
-#    Then transaction commits; fails
+  Scenario: Relation type can reset inherited @cascade annotation
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) set annotation: @cascade
+    When create relation type: fathership
+    When relation(fathership) set supertype: parentship
+    Then relation(fathership) get annotations contain: @cascade
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When relation(fathership) set annotation: @cascade
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When create relation type: mothership
+    When relation(mothership) set supertype: parentship
+    Then relation(mothership) get annotations contain: @cascade
+    When relation(mothership) set annotation: @cascade
+    Then transaction commits; fails
 
   #  TODO: Make it only for typeql
 #  Scenario: Relation type cannot set @cascade annotation with arguments

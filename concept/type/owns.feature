@@ -154,15 +154,14 @@ Feature: Concept Owns
     Then entity(player) set owns: email; fails
     Then entity(player) get owns is empty
 
-# TODO: Commit-time check is not implemented
-#  Scenario: Abstract entity type cannot own non-abstract attribute without value type
-#    When create entity type: player
-#    When entity(player) set annotation: @abstract
-#    When create attribute type: name
-#    When entity(player) set owns: name
-#    Then transaction commits; fails
-#    When connection open read transaction for database: typedb
-#    Then entity(player) set owns: name; fails
+  Scenario: Abstract entity type cannot own non-abstract attribute without value type
+    When create entity type: player
+    When entity(player) set annotation: @abstract
+    When create attribute type: name
+    When entity(player) set owns: name
+    Then transaction commits; fails
+    When connection open read transaction for database: typedb
+    Then entity(player) set owns: name; fails
 
   Scenario: Abstract entity type can own abstract attribute with and without value type
     When create entity type: player
@@ -3628,7 +3627,7 @@ Feature: Concept Owns
       | string      | "福"                                                                                                                                                                                                                                                                                                                                                                                                  |
       | string      | "s", "S"                                                                                                                                                                                                                                                                                                                                                                                             |
       | string      | "This rank contain a sufficiently detailed description of its nature"                                                                                                                                                                                                                                                                                                                                |
-      | string      | "Scout", "Stone Guard", "Stone Guard", "High Warlord"                                                                                                                                                                                                                                                                                                                                                |
+      | string      | "Scout", "Stone Guard", "High Warlord"                                                                                                                                                                                                                                                                                                                                                |
       | string      | "Rank with optional space", "Rank with optional space ", " Rank with optional space", "Rankwithoptionalspace", "Rank with optional space  "                                                                                                                                                                                                                                                          |
       | boolean     | true                                                                                                                                                                                                                                                                                                                                                                                                 |
       | boolean     | false                                                                                                                                                                                                                                                                                                                                                                                                |
@@ -3655,7 +3654,7 @@ Feature: Concept Owns
       | datetime    | 2024-06-04T16:35:02.1                                                                                                                                                                                                                                                                                                                                                                                |
       | datetime    | 2024-06-04T16:35:02.10                                                                                                                                                                                                                                                                                                                                                                               |
       | datetime    | 2024-06-04T16:35:02.103                                                                                                                                                                                                                                                                                                                                                                              |
-      | datetime    | 2024-06-04, 2024-06-04T16:35, 2024-06-04T16:35:02, 2024-06-04T16:35:02.1, 2024-06-04T16:35:02.10, 2024-06-04T16:35:02.103                                                                                                                                                                                                                                                                            |
+      | datetime    | 2024-06-04, 2024-06-04T16:35, 2024-06-04T16:35:02, 2024-06-04T16:35:02.01, 2024-06-04T16:35:02.10, 2024-06-04T16:35:02.103                                                                                                                                                                                                                                                                            |
       | datetime-tz | 2024-06-04+0000                                                                                                                                                                                                                                                                                                                                                                                      |
       | datetime-tz | 2024-06-04 Asia/Kathmandu                                                                                                                                                                                                                                                                                                                                                                            |
       | datetime-tz | 2024-06-04+0100                                                                                                                                                                                                                                                                                                                                                                                      |
@@ -3664,7 +3663,7 @@ Feature: Concept Owns
       | datetime-tz | 2024-06-04T16:35:02.1+0100                                                                                                                                                                                                                                                                                                                                                                           |
       | datetime-tz | 2024-06-04T16:35:02.10+0100                                                                                                                                                                                                                                                                                                                                                                          |
       | datetime-tz | 2024-06-04T16:35:02.103+0100                                                                                                                                                                                                                                                                                                                                                                         |
-      | datetime-tz | 2024-06-04+0001, 2024-06-04 Asia/Kathmandu, 2024-06-04+0002, 2024-06-04+0010, 2024-06-04+0100, 2024-06-04-0100, 2024-06-04T16:35-0100, 2024-06-04T16:35:02+0200, 2024-06-04T16:35:02.1-0300, 2024-06-04T16:35:02.10+1000, 2024-06-04T16:35:02.103+0011                                                                                                                                               |
+      | datetime-tz | 2024-06-04+0001, 2024-06-04 Asia/Kathmandu, 2024-06-04+0002, 2024-06-04+0010, 2024-06-04+0100, 2024-06-04-0100, 2024-06-04T16:35-0100, 2024-06-04T16:35:02+0200, 2024-06-04T16:35:02.10+1000                                                                                                                                                                                                         |
       | duration    | P1Y                                                                                                                                                                                                                                                                                                                                                                                                  |
       | duration    | P2M                                                                                                                                                                                                                                                                                                                                                                                                  |
       | duration    | P1Y2M                                                                                                                                                                                                                                                                                                                                                                                                |
@@ -3673,7 +3672,7 @@ Feature: Concept Owns
       | duration    | P1Y2M3DT4H5M                                                                                                                                                                                                                                                                                                                                                                                         |
       | duration    | P1Y2M3DT4H5M6S                                                                                                                                                                                                                                                                                                                                                                                       |
       | duration    | P1Y2M3DT4H5M6.789S                                                                                                                                                                                                                                                                                                                                                                                   |
-      | duration    | P1Y, P1Y1M, P1Y1M1D, P1Y1M1DT1H, P1Y1M1DT1H1M, P1Y1M1DT1H1M1S, 1Y1M1DT1H1M1S0.1S, 1Y1M1DT1H1M1S0.001S, 1Y1M1DT1H1M0.000001S                                                                                                                                                                                                                                                                          |
+      | duration    | P1Y, P1Y1M, P1Y1M1D, P1Y1M1DT1H, P1Y1M1DT1H1M, P1Y1M1DT1H1M1S, P1Y1M1DT1H1M1S0.1S, P1Y1M1DT1H1M1S0.001S, P1Y1M1DT1H1M0.000001S                                                                                                                                                                                                                                                                          |
 
     # TODO: Struct parsing is not supported now
 #  Scenario: Owns cannot set @values annotation for struct value type
@@ -3687,7 +3686,7 @@ Feature: Concept Owns
 #    When entity(person) get owns(custom-attribute) set annotation: @values(custom-struct("string")); fails
 #    When entity(person) get owns(custom-attribute) set annotation: @values(custom-struct(custom-field: "string")); fails
 
-  # TODO: Make it only for typeql (as we can't parse values in concept api)
+  # TODO: Make it only for typeql (as we can't parse values without value type in concept api tests)
 #  Scenario Outline: Owns cannot set @values annotation without value type
 #    When create attribute type: custom-attribute
 #    When entity(person) set owns: custom-attribute
@@ -3716,7 +3715,7 @@ Feature: Concept Owns
 #      | "1"                                                                   |
 #      | "福"                                                                   |
 #      | "s", "S"                                                              |
-#      | "Scout", "Stone Guard", "Stone Guard", "High Warlord"                 |
+#      | "Scout", "Stone Guard", "High Warlord"                 |
 #      | true                                                                  |
 #      | false                                                                 |
 #      | false, true                                                           |
@@ -3725,7 +3724,7 @@ Feature: Concept Owns
 #      | 0.00001, 0.0001, 0.001, 0.01                                          |
 #      | 2024-06-04                                                            |
 #      | 1970-01-01                                                            |
-#      | 1970-01-01, 1970-01-01, 0001-01-01, 2024-06-04, 2024-02-02            |
+#      | 1970-01-01, 0001-01-01, 2024-06-04, 2024-02-02            |
 #      | 2024-06-04T16:35:02                                                   |
 #      | 2024-06-04T16:35:02.103                                               |
 #      | 2024-06-04+0000                                                       |
@@ -4285,62 +4284,62 @@ Feature: Concept Owns
       | duration   | P1Y2M              | P1Y2M3DT4H5M6.789S |
       | duration   | P1Y2M3DT4H5M6.788S | P1Y2M3DT4H5M6.789S |
 
-    # TODO: Make it only for typeql (as we can't parse values in concept api)
-  Scenario Outline: Owns cannot set @range annotation without value type
-    When create attribute type: custom-attribute
-    When entity(person) set owns: custom-attribute
-    Then entity(person) get owns(custom-attribute) set annotation: @range(<arg0>..<arg1>); fails
-    Then entity(person) get owns(custom-attribute) get annotations do not contain: @range(<arg0>..<arg1>)
-    Then entity(person) get owns(custom-attribute) get declared annotations do not contain: @range(<arg0>..<arg1>)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then entity(person) get owns(custom-attribute) get annotations do not contain: @range(<arg0>..<arg1>)
-    Then entity(person) get owns(custom-attribute) get declared annotations do not contain: @range(<arg0>..<arg1>)
-    Then entity(person) get owns(custom-attribute) set annotation: @range(<arg0>..<arg1>); fails
-    Then entity(person) get owns(custom-attribute) get annotations do not contain: @range(<arg0>..<arg1>)
-    Then entity(person) get owns(custom-attribute) get declared annotations do not contain: @range(<arg0>..<arg1>)
-    When transaction closes
-    When connection open read transaction for database: typedb
-    Then entity(person) get owns(custom-attribute) get annotations do not contain: @range(<arg0>..<arg1>)
-    Then entity(person) get owns(custom-attribute) get declared annotations do not contain: @range(<arg0>..<arg1>)
-    Examples:
-      | arg0                         | arg1                                                  |
-      | 0                            | 1                                                     |
-      | 1                            | 2                                                     |
-      | 0                            | 2                                                     |
-      | -1                           | 1                                                     |
-      | -9223372036854775808         | 9223372036854775807                                   |
-      | "A"                          | "a"                                                   |
-      | "a"                          | "z"                                                   |
-      | "A"                          | "福"                                                   |
-      | "AA"                         | "AAA"                                                 |
-      | "short string"               | "very-very-very-very-very-very-very-very long string" |
-      | false                        | true                                                  |
-      | 0.0                          | 0.0001                                                |
-      | 0.01                         | 1.0                                                   |
-      | 123.123                      | 123123123123.122                                      |
-      | -2.45                        | 2.45                                                  |
-      | 0.0                          | 0.0001                                                |
-      | 0.01                         | 1.0                                                   |
-      | 123.123                      | 123123123123.122                                      |
-      | -2.45                        | 2.45                                                  |
-      | 2024-06-04                   | 2024-06-05                                            |
-      | 2024-06-04                   | 2024-07-03                                            |
-      | 2024-06-04                   | 2025-01-01                                            |
-      | 1970-01-01                   | 9999-12-12                                            |
-      | 2024-06-04                   | 2024-06-05                                            |
-      | 2024-06-04                   | 2024-07-03                                            |
-      | 2024-06-04                   | 2025-01-01                                            |
-      | 1970-01-01                   | 9999-12-12                                            |
-      | 2024-06-04T16:35:02.10       | 2024-06-04T16:35:02.11                                |
-      | 2024-06-04+0000              | 2024-06-05+0000                                       |
-      | 2024-06-04+0100              | 2048-06-04+0100                                       |
-      | 2024-06-04T16:35:02.103+0100 | 2024-06-04T16:35:02.104+0100                          |
-      | 2024-06-04 Asia/Kathmandu    | 2024-06-05 Asia/Kathmandu                             |
-      | P1Y                          | P2Y                                                   |
-      | P2M                          | P1Y2M                                                 |
-      | P1Y2M                        | P1Y2M3DT4H5M6.789S                                    |
-      | P1Y2M3DT4H5M6.788S           | P1Y2M3DT4H5M6.789S                                    |
+    # TODO: Make it only for typeql (as we can't parse values without value type in concept api tests)
+#  Scenario Outline: Owns cannot set @range annotation without value type
+#    When create attribute type: custom-attribute
+#    When entity(person) set owns: custom-attribute
+#    Then entity(person) get owns(custom-attribute) set annotation: @range(<arg0>..<arg1>); fails
+#    Then entity(person) get owns(custom-attribute) get annotations do not contain: @range(<arg0>..<arg1>)
+#    Then entity(person) get owns(custom-attribute) get declared annotations do not contain: @range(<arg0>..<arg1>)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then entity(person) get owns(custom-attribute) get annotations do not contain: @range(<arg0>..<arg1>)
+#    Then entity(person) get owns(custom-attribute) get declared annotations do not contain: @range(<arg0>..<arg1>)
+#    Then entity(person) get owns(custom-attribute) set annotation: @range(<arg0>..<arg1>); fails
+#    Then entity(person) get owns(custom-attribute) get annotations do not contain: @range(<arg0>..<arg1>)
+#    Then entity(person) get owns(custom-attribute) get declared annotations do not contain: @range(<arg0>..<arg1>)
+#    When transaction closes
+#    When connection open read transaction for database: typedb
+#    Then entity(person) get owns(custom-attribute) get annotations do not contain: @range(<arg0>..<arg1>)
+#    Then entity(person) get owns(custom-attribute) get declared annotations do not contain: @range(<arg0>..<arg1>)
+#    Examples:
+#      | arg0                         | arg1                                                  |
+#      | 0                            | 1                                                     |
+#      | 1                            | 2                                                     |
+#      | 0                            | 2                                                     |
+#      | -1                           | 1                                                     |
+#      | -9223372036854775808         | 9223372036854775807                                   |
+#      | "A"                          | "a"                                                   |
+#      | "a"                          | "z"                                                   |
+#      | "A"                          | "福"                                                   |
+#      | "AA"                         | "AAA"                                                 |
+#      | "short string"               | "very-very-very-very-very-very-very-very long string" |
+#      | false                        | true                                                  |
+#      | 0.0                          | 0.0001                                                |
+#      | 0.01                         | 1.0                                                   |
+#      | 123.123                      | 123123123123.122                                      |
+#      | -2.45                        | 2.45                                                  |
+#      | 0.0                          | 0.0001                                                |
+#      | 0.01                         | 1.0                                                   |
+#      | 123.123                      | 123123123123.122                                      |
+#      | -2.45                        | 2.45                                                  |
+#      | 2024-06-04                   | 2024-06-05                                            |
+#      | 2024-06-04                   | 2024-07-03                                            |
+#      | 2024-06-04                   | 2025-01-01                                            |
+#      | 1970-01-01                   | 9999-12-12                                            |
+#      | 2024-06-04                   | 2024-06-05                                            |
+#      | 2024-06-04                   | 2024-07-03                                            |
+#      | 2024-06-04                   | 2025-01-01                                            |
+#      | 1970-01-01                   | 9999-12-12                                            |
+#      | 2024-06-04T16:35:02.10       | 2024-06-04T16:35:02.11                                |
+#      | 2024-06-04+0000              | 2024-06-05+0000                                       |
+#      | 2024-06-04+0100              | 2048-06-04+0100                                       |
+#      | 2024-06-04T16:35:02.103+0100 | 2024-06-04T16:35:02.104+0100                          |
+#      | 2024-06-04 Asia/Kathmandu    | 2024-06-05 Asia/Kathmandu                             |
+#      | P1Y                          | P2Y                                                   |
+#      | P2M                          | P1Y2M                                                 |
+#      | P1Y2M                        | P1Y2M3DT4H5M6.789S                                    |
+#      | P1Y2M3DT4H5M6.788S           | P1Y2M3DT4H5M6.789S                                    |
 
     #  TODO: Make it only for typeql
 #  Scenario Outline: Owns cannot have @range annotation for <value-type> value type with less than two args
