@@ -2661,8 +2661,8 @@ Feature: Concept Owns
       | score    |
     Then <root-type>(<subtype-name>) get owns(username) get annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get owns(reference) get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns(score) get annotations do not contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns(rating) get annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(score) get annotations is empty
+    Then <root-type>(<subtype-name>) get owns(rating) get annotations is empty
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get owns contain:
@@ -2678,8 +2678,8 @@ Feature: Concept Owns
       | score    |
     Then <root-type>(<subtype-name>) get owns(username) get annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get owns(reference) get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns(score) get annotations do not contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns(rating) get annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(score) get annotations is empty
+    Then <root-type>(<subtype-name>) get owns(rating) get annotations is empty
     When create attribute type: license
     When attribute(license) set value type: string
     When attribute(license) set supertype: reference
@@ -2721,8 +2721,8 @@ Feature: Concept Owns
       | score    |
     Then <root-type>(<subtype-name>) get owns(username) get annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get owns(reference) get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns(score) get annotations do not contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns(rating) get annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(score) get annotations is empty
+    Then <root-type>(<subtype-name>) get owns(rating) get annotations is empty
     Then <root-type>(<subtype-name-2>) get owns contain:
       | username  |
       | reference |
@@ -2741,9 +2741,9 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name-2>) get owns(username) get annotations contain: @<annotation>
     Then <root-type>(<subtype-name-2>) get owns(reference) get annotations contain: @<annotation>
     Then <root-type>(<subtype-name-2>) get owns(license) get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name-2>) get owns(score) get annotations do not contain: @<annotation>
-    Then <root-type>(<subtype-name-2>) get owns(rating) get annotations do not contain: @<annotation>
-    Then <root-type>(<subtype-name-2>) get owns(points) get annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name-2>) get owns(score) get annotations is empty
+    Then <root-type>(<subtype-name-2>) get owns(rating) get annotations is empty
+    Then <root-type>(<subtype-name-2>) get owns(points) get annotations is empty
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | annotation       |
       | entity    | person         | customer     | subscriber     | key              |
@@ -3627,7 +3627,7 @@ Feature: Concept Owns
       | string      | "福"                                                                                                                                                                                                                                                                                                                                                                                                  |
       | string      | "s", "S"                                                                                                                                                                                                                                                                                                                                                                                             |
       | string      | "This rank contain a sufficiently detailed description of its nature"                                                                                                                                                                                                                                                                                                                                |
-      | string      | "Scout", "Stone Guard", "High Warlord"                                                                                                                                                                                                                                                                                                                                                |
+      | string      | "Scout", "Stone Guard", "High Warlord"                                                                                                                                                                                                                                                                                                                                                               |
       | string      | "Rank with optional space", "Rank with optional space ", " Rank with optional space", "Rankwithoptionalspace", "Rank with optional space  "                                                                                                                                                                                                                                                          |
       | boolean     | true                                                                                                                                                                                                                                                                                                                                                                                                 |
       | boolean     | false                                                                                                                                                                                                                                                                                                                                                                                                |
@@ -3654,7 +3654,7 @@ Feature: Concept Owns
       | datetime    | 2024-06-04T16:35:02.1                                                                                                                                                                                                                                                                                                                                                                                |
       | datetime    | 2024-06-04T16:35:02.10                                                                                                                                                                                                                                                                                                                                                                               |
       | datetime    | 2024-06-04T16:35:02.103                                                                                                                                                                                                                                                                                                                                                                              |
-      | datetime    | 2024-06-04, 2024-06-04T16:35, 2024-06-04T16:35:02, 2024-06-04T16:35:02.01, 2024-06-04T16:35:02.10, 2024-06-04T16:35:02.103                                                                                                                                                                                                                                                                            |
+      | datetime    | 2024-06-04, 2024-06-04T16:35, 2024-06-04T16:35:02, 2024-06-04T16:35:02.01, 2024-06-04T16:35:02.10, 2024-06-04T16:35:02.103                                                                                                                                                                                                                                                                           |
       | datetime-tz | 2024-06-04+0000                                                                                                                                                                                                                                                                                                                                                                                      |
       | datetime-tz | 2024-06-04 Asia/Kathmandu                                                                                                                                                                                                                                                                                                                                                                            |
       | datetime-tz | 2024-06-04+0100                                                                                                                                                                                                                                                                                                                                                                                      |
@@ -3672,7 +3672,7 @@ Feature: Concept Owns
       | duration    | P1Y2M3DT4H5M                                                                                                                                                                                                                                                                                                                                                                                         |
       | duration    | P1Y2M3DT4H5M6S                                                                                                                                                                                                                                                                                                                                                                                       |
       | duration    | P1Y2M3DT4H5M6.789S                                                                                                                                                                                                                                                                                                                                                                                   |
-      | duration    | P1Y, P1Y1M, P1Y1M1D, P1Y1M1DT1H, P1Y1M1DT1H1M, P1Y1M1DT1H1M1S, P1Y1M1DT1H1M1S0.1S, P1Y1M1DT1H1M1S0.001S, P1Y1M1DT1H1M0.000001S                                                                                                                                                                                                                                                                          |
+      | duration    | P1Y, P1Y1M, P1Y1M1D, P1Y1M1DT1H, P1Y1M1DT1H1M, P1Y1M1DT1H1M1S, P1Y1M1DT1H1M1S0.1S, P1Y1M1DT1H1M1S0.001S, P1Y1M1DT1H1M0.000001S                                                                                                                                                                                                                                                                       |
 
     # TODO: Struct parsing is not supported now
 #  Scenario: Owns cannot set @values annotation for struct value type
@@ -3933,8 +3933,10 @@ Feature: Concept Owns
     Then entity(player) get owns(custom-attribute) get declared annotations contain: @values(<args>)
     Then relation(marriage) get owns(custom-attribute) get annotations contain: @values(<args>)
     Then relation(marriage) get owns(custom-attribute) get declared annotations contain: @values(<args>)
-    Then entity(player) get owns do not contain: second-custom-attribute
-    Then relation(marriage) get owns do not contain: second-custom-attribute
+    Then entity(player) get owns do not contain:
+      | second-custom-attribute |
+    Then relation(marriage) get owns do not contain:
+      | second-custom-attribute |
     Then entity(player) get owns contain:
       | overridden-custom-attribute |
     Then relation(marriage) get owns contain:
@@ -4104,7 +4106,7 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @values(0, 1, 2, 3, 4, 5); fails
     Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @values(2, 3, 4, 5, 6); fails
     Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @values(1); fails
-    When <root-type>(<subtype-name-2>) get owns(name) set annotation: @values(1, 3)
+    When <root-type>(<subtype-name-2>) get owns(name) set annotation: @values(2, 3)
     Then <root-type>(<supertype-name>) get owns(name) get annotations contain: @values(0, 1, 2, 3, 4, 5)
     Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @values(0, 1, 2, 3, 4, 5)
     Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @values(0, 1, 2, 3, 4, 5)
@@ -4117,12 +4119,12 @@ Feature: Concept Owns
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @values(2, 3, 4, 5)
     Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @values(2, 3, 4, 5)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @values(2, 3, 4, 5)
-    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @values(1, 3)
-    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @values(1, 3)
-    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @values(1, 3)
-    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @values(1, 3)
-    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @values(1, 3)
-    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @values(1, 3)
+    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @values(2, 3)
+    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @values(2, 3)
+    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @values(2, 3)
+    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @values(2, 3)
+    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @values(2, 3)
+    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @values(2, 3)
     When transaction commits
     When connection open read transaction for database: typedb
     Then <root-type>(<supertype-name>) get owns(name) get annotations contain: @values(0, 1, 2, 3, 4, 5)
@@ -4137,12 +4139,12 @@ Feature: Concept Owns
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @values(2, 3, 4, 5)
     Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @values(2, 3, 4, 5)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @values(2, 3, 4, 5)
-    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @values(1, 3)
-    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @values(1, 3)
-    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @values(1, 3)
-    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @values(1, 3)
-    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @values(1, 3)
-    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @values(1, 3)
+    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @values(2, 3)
+    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @values(2, 3)
+    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @values(2, 3)
+    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @values(2, 3)
+    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @values(2, 3)
+    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @values(2, 3)
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 |
       | entity    | person         | customer     | subscriber     |
@@ -4151,19 +4153,20 @@ Feature: Concept Owns
 ########################
 # @range
 ########################
+  # TODO: range(..) with both Nones
   Scenario Outline: Ordered owns can set @range annotation for <value-type> value type in correct order and unset it
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
     When create attribute type: custom-attribute-2
     When attribute(custom-attribute-2) set value type: <value-type>
     When entity(person) set owns: custom-attribute
-    Then entity(player) get owns(custom-attribute) set annotation: @range(<arg1>..<arg0>); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @range(<arg1>..<arg0>); fails
     Then entity(person) get owns(custom-attribute) get annotations is empty
     When entity(person) get owns(custom-attribute) set annotation: @range(<arg0>..<arg1>)
     Then entity(person) get owns(custom-attribute) get annotations contain: @range(<arg0>..<arg1>)
     When entity(person) set owns: custom-attribute-2
     When entity(person) get owns(custom-attribute-2) set ordering: ordered
-    Then entity(player) get owns(custom-attribute-2) set annotation: @range(<arg1>..<arg0>); fails
+    Then entity(person) get owns(custom-attribute-2) set annotation: @range(<arg1>..<arg0>); fails
     Then entity(person) get owns(custom-attribute-2) get annotations is empty
     When entity(person) get owns(custom-attribute-2) set annotation: @range(<arg0>..<arg1>)
     Then entity(person) get owns(custom-attribute-2) get annotations contain: @range(<arg0>..<arg1>)
@@ -4189,13 +4192,11 @@ Feature: Concept Owns
     Then entity(person) get owns(custom-attribute) get annotations do not contain: @range(..<arg1>)
     Then entity(person) get owns(custom-attribute) get declared annotations do not contain: @range(..<arg1>)
     Then entity(person) get owns(custom-attribute) get annotation categories do not contain: @range
-    Then entity(person) get owns(custom-attribute) get declared annotation categories do not contain: @range
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get annotations do not contain: @range(..<arg1>)
     Then entity(person) get owns(custom-attribute) get declared annotations do not contain: @range(..<arg1>)
     Then entity(person) get owns(custom-attribute) get annotation categories do not contain: @range
-    Then entity(person) get owns(custom-attribute) get declared annotation categories do not contain: @range
     When entity(person) get owns(custom-attribute) set annotation: @range(<arg0>..)
     Then entity(person) get owns(custom-attribute) get annotations contain: @range(<arg0>..)
     Then entity(person) get owns(custom-attribute) get declared annotations contain: @range(<arg0>..)
@@ -4207,11 +4208,9 @@ Feature: Concept Owns
     Then entity(person) get owns(custom-attribute) get annotations do not contain: @range(<arg0>..)
     Then entity(person) get owns(custom-attribute) get declared annotations do not contain: @range(<arg0>..)
     Then entity(person) get owns(custom-attribute) get annotation categories do not contain: @range
-    Then entity(person) get owns(custom-attribute) get declared annotation categories do not contain: @range
     When transaction commits
     When connection open read transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get annotation categories do not contain: @range
-    Then entity(person) get owns(custom-attribute) get declared annotation categories do not contain: @range
     Examples:
       | value-type  | arg0                         | arg1                                                  |
       | long        | 0                            | 1                                                     |
@@ -4388,18 +4387,29 @@ Feature: Concept Owns
       | datetime    | 2024-05-06..2024-05-08           |
       | datetime-tz | 2024-05-07+0100..2024-05-10+0100 |
 
-  Scenario Outline: Owns cannot set multiple @range annotation with different arguments
+  Scenario Outline: Owns can reset @range annotation with different arguments
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
     When entity(person) set owns: custom-attribute
-    Then entity(person) get owns(custom-attribute) set annotation: @range(<args>)
-    Then entity(person) get owns(custom-attribute) set annotation: @range(<fail-args>); fails
-    Then entity(person) get owns(custom-attribute) get annotations is empty
+    When entity(person) get owns(custom-attribute) set annotation: @range(<args>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @range(<args>)
+    Then entity(person) get owns(custom-attribute) get annotations do not contain: @range(<reset-args>)
+    When entity(person) get owns(custom-attribute) set annotation: @range(<reset-args>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @range(<reset-args>)
+    Then entity(person) get owns(custom-attribute) get annotations do not contain: @range(<args>)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get owns(custom-attribute) get annotations contain: @range(<reset-args>)
+    Then entity(person) get owns(custom-attribute) get annotations do not contain: @range(<args>)
+    When entity(person) get owns(custom-attribute) set annotation: @range(<args>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @range(<args>)
+    Then entity(person) get owns(custom-attribute) get annotations do not contain: @range(<reset-args>)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns(custom-attribute) get annotations is empty
+    Then entity(person) get owns(custom-attribute) get annotations contain: @range(<args>)
+    Then entity(person) get owns(custom-attribute) get annotations do not contain: @range(<reset-args>)
     Examples:
-      | value-type  | args                             | fail-args                        |
+      | value-type  | args                             | reset-args                       |
       | long        | 1..5                             | 7..9                             |
       | double      | 1.1..1.5                         | -8.0..88.3                       |
       | decimal     | -8.0..88.3                       | 1.1..1.5                         |
@@ -4525,8 +4535,10 @@ Feature: Concept Owns
     Then entity(player) get owns(custom-attribute) get declared annotations contain: @range(<args>)
     Then relation(marriage) get owns(custom-attribute) get annotations contain: @range(<args>)
     Then relation(marriage) get owns(custom-attribute) get declared annotations contain: @range(<args>)
-    Then entity(player) get owns do not contain: second-custom-attribute
-    Then relation(marriage) get owns do not contain: second-custom-attribute
+    Then entity(player) get owns do not contain:
+      | second-custom-attribute |
+    Then relation(marriage) get owns do not contain:
+      | second-custom-attribute |
     Then entity(player) get owns contain:
       | overridden-custom-attribute |
     Then relation(marriage) get owns contain:
@@ -4547,33 +4559,51 @@ Feature: Concept Owns
     Then relation(marriage) get owns(overridden-custom-attribute) get declared annotations do not contain: @range(<args>)
     When entity(player) get owns(custom-attribute) set annotation: @range(<args-override>)
     When relation(marriage) get owns(custom-attribute) set annotation: @range(<args-override>)
+    When entity(player) get owns(overridden-custom-attribute) set annotation: @range(<args-override>)
+    When relation(marriage) get owns(overridden-custom-attribute) set annotation: @range(<args-override>)
+    Then entity(person) get owns(second-custom-attribute) get annotations contain: @range(<args>)
+    Then entity(person) get owns(second-custom-attribute) get declared annotations contain: @range(<args>)
+    Then relation(description) get owns(second-custom-attribute) get annotations contain: @range(<args>)
+    Then relation(description) get owns(second-custom-attribute) get declared annotations contain: @range(<args>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @range(<args-override>)
+    Then entity(person) get owns(custom-attribute) get declared annotations contain: @range(<args-override>)
+    Then relation(description) get owns(custom-attribute) get annotations contain: @range(<args-override>)
+    Then relation(description) get owns(custom-attribute) get declared annotations contain: @range(<args-override>)
     Then entity(player) get owns(custom-attribute) get annotations contain: @range(<args-override>)
     Then entity(player) get owns(custom-attribute) get declared annotations contain: @range(<args-override>)
     Then relation(marriage) get owns(custom-attribute) get annotations contain: @range(<args-override>)
     Then relation(marriage) get owns(custom-attribute) get declared annotations contain: @range(<args-override>)
     Then entity(player) get owns(overridden-custom-attribute) get annotations contain: @range(<args-override>)
-    Then entity(player) get owns(overridden-custom-attribute) get declared annotations do not contain: @range(<args-override>)
+    Then entity(player) get owns(overridden-custom-attribute) get declared annotations contain: @range(<args-override>)
     Then relation(marriage) get owns(overridden-custom-attribute) get annotations contain: @range(<args-override>)
-    Then relation(marriage) get owns(overridden-custom-attribute) get declared annotations do not contain: @range(<args-override>)
+    Then relation(marriage) get owns(overridden-custom-attribute) get declared annotations contain: @range(<args-override>)
     When transaction commits
     When connection open read transaction for database: typedb
+    Then entity(person) get owns(second-custom-attribute) get annotations contain: @range(<args>)
+    Then entity(person) get owns(second-custom-attribute) get declared annotations contain: @range(<args>)
+    Then relation(description) get owns(second-custom-attribute) get annotations contain: @range(<args>)
+    Then relation(description) get owns(second-custom-attribute) get declared annotations contain: @range(<args>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @range(<args-override>)
+    Then entity(person) get owns(custom-attribute) get declared annotations contain: @range(<args-override>)
+    Then relation(description) get owns(custom-attribute) get annotations contain: @range(<args-override>)
+    Then relation(description) get owns(custom-attribute) get declared annotations contain: @range(<args-override>)
     Then entity(player) get owns(custom-attribute) get annotations contain: @range(<args-override>)
     Then entity(player) get owns(custom-attribute) get declared annotations contain: @range(<args-override>)
     Then relation(marriage) get owns(custom-attribute) get annotations contain: @range(<args-override>)
     Then relation(marriage) get owns(custom-attribute) get declared annotations contain: @range(<args-override>)
     Then entity(player) get owns(overridden-custom-attribute) get annotations contain: @range(<args-override>)
-    Then entity(player) get owns(overridden-custom-attribute) get declared annotations do not contain: @range(<args-override>)
+    Then entity(player) get owns(overridden-custom-attribute) get declared annotations contain: @range(<args-override>)
     Then relation(marriage) get owns(overridden-custom-attribute) get annotations contain: @range(<args-override>)
-    Then relation(marriage) get owns(overridden-custom-attribute) get declared annotations do not contain: @range(<args-override>)
+    Then relation(marriage) get owns(overridden-custom-attribute) get declared annotations contain: @range(<args-override>)
     Examples:
       | value-type  | args                             | args-override                             |
-      | long        | 1, 10                            | 1, 5                                      |
-      | double      | 1.0, 10.0                        | 2.0, 10.0                                 |
-      | decimal     | 0.0, 1.0                         | 0.0, 0.999999                             |
-      | string      | "A", "Z"                         | "J", "Z"                                  |
-      | date        | 2024-06-04, 2024-06-06           | 2024-06-04, 2024-06-05                    |
-      | datetime    | 2024-06-04, 2024-06-05           | 2024-06-04, 2024-06-04T12:00:00           |
-      | datetime-tz | 2024-06-04+0010, 2024-06-05+0010 | 2024-06-04+0010, 2024-06-04T12:00:00+0010 |
+      | long        | 1..10                            | 1..5                                      |
+      | double      | 1.0..10.0                        | 2.0..10.0                                 |
+      | decimal     | 0.0..1.0                         | 0.0..0.999999                             |
+      | string      | "A".."Z"                         | "J".."Z"                                  |
+      | date        | 2024-06-04..2024-06-06           | 2024-06-04..2024-06-05                    |
+      | datetime    | 2024-06-04..2024-06-05           | 2024-06-04..2024-06-04T12:00:00           |
+      | datetime-tz | 2024-06-04+0010..2024-06-05+0010 | 2024-06-04+0010..2024-06-04T12:00:00+0010 |
 
   Scenario Outline: Inherited @range annotation on owns for <value-type> value type cannot be reset or overridden by the @range of not a subset of arguments
     When create attribute type: custom-attribute
@@ -4635,13 +4665,13 @@ Feature: Concept Owns
     Then transaction commits; fails
     Examples:
       | value-type  | args                             | args-override                             |
-      | long        | 1, 10                            | -1, 5                                     |
-      | double      | 1.0, 10.0                        | 0.0, 150.0                                |
-      | decimal     | 0.0, 1.0                         | -0.0001, 0.999999                         |
-      | string      | "A", "Z"                         | "A", "z"                                  |
-      | date        | 2024-06-04, 2024-06-06           | 2023-06-04, 2024-06-05                    |
-      | datetime    | 2024-06-04, 2024-06-05           | 2023-06-04, 2024-06-04T12:00:00           |
-      | datetime-tz | 2024-06-04+0010, 2024-06-05+0010 | 2024-06-04+0010, 2024-06-05T01:00:00+0010 |
+      | long        | 1..10                            | -1..5                                     |
+      | double      | 1.0..10.0                        | 0.0..150.0                                |
+      | decimal     | 0.0..1.0                         | -0.0001..0.999999                         |
+      | string      | "A".."Z"                         | "A".."z"                                  |
+      | date        | 2024-06-04..2024-06-06           | 2023-06-04..2024-06-05                    |
+      | datetime    | 2024-06-04..2024-06-05           | 2023-06-04..2024-06-04T12:00:00           |
+      | datetime-tz | 2024-06-04+0010..2024-06-05+0010 | 2024-06-04+0010..2024-06-05T01:00:00+0010 |
 
   Scenario Outline: Range can be narrowed for the same attribute for <root-type>'s owns
     When create attribute type: name
@@ -4688,11 +4718,11 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @range(2..5)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @range(2..5)
     Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @range(1..3); fails
-    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @range(0, 3); fails
+    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @range(0..3); fails
     Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @range(0..5); fails
     Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @range(2..6); fails
     Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @range(0..1); fails
-    When <root-type>(<subtype-name-2>) get owns(name) set annotation: @range(1..3)
+    When <root-type>(<subtype-name-2>) get owns(name) set annotation: @range(2..3)
     Then <root-type>(<supertype-name>) get owns(name) get annotations contain: @range(0..5)
     Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @range(0..5)
     Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @range(0..5)
@@ -4707,10 +4737,10 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @range(2..5)
     Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @range(1..3)
     Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @range(1..3)
-    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @range(1..3)
+    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @range(2..3)
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @range(1..3)
     Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @range(1..3)
-    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @range(1..3)
+    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @range(2..3)
     When transaction commits
     When connection open read transaction for database: typedb
     Then <root-type>(<supertype-name>) get owns(name) get annotations contain: @range(0..5)
@@ -4727,10 +4757,10 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @range(2..5)
     Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @range(1..3)
     Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @range(1..3)
-    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @range(1..3)
+    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @range(2..3)
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @range(1..3)
     Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @range(1..3)
-    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @range(1..3)
+    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @range(2..3)
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 |
       | entity    | person         | customer     | subscriber     |
@@ -5921,14 +5951,12 @@ Feature: Concept Owns
     When relation(description) set owns: custom-attribute
     When relation(description) get owns(custom-attribute) set annotation: @<annotation-1>
     When relation(description) get owns(custom-attribute) set annotation: @<annotation-2>
-    Then relation(description) get owns(custom-attribute) get annotations contain:
-      | @<annotation-1> |
-      | @<annotation-2> |
+    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-1>
+    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-2>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(description) get owns(custom-attribute) get annotations contain:
-      | @<annotation-1> |
-      | @<annotation-2> |
+    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-1>
+    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-2>
     When relation(description) get owns(custom-attribute) unset annotation: @<annotation-category-1>
     Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-1>
     Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-2>
@@ -5951,27 +5979,28 @@ Feature: Concept Owns
     Then relation(description) get owns(custom-attribute) get annotations is empty
     Examples:
     # TODO: Move to "cannot" test if something is wrong here.
-      | annotation-1                      | annotation-2       | annotation-category-1 | annotation-category-2 | value-type  |
-      | key                               | subkey(L)          | key                   | subkey                | long        |
-      | key                               | values(1, 2)       | key                   | values                | double      |
-      | key                               | range(1.0..2.0)    | key                   | range                 | decimal     |
-      | key                               | regex("s")         | key                   | regex                 | string      |
-      | key                               | regex("s")         | key                   | regex                 | string      |
-      | subkey(L)                         | unique             | subkey                | unique                | duration    |
-      | subkey(L)                         | values(1, 2)       | subkey                | values                | long        |
-      | subkey(L)                         | range(false..true) | subkey                | range                 | boolean     |
-      | subkey(L)                         | card(0, 1)         | subkey                | card                  | long        |
-      | subkey(L)                         | regex("s")         | subkey                | regex                 | string      |
-      | unique                            | values(1, 2)       | unique                | values                | long        |
-      | unique                            | range(1.0..2.0)    | unique                | range                 | decimal     |
-      | unique                            | card(0, 1)         | unique                | card                  | double      |
-      | unique                            | regex("s")         | unique                | regex                 | string      |
-      | values(2024-05-06+0100)           | card(0, 1)         | values                | card                  | datetime-tz |
-      | range("2020-05-05".."2025-05-05") | card(0, 1)         | range                 | card                  | datetime    |
-      | card(0, 1)                        | regex("s")         | card                  | regex                 | string      |
-      | values(1.0, 2.0)                  | range(1.0..2.0)    | values                | range                 | double      |
-      | values("str")                     | regex("s")         | values                | regex                 | string      |
-      | range("1".."2")                   | regex("s")         | range                 | regex                 | string      |
+      | annotation-1                  | annotation-2    | annotation-category-1 | annotation-category-2 | value-type  |
+      # TODO: subkey is not implemented
+#      | key                               | subkey(L)          | key                   | subkey                | long        |
+      | key                           | values(1, 2)    | key                   | values                | decimal     |
+      | key                           | range(1.0..2.0) | key                   | range                 | decimal     |
+      | key                           | regex("s")      | key                   | regex                 | string      |
+      | key                           | regex("s")      | key                   | regex                 | string      |
+#      | subkey(L)                         | unique             | subkey                | unique                | duration    |
+#      | subkey(L)                         | values(1, 2)       | subkey                | values                | long        |
+#      | subkey(L)                         | range(false..true) | subkey                | range                 | boolean     |
+#      | subkey(L)                         | card(0, 1)         | subkey                | card                  | long        |
+#      | subkey(L)                         | regex("s")         | subkey                | regex                 | string      |
+      | unique                        | values(1, 2)    | unique                | values                | long        |
+      | unique                        | range(1.0..2.0) | unique                | range                 | decimal     |
+      | unique                        | card(0, 1)      | unique                | card                  | decimal     |
+      | unique                        | regex("s")      | unique                | regex                 | string      |
+      | values(2024-05-06+0100)       | card(0, 1)      | values                | card                  | datetime-tz |
+      | range(2020-05-05..2025-05-05) | card(0, 1)      | range                 | card                  | datetime    |
+      | card(0, 1)                    | regex("s")      | card                  | regex                 | string      |
+      | values(1.0, 2.0)              | range(1.0..2.0) | values                | range                 | decimal     |
+      | values("str")                 | regex("s")      | values                | regex                 | string      |
+      | range("1".."2")               | regex("s")      | range                 | regex                 | string      |
 
   Scenario Outline: Ordered ownership can set @<annotation-1> and @<annotation-2> together and unset it for <value-type> value type
     When create attribute type: custom-attribute
@@ -5980,14 +6009,12 @@ Feature: Concept Owns
     When relation(description) get owns(custom-attribute) set ordering: ordered
     When relation(description) get owns(custom-attribute) set annotation: @<annotation-1>
     When relation(description) get owns(custom-attribute) set annotation: @<annotation-2>
-    Then relation(description) get owns(custom-attribute) get annotations contain:
-      | @<annotation-1> |
-      | @<annotation-2> |
+    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-1>
+    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-2>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(description) get owns(custom-attribute) get annotations contain:
-      | @<annotation-1> |
-      | @<annotation-2> |
+    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-1>
+    Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-2>
     When relation(description) get owns(custom-attribute) unset annotation: @<annotation-category-1>
     Then relation(description) get owns(custom-attribute) get annotations do not contain: @<annotation-1>
     Then relation(description) get owns(custom-attribute) get annotations contain: @<annotation-2>
@@ -6010,22 +6037,22 @@ Feature: Concept Owns
     Then relation(description) get owns(custom-attribute) get annotations is empty
     Examples:
     # TODO: Move to "cannot" test if something is wrong here.
-      | annotation-1                      | annotation-2    | annotation-category-1 | annotation-category-2 | value-type    |
-      | unique                            | values(1, 2)    | unique                | values                | long          |
-      | unique                            | range(1.0..2.0) | unique                | range                 | decimal       |
-      | unique                            | card(0, 1)      | unique                | card                  | double        |
-      | unique                            | regex("s")      | unique                | regex                 | string        |
-      | unique                            | distinct        | unique                | distinct              | string        |
-      | values(2024-05-06+0100)           | card(0, 1)      | values                | card                  | datetime-tz   |
-      | values(1, 2)                      | distinct        | values                | distinct              | long          |
-      | values(1.0, 2.0)                  | range(1.0..2.0) | values                | range                 | double        |
-      | values("str")                     | regex("s")      | values                | regex                 | string        |
-      | range("2020-05-05".."2025-05-05") | card(0, 1)      | range                 | card                  | datetime      |
-      | range("2020-05-05".."2025-05-05") | distinct        | range                 | distinct              | date          |
-      | card(0, 1)                        | regex("s")      | card                  | regex                 | string        |
-      | card(0, 1)                        | distinct        | card                  | distinct              | custom-struct |
-      | regex("s")                        | distinct        | regex                 | distinct              | string        |
-      | range("1".."2")                   | regex("s")      | range                 | regex                 | string        |
+      | annotation-1                  | annotation-2    | annotation-category-1 | annotation-category-2 | value-type  |
+      | unique                        | values(1, 2)    | unique                | values                | long        |
+      | unique                        | range(1.0..2.0) | unique                | range                 | decimal     |
+      | unique                        | card(0, 1)      | unique                | card                  | long        |
+      | unique                        | regex("s")      | unique                | regex                 | string      |
+      | unique                        | distinct        | unique                | distinct              | string      |
+      | values(2024-05-06+0100)       | card(0, 1)      | values                | card                  | datetime-tz |
+      | values(1, 2)                  | distinct        | values                | distinct              | long        |
+      | values(1.0, 2.0)              | range(1.0..2.0) | values                | range                 | decimal     |
+      | values("str")                 | regex("s")      | values                | regex                 | string      |
+      | range(2020-05-05..2025-05-05) | card(0, 1)      | range                 | card                  | datetime    |
+      | range(2020-05-05..2025-05-05) | distinct        | range                 | distinct              | date        |
+      | card(0, 1)                    | regex("s")      | card                  | regex                 | string      |
+      | card(0, 1)                    | distinct        | card                  | distinct              | long        |
+      | regex("s")                    | distinct        | regex                 | distinct              | string      |
+      | range("1".."2")               | regex("s")      | range                 | regex                 | string      |
 
   Scenario Outline: Owns cannot set @<annotation-1> and @<annotation-2> together for scalar <value-type>
     When create attribute type: custom-attribute
@@ -6078,6 +6105,65 @@ Feature: Concept Owns
       | key          | card(0, *)   | long       |
       | key          | card(1, 1)   | long       |
       | key          | card(2, 5)   | long       |
+
+  Scenario Outline: Annotation @key can be set if type has inherited cardinality that can be narrowed
+    When create attribute type: name
+    When attribute(name) set value type: string
+    When attribute(name) set annotation: @abstract
+    When create attribute type: surname
+    When attribute(surname) set value type: string
+    When attribute(surname) set supertype: name
+    When create attribute type: non-card-name
+    When attribute(non-card-name) set value type: string
+    When attribute(non-card-name) set supertype: name
+    When attribute(non-card-name) set annotation: @abstract
+    When create attribute type: third-name
+    When attribute(third-name) set value type: string
+    When attribute(third-name) set supertype: non-card-name
+    When entity(person) set owns: name
+    When entity(person) get owns(name) set annotation: @card(<card-args>)
+    When entity(person) set owns: non-card-name
+    When entity(customer) set supertype: person
+    When entity(customer) set owns: surname
+    When entity(customer) get owns(surname) set override: name
+    When entity(subscriber) set supertype: person
+    When entity(subscriber) set owns: surname
+    When entity(subscriber) get owns(surname) set annotation: @key
+    When entity(subscriber) set owns: third-name
+    When entity(subscriber) get owns(third-name) set override: name
+    When entity(person) get owns(name) set annotation: @card(<card-args>)
+    Then entity(person) get owns(name) get annotations contain: @card(<card-args>)
+    Then entity(person) get owns(name) get declared annotations contain: @card(<card-args>)
+    Then entity(person) get owns(name) get annotations do not contain: @key
+    Then entity(customer) get owns(surname) get annotations contain: @card(<card-args>)
+    Then entity(customer) get owns(surname) get declared annotations do not contain: @card(<card-args>)
+    Then entity(customer) get owns(surname) get annotations do not contain: @key
+    Then entity(subscriber) get owns(surname) get annotations do not contain: @card(<card-args>)
+    Then entity(subscriber) get owns(surname) get annotations contain: @key
+    Then entity(person) get owns(name) set annotation: @key; fails
+    When entity(customer) get owns(surname) set annotation: @key
+    Then entity(customer) get owns(surname) get annotations contain: @key
+    When entity(subscriber) get owns(surname) set override: name
+    Then entity(subscriber) get owns overridden(surname) get label: name
+    When entity(subscriber) get owns(third-name) set annotation: @key
+    Then entity(subscriber) get owns(third-name) get annotations contain: @key
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get owns(name) get annotations do not contain: @key
+    Then entity(person) get owns(name) get annotations contain: @card(<card-args>)
+    Then entity(customer) get owns overridden(surname) get label: name
+    Then entity(customer) get owns(surname) get annotations contain: @key
+    Then entity(customer) get owns(surname) get annotation categories do not contain: @card
+    Then entity(subscriber) get owns overridden(surname) get label: name
+    Then entity(subscriber) get owns(surname) get annotations contain: @key
+    Then entity(subscriber) get owns(surname) get annotation categories do not contain: @card
+    Then entity(subscriber) get owns overridden(third-name) get label: name
+    Then entity(subscriber) get owns(third-name) get annotations contain: @key
+    Then entity(subscriber) get owns(third-name) get annotation categories do not contain: @card
+    Examples:
+      | card-args |
+      | 0, 1      |
+      | 0, *      |
 
   Scenario Outline: Annotation @key cannot be set if type has not suitable cardinality
     When create attribute type: name
@@ -6184,7 +6270,6 @@ Feature: Concept Owns
     Then entity(subscriber) get owns(surname) get annotation categories do not contain: @card
     Examples:
       | card-args |
-      | 1, 1      |
       | 1, *      |
       | 2, 2      |
 
@@ -6263,6 +6348,7 @@ Feature: Concept Owns
     Then entity(player3) get owns(name4) get declared annotations do not contain: @unique
     Examples:
       | card-args |
+      | 1, 1      |
       | 0, 1      |
       | 0, 2      |
       | 0, *      |
@@ -6342,6 +6428,7 @@ Feature: Concept Owns
     Then entity(player3) get owns(name4) get declared annotations do not contain: @card(<card-args>)
     Examples:
       | card-args |
+      | 1, 1      |
       | 0, 1      |
       | 0, 2      |
       | 0, *      |

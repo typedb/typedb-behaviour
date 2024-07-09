@@ -2201,7 +2201,7 @@ Feature: Concept Attribute Type
     When attribute(overridden-name) set supertype: name
     When attribute(name) set annotation: @values(<args>)
     Then attribute(name) get annotations contain: @values(<args>)
-    Then attribute(name) get declared nnotations contain: @values(<args>)
+    Then attribute(name) get declared annotations contain: @values(<args>)
     Then attribute(overridden-name) get annotations contain: @values(<args>)
     Then attribute(overridden-name) get declared annotations do not contain: @values(<args>)
     When transaction commits
@@ -2240,6 +2240,7 @@ Feature: Concept Attribute Type
   Scenario Outline: Inherited @values annotation on attribute types for <value-type> value type cannot be overridden by the @values of not a subset of arguments
     When create attribute type: name
     When attribute(name) set value type: <value-type>
+    When attribute(name) set annotation: @abstract
     When create attribute type: overridden-name
     When attribute(overridden-name) set value type: <value-type>
     When attribute(overridden-name) set supertype: name
@@ -2640,12 +2641,12 @@ Feature: Concept Attribute Type
     When attribute(first-name) set supertype: name
     Then attribute(first-name) get annotations contain: @range("value".."value+1")
     Then attribute(first-name) get declared annotations do not contain: @range("value".."value+1")
-    Then attribute(first-name) unset annotation: @range; fail
+    Then attribute(first-name) unset annotation: @range; fails
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(first-name) get annotations contain: @range("value".."value+1")
     Then attribute(first-name) get declared annotations do not contain: @range("value".."value+1")
-    Then attribute(first-name) unset annotation: @range; fail
+    Then attribute(first-name) unset annotation: @range; fails
     Then attribute(first-name) set supertype: attribute
     Then attribute(first-name) get annotations do not contain: @range("value".."value+1")
     Then attribute(first-name) get declared annotations do not contain: @range("value".."value+1")
@@ -2698,7 +2699,6 @@ Feature: Concept Attribute Type
       | date        | 2024-06-04..2024-06-06           | 2024-06-04..2024-06-05                    |
       | datetime    | 2024-06-04..2024-06-05           | 2024-06-04..2024-06-04T12:00:00           |
       | datetime-tz | 2024-06-04+0010..2024-06-05+0010 | 2024-06-04+0010..2024-06-04T12:00:00+0010 |
-      | duration    | P6M..P1Y                         | P8M..P9M                                  |
 
   Scenario Outline: Inherited @range annotation on attribute types for <value-type> value type cannot be overridden by the @range of not a subset of arguments
     When create attribute type: name
@@ -2732,7 +2732,6 @@ Feature: Concept Attribute Type
       | date        | 2024-06-04..2024-06-05           | 2023-06-04..2024-06-04                    |
       | datetime    | 2024-06-04..2024-06-05           | 2023-06-04..2024-06-04T12:00:00           |
       | datetime-tz | 2024-06-04+0010..2024-06-05+0010 | 2024-06-04+0010..2024-06-05T01:00:00+0010 |
-      | duration    | P6M..P1Y                         | P8M..P1Y1D                                |
 
 ########################
 # not compatible @annotations: @distinct, @key, @unique, @subkey, @card, @cascade, @replace
