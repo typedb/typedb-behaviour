@@ -71,7 +71,6 @@ Feature: Schema validation
     When attribute(attr1) set supertype: attr0s
     Then transaction commits
 
-    When transaction closes
     When connection open schema transaction for database: typedb
     Then attribute(attr1) set supertype: attr0d; fails
 
@@ -96,7 +95,6 @@ Feature: Schema validation
     When attribute(attr1) set supertype: attr0a
     Then transaction commits
 
-    When transaction closes
     When connection open schema transaction for database: typedb
     When attribute(attr0a) unset annotation: @abstract; fails
 
@@ -110,32 +108,82 @@ Feature: Schema validation
     When attribute(attr1) set supertype: attr0c
     Then transaction commits
 
-  # Relation types must relate at least one role
-  Scenario: Concrete relation types must relate at least one role
-    When create relation type: rel0c
-    Then transaction commits; fails
 
-    When connection open schema transaction for database: typedb
-    When create relation type: rel0c
-    When relation(rel0c) create role: role0c
-    Then transaction commits
-
-    When connection open schema transaction for database: typedb
-    When relation(rel0c) delete role: role0c
-    Then transaction commits; fails
-
-    When connection open schema transaction for database: typedb
+  Scenario: Concrete relation types must relate at least one role, cannot unset relates root
     When create relation type: rel0a
-    When relation(rel0a) set annotation: @abstract
-    Then transaction commits
+    Then relation(rel0a) get roles contain:
+      | relation:role |
+    Then relation(rel0a) get declared roles is empty
+    When transaction commits
 
     When connection open schema transaction for database: typedb
-    When create relation type: rel0a
-    When relation(rel0a) unset annotation: @abstract
-    Then transaction commits; fails
+    Then relation(rel0a) get roles contain:
+      | relation:role |
+    Then relation(rel0a) get declared roles is empty
+    Then relation(rel0a) get role(role) does not exist
+    Then relation(relation) get role(role) exists
+    Then relation(relation) delete role: role; fails
+    Then relation(rel0a) get roles contain:
+      | relation:role |
+    Then relation(rel0a) get declared roles is empty
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When create relation type: rel0b
+    When relation(rel0b) create role: role0b
+    Then relation(rel0b) get roles contain:
+#     TODO: Now we hide relation:role. Do we want this behavior?
+#      | relation:role |
+      | rel0b:role0b  |
+    Then relation(rel0b) get declared roles contain:
+      | rel0b:role0b |
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then relation(rel0b) get roles contain:
+#     TODO: Now we hide relation:role. Do we want this behavior?
+#      | relation:role |
+      | rel0b:role0b  |
+    Then relation(rel0b) get declared roles contain:
+      | rel0b:role0b |
+    When relation(rel0b) delete role: role0b
+    Then relation(rel0b) get roles contain:
+      | relation:role |
+    Then relation(rel0b) get roles do not contain:
+      | rel0b:role0b |
+    Then relation(rel0b) get declared roles is empty
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then relation(rel0b) get roles contain:
+      | relation:role |
+    Then relation(rel0b) get roles do not contain:
+      | rel0b:role0b |
+    Then relation(rel0b) get declared roles is empty
+    When create relation type: rel0c
+    When relation(rel0c) set annotation: @abstract
+    Then relation(rel0c) get roles contain:
+      | relation:role |
+    Then relation(rel0c) get declared roles is empty
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then relation(rel0c) get roles contain:
+      | relation:role |
+    Then relation(rel0c) get declared roles is empty
+    When relation(rel0c) unset annotation: @abstract
+    Then relation(rel0c) get roles contain:
+      | relation:role |
+    Then relation(rel0c) get declared roles is empty
+    When transaction commits
+
+    When connection open read transaction for database: typedb
+    Then relation(rel0c) get roles contain:
+      | relation:role |
+    Then relation(rel0c) get declared roles is empty
 
 
-  Scenario: Concrete relation types must relate at least one role, but these may be inherited
+  Scenario: Concrete relation types must relate at least one role, but these may be inherited (including root)
     Given create relation type: rel00
     Given relation(rel00) set annotation: @abstract
     Given relation(rel00) create role: role00
@@ -146,27 +194,62 @@ Feature: Schema validation
     When connection open schema transaction for database: typedb
     When create relation type: rel1
     When relation(rel1) set supertype: rel01
-    Then transaction commits; fails
+    Then relation(rel1) get roles contain:
+      | relation:role |
+    Then relation(rel1) get declared roles is empty
+    When transaction commits
 
     When connection open schema transaction for database: typedb
-    When create relation type: rel1
+    Then relation(rel1) get roles contain:
+      | relation:role |
+    Then relation(rel1) get declared roles is empty
     When relation(rel1) set supertype: rel00
-    Then transaction commits
+    Then relation(rel1) get roles contain:
+      | rel00:role00 |
+    Then relation(rel1) get declared roles is empty
+    When transaction commits
 
     When connection open schema transaction for database: typedb
     When relation(rel00) delete role: role00
-    Then transaction commits; fails
+    Then relation(rel00) get roles contain:
+      | relation:role |
+    Then relation(rel1) get roles contain:
+      | relation:role |
+    Then relation(rel00) get roles do not contain:
+      | rel00:role00 |
+    Then relation(rel1) get roles do not contain:
+      | rel00:role00 |
+    When transaction commits
 
     When connection open schema transaction for database: typedb
+    Then relation(rel00) get roles contain:
+      | relation:role |
+    Then relation(rel1) get roles contain:
+      | relation:role |
+    Then relation(rel00) get roles do not contain:
+      | rel00:role00 |
+    Then relation(rel1) get roles do not contain:
+      | rel00:role00 |
     When relation(rel1) set supertype: rel01
-    Then transaction commits; fails
+    Then relation(rel1) get roles contain:
+      | relation:role |
+    Then relation(rel1) get roles do not contain:
+      | rel00:role00 |
+    When transaction commits
+
+    When connection open read transaction for database: typedb
+    Then relation(rel1) get roles contain:
+      | relation:role |
+    Then relation(rel1) get roles do not contain:
+      | rel00:role00 |
 
 
-  Scenario: Relation types may not declare a role with the same name as one declared by its ancestors
+  Scenario: Relation types may not declare a role with the same name as one declared in its inheritance line
     When create relation type: rel00
     When relation(rel00) create role: role00
     When create relation type: rel01
     When relation(rel01) create role: role01
+    When relation(rel01) create role: role02
     When create relation type: rel1
     When relation(rel1) set supertype: rel00
     When relation(rel1) create role: role01
@@ -177,11 +260,39 @@ Feature: Schema validation
 
     When transaction closes
     When connection open schema transaction for database: typedb
-    When relation(rel00) create role: role01; fails
+    When relation(rel00) create role: role01
+    Then transaction commits; fails
+
+    When connection open schema transaction for database: typedb
+    When relation(rel1) set supertype: rel01; fails
 
     When transaction closes
     When connection open schema transaction for database: typedb
-    When relation(rel1) set supertype: rel01; fails
+    When create relation type: rel2
+    When create relation type: rel02
+    When relation(rel02) create role: role02
+    When relation(rel02) set supertype: rel2
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    When relation(rel2) set supertype: rel01
+    Then transaction commits; fails
+
+    When connection open schema transaction for database: typedb
+    When create relation type: rel3
+    When create relation type: rel4
+    When relation(rel4) create role: role02
+    When relation(rel4) set supertype: rel3
+    Then relation(rel4) set supertype: rel02; fails
+    When relation(rel3) set supertype: rel02
+    Then transaction commits; fails
+
+    When connection open schema transaction for database: typedb
+    When create relation type: rel3
+    When create relation type: rel4
+    When relation(rel4) create role: role02
+    When relation(rel3) set supertype: rel02
+    Then relation(rel4) set supertype: rel3; fails
 
 
   Scenario: Concrete types may not own abstract attributes
@@ -192,18 +303,18 @@ Feature: Schema validation
     Given transaction commits
 
     When connection open schema transaction for database: typedb
-    When entity(ent0) set owns: attr0
-    Then transaction commits; fails
+    Then entity(ent0) set owns: attr0; fails
 
+    When transaction closes
     When connection open schema transaction for database: typedb
     When entity(ent0) set annotation: @abstract
     When entity(ent0) set owns: attr0
     Then transaction commits
 
     When connection open schema transaction for database: typedb
-    When entity(ent0) unset annotation: @abstract
-    Then transaction commits; fails
+    Then entity(ent0) unset annotation: @abstract; fails
 
+    When transaction closes
     When connection open schema transaction for database: typedb
     When create entity type: ent1
     When entity(ent1) set supertype: ent0
@@ -262,10 +373,10 @@ Feature: Schema validation
     Given transaction commits
 
     When connection open schema transaction for database: typedb
-    When entity(ent0) get owns attribute types contain:
+    When entity(ent0) get owns contain:
       | attr0 |
     When delete attribute type: attr0
-    Then entity(ent0) get owns attribute types do not contain:
+    Then entity(ent0) get owns do not contain:
       | attr0 |
     Then transaction commits
 
