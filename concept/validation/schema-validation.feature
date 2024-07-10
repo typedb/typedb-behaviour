@@ -132,7 +132,7 @@ Feature: Schema validation
     When create relation type: rel0b
     When relation(rel0b) create role: role0b
     Then relation(rel0b) get roles contain:
-#     TODO: Now we hide relation:role. Do we want this behavior?
+#     TODO: Now we hide relation:role. Do we want this behavior? We show it in typeql 2.x in like "$relation sub relation; $relation relates $r;"
 #      | relation:role |
       | rel0b:role0b  |
     Then relation(rel0b) get declared roles contain:
@@ -321,6 +321,7 @@ Feature: Schema validation
     Then transaction commits; fails
 
 
+    # TODO: Do the same for plays and owns
   Scenario: Modifying a relation or role does not leave invalid overrides
     Given create relation type: rel00
     Given relation(rel00) create role: role00
@@ -345,7 +346,53 @@ Feature: Schema validation
     When transaction closes
     When connection open schema transaction for database: typedb
     When relation(rel1) create role: role1
-    Then relation(rel1) get role(role1) set override: role00; fails
+    # TODO: I changed it from operation time error to commit time error now:
+    Then relation(rel1) get role(role1) set override: role00
+    Then transaction commits; fails
+
+    When connection open schema transaction for database: typedb
+    When create relation type: rel3
+    When relation(rel3) set supertype: rel1
+    When relation(rel3) create role: role3
+    When create relation type: rel4
+    When relation(rel4) set supertype: rel1
+    When relation(rel2) set supertype: rel3
+    Then relation(rel2) get role(role2) get supertype: rel00:role00
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then relation(rel2) get role(role2) get supertype: rel00:role00
+    When relation(rel2) set supertype: rel4
+    Then relation(rel2) get role(role2) get supertype: rel00:role00
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    When relation(rel3) get role(role3) set override: role00
+    Then relation(rel2) set supertype: rel3; fails
+    Then relation(rel3) create role: role00; fails
+
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When create relation type: rel5
+    When relation(rel5) create role: role00
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then relation(rel2) get role(role2) get supertype: rel00:role00
+    Then relation(rel2) set supertype: rel5; fails
+
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    Then relation(rel2) get supertype: rel4
+    Then relation(rel2) get role(role2) get supertype: rel00:role00
+    When relation(rel4) set supertype: rel5
+    Then transaction commits; fails
+
+    When connection open schema transaction for database: typedb
+    Then relation(rel2) get supertype: rel4
+    Then relation(rel2) get role(role2) get supertype: rel00:role00
+    When relation(rel4) set supertype: rel01
+    Then transaction commits; fails
 
 
   Scenario: Deleting a role does not leave dangling 'plays' declarations
@@ -357,12 +404,16 @@ Feature: Schema validation
     Given transaction commits
 
     When connection open schema transaction for database: typedb
-    When entity(ent0) get playing roles contain:
+    When entity(ent0) get plays contain:
       | rel0:role0 |
     When relation(rel0) delete role: role0
-    Then entity(ent0) get playing roles do not contain:
+    Then entity(ent0) get plays do not contain:
       | rel0:role0 |
     Then transaction commits
+
+    When connection open read transaction for database: typedb
+    Then entity(ent0) get plays do not contain:
+      | rel0:role0 |
 
 
   Scenario: Deleting an attribute-type does not leave dangling 'owns' declarations
@@ -379,6 +430,10 @@ Feature: Schema validation
     Then entity(ent0) get owns do not contain:
       | attr0 |
     Then transaction commits
+
+    When connection open read transaction for database: typedb
+    Then entity(ent0) get owns do not contain:
+      | attr0 |
 
 
   Scenario: The schema does not contain redundant owns declarations
@@ -606,11 +661,11 @@ Feature: Schema validation
     When connection open schema transaction for database: typedb
     When create entity type: ent1
     When entity(ent1) set supertype: ent00
-    When entity(ent1) get playing roles contain:
+    When entity(ent1) get plays contain:
       | rel0:role0 |
     # First without override
     Then entity(ent1) set plays: rel1:role1
-    Then entity(ent1) get playing roles contain:
+    Then entity(ent1) get plays contain:
       | rel0:role0 |
       | rel1:role1 |
     Then transaction commits
@@ -618,9 +673,9 @@ Feature: Schema validation
     When connection open schema transaction for database: typedb
     When entity(ent1) set plays: rel1:role1
     When entity(ent1) get plays(rel1:role1) set override: rel0:role0
-    Then entity(ent1) get playing roles contain:
+    Then entity(ent1) get plays contain:
       | rel1:role1 |
-    Then entity(ent1) get playing roles do not contain:
+    Then entity(ent1) get plays do not contain:
       | rel0:role0 |
     Then transaction commits
 
