@@ -2647,7 +2647,8 @@ Feature: Concept Attribute Type
     Then attribute(first-name) get annotations contain: @range("value".."value+1")
     Then attribute(first-name) get declared annotations do not contain: @range("value".."value+1")
     Then attribute(first-name) unset annotation: @range; fails
-    Then attribute(first-name) set supertype: attribute
+    When attribute(first-name) set value type: string
+    When attribute(first-name) set supertype: attribute
     Then attribute(first-name) get annotations do not contain: @range("value".."value+1")
     Then attribute(first-name) get declared annotations do not contain: @range("value".."value+1")
     When transaction commits

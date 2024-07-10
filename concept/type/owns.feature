@@ -3957,10 +3957,16 @@ Feature: Concept Owns
     Then relation(marriage) get owns(overridden-custom-attribute) get declared annotations do not contain: @values(<args>)
     When entity(player) get owns(custom-attribute) set annotation: @values(<args-override>)
     When relation(marriage) get owns(custom-attribute) set annotation: @values(<args-override>)
+    When entity(person) get owns(second-custom-attribute) set annotation: @values(<args-override>)
+    When relation(description) get owns(second-custom-attribute) set annotation: @values(<args-override>)
     Then entity(player) get owns(custom-attribute) get annotations contain: @values(<args-override>)
     Then entity(player) get owns(custom-attribute) get declared annotations contain: @values(<args-override>)
     Then relation(marriage) get owns(custom-attribute) get annotations contain: @values(<args-override>)
     Then relation(marriage) get owns(custom-attribute) get declared annotations contain: @values(<args-override>)
+    Then entity(person) get owns(second-custom-attribute) get annotations contain: @values(<args-override>)
+    Then entity(person) get owns(second-custom-attribute) get declared annotations contain: @values(<args-override>)
+    Then relation(description) get owns(second-custom-attribute) get annotations contain: @values(<args-override>)
+    Then relation(description) get owns(second-custom-attribute) get declared annotations contain: @values(<args-override>)
     Then entity(player) get owns(overridden-custom-attribute) get annotations contain: @values(<args-override>)
     Then entity(player) get owns(overridden-custom-attribute) get declared annotations do not contain: @values(<args-override>)
     Then relation(marriage) get owns(overridden-custom-attribute) get annotations contain: @values(<args-override>)
@@ -3971,6 +3977,10 @@ Feature: Concept Owns
     Then entity(player) get owns(custom-attribute) get declared annotations contain: @values(<args-override>)
     Then relation(marriage) get owns(custom-attribute) get annotations contain: @values(<args-override>)
     Then relation(marriage) get owns(custom-attribute) get declared annotations contain: @values(<args-override>)
+    Then entity(person) get owns(second-custom-attribute) get annotations contain: @values(<args-override>)
+    Then entity(person) get owns(second-custom-attribute) get declared annotations contain: @values(<args-override>)
+    Then relation(description) get owns(second-custom-attribute) get annotations contain: @values(<args-override>)
+    Then relation(description) get owns(second-custom-attribute) get declared annotations contain: @values(<args-override>)
     Then entity(player) get owns(overridden-custom-attribute) get annotations contain: @values(<args-override>)
     Then entity(player) get owns(overridden-custom-attribute) get declared annotations do not contain: @values(<args-override>)
     Then relation(marriage) get owns(overridden-custom-attribute) get annotations contain: @values(<args-override>)
@@ -6270,7 +6280,7 @@ Feature: Concept Owns
     Then entity(subscriber) get owns(surname) get annotation categories do not contain: @card
     Examples:
       | card-args |
-      | 1, *      |
+      | 2, *      |
       | 2, 2      |
 
   Scenario Outline: Annotation @unique is not inherited if @key is declared on a subtype for owns, cannot be declared having key
