@@ -114,19 +114,10 @@ Feature: Schema validation
     Then relation(rel0a) get roles contain:
       | relation:role |
     Then relation(rel0a) get declared roles is empty
-    When transaction commits
-
-    When connection open schema transaction for database: typedb
-    Then relation(rel0a) get roles contain:
-      | relation:role |
-    Then relation(rel0a) get declared roles is empty
     Then relation(rel0a) get role(role) does not exist
     Then relation(relation) get role(role) exists
     Then relation(relation) delete role: role; fails
-    Then relation(rel0a) get roles contain:
-      | relation:role |
-    Then relation(rel0a) get declared roles is empty
-    When transaction closes
+    Then transaction commits; fails
 
     When connection open schema transaction for database: typedb
     When create relation type: rel0b
@@ -134,7 +125,7 @@ Feature: Schema validation
     Then relation(rel0b) get roles contain:
 #     TODO: Now we hide relation:role. Do we want this behavior? We show it in typeql 2.x in like "$relation sub relation; $relation relates $r;"
 #      | relation:role |
-      | rel0b:role0b  |
+      | rel0b:role0b |
     Then relation(rel0b) get declared roles contain:
       | rel0b:role0b |
     When transaction commits
@@ -143,7 +134,7 @@ Feature: Schema validation
     Then relation(rel0b) get roles contain:
 #     TODO: Now we hide relation:role. Do we want this behavior?
 #      | relation:role |
-      | rel0b:role0b  |
+      | rel0b:role0b |
     Then relation(rel0b) get declared roles contain:
       | rel0b:role0b |
     When relation(rel0b) delete role: role0b
@@ -152,14 +143,9 @@ Feature: Schema validation
     Then relation(rel0b) get roles do not contain:
       | rel0b:role0b |
     Then relation(rel0b) get declared roles is empty
-    When transaction commits
+    Then transaction commits; fails
 
     When connection open schema transaction for database: typedb
-    Then relation(rel0b) get roles contain:
-      | relation:role |
-    Then relation(rel0b) get roles do not contain:
-      | rel0b:role0b |
-    Then relation(rel0b) get declared roles is empty
     When create relation type: rel0c
     When relation(rel0c) set annotation: @abstract
     Then relation(rel0c) get roles contain:
@@ -175,15 +161,10 @@ Feature: Schema validation
     Then relation(rel0c) get roles contain:
       | relation:role |
     Then relation(rel0c) get declared roles is empty
-    When transaction commits
-
-    When connection open read transaction for database: typedb
-    Then relation(rel0c) get roles contain:
-      | relation:role |
-    Then relation(rel0c) get declared roles is empty
+    Then transaction commits; fails
 
 
-  Scenario: Concrete relation types must relate at least one role, but these may be inherited (including root)
+  Scenario: Concrete relation types must relate at least one role
     Given create relation type: rel00
     Given relation(rel00) set annotation: @abstract
     Given relation(rel00) create role: role00
@@ -197,9 +178,11 @@ Feature: Schema validation
     Then relation(rel1) get roles contain:
       | relation:role |
     Then relation(rel1) get declared roles is empty
-    When transaction commits
+    Then transaction commits; fails
 
     When connection open schema transaction for database: typedb
+    When create relation type: rel1
+    When relation(rel1) set supertype: rel01
     Then relation(rel1) get roles contain:
       | relation:role |
     Then relation(rel1) get declared roles is empty
@@ -219,38 +202,27 @@ Feature: Schema validation
       | rel00:role00 |
     Then relation(rel1) get roles do not contain:
       | rel00:role00 |
-    When transaction commits
+    Then transaction commits; fails
 
     When connection open schema transaction for database: typedb
-    Then relation(rel00) get roles contain:
-      | relation:role |
-    Then relation(rel1) get roles contain:
-      | relation:role |
-    Then relation(rel00) get roles do not contain:
-      | rel00:role00 |
-    Then relation(rel1) get roles do not contain:
-      | rel00:role00 |
     When relation(rel1) set supertype: rel01
     Then relation(rel1) get roles contain:
       | relation:role |
     Then relation(rel1) get roles do not contain:
       | rel00:role00 |
-    When transaction commits
-
-    When connection open read transaction for database: typedb
-    Then relation(rel1) get roles contain:
-      | relation:role |
-    Then relation(rel1) get roles do not contain:
-      | rel00:role00 |
+    Then transaction commits; fails
 
 
   Scenario: Relation types may not declare a role with the same name as one declared in its inheritance line
     When create relation type: rel00
+    When relation(rel00) set annotation: @abstract
     When relation(rel00) create role: role00
     When create relation type: rel01
+    When relation(rel01) set annotation: @abstract
     When relation(rel01) create role: role01
     When relation(rel01) create role: role02
     When create relation type: rel1
+    When relation(rel1) set annotation: @abstract
     When relation(rel1) set supertype: rel00
     When relation(rel1) create role: role01
     Then transaction commits
@@ -269,7 +241,9 @@ Feature: Schema validation
     When transaction closes
     When connection open schema transaction for database: typedb
     When create relation type: rel2
+    When relation(rel2) set annotation: @abstract
     When create relation type: rel02
+    When relation(rel02) set annotation: @abstract
     When relation(rel02) create role: role02
     When relation(rel02) set supertype: rel2
     When transaction commits
@@ -280,7 +254,9 @@ Feature: Schema validation
 
     When connection open schema transaction for database: typedb
     When create relation type: rel3
+    When relation(rel3) set annotation: @abstract
     When create relation type: rel4
+    When relation(rel4) set annotation: @abstract
     When relation(rel4) create role: role02
     When relation(rel4) set supertype: rel3
     Then relation(rel4) set supertype: rel02; fails
@@ -289,7 +265,9 @@ Feature: Schema validation
 
     When connection open schema transaction for database: typedb
     When create relation type: rel3
+    When relation(rel3) set annotation: @abstract
     When create relation type: rel4
+    When relation(rel4) set annotation: @abstract
     When relation(rel4) create role: role02
     When relation(rel3) set supertype: rel02
     Then relation(rel4) set supertype: rel3; fails
@@ -450,7 +428,6 @@ Feature: Schema validation
     Then entity(ent1) set owns: attr0
     Then transaction commits; fails
 
-    When transaction closes
     When connection open schema transaction for database: typedb
     When entity(ent1) set supertype: ent01
     When entity(ent1) set owns: attr0
@@ -503,9 +480,9 @@ Feature: Schema validation
     When relation(rel1) set supertype: rel00
     When relation(rel1) create role: role1
     When relation(rel1) get role(role1) set override: role00
-    Then relation(rel1) get related roles contain:
+    Then relation(rel1) get roles contain:
       | rel1:role1 |
-    Then relation(rel1) get related roles do not contain:
+    Then relation(rel1) get roles do not contain:
       | rel0:role0 |
     Then transaction commits
 
@@ -549,8 +526,7 @@ Feature: Schema validation
     Then transaction commits; fails
 
     When connection open schema transaction for database: typedb
-    When entity(ent1) set supertype: ent01
-    Then transaction commits; fails
+    When entity(ent1) set supertype: ent01; fails
 
 
   Scenario: A type may not declare ownership of an attribute that has been overridden by an inherited ownership
@@ -606,6 +582,24 @@ Feature: Schema validation
     When connection open schema transaction for database: typedb
     When entity(ent3) set supertype: ent2; fails
 
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When create entity type: ent4
+    When entity(ent4) set annotation: @abstract
+    When entity(ent4) set owns: attr0
+    When entity(ent4) set supertype: ent3
+    When entity(ent3) unset owns: attr0
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then entity(ent4) get supertype: ent3
+    Then entity(ent4) get owns contain:
+      | attr0 |
+    Then entity(ent3) get owns do not contain:
+      | attr0 |
+    When entity(ent3) set supertype: ent2
+    Then transaction commits; fails
+
 
   Scenario: A type may only override an ownership it inherits with a subtype of the inherited attribute
     Given create attribute type: attr0
@@ -647,7 +641,6 @@ Feature: Schema validation
 
     When transaction closes
     When connection open schema transaction for database: typedb
-    When relation(rel1) create role: role1
     When relation(rel1) get role(role1) set override: role0
     Then transaction commits
 
@@ -691,13 +684,13 @@ Feature: Schema validation
     Given entity(ent00) set plays: rel0:role0
     Given create entity type: ent1
     Given entity(ent1) set supertype: ent00
+    Given entity(ent1) set plays: rel1:role1
     Given entity(ent1) get plays(rel1:role1) set override: rel0:role0
     Given create entity type: ent01
     Given transaction commits
 
     When connection open schema transaction for database: typedb
-    # Remove the relates override of role1 on role0
-    Then relation(rel1) create role: role1
+    Then relation(rel1) get role(role1) unset override
     Then transaction commits; fails
 
     When connection open schema transaction for database: typedb
@@ -705,8 +698,7 @@ Feature: Schema validation
     Then transaction commits; fails
 
     When connection open schema transaction for database: typedb
-    Then entity(ent1) set supertype: ent01
-    Then transaction commits; fails
+    Then entity(ent1) set supertype: ent01; fails
 
 
   Scenario: A thing-type may not redeclare the ability to play a RoleType which is hidden by an override
@@ -751,7 +743,7 @@ Feature: Schema validation
 
     # plays will be hidden under ent1
     Given create entity type: ent20
-    Given entity(ent1) set plays: rel0:role0
+    Given entity(ent20) set plays: rel0:role0
 
     # Overridden will be hidden under ent1
     Given create entity type: ent21
@@ -762,7 +754,7 @@ Feature: Schema validation
     # Will be redundant under ent1
     Given create entity type: ent22
     Given entity(ent22) set supertype: ent0
-    Given entity(ent1) set plays: rel10:role10
+    Given entity(ent22) set plays: rel10:role10
     Given transaction commits
 
     When connection open schema transaction for database: typedb
@@ -778,7 +770,7 @@ Feature: Schema validation
     Then transaction commits; fails
 
 
-  Scenario: A concrete type must override any ownerships of abstract attributes it inherits.
+  Scenario: A concrete type must override any ownerships of abstract attributes it inherits
     Given create attribute type: attr00
     Given attribute(attr00) set value type: string
     Given attribute(attr00) set annotation: @abstract
@@ -828,8 +820,7 @@ Feature: Schema validation
     Then transaction commits
 
     When connection open schema transaction for database: typedb
-    When entity(ent1) set supertype: ent01
-    Then transaction commits; fails
+    When entity(ent1) set supertype: ent01; fails
 
 #  TODO: Refactor to functions
 #  Scenario: Types which are referenced in rules may not be renamed
