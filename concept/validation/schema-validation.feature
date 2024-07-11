@@ -718,8 +718,14 @@ Feature: Schema validation
 
     When connection open schema transaction for database: typedb
     When entity(ent2) set plays: rel0:role0
+    When entity(ent2) get plays(rel0:role0) set annotation: @card(1, 1)
+    When entity(ent2) get plays(rel0:role0) set override: rel0:role0
     When entity(ent1) set plays: rel1:role1
-    Then entity(ent1) get plays(rel1:role1) set override: rel0:role0; fails
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) get plays(rel1:role1) set override: rel0:role0
+    Then transaction commits; fails
 
 
   Scenario: A thing-type may not be moved in a way that its plays declarations are hidden by an override
@@ -762,9 +768,9 @@ Feature: Schema validation
 
     When transaction closes
     When connection open schema transaction for database: typedb
-    When entity(ent21) set supertype: ent1
-    Then transaction commits; fails
+    Then entity(ent21) set supertype: ent1; fails
 
+    When transaction closes
     When connection open schema transaction for database: typedb
     When entity(ent22) set supertype: ent1
     Then transaction commits; fails
@@ -961,9 +967,8 @@ Feature: Schema validation
 
     When transaction closes
     When connection open schema transaction for database: typedb
-    # TODO: Either of set owns or set annotation could fail, not sure yet
-    When entity(ent0n) set owns: attr0
-    Then entity(ent0n) get owns(attr0) set annotation: @key; fails
+    When entity(ent0n) get owns(attr0) set annotation: @key
+    Then transaction commits; fails
 
 
   Scenario: Annotations on ownership redeclarations must be stricter than the previous declaration or will be flagged as redundant on commit.
@@ -985,11 +990,32 @@ Feature: Schema validation
     When connection open schema transaction for database: typedb
     When create entity type: ent1u
     When entity(ent1u) set supertype: ent0k
-    # TODO: Either of set owns or set annotation could fail, not sure yet
-    When entity(ent0u) set owns: attr0
-    Then entity(ent0u) get owns(attr0) set annotation: @unique; fails
+    When entity(ent1u) set owns: attr0
+    Then transaction commits; fails
 
-    When transaction closes
+    When connection open schema transaction for database: typedb
+    When create entity type: ent1u
+    When entity(ent1u) set supertype: ent0k
+    When entity(ent1u) set owns: attr0
+    When entity(ent0u) get owns(attr0) set annotation: @unique
+    Then transaction commits; fails
+
+    When connection open schema transaction for database: typedb
+    When create entity type: ent1u
+    When entity(ent1u) set supertype: ent0k
+    When entity(ent1u) set owns: attr0
+    When entity(ent1u) get owns(attr0) set override: attr0
+    When entity(ent0u) get owns(attr0) set annotation: @unique
+    Then transaction commits; fails
+
+    When connection open schema transaction for database: typedb
+    When create entity type: ent1u
+    When entity(ent1u) set supertype: ent0k
+    When entity(ent1u) set owns: attr0
+    When entity(ent0u) get owns(attr0) set annotation: @unique
+    When entity(ent1u) get owns(attr0) set override: attr0
+    Then transaction commits; fails
+
     When connection open schema transaction for database: typedb
     When create entity type: ent1u
     When entity(ent1u) set supertype: ent0u
@@ -1003,13 +1029,22 @@ Feature: Schema validation
     When entity(ent1u) set supertype: ent0n
     When entity(ent1u) set owns: attr0
     When entity(ent1u) get owns(attr0) set annotation: @unique
-    Then transaction commits
+    Then transaction commits; fails
+
+    When connection open schema transaction for database: typedb
+    When create entity type: ent1u
+    When entity(ent1u) set supertype: ent0n
+    When entity(ent1u) set owns: attr0
+    When entity(ent1u) get owns(attr0) set annotation: @unique
+    When entity(ent1u) get owns(attr0) set override: attr0
+    When transaction commits
 
     When connection open schema transaction for database: typedb
     Then entity(ent1u) set supertype: ent0k; fails
+    When entity(ent1u) get owns(attr0) unset override
+    When entity(ent1u) set supertype: ent0k
+    Then transaction commits; fails
 
-    When transaction closes
     When connection open schema transaction for database: typedb
-    # TODO: Either of set owns or set annotation could fail, not sure yet
-    When entity(ent0n) set owns: attr0
-    Then entity(ent0n) get owns(attr0) set annotation: @key; fails
+    When entity(ent0n) get owns(attr0) set annotation: @key
+    Then transaction commits; fails
