@@ -351,6 +351,26 @@ Feature: Concept Entity Type
 #      | annotation |
 #      |     |
 
+  # TODO: Uncomment this test and when there appear inherited annotations (abstract is not inherited)
+#  Scenario Outline: Entity type cannot set redundant duplicated @<annotation> while inheriting it
+#    When create entity type: person
+#    When entity(person) set annotation: @<annotation>
+#    When create entity type: player
+#    When entity(player) set supertype: person
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When entity(player) set annotation: @<annotation>
+#    Then transaction commits; fails
+#    When connection open schema transaction for database: typedb
+#    When entity(player) set annotation: @<annotation>
+#    When entity(person) unset annotation: @<annotation>
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then entity(person) get annotations do not contain: @<annotation>
+#    Then entity(player) get annotations contain: @<annotation>
+#    Examples:
+#      | annotation |
+
 ########################
 # @abstract
 ########################

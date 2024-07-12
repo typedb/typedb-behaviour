@@ -41,8 +41,6 @@ Feature: Concept Owns
 ########################
 # owns common
 ########################
-  # TODO: unset supertype for entity/relation while having overrides on its owns -- schema validation
-
   Scenario Outline: Entity types can own and unset attributes
     When create attribute type: name
     When attribute(name) set value type: <value-type>
@@ -664,14 +662,18 @@ Feature: Concept Owns
     When <root-type>(<subtype-name-2>) get owns(customer-name) set override: name
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name-2>) set owns: name
     When <root-type>(<subtype-name>) get owns(customer-name) set override: name
     Then transaction commits; fails
-    # TODO: Make it only for typeql
-#    When connection open schema transaction for database: typedb
-#    When <root-type>(<subtype-name>) get owns(customer-name) set override: name
-#    When <root-type>(<subtype-name-2>) set owns: customer-name
-#    When <root-type>(<subtype-name-2>) get owns(customer-name) set override: name
-#    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) set owns: name
+    When <root-type>(<subtype-name>) get owns(customer-name) set override: name
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) get owns(customer-name) set override: name
+    When <root-type>(<subtype-name-2>) set owns: customer-name
+    Then <root-type>(<subtype-name-2>) set owns: name; fails
+    Then <root-type>(<subtype-name-2>) get owns(customer-name) set override: name; fails
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | value-type |
       | entity    | person         | customer     | subscriber     | boolean    |
@@ -1421,12 +1423,12 @@ Feature: Concept Owns
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: name
     When <root-type>(<supertype-name>) get owns(name) set ordering: ordered
-    # TODO: No set override here?
     When <root-type>(<subtype-name>) set owns: customer-name
     When <root-type>(<subtype-name>) get owns(customer-name) set ordering: ordered
+    When <root-type>(<subtype-name>) get owns(customer-name) set override: name
     When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
-    Then <root-type>(<subtype-name-2>) set owns: customer-name
-    When <root-type>(<subtype-name-2>) get owns(customer-name) set ordering: ordered
+    Then <root-type>(<subtype-name-2>) set owns: name; fails
+    When <root-type>(<subtype-name-2>) set owns: customer-name
     Then transaction commits; fails
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | value-type |
@@ -1665,6 +1667,101 @@ Feature: Concept Owns
       | root-type | supertype-name | subtype-name | subtype-name-2 | value-type    |
       | entity    | person         | customer     | subscriber     | decimal       |
       | relation  | description    | registration | profile        | custom-struct |
+
+  Scenario Outline: <root-type> types cannot unset supertype while having owns override
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set value type: <value-type>
+    When create attribute type: surname
+    When attribute(surname) set value type: <value-type>
+    When attribute(surname) set supertype: name
+    When <root-type>(<supertype-name>) set owns: name
+    When <root-type>(<subtype-name>) set supertype: <supertype-name>
+    When <root-type>(<subtype-name>) set owns: surname
+    When <root-type>(<subtype-name>) get owns(surname) set override: name
+    Then <root-type>(<subtype-name>) set supertype: <root-type>; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<subtype-name>) set supertype: <root-type>; fails
+    When <root-type>(<subtype-name>) get owns(surname) unset override
+    When <root-type>(<subtype-name>) set supertype: <root-type>
+    Then <root-type>(<subtype-name>) get supertype: <root-type>
+    Then <root-type>(<subtype-name>) get owns overridden(surname) does not exist
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<subtype-name>) get supertype: <root-type>
+    Then <root-type>(<subtype-name>) get owns overridden(surname) does not exist
+    When <root-type>(<subtype-name>) set supertype: <supertype-name>
+    When <root-type>(<subtype-name>) unset owns: surname
+    When <root-type>(<subtype-name-2>) set owns: surname
+    When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
+    When <root-type>(<subtype-name-2>) get owns(surname) set override: name
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<subtype-name-2>) set supertype: <root-type>; fails
+    When <root-type>(<subtype-name>) set supertype: <root-type>
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name-2>) get owns(surname) unset override
+    When <root-type>(<subtype-name>) set supertype: <root-type>
+    Then <root-type>(<subtype-name>) get supertype: <root-type>
+    Then <root-type>(<subtype-name-2>) get owns overridden(surname) does not exist
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then <root-type>(<subtype-name>) get supertype: <root-type>
+    Then <root-type>(<subtype-name-2>) get owns overridden(surname) does not exist
+    Examples:
+      | root-type | supertype-name | subtype-name | subtype-name-2 | value-type  |
+      | entity    | person         | customer     | subscriber     | datetime-tz |
+      | relation  | description    | registration | profile        | double      |
+
+  Scenario Outline: Attribute type cannot unset supertype while having <root-type>'s owns override
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set value type: <value-type>
+    When create attribute type: surname
+    When attribute(surname) set annotation: @abstract
+    When attribute(surname) set value type: <value-type>
+    When attribute(surname) set supertype: name
+    When <root-type>(<supertype-name>) set owns: name
+    When <root-type>(<subtype-name>) set supertype: <supertype-name>
+    When <root-type>(<subtype-name>) set owns: surname
+    When <root-type>(<subtype-name>) get owns(surname) set override: name
+    Then attribute(surname) set supertype: attribute; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(surname) set supertype: attribute; fails
+    When <root-type>(<subtype-name>) get owns(surname) unset override
+    When attribute(surname) set supertype: attribute
+    Then attribute(surname) get supertype: attribute
+    Then <root-type>(<subtype-name>) get owns overridden(surname) does not exist
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(surname) get supertype: attribute
+    Then <root-type>(<subtype-name>) get owns overridden(surname) does not exist
+    When create attribute type: subsurname
+    When attribute(subsurname) set supertype: surname
+    When <root-type>(<subtype-name>) unset owns: surname
+    When <root-type>(<subtype-name>) set owns: subsurname
+    When <root-type>(<subtype-name>) get owns(subsurname) set override: name
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(subsurname) set supertype: attribute; fails
+    When attribute(surname) set supertype: attribute
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) get owns(subsurname) unset override
+    When attribute(surname) set supertype: attribute
+    Then attribute(surname) get supertype: attribute
+    Then <root-type>(<subtype-name>) get owns overriden(subsurname) does not exist
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(surname) get supertype: attribute
+    Then <root-type>(<subtype-name>) get owns overriden(subsurname) does not exist
+    Examples:
+      | root-type | supertype-name | subtype-name | value-type  |
+      | entity    | person         | customer     | datetime-tz |
+      | relation  | description    | registration | double      |
 
 ########################
 # @annotations common: contain common tests for annotations suitable for **scalar** owns:
@@ -2413,7 +2510,6 @@ Feature: Concept Owns
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name-2>) set owns: surname
-    # TODO: Can we override one attribute multiple times down the inheritance line? Maybe we need to test it
     Then <root-type>(<subtype-name-2>) get owns(surname) set override: surname
     When <root-type>(<subtype-name-2>) get owns(surname) set annotation: @<annotation>
     Then <root-type>(<subtype-name-2>) get owns(surname) get annotations contain: @<annotation>
@@ -2932,6 +3028,44 @@ Feature: Concept Owns
       | relation  | description    | registration | profile        | range("1".."2")  |
       | relation  | description    | registration | profile        | card(1, 2)       |
       | relation  | description    | registration | profile        | regex("\S+")     |
+
+  Scenario Outline: <root-tyoe> type cannot set redundant duplicated @<annotation> on plays while it inherits it
+    When create attribute type: name
+    When attribute(name) set value type: <value-type>
+    When attribute(name) set annotation: @abstract
+    When create attribute type: surname
+    When attribute(surname) set supertype: name
+    When <root-type>(<supertype-name>) set owns: name
+    When <root-type>(<supertype-name>) get owns(name) set annotation: @<annotation>
+    When <root-type>(<subtype-name>) set owns: surname
+    When <root-type>(<subtype-name>) get owns(surname) set override: name
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) get owns(surname) set annotation: @<annotation>
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) get owns(surname) set annotation: @<annotation>
+    When <root-type>(<supertype-name>) get owns(name) unset annotation: @<annotation>
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(surname) get annotations contain: @<annotation>
+    Examples:
+      | root-type | supertype-name | subtype-name | annotation       |
+      | entity    | person         | customer     | key              |
+      | entity    | person         | customer     | unique           |
+#      | entity    | person         | customer     | subkey(LABEL)    |
+      | entity    | person         | customer     | values("1", "2") |
+      | entity    | person         | customer     | range("1".."2")  |
+      | entity    | person         | customer     | card(1, 2)       |
+      | entity    | person         | customer     | regex("\S+")     |
+      | relation  | description    | registration | key              |
+      | relation  | description    | registration | unique           |
+#      | relation  | description    | registration | subkey(LABEL)    |
+      | relation  | description    | registration | values("1", "2") |
+      | relation  | description    | registration | range("1".."2")  |
+      | relation  | description    | registration | card(1, 2)       |
+      | relation  | description    | registration | regex("\S+")     |
 
 #########################
 ## @key
@@ -4171,7 +4305,6 @@ Feature: Concept Owns
 ########################
 # @range
 ########################
-  # TODO: range(..) with both Nones
   Scenario Outline: Ordered owns can set @range annotation for <value-type> value type in correct order and unset it
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
@@ -4179,6 +4312,7 @@ Feature: Concept Owns
     When attribute(custom-attribute-2) set value type: <value-type>
     When entity(person) set owns: custom-attribute
     Then entity(person) get owns(custom-attribute) set annotation: @range(<arg1>..<arg0>); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @range(..); fails
     Then entity(person) get owns(custom-attribute) get annotations is empty
     When entity(person) get owns(custom-attribute) set annotation: @range(<arg0>..<arg1>)
     Then entity(person) get owns(custom-attribute) get annotations contain: @range(<arg0>..<arg1>)
@@ -5575,6 +5709,115 @@ Feature: Concept Owns
       | root-type | supertype-name | subtype-name | value-type |
       | entity    | person         | customer     | long       |
       | relation  | description    | registration | string     |
+
+  Scenario Outline: Owns cannot have card that is not narrowed by other owns narrowing it for different subowners
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set value type: <value-type>
+    When create attribute type: overridden-name
+    When attribute(overridden-name) set supertype: name
+    When create attribute type: overridden-name-2
+    When attribute(overridden-name-2) set supertype: name
+    When <root-type>(<supertype-name>) set owns: name
+    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0, 1)
+    When <root-type>(<subtype-name>) set supertype: <supertype-name>
+    When <root-type>(<subtype-name>) set owns: overridden-name
+    When <root-type>(<subtype-name>) get owns(overridden-name) set override: name
+    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(0, 1)
+    When <root-type>(<subtype-name-2>) set supertype: <supertype-name>
+    When <root-type>(<subtype-name-2>) set owns: overridden-name-2
+    When <root-type>(<subtype-name-2>) get owns(overridden-name-2) set override: name
+    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(0, 1)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0, 1)
+    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(0, 1)
+    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(0, 1)
+    Then <root-type>(<subtype-name>) get owns(overridden-name) set annotation: @card(1, 2); fails
+    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) set annotation: @card(1, 2); fails
+    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(0, 2)
+    When <root-type>(<subtype-name>) get owns(overridden-name) set annotation: @card(0, 1)
+    When <root-type>(<subtype-name-2>) get owns(overridden-name-2) set annotation: @card(1, 2)
+    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0, 2)
+    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(0, 1)
+    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(1, 2)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0, 2)
+    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(0, 1)
+    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(1, 2)
+    When <root-type>(<subtype-name>) get owns(overridden-name) set annotation: @card(1, 2)
+    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(1, 2)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0, 2)
+    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(1, 2)
+    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(1, 2)
+    When <root-type>(<subtype-name-2>) get owns(overridden-name-2) set annotation: @card(2, 2)
+    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(2, 2)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0, 2)
+    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(1, 2)
+    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(2, 2)
+    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(0, 1)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(2, 2)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(0, *)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0, *)
+    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(1, 2)
+    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(2, 2)
+    When <root-type>(<subtype-name-2>) get owns(overridden-name-2) set annotation: @card(4, 5)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0, *)
+    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(1, 2)
+    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(4, 5)
+    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(0, 4)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(3, 3)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(2, 5)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<supertype-name>) get owns(name) unset annotation: @card
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(0, 5)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0, 5)
+    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(1, 2)
+    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(4, 5)
+    When <root-type>(<subtype-name>) get owns(overridden-name) set annotation: @card(1, 1)
+    When <root-type>(<subtype-name-2>) get owns(overridden-name-2) set annotation: @card(0, 1)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0, 5)
+    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(1, 1)
+    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(0, 1)
+    When <root-type>(<supertype-name>) get owns(name) unset annotation: @card
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0, 1)
+    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(1, 1)
+    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(0, 1)
+    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @card(0, 1)
+    Then <root-type>(<subtype-name>) get owns(overridden-name) get annotations contain: @card(1, 1)
+    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get annotations contain: @card(0, 1)
+    Examples:
+      | root-type | supertype-name | subtype-name | subtype-name-2 | value-type |
+      | entity    | person         | customer     | subscriber     | decimal    |
+      | relation  | description    | registration | profile        | double     |
+
+  # TODO: Add tests for one subowner with multiple owns overriding one own overridden_own(card(2, 3)) vs 3 subowns of (2, 3), (2, 3), (2, 3) etc
 
 ########################
 # @distinct

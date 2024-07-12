@@ -17,8 +17,6 @@ Feature: Concept Relation Type and Role Type
 # relation type common
 ########################
 
-  # TODO: unset supertype for relations while having overrides on its roles -- schema validation
-
   Scenario: Root relation type cannot be deleted
     Then delete relation type: relation; fails
 
@@ -663,6 +661,45 @@ Feature: Concept Relation Type and Role Type
     Then relation(split-parentship) get roles do not contain:
       | parentship:parent |
 
+  Scenario: Relation types cannot unset supertype while having relates override
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When create relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: father
+    When relation(fathership) get role(father) set override: parent
+    Then relation(fathership) set supertype: relation; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) set supertype: relation; fails
+    When relation(fathership) get role(father) unset override
+    When relation(fathership) set supertype: relation
+    Then relation(fathership) get supertype: relation
+    Then relation(fathership) get role(father) get supertype: role
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) get supertype: relation
+    Then relation(fathership) get role(father) get supertype: role
+    When relation(fathership) set supertype: parentship
+    When create relation type: subfathership
+    When relation(subfathership) create role: subfather
+    When relation(subfathership) set supertype: fathership
+    When relation(subfathership) get role(subfather) set override: parent
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(subfathership) set supertype: relation; fails
+    When relation(fathership) set supertype: relation
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(subfathership) get role(subfather) unset override
+    When relation(fathership) set supertype: relation
+    Then relation(fathership) get supertype: relation
+    Then relation(subfathership) get role(subfather) get supertype: role
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(fathership) get supertype: relation
+    Then relation(subfathership) get role(subfather) get supertype: role
+
 ########################
 # @annotations common
 ########################
@@ -825,6 +862,28 @@ Feature: Concept Relation Type and Role Type
     When connection open read transaction for database: typedb
     Then relation(parentship) get annotations contain: @<annotation>
     Then relation(fathership) get annotations do not contain: @<annotation>
+    Examples:
+      | annotation |
+      # abstract is not inherited
+      | cascade    |
+
+  Scenario Outline: Relation type cannot set redundant duplicated @<annotation> while inheriting it
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) set annotation: @<annotation>
+    When create relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When relation(fathership) set annotation: @<annotation>
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(fathership) set annotation: @<annotation>
+    When relation(parentship) unset annotation: @<annotation>
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get annotations do not contain: @<annotation>
+    Then relation(fathership) get annotations contain: @<annotation>
     Examples:
       | annotation |
       # abstract is not inherited
@@ -2112,6 +2171,30 @@ Feature: Concept Relation Type and Role Type
       | distinct   |
       | card(1, 2) |
 
+  Scenario Outline: Relates cannot set redundant duplicated @<annotation> while inheriting it
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) get role(parent) set annotation: @<annotation>
+    When create relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: father
+    When relation(fathership) get role(father) set override: parent
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When relation(fathership) get role(father) set annotation: @<annotation>
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(fathership) get role(father) set annotation: @<annotation>
+    When relation(parentship) get role(parent) unset annotation: @<annotation>
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get role(parent) get annotations do not contain: @<annotation>
+    Then relation(fathership) get role(father) get annotations contain: @<annotation>
+    Examples:
+      | annotation |
+      | distinct   |
+      | card(1, 2) |
+
 ########################
 # relates @abstract
 ########################
@@ -3015,6 +3098,109 @@ Feature: Concept Relation Type and Role Type
     Then relation(overridden-parentship) get role(overridden-ordered-parent) get cardinality: @card(0, *)
     Then relation(parentship) get role(parent) get cardinality: @card(1, 1)
     Then relation(parentship) get role(ordered-parent) get cardinality: @card(0, *)
+
+  Scenario: Relates cannot have card that is not narrowed by other owns narrowing it for different subrelations
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    Then relation(parentship) get role(parent) get cardinality: @card(1, 1)
+    When create relation type: overridden-parentship
+    When relation(overridden-parentship) create role: overridden-parent
+    When relation(overridden-parentship) set supertype: parentship
+    When relation(overridden-parentship) get role(overridden-parent) set override: parent
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1, 1)
+    When create relation type: overridden-parentship-2
+    When relation(overridden-parentship-2) create role: overridden-parent-2
+    When relation(overridden-parentship-2) set supertype: parentship
+    When relation(overridden-parentship-2) get role(overridden-parent-2) set override: parent
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(1, 1)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) get cardinality: @card(1, 1)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1, 1)
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(1, 1)
+    Then relation(overridden-parentship) get role(overridden-parent) set annotation: @card(1, 2); fails
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) set annotation: @card(1, 2); fails
+    Then relation(overridden-parentship) get role(overridden-parent) set annotation: @card(0, 1); fails
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) set annotation: @card(0, 1); fails
+    When relation(parentship) get role(parent) set annotation: @card(0, 2)
+    When relation(overridden-parentship) get role(overridden-parent) set annotation: @card(0, 1)
+    When relation(overridden-parentship-2) get role(overridden-parent-2) set annotation: @card(1, 2)
+    Then relation(parentship) get role(parent) get cardinality: @card(0, 2)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(0, 1)
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(1, 2)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) get cardinality: @card(0, 2)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(0, 1)
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(1, 2)
+    When relation(overridden-parentship) get role(overridden-parent) set annotation: @card(1, 2)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1, 2)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) get cardinality: @card(0, 2)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1, 2)
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(1, 2)
+    When relation(overridden-parentship-2) get role(overridden-parent-2) set annotation: @card(2, 2)
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(2, 2)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) get cardinality: @card(0, 2)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1, 2)
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(2, 2)
+    When relation(parentship) get role(parent) set annotation: @card(0, 1)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(parentship) get role(parent) set annotation: @card(2, 2)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(parentship) get role(parent) set annotation: @card(0, *)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) get cardinality: @card(0, *)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1, 2)
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(2, 2)
+    When relation(overridden-parentship-2) get role(overridden-parent-2) set annotation: @card(4, 5)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) get cardinality: @card(0, *)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1, 2)
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(4, 5)
+    When relation(parentship) get role(parent) set annotation: @card(0, 4)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(parentship) get role(parent) set annotation: @card(3, 3)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(parentship) get role(parent) set annotation: @card(2, 5)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(parentship) get role(parent) unset annotation: @card
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(parentship) get role(parent) set annotation: @card(1, 5)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) get cardinality: @card(1, 5)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1, 2)
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(4, 5)
+    When relation(overridden-parentship) get role(overridden-parent) set annotation: @card(1, 1)
+    When relation(overridden-parentship-2) get role(overridden-parent-2) set annotation: @card(1, 1)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) get cardinality: @card(1, 5)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1, 1)
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(1, 1)
+    When relation(parentship) get role(parent) unset annotation: @card
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get role(parent) get cardinality: @card(1, 1)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1, 1)
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(1, 1)
+    Then relation(parentship) get role(parent) get annotations do not contain: @card(1, 1)
+    Then relation(overridden-parentship) get role(overridden-parent) get annotations contain: @card(1, 1)
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) get annotations contain: @card(1, 1)
+
+  # TODO: Add tests for one subplayer with multiple plays overriding one plays overridden_plays(card(2, 3)) vs 3 subplays of (2, 3), (2, 3), (2, 3) etc
 
 ########################
 # relates not compatible @annotations: @key, @unique, @subkey, @values, @range, @abstract, @cascade, @independent, @replace, @regex
