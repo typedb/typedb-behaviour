@@ -560,7 +560,7 @@ Feature: Concept Entity Type
 #    Then entity(person) set annotation: @subkey(LABEL); fails
 #    Then entity(person) set annotation: @values(1, 2); fails
 #    Then entity(person) set annotation: @range(1, 2); fails
-#    Then entity(person) set annotation: @card(1, 2); fails
+#    Then entity(person) set annotation: @card(1..2); fails
 #    Then entity(person) set annotation: @cascade; fails
 #    Then entity(person) set annotation: @independent; fails
 #    Then entity(person) set annotation: @replace; fails

@@ -1274,7 +1274,7 @@ Feature: Concept Owns
     When <root-type>(<supertype-name>) set owns: name
     When <root-type>(<subtype-name>) set owns: surname
     When <root-type>(<subtype-name>) get owns(surname) set override: name
-    When <root-type>(<subtype-name>) get owns(surname) set annotation: @card(0, 1)
+    When <root-type>(<subtype-name>) get owns(surname) set annotation: @card(0..1)
     Then <root-type>(<subtype-name>) get owns(surname) set ordering: ordered; fails
     When <root-type>(<supertype-name>) get owns(name) set ordering: ordered
     When <root-type>(<subtype-name>) get owns(surname) set ordering: ordered
@@ -1813,14 +1813,14 @@ Feature: Concept Owns
 #      | entity    | person      | subkey(LABEL)    | subkey | string     |
       | entity    | person      | values("1", "2") | values              | string     |
       | entity    | person      | range("1".."2")  | range               | string     |
-      | entity    | person      | card(1, 2)       | card                | string     |
+      | entity    | person      | card(1..2)       | card                | string     |
       | entity    | person      | regex("\S+")     | regex               | string     |
       | relation  | description | key              | key                 | string     |
       | relation  | description | unique           | unique              | string     |
 #      | relation  | description | subkey(LABEL)    | subkey | string     |
       | relation  | description | values("1", "2") | values              | string     |
       | relation  | description | range("1".."2")  | range               | string     |
-      | relation  | description | card(1, 2)       | card                | string     |
+      | relation  | description | card(1..2)       | card                | string     |
       | relation  | description | regex("\S+")     | regex               | string     |
 
   Scenario Outline: <root-type> types can have owns with @<annotation> alongside pure owns
@@ -1865,14 +1865,14 @@ Feature: Concept Owns
 #      | entity    | person      | subkey(LABEL)    |
       | entity    | person      | values("1", "2") |
       | entity    | person      | range("1".."2")  |
-      | entity    | person      | card(1, 2)       |
+      | entity    | person      | card(1..2)       |
       | entity    | person      | regex("\S+")     |
       | relation  | description | key              |
       | relation  | description | unique           |
 #      | relation  | description | subkey(LABEL)    |
       | relation  | description | values("1", "2") |
       | relation  | description | range("1".."2")  |
-      | relation  | description | card(1, 2)       |
+      | relation  | description | card(1..2)       |
       | relation  | description | regex("\S+")     |
 
   Scenario Outline: <root-type> types can unset not set @<annotation> of ownership
@@ -1922,14 +1922,14 @@ Feature: Concept Owns
 #      | entity    | person      | subkey(LABEL)    | subkey              |
       | entity    | person      | values("1", "2") | values              |
       | entity    | person      | range("1".."2")  | range               |
-      | entity    | person      | card(1, 2)       | card                |
+      | entity    | person      | card(1..2)       | card                |
       | entity    | person      | regex("\S+")     | regex               |
       | relation  | description | key              | key                 |
       | relation  | description | unique           | unique              |
 #      | relation  | description | subkey(LABEL)    | subkey              |
       | relation  | description | values("1", "2") | values              |
       | relation  | description | range("1".."2")  | range               |
-      | relation  | description | card(1, 2)       | card                |
+      | relation  | description | card(1..2)       | card                |
       | relation  | description | regex("\S+")     | regex               |
 
   Scenario Outline: <root-type> types can set and unset @<annotation> of inherited ownership
@@ -1970,14 +1970,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subkey(LABEL)    | subkey              |
       | entity    | person         | customer     | values("1", "2") | values              |
       | entity    | person         | customer     | range("1".."2")  | range               |
-      | entity    | person         | customer     | card(1, 2)       | card                |
+      | entity    | person         | customer     | card(1..2)       | card                |
       | entity    | person         | customer     | regex("\S+")     | regex               |
       | relation  | description    | registration | key              | key                 |
       | relation  | description    | registration | unique           | unique              |
 #      | relation  | description    | registration | subkey(LABEL)    | subkey              |
       | relation  | description    | registration | values("1", "2") | values              |
       | relation  | description    | registration | range("1".."2")  | range               |
-      | relation  | description    | registration | card(1, 2)       | card                |
+      | relation  | description    | registration | card(1..2)       | card                |
       | relation  | description    | registration | regex("\S+")     | regex               |
 
   Scenario Outline: <root-type> types can set and unset @<annotation> of inherited ownership without annotations
@@ -2022,14 +2022,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subkey(LABEL)    | subkey              |
       | entity    | person         | customer     | values("1", "2") | values              |
       | entity    | person         | customer     | range("1".."2")  | range               |
-      | entity    | person         | customer     | card(1, 2)       | card                |
+      | entity    | person         | customer     | card(1..2)       | card                |
       | entity    | person         | customer     | regex("\S+")     | regex               |
       | relation  | description    | registration | key              | key                 |
       | relation  | description    | registration | unique           | unique              |
 #      | relation  | description    | registration | subkey(LABEL)    | subkey              |
       | relation  | description    | registration | values("1", "2") | values              |
       | relation  | description    | registration | range("1".."2")  | range               |
-      | relation  | description    | registration | card(1, 2)       | card                |
+      | relation  | description    | registration | card(1..2)       | card                |
       | relation  | description    | registration | regex("\S+")     | regex               |
 
   Scenario Outline: <root-type> types can set and unset @<annotation> of overridden ownership
@@ -2081,14 +2081,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subkey(LABEL)    | subkey              |
       | entity    | person         | customer     | values("1", "2") | values              |
       | entity    | person         | customer     | range("1".."2")  | range               |
-      | entity    | person         | customer     | card(1, 2)       | card                |
+      | entity    | person         | customer     | card(1..2)       | card                |
       | entity    | person         | customer     | regex("\S+")     | regex               |
       | relation  | description    | registration | key              | key                 |
       | relation  | description    | registration | unique           | unique              |
 #      | relation  | description    | registration | subkey(LABEL)    | subkey              |
       | relation  | description    | registration | values("1", "2") | values              |
       | relation  | description    | registration | range("1".."2")  | range               |
-      | relation  | description    | registration | card(1, 2)       | card                |
+      | relation  | description    | registration | card(1..2)       | card                |
       | relation  | description    | registration | regex("\S+")     | regex               |
 
   Scenario Outline: <root-type> types cannot set and unset @<annotation> of overridden ownership with inherited annotation
@@ -2147,14 +2147,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subkey(LABEL)    | subkey              |
       | entity    | person         | customer     | values("1", "2") | values              |
       | entity    | person         | customer     | range("1".."2")  | range               |
-      | entity    | person         | customer     | card(1, 2)       | card                |
+      | entity    | person         | customer     | card(1..2)       | card                |
       | entity    | person         | customer     | regex("\S+")     | regex               |
       | relation  | description    | registration | key              | key                 |
       | relation  | description    | registration | unique           | unique              |
 #      | relation  | description    | registration | subkey(LABEL)    | subkey              |
       | relation  | description    | registration | values("1", "2") | values              |
       | relation  | description    | registration | range("1".."2")  | range               |
-      | relation  | description    | registration | card(1, 2)       | card                |
+      | relation  | description    | registration | card(1..2)       | card                |
       | relation  | description    | registration | regex("\S+")     | regex               |
 
   Scenario Outline: <root-type> types can inherit owns with @<annotation>s alongside pure owns
@@ -2248,14 +2248,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subscriber     | subkey(LABEL)    |
       | entity    | person         | customer     | subscriber     | values("1", "2") |
       | entity    | person         | customer     | subscriber     | range("1".."2")  |
-      | entity    | person         | customer     | subscriber     | card(1, 2)       |
+      | entity    | person         | customer     | subscriber     | card(1..2)       |
       | entity    | person         | customer     | subscriber     | regex("\S+")     |
       | relation  | description    | registration | profile        | key              |
       | relation  | description    | registration | profile        | unique           |
 #      | relation  | description    | registration | profile        | subkey(LABEL)    |
       | relation  | description    | registration | profile        | values("1", "2") |
       | relation  | description    | registration | profile        | range("1".."2")  |
-      | relation  | description    | registration | profile        | card(1, 2)       |
+      | relation  | description    | registration | profile        | card(1..2)       |
       | relation  | description    | registration | profile        | regex("\S+")     |
 
   Scenario Outline: <root-type> types can redeclare owns with @<annotation>s as owns with @<annotation>s
@@ -2285,14 +2285,14 @@ Feature: Concept Owns
 #      | entity    | person      | subkey(LABEL)    | string     |
       | entity    | person      | values("1", "2") | string     |
       | entity    | person      | range("1".."2")  | string     |
-      | entity    | person      | card(1, 2)       | string     |
+      | entity    | person      | card(1..2)       | string     |
       | entity    | person      | regex("\S+")     | string     |
       | relation  | description | key              | string     |
       | relation  | description | unique           | string     |
 #      | relation  | description | subkey(LABEL)    | string     |
       | relation  | description | values("1", "2") | string     |
       | relation  | description | range("1".."2")  | string     |
-      | relation  | description | card(1, 2)       | string     |
+      | relation  | description | card(1..2)       | string     |
       | relation  | description | regex("\S+")     | string     |
 
   Scenario Outline: <root-type> types can redeclare owns as owns with @<annotation>
@@ -2324,14 +2324,14 @@ Feature: Concept Owns
 #      | entity    | person      | subkey(LABEL)    | string     |
       | entity    | person      | values("1", "2") | string     |
       | entity    | person      | range("1".."2")  | string     |
-      | entity    | person      | card(1, 2)       | string     |
+      | entity    | person      | card(1..2)       | string     |
       | entity    | person      | regex("\S+")     | string     |
       | relation  | description | key              | string     |
       | relation  | description | unique           | string     |
 #      | relation  | description | subkey(LABEL)    | string     |
       | relation  | description | values("1", "2") | string     |
       | relation  | description | range("1".."2")  | string     |
-      | relation  | description | card(1, 2)       | string     |
+      | relation  | description | card(1..2)       | string     |
       | relation  | description | regex("\S+")     | string     |
 
   Scenario Outline: <root-type> types can redeclare owns and save its @<annotation>
@@ -2364,14 +2364,14 @@ Feature: Concept Owns
 #      | entity    | person      | subkey(LABEL)    | string     |
       | entity    | person      | values("1", "2") | string     |
       | entity    | person      | range("1".."2")  | string     |
-      | entity    | person      | card(1, 2)       | string     |
+      | entity    | person      | card(1..2)       | string     |
       | entity    | person      | regex("\S+")     | string     |
       | relation  | description | key              | string     |
       | relation  | description | unique           | string     |
 #      | relation  | description | subkey(LABEL)    | string     |
       | relation  | description | values("1", "2") | string     |
       | relation  | description | range("1".."2")  | string     |
-      | relation  | description | card(1, 2)       | string     |
+      | relation  | description | card(1..2)       | string     |
       | relation  | description | regex("\S+")     | string     |
 
   Scenario Outline: <root-type> types can override inherited pure owns as owns with @<annotation>s
@@ -2413,14 +2413,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subkey(LABEL)    | string     |
       | entity    | person         | customer     | values("1", "2") | string     |
       | entity    | person         | customer     | range("1".."2")  | string     |
-      | entity    | person         | customer     | card(1, 2)       | string     |
+      | entity    | person         | customer     | card(1..2)       | string     |
       | entity    | person         | customer     | regex("\S+")     | string     |
       | relation  | description    | registration | key              | string     |
       | relation  | description    | registration | unique           | string     |
 #      | relation  | description    | registration | subkey(LABEL)    | string     |
       | relation  | description    | registration | values("1", "2") | string     |
       | relation  | description    | registration | range("1".."2")  | string     |
-      | relation  | description    | registration | card(1, 2)       | string     |
+      | relation  | description    | registration | card(1..2)       | string     |
       | relation  | description    | registration | regex("\S+")     | string     |
 
   Scenario Outline: <root-type> types can re-override owns with <annotation>s
@@ -2461,14 +2461,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subkey(LABEL)    | string     |
       | entity    | person         | customer     | values("1", "2") | string     |
       | entity    | person         | customer     | range("1".."2")  | string     |
-      | entity    | person         | customer     | card(1, 2)       | string     |
+      | entity    | person         | customer     | card(1..2)       | string     |
       | entity    | person         | customer     | regex("\S+")     | string     |
       | relation  | description    | registration | key              | string     |
       | relation  | description    | registration | unique           | string     |
 #      | relation  | description    | registration | subkey(LABEL)    | string     |
       | relation  | description    | registration | values("1", "2") | string     |
       | relation  | description    | registration | range("1".."2")  | string     |
-      | relation  | description    | registration | card(1, 2)       | string     |
+      | relation  | description    | registration | card(1..2)       | string     |
       | relation  | description    | registration | regex("\S+")     | string     |
 
   Scenario Outline: <root-type> types cannot redeclare inherited owns as owns with @<annotation> without overriding
@@ -2522,14 +2522,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subscriber     | subkey(LABEL)    | string     |
       | entity    | person         | customer     | subscriber     | values("1", "2") | string     |
       | entity    | person         | customer     | subscriber     | range("1".."2")  | string     |
-      | entity    | person         | customer     | subscriber     | card(1, 2)       | string     |
+      | entity    | person         | customer     | subscriber     | card(1..2)       | string     |
       | entity    | person         | customer     | subscriber     | regex("\S+")     | string     |
       | relation  | description    | registration | profile        | key              | string     |
       | relation  | description    | registration | profile        | unique           | string     |
 #      | relation  | description    | registration | profile        | subkey(LABEL)    | string     |
       | relation  | description    | registration | profile        | values("1", "2") | string     |
       | relation  | description    | registration | profile        | range("1".."2")  | string     |
-      | relation  | description    | registration | profile        | card(1, 2)       | string     |
+      | relation  | description    | registration | profile        | card(1..2)       | string     |
       | relation  | description    | registration | profile        | regex("\S+")     | string     |
 
   Scenario Outline: <root-type> types cannot redeclare inherited owns with @<annotation> as pure owns or owns with @<annotation>
@@ -2554,14 +2554,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subkey(LABEL)    | string     |
       | entity    | person         | customer     | values("1", "2") | string     |
       | entity    | person         | customer     | range("1".."2")  | string     |
-      | entity    | person         | customer     | card(1, 2)       | string     |
+      | entity    | person         | customer     | card(1..2)       | string     |
       | entity    | person         | customer     | regex("\S+")     | string     |
       | relation  | description    | registration | key              | string     |
       | relation  | description    | registration | unique           | string     |
 #      | relation  | description    | registration | subkey(LABEL)    | string     |
       | relation  | description    | registration | values("1", "2") | string     |
       | relation  | description    | registration | range("1".."2")  | string     |
-      | relation  | description    | registration | card(1, 2)       | string     |
+      | relation  | description    | registration | card(1..2)       | string     |
       | relation  | description    | registration | regex("\S+")     | string     |
 
   Scenario Outline: <root-type> types cannot redeclare inherited owns with @<annotation>
@@ -2587,14 +2587,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subscriber     | subkey(LABEL)    | string     |
       | entity    | person         | customer     | subscriber     | values("1", "2") | string     |
       | entity    | person         | customer     | subscriber     | range("1".."2")  | string     |
-      | entity    | person         | customer     | subscriber     | card(1, 2)       | string     |
+      | entity    | person         | customer     | subscriber     | card(1..2)       | string     |
       | entity    | person         | customer     | subscriber     | regex("\S+")     | string     |
       | relation  | description    | registration | profile        | key              | string     |
       | relation  | description    | registration | profile        | unique           | string     |
 #      | relation  | description    | registration | profile        | subkey(LABEL)    | string     |
       | relation  | description    | registration | profile        | values("1", "2") | string     |
       | relation  | description    | registration | profile        | range("1".."2")  | string     |
-      | relation  | description    | registration | profile        | card(1, 2)       | string     |
+      | relation  | description    | registration | profile        | card(1..2)       | string     |
       | relation  | description    | registration | profile        | regex("\S+")     | string     |
 
   Scenario Outline: <root-type> types cannot redeclare overridden owns with @<annotation>s
@@ -2620,14 +2620,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subscriber     | subkey(LABEL)    | string     |
       | entity    | person         | customer     | subscriber     | values("1", "2") | string     |
       | entity    | person         | customer     | subscriber     | range("1".."2")  | string     |
-      | entity    | person         | customer     | subscriber     | card(1, 2)       | string     |
+      | entity    | person         | customer     | subscriber     | card(1..2)       | string     |
       | entity    | person         | customer     | subscriber     | regex("\S+")     | string     |
       | relation  | description    | registration | profile        | key              | string     |
       | relation  | description    | registration | profile        | unique           | string     |
 #      | relation  | description    | registration | profile        | subkey(LABEL)    | string     |
       | relation  | description    | registration | profile        | values("1", "2") | string     |
       | relation  | description    | registration | profile        | range("1".."2")  | string     |
-      | relation  | description    | registration | profile        | card(1, 2)       | string     |
+      | relation  | description    | registration | profile        | card(1..2)       | string     |
       | relation  | description    | registration | profile        | regex("\S+")     | string     |
 
   Scenario Outline: <root-type> types cannot redeclare overridden owns with @<annotation>s on multiple layers
@@ -2654,14 +2654,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subscriber     | subkey(LABEL)    | string     |
       | entity    | person         | customer     | subscriber     | values("1", "2") | string     |
       | entity    | person         | customer     | subscriber     | range("1".."2")  | string     |
-      | entity    | person         | customer     | subscriber     | card(1, 2)       | string     |
+      | entity    | person         | customer     | subscriber     | card(1..2)       | string     |
       | entity    | person         | customer     | subscriber     | regex("\S+")     | string     |
       | relation  | description    | registration | profile        | key              | string     |
       | relation  | description    | registration | profile        | unique           | string     |
 #      | relation  | description    | registration | profile        | subkey(LABEL)    | string     |
       | relation  | description    | registration | profile        | values("1", "2") | string     |
       | relation  | description    | registration | profile        | range("1".."2")  | string     |
-      | relation  | description    | registration | profile        | card(1, 2)       | string     |
+      | relation  | description    | registration | profile        | card(1..2)       | string     |
       | relation  | description    | registration | profile        | regex("\S+")     | string     |
 
   Scenario Outline: <root-type> subtypes can redeclare owns with @<annotation>s after it is unset from supertype
@@ -2711,14 +2711,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subkey(LABEL)    | subkey              | string     |
       | entity    | person         | customer     | values("1", "2") | values              | string     |
       | entity    | person         | customer     | range("1".."2")  | range               | string     |
-      | entity    | person         | customer     | card(1, 2)       | card                | string     |
+      | entity    | person         | customer     | card(1..2)       | card                | string     |
       | entity    | person         | customer     | regex("\S+")     | regex               | string     |
       | relation  | description    | registration | key              | key                 | string     |
       | relation  | description    | registration | unique           | unique              | string     |
 #      | relation  | description    | registration | subkey(LABEL)    | subkey              | string     |
       | relation  | description    | registration | values("1", "2") | values              | string     |
       | relation  | description    | registration | range("1".."2")  | range               | string     |
-      | relation  | description    | registration | card(1, 2)       | card                | string     |
+      | relation  | description    | registration | card(1..2)       | card                | string     |
       | relation  | description    | registration | regex("\S+")     | regex               | string     |
 
   Scenario Outline: <root-type> types can inherit owns with @<annotation>s and pure owns that are subtypes of each other
@@ -2847,14 +2847,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subscriber     | subkey(LABEL)    |
       | entity    | person         | customer     | subscriber     | values("1", "2") |
       | entity    | person         | customer     | subscriber     | range("1".."2")  |
-      | entity    | person         | customer     | subscriber     | card(1, 2)       |
+      | entity    | person         | customer     | subscriber     | card(1..2)       |
       | entity    | person         | customer     | subscriber     | regex("\S+")     |
       | relation  | description    | registration | profile        | key              |
       | relation  | description    | registration | profile        | unique           |
 #      | relation  | description    | registration | profile        | subkey(LABEL)    |
       | relation  | description    | registration | profile        | values("1", "2") |
       | relation  | description    | registration | profile        | range("1".."2")  |
-      | relation  | description    | registration | profile        | card(1, 2)       |
+      | relation  | description    | registration | profile        | card(1..2)       |
       | relation  | description    | registration | profile        | regex("\S+")     |
 
   Scenario Outline: <root-type> types can override inherited owns with @<annotation>s and pure owns
@@ -3019,14 +3019,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subscriber     | subkey(LABEL)    |
       | entity    | person         | customer     | subscriber     | values("1", "2") |
       | entity    | person         | customer     | subscriber     | range("1".."2")  |
-      | entity    | person         | customer     | subscriber     | card(1, 2)       |
+      | entity    | person         | customer     | subscriber     | card(1..2)       |
       | entity    | person         | customer     | subscriber     | regex("\S+")     |
       | relation  | description    | registration | profile        | key              |
       | relation  | description    | registration | profile        | unique           |
 #      | relation  | description    | registration | profile        | subkey(LABEL)    |
       | relation  | description    | registration | profile        | values("1", "2") |
       | relation  | description    | registration | profile        | range("1".."2")  |
-      | relation  | description    | registration | profile        | card(1, 2)       |
+      | relation  | description    | registration | profile        | card(1..2)       |
       | relation  | description    | registration | profile        | regex("\S+")     |
 
   Scenario Outline: <root-tyoe> type cannot set redundant duplicated @<annotation> on plays while it inherits it
@@ -3057,14 +3057,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subkey(LABEL)    |
       | entity    | person         | customer     | values("1", "2") |
       | entity    | person         | customer     | range("1".."2")  |
-      | entity    | person         | customer     | card(1, 2)       |
+      | entity    | person         | customer     | card(1..2)       |
       | entity    | person         | customer     | regex("\S+")     |
       | relation  | description    | registration | key              |
       | relation  | description    | registration | unique           |
 #      | relation  | description    | registration | subkey(LABEL)    |
       | relation  | description    | registration | values("1", "2") |
       | relation  | description    | registration | range("1".."2")  |
-      | relation  | description    | registration | card(1, 2)       |
+      | relation  | description    | registration | card(1..2)       |
       | relation  | description    | registration | regex("\S+")     |
 
 #########################
@@ -3075,28 +3075,28 @@ Feature: Concept Owns
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
     When entity(person) set owns: custom-attribute
-    Then entity(person) get owns(custom-attribute) get cardinality: @card(0, 1)
+    Then entity(person) get owns(custom-attribute) get cardinality: @card(0..1)
     When entity(person) get owns(custom-attribute) set annotation: @key
     Then entity(person) get owns(custom-attribute) get annotations contain: @key
-    Then entity(person) get owns(custom-attribute) get cardinality: @card(1, 1)
+    Then entity(person) get owns(custom-attribute) get cardinality: @card(1..1)
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get annotations contain: @key
-    Then entity(person) get owns(custom-attribute) get cardinality: @card(1, 1)
+    Then entity(person) get owns(custom-attribute) get cardinality: @card(1..1)
     When entity(person) get owns(custom-attribute) unset annotation: @key
     Then entity(person) get owns(custom-attribute) get annotations is empty
-    Then entity(person) get owns(custom-attribute) get cardinality: @card(0, 1)
+    Then entity(person) get owns(custom-attribute) get cardinality: @card(0..1)
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get annotations is empty
-    Then entity(person) get owns(custom-attribute) get cardinality: @card(0, 1)
+    Then entity(person) get owns(custom-attribute) get cardinality: @card(0..1)
     When entity(person) get owns(custom-attribute) set annotation: @key
     Then entity(person) get owns(custom-attribute) get annotations contain: @key
-    Then entity(person) get owns(custom-attribute) get cardinality: @card(1, 1)
+    Then entity(person) get owns(custom-attribute) get cardinality: @card(1..1)
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get annotations contain: @key
-    Then entity(person) get owns(custom-attribute) get cardinality: @card(1, 1)
+    Then entity(person) get owns(custom-attribute) get cardinality: @card(1..1)
     When entity(person) unset owns: custom-attribute
     Then entity(person) get owns is empty
     When transaction commits
@@ -4930,19 +4930,19 @@ Feature: Concept Owns
     When attribute(custom-attribute-2) set value type: <value-type>
     When entity(person) set owns: custom-attribute
     Then entity(person) get owns(custom-attribute) get annotations is empty
-    Then entity(person) get owns(custom-attribute) get cardinality: @card(0, 1)
+    Then entity(person) get owns(custom-attribute) get cardinality: @card(0..1)
     When entity(person) set owns: custom-attribute-2
     Then entity(person) get owns(custom-attribute-2) get annotations is empty
-    Then entity(person) get owns(custom-attribute-2) get cardinality: @card(0, 1)
+    Then entity(person) get owns(custom-attribute-2) get cardinality: @card(0..1)
     When entity(person) get owns(custom-attribute-2) set ordering: ordered
     Then entity(person) get owns(custom-attribute-2) get annotations is empty
-    Then entity(person) get owns(custom-attribute-2) get cardinality: @card(0, *)
+    Then entity(person) get owns(custom-attribute-2) get cardinality: @card(0..)
     When transaction commits
     When connection open read transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get annotations is empty
-    Then entity(person) get owns(custom-attribute) get cardinality: @card(0, 1)
+    Then entity(person) get owns(custom-attribute) get cardinality: @card(0..1)
     Then entity(person) get owns(custom-attribute-2) get annotations is empty
-    Then entity(person) get owns(custom-attribute-2) get cardinality: @card(0, *)
+    Then entity(person) get owns(custom-attribute-2) get cardinality: @card(0..)
     Examples:
       | value-type  |
       | long        |
@@ -4962,47 +4962,47 @@ Feature: Concept Owns
     When attribute(custom-attribute-2) set value type: <value-type>
     When entity(person) set owns: custom-attribute
     Then entity(person) get owns(custom-attribute) get annotations is empty
-    Then entity(person) get owns(custom-attribute) get cardinality: @card(0, 1)
-    When entity(person) get owns(custom-attribute) set annotation: @card(<arg0>, <arg1>)
-    Then entity(person) get owns(custom-attribute) get annotations contain: @card(<arg0>, <arg1>)
-    Then entity(person) get owns(custom-attribute) get cardinality: @card(<arg0>, <arg1>)
+    Then entity(person) get owns(custom-attribute) get cardinality: @card(0..1)
+    When entity(person) get owns(custom-attribute) set annotation: @card(<arg0>..<arg1>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @card(<arg0>..<arg1>)
+    Then entity(person) get owns(custom-attribute) get cardinality: @card(<arg0>..<arg1>)
     When entity(person) set owns: custom-attribute-2
     When entity(person) get owns(custom-attribute-2) set ordering: ordered
     Then entity(person) get owns(custom-attribute-2) get annotations is empty
-    Then entity(person) get owns(custom-attribute-2) get cardinality: @card(0, *)
-    When entity(person) get owns(custom-attribute-2) set annotation: @card(<arg0>, <arg1>)
-    Then entity(person) get owns(custom-attribute-2) get annotations contain: @card(<arg0>, <arg1>)
-    Then entity(person) get owns(custom-attribute-2) get cardinality: @card(<arg0>, <arg1>)
+    Then entity(person) get owns(custom-attribute-2) get cardinality: @card(0..)
+    When entity(person) get owns(custom-attribute-2) set annotation: @card(<arg0>..<arg1>)
+    Then entity(person) get owns(custom-attribute-2) get annotations contain: @card(<arg0>..<arg1>)
+    Then entity(person) get owns(custom-attribute-2) get cardinality: @card(<arg0>..<arg1>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get owns(custom-attribute) get annotations contain: @card(<arg0>, <arg1>)
-    Then entity(person) get owns(custom-attribute) get cardinality: @card(<arg0>, <arg1>)
-    Then entity(person) get owns(custom-attribute-2) get annotations contain: @card(<arg0>, <arg1>)
-    Then entity(person) get owns(custom-attribute-2) get cardinality: @card(<arg0>, <arg1>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @card(<arg0>..<arg1>)
+    Then entity(person) get owns(custom-attribute) get cardinality: @card(<arg0>..<arg1>)
+    Then entity(person) get owns(custom-attribute-2) get annotations contain: @card(<arg0>..<arg1>)
+    Then entity(person) get owns(custom-attribute-2) get cardinality: @card(<arg0>..<arg1>)
     When entity(person) get owns(custom-attribute) unset annotation: @card
     Then entity(person) get owns(custom-attribute) get annotations is empty
-    Then entity(person) get owns(custom-attribute) get cardinality: @card(0, 1)
+    Then entity(person) get owns(custom-attribute) get cardinality: @card(0..1)
     When entity(person) get owns(custom-attribute-2) unset annotation: @card
     Then entity(person) get owns(custom-attribute-2) get annotations is empty
-    Then entity(person) get owns(custom-attribute-2) get cardinality: @card(0, *)
+    Then entity(person) get owns(custom-attribute-2) get cardinality: @card(0..)
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get annotations is empty
-    Then entity(person) get owns(custom-attribute) get cardinality: @card(0, 1)
+    Then entity(person) get owns(custom-attribute) get cardinality: @card(0..1)
     Then entity(person) get owns(custom-attribute-2) get annotations is empty
-    Then entity(person) get owns(custom-attribute-2) get cardinality: @card(0, *)
-    When entity(person) get owns(custom-attribute) set annotation: @card(<arg0>, <arg1>)
-    Then entity(person) get owns(custom-attribute) get annotations contain: @card(<arg0>, <arg1>)
-    Then entity(person) get owns(custom-attribute) get cardinality: @card(<arg0>, <arg1>)
-    When entity(person) get owns(custom-attribute-2) set annotation: @card(<arg0>, <arg1>)
-    Then entity(person) get owns(custom-attribute-2) get annotations contain: @card(<arg0>, <arg1>)
-    Then entity(person) get owns(custom-attribute-2) get cardinality: @card(<arg0>, <arg1>)
+    Then entity(person) get owns(custom-attribute-2) get cardinality: @card(0..)
+    When entity(person) get owns(custom-attribute) set annotation: @card(<arg0>..<arg1>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @card(<arg0>..<arg1>)
+    Then entity(person) get owns(custom-attribute) get cardinality: @card(<arg0>..<arg1>)
+    When entity(person) get owns(custom-attribute-2) set annotation: @card(<arg0>..<arg1>)
+    Then entity(person) get owns(custom-attribute-2) get annotations contain: @card(<arg0>..<arg1>)
+    Then entity(person) get owns(custom-attribute-2) get cardinality: @card(<arg0>..<arg1>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get owns(custom-attribute) get annotations contain: @card(<arg0>, <arg1>)
-    Then entity(person) get owns(custom-attribute) get cardinality: @card(<arg0>, <arg1>)
-    Then entity(person) get owns(custom-attribute-2) get annotations contain: @card(<arg0>, <arg1>)
-    Then entity(person) get owns(custom-attribute-2) get cardinality: @card(<arg0>, <arg1>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @card(<arg0>..<arg1>)
+    Then entity(person) get owns(custom-attribute) get cardinality: @card(<arg0>..<arg1>)
+    Then entity(person) get owns(custom-attribute-2) get annotations contain: @card(<arg0>..<arg1>)
+    Then entity(person) get owns(custom-attribute-2) get cardinality: @card(<arg0>..<arg1>)
     When entity(person) unset owns: custom-attribute
     When entity(person) unset owns: custom-attribute-2
     Then entity(person) get owns is empty
@@ -5077,11 +5077,11 @@ Feature: Concept Owns
     When attribute(custom-attribute) set value type: <value-type>
     When entity(person) set owns: custom-attribute
     Then entity(person) get owns(custom-attribute) get annotations is empty
-    When entity(person) get owns(custom-attribute) set annotation: @card(<arg>, <arg>)
-    Then entity(person) get owns(custom-attribute) get annotations contain: @card(<arg>, <arg>)
+    When entity(person) get owns(custom-attribute) set annotation: @card(<arg>..<arg>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @card(<arg>..<arg>)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns(custom-attribute) get annotations contain: @card(<arg>, <arg>)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @card(<arg>..<arg>)
     Examples:
       | value-type    | arg  |
       | long          | 1    |
@@ -5114,17 +5114,15 @@ Feature: Concept Owns
 #    Then entity(person) get owns(custom-attribute) set annotation: @card(); fails
 #    Then entity(person) get owns(custom-attribute) set annotation: @card(1); fails
 #    Then entity(person) get owns(custom-attribute) set annotation: @card(*); fails
-#    Then entity(person) get owns(custom-attribute) set annotation: @card(1, 2, 3); fails
-#    Then entity(person) get owns(custom-attribute) set annotation: @card(-1, 1); fails
-#    Then entity(person) get owns(custom-attribute) set annotation: @card(0, 0.1); fails
-#    Then entity(person) get owns(custom-attribute) set annotation: @card(0, 1.5); fails
-#    Then entity(person) get owns(custom-attribute) set annotation: @card(*, *); fails
-#    Then entity(person) get owns(custom-attribute) set annotation: @card(0, **); fails
-#    Then entity(person) get owns(custom-attribute) set annotation: @card(1, "2"); fails
-#    Then entity(person) get owns(custom-attribute) set annotation: @card("1", 2); fails
-#    Then entity(person) get owns(custom-attribute) set annotation: @card(*, *); fails
-    Then entity(person) get owns(custom-attribute) set annotation: @card(2, 1); fails
-    Then entity(person) get owns(custom-attribute) set annotation: @card(0, 0); fails
+#    Then entity(person) get owns(custom-attribute) set annotation: @card(1..2..3); fails
+#    Then entity(person) get owns(custom-attribute) set annotation: @card(-1..1); fails
+#    Then entity(person) get owns(custom-attribute) set annotation: @card(0..0.1); fails
+#    Then entity(person) get owns(custom-attribute) set annotation: @card(0..1.5); fails
+#    Then entity(person) get owns(custom-attribute) set annotation: @card(..); fails
+#    Then entity(person) get owns(custom-attribute) set annotation: @card(1.."2"); fails
+#    Then entity(person) get owns(custom-attribute) set annotation: @card("1"..2); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @card(2..1); fails
+    Then entity(person) get owns(custom-attribute) set annotation: @card(0..0); fails
     Then entity(person) get owns(custom-attribute) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
@@ -5147,12 +5145,12 @@ Feature: Concept Owns
     When attribute(custom-attribute) get value type is none
     When entity(person) set owns: custom-attribute
     Then entity(person) get owns(custom-attribute) set ordering: ordered
-    When entity(person) get owns(custom-attribute) set annotation: @card(0, 2)
-    Then entity(person) get owns(custom-attribute) get annotations contain: @card(0, 2)
+    When entity(person) get owns(custom-attribute) set annotation: @card(0..2)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @card(0..2)
     Then attribute(custom-attribute) get value type is none
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns(custom-attribute) get annotations contain: @card(0, 2)
+    Then entity(person) get owns(custom-attribute) get annotations contain: @card(0..2)
     Then attribute(custom-attribute) get value type is none
 
   Scenario Outline: Owns can reset @card annotation with the same argument
@@ -5170,27 +5168,27 @@ Feature: Concept Owns
     Then entity(person) get owns(custom-attribute) get annotations contain: @card(<args>)
     Examples:
       | value-type  | args |
-      | long        | 1, 2 |
-      | double      | 1, 3 |
-      | decimal     | 1, 4 |
-      | string      | 1, 5 |
-      | boolean     | 1, 6 |
-      | date        | 1, 7 |
-      | datetime    | 1, 8 |
-      | datetime-tz | 1, 9 |
-      | duration    | 0, 9 |
+      | long        | 1..2 |
+      | double      | 1..3 |
+      | decimal     | 1..4 |
+      | string      | 1..5 |
+      | boolean     | 1..6 |
+      | date        | 1..7 |
+      | datetime    | 1..8 |
+      | datetime-tz | 1..9 |
+      | duration    | 0..9 |
 
   Scenario Outline: Owns can reset @card annotations
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: decimal
     When entity(person) set owns: custom-attribute
-    When entity(person) get owns(custom-attribute) set annotation: @card(2, 5)
+    When entity(person) get owns(custom-attribute) set annotation: @card(2..5)
     Then entity(person) get owns(custom-attribute) set annotation: @card(<reset-args>)
-    Then entity(person) get owns(custom-attribute) get annotations do not contain: @card(2, 5)
+    Then entity(person) get owns(custom-attribute) get annotations do not contain: @card(2..5)
     Then entity(person) get owns(custom-attribute) get annotations contain: @card(<reset-args>)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns(custom-attribute) get annotations do not contain: @card(2, 5)
+    Then entity(person) get owns(custom-attribute) get annotations do not contain: @card(2..5)
     Then entity(person) get owns(custom-attribute) get annotations contain: @card(<reset-args>)
     Examples:
       | reset-args |
@@ -5224,15 +5222,15 @@ Feature: Concept Owns
     Then entity(person) get owns(custom-attribute) get annotations contain: @card(<args>)
     Examples:
       | value-type  | args | reset-args |
-      | long        | 2, 5 | 7, 9       |
-      | double      | 2, 5 | 0, 1       |
-      | decimal     | 2, 5 | 0, *       |
-      | string      | 2, 5 | 4, *       |
-      | boolean     | 2, 5 | 4, 5       |
-      | date        | 2, 5 | 2, 2       |
-      | datetime    | 2, 5 | 2, 6       |
-      | datetime-tz | 2, 5 | 2, 4       |
-      | duration    | 2, 5 | 2, *       |
+      | long        | 2..5 | 7..9       |
+      | double      | 2..5 | 0..1       |
+      | decimal     | 2..5 | 0..        |
+      | string      | 2..5 | 4..        |
+      | boolean     | 2..5 | 4..5       |
+      | date        | 2..5 | 2..2       |
+      | datetime    | 2..5 | 2..6       |
+      | datetime-tz | 2..5 | 2..4       |
+      | duration    | 2..5 | 2..        |
 
   Scenario Outline: Owns-related @card annotation for <value-type> value type can be inherited and overridden by a subset of arguments
     When create attribute type: custom-attribute
@@ -5349,14 +5347,14 @@ Feature: Concept Owns
     Then relation(description) get owns(second-custom-attribute) get declared annotations do not contain: @card(<args-override>)
     Examples:
       | value-type  | args       | args-override |
-      | long        | 0, *       | 0, 10000      |
-      | double      | 0, 10      | 0, 1          |
-      | decimal     | 0, 2       | 1, 2          |
-      | string      | 1, *       | 1, 1          |
-      | date        | 1, 5       | 3, 5          |
-      | datetime    | 1, 5       | 3, 4          |
-      | datetime-tz | 38, 111    | 39, 111       |
-      | duration    | 1000, 1100 | 1000, 1099    |
+      | long        | 0..        | 0..10000      |
+      | double      | 0..10      | 0..1          |
+      | decimal     | 0..2       | 1..2          |
+      | string      | 1..        | 1..1          |
+      | date        | 1..5       | 3..5          |
+      | datetime    | 1..5       | 3..4          |
+      | datetime-tz | 38..111    | 39..111       |
+      | duration    | 1000..1100 | 1000..1099    |
 
   Scenario Outline: Inherited @card annotation on owns for <value-type> value type cannot be reset or overridden by the @card of not a subset of arguments
     When create attribute type: custom-attribute
@@ -5418,106 +5416,106 @@ Feature: Concept Owns
     Then transaction commits; fails
     Examples:
       | value-type  | args       | args-override |
-      | long        | 0, 10000   | 0, 10001      |
-      | double      | 0, 10      | 1, 11         |
-      | string      | 1, *       | 0, 2          |
-      | decimal     | 2, 2       | 1, 1          |
-      | date        | 1, 5       | 1, *          |
-      | datetime    | 1, 5       | 6, 10         |
-      | datetime-tz | 38, 111    | 37, 111       |
-      | duration    | 1000, 1100 | 1000, 1199    |
+      | long        | 0..10000   | 0..10001      |
+      | double      | 0..10      | 1..11         |
+      | string      | 1..        | 0..2          |
+      | decimal     | 2..2       | 1..1          |
+      | date        | 1..5       | 1..           |
+      | datetime    | 1..5       | 6..10         |
+      | datetime-tz | 38..111    | 37..111       |
+      | duration    | 1000..1100 | 1000..1199    |
 
   Scenario Outline: Cardinality can be narrowed for the same attribute for <root-type>'s owns
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When <root-type>(<supertype-name>) set owns: name
-    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(0, *)
+    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(0..)
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
     When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
     When <root-type>(<subtype-name>) set owns: name
     When <root-type>(<subtype-name>) get owns(name) set override: name
-    Then <root-type>(<supertype-name>) get owns(name) get annotations contain: @card(0, *)
-    Then <root-type>(<subtype-name>) get owns(name) get annotations contain: @card(0, *)
-    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @card(0, *)
-    Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @card(0, *)
-    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @card(0, *)
-    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(0, *)
-    When <root-type>(<subtype-name>) get owns(name) set annotation: @card(3, *)
-    Then <root-type>(<supertype-name>) get owns(name) get annotations contain: @card(0, *)
-    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @card(0, *)
-    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @card(0, *)
-    Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @card(0, *)
-    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @card(0, *)
-    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(0, *)
-    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @card(3, *)
-    Then <root-type>(<subtype-name>) get owns(name) get annotations contain: @card(3, *)
-    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @card(3, *)
-    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @card(3, *)
-    Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @card(3, *)
-    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @card(3, *)
+    Then <root-type>(<supertype-name>) get owns(name) get annotations contain: @card(0..)
+    Then <root-type>(<subtype-name>) get owns(name) get annotations contain: @card(0..)
+    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @card(0..)
+    Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @card(0..)
+    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @card(0..)
+    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(0..)
+    When <root-type>(<subtype-name>) get owns(name) set annotation: @card(3..)
+    Then <root-type>(<supertype-name>) get owns(name) get annotations contain: @card(0..)
+    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @card(0..)
+    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @card(0..)
+    Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @card(0..)
+    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @card(0..)
+    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(0..)
+    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @card(3..)
+    Then <root-type>(<subtype-name>) get owns(name) get annotations contain: @card(3..)
+    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @card(3..)
+    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @card(3..)
+    Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @card(3..)
+    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @card(3..)
     Then <root-type>(<subtype-name-2>) get declared owns do not contain:
       | name |
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(name) get annotations contain: @card(0, *)
-    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @card(0, *)
-    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @card(0, *)
-    Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @card(0, *)
-    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @card(0, *)
-    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(0, *)
-    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @card(3, *)
-    Then <root-type>(<subtype-name>) get owns(name) get annotations contain: @card(3, *)
-    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @card(3, *)
-    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @card(3, *)
-    Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @card(3, *)
-    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @card(3, *)
+    Then <root-type>(<supertype-name>) get owns(name) get annotations contain: @card(0..)
+    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @card(0..)
+    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @card(0..)
+    Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @card(0..)
+    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @card(0..)
+    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(0..)
+    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @card(3..)
+    Then <root-type>(<subtype-name>) get owns(name) get annotations contain: @card(3..)
+    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @card(3..)
+    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @card(3..)
+    Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @card(3..)
+    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @card(3..)
     When <root-type>(<subtype-name-2>) set owns: name
     When <root-type>(<subtype-name-2>) get owns(name) set override: name
-    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(3, *)
-    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @card(2, *); fails
-    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @card(1, *); fails
-    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @card(0, *); fails
-    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @card(0, 6); fails
-    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @card(0, 2); fails
-    When <root-type>(<subtype-name-2>) get owns(name) set annotation: @card(3, 6)
-    Then <root-type>(<supertype-name>) get owns(name) get annotations contain: @card(0, *)
-    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @card(0, *)
-    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @card(0, *)
-    Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @card(0, *)
-    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @card(0, *)
-    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(0, *)
-    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @card(3, *)
-    Then <root-type>(<subtype-name>) get owns(name) get annotations contain: @card(3, *)
-    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @card(3, *)
-    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @card(3, *)
-    Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @card(3, *)
-    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(3, *)
-    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @card(3, 6)
-    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @card(3, 6)
-    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @card(3, 6)
-    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @card(3, 6)
-    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @card(3, 6)
-    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @card(3, 6)
+    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(3..)
+    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @card(2..); fails
+    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @card(1..); fails
+    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @card(0..); fails
+    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @card(0..6); fails
+    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @card(0..2); fails
+    When <root-type>(<subtype-name-2>) get owns(name) set annotation: @card(3..6)
+    Then <root-type>(<supertype-name>) get owns(name) get annotations contain: @card(0..)
+    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @card(0..)
+    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @card(0..)
+    Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @card(0..)
+    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @card(0..)
+    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(0..)
+    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @card(3..)
+    Then <root-type>(<subtype-name>) get owns(name) get annotations contain: @card(3..)
+    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @card(3..)
+    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @card(3..)
+    Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @card(3..)
+    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(3..)
+    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @card(3..6)
+    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @card(3..6)
+    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @card(3..6)
+    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @card(3..6)
+    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @card(3..6)
+    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @card(3..6)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(name) get annotations contain: @card(0, *)
-    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @card(0, *)
-    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @card(0, *)
-    Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @card(0, *)
-    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @card(0, *)
-    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(0, *)
-    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @card(3, *)
-    Then <root-type>(<subtype-name>) get owns(name) get annotations contain: @card(3, *)
-    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @card(3, *)
-    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @card(3, *)
-    Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @card(3, *)
-    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(3, *)
-    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @card(3, 6)
-    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @card(3, 6)
-    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @card(3, 6)
-    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @card(3, 6)
-    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @card(3, 6)
-    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @card(3, 6)
+    Then <root-type>(<supertype-name>) get owns(name) get annotations contain: @card(0..)
+    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @card(0..)
+    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @card(0..)
+    Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @card(0..)
+    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @card(0..)
+    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(0..)
+    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @card(3..)
+    Then <root-type>(<subtype-name>) get owns(name) get annotations contain: @card(3..)
+    Then <root-type>(<subtype-name-2>) get owns(name) get annotations do not contain: @card(3..)
+    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @card(3..)
+    Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @card(3..)
+    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(3..)
+    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @card(3..6)
+    Then <root-type>(<subtype-name>) get owns(name) get annotations do not contain: @card(3..6)
+    Then <root-type>(<subtype-name-2>) get owns(name) get annotations contain: @card(3..6)
+    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @card(3..6)
+    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @card(3..6)
+    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @card(3..6)
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | value-type |
       | entity    | person         | customer     | subscriber     | decimal    |
@@ -5540,18 +5538,18 @@ Feature: Concept Owns
     When attribute(overridden-ordered-custom-attribute) set supertype: ordered-custom-attribute
     When <root-type>(<supertype-name>) set owns: custom-attribute
     Then <root-type>(<supertype-name>) get owns(custom-attribute) get ordering: unordered
-    Then <root-type>(<supertype-name>) get owns(custom-attribute) get cardinality: @card(0, 1)
+    Then <root-type>(<supertype-name>) get owns(custom-attribute) get cardinality: @card(0..1)
     When <root-type>(<supertype-name>) set owns: custom-attribute-2
     Then <root-type>(<supertype-name>) get owns(custom-attribute-2) get ordering: unordered
-    Then <root-type>(<supertype-name>) get owns(custom-attribute-2) get cardinality: @card(0, 1)
+    Then <root-type>(<supertype-name>) get owns(custom-attribute-2) get cardinality: @card(0..1)
     When <root-type>(<supertype-name>) set owns: ordered-custom-attribute
     When <root-type>(<supertype-name>) get owns(ordered-custom-attribute) set ordering: ordered
     Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute) get ordering: ordered
-    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute) get cardinality: @card(0, *)
+    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute) get cardinality: @card(0..)
     When <root-type>(<supertype-name>) set owns: ordered-custom-attribute-2
     When <root-type>(<supertype-name>) get owns(ordered-custom-attribute-2) set ordering: ordered
     Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute-2) get ordering: ordered
-    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0, *)
+    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0..)
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
     When <root-type>(<subtype-name>) set owns: overridden-custom-attribute
     When <root-type>(<subtype-name>) get owns(overridden-custom-attribute) set override: custom-attribute
@@ -5565,106 +5563,106 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) set override: ordered-custom-attribute-2; fails
     When <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) set ordering: ordered
     When <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) set override: ordered-custom-attribute-2
-    When <root-type>(<subtype-name>) get owns(overridden-custom-attribute) set annotation: @card(0, 1)
-    When <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) set annotation: @card(0, 1)
-    When <root-type>(<subtype-name>) get owns(custom-attribute-2) set annotation: @card(0, 1)
-    When <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) set annotation: @card(0, 1)
-    Then <root-type>(<subtype-name>) get owns(overridden-custom-attribute) get cardinality: @card(0, 1)
-    Then <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) get cardinality: @card(0, 1)
-    Then <root-type>(<subtype-name>) get owns(custom-attribute-2) get cardinality: @card(0, 1)
-    Then <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0, 1)
-    Then <root-type>(<supertype-name>) get owns(custom-attribute) get cardinality: @card(0, 1)
-    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute) get cardinality: @card(0, *)
-    Then <root-type>(<supertype-name>) get owns(custom-attribute-2) get cardinality: @card(0, 1)
-    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0, *)
+    When <root-type>(<subtype-name>) get owns(overridden-custom-attribute) set annotation: @card(0..1)
+    When <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) set annotation: @card(0..1)
+    When <root-type>(<subtype-name>) get owns(custom-attribute-2) set annotation: @card(0..1)
+    When <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) set annotation: @card(0..1)
+    Then <root-type>(<subtype-name>) get owns(overridden-custom-attribute) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name>) get owns(custom-attribute-2) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0..1)
+    Then <root-type>(<supertype-name>) get owns(custom-attribute) get cardinality: @card(0..1)
+    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute) get cardinality: @card(0..)
+    Then <root-type>(<supertype-name>) get owns(custom-attribute-2) get cardinality: @card(0..1)
+    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0..)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns(overridden-custom-attribute) get cardinality: @card(0, 1)
-    Then <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) get cardinality: @card(0, 1)
-    Then <root-type>(<subtype-name>) get owns(custom-attribute-2) get cardinality: @card(0, 1)
-    Then <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0, 1)
-    Then <root-type>(<supertype-name>) get owns(custom-attribute) get cardinality: @card(0, 1)
-    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute) get cardinality: @card(0, *)
-    Then <root-type>(<supertype-name>) get owns(custom-attribute-2) get cardinality: @card(0, 1)
-    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0, *)
-    When <root-type>(<subtype-name>) get owns(overridden-custom-attribute) set annotation: @card(1, 1)
-    When <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) set annotation: @card(1, 1)
-    When <root-type>(<subtype-name>) get owns(custom-attribute-2) set annotation: @card(1, 1)
-    When <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) set annotation: @card(1, 1)
-    Then <root-type>(<subtype-name>) get owns(overridden-custom-attribute) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name>) get owns(custom-attribute-2) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(1, 1)
-    Then <root-type>(<supertype-name>) get owns(custom-attribute) get cardinality: @card(0, 1)
-    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute) get cardinality: @card(0, *)
-    Then <root-type>(<supertype-name>) get owns(custom-attribute-2) get cardinality: @card(0, 1)
-    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0, *)
+    Then <root-type>(<subtype-name>) get owns(overridden-custom-attribute) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name>) get owns(custom-attribute-2) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0..1)
+    Then <root-type>(<supertype-name>) get owns(custom-attribute) get cardinality: @card(0..1)
+    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute) get cardinality: @card(0..)
+    Then <root-type>(<supertype-name>) get owns(custom-attribute-2) get cardinality: @card(0..1)
+    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0..)
+    When <root-type>(<subtype-name>) get owns(overridden-custom-attribute) set annotation: @card(1..1)
+    When <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) set annotation: @card(1..1)
+    When <root-type>(<subtype-name>) get owns(custom-attribute-2) set annotation: @card(1..1)
+    When <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) set annotation: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(overridden-custom-attribute) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(custom-attribute-2) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(1..1)
+    Then <root-type>(<supertype-name>) get owns(custom-attribute) get cardinality: @card(0..1)
+    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute) get cardinality: @card(0..)
+    Then <root-type>(<supertype-name>) get owns(custom-attribute-2) get cardinality: @card(0..1)
+    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0..)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns(overridden-custom-attribute) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name>) get owns(custom-attribute-2) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(1, 1)
-    Then <root-type>(<supertype-name>) get owns(custom-attribute) get cardinality: @card(0, 1)
-    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute) get cardinality: @card(0, *)
-    Then <root-type>(<supertype-name>) get owns(custom-attribute-2) get cardinality: @card(0, 1)
-    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0, *)
-    Then <root-type>(<subtype-name>) get owns(overridden-custom-attribute) set annotation: @card(1, 5); fails
-    When <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) set annotation: @card(1, 5)
-    Then <root-type>(<subtype-name>) get owns(custom-attribute-2) set annotation: @card(1, 5); fails
-    When <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) set annotation: @card(1, 5)
-    Then <root-type>(<subtype-name>) get owns(overridden-custom-attribute) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) get cardinality: @card(1, 5)
-    Then <root-type>(<subtype-name>) get owns(custom-attribute-2) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(1, 5)
-    Then <root-type>(<supertype-name>) get owns(custom-attribute) get cardinality: @card(0, 1)
-    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute) get cardinality: @card(0, *)
-    Then <root-type>(<supertype-name>) get owns(custom-attribute-2) get cardinality: @card(0, 1)
-    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0, *)
+    Then <root-type>(<subtype-name>) get owns(overridden-custom-attribute) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(custom-attribute-2) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(1..1)
+    Then <root-type>(<supertype-name>) get owns(custom-attribute) get cardinality: @card(0..1)
+    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute) get cardinality: @card(0..)
+    Then <root-type>(<supertype-name>) get owns(custom-attribute-2) get cardinality: @card(0..1)
+    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0..)
+    Then <root-type>(<subtype-name>) get owns(overridden-custom-attribute) set annotation: @card(1..5); fails
+    When <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) set annotation: @card(1..5)
+    Then <root-type>(<subtype-name>) get owns(custom-attribute-2) set annotation: @card(1..5); fails
+    When <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) set annotation: @card(1..5)
+    Then <root-type>(<subtype-name>) get owns(overridden-custom-attribute) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) get cardinality: @card(1..5)
+    Then <root-type>(<subtype-name>) get owns(custom-attribute-2) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(1..5)
+    Then <root-type>(<supertype-name>) get owns(custom-attribute) get cardinality: @card(0..1)
+    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute) get cardinality: @card(0..)
+    Then <root-type>(<supertype-name>) get owns(custom-attribute-2) get cardinality: @card(0..1)
+    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0..)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns(overridden-custom-attribute) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) get cardinality: @card(1, 5)
-    Then <root-type>(<subtype-name>) get owns(custom-attribute-2) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(1, 5)
-    Then <root-type>(<supertype-name>) get owns(custom-attribute) get cardinality: @card(0, 1)
-    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute) get cardinality: @card(0, *)
-    Then <root-type>(<supertype-name>) get owns(custom-attribute-2) get cardinality: @card(0, 1)
-    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0, *)
-    Then <root-type>(<subtype-name>) get owns(overridden-custom-attribute) set annotation: @card(0, *); fails
-    When <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) set annotation: @card(0, *)
-    Then <root-type>(<subtype-name>) get owns(custom-attribute-2) set annotation: @card(0, *); fails
-    When <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) set annotation: @card(0, *)
-    Then <root-type>(<subtype-name>) get owns(overridden-custom-attribute) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) get cardinality: @card(0, *)
-    Then <root-type>(<subtype-name>) get owns(custom-attribute-2) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0, *)
-    Then <root-type>(<supertype-name>) get owns(custom-attribute) get cardinality: @card(0, 1)
-    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute) get cardinality: @card(0, *)
-    Then <root-type>(<supertype-name>) get owns(custom-attribute-2) get cardinality: @card(0, 1)
-    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0, *)
+    Then <root-type>(<subtype-name>) get owns(overridden-custom-attribute) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) get cardinality: @card(1..5)
+    Then <root-type>(<subtype-name>) get owns(custom-attribute-2) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(1..5)
+    Then <root-type>(<supertype-name>) get owns(custom-attribute) get cardinality: @card(0..1)
+    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute) get cardinality: @card(0..)
+    Then <root-type>(<supertype-name>) get owns(custom-attribute-2) get cardinality: @card(0..1)
+    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0..)
+    Then <root-type>(<subtype-name>) get owns(overridden-custom-attribute) set annotation: @card(0..); fails
+    When <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) set annotation: @card(0..)
+    Then <root-type>(<subtype-name>) get owns(custom-attribute-2) set annotation: @card(0..); fails
+    When <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) set annotation: @card(0..)
+    Then <root-type>(<subtype-name>) get owns(overridden-custom-attribute) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) get cardinality: @card(0..)
+    Then <root-type>(<subtype-name>) get owns(custom-attribute-2) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0..)
+    Then <root-type>(<supertype-name>) get owns(custom-attribute) get cardinality: @card(0..1)
+    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute) get cardinality: @card(0..)
+    Then <root-type>(<supertype-name>) get owns(custom-attribute-2) get cardinality: @card(0..1)
+    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0..)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns(overridden-custom-attribute) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) get cardinality: @card(0, *)
-    Then <root-type>(<subtype-name>) get owns(custom-attribute-2) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0, *)
-    Then <root-type>(<supertype-name>) get owns(custom-attribute) get cardinality: @card(0, 1)
-    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute) get cardinality: @card(0, *)
-    Then <root-type>(<supertype-name>) get owns(custom-attribute-2) get cardinality: @card(0, 1)
-    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0, *)
+    Then <root-type>(<subtype-name>) get owns(overridden-custom-attribute) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) get cardinality: @card(0..)
+    Then <root-type>(<subtype-name>) get owns(custom-attribute-2) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0..)
+    Then <root-type>(<supertype-name>) get owns(custom-attribute) get cardinality: @card(0..1)
+    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute) get cardinality: @card(0..)
+    Then <root-type>(<supertype-name>) get owns(custom-attribute-2) get cardinality: @card(0..1)
+    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0..)
     When <root-type>(<subtype-name>) get owns(overridden-custom-attribute) unset annotation: @card
     When <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) unset annotation: @card
     When <root-type>(<subtype-name>) get owns(custom-attribute-2) unset annotation: @card
     When <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) unset annotation: @card
-    Then <root-type>(<subtype-name>) get owns(overridden-custom-attribute) get cardinality: @card(0, 1)
-    Then <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) get cardinality: @card(0, *)
-    Then <root-type>(<subtype-name>) get owns(custom-attribute-2) get cardinality: @card(0, 1)
-    Then <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0, *)
-    Then <root-type>(<supertype-name>) get owns(custom-attribute) get cardinality: @card(0, 1)
-    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute) get cardinality: @card(0, *)
-    Then <root-type>(<supertype-name>) get owns(custom-attribute-2) get cardinality: @card(0, 1)
-    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0, *)
+    Then <root-type>(<subtype-name>) get owns(overridden-custom-attribute) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) get cardinality: @card(0..)
+    Then <root-type>(<subtype-name>) get owns(custom-attribute-2) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0..)
+    Then <root-type>(<supertype-name>) get owns(custom-attribute) get cardinality: @card(0..1)
+    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute) get cardinality: @card(0..)
+    Then <root-type>(<supertype-name>) get owns(custom-attribute-2) get cardinality: @card(0..1)
+    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0..)
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name>) get owns(overridden-custom-attribute) unset annotation: @card
@@ -5687,24 +5685,24 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get owns contain:
       | custom-attribute-2         |
       | ordered-custom-attribute-2 |
-    Then <root-type>(<subtype-name>) get owns(overridden-custom-attribute) get cardinality: @card(0, 1)
-    Then <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) get cardinality: @card(0, *)
-    Then <root-type>(<subtype-name>) get owns(custom-attribute-2) get cardinality: @card(0, 1)
-    Then <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0, *)
-    Then <root-type>(<supertype-name>) get owns(custom-attribute) get cardinality: @card(0, 1)
-    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute) get cardinality: @card(0, *)
-    Then <root-type>(<supertype-name>) get owns(custom-attribute-2) get cardinality: @card(0, 1)
-    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0, *)
+    Then <root-type>(<subtype-name>) get owns(overridden-custom-attribute) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) get cardinality: @card(0..)
+    Then <root-type>(<subtype-name>) get owns(custom-attribute-2) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0..)
+    Then <root-type>(<supertype-name>) get owns(custom-attribute) get cardinality: @card(0..1)
+    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute) get cardinality: @card(0..)
+    Then <root-type>(<supertype-name>) get owns(custom-attribute-2) get cardinality: @card(0..1)
+    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0..)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns(overridden-custom-attribute) get cardinality: @card(0, 1)
-    Then <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) get cardinality: @card(0, *)
-    Then <root-type>(<subtype-name>) get owns(custom-attribute-2) get cardinality: @card(0, 1)
-    Then <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0, *)
-    Then <root-type>(<supertype-name>) get owns(custom-attribute) get cardinality: @card(0, 1)
-    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute) get cardinality: @card(0, *)
-    Then <root-type>(<supertype-name>) get owns(custom-attribute-2) get cardinality: @card(0, 1)
-    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0, *)
+    Then <root-type>(<subtype-name>) get owns(overridden-custom-attribute) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name>) get owns(overridden-ordered-custom-attribute) get cardinality: @card(0..)
+    Then <root-type>(<subtype-name>) get owns(custom-attribute-2) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0..)
+    Then <root-type>(<supertype-name>) get owns(custom-attribute) get cardinality: @card(0..1)
+    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute) get cardinality: @card(0..)
+    Then <root-type>(<supertype-name>) get owns(custom-attribute-2) get cardinality: @card(0..1)
+    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0..)
     Examples:
       | root-type | supertype-name | subtype-name | value-type |
       | entity    | person         | customer     | long       |
@@ -5719,105 +5717,105 @@ Feature: Concept Owns
     When create attribute type: overridden-name-2
     When attribute(overridden-name-2) set supertype: name
     When <root-type>(<supertype-name>) set owns: name
-    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0, 1)
+    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0..1)
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
     When <root-type>(<subtype-name>) set owns: overridden-name
     When <root-type>(<subtype-name>) get owns(overridden-name) set override: name
-    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(0, 1)
+    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(0..1)
     When <root-type>(<subtype-name-2>) set supertype: <supertype-name>
     When <root-type>(<subtype-name-2>) set owns: overridden-name-2
     When <root-type>(<subtype-name-2>) get owns(overridden-name-2) set override: name
-    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(0, 1)
+    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(0..1)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0, 1)
-    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(0, 1)
-    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(0, 1)
-    Then <root-type>(<subtype-name>) get owns(overridden-name) set annotation: @card(1, 2); fails
-    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) set annotation: @card(1, 2); fails
-    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(0, 2)
-    When <root-type>(<subtype-name>) get owns(overridden-name) set annotation: @card(0, 1)
-    When <root-type>(<subtype-name-2>) get owns(overridden-name-2) set annotation: @card(1, 2)
-    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0, 2)
-    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(0, 1)
-    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(1, 2)
+    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name>) get owns(overridden-name) set annotation: @card(1..2); fails
+    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) set annotation: @card(1..2); fails
+    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(0..2)
+    When <root-type>(<subtype-name>) get owns(overridden-name) set annotation: @card(0..1)
+    When <root-type>(<subtype-name-2>) get owns(overridden-name-2) set annotation: @card(1..2)
+    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0..2)
+    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(1..2)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0, 2)
-    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(0, 1)
-    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(1, 2)
-    When <root-type>(<subtype-name>) get owns(overridden-name) set annotation: @card(1, 2)
-    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(1, 2)
+    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0..2)
+    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(1..2)
+    When <root-type>(<subtype-name>) get owns(overridden-name) set annotation: @card(1..2)
+    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(1..2)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0, 2)
-    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(1, 2)
-    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(1, 2)
-    When <root-type>(<subtype-name-2>) get owns(overridden-name-2) set annotation: @card(2, 2)
-    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(2, 2)
+    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0..2)
+    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(1..2)
+    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(1..2)
+    When <root-type>(<subtype-name-2>) get owns(overridden-name-2) set annotation: @card(2..2)
+    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(2..2)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0, 2)
-    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(1, 2)
-    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(2, 2)
-    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(0, 1)
+    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0..2)
+    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(1..2)
+    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(2..2)
+    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(0..1)
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(2, 2)
+    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(2..2)
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(0, *)
+    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(0..)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0, *)
-    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(1, 2)
-    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(2, 2)
-    When <root-type>(<subtype-name-2>) get owns(overridden-name-2) set annotation: @card(4, 5)
+    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0..)
+    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(1..2)
+    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(2..2)
+    When <root-type>(<subtype-name-2>) get owns(overridden-name-2) set annotation: @card(4..5)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0, *)
-    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(1, 2)
-    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(4, 5)
-    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(0, 4)
+    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0..)
+    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(1..2)
+    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(4..5)
+    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(0..4)
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(3, 3)
+    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(3..3)
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(2, 5)
+    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(2..5)
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When <root-type>(<supertype-name>) get owns(name) unset annotation: @card
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(0, 5)
+    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(0..5)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0, 5)
-    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(1, 2)
-    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(4, 5)
-    When <root-type>(<subtype-name>) get owns(overridden-name) set annotation: @card(1, 1)
-    When <root-type>(<subtype-name-2>) get owns(overridden-name-2) set annotation: @card(0, 1)
+    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0..5)
+    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(1..2)
+    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(4..5)
+    When <root-type>(<subtype-name>) get owns(overridden-name) set annotation: @card(1..1)
+    When <root-type>(<subtype-name-2>) get owns(overridden-name-2) set annotation: @card(0..1)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0, 5)
-    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(0, 1)
+    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0..5)
+    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(0..1)
     When <root-type>(<supertype-name>) get owns(name) unset annotation: @card
     When transaction commits
     When connection open read transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0, 1)
-    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(0, 1)
-    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @card(0, 1)
-    Then <root-type>(<subtype-name>) get owns(overridden-name) get annotations contain: @card(1, 1)
-    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get annotations contain: @card(0, 1)
+    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(0..1)
+    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @card(0..1)
+    Then <root-type>(<subtype-name>) get owns(overridden-name) get annotations contain: @card(1..1)
+    Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get annotations contain: @card(0..1)
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | value-type |
       | entity    | person         | customer     | subscriber     | decimal    |
       | relation  | description    | registration | profile        | double     |
 
-  # TODO: Add tests for one subowner with multiple owns overriding one own overridden_own(card(2, 3)) vs 3 subowns of (2, 3), (2, 3), (2, 3) etc
+  # TODO: Add tests for one subowner with multiple owns overriding one own overridden_own(card(2..3)) vs 3 subowns of (2, 3), (2, 3), (2, 3) etc
 
 ########################
 # @distinct
@@ -6499,15 +6497,15 @@ Feature: Concept Owns
 #      | subkey(L)                         | unique             | subkey                | unique                | duration    |
 #      | subkey(L)                         | values(1, 2)       | subkey                | values                | long        |
 #      | subkey(L)                         | range(false..true) | subkey                | range                 | boolean     |
-#      | subkey(L)                         | card(0, 1)         | subkey                | card                  | long        |
+#      | subkey(L)                         | card(0..1)         | subkey                | card                  | long        |
 #      | subkey(L)                         | regex("s")         | subkey                | regex                 | string      |
       | unique                        | values(1, 2)    | unique                | values                | long        |
       | unique                        | range(1.0..2.0) | unique                | range                 | decimal     |
-      | unique                        | card(0, 1)      | unique                | card                  | decimal     |
+      | unique                        | card(0..1)      | unique                | card                  | decimal     |
       | unique                        | regex("s")      | unique                | regex                 | string      |
-      | values(2024-05-06+0100)       | card(0, 1)      | values                | card                  | datetime-tz |
-      | range(2020-05-05..2025-05-05) | card(0, 1)      | range                 | card                  | datetime    |
-      | card(0, 1)                    | regex("s")      | card                  | regex                 | string      |
+      | values(2024-05-06+0100)       | card(0..1)      | values                | card                  | datetime-tz |
+      | range(2020-05-05..2025-05-05) | card(0..1)      | range                 | card                  | datetime    |
+      | card(0..1)                    | regex("s")      | card                  | regex                 | string      |
       | values(1.0, 2.0)              | range(1.0..2.0) | values                | range                 | decimal     |
       | values("str")                 | regex("s")      | values                | regex                 | string      |
       | range("1".."2")               | regex("s")      | range                 | regex                 | string      |
@@ -6550,17 +6548,17 @@ Feature: Concept Owns
       | annotation-1                  | annotation-2    | annotation-category-1 | annotation-category-2 | value-type  |
       | unique                        | values(1, 2)    | unique                | values                | long        |
       | unique                        | range(1.0..2.0) | unique                | range                 | decimal     |
-      | unique                        | card(0, 1)      | unique                | card                  | long        |
+      | unique                        | card(0..1)      | unique                | card                  | long        |
       | unique                        | regex("s")      | unique                | regex                 | string      |
       | unique                        | distinct        | unique                | distinct              | string      |
-      | values(2024-05-06+0100)       | card(0, 1)      | values                | card                  | datetime-tz |
+      | values(2024-05-06+0100)       | card(0..1)      | values                | card                  | datetime-tz |
       | values(1, 2)                  | distinct        | values                | distinct              | long        |
       | values(1.0, 2.0)              | range(1.0..2.0) | values                | range                 | decimal     |
       | values("str")                 | regex("s")      | values                | regex                 | string      |
-      | range(2020-05-05..2025-05-05) | card(0, 1)      | range                 | card                  | datetime    |
+      | range(2020-05-05..2025-05-05) | card(0..1)      | range                 | card                  | datetime    |
       | range(2020-05-05..2025-05-05) | distinct        | range                 | distinct              | date        |
-      | card(0, 1)                    | regex("s")      | card                  | regex                 | string      |
-      | card(0, 1)                    | distinct        | card                  | distinct              | long        |
+      | card(0..1)                    | regex("s")      | card                  | regex                 | string      |
+      | card(0..1)                    | distinct        | card                  | distinct              | long        |
       | regex("s")                    | distinct        | regex                 | distinct              | string      |
       | range("1".."2")               | regex("s")      | range                 | regex                 | string      |
 
@@ -6584,10 +6582,10 @@ Feature: Concept Owns
     Examples:
       | annotation-1 | annotation-2 | value-type |
       | key          | unique       | long       |
-      | key          | card(0, 1)   | long       |
-      | key          | card(0, *)   | long       |
-      | key          | card(1, 1)   | long       |
-      | key          | card(2, 5)   | long       |
+      | key          | card(0..1)   | long       |
+      | key          | card(0..)   | long       |
+      | key          | card(1..1)   | long       |
+      | key          | card(2..5)   | long       |
 
   Scenario Outline: Ordered ownership cannot set @<annotation-1> and @<annotation-2> together for <value-type> value type
     When create attribute type: custom-attribute
@@ -6611,10 +6609,10 @@ Feature: Concept Owns
     Examples:
       | annotation-1 | annotation-2 | value-type |
       | key          | unique       | long       |
-      | key          | card(0, 1)   | long       |
-      | key          | card(0, *)   | long       |
-      | key          | card(1, 1)   | long       |
-      | key          | card(2, 5)   | long       |
+      | key          | card(0..1)   | long       |
+      | key          | card(0..)   | long       |
+      | key          | card(1..1)   | long       |
+      | key          | card(2..5)   | long       |
 
   Scenario Outline: Annotation @key can be set if type has inherited cardinality that can be narrowed
     When create attribute type: name
@@ -6639,7 +6637,7 @@ Feature: Concept Owns
     When entity(subscriber) set supertype: person
     When entity(subscriber) set owns: surname
     When entity(subscriber) get owns(surname) set annotation: @key
-    Then entity(subscriber) get owns(surname) get cardinality: @card(1, 1)
+    Then entity(subscriber) get owns(surname) get cardinality: @card(1..1)
     When entity(subscriber) set owns: third-name
     When entity(subscriber) get owns(third-name) set override: name
     When entity(person) get owns(name) set annotation: @card(<card-args>)
@@ -6653,16 +6651,16 @@ Feature: Concept Owns
     Then entity(customer) get owns(surname) get annotations do not contain: @key
     Then entity(subscriber) get owns(surname) get annotations do not contain: @card(<card-args>)
     Then entity(subscriber) get owns(surname) get annotations contain: @key
-    Then entity(subscriber) get owns(surname) get cardinality: @card(1, 1)
+    Then entity(subscriber) get owns(surname) get cardinality: @card(1..1)
     Then entity(person) get owns(name) set annotation: @key; fails
     When entity(customer) get owns(surname) set annotation: @key
     Then entity(customer) get owns(surname) get annotations contain: @key
-    Then entity(customer) get owns(surname) get cardinality: @card(1, 1)
+    Then entity(customer) get owns(surname) get cardinality: @card(1..1)
     When entity(subscriber) get owns(surname) set override: name
     Then entity(subscriber) get owns overridden(surname) get label: name
     When entity(subscriber) get owns(third-name) set annotation: @key
     Then entity(subscriber) get owns(third-name) get annotations contain: @key
-    Then entity(subscriber) get owns(third-name) get cardinality: @card(1, 1)
+    Then entity(subscriber) get owns(third-name) get cardinality: @card(1..1)
     When transaction commits
     When connection open read transaction for database: typedb
     Then entity(person) get owns(name) get annotations do not contain: @key
@@ -6671,15 +6669,15 @@ Feature: Concept Owns
     Then entity(customer) get owns overridden(surname) get label: name
     Then entity(customer) get owns(surname) get annotations contain: @key
     Then entity(customer) get owns(surname) get annotation categories do not contain: @card
-    Then entity(customer) get owns(surname) get cardinality: @card(1, 1)
+    Then entity(customer) get owns(surname) get cardinality: @card(1..1)
     Then entity(subscriber) get owns overridden(surname) get label: name
     Then entity(subscriber) get owns(surname) get annotations contain: @key
     Then entity(subscriber) get owns(surname) get annotation categories do not contain: @card
-    Then entity(subscriber) get owns(surname) get cardinality: @card(1, 1)
+    Then entity(subscriber) get owns(surname) get cardinality: @card(1..1)
     Then entity(subscriber) get owns overridden(third-name) get label: name
     Then entity(subscriber) get owns(third-name) get annotations contain: @key
     Then entity(subscriber) get owns(third-name) get annotation categories do not contain: @card
-    Then entity(subscriber) get owns(third-name) get cardinality: @card(1, 1)
+    Then entity(subscriber) get owns(third-name) get cardinality: @card(1..1)
     Examples:
       | card-args |
       | 0, 1      |
@@ -6721,7 +6719,7 @@ Feature: Concept Owns
     Then entity(customer) get owns(surname) get annotations do not contain: @key
     Then entity(subscriber) get owns(surname) get annotations do not contain: @card(<card-args>)
     Then entity(subscriber) get owns(surname) get annotations contain: @key
-    Then entity(subscriber) get owns(surname) get cardinality: @card(1, 1)
+    Then entity(subscriber) get owns(surname) get cardinality: @card(1..1)
     Then entity(person) get owns(name) set annotation: @key; fails
     Then entity(customer) get owns(surname) set annotation: @key; fails
     Then entity(subscriber) get owns(surname) set override: name; fails
@@ -6730,7 +6728,7 @@ Feature: Concept Owns
     When entity(subscriber) get owns(third-name) set annotation: @key
     Then entity(subscriber) get owns(third-name) get annotations contain: @key
     Then entity(subscriber) get owns(third-name) get declared annotations contain: @key
-    Then entity(subscriber) get owns(third-name) get cardinality: @card(1, 1)
+    Then entity(subscriber) get owns(third-name) get cardinality: @card(1..1)
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) get owns(name) get annotations contain: @card(<card-args>)
@@ -6745,7 +6743,7 @@ Feature: Concept Owns
     Then entity(subscriber) get owns(surname) get annotations contain: @key
     Then entity(subscriber) get owns(third-name) get annotations contain: @key
     Then entity(subscriber) get owns(third-name) get declared annotations contain: @key
-    Then entity(subscriber) get owns(third-name) get cardinality: @card(1, 1)
+    Then entity(subscriber) get owns(third-name) get cardinality: @card(1..1)
     Then entity(person) get owns(name) set annotation: @key; fails
     Then entity(customer) get owns(surname) set annotation: @key; fails
     Then entity(subscriber) get owns(surname) set override: name; fails
@@ -6767,7 +6765,7 @@ Feature: Concept Owns
     Then entity(subscriber) get owns(surname) get annotations do not contain: @key
     Then entity(customer) get owns(surname) get annotations do not contain: @card(<card-args>)
     Then entity(customer) get owns(surname) get annotations contain: @key
-    Then entity(customer) get owns(surname) get cardinality: @card(1, 1)
+    Then entity(customer) get owns(surname) get cardinality: @card(1..1)
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) get owns(name) set annotation: @key; fails
@@ -6783,30 +6781,30 @@ Feature: Concept Owns
     Then entity(subscriber) get owns(surname) get annotations do not contain: @key
     Then entity(customer) get owns(surname) get annotations do not contain: @card(<card-args>)
     Then entity(customer) get owns(surname) get annotations contain: @key
-    Then entity(customer) get owns(surname) get cardinality: @card(1, 1)
+    Then entity(customer) get owns(surname) get cardinality: @card(1..1)
     When entity(person) get owns(name) unset annotation: @card
     When entity(customer) get owns(surname) set override: name
     When entity(subscriber) get owns(surname) set annotation: @key
     Then entity(person) get owns(name) get annotations do not contain: @key
     Then entity(person) get owns(name) get annotation categories do not contain: @card
-    Then entity(person) get owns(name) get cardinality: @card(0, 1)
+    Then entity(person) get owns(name) get cardinality: @card(0..1)
     Then entity(customer) get owns(surname) get annotations contain: @key
     Then entity(customer) get owns(surname) get annotation categories do not contain: @card
-    Then entity(customer) get owns(surname) get cardinality: @card(1, 1)
+    Then entity(customer) get owns(surname) get cardinality: @card(1..1)
     Then entity(subscriber) get owns(surname) get annotations contain: @key
     Then entity(subscriber) get owns(surname) get annotation categories do not contain: @card
-    Then entity(subscriber) get owns(surname) get cardinality: @card(1, 1)
+    Then entity(subscriber) get owns(surname) get cardinality: @card(1..1)
     When transaction commits
     When connection open read transaction for database: typedb
     Then entity(person) get owns(name) get annotations do not contain: @key
     Then entity(person) get owns(name) get annotation categories do not contain: @card
-    Then entity(person) get owns(name) get cardinality: @card(0, 1)
+    Then entity(person) get owns(name) get cardinality: @card(0..1)
     Then entity(customer) get owns(surname) get annotations contain: @key
     Then entity(customer) get owns(surname) get annotation categories do not contain: @card
-    Then entity(customer) get owns(surname) get cardinality: @card(1, 1)
+    Then entity(customer) get owns(surname) get cardinality: @card(1..1)
     Then entity(subscriber) get owns(surname) get annotations contain: @key
     Then entity(subscriber) get owns(surname) get annotation categories do not contain: @card
-    Then entity(subscriber) get owns(surname) get cardinality: @card(1, 1)
+    Then entity(subscriber) get owns(surname) get cardinality: @card(1..1)
     Examples:
       | card-args |
       | 2, *      |
@@ -6918,7 +6916,7 @@ Feature: Concept Owns
     When entity(player) set owns: name2
     When entity(player) get owns(name2) set override: name
     When entity(player) get owns(name2) set annotation: @key
-    Then entity(player) get owns(name2) get cardinality: @card(1, 1)
+    Then entity(player) get owns(name2) get cardinality: @card(1..1)
     Then entity(player) get owns(name2) set annotation: @card(<card-args>); fails
     When create entity type: subplayer
     When entity(subplayer) set supertype: player
@@ -6927,7 +6925,7 @@ Feature: Concept Owns
     When entity(subplayer) get owns(subname2) set override: name2
     Then entity(subplayer) get owns(subname2) get annotations contain: @key
     Then entity(subplayer) get owns(subname2) get annotation categories do not contain: @card
-    Then entity(subplayer) get owns(subname2) get cardinality: @card(1, 1)
+    Then entity(subplayer) get owns(subname2) get cardinality: @card(1..1)
     Then entity(subplayer) get owns(subname2) set annotation: @card(<card-args>); fails
     When entity(subplayer) get owns(subname2) unset override
     When entity(subplayer) get owns(subname2) set annotation: @card(<card-args>)
@@ -6950,7 +6948,7 @@ Feature: Concept Owns
     Then entity(player) get owns(name2) get annotations do not contain: @card(<card-args>)
     Then entity(player) get owns(name2) get declared annotations contain: @key
     Then entity(player) get owns(name2) get declared annotations do not contain: @card(<card-args>)
-    Then entity(player) get owns(name2) get cardinality: @card(1, 1)
+    Then entity(player) get owns(name2) get cardinality: @card(1..1)
     Then entity(player2) get owns(name3) get annotations contain: @unique
     Then entity(player2) get owns(name3) get annotations contain: @card(<card-args>)
     Then entity(player2) get owns(name3) get declared annotations contain: @unique
@@ -6967,7 +6965,7 @@ Feature: Concept Owns
     Then entity(player) get owns(name2) get annotations do not contain: @card(<card-args>)
     Then entity(player) get owns(name2) get declared annotations contain: @key
     Then entity(player) get owns(name2) get declared annotations do not contain: @card(<card-args>)
-    Then entity(player) get owns(name2) get cardinality: @card(1, 1)
+    Then entity(player) get owns(name2) get cardinality: @card(1..1)
     Then entity(player2) get owns(name3) get annotations contain: @unique
     Then entity(player2) get owns(name3) get annotations contain: @card(<card-args>)
     Then entity(player2) get owns(name3) get declared annotations contain: @unique

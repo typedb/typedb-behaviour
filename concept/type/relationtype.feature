@@ -1195,7 +1195,7 @@ Feature: Concept Relation Type and Role Type
 #    Then relation(parentship) set annotation: @subkey(LABEL); fails
 #    Then relation(parentship) set annotation: @values(1, 2); fails
 #    Then relation(parentship) set annotation: @range(1, 2); fails
-#    Then relation(parentship) set annotation: @card(1, 2); fails
+#    Then relation(parentship) set annotation: @card(1..2); fails
 #    Then relation(parentship) set annotation: @independent; fails
 #    Then relation(parentship) set annotation: @replace; fails
 #    Then relation(parentship) set annotation: @regex("val"); fails
@@ -1341,7 +1341,7 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) create role: father
     When relation(fathership) set supertype: parentship
     When relation(fathership) get role(father) set override: parent
-    When relation(fathership) get role(father) set annotation: @card(0, 1)
+    When relation(fathership) get role(father) set annotation: @card(0..1)
     When relation(fathership) get role(father) set ordering: unordered
     Then relation(fathership) get role(father) get ordering: unordered
     Then relation(fathership) get role(father) set ordering: ordered; fails
@@ -1913,7 +1913,7 @@ Feature: Concept Relation Type and Role Type
       | annotation | annotation-category |
       | abstract   | abstract            |
       | distinct   | distinct            |
-      | card(1, 2) | card                |
+      | card(1..2) | card                |
 
   Scenario Outline: Role can set and unset @<annotation>
     When create relation type: marriage
@@ -1943,7 +1943,7 @@ Feature: Concept Relation Type and Role Type
     Examples:
       | annotation | annotation-category |
       | abstract   | abstract            |
-      | card(1, 2) | card                |
+      | card(1..2) | card                |
 
   Scenario Outline: Ordered role can unset not set @<annotation>
     When create relation type: marriage
@@ -1965,7 +1965,7 @@ Feature: Concept Relation Type and Role Type
       | annotation | annotation-category |
       | abstract   | abstract            |
       | distinct   | distinct            |
-      | card(1, 2) | card                |
+      | card(1..2) | card                |
 
   Scenario Outline: Ordered roles can set and unset @<annotation>
     When create relation type: marriage
@@ -1997,7 +1997,7 @@ Feature: Concept Relation Type and Role Type
       | annotation | annotation-category |
       | abstract   | abstract            |
       | distinct   | distinct            |
-      | card(1, 2) | card                |
+      | card(1..2) | card                |
 
   Scenario Outline: Role can set or unset inherited @<annotation> of inherited role
     When create relation type: parentship
@@ -2044,7 +2044,7 @@ Feature: Concept Relation Type and Role Type
     Examples:
       | annotation | annotation-category |
       | distinct   | distinct            |
-      | card(1, 2) | card                |
+      | card(1..2) | card                |
 
   Scenario Outline: Role cannot set or unset inherited @<annotation> of overridden role
     When create relation type: parentship
@@ -2083,7 +2083,7 @@ Feature: Concept Relation Type and Role Type
     Examples:
       | annotation | annotation-category |
       | distinct   | distinct            |
-      | card(1, 2) | card                |
+      | card(1..2) | card                |
 
   Scenario Outline: Role cannot set supertype with the same @<annotation> until it is explicitly unset from type
     When create relation type: parentship
@@ -2130,7 +2130,7 @@ Feature: Concept Relation Type and Role Type
     Examples:
       | annotation | annotation-category |
       | distinct   | distinct            |
-      | card(1, 2) | card                |
+      | card(1..2) | card                |
 
   Scenario Outline: Role type loses inherited @<annotation> if supertype is unset
     When create relation type: parentship
@@ -2169,7 +2169,7 @@ Feature: Concept Relation Type and Role Type
     Examples:
       | annotation |
       | distinct   |
-      | card(1, 2) |
+      | card(1..2) |
 
   Scenario Outline: Relates cannot set redundant duplicated @<annotation> while inheriting it
     When create relation type: parentship
@@ -2193,7 +2193,7 @@ Feature: Concept Relation Type and Role Type
     Examples:
       | annotation |
       | distinct   |
-      | card(1, 2) |
+      | card(1..2) |
 
 ########################
 # relates @abstract
@@ -2609,65 +2609,65 @@ Feature: Concept Relation Type and Role Type
     When create relation type: parentship
     When relation(parentship) create role: parent
     Then relation(parentship) get role(parent) get annotations is empty
-    Then relation(parentship) get role(parent) get cardinality: @card(1, 1)
+    Then relation(parentship) get role(parent) get cardinality: @card(1..1)
     When relation(parentship) create role: child
     Then relation(parentship) get role(child) get annotations is empty
-    Then relation(parentship) get role(child) get cardinality: @card(1, 1)
+    Then relation(parentship) get role(child) get cardinality: @card(1..1)
     When relation(parentship) get role(child) set ordering: ordered
     Then relation(parentship) get role(child) get annotations is empty
-    Then relation(parentship) get role(child) get cardinality: @card(0, *)
+    Then relation(parentship) get role(child) get cardinality: @card(0..)
     When transaction commits
     When connection open read transaction for database: typedb
     Then relation(parentship) get role(parent) get annotations is empty
-    Then relation(parentship) get role(parent) get cardinality: @card(1, 1)
+    Then relation(parentship) get role(parent) get cardinality: @card(1..1)
     Then relation(parentship) get role(child) get annotations is empty
-    Then relation(parentship) get role(child) get cardinality: @card(0, *)
+    Then relation(parentship) get role(child) get cardinality: @card(0..)
 
   Scenario Outline: Relation type can set @card annotation on roles and unset it
     When create relation type: parentship
     When relation(parentship) create role: parent
-    Then relation(parentship) get role(parent) get cardinality: @card(1, 1)
+    Then relation(parentship) get role(parent) get cardinality: @card(1..1)
     When relation(parentship) create role: child
     When relation(parentship) get role(child) set ordering: ordered
-    Then relation(parentship) get role(child) get cardinality: @card(0, *)
-    When relation(parentship) get role(parent) set annotation: @card(<arg0>, <arg1>)
-    Then relation(parentship) get role(parent) get cardinality: @card(<arg0>, <arg1>)
-    Then relation(parentship) get role(parent) get annotations contain: @card(<arg0>, <arg1>)
-    Then relation(parentship) get role(parent) get declared annotations contain: @card(<arg0>, <arg1>)
+    Then relation(parentship) get role(child) get cardinality: @card(0..)
+    When relation(parentship) get role(parent) set annotation: @card(<arg0>..<arg1>)
+    Then relation(parentship) get role(parent) get cardinality: @card(<arg0>..<arg1>)
+    Then relation(parentship) get role(parent) get annotations contain: @card(<arg0>..<arg1>)
+    Then relation(parentship) get role(parent) get declared annotations contain: @card(<arg0>..<arg1>)
     Then relation(parentship) get role(parent) get annotation categories contain: @card
-    When relation(parentship) get role(child) set annotation: @card(<arg0>, <arg1>)
-    Then relation(parentship) get role(child) get cardinality: @card(<arg0>, <arg1>)
-    Then relation(parentship) get role(child) get annotations contain: @card(<arg0>, <arg1>)
-    Then relation(parentship) get role(child) get declared annotations contain: @card(<arg0>, <arg1>)
+    When relation(parentship) get role(child) set annotation: @card(<arg0>..<arg1>)
+    Then relation(parentship) get role(child) get cardinality: @card(<arg0>..<arg1>)
+    Then relation(parentship) get role(child) get annotations contain: @card(<arg0>..<arg1>)
+    Then relation(parentship) get role(child) get declared annotations contain: @card(<arg0>..<arg1>)
     Then relation(parentship) get role(child) get annotation categories contain: @card
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(parentship) get role(parent) get cardinality: @card(<arg0>, <arg1>)
-    Then relation(parentship) get role(parent) get annotations contain: @card(<arg0>, <arg1>)
-    Then relation(parentship) get role(parent) get declared annotations contain: @card(<arg0>, <arg1>)
+    Then relation(parentship) get role(parent) get cardinality: @card(<arg0>..<arg1>)
+    Then relation(parentship) get role(parent) get annotations contain: @card(<arg0>..<arg1>)
+    Then relation(parentship) get role(parent) get declared annotations contain: @card(<arg0>..<arg1>)
     Then relation(parentship) get role(parent) get annotation categories contain: @card
-    Then relation(parentship) get role(child) get cardinality: @card(<arg0>, <arg1>)
-    Then relation(parentship) get role(child) get annotations contain: @card(<arg0>, <arg1>)
-    Then relation(parentship) get role(child) get declared annotations contain: @card(<arg0>, <arg1>)
+    Then relation(parentship) get role(child) get cardinality: @card(<arg0>..<arg1>)
+    Then relation(parentship) get role(child) get annotations contain: @card(<arg0>..<arg1>)
+    Then relation(parentship) get role(child) get declared annotations contain: @card(<arg0>..<arg1>)
     Then relation(parentship) get role(child) get annotation categories contain: @card
     When relation(parentship) get role(parent) unset annotation: @card
     Then relation(parentship) get role(parent) get annotations is empty
     Then relation(parentship) get role(parent) get annotation categories do not contain: @card
     Then relation(parentship) get role(parent) get declared annotations is empty
-    Then relation(parentship) get role(parent) get cardinality: @card(1, 1)
+    Then relation(parentship) get role(parent) get cardinality: @card(1..1)
     When relation(parentship) get role(child) unset annotation: @card
     Then relation(parentship) get role(child) get annotations is empty
     Then relation(parentship) get role(child) get annotation categories do not contain: @card
     Then relation(parentship) get role(child) get declared annotations is empty
-    Then relation(parentship) get role(child) get cardinality: @card(0, *)
+    Then relation(parentship) get role(child) get cardinality: @card(0..)
     When transaction commits
     When connection open read transaction for database: typedb
     Then relation(parentship) get role(parent) get annotations is empty
     Then relation(parentship) get role(parent) get declared annotations is empty
-    Then relation(parentship) get role(parent) get cardinality: @card(1, 1)
+    Then relation(parentship) get role(parent) get cardinality: @card(1..1)
     Then relation(parentship) get role(child) get annotations is empty
     Then relation(parentship) get role(child) get declared annotations is empty
-    Then relation(parentship) get role(child) get cardinality: @card(0, *)
+    Then relation(parentship) get role(child) get cardinality: @card(0..)
     Examples:
       | arg0 | arg1                |
       | 0    | 1                   |
@@ -2682,18 +2682,18 @@ Feature: Concept Relation Type and Role Type
     When relation(parentship) create role: parent
     When relation(parentship) create role: child
     When relation(parentship) get role(child) set ordering: ordered
-    When relation(parentship) get role(parent) set annotation: @card(<arg>, <arg>)
-    Then relation(parentship) get role(parent) get annotations contain: @card(<arg>, <arg>)
-    Then relation(parentship) get role(parent) get declared annotations contain: @card(<arg>, <arg>)
-    When relation(parentship) get role(child) set annotation: @card(<arg>, <arg>)
-    Then relation(parentship) get role(child) get annotations contain: @card(<arg>, <arg>)
-    Then relation(parentship) get role(child) get declared annotations contain: @card(<arg>, <arg>)
+    When relation(parentship) get role(parent) set annotation: @card(<arg>..<arg>)
+    Then relation(parentship) get role(parent) get annotations contain: @card(<arg>..<arg>)
+    Then relation(parentship) get role(parent) get declared annotations contain: @card(<arg>..<arg>)
+    When relation(parentship) get role(child) set annotation: @card(<arg>..<arg>)
+    Then relation(parentship) get role(child) get annotations contain: @card(<arg>..<arg>)
+    Then relation(parentship) get role(child) get declared annotations contain: @card(<arg>..<arg>)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then relation(parentship) get role(parent) get annotations contain: @card(<arg>, <arg>)
-    Then relation(parentship) get role(parent) get declared annotations contain: @card(<arg>, <arg>)
-    Then relation(parentship) get role(child) get annotations contain: @card(<arg>, <arg>)
-    Then relation(parentship) get role(child) get declared annotations contain: @card(<arg>, <arg>)
+    Then relation(parentship) get role(parent) get annotations contain: @card(<arg>..<arg>)
+    Then relation(parentship) get role(parent) get declared annotations contain: @card(<arg>..<arg>)
+    Then relation(parentship) get role(child) get annotations contain: @card(<arg>..<arg>)
+    Then relation(parentship) get role(child) get declared annotations contain: @card(<arg>..<arg>)
     Examples:
       | arg  |
       | 1    |
@@ -2707,17 +2707,15 @@ Feature: Concept Relation Type and Role Type
 #    Then relation(parentship) get role(parent) set annotation: @card(0); fails
 #    Then relation(parentship) get role(parent) set annotation: @card(1); fails
 #    Then relation(parentship) get role(parent) set annotation: @card(*); fails
-#    Then relation(parentship) get role(parent) set annotation: @card(1, 2, 3); fails
-#    Then relation(parentship) get role(parent) set annotation: @card(-1, 1); fails
-#    Then relation(parentship) get role(parent) set annotation: @card(0, 0.1); fails
-#    Then relation(parentship) get role(parent) set annotation: @card(0, 1.5); fails
-#    Then relation(parentship) get role(parent) set annotation: @card(*, *); fails
-#    Then relation(parentship) get role(parent) set annotation: @card(0, **); fails
-#    Then relation(parentship) get role(parent) set annotation: @card(1, "2"); fails
-#    Then relation(parentship) get role(parent) set annotation: @card("1", 2); fails
-#    Then relation(parentship) get role(parent) set annotation: @card(*, *); fails
-    Then relation(parentship) get role(parent) set annotation: @card(2, 1); fails
-    Then relation(parentship) get role(parent) set annotation: @card(0, 0); fails
+#    Then relation(parentship) get role(parent) set annotation: @card(1..2..3); fails
+#    Then relation(parentship) get role(parent) set annotation: @card(-1..1); fails
+#    Then relation(parentship) get role(parent) set annotation: @card(0..0.1); fails
+#    Then relation(parentship) get role(parent) set annotation: @card(0..1.5); fails
+#    Then relation(parentship) get role(parent) set annotation: @card(..); fails
+#    Then relation(parentship) get role(parent) set annotation: @card(1.."2"); fails
+#    Then relation(parentship) get role(parent) set annotation: @card("1"..2); fails
+    Then relation(parentship) get role(parent) set annotation: @card(2..1); fails
+    Then relation(parentship) get role(parent) set annotation: @card(0..0); fails
     Then relation(parentship) get role(parent) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
@@ -2765,21 +2763,21 @@ Feature: Concept Relation Type and Role Type
   Scenario: Relation type's inherited role can reset @card annotation
     When create relation type: parentship
     When relation(parentship) create role: parent
-    When relation(parentship) get role(parent) set annotation: @card(0, 1)
+    When relation(parentship) get role(parent) set annotation: @card(0..1)
     When create relation type: fathership
     When relation(fathership) set supertype: parentship
-    Then relation(fathership) get role(parent) get annotations contain: @card(0, 1)
-    Then relation(fathership) get role(parent) get declared annotations contain: @card(0, 1)
+    Then relation(fathership) get role(parent) get annotations contain: @card(0..1)
+    Then relation(fathership) get role(parent) get declared annotations contain: @card(0..1)
     When transaction commits
     When connection open schema transaction for database: typedb
-    When relation(fathership) get role(parent) set annotation: @card(0, 1)
+    When relation(fathership) get role(parent) set annotation: @card(0..1)
     When transaction commits
     When connection open schema transaction for database: typedb
     When create relation type: mothership
     When relation(mothership) set supertype: parentship
-    Then relation(mothership) get role(parent) get annotations contain: @card(0, 1)
-    Then relation(mothership) get role(parent) get declared annotations contain: @card(0, 1)
-    When relation(mothership) get role(parent) set annotation: @card(0, 1)
+    Then relation(mothership) get role(parent) get annotations contain: @card(0..1)
+    Then relation(mothership) get role(parent) get declared annotations contain: @card(0..1)
+    When relation(mothership) get role(parent) set annotation: @card(0..1)
     When transaction commits
     When connection open schema transaction for database: typedb
     Then relation(fathership) get role(parent) set override: parent; fails
@@ -2788,35 +2786,35 @@ Feature: Concept Relation Type and Role Type
   Scenario: Relation type's inherited role can unset @card annotation
     When create relation type: parentship
     When relation(parentship) create role: parent
-    When relation(parentship) get role(parent) set annotation: @card(0, 1)
+    When relation(parentship) get role(parent) set annotation: @card(0..1)
     When create relation type: fathership
     When relation(fathership) set supertype: parentship
-    Then relation(fathership) get role(parent) get annotations contain: @card(0, 1)
-    Then relation(fathership) get role(parent) get declared annotations contain: @card(0, 1)
+    Then relation(fathership) get role(parent) get annotations contain: @card(0..1)
+    Then relation(fathership) get role(parent) get declared annotations contain: @card(0..1)
     When relation(fathership) get role(parent) unset annotation: @card
     Then relation(parentship) get role(parent) get annotation categories do not contain: @card
     Then relation(fathership) get role(parent) get annotation categories do not contain: @card
-    Then relation(fathership) get role(parent) get declared annotations do not contain: @card(0, 1)
+    Then relation(fathership) get role(parent) get declared annotations do not contain: @card(0..1)
     When transaction commits
     When connection open schema transaction for database: typedb
     Then relation(parentship) get role(parent) get annotation categories do not contain: @card
     Then relation(fathership) get role(parent) get annotation categories do not contain: @card
-    Then relation(fathership) get role(parent) get declared annotations do not contain: @card(0, 1)
-    When relation(fathership) get role(parent) set annotation: @card(0, 1)
+    Then relation(fathership) get role(parent) get declared annotations do not contain: @card(0..1)
+    When relation(fathership) get role(parent) set annotation: @card(0..1)
     Then relation(parentship) get role(parent) get annotation categories contain: @card
     Then relation(fathership) get role(parent) get annotation categories contain: @card
-    Then relation(parentship) get role(parent) get annotations contain: @card(0, 1)
-    Then relation(parentship) get role(parent) get declared annotations contain: @card(0, 1)
-    Then relation(fathership) get role(parent) get annotations contain: @card(0, 1)
-    Then relation(fathership) get role(parent) get declared annotations contain: @card(0, 1)
+    Then relation(parentship) get role(parent) get annotations contain: @card(0..1)
+    Then relation(parentship) get role(parent) get declared annotations contain: @card(0..1)
+    Then relation(fathership) get role(parent) get annotations contain: @card(0..1)
+    Then relation(fathership) get role(parent) get declared annotations contain: @card(0..1)
     When transaction commits
     When connection open schema transaction for database: typedb
     Then relation(parentship) get role(parent) get annotation categories contain: @card
     Then relation(fathership) get role(parent) get annotation categories contain: @card
-    Then relation(parentship) get role(parent) get annotations contain: @card(0, 1)
-    Then relation(parentship) get role(parent) get declared annotations contain: @card(0, 1)
-    Then relation(fathership) get role(parent) get annotations contain: @card(0, 1)
-    Then relation(fathership) get role(parent) get declared annotations contain: @card(0, 1)
+    Then relation(parentship) get role(parent) get annotations contain: @card(0..1)
+    Then relation(parentship) get role(parent) get declared annotations contain: @card(0..1)
+    Then relation(fathership) get role(parent) get annotations contain: @card(0..1)
+    Then relation(fathership) get role(parent) get declared annotations contain: @card(0..1)
     When relation(fathership) get role(parent) unset annotation: @card
     Then relation(parentship) get role(parent) get annotation categories do not contain: @card
     Then relation(fathership) get role(parent) get annotation categories do not contain: @card
@@ -2828,26 +2826,26 @@ Feature: Concept Relation Type and Role Type
   Scenario: Role cannot unset inherited @card annotation from an overridden role
     When create relation type: parentship
     When relation(parentship) create role: parent
-    When relation(parentship) get role(parent) set annotation: @card(0, 1)
+    When relation(parentship) get role(parent) set annotation: @card(0..1)
     When create relation type: fathership
     When relation(fathership) create role: father
     When relation(fathership) set supertype: parentship
     Then relation(fathership) get role(father) set override: parent
-    Then relation(fathership) get role(father) get annotations contain: @card(0, 1)
-    Then relation(fathership) get role(father) get declared annotations do not contain: @card(0, 1)
+    Then relation(fathership) get role(father) get annotations contain: @card(0..1)
+    Then relation(fathership) get role(father) get declared annotations do not contain: @card(0..1)
     Then relation(fathership) get role(father) unset annotation: @card; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(fathership) get role(father) get annotations contain: @card(0, 1)
-    Then relation(fathership) get role(father) get declared annotations do not contain: @card(0, 1)
+    Then relation(fathership) get role(father) get annotations contain: @card(0..1)
+    Then relation(fathership) get role(father) get declared annotations do not contain: @card(0..1)
     Then relation(fathership) get role(father) unset annotation: @card; fails
     Then relation(fathership) get role(father) unset override
-    Then relation(fathership) get role(father) get annotations do not contain: @card(0, 1)
-    Then relation(fathership) get role(father) get declared annotations do not contain: @card(0, 1)
+    Then relation(fathership) get role(father) get annotations do not contain: @card(0..1)
+    Then relation(fathership) get role(father) get declared annotations do not contain: @card(0..1)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then relation(fathership) get role(father) get annotations do not contain: @card(0, 1)
-    Then relation(fathership) get role(father) get declared annotations do not contain: @card(0, 1)
+    Then relation(fathership) get role(father) get annotations do not contain: @card(0..1)
+    Then relation(fathership) get role(father) get declared annotations do not contain: @card(0..1)
 
   Scenario Outline: Role's @card annotation can be inherited and overridden by a subset of arguments
     When create relation type: parentship
@@ -2893,13 +2891,13 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get role(overridden-custom-role) get declared annotations do not contain: @card(<args>)
     Examples:
       | args       | args-override |
-      | 0, *       | 0, 10000      |
-      | 0, 10      | 0, 1          |
-      | 0, 2       | 1, 2          |
-      | 1, *       | 1, 1          |
-      | 1, 5       | 3, 4          |
-      | 38, 111    | 39, 111       |
-      | 1000, 1100 | 1000, 1099    |
+      | 0..        | 0..10000      |
+      | 0..10      | 0..1          |
+      | 0..2       | 1..2          |
+      | 1..        | 1..1          |
+      | 1..5       | 3..4          |
+      | 38..111    | 39..111       |
+      | 1000..1100 | 1000..1099    |
 
   Scenario Outline: Inherited @card annotation of roles cannot be reset or overridden by the @card of not a subset of arguments
     When create relation type: parentship
@@ -2935,18 +2933,18 @@ Feature: Concept Relation Type and Role Type
     Then transaction commits; fails
     Examples:
       | args       | args-override |
-      | 0, 10000   | 0, 10001      |
-      | 0, 10      | 1, 11         |
-      | 1, *       | 0, 2          |
-      | 1, 5       | 6, 10         |
-      | 2, 2       | 1, 1          |
-      | 38, 111    | 37, 111       |
-      | 1000, 1100 | 1000, 1199    |
+      | 0..10000   | 0..10001      |
+      | 0..10      | 1..11         |
+      | 1..       | 0..2          |
+      | 1..5       | 6..10         |
+      | 2..2       | 1..1          |
+      | 38..111    | 37..111       |
+      | 1000..1100 | 1000..1199    |
 
   Scenario: Cardinality can be narrowed for different roles
     When create relation type: parentship
     When relation(parentship) create role: parent
-    When relation(parentship) get role(parent) set annotation: @card(0, *)
+    When relation(parentship) get role(parent) set annotation: @card(0..)
     When create relation type: single-parentship
     When relation(single-parentship) set supertype: parentship
     When create relation type: divorced-parentship
@@ -2955,83 +2953,83 @@ Feature: Concept Relation Type and Role Type
     When relation(single-parentship) get role(single-parent) set override: parent
     When relation(divorced-parentship) create role: divorced-parent
     When relation(divorced-parentship) get role(divorced-parent) set override: single-parent
-    Then relation(parentship) get role(parent) get annotations contain: @card(0, *)
-    Then relation(single-parentship) get role(single-parent) get annotations contain: @card(0, *)
-    Then relation(divorced-parentship) get role(divorced-parent) get annotations contain: @card(0, *)
-    Then relation(parentship) get role(parent) get declared annotations contain: @card(0, *)
-    Then relation(single-parentship) get role(single-parent) get declared annotations do not contain: @card(0, *)
-    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations do not contain: @card(0, *)
-    When relation(single-parentship) get role(single-parent) set annotation: @card(3, *)
-    Then relation(parentship) get role(parent) get annotations contain: @card(0, *)
-    Then relation(single-parentship) get role(single-parent) get annotations do not contain: @card(0, *)
-    Then relation(divorced-parentship) get role(divorced-parent) get annotations do not contain: @card(0, *)
-    Then relation(parentship) get role(parent) get declared annotations contain: @card(0, *)
-    Then relation(single-parentship) get role(single-parent) get declared annotations do not contain: @card(0, *)
-    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations do not contain: @card(0, *)
-    Then relation(parentship) get role(parent) get annotations do not contain: @card(3, *)
-    Then relation(single-parentship) get role(single-parent) get annotations contain: @card(3, *)
-    Then relation(divorced-parentship) get role(divorced-parent) get annotations contain: @card(3, *)
-    Then relation(parentship) get role(parent) get declared annotations do not contain: @card(3, *)
-    Then relation(single-parentship) get role(single-parent) get declared annotations contain: @card(3, *)
-    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations do not contain: @card(3, *)
+    Then relation(parentship) get role(parent) get annotations contain: @card(0..)
+    Then relation(single-parentship) get role(single-parent) get annotations contain: @card(0..)
+    Then relation(divorced-parentship) get role(divorced-parent) get annotations contain: @card(0..)
+    Then relation(parentship) get role(parent) get declared annotations contain: @card(0..)
+    Then relation(single-parentship) get role(single-parent) get declared annotations do not contain: @card(0..)
+    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations do not contain: @card(0..)
+    When relation(single-parentship) get role(single-parent) set annotation: @card(3..)
+    Then relation(parentship) get role(parent) get annotations contain: @card(0..)
+    Then relation(single-parentship) get role(single-parent) get annotations do not contain: @card(0..)
+    Then relation(divorced-parentship) get role(divorced-parent) get annotations do not contain: @card(0..)
+    Then relation(parentship) get role(parent) get declared annotations contain: @card(0..)
+    Then relation(single-parentship) get role(single-parent) get declared annotations do not contain: @card(0..)
+    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations do not contain: @card(0..)
+    Then relation(parentship) get role(parent) get annotations do not contain: @card(3..)
+    Then relation(single-parentship) get role(single-parent) get annotations contain: @card(3..)
+    Then relation(divorced-parentship) get role(divorced-parent) get annotations contain: @card(3..)
+    Then relation(parentship) get role(parent) get declared annotations do not contain: @card(3..)
+    Then relation(single-parentship) get role(single-parent) get declared annotations contain: @card(3..)
+    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations do not contain: @card(3..)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(parentship) get role(parent) get annotations contain: @card(0, *)
-    Then relation(single-parentship) get role(single-parent) get annotations do not contain: @card(0, *)
-    Then relation(divorced-parentship) get role(divorced-parent) get annotations do not contain: @card(0, *)
-    Then relation(parentship) get role(parent) get declared annotations contain: @card(0, *)
-    Then relation(single-parentship) get role(single-parent) get declared annotations do not contain: @card(0, *)
-    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations do not contain: @card(0, *)
-    Then relation(parentship) get role(parent) get annotations do not contain: @card(3, *)
-    Then relation(single-parentship) get role(single-parent) get annotations contain: @card(3, *)
-    Then relation(divorced-parentship) get role(divorced-parent) get annotations contain: @card(3, *)
-    Then relation(parentship) get role(parent) get declared annotations do not contain: @card(3, *)
-    Then relation(single-parentship) get role(single-parent) get declared annotations contain: @card(3, *)
-    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations do not contain: @card(3, *)
-    Then relation(divorced-parentship) get role(divorced-parent) set annotation: @card(2, *); fails
-    Then relation(divorced-parentship) get role(divorced-parent) set annotation: @card(1, *); fails
-    Then relation(divorced-parentship) get role(divorced-parent) set annotation: @card(0, *); fails
-    Then relation(divorced-parentship) get role(divorced-parent) set annotation: @card(0, 6); fails
-    Then relation(divorced-parentship) get role(divorced-parent) set annotation: @card(0, 2); fails
-    When relation(divorced-parentship) get role(divorced-parent) set annotation: @card(3, 6)
-    Then relation(parentship) get role(parent) get annotations contain: @card(0, *)
-    Then relation(single-parentship) get role(single-parent) get annotations do not contain: @card(0, *)
-    Then relation(divorced-parentship) get role(divorced-parent) get annotations do not contain: @card(0, *)
-    Then relation(parentship) get role(parent) get declared annotations contain: @card(0, *)
-    Then relation(single-parentship) get role(single-parent) get declared annotations do not contain: @card(0, *)
-    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations do not contain: @card(0, *)
-    Then relation(parentship) get role(parent) get annotations do not contain: @card(3, *)
-    Then relation(single-parentship) get role(single-parent) get annotations contain: @card(3, *)
-    Then relation(divorced-parentship) get role(divorced-parent) get annotations do not contain: @card(3, *)
-    Then relation(parentship) get role(parent) get declared annotations do not contain: @card(3, *)
-    Then relation(single-parentship) get role(single-parent) get declared annotations contain: @card(3, *)
-    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations do not contain: @card(3, *)
-    Then relation(parentship) get role(parent) get annotations do not contain: @card(3, 6)
-    Then relation(single-parentship) get role(single-parent) get annotations do not contain: @card(3, 6)
-    Then relation(divorced-parentship) get role(divorced-parent) get annotations contain: @card(3, 6)
-    Then relation(parentship) get role(parent) get declared annotations do not contain: @card(3, 6)
-    Then relation(single-parentship) get role(single-parent) get declared annotations do not contain: @card(3, 6)
-    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations contain: @card(3, 6)
+    Then relation(parentship) get role(parent) get annotations contain: @card(0..)
+    Then relation(single-parentship) get role(single-parent) get annotations do not contain: @card(0..)
+    Then relation(divorced-parentship) get role(divorced-parent) get annotations do not contain: @card(0..)
+    Then relation(parentship) get role(parent) get declared annotations contain: @card(0..)
+    Then relation(single-parentship) get role(single-parent) get declared annotations do not contain: @card(0..)
+    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations do not contain: @card(0..)
+    Then relation(parentship) get role(parent) get annotations do not contain: @card(3..)
+    Then relation(single-parentship) get role(single-parent) get annotations contain: @card(3..)
+    Then relation(divorced-parentship) get role(divorced-parent) get annotations contain: @card(3..)
+    Then relation(parentship) get role(parent) get declared annotations do not contain: @card(3..)
+    Then relation(single-parentship) get role(single-parent) get declared annotations contain: @card(3..)
+    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations do not contain: @card(3..)
+    Then relation(divorced-parentship) get role(divorced-parent) set annotation: @card(2..); fails
+    Then relation(divorced-parentship) get role(divorced-parent) set annotation: @card(1..); fails
+    Then relation(divorced-parentship) get role(divorced-parent) set annotation: @card(0..); fails
+    Then relation(divorced-parentship) get role(divorced-parent) set annotation: @card(0..6); fails
+    Then relation(divorced-parentship) get role(divorced-parent) set annotation: @card(0..2); fails
+    When relation(divorced-parentship) get role(divorced-parent) set annotation: @card(3..6)
+    Then relation(parentship) get role(parent) get annotations contain: @card(0..)
+    Then relation(single-parentship) get role(single-parent) get annotations do not contain: @card(0..)
+    Then relation(divorced-parentship) get role(divorced-parent) get annotations do not contain: @card(0..)
+    Then relation(parentship) get role(parent) get declared annotations contain: @card(0..)
+    Then relation(single-parentship) get role(single-parent) get declared annotations do not contain: @card(0..)
+    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations do not contain: @card(0..)
+    Then relation(parentship) get role(parent) get annotations do not contain: @card(3..)
+    Then relation(single-parentship) get role(single-parent) get annotations contain: @card(3..)
+    Then relation(divorced-parentship) get role(divorced-parent) get annotations do not contain: @card(3..)
+    Then relation(parentship) get role(parent) get declared annotations do not contain: @card(3..)
+    Then relation(single-parentship) get role(single-parent) get declared annotations contain: @card(3..)
+    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations do not contain: @card(3..)
+    Then relation(parentship) get role(parent) get annotations do not contain: @card(3..6)
+    Then relation(single-parentship) get role(single-parent) get annotations do not contain: @card(3..6)
+    Then relation(divorced-parentship) get role(divorced-parent) get annotations contain: @card(3..6)
+    Then relation(parentship) get role(parent) get declared annotations do not contain: @card(3..6)
+    Then relation(single-parentship) get role(single-parent) get declared annotations do not contain: @card(3..6)
+    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations contain: @card(3..6)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then relation(parentship) get role(parent) get annotations contain: @card(0, *)
-    Then relation(single-parentship) get role(single-parent) get annotations do not contain: @card(0, *)
-    Then relation(divorced-parentship) get role(divorced-parent) get annotations do not contain: @card(0, *)
-    Then relation(parentship) get role(parent) get declared annotations contain: @card(0, *)
-    Then relation(single-parentship) get role(single-parent) get declared annotations do not contain: @card(0, *)
-    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations do not contain: @card(0, *)
-    Then relation(parentship) get role(parent) get annotations do not contain: @card(3, *)
-    Then relation(single-parentship) get role(single-parent) get annotations contain: @card(3, *)
-    Then relation(divorced-parentship) get role(divorced-parent) get annotations do not contain: @card(3, *)
-    Then relation(parentship) get role(parent) get declared annotations do not contain: @card(3, *)
-    Then relation(single-parentship) get role(single-parent) get declared annotations contain: @card(3, *)
-    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations do not contain: @card(3, *)
-    Then relation(parentship) get role(parent) get annotations do not contain: @card(3, 6)
-    Then relation(single-parentship) get role(single-parent) get annotations do not contain: @card(3, 6)
-    Then relation(divorced-parentship) get role(divorced-parent) get annotations contain: @card(3, 6)
-    Then relation(parentship) get role(parent) get declared annotations do not contain: @card(3, 6)
-    Then relation(single-parentship) get role(single-parent) get declared annotations do not contain: @card(3, 6)
-    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations contain: @card(3, 6)
+    Then relation(parentship) get role(parent) get annotations contain: @card(0..)
+    Then relation(single-parentship) get role(single-parent) get annotations do not contain: @card(0..)
+    Then relation(divorced-parentship) get role(divorced-parent) get annotations do not contain: @card(0..)
+    Then relation(parentship) get role(parent) get declared annotations contain: @card(0..)
+    Then relation(single-parentship) get role(single-parent) get declared annotations do not contain: @card(0..)
+    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations do not contain: @card(0..)
+    Then relation(parentship) get role(parent) get annotations do not contain: @card(3..)
+    Then relation(single-parentship) get role(single-parent) get annotations contain: @card(3..)
+    Then relation(divorced-parentship) get role(divorced-parent) get annotations do not contain: @card(3..)
+    Then relation(parentship) get role(parent) get declared annotations do not contain: @card(3..)
+    Then relation(single-parentship) get role(single-parent) get declared annotations contain: @card(3..)
+    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations do not contain: @card(3..)
+    Then relation(parentship) get role(parent) get annotations do not contain: @card(3..6)
+    Then relation(single-parentship) get role(single-parent) get annotations do not contain: @card(3..6)
+    Then relation(divorced-parentship) get role(divorced-parent) get annotations contain: @card(3..6)
+    Then relation(parentship) get role(parent) get declared annotations do not contain: @card(3..6)
+    Then relation(single-parentship) get role(single-parent) get declared annotations do not contain: @card(3..6)
+    Then relation(divorced-parentship) get role(divorced-parent) get declared annotations contain: @card(3..6)
 
   Scenario: Default @card annotation for <value-type> value type owns can be overridden only by a subset of arguments
     When create relation type: parentship
@@ -3048,159 +3046,159 @@ Feature: Concept Relation Type and Role Type
     Then relation(overridden-parentship) get role(overridden-ordered-parent) set override: ordered-parent; fails
     When relation(overridden-parentship) get role(overridden-ordered-parent) set ordering: ordered
     When relation(overridden-parentship) get role(overridden-ordered-parent) set override: ordered-parent
-    Then relation(parentship) get role(parent) get cardinality: @card(1, 1)
-    Then relation(parentship) get role(ordered-parent) get cardinality: @card(0, *)
-    When relation(overridden-parentship) get role(overridden-parent) set annotation: @card(1, 1)
-    When relation(overridden-parentship) get role(overridden-ordered-parent) set annotation: @card(1, 1)
-    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1, 1)
-    Then relation(overridden-parentship) get role(overridden-ordered-parent) get cardinality: @card(1, 1)
-    Then relation(parentship) get role(parent) get cardinality: @card(1, 1)
-    Then relation(parentship) get role(ordered-parent) get cardinality: @card(0, *)
+    Then relation(parentship) get role(parent) get cardinality: @card(1..1)
+    Then relation(parentship) get role(ordered-parent) get cardinality: @card(0..)
+    When relation(overridden-parentship) get role(overridden-parent) set annotation: @card(1..1)
+    When relation(overridden-parentship) get role(overridden-ordered-parent) set annotation: @card(1..1)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1..1)
+    Then relation(overridden-parentship) get role(overridden-ordered-parent) get cardinality: @card(1..1)
+    Then relation(parentship) get role(parent) get cardinality: @card(1..1)
+    Then relation(parentship) get role(ordered-parent) get cardinality: @card(0..)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1, 1)
-    Then relation(overridden-parentship) get role(overridden-ordered-parent) get cardinality: @card(1, 1)
-    Then relation(parentship) get role(parent) get cardinality: @card(1, 1)
-    Then relation(parentship) get role(ordered-parent) get cardinality: @card(0, *)
-    Then relation(overridden-parentship) get role(overridden-parent) set annotation: @card(0, 1); fails
-    When relation(overridden-parentship) get role(overridden-ordered-parent) set annotation: @card(0, 1)
-    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1, 1)
-    Then relation(overridden-parentship) get role(overridden-ordered-parent) get cardinality: @card(0, 1)
-    Then relation(parentship) get role(parent) get cardinality: @card(1, 1)
-    Then relation(parentship) get role(ordered-parent) get cardinality: @card(0, *)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1..1)
+    Then relation(overridden-parentship) get role(overridden-ordered-parent) get cardinality: @card(1..1)
+    Then relation(parentship) get role(parent) get cardinality: @card(1..1)
+    Then relation(parentship) get role(ordered-parent) get cardinality: @card(0..)
+    Then relation(overridden-parentship) get role(overridden-parent) set annotation: @card(0..1); fails
+    When relation(overridden-parentship) get role(overridden-ordered-parent) set annotation: @card(0..1)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1..1)
+    Then relation(overridden-parentship) get role(overridden-ordered-parent) get cardinality: @card(0..1)
+    Then relation(parentship) get role(parent) get cardinality: @card(1..1)
+    Then relation(parentship) get role(ordered-parent) get cardinality: @card(0..)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1, 1)
-    Then relation(overridden-parentship) get role(overridden-ordered-parent) get cardinality: @card(0, 1)
-    Then relation(parentship) get role(parent) get cardinality: @card(1, 1)
-    Then relation(parentship) get role(ordered-parent) get cardinality: @card(0, *)
-    Then relation(overridden-parentship) get role(overridden-parent) set annotation: @card(0, *); fails
-    When relation(overridden-parentship) get role(overridden-ordered-parent) set annotation: @card(0, *)
-    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1, 1)
-    Then relation(overridden-parentship) get role(overridden-ordered-parent) get cardinality: @card(0, *)
-    Then relation(parentship) get role(parent) get cardinality: @card(1, 1)
-    Then relation(parentship) get role(ordered-parent) get cardinality: @card(0, *)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1..1)
+    Then relation(overridden-parentship) get role(overridden-ordered-parent) get cardinality: @card(0..1)
+    Then relation(parentship) get role(parent) get cardinality: @card(1..1)
+    Then relation(parentship) get role(ordered-parent) get cardinality: @card(0..)
+    Then relation(overridden-parentship) get role(overridden-parent) set annotation: @card(0..); fails
+    When relation(overridden-parentship) get role(overridden-ordered-parent) set annotation: @card(0..)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1..1)
+    Then relation(overridden-parentship) get role(overridden-ordered-parent) get cardinality: @card(0..)
+    Then relation(parentship) get role(parent) get cardinality: @card(1..1)
+    Then relation(parentship) get role(ordered-parent) get cardinality: @card(0..)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1, 1)
-    Then relation(overridden-parentship) get role(overridden-ordered-parent) get cardinality: @card(0, *)
-    Then relation(parentship) get role(parent) get cardinality: @card(1, 1)
-    Then relation(parentship) get role(ordered-parent) get cardinality: @card(0, *)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1..1)
+    Then relation(overridden-parentship) get role(overridden-ordered-parent) get cardinality: @card(0..)
+    Then relation(parentship) get role(parent) get cardinality: @card(1..1)
+    Then relation(parentship) get role(ordered-parent) get cardinality: @card(0..)
     When relation(overridden-parentship) get role(overridden-parent) unset annotation: @card
     When relation(overridden-parentship) get role(overridden-ordered-parent) unset annotation: @card
-    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1, 1)
-    Then relation(overridden-parentship) get role(overridden-ordered-parent) get cardinality: @card(0, *)
-    Then relation(parentship) get role(parent) get cardinality: @card(1, 1)
-    Then relation(parentship) get role(ordered-parent) get cardinality: @card(0, *)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1..1)
+    Then relation(overridden-parentship) get role(overridden-ordered-parent) get cardinality: @card(0..)
+    Then relation(parentship) get role(parent) get cardinality: @card(1..1)
+    Then relation(parentship) get role(ordered-parent) get cardinality: @card(0..)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1, 1)
-    Then relation(overridden-parentship) get role(overridden-ordered-parent) get cardinality: @card(0, *)
-    Then relation(parentship) get role(parent) get cardinality: @card(1, 1)
-    Then relation(parentship) get role(ordered-parent) get cardinality: @card(0, *)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1..1)
+    Then relation(overridden-parentship) get role(overridden-ordered-parent) get cardinality: @card(0..)
+    Then relation(parentship) get role(parent) get cardinality: @card(1..1)
+    Then relation(parentship) get role(ordered-parent) get cardinality: @card(0..)
 
   Scenario: Relates cannot have card that is not narrowed by other owns narrowing it for different subrelations
     When create relation type: parentship
     When relation(parentship) create role: parent
-    Then relation(parentship) get role(parent) get cardinality: @card(1, 1)
+    Then relation(parentship) get role(parent) get cardinality: @card(1..1)
     When create relation type: overridden-parentship
     When relation(overridden-parentship) create role: overridden-parent
     When relation(overridden-parentship) set supertype: parentship
     When relation(overridden-parentship) get role(overridden-parent) set override: parent
-    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1, 1)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1..1)
     When create relation type: overridden-parentship-2
     When relation(overridden-parentship-2) create role: overridden-parent-2
     When relation(overridden-parentship-2) set supertype: parentship
     When relation(overridden-parentship-2) get role(overridden-parent-2) set override: parent
-    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(1, 1)
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(1..1)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(parentship) get role(parent) get cardinality: @card(1, 1)
-    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1, 1)
-    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(1, 1)
-    Then relation(overridden-parentship) get role(overridden-parent) set annotation: @card(1, 2); fails
-    Then relation(overridden-parentship-2) get role(overridden-parent-2) set annotation: @card(1, 2); fails
-    Then relation(overridden-parentship) get role(overridden-parent) set annotation: @card(0, 1); fails
-    Then relation(overridden-parentship-2) get role(overridden-parent-2) set annotation: @card(0, 1); fails
-    When relation(parentship) get role(parent) set annotation: @card(0, 2)
-    When relation(overridden-parentship) get role(overridden-parent) set annotation: @card(0, 1)
-    When relation(overridden-parentship-2) get role(overridden-parent-2) set annotation: @card(1, 2)
-    Then relation(parentship) get role(parent) get cardinality: @card(0, 2)
-    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(0, 1)
-    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(1, 2)
+    Then relation(parentship) get role(parent) get cardinality: @card(1..1)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1..1)
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(1..1)
+    Then relation(overridden-parentship) get role(overridden-parent) set annotation: @card(1..2); fails
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) set annotation: @card(1..2); fails
+    Then relation(overridden-parentship) get role(overridden-parent) set annotation: @card(0..1); fails
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) set annotation: @card(0..1); fails
+    When relation(parentship) get role(parent) set annotation: @card(0..2)
+    When relation(overridden-parentship) get role(overridden-parent) set annotation: @card(0..1)
+    When relation(overridden-parentship-2) get role(overridden-parent-2) set annotation: @card(1..2)
+    Then relation(parentship) get role(parent) get cardinality: @card(0..2)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(0..1)
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(1..2)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(parentship) get role(parent) get cardinality: @card(0, 2)
-    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(0, 1)
-    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(1, 2)
-    When relation(overridden-parentship) get role(overridden-parent) set annotation: @card(1, 2)
-    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1, 2)
+    Then relation(parentship) get role(parent) get cardinality: @card(0..2)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(0..1)
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(1..2)
+    When relation(overridden-parentship) get role(overridden-parent) set annotation: @card(1..2)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1..2)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(parentship) get role(parent) get cardinality: @card(0, 2)
-    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1, 2)
-    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(1, 2)
-    When relation(overridden-parentship-2) get role(overridden-parent-2) set annotation: @card(2, 2)
-    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(2, 2)
+    Then relation(parentship) get role(parent) get cardinality: @card(0..2)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1..2)
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(1..2)
+    When relation(overridden-parentship-2) get role(overridden-parent-2) set annotation: @card(2..2)
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(2..2)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(parentship) get role(parent) get cardinality: @card(0, 2)
-    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1, 2)
-    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(2, 2)
-    When relation(parentship) get role(parent) set annotation: @card(0, 1)
+    Then relation(parentship) get role(parent) get cardinality: @card(0..2)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1..2)
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(2..2)
+    When relation(parentship) get role(parent) set annotation: @card(0..1)
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When relation(parentship) get role(parent) set annotation: @card(2, 2)
+    When relation(parentship) get role(parent) set annotation: @card(2..2)
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When relation(parentship) get role(parent) set annotation: @card(0, *)
+    When relation(parentship) get role(parent) set annotation: @card(0..)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(parentship) get role(parent) get cardinality: @card(0, *)
-    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1, 2)
-    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(2, 2)
-    When relation(overridden-parentship-2) get role(overridden-parent-2) set annotation: @card(4, 5)
+    Then relation(parentship) get role(parent) get cardinality: @card(0..)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1..2)
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(2..2)
+    When relation(overridden-parentship-2) get role(overridden-parent-2) set annotation: @card(4..5)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(parentship) get role(parent) get cardinality: @card(0, *)
-    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1, 2)
-    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(4, 5)
-    When relation(parentship) get role(parent) set annotation: @card(0, 4)
+    Then relation(parentship) get role(parent) get cardinality: @card(0..)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1..2)
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(4..5)
+    When relation(parentship) get role(parent) set annotation: @card(0..4)
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When relation(parentship) get role(parent) set annotation: @card(3, 3)
+    When relation(parentship) get role(parent) set annotation: @card(3..3)
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When relation(parentship) get role(parent) set annotation: @card(2, 5)
+    When relation(parentship) get role(parent) set annotation: @card(2..5)
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When relation(parentship) get role(parent) unset annotation: @card
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When relation(parentship) get role(parent) set annotation: @card(1, 5)
+    When relation(parentship) get role(parent) set annotation: @card(1..5)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(parentship) get role(parent) get cardinality: @card(1, 5)
-    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1, 2)
-    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(4, 5)
-    When relation(overridden-parentship) get role(overridden-parent) set annotation: @card(1, 1)
-    When relation(overridden-parentship-2) get role(overridden-parent-2) set annotation: @card(1, 1)
+    Then relation(parentship) get role(parent) get cardinality: @card(1..5)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1..2)
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(4..5)
+    When relation(overridden-parentship) get role(overridden-parent) set annotation: @card(1..1)
+    When relation(overridden-parentship-2) get role(overridden-parent-2) set annotation: @card(1..1)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(parentship) get role(parent) get cardinality: @card(1, 5)
-    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1, 1)
-    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(1, 1)
+    Then relation(parentship) get role(parent) get cardinality: @card(1..5)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1..1)
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(1..1)
     When relation(parentship) get role(parent) unset annotation: @card
     When transaction commits
     When connection open read transaction for database: typedb
-    Then relation(parentship) get role(parent) get cardinality: @card(1, 1)
-    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1, 1)
-    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(1, 1)
-    Then relation(parentship) get role(parent) get annotations do not contain: @card(1, 1)
-    Then relation(overridden-parentship) get role(overridden-parent) get annotations contain: @card(1, 1)
-    Then relation(overridden-parentship-2) get role(overridden-parent-2) get annotations contain: @card(1, 1)
+    Then relation(parentship) get role(parent) get cardinality: @card(1..1)
+    Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1..1)
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(1..1)
+    Then relation(parentship) get role(parent) get annotations do not contain: @card(1..1)
+    Then relation(overridden-parentship) get role(overridden-parent) get annotations contain: @card(1..1)
+    Then relation(overridden-parentship-2) get role(overridden-parent-2) get annotations contain: @card(1..1)
 
-  # TODO: Add tests for one subplayer with multiple plays overriding one plays overridden_plays(card(2, 3)) vs 3 subplays of (2, 3), (2, 3), (2, 3) etc
+  # TODO: Add tests for one subplayer with multiple plays overriding one plays overridden_plays(card(2..3)) vs 3 subplays of (2, 3), (2, 3), (2, 3) etc
 
 ########################
 # relates not compatible @annotations: @key, @unique, @subkey, @values, @range, @abstract, @cascade, @independent, @replace, @regex
@@ -3287,7 +3285,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(parent) get declared annotations is empty
     Examples:
       | annotation-1 | annotation-2 | annotation-category-1 | annotation-category-2 |
-      | abstract     | card(0, 1)   | abstract              | card                  |
+      | abstract     | card(0..1)   | abstract              | card                  |
 
   Scenario Outline: Ordered roles can set @<annotation-1> and @<annotation-2> together and unset it
     When create relation type: parentship
@@ -3338,8 +3336,8 @@ Feature: Concept Relation Type and Role Type
     Examples:
       | annotation-1 | annotation-2 | annotation-category-1 | annotation-category-2 |
       | abstract     | distinct     | abstract              | distinct              |
-      | abstract     | card(0, 1)   | abstract              | card                  |
-      | distinct     | card(0, 1)   | distinct              | card                  |
+      | abstract     | card(0..1)   | abstract              | card                  |
+      | distinct     | card(0..1)   | distinct              | card                  |
 
       # Uncomment and add Examples when they appear!
 #  Scenario Outline: Roles lists cannot set @<annotation-1> and @<annotation-2> together and unset it

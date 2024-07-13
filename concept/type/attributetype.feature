@@ -2768,7 +2768,7 @@ Feature: Concept Attribute Type
 #    Then attribute(email) set annotation: @key; fails
 #    Then attribute(email) set annotation: @unique; fails
 #    Then attribute(email) set annotation: @subkey(LABEL); fails
-#    Then attribute(email) set annotation: @card(1, 2); fails
+#    Then attribute(email) set annotation: @card(1..2); fails
 #    Then attribute(email) set annotation: @cascade; fails
 #    Then attribute(email) set annotation: @replace; fails
 #    Then attribute(email) get annotations is empty

@@ -1504,8 +1504,8 @@ Feature: Concept Plays
     Then <root-type>(<type-name>) get plays is empty
     Examples:
       | root-type | type-name   | annotation | annotation-category |
-      | entity    | person      | card(0, 1) | card                |
-      | relation  | description | card(0, 1) | card                |
+      | entity    | person      | card(0..1) | card                |
+      | relation  | description | card(0..1) | card                |
 
   Scenario Outline: <root-type> types can have plays with @<annotation> alongside pure plays
     When create relation type: parentship
@@ -1544,8 +1544,8 @@ Feature: Concept Plays
       | employment:employee |
     Examples:
       | root-type | type-name   | annotation |
-      | entity    | person      | card(0, 1) |
-      | relation  | description | card(0, 1) |
+      | entity    | person      | card(0..1) |
+      | relation  | description | card(0..1) |
 
   Scenario Outline: <root-type> types can unset not set @<annotation> of plays
     When create relation type: marriage
@@ -1587,8 +1587,8 @@ Feature: Concept Plays
     Then <root-type>(<type-name>) get plays(parentship:parent) get declared annotations is empty
     Examples:
       | root-type | type-name   | annotation | annotation-category |
-      | entity    | person      | card(0, 1) | card                |
-      | relation  | description | card(0, 1) | card                |
+      | entity    | person      | card(0..1) | card                |
+      | relation  | description | card(0..1) | card                |
 
   Scenario Outline: <root-type> types can unset @<annotation> of inherited plays
     When create relation type: marriage
@@ -1623,8 +1623,8 @@ Feature: Concept Plays
     Then <root-type>(<subtype-name>) get plays(marriage:spouse) get declared annotations contain: @<annotation>
     Examples:
       | root-type | supertype-name | subtype-name | annotation | annotation-category |
-      | entity    | person         | customer     | card(1, 2) | card                |
-      | relation  | description    | registration | card(1, 2) | card                |
+      | entity    | person         | customer     | card(1..2) | card                |
+      | relation  | description    | registration | card(1..2) | card                |
 
   Scenario Outline: <root-type> types cannot unset inherited @<annotation> of overridden plays
     When create relation type: marriage
@@ -1667,8 +1667,8 @@ Feature: Concept Plays
     Then <root-type>(<subtype-name>) get plays(concrete-marriage:husband) get declared annotations do not contain: @<annotation>
     Examples:
       | root-type | supertype-name | subtype-name | annotation | annotation-category |
-      | entity    | person         | customer     | card(1, 2) | card                |
-      | relation  | description    | registration | card(1, 2) | card                |
+      | entity    | person         | customer     | card(1..2) | card                |
+      | relation  | description    | registration | card(1..2) | card                |
 
   Scenario Outline: <root-type> types can inherit plays with @<annotation>s alongside pure plays
     When create relation type: parentship
@@ -1756,8 +1756,8 @@ Feature: Concept Plays
       | marriage:spouse     |
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | annotation |
-      | entity    | person         | customer     | subscriber     | card(1, 2) |
-      | relation  | description    | registration | profile        | card(1, 2) |
+      | entity    | person         | customer     | subscriber     | card(1..2) |
+      | relation  | description    | registration | profile        | card(1..2) |
 
   Scenario Outline: <root-type> types can redeclare plays with @<annotation>s as plays with @<annotation>s
     When create relation type: contract
@@ -1786,8 +1786,8 @@ Feature: Concept Plays
     Then <root-type>(<type-name>) get plays(parentship:parent) get annotations contain: @<annotation>
     Examples:
       | root-type | type-name   | annotation |
-      | entity    | person      | card(1, 2) |
-      | relation  | description | card(1, 2) |
+      | entity    | person      | card(1..2) |
+      | relation  | description | card(1..2) |
 
   Scenario Outline: <root-type> types can redeclare plays as plays with @<annotation>
     When create relation type: contract
@@ -1822,8 +1822,8 @@ Feature: Concept Plays
     Then <root-type>(<type-name>) get plays(marriage:spouse) get declared annotations contain: @<annotation>
     Examples:
       | root-type | type-name   | annotation |
-      | entity    | person      | card(1, 2) |
-      | relation  | description | card(1, 2) |
+      | entity    | person      | card(1..2) |
+      | relation  | description | card(1..2) |
 
   Scenario Outline: <root-type> types can redeclare plays with @<annotation> as pure plays (annotations are persisted)
     When create relation type: contract
@@ -1854,8 +1854,8 @@ Feature: Concept Plays
     Then <root-type>(<type-name>) get plays(parentship:parent) get declared annotations contain: @<annotation>
     Examples:
       | root-type | type-name   | annotation |
-      | entity    | person      | card(1, 2) |
-      | relation  | description | card(1, 2) |
+      | entity    | person      | card(1..2) |
+      | relation  | description | card(1..2) |
 
   Scenario Outline: <root-type> types can override inherited pure plays as plays with @<annotation>s
     When create relation type: contract
@@ -1892,8 +1892,8 @@ Feature: Concept Plays
     Then <root-type>(<supertype-name>) get plays(contract:contractor) get declared annotations do not contain: @<annotation>
     Examples:
       | root-type | supertype-name | subtype-name | annotation |
-      | entity    | person         | customer     | card(1, 2) |
-      | relation  | description    | registration | card(1, 2) |
+      | entity    | person         | customer     | card(1..2) |
+      | relation  | description    | registration | card(1..2) |
 
   Scenario Outline: <root-type> types can re-override plays with <annotation>s
     When create relation type: parentship
@@ -1930,8 +1930,8 @@ Feature: Concept Plays
     Then <root-type>(<subtype-name>) get plays(fathership:father) get declared annotations do not contain: @<annotation>
     Examples:
       | root-type | supertype-name | subtype-name | annotation |
-      | entity    | person         | customer     | card(1, 2) |
-      | relation  | description    | registration | card(1, 2) |
+      | entity    | person         | customer     | card(1..2) |
+      | relation  | description    | registration | card(1..2) |
 
   Scenario Outline: <root-type> types cannot redeclare inherited plays as plays with @<annotation> without override
     When create relation type: parentship
@@ -1971,8 +1971,8 @@ Feature: Concept Plays
     Then transaction commits; fails
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | annotation |
-      | entity    | person         | customer     | subscriber     | card(1, 2) |
-      | relation  | description    | registration | profile        | card(1, 2) |
+      | entity    | person         | customer     | subscriber     | card(1..2) |
+      | relation  | description    | registration | profile        | card(1..2) |
 
   Scenario Outline: <root-type> types cannot redeclare inherited plays with @<annotation> as pure plays or plays with @<annotation>
     When create relation type: parentship
@@ -1991,8 +1991,8 @@ Feature: Concept Plays
     Then transaction commits; fails
     Examples:
       | root-type | supertype-name | subtype-name | annotation |
-      | entity    | person         | customer     | card(1, 2) |
-      | relation  | description    | registration | card(1, 2) |
+      | entity    | person         | customer     | card(1..2) |
+      | relation  | description    | registration | card(1..2) |
 
   Scenario Outline: <root-type> types cannot redeclare inherited plays with @<annotation>
     When create relation type: parentship
@@ -2012,8 +2012,8 @@ Feature: Concept Plays
     Then transaction commits; fails
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | annotation |
-      | entity    | person         | customer     | subscriber     | card(1, 2) |
-      | relation  | description    | registration | profile        | card(1, 2) |
+      | entity    | person         | customer     | subscriber     | card(1..2) |
+      | relation  | description    | registration | profile        | card(1..2) |
 
   Scenario Outline: <root-type> types cannot redeclare overridden plays with @<annotation>s
     When create relation type: parentship
@@ -2034,8 +2034,8 @@ Feature: Concept Plays
     Then transaction commits; fails
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | annotation |
-      | entity    | person         | customer     | subscriber     | card(1, 2) |
-      | relation  | description    | registration | profile        | card(1, 2) |
+      | entity    | person         | customer     | subscriber     | card(1..2) |
+      | relation  | description    | registration | profile        | card(1..2) |
 
   Scenario Outline: <root-type> types cannot redeclare overridden plays with @<annotation>s on multiple layers
     When create relation type: parentship
@@ -2057,8 +2057,8 @@ Feature: Concept Plays
     Then transaction commits; fails
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | annotation |
-      | entity    | person         | customer     | subscriber     | card(1, 2) |
-      | relation  | description    | registration | profile        | card(1, 2) |
+      | entity    | person         | customer     | subscriber     | card(1..2) |
+      | relation  | description    | registration | profile        | card(1..2) |
 
   Scenario Outline: <root-type> types can inherit plays with @<annotation>s and pure plays that are subtypes of each other
     When create relation type: contract
@@ -2183,8 +2183,8 @@ Feature: Concept Plays
     Then <root-type>(<subtype-name-2>) get plays(fathership:father) get annotations do not contain: @<annotation>
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | annotation |
-      | entity    | person         | customer     | subscriber     | card(1, 2) |
-      | relation  | description    | registration | profile        | card(1, 2) |
+      | entity    | person         | customer     | subscriber     | card(1..2) |
+      | relation  | description    | registration | profile        | card(1..2) |
 
   Scenario Outline: <root-type> types can override inherited plays with @<annotation>s and pure plays
     When create relation type: dispatch
@@ -2347,8 +2347,8 @@ Feature: Concept Plays
     Then <root-type>(<subtype-name-2>) get plays(fathership:father) get annotations contain: @<annotation>
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | annotation |
-      | entity    | person         | customer     | subscriber     | card(1, 2) |
-      | relation  | description    | registration | profile        | card(1, 2) |
+      | entity    | person         | customer     | subscriber     | card(1..2) |
+      | relation  | description    | registration | profile        | card(1..2) |
 
   Scenario Outline: <root-tyoe> type cannot set redundant duplicated @<annotation> on plays while it inherits it
     When create relation type: parentship
@@ -2374,8 +2374,8 @@ Feature: Concept Plays
     Then <root-type>(<subtype-name>) get plays(fathership:father) get annotations contain: @<annotation>
     Examples:
       | root-type | supertype-name | subtype-name | annotation |
-      | entity    | person         | customer     | card(1, 2) |
-      | relation  | description    | registration | card(1, 2) |
+      | entity    | person         | customer     | card(1..2) |
+      | relation  | description    | registration | card(1..2) |
 
 ########################
 # @card
@@ -2386,39 +2386,39 @@ Feature: Concept Plays
     When relation(marriage) create role: spouse
     When entity(person) set plays: marriage:spouse
     Then entity(person) get plays(marriage:spouse) get annotations is empty
-    Then entity(person) get plays(marriage:spouse) get cardinality: @card(1, 1)
+    Then entity(person) get plays(marriage:spouse) get cardinality: @card(1..1)
     When transaction commits
     When connection open read transaction for database: typedb
     Then entity(person) get plays(marriage:spouse) get annotations is empty
-    Then entity(person) get plays(marriage:spouse) get cardinality: @card(1, 1)
+    Then entity(person) get plays(marriage:spouse) get cardinality: @card(1..1)
 
   Scenario Outline: Plays can set @card annotation with arguments in correct order and unset it
     When create relation type: marriage
     When relation(marriage) create role: spouse
     When entity(person) set plays: marriage:spouse
     Then entity(person) get plays(marriage:spouse) get annotations is empty
-    Then entity(person) get plays(marriage:spouse) get cardinality: @card(1, 1)
-    When entity(person) get plays(marriage:spouse) set annotation: @card(<arg0>, <arg1>)
-    Then entity(person) get plays(marriage:spouse) get annotations contain: @card(<arg0>, <arg1>)
-    Then entity(person) get plays(marriage:spouse) get cardinality: @card(<arg0>, <arg1>)
+    Then entity(person) get plays(marriage:spouse) get cardinality: @card(1..1)
+    When entity(person) get plays(marriage:spouse) set annotation: @card(<arg0>..<arg1>)
+    Then entity(person) get plays(marriage:spouse) get annotations contain: @card(<arg0>..<arg1>)
+    Then entity(person) get plays(marriage:spouse) get cardinality: @card(<arg0>..<arg1>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get plays(marriage:spouse) get annotations contain: @card(<arg0>, <arg1>)
-    Then entity(person) get plays(marriage:spouse) get cardinality: @card(<arg0>, <arg1>)
+    Then entity(person) get plays(marriage:spouse) get annotations contain: @card(<arg0>..<arg1>)
+    Then entity(person) get plays(marriage:spouse) get cardinality: @card(<arg0>..<arg1>)
     Then entity(person) get plays(marriage:spouse) unset annotation: @card
     Then entity(person) get plays(marriage:spouse) get annotations is empty
-    Then entity(person) get plays(marriage:spouse) get cardinality: @card(1, 1)
+    Then entity(person) get plays(marriage:spouse) get cardinality: @card(1..1)
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) get plays(marriage:spouse) get annotations is empty
-    Then entity(person) get plays(marriage:spouse) get cardinality: @card(1, 1)
-    When entity(person) get plays(marriage:spouse) set annotation: @card(<arg0>, <arg1>)
-    Then entity(person) get plays(marriage:spouse) get annotations contain: @card(<arg0>, <arg1>)
-    Then entity(person) get plays(marriage:spouse) get cardinality: @card(<arg0>, <arg1>)
+    Then entity(person) get plays(marriage:spouse) get cardinality: @card(1..1)
+    When entity(person) get plays(marriage:spouse) set annotation: @card(<arg0>..<arg1>)
+    Then entity(person) get plays(marriage:spouse) get annotations contain: @card(<arg0>..<arg1>)
+    Then entity(person) get plays(marriage:spouse) get cardinality: @card(<arg0>..<arg1>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get plays(marriage:spouse) get annotations contain: @card(<arg0>, <arg1>)
-    Then entity(person) get plays(marriage:spouse) get cardinality: @card(<arg0>, <arg1>)
+    Then entity(person) get plays(marriage:spouse) get annotations contain: @card(<arg0>..<arg1>)
+    Then entity(person) get plays(marriage:spouse) get cardinality: @card(<arg0>..<arg1>)
     When entity(person) unset plays: marriage:spouse
     Then entity(person) get plays is empty
     When transaction commits
@@ -2438,11 +2438,11 @@ Feature: Concept Plays
     When relation(marriage) create role: spouse
     When entity(person) set plays: marriage:spouse
     Then entity(person) get plays(marriage:spouse) get annotations is empty
-    When entity(person) get plays(marriage:spouse) set annotation: @card(<arg>, <arg>)
-    Then entity(person) get plays(marriage:spouse) get annotations contain: @card(<arg>, <arg>)
+    When entity(person) get plays(marriage:spouse) set annotation: @card(<arg>..<arg>)
+    Then entity(person) get plays(marriage:spouse) get annotations contain: @card(<arg>..<arg>)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get plays(marriage:spouse) get annotations contain: @card(<arg>, <arg>)
+    Then entity(person) get plays(marriage:spouse) get annotations contain: @card(<arg>..<arg>)
     Examples:
       | arg                 |
       | 1                   |
@@ -2459,17 +2459,15 @@ Feature: Concept Plays
 #    Then entity(person) get plays(marriage:spouse) set annotation: @card(); fails
 #    Then entity(person) get plays(marriage:spouse) set annotation: @card(1); fails
 #    Then entity(person) get plays(marriage:spouse) set annotation: @card(*); fails
-#    Then entity(person) get plays(marriage:spouse) set annotation: @card(1, 2, 3); fails
-#    Then entity(person) get plays(marriage:spouse) set annotation: @card(-1, 1); fails
-#    Then entity(person) get plays(marriage:spouse) set annotation: @card(0, 0.1); fails
-#    Then entity(person) get plays(marriage:spouse) set annotation: @card(0, 1.5); fails
-#    Then entity(person) get plays(marriage:spouse) set annotation: @card(*, *); fails
-#    Then entity(person) get plays(marriage:spouse) set annotation: @card(0, **); fails
-#    Then entity(person) get plays(marriage:spouse) set annotation: @card(1, "2"); fails
-#    Then entity(person) get plays(marriage:spouse) set annotation: @card("1", 2); fails
-#    Then entity(person) get plays(marriage:spouse) set annotation: @card(*, *); fails
-    Then entity(person) get plays(marriage:spouse) set annotation: @card(2, 1); fails
-    Then entity(person) get plays(marriage:spouse) set annotation: @card(0, 0); fails
+#    Then entity(person) get plays(marriage:spouse) set annotation: @card(1..2..3); fails
+#    Then entity(person) get plays(marriage:spouse) set annotation: @card(-1..1); fails
+#    Then entity(person) get plays(marriage:spouse) set annotation: @card(0..0.1); fails
+#    Then entity(person) get plays(marriage:spouse) set annotation: @card(0..1.5); fails
+#    Then entity(person) get plays(marriage:spouse) set annotation: @card(..); fails
+#    Then entity(person) get plays(marriage:spouse) set annotation: @card(1.."2"); fails
+#    Then entity(person) get plays(marriage:spouse) set annotation: @card("1"..2); fails
+    Then entity(person) get plays(marriage:spouse) set annotation: @card(2..1); fails
+    Then entity(person) get plays(marriage:spouse) set annotation: @card(0..0); fails
     Then entity(person) get plays(marriage:spouse) get annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
@@ -2619,13 +2617,13 @@ Feature: Concept Plays
     Then relation(description) get plays(second-custom-relation:r2) get declared annotations contain: @card(<args>)
     Examples:
       | args       | args-override |
-      | 0, *       | 0, 10000      |
-      | 0, 10      | 0, 1          |
-      | 0, 2       | 1, 2          |
-      | 1, *       | 1, 1          |
-      | 1, 5       | 3, 4          |
-      | 38, 111    | 39, 111       |
-      | 1000, 1100 | 1000, 1099    |
+      | 0..        | 0..10000      |
+      | 0..10      | 0..1          |
+      | 0..2       | 1..2          |
+      | 1..        | 1..1          |
+      | 1..5       | 3..4          |
+      | 38..111    | 39..111       |
+      | 1000..1100 | 1000..1099    |
 
   Scenario Outline: Inherited @card annotation on plays cannot be reset or overridden by the @card of not a subset of arguments
     When create relation type: custom-relation
@@ -2693,103 +2691,103 @@ Feature: Concept Plays
     Then transaction commits; fails
     Examples:
       | args       | args-override |
-      | 0, 10000   | 0, 10001      |
-      | 0, 10      | 1, 11         |
-      | 1, *       | 0, 2          |
-      | 1, 5       | 6, 10         |
-      | 2, 2       | 1, 1          |
-      | 38, 111    | 37, 111       |
-      | 1000, 1100 | 1000, 1199    |
+      | 0..10000   | 0..10001      |
+      | 0..10      | 1..11         |
+      | 1..        | 0..2          |
+      | 1..5       | 6..10         |
+      | 2..2       | 1..1          |
+      | 38..111    | 37..111       |
+      | 1000..1100 | 1000..1199    |
 
   Scenario Outline: Cardinality can be narrowed for the same role for <root-type>'s plays
     When create relation type: parentship
     When relation(parentship) create role: parent
     When <root-type>(<supertype-name>) set plays: parentship:parent
-    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(0, *)
+    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(0..)
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
     When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
     When <root-type>(<subtype-name>) set plays: parentship:parent
     When <root-type>(<subtype-name>) get plays(parentship:parent) set override: parentship:parent
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations contain: @card(0, *)
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations contain: @card(0, *)
-    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get annotations contain: @card(0, *)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get declared annotations contain: @card(0, *)
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get declared annotations do not contain: @card(0, *)
-    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get declared annotations do not contain: @card(0, *)
-    When <root-type>(<subtype-name>) get plays(parentship:parent) set annotation: @card(3, *)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations contain: @card(0, *)
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations do not contain: @card(0, *)
-    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get annotations do not contain: @card(0, *)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get declared annotations contain: @card(0, *)
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get declared annotations do not contain: @card(0, *)
-    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get declared annotations do not contain: @card(0, *)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations do not contain: @card(3, *)
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations contain: @card(3, *)
-    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get annotations contain: @card(3, *)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get declared annotations do not contain: @card(3, *)
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get declared annotations contain: @card(3, *)
-    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get declared annotations contain: @card(3, *)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations contain: @card(0..)
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations contain: @card(0..)
+    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get annotations contain: @card(0..)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get declared annotations contain: @card(0..)
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get declared annotations do not contain: @card(0..)
+    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get declared annotations do not contain: @card(0..)
+    When <root-type>(<subtype-name>) get plays(parentship:parent) set annotation: @card(3..)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations contain: @card(0..)
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations do not contain: @card(0..)
+    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get annotations do not contain: @card(0..)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get declared annotations contain: @card(0..)
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get declared annotations do not contain: @card(0..)
+    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get declared annotations do not contain: @card(0..)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations do not contain: @card(3..)
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations contain: @card(3..)
+    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get annotations contain: @card(3..)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get declared annotations do not contain: @card(3..)
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get declared annotations contain: @card(3..)
+    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get declared annotations contain: @card(3..)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations contain: @card(0, *)
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations do not contain: @card(0, *)
-    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get annotations do not contain: @card(0, *)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get declared annotations contain: @card(0, *)
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get declared annotations do not contain: @card(0, *)
-    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get declared annotations do not contain: @card(0, *)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations do not contain: @card(3, *)
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations contain: @card(3, *)
-    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get annotations contain: @card(3, *)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get declared annotations do not contain: @card(3, *)
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get declared annotations contain: @card(3, *)
-    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get declared annotations contain: @card(3, *)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations contain: @card(0..)
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations do not contain: @card(0..)
+    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get annotations do not contain: @card(0..)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get declared annotations contain: @card(0..)
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get declared annotations do not contain: @card(0..)
+    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get declared annotations do not contain: @card(0..)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations do not contain: @card(3..)
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations contain: @card(3..)
+    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get annotations contain: @card(3..)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get declared annotations do not contain: @card(3..)
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get declared annotations contain: @card(3..)
+    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get declared annotations contain: @card(3..)
     When <root-type>(<subtype-name-2>) set plays: parentship:parent
     When <root-type>(<subtype-name-2>) get plays(parentship:parent) set override: parentship:parent
-    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get declared annotations do not contain: @card(3, *)
-    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) set annotation: @card(2, *); fails
-    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) set annotation: @card(1, *); fails
-    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) set annotation: @card(0, *); fails
-    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) set annotation: @card(0, 6); fails
-    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) set annotation: @card(0, 2); fails
-    When <root-type>(<subtype-name-2>) get plays(parentship:parent) set annotation: @card(3, 6)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations contain: @card(0, *)
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations do not contain: @card(0, *)
-    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get annotations do not contain: @card(0, *)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get declared annotations contain: @card(0, *)
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get declared annotations do not contain: @card(0, *)
-    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get declared annotations do not contain: @card(0, *)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations do not contain: @card(3, *)
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations contain: @card(3, *)
-    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get annotations do not contain: @card(3, *)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get declared annotations do not contain: @card(3, *)
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get declared annotations contain: @card(3, *)
-    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get declared annotations do not contain: @card(3, *)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations do not contain: @card(3, 6)
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations do not contain: @card(3, 6)
-    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get annotations contain: @card(3, 6)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get declared annotations do not contain: @card(3, 6)
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get declared annotations do not contain: @card(3, 6)
-    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get declared annotations contain: @card(3, 6)
+    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get declared annotations do not contain: @card(3..)
+    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) set annotation: @card(2..); fails
+    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) set annotation: @card(1..); fails
+    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) set annotation: @card(0..); fails
+    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) set annotation: @card(0..6); fails
+    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) set annotation: @card(0..2); fails
+    When <root-type>(<subtype-name-2>) get plays(parentship:parent) set annotation: @card(3..6)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations contain: @card(0..)
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations do not contain: @card(0..)
+    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get annotations do not contain: @card(0..)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get declared annotations contain: @card(0..)
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get declared annotations do not contain: @card(0..)
+    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get declared annotations do not contain: @card(0..)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations do not contain: @card(3..)
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations contain: @card(3..)
+    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get annotations do not contain: @card(3..)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get declared annotations do not contain: @card(3..)
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get declared annotations contain: @card(3..)
+    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get declared annotations do not contain: @card(3..)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations do not contain: @card(3..6)
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations do not contain: @card(3..6)
+    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get annotations contain: @card(3..6)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get declared annotations do not contain: @card(3..6)
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get declared annotations do not contain: @card(3..6)
+    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get declared annotations contain: @card(3..6)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations contain: @card(0, *)
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations do not contain: @card(0, *)
-    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get annotations do not contain: @card(0, *)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get declared annotations contain: @card(0, *)
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get declared annotations do not contain: @card(0, *)
-    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get declared annotations do not contain: @card(0, *)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations do not contain: @card(3, *)
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations contain: @card(3, *)
-    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get annotations do not contain: @card(3, *)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get declared annotations do not contain: @card(3, *)
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get declared annotations contain: @card(3, *)
-    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get declared annotations do not contain: @card(3, *)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations do not contain: @card(3, 6)
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations do not contain: @card(3, 6)
-    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get annotations contain: @card(3, 6)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get declared annotations do not contain: @card(3, 6)
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get declared annotations do not contain: @card(3, 6)
-    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get declared annotations contain: @card(3, 6)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations contain: @card(0..)
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations do not contain: @card(0..)
+    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get annotations do not contain: @card(0..)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get declared annotations contain: @card(0..)
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get declared annotations do not contain: @card(0..)
+    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get declared annotations do not contain: @card(0..)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations do not contain: @card(3..)
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations contain: @card(3..)
+    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get annotations do not contain: @card(3..)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get declared annotations do not contain: @card(3..)
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get declared annotations contain: @card(3..)
+    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get declared annotations do not contain: @card(3..)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations do not contain: @card(3..6)
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations do not contain: @card(3..6)
+    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get annotations contain: @card(3..6)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get declared annotations do not contain: @card(3..6)
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get declared annotations do not contain: @card(3..6)
+    Then <root-type>(<subtype-name-2>) get plays(parentship:parent) get declared annotations contain: @card(3..6)
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 |
       | entity    | person         | customer     | subscriber     |
@@ -2805,54 +2803,54 @@ Feature: Concept Plays
     When relation(overridden-parentship) set supertype: parentship
     When relation(overridden-parentship) get role(overridden-parent) set override: parent
     When <root-type>(<supertype-name>) set plays: parentship:parent
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1, 1)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1..1)
     When <root-type>(<supertype-name>) set plays: parentship-2:parent-2
-    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1, 1)
+    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1..1)
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
     When <root-type>(<subtype-name>) set plays: overridden-parentship:overridden-parent
-    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1, 1)
+    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1..1)
     When <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) set override: parentship:parent
-    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1, 1)
+    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1..1)
     When <root-type>(<subtype-name>) set plays: parentship-2:parent-2
     When <root-type>(<subtype-name>) get plays(parentship-2:parent-2) set override: parentship-2:parent-2
-    When <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) set annotation: @card(1, 1)
-    When <root-type>(<subtype-name>) get plays(parentship-2:parent-2) set annotation: @card(1, 1)
-    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1, 1)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1, 1)
-    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1, 1)
+    When <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) set annotation: @card(1..1)
+    When <root-type>(<subtype-name>) get plays(parentship-2:parent-2) set annotation: @card(1..1)
+    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1..1)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1..1)
+    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1..1)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1, 1)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1, 1)
-    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) set annotation: @card(0, 1); fails
-    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) set annotation: @card(0, 1); fails
-    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) set annotation: @card(0, *); fails
-    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) set annotation: @card(0, *); fails
-    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) set annotation: @card(1, *); fails
-    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) set annotation: @card(1, *); fails
-    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) set annotation: @card(5, 7); fails
-    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) set annotation: @card(5, 7); fails
-    When <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) set annotation: @card(1, 1)
-    When <root-type>(<subtype-name>) get plays(parentship-2:parent-2) set annotation: @card(1, 1)
-    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1, 1)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1, 1)
-    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1, 1)
+    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1..1)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1..1)
+    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) set annotation: @card(0..1); fails
+    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) set annotation: @card(0..1); fails
+    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) set annotation: @card(0..); fails
+    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) set annotation: @card(0..); fails
+    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) set annotation: @card(1..); fails
+    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) set annotation: @card(1..); fails
+    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) set annotation: @card(5..7); fails
+    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) set annotation: @card(5..7); fails
+    When <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) set annotation: @card(1..1)
+    When <root-type>(<subtype-name>) get plays(parentship-2:parent-2) set annotation: @card(1..1)
+    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1..1)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1..1)
+    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1..1)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1, 1)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1, 1)
-    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1, 1)
+    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1..1)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1..1)
+    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1..1)
     When <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) unset annotation: @card
     When <root-type>(<subtype-name>) get plays(parentship-2:parent-2) unset annotation: @card
-    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1, 1)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1, 1)
-    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1, 1)
+    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1..1)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1..1)
+    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1..1)
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) unset annotation: @card
@@ -2867,16 +2865,16 @@ Feature: Concept Plays
       | parentship-2:parent-2 |
     Then <root-type>(<subtype-name>) get plays contain:
       | parentship-2:parent-2 |
-    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1, 1)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1, 1)
-    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1, 1)
+    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1..1)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1..1)
+    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1..1)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1, 1)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1, 1)
-    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1, 1)
+    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1..1)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1..1)
+    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(1..1)
     Examples:
       | root-type | supertype-name | subtype-name |
       | entity    | person         | customer     |
@@ -2894,107 +2892,107 @@ Feature: Concept Plays
     When relation(overridden-parentship-2) set supertype: parentship
     When relation(overridden-parentship-2) get role(overridden-parent-2) set override: parent
     When <root-type>(<supertype-name>) set plays: parentship:parent
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1, 1)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1..1)
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
     When <root-type>(<subtype-name>) set plays: overridden-parentship:overridden-parent
     When <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) set override: parentship:parent
-    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1, 1)
+    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1..1)
     When <root-type>(<subtype-name-2>) set supertype: <supertype-name>
     When <root-type>(<subtype-name-2>) set plays: overridden-parentship-2:overridden-parent-2
     When <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) set override: parentship:parent
-    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) get cardinality: @card(1, 1)
+    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) get cardinality: @card(1..1)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) set annotation: @card(1, 2); fails
-    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) set annotation: @card(1, 2); fails
-    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) set annotation: @card(0, 1); fails
-    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) set annotation: @card(0, 1); fails
-    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(0, 2)
-    When <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) set annotation: @card(0, 1)
-    When <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) set annotation: @card(1, 2)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0, 2)
-    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(0, 1)
-    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) get cardinality: @card(1, 2)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) set annotation: @card(1..2); fails
+    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) set annotation: @card(1..2); fails
+    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) set annotation: @card(0..1); fails
+    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) set annotation: @card(0..1); fails
+    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(0..2)
+    When <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) set annotation: @card(0..1)
+    When <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) set annotation: @card(1..2)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..2)
+    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) get cardinality: @card(1..2)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0, 2)
-    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(0, 1)
-    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) get cardinality: @card(1, 2)
-    When <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) set annotation: @card(1, 2)
-    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1, 2)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..2)
+    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) get cardinality: @card(1..2)
+    When <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) set annotation: @card(1..2)
+    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1..2)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0, 2)
-    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1, 2)
-    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) get cardinality: @card(1, 2)
-    When <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) set annotation: @card(2, 2)
-    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) get cardinality: @card(2, 2)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..2)
+    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1..2)
+    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) get cardinality: @card(1..2)
+    When <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) set annotation: @card(2..2)
+    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) get cardinality: @card(2..2)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0, 2)
-    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1, 2)
-    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) get cardinality: @card(2, 2)
-    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(0, 1)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..2)
+    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1..2)
+    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) get cardinality: @card(2..2)
+    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(0..1)
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(2, 2)
+    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(2..2)
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(0, *)
+    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(0..)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0, *)
-    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1, 2)
-    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) get cardinality: @card(2, 2)
-    When <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) set annotation: @card(4, 5)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
+    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1..2)
+    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) get cardinality: @card(2..2)
+    When <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) set annotation: @card(4..5)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0, *)
-    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1, 2)
-    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) get cardinality: @card(4, 5)
-    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(0, 4)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
+    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1..2)
+    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) get cardinality: @card(4..5)
+    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(0..4)
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(3, 3)
+    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(3..3)
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(2, 5)
+    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(2..5)
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When <root-type>(<supertype-name>) get plays(parentship:parent) unset annotation: @card
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(1, 5)
+    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(1..5)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1, 5)
-    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1, 2)
-    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) get cardinality: @card(4, 5)
-    When <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) set annotation: @card(1, 1)
-    When <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) set annotation: @card(1, 1)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1..5)
+    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1..2)
+    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) get cardinality: @card(4..5)
+    When <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) set annotation: @card(1..1)
+    When <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) set annotation: @card(1..1)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1, 5)
-    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) get cardinality: @card(1, 1)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1..5)
+    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) get cardinality: @card(1..1)
     When <root-type>(<supertype-name>) get plays(parentship:parent) unset annotation: @card
     When transaction commits
     When connection open read transaction for database: typedb
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1, 1)
-    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) get cardinality: @card(1, 1)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations do not contain: @card(1, 1)
-    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get annotations contain: @card(1, 1)
-    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) get annotations contain: @card(1, 1)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) get cardinality: @card(1..1)
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations do not contain: @card(1..1)
+    Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get annotations contain: @card(1..1)
+    Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) get annotations contain: @card(1..1)
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 |
       | entity    | person         | customer     | subscriber     |
       | relation  | description    | registration | profile        |
 
-  # TODO: Add tests for one subplayer with multiple plays overriding one plays overridden_plays(card(2, 3)) vs 3 subplays of (2, 3), (2, 3), (2, 3) etc
+  # TODO: Add tests for one subplayer with multiple plays overriding one plays overridden_plays(card(2..3)) vs 3 subplays of (2, 3), (2, 3), (2, 3) etc
 
 ########################
 # not compatible @annotations: @distinct, @key, @unique, @subkey, @values, @range, @regex, @abstract, @cascade, @independent, @replace
