@@ -2587,14 +2587,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subscriber     | subkey(LABEL)    | string     |
       | entity    | person         | customer     | subscriber     | values("1", "2") | string     |
       | entity    | person         | customer     | subscriber     | range("1".."2")  | string     |
-      | entity    | person         | customer     | subscriber     | card(1..2)       | string     |
+      | entity    | person         | customer     | subscriber     | card(1..1)       | string     |
       | entity    | person         | customer     | subscriber     | regex("\S+")     | string     |
       | relation  | description    | registration | profile        | key              | string     |
       | relation  | description    | registration | profile        | unique           | string     |
 #      | relation  | description    | registration | profile        | subkey(LABEL)    | string     |
       | relation  | description    | registration | profile        | values("1", "2") | string     |
       | relation  | description    | registration | profile        | range("1".."2")  | string     |
-      | relation  | description    | registration | profile        | card(1..2)       | string     |
+      | relation  | description    | registration | profile        | card(1..1)       | string     |
       | relation  | description    | registration | profile        | regex("\S+")     | string     |
 
   Scenario Outline: <root-type> types cannot redeclare overridden owns with @<annotation>s
@@ -2620,14 +2620,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subscriber     | subkey(LABEL)    | string     |
       | entity    | person         | customer     | subscriber     | values("1", "2") | string     |
       | entity    | person         | customer     | subscriber     | range("1".."2")  | string     |
-      | entity    | person         | customer     | subscriber     | card(1..2)       | string     |
+      | entity    | person         | customer     | subscriber     | card(1..1)       | string     |
       | entity    | person         | customer     | subscriber     | regex("\S+")     | string     |
       | relation  | description    | registration | profile        | key              | string     |
       | relation  | description    | registration | profile        | unique           | string     |
 #      | relation  | description    | registration | profile        | subkey(LABEL)    | string     |
       | relation  | description    | registration | profile        | values("1", "2") | string     |
       | relation  | description    | registration | profile        | range("1".."2")  | string     |
-      | relation  | description    | registration | profile        | card(1..2)       | string     |
+      | relation  | description    | registration | profile        | card(1..1)       | string     |
       | relation  | description    | registration | profile        | regex("\S+")     | string     |
 
   Scenario Outline: <root-type> types cannot redeclare overridden owns with @<annotation>s on multiple layers
@@ -2654,14 +2654,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subscriber     | subkey(LABEL)    | string     |
       | entity    | person         | customer     | subscriber     | values("1", "2") | string     |
       | entity    | person         | customer     | subscriber     | range("1".."2")  | string     |
-      | entity    | person         | customer     | subscriber     | card(1..2)       | string     |
+      | entity    | person         | customer     | subscriber     | card(1..1)       | string     |
       | entity    | person         | customer     | subscriber     | regex("\S+")     | string     |
       | relation  | description    | registration | profile        | key              | string     |
       | relation  | description    | registration | profile        | unique           | string     |
 #      | relation  | description    | registration | profile        | subkey(LABEL)    | string     |
       | relation  | description    | registration | profile        | values("1", "2") | string     |
       | relation  | description    | registration | profile        | range("1".."2")  | string     |
-      | relation  | description    | registration | profile        | card(1..2)       | string     |
+      | relation  | description    | registration | profile        | card(1..1)       | string     |
       | relation  | description    | registration | profile        | regex("\S+")     | string     |
 
   Scenario Outline: <root-type> subtypes can redeclare owns with @<annotation>s after it is unset from supertype
@@ -2711,14 +2711,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subkey(LABEL)    | subkey              | string     |
       | entity    | person         | customer     | values("1", "2") | values              | string     |
       | entity    | person         | customer     | range("1".."2")  | range               | string     |
-      | entity    | person         | customer     | card(1..2)       | card                | string     |
+      | entity    | person         | customer     | card(1..1)       | card                | string     |
       | entity    | person         | customer     | regex("\S+")     | regex               | string     |
       | relation  | description    | registration | key              | key                 | string     |
       | relation  | description    | registration | unique           | unique              | string     |
 #      | relation  | description    | registration | subkey(LABEL)    | subkey              | string     |
       | relation  | description    | registration | values("1", "2") | values              | string     |
       | relation  | description    | registration | range("1".."2")  | range               | string     |
-      | relation  | description    | registration | card(1..2)       | card                | string     |
+      | relation  | description    | registration | card(1..1)       | card                | string     |
       | relation  | description    | registration | regex("\S+")     | regex               | string     |
 
   Scenario Outline: <root-type> types can inherit owns with @<annotation>s and pure owns that are subtypes of each other

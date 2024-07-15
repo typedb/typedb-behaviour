@@ -25,7 +25,9 @@ Feature: Concept Plays
     Given create relation type: profile
     # Notice: supertypes are the same, but can be overridden for the second subtype inside the tests
     Given relation(registration) set supertype: description
+    Given relation(registration) create role: object2
     Given relation(profile) set supertype: description
+    Given relation(profile) create role: object3
 
     Given transaction commits
     Given connection open schema transaction for database: typedb
@@ -1392,17 +1394,18 @@ Feature: Concept Plays
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
     When <root-type>(<subtype-name>) set plays: fathership:father
     When <root-type>(<subtype-name>) get plays(fathership:father) set override: parentship:parent
-    Then relation(fathership) get role(father) unset override; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(fathership) get role(father) unset override; fails
+    When relation(fathership) get role(father) unset override
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name>) get plays(fathership:father) unset override
     When relation(fathership) get role(father) unset override
-    Then relation(fathership) get role(father) get supertype: role
+    Then relation(fathership) get role(father) get supertype: relation:role
     Then <root-type>(<subtype-name>) get plays overridden(fathership:father) does not exist
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(fathership) get role(father) get supertype: role
+    Then relation(fathership) get role(father) get supertype: relation:role
     Then <root-type>(<subtype-name>) get plays overridden(fathership:father) does not exist
     When create relation type: subfathership
     When relation(subfathership) create role: subfather
@@ -1410,25 +1413,27 @@ Feature: Concept Plays
     When relation(subfathership) get role(subfather) set override: parent
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(subfathership) get role(subfather) unset override; fails
     When relation(fathership) set supertype: relation
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When relation(subfathership) get role(subfather) unset override
-    When relation(fathership) set supertype: relation
-    Then relation(subfathership) get role(subfather) get supertype: role
+    Then relation(subfathership) get role(subfather) get supertype: relation:role
     Then relation(subfathership) get roles contain:
       | subfathership:subfather |
       | fathership:father       |
       | parentship:parent       |
+    When relation(fathership) set supertype: relation
+    Then relation(subfathership) get role(subfather) get supertype: relation:role
+    Then relation(subfathership) get roles contain:
+      | subfathership:subfather |
+      | fathership:father       |
     Then relation(fathership) get supertype: relation
     When transaction commits
     When connection open read transaction for database: typedb
-    Then relation(subfathership) get role(subfather) get supertype: role
+    Then relation(subfathership) get role(subfather) get supertype: relation:role
     Then relation(subfathership) get roles contain:
       | subfathership:subfather |
       | fathership:father       |
-      | parentship:parent       |
     Then relation(fathership) get supertype: relation
     Examples:
       | root-type | supertype-name | subtype-name |
@@ -1892,8 +1897,8 @@ Feature: Concept Plays
     Then <root-type>(<supertype-name>) get plays(contract:contractor) get declared annotations do not contain: @<annotation>
     Examples:
       | root-type | supertype-name | subtype-name | annotation |
-      | entity    | person         | customer     | card(1..2) |
-      | relation  | description    | registration | card(1..2) |
+      | entity    | person         | customer     | card(1..1) |
+      | relation  | description    | registration | card(1..1) |
 
   Scenario Outline: <root-type> types can re-override plays with <annotation>s
     When create relation type: parentship
@@ -1944,6 +1949,7 @@ Feature: Concept Plays
     When <root-type>(<subtype-name>) set plays: parentship:parent
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) set plays: parentship:parent
     When <root-type>(<subtype-name>) get plays(parentship:parent) set annotation: @<annotation>
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
@@ -1952,7 +1958,7 @@ Feature: Concept Plays
     Then <root-type>(<subtype-name>) get plays(parentship:parent) set override: parentship:parent
     Then <root-type>(<subtype-name>) get plays overridden(parentship:parent) exists
     Then <root-type>(<subtype-name>) get plays overridden(parentship:parent) get label: parentship:parent
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations is empty
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations is empty
     Then <root-type>(<subtype-name>) get plays(parentship:parent) set annotation: @<annotation>
     Then <root-type>(<subtype-name>) get plays(parentship:parent) get annotations contain: @<annotation>
     Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations is empty
@@ -1971,8 +1977,8 @@ Feature: Concept Plays
     Then transaction commits; fails
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | annotation |
-      | entity    | person         | customer     | subscriber     | card(1..2) |
-      | relation  | description    | registration | profile        | card(1..2) |
+      | entity    | person         | customer     | subscriber     | card(1..1) |
+      | relation  | description    | registration | profile        | card(1..1) |
 
   Scenario Outline: <root-type> types cannot redeclare inherited plays with @<annotation> as pure plays or plays with @<annotation>
     When create relation type: parentship
@@ -2367,15 +2373,15 @@ Feature: Concept Plays
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name>) get plays(fathership:father) set annotation: @<annotation>
-    When <root-type>(<supertype-name>) get plays(parentship:parent) unset annotation: @<annotation>
+    When <root-type>(<supertype-name>) get plays(parentship:parent) unset annotation: @<annotation-category>
     When transaction commits
     When connection open read transaction for database: typedb
     Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations do not contain: @<annotation>
     Then <root-type>(<subtype-name>) get plays(fathership:father) get annotations contain: @<annotation>
     Examples:
-      | root-type | supertype-name | subtype-name | annotation |
-      | entity    | person         | customer     | card(1..2) |
-      | relation  | description    | registration | card(1..2) |
+      | root-type | supertype-name | subtype-name | annotation | annotation-category |
+      | entity    | person         | customer     | card(1..1) | card                |
+      | relation  | description    | registration | card(1..1) | card                |
 
 ########################
 # @card

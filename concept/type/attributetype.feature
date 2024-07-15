@@ -563,18 +563,18 @@ Feature: Concept Attribute Type
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When attribute(surname) set annotation: @<annotation>
-    When attribute(name) unset annotation: @<annotation>
+    When attribute(name) unset annotation: @<annotation-category>
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(name) get annotations do not contain: @<annotation>
     Then attribute(surname) get annotations contain: @<annotation>
     Examples:
-      | value-type | annotation   |
+      | value-type | annotation   | annotation-category |
       # abstract is not inherited
-      | decimal    | independent  |
-      | string     | regex("\S+") |
-      | string     | values("1")  |
-      | long       | range(1..3)  |
+      | decimal    | independent  | independent         |
+      | string     | regex("\S+") | regex               |
+      | string     | values("1")  | values              |
+      | long       | range(1..3)  | range               |
 
 ########################
 # @abstract
@@ -674,10 +674,11 @@ Feature: Concept Attribute Type
     When attribute(surname) set supertype: name
     Then attribute(surname) get value type: string
     Then attribute(surname) get annotations do not contain: @abstract
-    Then attribute(name) unset value type; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) unset value type; fails
+    When attribute(name) unset value type
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
     When attribute(surname) set value type: string
     When attribute(name) unset value type
     Then attribute(surname) get value type: string
@@ -1041,24 +1042,48 @@ Feature: Concept Attribute Type
     Then attribute(second-name) get value type is none
     Then attribute(sub-first-name) get value type is none
     When attribute(first-name) set value type: <value-type-1>
-    Then attribute(name) set value type: <value-type-2>; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When attribute(name) set value type: <value-type-2>
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
     When attribute(first-name) unset value type
     When attribute(second-name) set value type: <value-type-1>
-    Then attribute(name) set value type: <value-type-2>; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When attribute(name) set value type: <value-type-2>
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
     When attribute(second-name) unset value type
     When attribute(sub-first-name) set value type: <value-type-1>
-    Then attribute(name) set value type: <value-type-2>; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When attribute(name) set value type: <value-type-2>
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
     When attribute(sub-first-name) unset value type
     When transaction commits
     When connection open schema transaction for database: typedb
     When attribute(first-name) set value type: <value-type-1>
-    Then attribute(name) set value type: <value-type-2>; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When attribute(name) set value type: <value-type-2>
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
     When attribute(first-name) unset value type
     When attribute(second-name) set value type: <value-type-1>
-    Then attribute(name) set value type: <value-type-2>; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When attribute(name) set value type: <value-type-2>
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
     When attribute(second-name) unset value type
     When attribute(sub-first-name) set value type: <value-type-1>
-    Then attribute(name) set value type: <value-type-2>; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When attribute(name) set value type: <value-type-2>
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
     When attribute(sub-first-name) unset value type
     Then attribute(name) set value type: <value-type-2>
     Then attribute(first-name) get value type: <value-type-2>
@@ -1273,7 +1298,6 @@ Feature: Concept Attribute Type
     When attribute(name) set annotation: @abstract
     When attribute(name) set value type: <value-type>
     When create attribute type: first-name
-    Then attribute(first-name) set supertype: name; fails
     Then attribute(first-name) get value type is none
     When attribute(first-name) set supertype: name
     Then attribute(first-name) get supertype: name
@@ -1470,6 +1494,7 @@ Feature: Concept Attribute Type
   Scenario: Abstract attribute type cannot set non-abstract supertype
     When create attribute type: name
     Then attribute(name) get annotations do not contain: @abstract
+    When attribute(name) set value type: string
     When create attribute type: surname
     When attribute(surname) set annotation: @abstract
     Then attribute(surname) get annotations contain: @abstract
@@ -1493,43 +1518,6 @@ Feature: Concept Attribute Type
     Then attribute(name) get annotations contain: @abstract
     Then attribute(surname) get annotations contain: @abstract
     Then attribute(surname) get supertype: name
-
-  Scenario: Attribute type cannot set @abstract annotation while having non-abstract supertype
-    When create attribute type: name
-    Then attribute(name) get annotations do not contain: @abstract
-    When create attribute type: surname
-    When attribute(surname) set supertype: name
-    Then attribute(surname) set annotation: @abstract; fails
-    Then attribute(name) get annotations do not contain: @abstract
-    Then attribute(surname) get annotations do not contain: @abstract
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations do not contain: @abstract
-    Then attribute(surname) get annotations do not contain: @abstract
-    Then attribute(surname) set annotation: @abstract; fails
-    When attribute(name) set annotation: @abstract
-    When attribute(surname) set annotation: @abstract
-    Then attribute(name) get annotations contain: @abstract
-    Then attribute(surname) get annotations contain: @abstract
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations contain: @abstract
-    Then attribute(surname) get annotations contain: @abstract
-    When attribute(name) unset annotation: @abstract
-    Then attribute(name) get annotations do not contain: @abstract
-    Then attribute(surname) get annotations contain: @abstract
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations contain: @abstract
-    Then attribute(surname) get annotations contain: @abstract
-    When attribute(name) unset annotation: @abstract
-    When attribute(surname) unset annotation: @abstract
-    Then attribute(name) get annotations do not contain: @abstract
-    Then attribute(surname) get annotations do not contain: @abstract
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then attribute(name) get annotations do not contain: @abstract
-    Then attribute(surname) get annotations do not contain: @abstract
 
 ########################
 # @regex
