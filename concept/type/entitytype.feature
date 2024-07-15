@@ -547,6 +547,53 @@ Feature: Concept Entity Type
     Then entity(player) get supertypes do not contain:
       | person |
     Then entity(player) set supertype: person; fails
+    When entity(person) set annotation: @abstract
+    When entity(player) set supertype: person
+    Then entity(person) get annotations contain: @abstract
+    Then entity(player) get annotations contain: @abstract
+    Then entity(player) get supertype: person
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get annotations contain: @abstract
+    Then entity(player) get annotations contain: @abstract
+    Then entity(player) get supertype: person
+
+  Scenario: Entity type cannot set @abstract annotation while having non-abstract supertype
+    When create entity type: person
+    Then entity(person) get annotations do not contain: @abstract
+    When create entity type: player
+    When entity(player) set supertype: person
+    Then entity(player) set annotation: @abstract; fails
+    Then entity(person) get annotations do not contain: @abstract
+    Then entity(player) get annotations do not contain: @abstract
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get annotations do not contain: @abstract
+    Then entity(player) get annotations do not contain: @abstract
+    Then entity(player) set annotation: @abstract; fails
+    When entity(person) set annotation: @abstract
+    When entity(player) set annotation: @abstract
+    Then entity(person) get annotations contain: @abstract
+    Then entity(player) get annotations contain: @abstract
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get annotations contain: @abstract
+    Then entity(player) get annotations contain: @abstract
+    When entity(person) unset annotation: @abstract
+    Then entity(person) get annotations do not contain: @abstract
+    Then entity(player) get annotations contain: @abstract
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    Then entity(person) get annotations contain: @abstract
+    Then entity(player) get annotations contain: @abstract
+    When entity(person) unset annotation: @abstract
+    When entity(player) unset annotation: @abstract
+    Then entity(person) get annotations do not contain: @abstract
+    Then entity(player) get annotations do not contain: @abstract
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get annotations do not contain: @abstract
+    Then entity(player) get annotations do not contain: @abstract
 
 ########################
 # not compatible @annotations: @distinct, @key, @unique, @subkey, @values, @range, @card, @cascade, @independent, @replace, @regex

@@ -3029,9 +3029,9 @@ Feature: Concept Owns
       | relation  | description    | registration | profile        | card(1..2)       |
       | relation  | description    | registration | profile        | regex("\S+")     |
 
-  Scenario Outline: <root-tyoe> type cannot set redundant duplicated @<annotation> on plays while it inherits it
+  Scenario Outline: <root-type> type cannot set redundant duplicated @<annotation> on plays while it inherits it
     When create attribute type: name
-    When attribute(name) set value type: <value-type>
+    When attribute(name) set value type: string
     When attribute(name) set annotation: @abstract
     When create attribute type: surname
     When attribute(surname) set supertype: name
@@ -5015,62 +5015,62 @@ Feature: Concept Owns
       | long          | 0    | 10                  |
       | long          | 0    | 9223372036854775807 |
       | long          | 1    | 10                  |
-      | long          | 0    | *                   |
-      | long          | 1    | *                   |
+      | long          | 0    |                     |
+      | long          | 1    |                     |
       | string        | 0    | 1                   |
       | string        | 0    | 10                  |
       | string        | 0    | 9223372036854775807 |
       | string        | 1    | 10                  |
-      | string        | 0    | *                   |
-      | string        | 1    | *                   |
+      | string        | 0    |                     |
+      | string        | 1    |                     |
       | boolean       | 0    | 1                   |
       | boolean       | 0    | 10                  |
       | boolean       | 0    | 9223372036854775807 |
       | boolean       | 1    | 10                  |
-      | boolean       | 0    | *                   |
-      | boolean       | 1    | *                   |
+      | boolean       | 0    |                     |
+      | boolean       | 1    |                     |
       | double        | 0    | 1                   |
       | double        | 0    | 10                  |
       | double        | 0    | 9223372036854775807 |
       | double        | 1    | 10                  |
-      | double        | 0    | *                   |
-      | double        | 1    | *                   |
+      | double        | 0    |                     |
+      | double        | 1    |                     |
       | decimal       | 0    | 1                   |
       | decimal       | 0    | 10                  |
       | decimal       | 0    | 9223372036854775807 |
       | decimal       | 1    | 10                  |
-      | decimal       | 0    | *                   |
-      | decimal       | 1    | *                   |
+      | decimal       | 0    |                     |
+      | decimal       | 1    |                     |
       | date          | 0    | 1                   |
       | date          | 0    | 10                  |
       | date          | 0    | 9223372036854775807 |
       | date          | 1    | 10                  |
-      | date          | 0    | *                   |
-      | date          | 1    | *                   |
+      | date          | 0    |                     |
+      | date          | 1    |                     |
       | datetime      | 0    | 1                   |
       | datetime      | 0    | 10                  |
       | datetime      | 0    | 9223372036854775807 |
       | datetime      | 1    | 10                  |
-      | datetime      | 0    | *                   |
-      | datetime      | 1    | *                   |
+      | datetime      | 0    |                     |
+      | datetime      | 1    |                     |
       | datetime-tz   | 0    | 1                   |
       | datetime-tz   | 0    | 10                  |
       | datetime-tz   | 0    | 9223372036854775807 |
       | datetime-tz   | 1    | 10                  |
-      | datetime-tz   | 0    | *                   |
-      | datetime-tz   | 1    | *                   |
+      | datetime-tz   | 0    |                     |
+      | datetime-tz   | 1    |                     |
       | duration      | 0    | 1                   |
       | duration      | 0    | 10                  |
       | duration      | 0    | 9223372036854775807 |
       | duration      | 1    | 10                  |
-      | duration      | 0    | *                   |
-      | duration      | 1    | *                   |
+      | duration      | 0    |                     |
+      | duration      | 1    |                     |
       | custom-struct | 0    | 1                   |
       | custom-struct | 0    | 10                  |
       | custom-struct | 0    | 9223372036854775807 |
       | custom-struct | 1    | 10                  |
-      | custom-struct | 0    | *                   |
-      | custom-struct | 1    | *                   |
+      | custom-struct | 0    |                     |
+      | custom-struct | 1    |                     |
 
   Scenario Outline: Owns can set @card annotation for <value-type> value type with duplicate args (exactly N ownerships)
     When create attribute type: custom-attribute
@@ -5192,18 +5192,18 @@ Feature: Concept Owns
     Then entity(person) get owns(custom-attribute) get annotations contain: @card(<reset-args>)
     Examples:
       | reset-args |
-      | 0, 1       |
-      | 0, 2       |
-      | 0, 3       |
-      | 0, 5       |
-      | 0, *       |
-      | 2, 3       |
-      | 2, *       |
-      | 3, 4       |
-      | 3, 5       |
-      | 3, *       |
-      | 5, *       |
-      | 6, *       |
+      | 0..1       |
+      | 0..2       |
+      | 0..3       |
+      | 0..5       |
+      | 0..        |
+      | 2..3       |
+      | 2..        |
+      | 3..4       |
+      | 3..5       |
+      | 3..        |
+      | 5..        |
+      | 6..        |
 
   Scenario Outline: Owns can redeclare @card annotation with different arguments
     When create attribute type: custom-attribute
@@ -6680,8 +6680,8 @@ Feature: Concept Owns
     Then entity(subscriber) get owns(third-name) get cardinality: @card(1..1)
     Examples:
       | card-args |
-      | 0, 1      |
-      | 0, *      |
+      | 0..1      |
+      | 0..       |
 
   Scenario Outline: Annotation @key cannot be set if type has not suitable cardinality
     When create attribute type: name
@@ -6807,8 +6807,8 @@ Feature: Concept Owns
     Then entity(subscriber) get owns(surname) get cardinality: @card(1..1)
     Examples:
       | card-args |
-      | 2, *      |
-      | 2, 2      |
+      | 2..       |
+      | 2..2      |
 
   Scenario Outline: Annotation @unique is not inherited if @key is declared on a subtype for owns, cannot be declared having key
     When create attribute type: name
@@ -6887,8 +6887,8 @@ Feature: Concept Owns
     Then entity(player3) get owns(name4) get declared annotations do not contain: @unique
     Examples:
       | card-args | card-non-default-narrowing-args |
-      | 1, 1      | 0, 2                            |
-      | 0, 1      | 0, *                            |
+      | 1..1      | 0..2                            |
+      | 0..1      | 0..                             |
 
   Scenario Outline: Annotation @card is not inherited if @key is declared on a subtype for owns, cannot be declared having key
     When create attribute type: name
@@ -6975,7 +6975,7 @@ Feature: Concept Owns
     Then entity(player3) get owns(name4) get cardinality: @card(<card-args>)
     Examples:
       | card-args |
-      | 1, 1      |
-      | 0, 1      |
-      | 0, 2      |
-      | 0, *      |
+      | 1..1      |
+      | 0..1      |
+      | 0..2      |
+      | 0..       |

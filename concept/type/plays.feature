@@ -2350,7 +2350,7 @@ Feature: Concept Plays
       | entity    | person         | customer     | subscriber     | card(1..2) |
       | relation  | description    | registration | profile        | card(1..2) |
 
-  Scenario Outline: <root-tyoe> type cannot set redundant duplicated @<annotation> on plays while it inherits it
+  Scenario Outline: <root-type> type cannot set redundant duplicated @<annotation> on plays while it inherits it
     When create relation type: parentship
     When relation(parentship) create role: parent
     When create relation type: fathership
@@ -2430,8 +2430,8 @@ Feature: Concept Plays
       | 0    | 10                  |
       | 0    | 9223372036854775807 |
       | 1    | 10                  |
-      | 0    | *                   |
-      | 1    | *                   |
+      | 0    |                     |
+      | 1    |                     |
 
   Scenario Outline: Plays can set @card annotation with duplicate args (exactly N plays)
     When create relation type: marriage
@@ -2498,21 +2498,21 @@ Feature: Concept Plays
     Then entity(person) get plays(marriage:spouse) get annotations do not contain: @card(<reset-args>)
     Examples:
       | init-args | reset-args |
-      | 0, *      | 0, 1       |
-      | 0, 5      | 0, 1       |
-      | 2, 5      | 0, 1       |
-      | 2, 5      | 0, 2       |
-      | 2, 5      | 0, 3       |
-      | 2, 5      | 0, 5       |
-      | 2, 5      | 0, *       |
-      | 2, 5      | 2, 3       |
-      | 2, 5      | 2, 6       |
-      | 2, 5      | 2, *       |
-      | 2, 5      | 3, 4       |
-      | 2, 5      | 3, 5       |
-      | 2, 5      | 3, *       |
-      | 2, 5      | 5, *       |
-      | 2, 5      | 6, *       |
+      | 0..       | 0..1       |
+      | 0..5      | 0..1       |
+      | 2..5      | 0..1       |
+      | 2..5      | 0..2       |
+      | 2..5      | 0..3       |
+      | 2..5      | 0..5       |
+      | 2..5      | 0..        |
+      | 2..5      | 2..3       |
+      | 2..5      | 2..6       |
+      | 2..5      | 2..        |
+      | 2..5      | 3..4       |
+      | 2..5      | 3..5       |
+      | 2..5      | 3..        |
+      | 2..5      | 5..        |
+      | 2..5      | 6..        |
 
   Scenario Outline: Plays-related @card annotation can be inherited and overridden by a subset of arguments
     When create relation type: custom-relation

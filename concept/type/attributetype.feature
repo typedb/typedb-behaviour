@@ -1467,6 +1467,70 @@ Feature: Concept Attribute Type
 #    When connection open read transaction for database: typedb
 #    Then attribute(name) get annotations is empty
 
+  Scenario: Abstract attribute type cannot set non-abstract supertype
+    When create attribute type: name
+    Then attribute(name) get annotations do not contain: @abstract
+    When create attribute type: surname
+    When attribute(surname) set annotation: @abstract
+    Then attribute(surname) get annotations contain: @abstract
+    Then attribute(surname) set supertype: name; fails
+    Then attribute(name) get annotations do not contain: @abstract
+    Then attribute(surname) get annotations contain: @abstract
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotations do not contain: @abstract
+    Then attribute(surname) get annotations contain: @abstract
+    Then attribute(surname) get supertypes do not contain:
+      | name |
+    Then attribute(surname) set supertype: name; fails
+    When attribute(name) set annotation: @abstract
+    When attribute(surname) set supertype: name
+    Then attribute(name) get annotations contain: @abstract
+    Then attribute(surname) get annotations contain: @abstract
+    Then attribute(surname) get supertype: name
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get annotations contain: @abstract
+    Then attribute(surname) get annotations contain: @abstract
+    Then attribute(surname) get supertype: name
+
+  Scenario: Attribute type cannot set @abstract annotation while having non-abstract supertype
+    When create attribute type: name
+    Then attribute(name) get annotations do not contain: @abstract
+    When create attribute type: surname
+    When attribute(surname) set supertype: name
+    Then attribute(surname) set annotation: @abstract; fails
+    Then attribute(name) get annotations do not contain: @abstract
+    Then attribute(surname) get annotations do not contain: @abstract
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotations do not contain: @abstract
+    Then attribute(surname) get annotations do not contain: @abstract
+    Then attribute(surname) set annotation: @abstract; fails
+    When attribute(name) set annotation: @abstract
+    When attribute(surname) set annotation: @abstract
+    Then attribute(name) get annotations contain: @abstract
+    Then attribute(surname) get annotations contain: @abstract
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotations contain: @abstract
+    Then attribute(surname) get annotations contain: @abstract
+    When attribute(name) unset annotation: @abstract
+    Then attribute(name) get annotations do not contain: @abstract
+    Then attribute(surname) get annotations contain: @abstract
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get annotations contain: @abstract
+    Then attribute(surname) get annotations contain: @abstract
+    When attribute(name) unset annotation: @abstract
+    When attribute(surname) unset annotation: @abstract
+    Then attribute(name) get annotations do not contain: @abstract
+    Then attribute(surname) get annotations do not contain: @abstract
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get annotations do not contain: @abstract
+    Then attribute(surname) get annotations do not contain: @abstract
+
 ########################
 # @regex
 ########################
