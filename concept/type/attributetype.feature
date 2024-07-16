@@ -516,11 +516,13 @@ Feature: Concept Attribute Type
     Then attribute(surname) set supertype: attribute; fails
     When attribute(surname) set annotation: @abstract
     When attribute(surname) set supertype: attribute
+    When attribute(surname) set value type: <value-type>
     Then attribute(name) get annotations contain: @<annotation>
     Then attribute(name) get declared annotations contain: @<annotation>
     Then attribute(surname) get annotations do not contain: @<annotation>
     Then attribute(surname) get declared annotations do not contain: @<annotation>
     When attribute(surname) set supertype: name
+    When attribute(surname) unset value type
     Then attribute(name) get annotations contain: @<annotation>
     Then attribute(name) get declared annotations contain: @<annotation>
     Then attribute(surname) get annotations contain: @<annotation>
@@ -532,6 +534,7 @@ Feature: Concept Attribute Type
     Then attribute(surname) get annotations contain: @<annotation>
     Then attribute(surname) get declared annotations do not contain: @<annotation>
     When attribute(surname) set supertype: attribute
+    When attribute(surname) set value type: <value-type>
     Then attribute(name) get annotations contain: @<annotation>
     Then attribute(name) get declared annotations contain: @<annotation>
     Then attribute(surname) get annotations do not contain: @<annotation>
@@ -1535,6 +1538,8 @@ Feature: Concept Attribute Type
     Then attribute(first-name) get declared annotations contain: @regex("\S++")
     Then attribute(first-name) set supertype: name; fails
     When attribute(first-name) unset annotation: @regex
+    Then attribute(first-name) unset value type; fails
+    When attribute(first-name) set annotation: @abstract
     When attribute(first-name) unset value type
     When attribute(first-name) set supertype: name
     Then attribute(first-name) get annotations contain: @regex("\S+")
@@ -1581,6 +1586,7 @@ Feature: Concept Attribute Type
     Then attribute(first-name) get annotations contain: @regex("value")
     Then attribute(first-name) get declared annotations do not contain: @regex("value")
     Then attribute(first-name) unset annotation: @regex; fails
+    When attribute(first-name) set annotation: @abstract
     When attribute(first-name) set supertype: attribute
     Then attribute(first-name) get annotations do not contain: @regex("value")
     Then attribute(first-name) get declared annotations do not contain: @regex("value")
@@ -2074,12 +2080,10 @@ Feature: Concept Attribute Type
     Then attribute(first-name) set supertype: attribute; fails
     When attribute(first-name) set annotation: @abstract
     When attribute(first-name) set supertype: attribute
-    Then attribute(first-name) get annotations do not contain: @values("value")
-    Then attribute(first-name) get declared annotations do not contain: @values("value")
+    Then attribute(first-name) get annotation categories do not contain: @values
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(first-name) get annotations do not contain: @values("value")
-    Then attribute(first-name) get declared annotations do not contain: @values("value")
+    Then attribute(first-name) get annotation categories do not contain: @values
 
   Scenario Outline: Attribute types' @values annotation for <value-type> value type can be inherited and overridden by a subset of arguments
     When create attribute type: name
@@ -2917,6 +2921,16 @@ Feature: Concept Attribute Type
     Then struct(passport) does not exist
     When transaction commits
     When connection open schema transaction for database: typedb
+    Then struct(passport) does not exist
+    When create struct: passport
+    When struct(passport) create field: name, with value type: string
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When struct(passport) create field: birthday, with value type: datetime
+    When delete struct: passport
+    Then struct(passport) does not exist
+    When transaction commits
+    When connection open read transaction for database: typedb
     Then struct(passport) does not exist
 
   Scenario Outline: Struct can delete fields of type <value-type>

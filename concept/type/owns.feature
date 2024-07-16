@@ -1458,7 +1458,6 @@ Feature: Concept Owns
     When <root-type>(<supertype-name>) set owns: surname
     When <root-type>(<supertype-name>) get owns(surname) set ordering: ordered
     When attribute(name) set supertype: surname
-    When attribute(name) unset value type
     When <root-type>(<subtype-name>) get owns(name) set override: surname
     Then <root-type>(<subtype-name>) get owns overridden(name) get label: surname
     When transaction commits
@@ -1546,8 +1545,6 @@ Feature: Concept Owns
     When transaction closes
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get owns(name) set ordering: ordered; fails
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
     When <root-type>(<supertype-name>) get owns(literal) set ordering: ordered
     When <root-type>(<subtype-name>) get owns(name) set ordering: ordered
     When <root-type>(<subtype-name-2>) get owns(surname) set ordering: ordered
@@ -2707,10 +2704,8 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get owns(score) get annotations is empty
     Then <root-type>(<subtype-name>) get owns(rating) get annotations is empty
     When create attribute type: license
-    When attribute(license) set value type: string
     When attribute(license) set supertype: reference
     When create attribute type: points
-    When attribute(points) set value type: double
     When attribute(points) set supertype: rating
     When <root-type>(<subtype-name-2>) set annotation: @abstract
     When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
