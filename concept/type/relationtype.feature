@@ -3365,7 +3365,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(overridden-parentship) get role(overridden-parent) get annotations contain: @card(1..1)
     Then relation(overridden-parentship-2) get role(overridden-parent-2) get annotations contain: @card(1..1)
 
-  # TODO: Add tests for one subplayer with multiple plays overriding one plays overridden_plays(card(2..3)) vs 3 subplays of (2, 3), (2, 3), (2, 3) etc
+  # TODO: Add tests for one subrelation with multiple relates overriding one relates overridden_relates(card(2..3)) vs 3 subrelates of (2, 3), (2, 3), (2, 3) etc
 
 ########################
 # relates not compatible @annotations: @key, @unique, @subkey, @values, @range, @abstract, @cascade, @independent, @replace, @regex

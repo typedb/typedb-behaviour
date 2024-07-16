@@ -421,7 +421,6 @@ Feature: Concept Attribute Type
     When attribute(name) set annotation: @abstract
     When attribute(name) set annotation: @<annotation>
     When create attribute type: surname
-    When attribute(surname) set value type: <value-type>
     When attribute(surname) set supertype: name
     Then attribute(name) get annotations contain: @<annotation>
     Then attribute(name) get declared annotations contain: @<annotation>
@@ -486,6 +485,7 @@ Feature: Concept Attribute Type
     Then attribute(surname) get declared annotations contain: @<annotation>
     When attribute(surname) set supertype: name
     When attribute(surname) unset annotation: @<annotation-category>
+    When attribute(surname) unset value type
     Then attribute(surname) get annotations contain: @<annotation>
     Then attribute(surname) get declared annotations do not contain: @<annotation>
     When transaction commits
@@ -508,12 +508,13 @@ Feature: Concept Attribute Type
     When attribute(name) set annotation: @abstract
     When attribute(name) set annotation: @<annotation>
     When create attribute type: surname
-    When attribute(surname) set value type: <value-type>
     When attribute(surname) set supertype: name
     Then attribute(name) get annotations contain: @<annotation>
     Then attribute(name) get declared annotations contain: @<annotation>
     Then attribute(surname) get annotations contain: @<annotation>
     Then attribute(surname) get declared annotations do not contain: @<annotation>
+    Then attribute(surname) set supertype: attribute; fails
+    When attribute(surname) set annotation: @abstract
     When attribute(surname) set supertype: attribute
     Then attribute(name) get annotations contain: @<annotation>
     Then attribute(name) get declared annotations contain: @<annotation>
@@ -555,7 +556,6 @@ Feature: Concept Attribute Type
     When attribute(name) set annotation: @abstract
     When attribute(name) set annotation: @<annotation>
     When create attribute type: surname
-    When attribute(surname) set value type: <value-type>
     When attribute(surname) set supertype: name
     When transaction commits
     When connection open schema transaction for database: typedb
@@ -591,6 +591,12 @@ Feature: Concept Attribute Type
     When create attribute type: email
     Then attribute(email) get annotations do not contain: @abstract
     Then attribute(email) get declared annotations do not contain: @abstract
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When create attribute type: email
+    When attribute(email) set value type: string
+    Then attribute(email) get annotations do not contain: @abstract
+    Then attribute(email) get declared annotations do not contain: @abstract
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(name) get annotations contain: @abstract
@@ -605,7 +611,14 @@ Feature: Concept Attribute Type
     When transaction commits
     When connection open schema transaction for database: typedb
     When create attribute type: company-email
-    When attribute(company-email) set value type: string
+    When attribute(company-email) set supertype: email
+    Then attribute(email) unset annotation: @abstract; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When attribute(email) unset value type
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When create attribute type: company-email
     When attribute(company-email) set supertype: email
     Then attribute(email) unset annotation: @abstract; fails
 
@@ -640,13 +653,14 @@ Feature: Concept Attribute Type
     When attribute(name) set value type: string
     When attribute(name) set annotation: @abstract
     When create attribute type: surname
-    Then attribute(surname) set value type: string
     When attribute(surname) set supertype: name
-    Then attribute(surname) get value type: string
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(surname) get value type: string
+    When attribute(surname) set value type: string
+    Then attribute(surname) get value type: string
     When attribute(surname) unset value type
+    Then attribute(surname) unset value type; fails
     Then attribute(name) get value type: string
     Then attribute(surname) get value type: string
     When transaction commits
@@ -659,10 +673,11 @@ Feature: Concept Attribute Type
     When connection open schema transaction for database: typedb
     When attribute(surname) set supertype: name
     Then attribute(surname) get value type: string
-    When attribute(surname) unset value type
+    Then attribute(surname) unset value type; fails
     Then attribute(surname) get value type: string
     When transaction commits
     When connection open read transaction for database: typedb
+    Then attribute(name) get value type: string
     Then attribute(surname) get value type: string
 
   Scenario: Attribute types cannot unset value type if there are subtypes without @abstract annotation and value types
@@ -687,12 +702,13 @@ Feature: Concept Attribute Type
     When connection open schema transaction for database: typedb
     When attribute(name) set value type: string
     When attribute(surname) unset value type
-    Then attribute(name) get value type: string
-    Then attribute(surname) get value type: string
-    Then attribute(name) unset value type; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) unset value type; fails
+    Then attribute(name) get value type: string
+    Then attribute(surname) get value type: string
+    When attribute(name) unset value type
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
     When attribute(surname) set annotation: @abstract
     Then attribute(surname) get value type: string
     When attribute(name) unset value type
@@ -705,8 +721,6 @@ Feature: Concept Attribute Type
     When connection open read transaction for database: typedb
     Then attribute(name) get value type is none
     Then attribute(surname) get value type is none
-
-    # TODO: Add operation and commit time validations for inherited value types changing and unsetting
 
   Scenario: Attribute types cannot unset @abstract annotation without value type
     When create attribute type: email
@@ -832,77 +846,13 @@ Feature: Concept Attribute Type
       | long          | duration        |
       | long          | custom-struct   |
       | string        | long            |
-      | string        | boolean         |
-      | string        | double          |
-      | string        | decimal         |
-      | string        | date            |
-      | string        | datetime        |
-      | string        | datetime-tz     |
-      | string        | duration        |
-      | string        | custom-struct   |
-      | boolean       | long            |
       | boolean       | string          |
-      | boolean       | double          |
-      | boolean       | decimal         |
-      | boolean       | date            |
-      | boolean       | datetime        |
-      | boolean       | datetime-tz     |
-      | boolean       | duration        |
-      | boolean       | custom-struct   |
-      | double        | long            |
-      | double        | string          |
-      | double        | boolean         |
-      | double        | decimal         |
-      | double        | date            |
-      | double        | datetime        |
       | double        | datetime-tz     |
-      | double        | duration        |
-      | double        | custom-struct   |
-      | decimal       | long            |
-      | decimal       | string          |
-      | decimal       | boolean         |
-      | decimal       | double          |
-      | decimal       | date            |
       | decimal       | datetime        |
-      | decimal       | datetime-tz     |
-      | decimal       | duration        |
-      | decimal       | custom-struct   |
-      | date          | long            |
-      | date          | string          |
-      | date          | boolean         |
-      | date          | double          |
       | date          | decimal         |
-      | date          | datetime        |
-      | date          | datetime-tz     |
-      | date          | duration        |
-      | date          | custom-struct   |
-      | datetime      | long            |
-      | datetime      | string          |
-      | datetime      | boolean         |
-      | datetime      | double          |
-      | datetime      | decimal         |
       | datetime      | date            |
-      | datetime      | datetime-tz     |
-      | datetime      | duration        |
-      | datetime      | custom-struct   |
-      | datetime-tz   | long            |
-      | datetime-tz   | string          |
-      | datetime-tz   | boolean         |
       | datetime-tz   | double          |
-      | datetime-tz   | decimal         |
-      | datetime-tz   | date            |
-      | datetime-tz   | datetime        |
-      | datetime-tz   | duration        |
-      | datetime-tz   | custom-struct   |
-      | duration      | long            |
-      | duration      | string          |
       | duration      | boolean         |
-      | duration      | double          |
-      | duration      | decimal         |
-      | duration      | date            |
-      | duration      | datetime        |
-      | duration      | datetime-tz     |
-      | duration      | custom-struct   |
       | custom-struct | long            |
       | custom-struct | string          |
       | custom-struct | boolean         |
@@ -942,78 +892,14 @@ Feature: Concept Attribute Type
       | long          | datetime-tz     |
       | long          | duration        |
       | long          | custom-struct   |
-      | string        | long            |
       | string        | boolean         |
-      | string        | double          |
-      | string        | decimal         |
-      | string        | date            |
-      | string        | datetime        |
-      | string        | datetime-tz     |
-      | string        | duration        |
-      | string        | custom-struct   |
-      | boolean       | long            |
       | boolean       | string          |
-      | boolean       | double          |
-      | boolean       | decimal         |
-      | boolean       | date            |
-      | boolean       | datetime        |
-      | boolean       | datetime-tz     |
-      | boolean       | duration        |
-      | boolean       | custom-struct   |
-      | double        | long            |
-      | double        | string          |
-      | double        | boolean         |
-      | double        | decimal         |
-      | double        | date            |
       | double        | datetime        |
-      | double        | datetime-tz     |
-      | double        | duration        |
-      | double        | custom-struct   |
-      | decimal       | long            |
-      | decimal       | string          |
-      | decimal       | boolean         |
-      | decimal       | double          |
-      | decimal       | date            |
-      | decimal       | datetime        |
       | decimal       | datetime-tz     |
-      | decimal       | duration        |
-      | decimal       | custom-struct   |
-      | date          | long            |
-      | date          | string          |
-      | date          | boolean         |
-      | date          | double          |
       | date          | decimal         |
-      | date          | datetime        |
-      | date          | datetime-tz     |
-      | date          | duration        |
-      | date          | custom-struct   |
       | datetime      | long            |
-      | datetime      | string          |
-      | datetime      | boolean         |
-      | datetime      | double          |
-      | datetime      | decimal         |
-      | datetime      | date            |
-      | datetime      | datetime-tz     |
-      | datetime      | duration        |
-      | datetime      | custom-struct   |
-      | datetime-tz   | long            |
-      | datetime-tz   | string          |
-      | datetime-tz   | boolean         |
       | datetime-tz   | double          |
-      | datetime-tz   | decimal         |
-      | datetime-tz   | date            |
-      | datetime-tz   | datetime        |
-      | datetime-tz   | duration        |
-      | datetime-tz   | custom-struct   |
-      | duration      | long            |
-      | duration      | string          |
-      | duration      | boolean         |
-      | duration      | double          |
-      | duration      | decimal         |
       | duration      | date            |
-      | duration      | datetime        |
-      | duration      | datetime-tz     |
-      | duration      | custom-struct   |
       | custom-struct | long            |
       | custom-struct | string          |
       | custom-struct | boolean         |
@@ -1118,78 +1004,14 @@ Feature: Concept Attribute Type
       | long          | datetime-tz     |
       | long          | duration        |
       | long          | custom-struct   |
-      | string        | long            |
-      | string        | boolean         |
-      | string        | double          |
-      | string        | decimal         |
-      | string        | date            |
-      | string        | datetime        |
       | string        | datetime-tz     |
-      | string        | duration        |
-      | string        | custom-struct   |
-      | boolean       | long            |
-      | boolean       | string          |
-      | boolean       | double          |
-      | boolean       | decimal         |
       | boolean       | date            |
-      | boolean       | datetime        |
-      | boolean       | datetime-tz     |
-      | boolean       | duration        |
-      | boolean       | custom-struct   |
-      | double        | long            |
-      | double        | string          |
-      | double        | boolean         |
-      | double        | decimal         |
-      | double        | date            |
       | double        | datetime        |
-      | double        | datetime-tz     |
-      | double        | duration        |
-      | double        | custom-struct   |
-      | decimal       | long            |
-      | decimal       | string          |
-      | decimal       | boolean         |
       | decimal       | double          |
-      | decimal       | date            |
-      | decimal       | datetime        |
-      | decimal       | datetime-tz     |
-      | decimal       | duration        |
-      | decimal       | custom-struct   |
-      | date          | long            |
       | date          | string          |
-      | date          | boolean         |
-      | date          | double          |
-      | date          | decimal         |
-      | date          | datetime        |
-      | date          | datetime-tz     |
-      | date          | duration        |
-      | date          | custom-struct   |
       | datetime      | long            |
-      | datetime      | string          |
-      | datetime      | boolean         |
-      | datetime      | double          |
-      | datetime      | decimal         |
-      | datetime      | date            |
-      | datetime      | datetime-tz     |
-      | datetime      | duration        |
-      | datetime      | custom-struct   |
-      | datetime-tz   | long            |
-      | datetime-tz   | string          |
-      | datetime-tz   | boolean         |
-      | datetime-tz   | double          |
       | datetime-tz   | decimal         |
-      | datetime-tz   | date            |
-      | datetime-tz   | datetime        |
-      | datetime-tz   | duration        |
-      | datetime-tz   | custom-struct   |
-      | duration      | long            |
-      | duration      | string          |
       | duration      | boolean         |
-      | duration      | double          |
-      | duration      | decimal         |
-      | duration      | date            |
-      | duration      | datetime        |
-      | duration      | datetime-tz     |
-      | duration      | custom-struct   |
       | custom-struct | long            |
       | custom-struct | string          |
       | custom-struct | boolean         |
@@ -1326,7 +1148,6 @@ Feature: Concept Attribute Type
     Then attribute(name) get declared annotations contain: @abstract
     When attribute(name) set value type: <value-type>
     When create attribute type: first-name
-    When attribute(first-name) set value type: <value-type>
     When attribute(first-name) set supertype: name
     Then attribute(name) get annotations contain: @abstract
     Then attribute(name) get declared annotations contain: @abstract
@@ -1619,7 +1440,6 @@ Feature: Concept Attribute Type
     When attribute(name) set annotation: @abstract
     When attribute(name) set annotation: @regex("value")
     When create attribute type: first-name
-    When attribute(first-name) set value type: string
     When attribute(first-name) set supertype: name
     Then attribute(first-name) get annotations contain: @regex("value")
     Then attribute(first-name) get declared annotations do not contain: @regex("value")
@@ -1697,6 +1517,7 @@ Feature: Concept Attribute Type
     Then attribute(first-name) get annotations is empty
     Then attribute(first-name) get declared annotations is empty
     When attribute(first-name) set supertype: name
+    When attribute(first-name) unset value type
     Then attribute(first-name) get annotations contain: @regex("\S+")
     Then attribute(first-name) get declared annotations do not contain: @regex("\S+")
     Then attribute(first-name) set annotation: @regex("test"); fails
@@ -1714,6 +1535,7 @@ Feature: Concept Attribute Type
     Then attribute(first-name) get declared annotations contain: @regex("\S++")
     Then attribute(first-name) set supertype: name; fails
     When attribute(first-name) unset annotation: @regex
+    When attribute(first-name) unset value type
     When attribute(first-name) set supertype: name
     Then attribute(first-name) get annotations contain: @regex("\S+")
     Then attribute(first-name) get declared annotations do not contain: @regex("\S+")
@@ -1730,7 +1552,6 @@ Feature: Concept Attribute Type
     When attribute(name) set value type: string
     When attribute(name) set annotation: @regex("value")
     When create attribute type: first-name
-    When attribute(first-name) set value type: string
     When attribute(first-name) set supertype: name
     When transaction commits
     When connection open schema transaction for database: typedb
@@ -1751,7 +1572,6 @@ Feature: Concept Attribute Type
     When attribute(name) set value type: string
     When attribute(name) set annotation: @regex("value")
     When create attribute type: first-name
-    When attribute(first-name) set value type: string
     When attribute(first-name) set supertype: name
     Then attribute(first-name) get annotations contain: @regex("value")
     Then attribute(first-name) get declared annotations do not contain: @regex("value")
@@ -1861,7 +1681,6 @@ Feature: Concept Attribute Type
     When attribute(name) set annotation: @abstract
     When attribute(name) set annotation: @independent
     When create attribute type: first-name
-    When attribute(first-name) set value type: string
     When attribute(first-name) set supertype: name
     Then attribute(first-name) get annotations contain: @independent
     Then attribute(first-name) get declared annotations do not contain: @independent
@@ -1876,7 +1695,6 @@ Feature: Concept Attribute Type
     When attribute(name) set annotation: @independent
     When attribute(name) set value type: string
     When create attribute type: first-name
-    When attribute(first-name) set value type: string
     When attribute(first-name) set supertype: name
     Then attribute(first-name) get annotations contain: @independent
     When transaction commits
@@ -1885,7 +1703,6 @@ Feature: Concept Attribute Type
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When create attribute type: second-name
-    When attribute(second-name) set value type: string
     When attribute(second-name) set supertype: name
     Then attribute(second-name) get annotations contain: @independent
     When attribute(second-name) set annotation: @independent
@@ -1897,7 +1714,6 @@ Feature: Concept Attribute Type
     When attribute(name) set annotation: @independent
     When attribute(name) set value type: string
     When create attribute type: first-name
-    When attribute(first-name) set value type: string
     When attribute(first-name) set supertype: name
     Then attribute(first-name) get annotations contain: @independent
     Then attribute(first-name) get declared annotations do not contain: @independent
@@ -1907,6 +1723,7 @@ Feature: Concept Attribute Type
     Then attribute(first-name) get annotations contain: @independent
     Then attribute(first-name) get declared annotations do not contain: @independent
     Then attribute(first-name) unset annotation: @independent; fails
+    When attribute(first-name) set annotation: @abstract
     When attribute(first-name) set supertype: attribute
     Then attribute(first-name) get annotations do not contain: @independent
     Then attribute(first-name) get declared annotations do not contain: @independent
@@ -2075,7 +1892,6 @@ Feature: Concept Attribute Type
     When attribute(name) set annotation: @abstract
     When attribute(name) set annotation: @values("value", "value2")
     When create attribute type: first-name
-    When attribute(first-name) set value type: string
     When attribute(first-name) set supertype: name
     Then attribute(first-name) get annotations contain: @values("value", "value2")
     Then attribute(first-name) get declared annotations do not contain: @values("value", "value2")
@@ -2227,7 +2043,6 @@ Feature: Concept Attribute Type
     When attribute(name) set value type: string
     When attribute(name) set annotation: @values("value")
     When create attribute type: first-name
-    When attribute(first-name) set value type: string
     When attribute(first-name) set supertype: name
     Then attribute(first-name) get annotations contain: @values("value")
     When transaction commits
@@ -2236,7 +2051,6 @@ Feature: Concept Attribute Type
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When create attribute type: second-name
-    When attribute(second-name) set value type: string
     When attribute(second-name) set supertype: name
     Then attribute(second-name) get annotations contain: @values("value")
     When attribute(second-name) set annotation: @values("value")
@@ -2248,7 +2062,6 @@ Feature: Concept Attribute Type
     When attribute(name) set value type: string
     When attribute(name) set annotation: @values("value")
     When create attribute type: first-name
-    When attribute(first-name) set value type: string
     When attribute(first-name) set supertype: name
     Then attribute(first-name) get annotations contain: @values("value")
     Then attribute(first-name) get declared annotations do not contain: @values("value")
@@ -2258,6 +2071,8 @@ Feature: Concept Attribute Type
     Then attribute(first-name) get annotations contain: @values("value")
     Then attribute(first-name) get declared annotations do not contain: @values("value")
     Then attribute(first-name) unset annotation: @values; fails
+    Then attribute(first-name) set supertype: attribute; fails
+    When attribute(first-name) set annotation: @abstract
     When attribute(first-name) set supertype: attribute
     Then attribute(first-name) get annotations do not contain: @values("value")
     Then attribute(first-name) get declared annotations do not contain: @values("value")
@@ -2271,7 +2086,6 @@ Feature: Concept Attribute Type
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
     When create attribute type: overridden-name
-    When attribute(overridden-name) set value type: <value-type>
     When attribute(overridden-name) set supertype: name
     When attribute(name) set annotation: @values(<args>)
     Then attribute(name) get annotations contain: @values(<args>)
@@ -2316,7 +2130,6 @@ Feature: Concept Attribute Type
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
     When create attribute type: overridden-name
-    When attribute(overridden-name) set value type: <value-type>
     When attribute(overridden-name) set supertype: name
     When attribute(name) set annotation: @values(<args>)
     Then attribute(name) get annotations contain: @values(<args>)
@@ -2537,7 +2350,6 @@ Feature: Concept Attribute Type
     When attribute(name) set annotation: @abstract
     When attribute(name) set annotation: @range(3..5)
     When create attribute type: first-name
-    When attribute(first-name) set value type: string
     When attribute(first-name) set supertype: name
     Then attribute(first-name) get annotations contain: @range(3..5)
     Then attribute(first-name) get declared annotations do not contain: @range(3..5)
@@ -2735,7 +2547,6 @@ Feature: Concept Attribute Type
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
     When create attribute type: overridden-name
-    When attribute(overridden-name) set value type: <value-type>
     When attribute(overridden-name) set supertype: name
     When attribute(name) set annotation: @range(<args>)
     Then attribute(name) get annotations contain: @range(<args>)
@@ -2780,7 +2591,6 @@ Feature: Concept Attribute Type
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
     When create attribute type: overridden-name
-    When attribute(overridden-name) set value type: <value-type>
     When attribute(overridden-name) set supertype: name
     When attribute(name) set annotation: @range(<args>)
     Then attribute(name) get annotations contain: @range(<args>)
@@ -3078,9 +2888,11 @@ Feature: Concept Attribute Type
     Then struct(passport) does not exist
     When create struct: passport
     Then struct(passport) exists
+    When struct(passport) create field: name, with value type: string
     When transaction commits
     When connection open schema transaction for database: typedb
     Then struct(passport) exists
+    When struct(passport) delete field: name
     When delete struct: passport
     Then struct(passport) does not exist
     When transaction commits
@@ -3128,10 +2940,13 @@ Feature: Concept Attribute Type
     When struct(passport) delete field: name
     Then struct(passport) get fields do not contain:
       | name |
+    When struct(passport) create field: not-name, with value type: <value-type>
     When transaction commits
     When connection open read transaction for database: typedb
     Then struct(passport) get fields do not contain:
       | name |
+    Then struct(passport) get fields contain:
+      | not-name |
     Examples:
       | value-type    |
       | long          |
@@ -3145,26 +2960,21 @@ Feature: Concept Attribute Type
       | duration      |
       | custom-struct |
 
-    # TODO: Maybe only for typeql!
   Scenario Outline: Struct cannot delete fields of type <value-type> if it doesn't exist
     When create struct: passport
     When struct(passport) create field: name, with value type: <value-type>
     When create struct: table
     Then struct(table) delete field: name; fails
+    When struct(table) create field: name, with value type: <value-type>
     When transaction commits
     When connection open schema transaction for database: typedb
+    When struct(table) delete field: name
     Then struct(table) delete field: name; fails
     Examples:
       | value-type    |
       | long          |
       | string        |
-      | boolean       |
-      | double        |
-      | decimal       |
       | date          |
-      | datetime      |
-      | datetime-tz   |
-      | duration      |
       | custom-struct |
 
   Scenario: Struct cannot be redefined

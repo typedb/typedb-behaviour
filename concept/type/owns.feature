@@ -109,14 +109,7 @@ Feature: Concept Owns
     Examples:
       | value-type    |
       | long          |
-      | double        |
-      | decimal       |
-      | string        |
-      | boolean       |
-      | date          |
       | datetime      |
-      | datetime-tz   |
-      | duration      |
       | custom-struct |
 
     # TODO: Only for typeql
@@ -158,8 +151,16 @@ Feature: Concept Owns
     When create attribute type: name
     When entity(player) set owns: name
     Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When create entity type: player
+    When entity(player) set annotation: @abstract
+    When create attribute type: name
+    When entity(player) set owns: name
+    When attribute(name) set value type: string
+    When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(player) set owns: name; fails
+    Then entity(player) get declared owns contain:
+      | name |
 
   Scenario: Abstract entity type can own abstract attribute with and without value type
     When create entity type: player
@@ -271,17 +272,10 @@ Feature: Concept Owns
     When connection open schema transaction for database: typedb
     Then relation(reference) set owns: email
     Examples:
-      | value-type    |
-      | long          |
-      | double        |
-      | decimal       |
-      | string        |
-      | boolean       |
-      | date          |
-      | datetime      |
-      | datetime-tz   |
-      | duration      |
-      | custom-struct |
+      | value-type |
+      | double     |
+      | boolean    |
+      | date       |
 
     # TODO: Only for typeql
 #  Scenario: Relation types cannot own entities, relations, roles, structs, structs fields, and non-existing things
@@ -460,7 +454,6 @@ Feature: Concept Owns
     When attribute(email) set value type: <value-type>
     When attribute(email) set annotation: @abstract
     When create attribute type: work-email
-    When attribute(work-email) set value type: <value-type>
     When attribute(work-email) set supertype: email
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: email
@@ -478,26 +471,14 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get owns overridden(work-email) get label: email
     Examples:
       | root-type | supertype-name | subtype-name | value-type    |
-      | entity    | person         | customer     | long          |
       | entity    | person         | customer     | double        |
-      | entity    | person         | customer     | decimal       |
-      | entity    | person         | customer     | string        |
-      | entity    | person         | customer     | boolean       |
       | entity    | person         | customer     | date          |
       | entity    | person         | customer     | datetime      |
-      | entity    | person         | customer     | datetime-tz   |
-      | entity    | person         | customer     | duration      |
       | entity    | person         | customer     | custom-struct |
       | relation  | description    | registration | long          |
-      | relation  | description    | registration | double        |
       | relation  | description    | registration | decimal       |
       | relation  | description    | registration | string        |
-      | relation  | description    | registration | boolean       |
-      | relation  | description    | registration | date          |
-      | relation  | description    | registration | datetime      |
       | relation  | description    | registration | datetime-tz   |
-      | relation  | description    | registration | duration      |
-      | relation  | description    | registration | custom-struct |
 
   Scenario Outline: <root-type> types can unset override of inherited owns
     When create attribute type: email
@@ -507,7 +488,6 @@ Feature: Concept Owns
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
     When create attribute type: work-email
-    When attribute(work-email) set value type: <value-type>
     When attribute(work-email) set supertype: email
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: email
@@ -630,7 +610,6 @@ Feature: Concept Owns
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
     When create attribute type: customer-name
-    When attribute(customer-name) set value type: <value-type>
     When attribute(customer-name) set supertype: name
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: name
@@ -650,7 +629,6 @@ Feature: Concept Owns
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
     When create attribute type: customer-name
-    When attribute(customer-name) set value type: <value-type>
     When attribute(customer-name) set supertype: name
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: name
@@ -686,7 +664,6 @@ Feature: Concept Owns
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
     When create attribute type: first-name
-    When attribute(first-name) set value type: <value-type>
     When attribute(first-name) set supertype: name
     When <root-type>(<type-name>) set annotation: @abstract
     When <root-type>(<type-name>) set owns: name
@@ -742,10 +719,8 @@ Feature: Concept Owns
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
     When create attribute type: first-name
-    When attribute(first-name) set value type: <value-type>
     When attribute(first-name) set supertype: name
     When create attribute type: second-name
-    When attribute(second-name) set value type: <value-type>
     When attribute(second-name) set supertype: name
     When <root-type>(<supertype-name>) set owns: name
     Then <root-type>(<supertype-name>) get owns contain:
@@ -1040,13 +1015,7 @@ Feature: Concept Owns
       | value-type    | value-type-2 |
       | long          | string       |
       | double        | datetime-tz  |
-      | decimal       | datetime     |
-      | string        | duration     |
-      | boolean       | long         |
-      | date          | decimal      |
-      | datetime-tz   | double       |
-      | duration      | boolean      |
-      | custom-struct | long         |
+      | custom-struct | decimal      |
 
      # TODO: Move to thing-feature or schema/data-validation?
 #  Scenario: Ownership can change ordering if it does not have instances even if its owner has instances for relation type
@@ -1228,25 +1197,9 @@ Feature: Concept Owns
     Then <root-type>(<type-name>) get owns(name) get ordering: ordered
     Then <root-type>(<type-name>) get owns(surname) get ordering: unordered
     Examples:
-      | root-type | type-name   | value-type  |
-      | entity    | person      | long        |
-      | entity    | person      | double      |
-      | entity    | person      | decimal     |
-      | entity    | person      | string      |
-      | entity    | person      | boolean     |
-      | entity    | person      | date        |
-      | entity    | person      | datetime    |
-      | entity    | person      | datetime-tz |
-      | entity    | person      | duration    |
-      | relation  | description | long        |
-      | relation  | description | double      |
-      | relation  | description | decimal     |
-      | relation  | description | string      |
-      | relation  | description | boolean     |
-      | relation  | description | date        |
-      | relation  | description | datetime    |
-      | relation  | description | datetime-tz |
-      | relation  | description | duration    |
+      | root-type | type-name   | value-type |
+      | entity    | person      | date       |
+      | relation  | description | duration   |
 
   Scenario Outline: Ordered owns can redeclare ordering
     When create attribute type: name
@@ -1331,7 +1284,6 @@ Feature: Concept Owns
     When attribute(email) set value type: <value-type>
     When attribute(email) set annotation: @abstract
     When create attribute type: work-email
-    When attribute(work-email) set value type: <value-type>
     When attribute(work-email) set supertype: email
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: email
@@ -1353,27 +1305,9 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get owns overridden(work-email) get label: email
     Then <root-type>(<subtype-name>) get owns(work-email) get ordering: ordered
     Examples:
-      | root-type | supertype-name | subtype-name | value-type    |
-      | entity    | person         | customer     | long          |
-      | entity    | person         | customer     | double        |
-      | entity    | person         | customer     | decimal       |
-      | entity    | person         | customer     | string        |
-      | entity    | person         | customer     | boolean       |
-      | entity    | person         | customer     | date          |
-      | entity    | person         | customer     | datetime      |
-      | entity    | person         | customer     | datetime-tz   |
-      | entity    | person         | customer     | duration      |
-      | entity    | person         | customer     | custom-struct |
-      | relation  | description    | registration | long          |
-      | relation  | description    | registration | double        |
-      | relation  | description    | registration | decimal       |
-      | relation  | description    | registration | string        |
-      | relation  | description    | registration | boolean       |
-      | relation  | description    | registration | date          |
-      | relation  | description    | registration | datetime      |
-      | relation  | description    | registration | datetime-tz   |
-      | relation  | description    | registration | duration      |
-      | relation  | description    | registration | custom-struct |
+      | root-type | supertype-name | subtype-name | value-type |
+      | entity    | person         | customer     | long       |
+      | relation  | description    | registration | string     |
 
   Scenario Outline: <root-type> types cannot redeclare inherited owns as owns
     When create attribute type: email
@@ -1396,7 +1330,6 @@ Feature: Concept Owns
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
     When create attribute type: customer-name
-    When attribute(customer-name) set value type: <value-type>
     When attribute(customer-name) set supertype: name
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: name
@@ -1418,7 +1351,6 @@ Feature: Concept Owns
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
     When create attribute type: customer-name
-    When attribute(customer-name) set value type: <value-type>
     When attribute(customer-name) set supertype: name
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: name
@@ -1442,7 +1374,6 @@ Feature: Concept Owns
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
     When create attribute type: first-name
-    When attribute(first-name) set value type: <value-type>
     When attribute(first-name) set supertype: name
     When <root-type>(<type-name>) set annotation: @abstract
     When <root-type>(<type-name>) set owns: name
@@ -1511,7 +1442,6 @@ Feature: Concept Owns
     When <root-type>(<supertype-name>) get owns(other) set ordering: ordered
     When create attribute type: name
     When attribute(name) set annotation: @abstract
-    When attribute(name) set value type: <value-type>
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
     When <root-type>(<subtype-name>) set annotation: @abstract
     When <root-type>(<subtype-name>) set owns: name
@@ -1528,6 +1458,7 @@ Feature: Concept Owns
     When <root-type>(<supertype-name>) set owns: surname
     When <root-type>(<supertype-name>) get owns(surname) set ordering: ordered
     When attribute(name) set supertype: surname
+    When attribute(name) unset value type
     When <root-type>(<subtype-name>) get owns(name) set override: surname
     Then <root-type>(<subtype-name>) get owns overridden(name) get label: surname
     When transaction commits
@@ -1581,11 +1512,9 @@ Feature: Concept Owns
     When attribute(literal) set value type: <value-type>
     When create attribute type: name
     When attribute(name) set annotation: @abstract
-    When attribute(name) set value type: <value-type>
     When attribute(name) set supertype: literal
     When create attribute type: surname
     When attribute(surname) set annotation: @abstract
-    When attribute(surname) set value type: <value-type>
     When attribute(surname) set supertype: name
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: literal
@@ -1673,7 +1602,6 @@ Feature: Concept Owns
     When attribute(name) set annotation: @abstract
     When attribute(name) set value type: <value-type>
     When create attribute type: surname
-    When attribute(surname) set value type: <value-type>
     When attribute(surname) set supertype: name
     When <root-type>(<supertype-name>) set owns: name
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
@@ -1721,16 +1649,16 @@ Feature: Concept Owns
     When attribute(name) set value type: <value-type>
     When create attribute type: surname
     When attribute(surname) set annotation: @abstract
-    When attribute(surname) set value type: <value-type>
     When attribute(surname) set supertype: name
     When <root-type>(<supertype-name>) set owns: name
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
     When <root-type>(<subtype-name>) set owns: surname
     When <root-type>(<subtype-name>) get owns(surname) set override: name
-    Then attribute(surname) set supertype: attribute; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(surname) set supertype: attribute; fails
+    When attribute(surname) set supertype: attribute
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name>) get owns(surname) unset override
     When attribute(surname) set supertype: attribute
     Then attribute(surname) get supertype: attribute
@@ -1743,21 +1671,27 @@ Feature: Concept Owns
     When attribute(subsurname) set supertype: surname
     When <root-type>(<subtype-name>) unset owns: surname
     When <root-type>(<subtype-name>) set owns: subsurname
+    Then <root-type>(<subtype-name>) get owns(subsurname) set override: name; fails
+    When attribute(surname) set supertype: name
     When <root-type>(<subtype-name>) get owns(subsurname) set override: name
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(subsurname) set supertype: attribute; fails
+    When attribute(subsurname) set annotation: @abstract
+    When attribute(subsurname) set supertype: attribute
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
     When attribute(surname) set supertype: attribute
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name>) get owns(subsurname) unset override
     When attribute(surname) set supertype: attribute
     Then attribute(surname) get supertype: attribute
-    Then <root-type>(<subtype-name>) get owns overriden(subsurname) does not exist
+    Then <root-type>(<subtype-name>) get owns overridden(subsurname) does not exist
+    When attribute(subsurname) set annotation: @abstract
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(surname) get supertype: attribute
-    Then <root-type>(<subtype-name>) get owns overriden(subsurname) does not exist
+    Then <root-type>(<subtype-name>) get owns overridden(subsurname) does not exist
     Examples:
       | root-type | supertype-name | subtype-name | value-type  |
       | entity    | person         | customer     | datetime-tz |
@@ -1813,14 +1747,14 @@ Feature: Concept Owns
 #      | entity    | person      | subkey(LABEL)    | subkey | string     |
       | entity    | person      | values("1", "2") | values              | string     |
       | entity    | person      | range("1".."2")  | range               | string     |
-      | entity    | person      | card(1..2)       | card                | string     |
+      | entity    | person      | card(1..1)       | card                | string     |
       | entity    | person      | regex("\S+")     | regex               | string     |
       | relation  | description | key              | key                 | string     |
       | relation  | description | unique           | unique              | string     |
 #      | relation  | description | subkey(LABEL)    | subkey | string     |
       | relation  | description | values("1", "2") | values              | string     |
       | relation  | description | range("1".."2")  | range               | string     |
-      | relation  | description | card(1..2)       | card                | string     |
+      | relation  | description | card(1..1)       | card                | string     |
       | relation  | description | regex("\S+")     | regex               | string     |
 
   Scenario Outline: <root-type> types can have owns with @<annotation> alongside pure owns
@@ -1865,14 +1799,14 @@ Feature: Concept Owns
 #      | entity    | person      | subkey(LABEL)    |
       | entity    | person      | values("1", "2") |
       | entity    | person      | range("1".."2")  |
-      | entity    | person      | card(1..2)       |
+      | entity    | person      | card(1..1)       |
       | entity    | person      | regex("\S+")     |
       | relation  | description | key              |
       | relation  | description | unique           |
 #      | relation  | description | subkey(LABEL)    |
       | relation  | description | values("1", "2") |
       | relation  | description | range("1".."2")  |
-      | relation  | description | card(1..2)       |
+      | relation  | description | card(1..1)       |
       | relation  | description | regex("\S+")     |
 
   Scenario Outline: <root-type> types can unset not set @<annotation> of ownership
@@ -1922,14 +1856,14 @@ Feature: Concept Owns
 #      | entity    | person      | subkey(LABEL)    | subkey              |
       | entity    | person      | values("1", "2") | values              |
       | entity    | person      | range("1".."2")  | range               |
-      | entity    | person      | card(1..2)       | card                |
+      | entity    | person      | card(1..1)       | card                |
       | entity    | person      | regex("\S+")     | regex               |
       | relation  | description | key              | key                 |
       | relation  | description | unique           | unique              |
 #      | relation  | description | subkey(LABEL)    | subkey              |
       | relation  | description | values("1", "2") | values              |
       | relation  | description | range("1".."2")  | range               |
-      | relation  | description | card(1..2)       | card                |
+      | relation  | description | card(1..1)       | card                |
       | relation  | description | regex("\S+")     | regex               |
 
   Scenario Outline: <root-type> types can set and unset @<annotation> of inherited ownership
@@ -1970,14 +1904,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subkey(LABEL)    | subkey              |
       | entity    | person         | customer     | values("1", "2") | values              |
       | entity    | person         | customer     | range("1".."2")  | range               |
-      | entity    | person         | customer     | card(1..2)       | card                |
+      | entity    | person         | customer     | card(1..1)       | card                |
       | entity    | person         | customer     | regex("\S+")     | regex               |
       | relation  | description    | registration | key              | key                 |
       | relation  | description    | registration | unique           | unique              |
 #      | relation  | description    | registration | subkey(LABEL)    | subkey              |
       | relation  | description    | registration | values("1", "2") | values              |
       | relation  | description    | registration | range("1".."2")  | range               |
-      | relation  | description    | registration | card(1..2)       | card                |
+      | relation  | description    | registration | card(1..1)       | card                |
       | relation  | description    | registration | regex("\S+")     | regex               |
 
   Scenario Outline: <root-type> types can set and unset @<annotation> of inherited ownership without annotations
@@ -2009,6 +1943,10 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get owns(username) get annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get owns(username) get declared annotations contain: @<annotation>
     When <root-type>(<subtype-name>) get owns(username) unset annotation: @<annotation-category>
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) get owns(username) unset annotation: @<annotation-category>
+    When <root-type>(<subtype-name>) unset owns: username
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<supertype-name>) get owns(username) get annotations do not contain: @<annotation>
@@ -2022,14 +1960,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subkey(LABEL)    | subkey              |
       | entity    | person         | customer     | values("1", "2") | values              |
       | entity    | person         | customer     | range("1".."2")  | range               |
-      | entity    | person         | customer     | card(1..2)       | card                |
+      | entity    | person         | customer     | card(1..1)       | card                |
       | entity    | person         | customer     | regex("\S+")     | regex               |
       | relation  | description    | registration | key              | key                 |
       | relation  | description    | registration | unique           | unique              |
 #      | relation  | description    | registration | subkey(LABEL)    | subkey              |
       | relation  | description    | registration | values("1", "2") | values              |
       | relation  | description    | registration | range("1".."2")  | range               |
-      | relation  | description    | registration | card(1..2)       | card                |
+      | relation  | description    | registration | card(1..1)       | card                |
       | relation  | description    | registration | regex("\S+")     | regex               |
 
   Scenario Outline: <root-type> types can set and unset @<annotation> of overridden ownership
@@ -2081,14 +2019,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subkey(LABEL)    | subkey              |
       | entity    | person         | customer     | values("1", "2") | values              |
       | entity    | person         | customer     | range("1".."2")  | range               |
-      | entity    | person         | customer     | card(1..2)       | card                |
+      | entity    | person         | customer     | card(1..1)       | card                |
       | entity    | person         | customer     | regex("\S+")     | regex               |
       | relation  | description    | registration | key              | key                 |
       | relation  | description    | registration | unique           | unique              |
 #      | relation  | description    | registration | subkey(LABEL)    | subkey              |
       | relation  | description    | registration | values("1", "2") | values              |
       | relation  | description    | registration | range("1".."2")  | range               |
-      | relation  | description    | registration | card(1..2)       | card                |
+      | relation  | description    | registration | card(1..1)       | card                |
       | relation  | description    | registration | regex("\S+")     | regex               |
 
   Scenario Outline: <root-type> types cannot set and unset @<annotation> of overridden ownership with inherited annotation
@@ -2147,14 +2085,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subkey(LABEL)    | subkey              |
       | entity    | person         | customer     | values("1", "2") | values              |
       | entity    | person         | customer     | range("1".."2")  | range               |
-      | entity    | person         | customer     | card(1..2)       | card                |
+      | entity    | person         | customer     | card(1..1)       | card                |
       | entity    | person         | customer     | regex("\S+")     | regex               |
       | relation  | description    | registration | key              | key                 |
       | relation  | description    | registration | unique           | unique              |
 #      | relation  | description    | registration | subkey(LABEL)    | subkey              |
       | relation  | description    | registration | values("1", "2") | values              |
       | relation  | description    | registration | range("1".."2")  | range               |
-      | relation  | description    | registration | card(1..2)       | card                |
+      | relation  | description    | registration | card(1..1)       | card                |
       | relation  | description    | registration | regex("\S+")     | regex               |
 
   Scenario Outline: <root-type> types can inherit owns with @<annotation>s alongside pure owns
@@ -2248,14 +2186,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subscriber     | subkey(LABEL)    |
       | entity    | person         | customer     | subscriber     | values("1", "2") |
       | entity    | person         | customer     | subscriber     | range("1".."2")  |
-      | entity    | person         | customer     | subscriber     | card(1..2)       |
+      | entity    | person         | customer     | subscriber     | card(1..1)       |
       | entity    | person         | customer     | subscriber     | regex("\S+")     |
       | relation  | description    | registration | profile        | key              |
       | relation  | description    | registration | profile        | unique           |
 #      | relation  | description    | registration | profile        | subkey(LABEL)    |
       | relation  | description    | registration | profile        | values("1", "2") |
       | relation  | description    | registration | profile        | range("1".."2")  |
-      | relation  | description    | registration | profile        | card(1..2)       |
+      | relation  | description    | registration | profile        | card(1..1)       |
       | relation  | description    | registration | profile        | regex("\S+")     |
 
   Scenario Outline: <root-type> types can redeclare owns with @<annotation>s as owns with @<annotation>s
@@ -2285,14 +2223,14 @@ Feature: Concept Owns
 #      | entity    | person      | subkey(LABEL)    | string     |
       | entity    | person      | values("1", "2") | string     |
       | entity    | person      | range("1".."2")  | string     |
-      | entity    | person      | card(1..2)       | string     |
+      | entity    | person      | card(1..1)       | string     |
       | entity    | person      | regex("\S+")     | string     |
       | relation  | description | key              | string     |
       | relation  | description | unique           | string     |
 #      | relation  | description | subkey(LABEL)    | string     |
       | relation  | description | values("1", "2") | string     |
       | relation  | description | range("1".."2")  | string     |
-      | relation  | description | card(1..2)       | string     |
+      | relation  | description | card(1..1)       | string     |
       | relation  | description | regex("\S+")     | string     |
 
   Scenario Outline: <root-type> types can redeclare owns as owns with @<annotation>
@@ -2324,14 +2262,14 @@ Feature: Concept Owns
 #      | entity    | person      | subkey(LABEL)    | string     |
       | entity    | person      | values("1", "2") | string     |
       | entity    | person      | range("1".."2")  | string     |
-      | entity    | person      | card(1..2)       | string     |
+      | entity    | person      | card(1..1)       | string     |
       | entity    | person      | regex("\S+")     | string     |
       | relation  | description | key              | string     |
       | relation  | description | unique           | string     |
 #      | relation  | description | subkey(LABEL)    | string     |
       | relation  | description | values("1", "2") | string     |
       | relation  | description | range("1".."2")  | string     |
-      | relation  | description | card(1..2)       | string     |
+      | relation  | description | card(1..1)       | string     |
       | relation  | description | regex("\S+")     | string     |
 
   Scenario Outline: <root-type> types can redeclare owns and save its @<annotation>
@@ -2364,14 +2302,14 @@ Feature: Concept Owns
 #      | entity    | person      | subkey(LABEL)    | string     |
       | entity    | person      | values("1", "2") | string     |
       | entity    | person      | range("1".."2")  | string     |
-      | entity    | person      | card(1..2)       | string     |
+      | entity    | person      | card(1..1)       | string     |
       | entity    | person      | regex("\S+")     | string     |
       | relation  | description | key              | string     |
       | relation  | description | unique           | string     |
 #      | relation  | description | subkey(LABEL)    | string     |
       | relation  | description | values("1", "2") | string     |
       | relation  | description | range("1".."2")  | string     |
-      | relation  | description | card(1..2)       | string     |
+      | relation  | description | card(1..1)       | string     |
       | relation  | description | regex("\S+")     | string     |
 
   Scenario Outline: <root-type> types can override inherited pure owns as owns with @<annotation>s
@@ -2379,7 +2317,6 @@ Feature: Concept Owns
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
     When create attribute type: username
-    When attribute(username) set value type: <value-type>
     When attribute(username) set supertype: name
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: name
@@ -2413,14 +2350,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subkey(LABEL)    | string     |
       | entity    | person         | customer     | values("1", "2") | string     |
       | entity    | person         | customer     | range("1".."2")  | string     |
-      | entity    | person         | customer     | card(1..2)       | string     |
+      | entity    | person         | customer     | card(1..1)       | string     |
       | entity    | person         | customer     | regex("\S+")     | string     |
       | relation  | description    | registration | key              | string     |
       | relation  | description    | registration | unique           | string     |
 #      | relation  | description    | registration | subkey(LABEL)    | string     |
       | relation  | description    | registration | values("1", "2") | string     |
       | relation  | description    | registration | range("1".."2")  | string     |
-      | relation  | description    | registration | card(1..2)       | string     |
+      | relation  | description    | registration | card(1..1)       | string     |
       | relation  | description    | registration | regex("\S+")     | string     |
 
   Scenario Outline: <root-type> types can re-override owns with <annotation>s
@@ -2428,7 +2365,6 @@ Feature: Concept Owns
     When attribute(email) set value type: <value-type>
     When attribute(email) set annotation: @abstract
     When create attribute type: work-email
-    When attribute(work-email) set value type: <value-type>
     When attribute(work-email) set supertype: email
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: email
@@ -2461,14 +2397,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subkey(LABEL)    | string     |
       | entity    | person         | customer     | values("1", "2") | string     |
       | entity    | person         | customer     | range("1".."2")  | string     |
-      | entity    | person         | customer     | card(1..2)       | string     |
+      | entity    | person         | customer     | card(1..1)       | string     |
       | entity    | person         | customer     | regex("\S+")     | string     |
       | relation  | description    | registration | key              | string     |
       | relation  | description    | registration | unique           | string     |
 #      | relation  | description    | registration | subkey(LABEL)    | string     |
       | relation  | description    | registration | values("1", "2") | string     |
       | relation  | description    | registration | range("1".."2")  | string     |
-      | relation  | description    | registration | card(1..2)       | string     |
+      | relation  | description    | registration | card(1..1)       | string     |
       | relation  | description    | registration | regex("\S+")     | string     |
 
   Scenario Outline: <root-type> types cannot redeclare inherited owns as owns with @<annotation> without overriding
@@ -2504,16 +2440,15 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get owns(surname) get annotations contain: @<annotation>
     Then <root-type>(<supertype-name>) get owns(name) get annotations is empty
     Then <root-type>(<subtype-name-2>) set owns: name; fails
+    When <root-type>(<subtype-name-2>) set owns: surname
     When <root-type>(<subtype-name-2>) get owns(surname) set annotation: @<annotation>
     Then <root-type>(<subtype-name-2>) get owns(surname) get annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get owns(surname) get annotations contain: @<annotation>
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
+    Then <root-type>(<subtype-name-2>) get owns(surname) set override: surname; fails
     When <root-type>(<subtype-name-2>) set owns: surname
-    Then <root-type>(<subtype-name-2>) get owns(surname) set override: surname
-    When <root-type>(<subtype-name-2>) get owns(surname) set annotation: @<annotation>
-    Then <root-type>(<subtype-name-2>) get owns(surname) get annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns(surname) get annotations contain: @<annotation>
+    When <root-type>(<subtype-name-2>) get owns(surname) set override: surname
     Then transaction commits; fails
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | annotation       | value-type |
@@ -2522,14 +2457,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subscriber     | subkey(LABEL)    | string     |
       | entity    | person         | customer     | subscriber     | values("1", "2") | string     |
       | entity    | person         | customer     | subscriber     | range("1".."2")  | string     |
-      | entity    | person         | customer     | subscriber     | card(1..2)       | string     |
+      | entity    | person         | customer     | subscriber     | card(1..1)       | string     |
       | entity    | person         | customer     | subscriber     | regex("\S+")     | string     |
       | relation  | description    | registration | profile        | key              | string     |
       | relation  | description    | registration | profile        | unique           | string     |
 #      | relation  | description    | registration | profile        | subkey(LABEL)    | string     |
       | relation  | description    | registration | profile        | values("1", "2") | string     |
       | relation  | description    | registration | profile        | range("1".."2")  | string     |
-      | relation  | description    | registration | profile        | card(1..2)       | string     |
+      | relation  | description    | registration | profile        | card(1..1)       | string     |
       | relation  | description    | registration | profile        | regex("\S+")     | string     |
 
   Scenario Outline: <root-type> types cannot redeclare inherited owns with @<annotation> as pure owns or owns with @<annotation>
@@ -2554,14 +2489,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subkey(LABEL)    | string     |
       | entity    | person         | customer     | values("1", "2") | string     |
       | entity    | person         | customer     | range("1".."2")  | string     |
-      | entity    | person         | customer     | card(1..2)       | string     |
+      | entity    | person         | customer     | card(1..1)       | string     |
       | entity    | person         | customer     | regex("\S+")     | string     |
       | relation  | description    | registration | key              | string     |
       | relation  | description    | registration | unique           | string     |
 #      | relation  | description    | registration | subkey(LABEL)    | string     |
       | relation  | description    | registration | values("1", "2") | string     |
       | relation  | description    | registration | range("1".."2")  | string     |
-      | relation  | description    | registration | card(1..2)       | string     |
+      | relation  | description    | registration | card(1..1)       | string     |
       | relation  | description    | registration | regex("\S+")     | string     |
 
   Scenario Outline: <root-type> types cannot redeclare inherited owns with @<annotation>
@@ -2569,7 +2504,6 @@ Feature: Concept Owns
     When attribute(email) set value type: <value-type>
     When attribute(email) set annotation: @abstract
     When create attribute type: customer-email
-    When attribute(customer-email) set value type: <value-type>
     When attribute(customer-email) set supertype: email
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: email
@@ -2602,7 +2536,6 @@ Feature: Concept Owns
     When attribute(email) set value type: <value-type>
     When attribute(email) set annotation: @abstract
     When create attribute type: customer-email
-    When attribute(customer-email) set value type: <value-type>
     When attribute(customer-email) set supertype: email
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: email
@@ -2635,7 +2568,6 @@ Feature: Concept Owns
     When attribute(email) set value type: <value-type>
     When attribute(email) set annotation: @abstract
     When create attribute type: customer-email
-    When attribute(customer-email) set value type: <value-type>
     When attribute(customer-email) set supertype: email
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: email
@@ -2729,11 +2661,9 @@ Feature: Concept Owns
     When attribute(score) set value type: double
     When attribute(score) set annotation: @abstract
     When create attribute type: reference
-    When attribute(reference) set value type: string
     When attribute(reference) set annotation: @abstract
     When attribute(reference) set supertype: username
     When create attribute type: rating
-    When attribute(rating) set value type: double
     When attribute(rating) set annotation: @abstract
     When attribute(rating) set supertype: score
     When <root-type>(<supertype-name>) set annotation: @abstract
@@ -2847,14 +2777,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subscriber     | subkey(LABEL)    |
       | entity    | person         | customer     | subscriber     | values("1", "2") |
       | entity    | person         | customer     | subscriber     | range("1".."2")  |
-      | entity    | person         | customer     | subscriber     | card(1..2)       |
+      | entity    | person         | customer     | subscriber     | card(1..1)       |
       | entity    | person         | customer     | subscriber     | regex("\S+")     |
       | relation  | description    | registration | profile        | key              |
       | relation  | description    | registration | profile        | unique           |
 #      | relation  | description    | registration | profile        | subkey(LABEL)    |
       | relation  | description    | registration | profile        | values("1", "2") |
       | relation  | description    | registration | profile        | range("1".."2")  |
-      | relation  | description    | registration | profile        | card(1..2)       |
+      | relation  | description    | registration | profile        | card(1..1)       |
       | relation  | description    | registration | profile        | regex("\S+")     |
 
   Scenario Outline: <root-type> types can override inherited owns with @<annotation>s and pure owns
@@ -2872,10 +2802,8 @@ Feature: Concept Owns
     When attribute(reference) set value type: string
     When attribute(reference) set annotation: @abstract
     When create attribute type: work-email
-    When attribute(work-email) set value type: string
     When attribute(work-email) set supertype: email
     When create attribute type: nick-name
-    When attribute(nick-name) set value type: string
     When attribute(nick-name) set supertype: name
     When create attribute type: rating
     When attribute(rating) set value type: double
@@ -2948,10 +2876,8 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get owns(reference) get annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get owns(work-email) get annotations contain: @<annotation>
     When create attribute type: license
-    When attribute(license) set value type: string
     When attribute(license) set supertype: reference
     When create attribute type: points
-    When attribute(points) set value type: double
     When attribute(points) set supertype: rating
     When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
     When <root-type>(<subtype-name-2>) set owns: license
@@ -3019,14 +2945,14 @@ Feature: Concept Owns
 #      | entity    | person         | customer     | subscriber     | subkey(LABEL)    |
       | entity    | person         | customer     | subscriber     | values("1", "2") |
       | entity    | person         | customer     | subscriber     | range("1".."2")  |
-      | entity    | person         | customer     | subscriber     | card(1..2)       |
+      | entity    | person         | customer     | subscriber     | card(1..1)       |
       | entity    | person         | customer     | subscriber     | regex("\S+")     |
       | relation  | description    | registration | profile        | key              |
       | relation  | description    | registration | profile        | unique           |
 #      | relation  | description    | registration | profile        | subkey(LABEL)    |
       | relation  | description    | registration | profile        | values("1", "2") |
       | relation  | description    | registration | profile        | range("1".."2")  |
-      | relation  | description    | registration | profile        | card(1..2)       |
+      | relation  | description    | registration | profile        | card(1..1)       |
       | relation  | description    | registration | profile        | regex("\S+")     |
 
   Scenario Outline: <root-type> type cannot set redundant duplicated @<annotation> on plays while it inherits it
@@ -3045,27 +2971,27 @@ Feature: Concept Owns
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name>) get owns(surname) set annotation: @<annotation>
-    When <root-type>(<supertype-name>) get owns(name) unset annotation: @<annotation>
+    When <root-type>(<supertype-name>) get owns(name) unset annotation: @<annotation-category>
     When transaction commits
     When connection open read transaction for database: typedb
     Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @<annotation>
     Then <root-type>(<subtype-name>) get owns(surname) get annotations contain: @<annotation>
     Examples:
-      | root-type | supertype-name | subtype-name | annotation       |
-      | entity    | person         | customer     | key              |
-      | entity    | person         | customer     | unique           |
-#      | entity    | person         | customer     | subkey(LABEL)    |
-      | entity    | person         | customer     | values("1", "2") |
-      | entity    | person         | customer     | range("1".."2")  |
-      | entity    | person         | customer     | card(1..2)       |
-      | entity    | person         | customer     | regex("\S+")     |
-      | relation  | description    | registration | key              |
-      | relation  | description    | registration | unique           |
-#      | relation  | description    | registration | subkey(LABEL)    |
-      | relation  | description    | registration | values("1", "2") |
-      | relation  | description    | registration | range("1".."2")  |
-      | relation  | description    | registration | card(1..2)       |
-      | relation  | description    | registration | regex("\S+")     |
+      | root-type | supertype-name | subtype-name | annotation       | annotation-category |
+      | entity    | person         | customer     | key              | key                 |
+      | entity    | person         | customer     | unique           | unique              |
+#      | entity    | person         | customer     | subkey(LABEL)    | subkey              |
+      | entity    | person         | customer     | values("1", "2") | values              |
+      | entity    | person         | customer     | range("1".."2")  | range               |
+      | entity    | person         | customer     | card(1..1)       | card                |
+      | entity    | person         | customer     | regex("\S+")     | regex               |
+      | relation  | description    | registration | key              | key                 |
+      | relation  | description    | registration | unique           | unique              |
+#      | relation  | description    | registration | subkey(LABEL)    | subkey              |
+      | relation  | description    | registration | values("1", "2") | values              |
+      | relation  | description    | registration | range("1".."2")  | range               |
+      | relation  | description    | registration | card(1..1)       | card                |
+      | relation  | description    | registration | regex("\S+")     | regex               |
 
 #########################
 ## @key
@@ -3166,6 +3092,7 @@ Feature: Concept Owns
     When attribute(seq) set value type: long
     When create attribute type: unknown
     When attribute(unknown) set supertype: id
+    When attribute(unknown) set annotation: @abstract
     When create attribute type: bad
     When attribute(bad) set supertype: id
     When attribute(bad) set value type: double
@@ -3177,26 +3104,31 @@ Feature: Concept Owns
     Then entity(named-person) get owns(name) get annotations contain: @key
     When create entity type: seqed-person
     When entity(seqed-person) set supertype: person
+    When entity(seqed-person) set annotation: @abstract
     Then entity(seqed-person) get owns(id) get annotations contain: @key
     When entity(seqed-person) set owns: seq
     When entity(seqed-person) get owns(seq) set override: id
     Then entity(seqed-person) get owns(seq) get annotations contain: @key
     When create entity type: unknown-person
     When entity(unknown-person) set supertype: person
+    When entity(unknown-person) set annotation: @abstract
     Then entity(unknown-person) get owns(id) get annotations contain: @key
     When entity(unknown-person) set owns: unknown
     When entity(unknown-person) get owns(unknown) set override: id
     Then entity(unknown-person) get owns(unknown) get annotations contain: @key
     Then attribute(unknown) set value type: double; fails
     Then attribute(unknown) set value type: custom-struct; fails
-    When entity(unknown-person) get owns(unknown) set annotation: @key
     When create entity type: bad-person
     When entity(bad-person) set supertype: person
+    When entity(bad-person) set annotation: @abstract
     Then entity(bad-person) get owns(id) get annotations contain: @key
     When entity(bad-person) set owns: bad
     Then entity(bad-person) get owns(bad) set override: id; fails
     Then entity(bad-person) get owns(bad) get annotations do not contain: @key
     When transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(unknown-person) get owns(unknown) set annotation: @key
+    Then transaction commits; fails
     When connection open schema transaction for database: typedb
     Then attribute(name) get value type: string
     Then entity(named-person) get owns(name) get annotations contain: @key
@@ -3611,6 +3543,7 @@ Feature: Concept Owns
     When attribute(seq) set value type: long
     When create attribute type: unknown
     When attribute(unknown) set supertype: id
+    When attribute(unknown) set annotation: @abstract
     When create attribute type: bad
     When attribute(bad) set supertype: id
     When attribute(bad) set value type: double
@@ -3627,6 +3560,7 @@ Feature: Concept Owns
     When entity(seqed-person) get owns(seq) set override: id
     Then entity(seqed-person) get owns(seq) get annotations contain: @unique
     When create entity type: unknown-person
+    When entity(unknown-person) set annotation: @abstract
     When entity(unknown-person) set supertype: person
     Then entity(unknown-person) get owns(id) get annotations contain: @unique
     When entity(unknown-person) set owns: unknown
@@ -3634,14 +3568,17 @@ Feature: Concept Owns
     Then entity(unknown-person) get owns(unknown) get annotations contain: @unique
     Then attribute(unknown) set value type: double; fails
     Then attribute(unknown) set value type: custom-struct; fails
-    When entity(unknown-person) get owns(unknown) set annotation: @unique
     When create entity type: bad-person
     When entity(bad-person) set supertype: person
     Then entity(bad-person) get owns(id) get annotations contain: @unique
     When entity(bad-person) set owns: bad
     Then entity(bad-person) get owns(bad) set override: id; fails
     Then entity(bad-person) get owns(bad) get annotations do not contain: @unique
+    When entity(bad-person) set annotation: @abstract
     When transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(unknown-person) get owns(unknown) set annotation: @unique
+    Then transaction commits; fails
     When connection open schema transaction for database: typedb
     Then attribute(name) get value type: string
     Then entity(named-person) get owns(name) get annotations contain: @unique
@@ -4040,7 +3977,6 @@ Feature: Concept Owns
     When attribute(second-custom-attribute) set value type: <value-type>
     When attribute(second-custom-attribute) set annotation: @abstract
     When create attribute type: overridden-custom-attribute
-    When attribute(overridden-custom-attribute) set value type: <value-type>
     When attribute(overridden-custom-attribute) set supertype: second-custom-attribute
     When entity(person) set owns: custom-attribute
     When relation(description) set owns: custom-attribute
@@ -4145,7 +4081,6 @@ Feature: Concept Owns
     When attribute(second-custom-attribute) set value type: <value-type>
     When attribute(second-custom-attribute) set annotation: @abstract
     When create attribute type: overridden-custom-attribute
-    When attribute(overridden-custom-attribute) set value type: <value-type>
     When attribute(overridden-custom-attribute) set supertype: second-custom-attribute
     When entity(person) set owns: custom-attribute
     When relation(description) set owns: custom-attribute
@@ -4653,7 +4588,6 @@ Feature: Concept Owns
     When attribute(second-custom-attribute) set value type: <value-type>
     When attribute(second-custom-attribute) set annotation: @abstract
     When create attribute type: overridden-custom-attribute
-    When attribute(overridden-custom-attribute) set value type: <value-type>
     When attribute(overridden-custom-attribute) set supertype: second-custom-attribute
     When entity(person) set owns: custom-attribute
     When relation(description) set owns: custom-attribute
@@ -4764,7 +4698,6 @@ Feature: Concept Owns
     When attribute(second-custom-attribute) set value type: <value-type>
     When attribute(second-custom-attribute) set annotation: @abstract
     When create attribute type: overridden-custom-attribute
-    When attribute(overridden-custom-attribute) set value type: <value-type>
     When attribute(overridden-custom-attribute) set supertype: second-custom-attribute
     When entity(person) set owns: custom-attribute
     When relation(description) set owns: custom-attribute
@@ -5010,67 +4943,16 @@ Feature: Concept Owns
     When connection open read transaction for database: typedb
     Then entity(person) get owns is empty
     Examples:
-      | value-type    | arg0 | arg1                |
-      | long          | 0    | 1                   |
-      | long          | 0    | 10                  |
-      | long          | 0    | 9223372036854775807 |
-      | long          | 1    | 10                  |
-      | long          | 0    |                     |
-      | long          | 1    |                     |
-      | string        | 0    | 1                   |
-      | string        | 0    | 10                  |
-      | string        | 0    | 9223372036854775807 |
-      | string        | 1    | 10                  |
-      | string        | 0    |                     |
-      | string        | 1    |                     |
-      | boolean       | 0    | 1                   |
-      | boolean       | 0    | 10                  |
-      | boolean       | 0    | 9223372036854775807 |
-      | boolean       | 1    | 10                  |
-      | boolean       | 0    |                     |
-      | boolean       | 1    |                     |
-      | double        | 0    | 1                   |
-      | double        | 0    | 10                  |
-      | double        | 0    | 9223372036854775807 |
-      | double        | 1    | 10                  |
-      | double        | 0    |                     |
-      | double        | 1    |                     |
-      | decimal       | 0    | 1                   |
-      | decimal       | 0    | 10                  |
-      | decimal       | 0    | 9223372036854775807 |
-      | decimal       | 1    | 10                  |
-      | decimal       | 0    |                     |
-      | decimal       | 1    |                     |
-      | date          | 0    | 1                   |
-      | date          | 0    | 10                  |
-      | date          | 0    | 9223372036854775807 |
-      | date          | 1    | 10                  |
-      | date          | 0    |                     |
-      | date          | 1    |                     |
-      | datetime      | 0    | 1                   |
-      | datetime      | 0    | 10                  |
-      | datetime      | 0    | 9223372036854775807 |
-      | datetime      | 1    | 10                  |
-      | datetime      | 0    |                     |
-      | datetime      | 1    |                     |
-      | datetime-tz   | 0    | 1                   |
-      | datetime-tz   | 0    | 10                  |
-      | datetime-tz   | 0    | 9223372036854775807 |
-      | datetime-tz   | 1    | 10                  |
-      | datetime-tz   | 0    |                     |
-      | datetime-tz   | 1    |                     |
-      | duration      | 0    | 1                   |
-      | duration      | 0    | 10                  |
-      | duration      | 0    | 9223372036854775807 |
-      | duration      | 1    | 10                  |
-      | duration      | 0    |                     |
-      | duration      | 1    |                     |
-      | custom-struct | 0    | 1                   |
-      | custom-struct | 0    | 10                  |
-      | custom-struct | 0    | 9223372036854775807 |
-      | custom-struct | 1    | 10                  |
-      | custom-struct | 0    |                     |
-      | custom-struct | 1    |                     |
+      | value-type    | arg0                | arg1                |
+      | long          | 0                   | 1                   |
+      | string        | 0                   | 10                  |
+      | boolean       | 0                   | 9223372036854775807 |
+      | double        | 1                   | 10                  |
+      | decimal       | 0                   |                     |
+      | date          | 1                   |                     |
+      | datetime-tz   | 1                   | 1                   |
+      | duration      | 9223372036854775807 | 9223372036854775807 |
+      | custom-struct | 9223372036854775807 |                     |
 
   Scenario Outline: Owns can set @card annotation for <value-type> value type with duplicate args (exactly N ownerships)
     When create attribute type: custom-attribute
@@ -5086,23 +4968,14 @@ Feature: Concept Owns
       | value-type    | arg  |
       | long          | 1    |
       | long          | 9999 |
-      | string        | 1    |
       | string        | 8888 |
-      | boolean       | 1    |
       | boolean       | 7777 |
-      | double        | 1    |
       | double        | 666  |
-      | decimal       | 1    |
       | decimal       | 555  |
-      | date          | 1    |
       | date          | 444  |
-      | datetime      | 1    |
       | datetime      | 444  |
-      | datetime-tz   | 1    |
       | datetime-tz   | 33   |
-      | duration      | 1    |
       | duration      | 22   |
-      | custom-struct | 1    |
       | custom-struct | 11   |
 
   Scenario Outline: Owns cannot have @card annotation for <value-type> value type with invalid arguments
@@ -5130,14 +5003,6 @@ Feature: Concept Owns
     Examples:
       | value-type  |
       | long        |
-      | double      |
-      | decimal     |
-      | string      |
-      | boolean     |
-      | date        |
-      | datetime    |
-      | datetime-tz |
-      | duration    |
 
   Scenario: Owns can have @card annotation for none value type
     When create attribute type: custom-attribute
@@ -5169,13 +5034,6 @@ Feature: Concept Owns
     Examples:
       | value-type  | args |
       | long        | 1..2 |
-      | double      | 1..3 |
-      | decimal     | 1..4 |
-      | string      | 1..5 |
-      | boolean     | 1..6 |
-      | date        | 1..7 |
-      | datetime    | 1..8 |
-      | datetime-tz | 1..9 |
       | duration    | 0..9 |
 
   Scenario Outline: Owns can reset @card annotations
@@ -5239,7 +5097,6 @@ Feature: Concept Owns
     When attribute(second-custom-attribute) set value type: <value-type>
     When attribute(second-custom-attribute) set annotation: @abstract
     When create attribute type: overridden-custom-attribute
-    When attribute(overridden-custom-attribute) set value type: <value-type>
     When attribute(overridden-custom-attribute) set supertype: second-custom-attribute
     When entity(person) set owns: custom-attribute
     When relation(description) set owns: custom-attribute
@@ -5363,7 +5220,6 @@ Feature: Concept Owns
     When attribute(second-custom-attribute) set value type: <value-type>
     When attribute(second-custom-attribute) set annotation: @abstract
     When create attribute type: overridden-custom-attribute
-    When attribute(overridden-custom-attribute) set value type: <value-type>
     When attribute(overridden-custom-attribute) set supertype: second-custom-attribute
     When entity(person) set owns: custom-attribute
     When relation(description) set owns: custom-attribute
@@ -5881,25 +5737,7 @@ Feature: Concept Owns
     Examples:
       | root-type | type-name   | value-type    |
       | entity    | person      | long          |
-      | entity    | person      | string        |
-      | entity    | person      | boolean       |
-      | entity    | person      | double        |
-      | entity    | person      | decimal       |
-      | entity    | person      | date          |
-      | entity    | person      | datetime      |
-      | entity    | person      | datetime-tz   |
-      | entity    | person      | duration      |
-      | entity    | person      | custom-struct |
-      | relation  | description | long          |
-      | relation  | description | string        |
-      | relation  | description | boolean       |
       | relation  | description | double        |
-      | relation  | description | decimal       |
-      | relation  | description | date          |
-      | relation  | description | datetime      |
-      | relation  | description | datetime-tz   |
-      | relation  | description | duration      |
-      | relation  | description | custom-struct |
 
   Scenario: Owns can have @distinct annotation for none value type
     When create attribute type: custom-attribute
@@ -5958,15 +5796,7 @@ Feature: Concept Owns
     Examples:
       | value-type    |
       | long          |
-      | string        |
-      | boolean       |
-      | double        |
       | decimal       |
-      | date          |
-      | datetime      |
-      | datetime-tz   |
-      | duration      |
-      | custom-struct |
 
   Scenario Outline: <root-type> types can redeclare owns as owns with @distinct
     When create attribute type: name
@@ -6329,7 +6159,6 @@ Feature: Concept Owns
     Then entity(person) get owns(custom-attribute) get annotations contain: @regex("\S+")
     Then entity(customer) get owns(custom-attribute) get annotations contain: @regex("\S+")
     When create attribute type: custom-attribute-2
-    When attribute(custom-attribute-2) set value type: string
     When attribute(custom-attribute-2) set supertype: custom-attribute
     When entity(customer) set owns: custom-attribute-2
     Then entity(customer) get owns(custom-attribute-2) get annotations is empty
@@ -6583,7 +6412,7 @@ Feature: Concept Owns
       | annotation-1 | annotation-2 | value-type |
       | key          | unique       | long       |
       | key          | card(0..1)   | long       |
-      | key          | card(0..)   | long       |
+      | key          | card(0..)    | long       |
       | key          | card(1..1)   | long       |
       | key          | card(2..5)   | long       |
 
@@ -6610,7 +6439,7 @@ Feature: Concept Owns
       | annotation-1 | annotation-2 | value-type |
       | key          | unique       | long       |
       | key          | card(0..1)   | long       |
-      | key          | card(0..)   | long       |
+      | key          | card(0..)    | long       |
       | key          | card(1..1)   | long       |
       | key          | card(2..5)   | long       |
 
@@ -6619,14 +6448,11 @@ Feature: Concept Owns
     When attribute(name) set value type: string
     When attribute(name) set annotation: @abstract
     When create attribute type: surname
-    When attribute(surname) set value type: string
     When attribute(surname) set supertype: name
     When create attribute type: non-card-name
-    When attribute(non-card-name) set value type: string
     When attribute(non-card-name) set supertype: name
     When attribute(non-card-name) set annotation: @abstract
     When create attribute type: third-name
-    When attribute(third-name) set value type: string
     When attribute(third-name) set supertype: non-card-name
     When entity(person) set owns: name
     When entity(person) get owns(name) set annotation: @card(<card-args>)
@@ -6688,14 +6514,11 @@ Feature: Concept Owns
     When attribute(name) set value type: string
     When attribute(name) set annotation: @abstract
     When create attribute type: surname
-    When attribute(surname) set value type: string
     When attribute(surname) set supertype: name
     When create attribute type: non-card-name
-    When attribute(non-card-name) set value type: string
     When attribute(non-card-name) set supertype: name
     When attribute(non-card-name) set annotation: @abstract
     When create attribute type: third-name
-    When attribute(third-name) set value type: string
     When attribute(third-name) set supertype: non-card-name
     When entity(person) set owns: name
     When entity(person) get owns(name) set annotation: @card(<card-args>)
@@ -6815,17 +6638,13 @@ Feature: Concept Owns
     When attribute(name) set value type: string
     When attribute(name) set annotation: @abstract
     When create attribute type: name2
-    When attribute(name2) set value type: string
     When attribute(name2) set annotation: @abstract
     When attribute(name2) set supertype: name
     When create attribute type: subname2
-    When attribute(subname2) set value type: string
     When attribute(subname2) set supertype: name2
     When create attribute type: name3
-    When attribute(name3) set value type: string
     When attribute(name3) set supertype: name
     When create attribute type: name4
-    When attribute(name4) set value type: string
     When attribute(name4) set supertype: name
     When entity(person) set annotation: @abstract
     When entity(person) set owns: name
@@ -6895,17 +6714,13 @@ Feature: Concept Owns
     When attribute(name) set value type: string
     When attribute(name) set annotation: @abstract
     When create attribute type: name2
-    When attribute(name2) set value type: string
     When attribute(name2) set annotation: @abstract
     When attribute(name2) set supertype: name
     When create attribute type: subname2
-    When attribute(subname2) set value type: string
     When attribute(subname2) set supertype: name2
     When create attribute type: name3
-    When attribute(name3) set value type: string
     When attribute(name3) set supertype: name
     When create attribute type: name4
-    When attribute(name4) set value type: string
     When attribute(name4) set supertype: name
     When entity(person) set annotation: @abstract
     When entity(person) set owns: name
