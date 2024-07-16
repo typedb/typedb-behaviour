@@ -2383,6 +2383,49 @@ Feature: Concept Plays
       | entity    | person         | customer     | card(1..1) | card                |
       | relation  | description    | registration | card(1..1) | card                |
 
+  Scenario Outline: Non-abstract <root-type> type cannot set plays for abstract role
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) get role(parent) set annotation: @abstract
+    When <root-type>(<type-name>) unset annotation: @abstract
+    Then <root-type>(<type-name>) set plays: parentship:parent; fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<type-name>) set plays: parentship:parent; fails
+    When <root-type>(<type-name>) set annotation: @abstract
+    When <root-type>(<type-name>) set plays: parentship:parent
+    Then <root-type>(<type-name>) get plays contain:
+      | parentship:parent |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then <root-type>(<type-name>) get plays contain:
+      | parentship:parent |
+    Examples:
+      | root-type | type-name   |
+      | entity    | person      |
+      | relation  | description |
+
+  Scenario Outline: Abstract <root-type> type can set plays for both non-abstract and abstract roles
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When <root-type>(<type-name>) set annotation: @abstract
+    When <root-type>(<type-name>) set plays: parentship:parent
+    Then <root-type>(<type-name>) get plays contain:
+      | parentship:parent |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<type-name>) get plays contain:
+      | parentship:parent |
+    When relation(parentship) get role(parent) set annotation: @abstract
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then <root-type>(<type-name>) get plays contain:
+      | parentship:parent |
+    Examples:
+      | root-type | type-name   |
+      | entity    | person      |
+      | relation  | description |
+
 ########################
 # @card
 ########################
