@@ -3207,6 +3207,55 @@ Feature: Concept Owns
       | double        |
       | custom-struct |
 
+  Scenario Outline: Cannot set multiple overrides on the same type for a @key owns because of the cardinality
+    When create attribute type: name
+    When attribute(name) set value type: <value-type>
+    When attribute(name) set annotation: @abstract
+    When create attribute type: surname
+    When attribute(surname) set supertype: name
+    When create attribute type: third-name
+    When attribute(third-name) set supertype: name
+    When <root-type>(<supertype-name>) set owns: name
+    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0..1)
+    When <root-type>(<supertype-name>) get owns(name) set annotation: @key
+    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(1..1)
+    When <root-type>(<subtype-name>) set supertype: <supertype-name>
+    When <root-type>(<subtype-name>) set owns: surname
+    When <root-type>(<subtype-name>) get owns(surname) set override: name
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) set owns: third-name
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) get owns(third-name) set override: name
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<supertype-name>) get owns(name) unset annotation: @key
+    When <root-type>(<subtype-name>) get owns(third-name) set override: name
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @key
+    Then <root-type>(<subtype-name>) get owns(surname) get annotations do not contain: @key
+    Then <root-type>(<subtype-name>) get owns(third-name) get annotations do not contain: @key
+    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name>) get owns(surname) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name>) get owns(third-name) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name>) get owns overridden(surname) get label: name
+    Then <root-type>(<subtype-name>) get owns overridden(third-name) get label: name
+    When <root-type>(<subtype-name>) get owns(surname) set annotation: @key
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name>) get owns(surname) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(third-name) get cardinality: @card(0..1)
+    When <root-type>(<subtype-name>) get owns(surname) unset annotation: @key
+    When <root-type>(<supertype-name>) get owns(name) set annotation: @key
+    Then transaction commits; fails
+    Examples:
+      | root-type | supertype-name | subtype-name | value-type |
+      | entity    | person         | customer     | string     |
+      | relation  | description    | registration | decimal    |
+
      # TODO: Move to thing-feature or schema/data-validation?
 #  Scenario: Entity types can only commit keys if every instance owns a distinct key
 #    When create attribute type: email
@@ -5666,7 +5715,468 @@ Feature: Concept Owns
       | entity    | person         | customer     | subscriber     | decimal    |
       | relation  | description    | registration | profile        | double     |
 
-  # TODO: Add tests for one subowner with multiple owns overriding one own overridden_own(card(2..3)) vs 3 subowns of (2, 3), (2, 3), (2, 3) etc
+
+  Scenario Outline: Owns can have multiple overriding owns with narrowing cardinalities and correct min sum
+    When create attribute type: attribute-to-disturb
+    When attribute(attribute-to-disturb) set value type: string
+    When attribute(attribute-to-disturb) set annotation: @abstract
+    When <root-type>(<supertype-name>) set owns: attribute-to-disturb
+    When <root-type>(<supertype-name>) get owns(attribute-to-disturb) set annotation: @card(1..1)
+    When create attribute type: subtype-to-disturb
+    When attribute(subtype-to-disturb) set supertype: attribute-to-disturb
+    When attribute(subtype-to-disturb) set annotation: @abstract
+    When <root-type>(<subtype-name>) set supertype: <supertype-name>
+    When <root-type>(<subtype-name>) set owns: subtype-to-disturb
+    When <root-type>(<subtype-name>) get owns(subtype-to-disturb) set override: attribute-to-disturb
+    Then <root-type>(<subtype-name>) get owns(subtype-to-disturb) get cardinality: @card(1..1)
+    When create attribute type: literal
+    When attribute(literal) set value type: string
+    When attribute(literal) set annotation: @abstract
+    When <root-type>(<supertype-name>) set owns: literal
+    When <root-type>(<supertype-name>) get owns(literal) set annotation: @card(1..2)
+    When <root-type>(<supertype-name>) get owns(literal) get cardinality: @card(1..2)
+    When create attribute type: name
+    When attribute(name) set supertype: literal
+    When <root-type>(<subtype-name>) set owns: name
+    When <root-type>(<subtype-name>) get owns(name) set override: literal
+    Then <root-type>(<subtype-name>) get owns(name) get cardinality: @card(1..2)
+    When create attribute type: text
+    When attribute(text) set supertype: literal
+    When <root-type>(<subtype-name>) set owns: text
+    When <root-type>(<subtype-name>) get owns(text) set override: literal
+    Then <root-type>(<subtype-name>) get owns(text) get cardinality: @card(1..2)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) get owns(name) set annotation: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(name) get cardinality: @card(1..1)
+    When <root-type>(<subtype-name>) get owns(text) set annotation: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(text) get cardinality: @card(1..1)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When create attribute type: cardinality-destroyer
+    When attribute(cardinality-destroyer) set supertype: literal
+    When <root-type>(<subtype-name>) set owns: cardinality-destroyer
+    When <root-type>(<subtype-name>) get owns(cardinality-destroyer) set override: literal
+    Then <root-type>(<subtype-name>) get owns(cardinality-destroyer) set annotation: @card(0..2); fails
+    Then <root-type>(<subtype-name>) get owns(cardinality-destroyer) get cardinality: @card(1..2)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When create attribute type: cardinality-destroyer
+    When attribute(cardinality-destroyer) set supertype: literal
+    When <root-type>(<subtype-name>) set owns: cardinality-destroyer
+    When <root-type>(<subtype-name>) get owns(cardinality-destroyer) set override: literal
+    When <root-type>(<supertype-name>) get owns(literal) set annotation: @card(1..3)
+    Then <root-type>(<supertype-name>) get owns(literal) get cardinality: @card(1..3)
+    Then <root-type>(<subtype-name>) get owns(name) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(text) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(cardinality-destroyer) get cardinality: @card(1..3)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<supertype-name>) get owns(literal) set annotation: @card(0..3)
+    Then <root-type>(<supertype-name>) get owns(literal) get cardinality: @card(0..3)
+    Then <root-type>(<subtype-name>) get owns(name) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(text) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(cardinality-destroyer) get cardinality: @card(0..3)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) get owns(cardinality-destroyer) set annotation: @card(3..3)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) get owns(cardinality-destroyer) set annotation: @card(2..3)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) get owns(cardinality-destroyer) set annotation: @card(2..3)
+    When <root-type>(<subtype-name>) get owns(name) set annotation: @card(0..1)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(literal) get cardinality: @card(0..3)
+    Then <root-type>(<subtype-name>) get owns(name) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name>) get owns(text) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(cardinality-destroyer) get cardinality: @card(2..3)
+    When <root-type>(<supertype-name>) get owns(literal) set annotation: @card(0..1)
+    Then <root-type>(<supertype-name>) get owns(literal) get cardinality: @card(0..1)
+    When <root-type>(<subtype-name>) get owns(name) unset annotation: @card
+    When <root-type>(<subtype-name>) get owns(text) unset annotation: @card
+    When <root-type>(<subtype-name>) get owns(cardinality-destroyer) unset annotation: @card
+    Then <root-type>(<subtype-name>) get owns(name) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name>) get owns(text) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name>) get owns(cardinality-destroyer) get cardinality: @card(0..1)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) get owns(name) set annotation: @card(1..1)
+    Then <root-type>(<supertype-name>) get owns(literal) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name>) get owns(name) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(text) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name>) get owns(cardinality-destroyer) get cardinality: @card(0..1)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) get owns(cardinality-destroyer) set annotation: @card(1..1)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When create attribute type: subsubtype-to-disturb
+    When attribute(subsubtype-to-disturb) set supertype: subtype-to-disturb
+    When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
+    When <root-type>(<subtype-name-2>) set owns: subsubtype-to-disturb
+    When <root-type>(<subtype-name-2>) get owns(subsubtype-to-disturb) set override: subtype-to-disturb
+    Then <root-type>(<subtype-name-2>) get owns(subsubtype-to-disturb) get cardinality: @card(1..1)
+    When transaction commits
+    Examples:
+      | root-type | supertype-name | subtype-name | subtype-name-2 |
+      | entity    | person         | customer     | subscriber     |
+      | relation  | description    | registration | profile        |
+
+  Scenario Outline: Type can have only N/M overriding owns when the root owns has cardinality(M, N) that are inherited
+    When create attribute type: literal
+    When attribute(literal) set value type: string
+    When attribute(literal) set annotation: @abstract
+    When <root-type>(<supertype-name>) set owns: literal
+    When <root-type>(<supertype-name>) get owns(literal) set annotation: @card(1..1)
+    When <root-type>(<supertype-name>) get owns(literal) get cardinality: @card(1..1)
+    When create attribute type: name
+    When attribute(name) set supertype: literal
+    When create attribute type: surname
+    When attribute(surname) set supertype: literal
+    When create attribute type: third-name
+    When attribute(third-name) set supertype: literal
+    When <root-type>(<subtype-name>) set supertype: <supertype-name>
+    When <root-type>(<subtype-name>) set owns: name
+    When <root-type>(<subtype-name>) set owns: surname
+    When <root-type>(<subtype-name>) set owns: third-name
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) get owns(name) set override: literal
+    Then <root-type>(<subtype-name>) get owns(name) get cardinality: @card(1..1)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) get owns(surname) set override: literal
+    Then <root-type>(<subtype-name>) get owns(surname) get cardinality: @card(1..1)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) get owns(surname) set override: literal
+    Then <root-type>(<subtype-name>) get owns(surname) get cardinality: @card(1..1)
+    When <root-type>(<subtype-name>) get owns(third-name) set override: literal
+    Then <root-type>(<subtype-name>) get owns(third-name) get cardinality: @card(1..1)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) get owns(name) unset override
+    When <root-type>(<supertype-name>) get owns(literal) set annotation: @card(1..2)
+    When <root-type>(<supertype-name>) get owns(literal) get cardinality: @card(1..2)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) get owns(name) set override: literal
+    Then <root-type>(<subtype-name>) get owns(name) get cardinality: @card(1..2)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) get owns(surname) set override: literal
+    Then <root-type>(<subtype-name>) get owns(surname) get cardinality: @card(1..2)
+    When <root-type>(<subtype-name>) get owns(third-name) set override: literal
+    Then <root-type>(<subtype-name>) get owns(third-name) get cardinality: @card(1..2)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) get owns(surname) set override: literal
+    Then <root-type>(<subtype-name>) get owns(surname) get cardinality: @card(1..2)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) get owns(third-name) set override: literal
+    Then <root-type>(<subtype-name>) get owns(third-name) get cardinality: @card(1..2)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) get owns(name) unset override
+    When <root-type>(<subtype-name>) get owns(surname) unset override
+    When <root-type>(<supertype-name>) get owns(literal) set annotation: @card(1..3)
+    When <root-type>(<supertype-name>) get owns(literal) get cardinality: @card(1..3)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) get owns(surname) set override: literal
+    Then <root-type>(<subtype-name>) get owns(surname) get cardinality: @card(1..3)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) get owns(third-name) set override: literal
+    Then <root-type>(<subtype-name>) get owns(third-name) get cardinality: @card(1..3)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) get owns(name) set override: literal
+    Then <root-type>(<subtype-name>) get owns(name) get cardinality: @card(1..3)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<supertype-name>) get owns(literal) set annotation: @card(2..3)
+    When <root-type>(<supertype-name>) get owns(literal) get cardinality: @card(2..3)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<supertype-name>) get owns(literal) set annotation: @card(2..3)
+    When <root-type>(<supertype-name>) get owns(literal) get cardinality: @card(2..3)
+    When <root-type>(<subtype-name>) get owns(third-name) unset override
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<supertype-name>) get owns(literal) set annotation: @card(2..3)
+    When <root-type>(<supertype-name>) get owns(literal) get cardinality: @card(2..3)
+    When <root-type>(<subtype-name>) get owns(third-name) unset override
+    When <root-type>(<subtype-name>) get owns(surname) unset override
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) get owns(surname) set override: literal
+    When <root-type>(<subtype-name>) get owns(surname) get cardinality: @card(2..3)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<supertype-name>) get owns(literal) set annotation: @card(2..4)
+    When <root-type>(<supertype-name>) get owns(literal) get cardinality: @card(2..4)
+    When <root-type>(<subtype-name>) get owns(surname) set override: literal
+    When <root-type>(<subtype-name>) get owns(surname) get cardinality: @card(2..4)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) get owns(third-name) set override: literal
+    When <root-type>(<subtype-name>) get owns(third-name) get cardinality: @card(2..4)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<supertype-name>) get owns(literal) set annotation: @card(2..6)
+    When <root-type>(<supertype-name>) get owns(literal) get cardinality: @card(2..6)
+    When <root-type>(<subtype-name>) get owns(third-name) set override: literal
+    When <root-type>(<subtype-name>) get owns(third-name) get cardinality: @card(2..6)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<supertype-name>) get owns(literal) set annotation: @card(2..5)
+    When <root-type>(<supertype-name>) get owns(literal) get cardinality: @card(2..5)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<supertype-name>) get owns(literal) set annotation: @card(3..8)
+    When <root-type>(<supertype-name>) get owns(literal) get cardinality: @card(3..8)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<supertype-name>) get owns(literal) set annotation: @card(3..9)
+    When <root-type>(<supertype-name>) get owns(literal) get cardinality: @card(3..9)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<supertype-name>) get owns(literal) set annotation: @card(1..1)
+    When <root-type>(<supertype-name>) get owns(literal) get cardinality: @card(1..1)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<supertype-name>) get owns(literal) set annotation: @card(0..1)
+    When <root-type>(<supertype-name>) get owns(literal) get cardinality: @card(0..1)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) get owns(third-name) set annotation: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(third-name) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(surname) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name>) get owns(name) get cardinality: @card(0..1)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) get owns(surname) set annotation: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(third-name) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(surname) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(name) get cardinality: @card(0..1)
+    Then transaction commits; fails
+    Examples:
+      | root-type | supertype-name | subtype-name |
+      | entity    | person         | customer     |
+      | relation  | description    | registration |
+
+  Scenario: Owns cardinality should be checked against overrides' overrides cardinality
+    When create attribute type: literal
+    When attribute(literal) set value type: string
+    When attribute(literal) set annotation: @abstract
+    When entity(person) set owns: literal
+    When entity(person) get owns(literal) set annotation: @card(5..10)
+    Then entity(person) get owns(literal) get cardinality: @card(5..10)
+    When create attribute type: name
+    When attribute(name) set supertype: literal
+    When attribute(name) set annotation: @abstract
+    When entity(customer) set supertype: person
+    When entity(customer) set owns: name
+    When entity(customer) get owns(name) set override: literal
+    Then entity(customer) get owns(name) get cardinality: @card(5..10)
+    When create attribute type: text
+    When attribute(text) set supertype: literal
+    When attribute(text) set annotation: @abstract
+    When entity(customer) set owns: text
+    When entity(customer) get owns(text) set override: literal
+    Then entity(customer) get owns(text) get cardinality: @card(5..10)
+    When create attribute type: surname
+    When attribute(surname) set supertype: name
+    When entity(subscriber) set supertype: customer
+    When entity(subscriber) set owns: surname
+    When entity(subscriber) get owns(surname) set override: name
+    Then entity(subscriber) get owns(surname) get cardinality: @card(5..10)
+    When create attribute type: article
+    When attribute(article) set supertype: text
+    When entity(subscriber) set owns: article
+    When entity(subscriber) get owns(article) set override: text
+    Then entity(subscriber) get owns(article) get cardinality: @card(5..10)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When create attribute type: surname-2
+    When attribute(surname-2) set supertype: name
+    When entity(subscriber) set owns: surname-2
+    Then entity(subscriber) get owns(surname-2) get cardinality: @card(0..1)
+    When create attribute type: article-2
+    When attribute(article-2) set supertype: text
+    When entity(subscriber) set owns: article-2
+    Then entity(subscriber) get owns(article-2) get cardinality: @card(0..1)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(subscriber) get owns(surname-2) set override: name
+    Then entity(subscriber) get owns(surname-2) get cardinality: @card(5..10)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When entity(subscriber) get owns(surname-2) set override: name
+    Then entity(subscriber) get owns(surname-2) get cardinality: @card(5..10)
+    When entity(subscriber) get owns(article-2) set override: text
+    Then entity(subscriber) get owns(article-2) get cardinality: @card(5..10)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When entity(person) get owns(literal) set annotation: @card(3..10)
+    Then entity(person) get owns(literal) get cardinality: @card(3..10)
+    When entity(subscriber) get owns(surname-2) set override: name
+    Then entity(subscriber) get owns(surname-2) get cardinality: @card(3..10)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(subscriber) get owns(surname-2) set override: name
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(subscriber) get owns(article-2) set override: text
+    Then entity(subscriber) get owns(article-2) get cardinality: @card(3..10)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When entity(person) get owns(literal) set annotation: @card(3..)
+    Then entity(person) get owns(literal) get cardinality: @card(3..)
+    When entity(subscriber) get owns(article-2) set override: text
+    Then entity(subscriber) get owns(article-2) get cardinality: @card(3..)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(customer) get owns(name) unset override
+    When entity(customer) get owns(text) unset override
+    When entity(customer) get owns(name) set annotation: @card(0..)
+    When entity(customer) get owns(text) set annotation: @card(0..)
+    When entity(person) get owns(literal) set annotation: @card(1..1)
+    Then entity(person) get owns(literal) get cardinality: @card(1..1)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(subscriber) get owns(surname-2) unset override
+    When entity(customer) get owns(name) unset annotation: @card
+    When entity(customer) get owns(name) set override: literal
+    Then entity(customer) get owns overridden(name) get label: literal
+    Then entity(subscriber) get owns overridden(surname) get label: name
+    Then entity(subscriber) get owns(surname) get cardinality: @card(1..1)
+    Then entity(subscriber) get owns overridden(surname-2) does not exist
+    Then entity(customer) get owns overridden(text) does not exist
+    Then entity(subscriber) get owns overridden(article) get label: text
+    Then entity(subscriber) get owns overridden(article-2) get label: text
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(subscriber) get owns(surname-2) set override: name
+    Then entity(customer) get owns overridden(name) get label: literal
+    Then entity(subscriber) get owns overridden(surname) get label: name
+    Then entity(subscriber) get owns overridden(surname-2) get label: name
+    Then entity(subscriber) get owns(surname) get cardinality: @card(1..1)
+    Then entity(subscriber) get owns(surname-2) get cardinality: @card(1..1)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When entity(person) get owns(literal) set annotation: @card(2..5)
+    When entity(subscriber) get owns(surname-2) set override: name
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(subscriber) get owns(article-2) unset override
+    When entity(customer) get owns(text) unset annotation: @card
+    When entity(customer) get owns(text) set override: literal
+    Then entity(customer) get owns overridden(text) get label: literal
+    Then entity(subscriber) get owns overridden(article) get label: text
+    Then entity(subscriber) get owns overridden(article-2) does not exist
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When entity(subscriber) get owns(article-2) unset override
+    When entity(customer) get owns(text) unset annotation: @card
+    When entity(customer) get owns(text) set override: literal
+    Then entity(customer) get owns overridden(text) get label: literal
+    Then entity(subscriber) get owns overridden(article) get label: text
+    Then entity(subscriber) get owns overridden(article-2) does not exist
+    When entity(person) get owns(literal) set annotation: @card(2..6)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(subscriber) get owns(article-2) set override: text
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When create attribute type: logo
+    When attribute(logo) set supertype: name
+    When attribute(logo) set annotation: @abstract
+    When create entity type: real-customer
+    When entity(real-customer) set supertype: customer
+    When entity(real-customer) set annotation: @abstract
+    When entity(real-customer) set owns: logo
+    When entity(real-customer) get owns(logo) set override: name
+    Then entity(real-customer) get owns(logo) get cardinality: @card(2..6)
+    When create attribute type: book
+    When attribute(book) set supertype: text
+    When attribute(book) set annotation: @abstract
+    When entity(real-customer) set owns: book
+    When entity(real-customer) get owns(book) set override: text
+    Then entity(real-customer) get owns(book) get cardinality: @card(2..6)
+    When create attribute type: book-starting-A
+    When attribute(book-starting-A) set supertype: book
+    When create attribute type: book-starting-B
+    When attribute(book-starting-B) set supertype: book
+    When create attribute type: book-starting-C
+    When attribute(book-starting-C) set supertype: book
+    When create entity type: real-customer-with-three-books
+    When entity(real-customer-with-three-books) set supertype: real-customer
+    When entity(real-customer-with-three-books) set owns: book-starting-A
+    When entity(real-customer-with-three-books) get owns(book-starting-A) set override: book
+    Then entity(real-customer-with-three-books) get owns(book-starting-A) get cardinality: @card(2..6)
+    When entity(real-customer-with-three-books) set owns: book-starting-B
+    When entity(real-customer-with-three-books) get owns(book-starting-B) set override: book
+    Then entity(real-customer-with-three-books) get owns(book-starting-B) get cardinality: @card(2..6)
+    When entity(real-customer-with-three-books) set owns: book-starting-C
+    When entity(real-customer-with-three-books) get owns(book-starting-C) set override: book
+    Then entity(real-customer-with-three-books) get owns(book-starting-C) get cardinality: @card(2..6)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When create attribute type: book-logo
+    When attribute(book-logo) set supertype: logo
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(real-customer-with-three-books) set owns: book-logo
+    When entity(real-customer-with-three-books) get owns(book-logo) set override: logo
+    Then entity(real-customer-with-three-books) get owns(book-logo) get cardinality: @card(2..6)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When entity(customer) get owns(name) unset override
+    When entity(customer) get owns(name) set annotation: @card(2..6)
+    When entity(real-customer-with-three-books) set owns: book-logo
+    When entity(real-customer-with-three-books) get owns(book-logo) set override: logo
+    Then entity(real-customer-with-three-books) get owns(book-logo) get cardinality: @card(2..6)
+    When transaction commits
+
+  Scenario: Owns default cardinality is permissively validated in multiple inheritance
+    When create attribute type: literal
+    When attribute(literal) set value type: string
+    When attribute(literal) set annotation: @abstract
+    When entity(person) set owns: literal
+    Then entity(person) get owns(literal) get cardinality: @card(0..1)
+    When create attribute type: name
+    When attribute(name) set supertype: literal
+    When attribute(name) set annotation: @abstract
+    When entity(customer) set supertype: person
+    When entity(customer) set owns: name
+    When entity(customer) get owns(name) set override: literal
+    Then entity(customer) get owns(name) get cardinality: @card(0..1)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When create attribute type: surname
+    When attribute(surname) set supertype: name
+    When entity(subscriber) set supertype: customer
+    When entity(subscriber) set owns: surname
+    When entity(subscriber) get owns(surname) set override: name
+    Then entity(subscriber) get owns(surname) get cardinality: @card(0..1)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When create attribute type: third-name
+    When attribute(third-name) set supertype: name
+    When entity(subscriber) set owns: third-name
+    When entity(subscriber) get owns(third-name) set override: name
+    Then entity(subscriber) get owns(third-name) get cardinality: @card(0..1)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When create attribute type: text
+    Then entity(subscriber) get owns overridden(surname) get label: name
+    Then entity(subscriber) get owns overridden(third-name) get label: name
 
 ########################
 # @distinct
@@ -6501,8 +7011,54 @@ Feature: Concept Owns
     Then entity(subscriber) get owns(third-name) get cardinality: @card(1..1)
     Examples:
       | card-args |
-      | 0..1      |
+      | 0..2      |
       | 0..       |
+
+  Scenario: Cannot set multiple @key annotations to owns that override a single owns with too low cardinality
+    When create attribute type: name
+    When attribute(name) set value type: string
+    When attribute(name) set annotation: @abstract
+    When create attribute type: surname
+    When attribute(surname) set supertype: name
+    When create attribute type: non-card-name
+    When attribute(non-card-name) set supertype: name
+    When attribute(non-card-name) set annotation: @abstract
+    When create attribute type: third-name
+    When attribute(third-name) set supertype: non-card-name
+    When entity(person) set owns: name
+    When entity(person) get owns(name) set annotation: @card(0..1)
+    When entity(person) set owns: non-card-name
+    When entity(customer) set supertype: person
+    When entity(customer) set owns: surname
+    When entity(customer) get owns(surname) set override: name
+    When entity(subscriber) set supertype: person
+    When entity(subscriber) set owns: surname
+    When entity(subscriber) get owns(surname) set annotation: @key
+    Then entity(subscriber) get owns(surname) get cardinality: @card(1..1)
+    When entity(subscriber) set owns: third-name
+    When entity(subscriber) get owns(third-name) set override: name
+    When entity(person) get owns(name) set annotation: @card(0..1)
+    Then entity(person) get owns(name) get annotations contain: @card(0..1)
+    Then entity(person) get owns(name) get declared annotations contain: @card(0..1)
+    Then entity(person) get owns(name) get cardinality: @card(0..1)
+    Then entity(person) get owns(name) get annotations do not contain: @key
+    Then entity(customer) get owns(surname) get annotations contain: @card(0..1)
+    Then entity(customer) get owns(surname) get declared annotations do not contain: @card(0..1)
+    Then entity(customer) get owns(surname) get cardinality: @card(0..1)
+    Then entity(customer) get owns(surname) get annotations do not contain: @key
+    Then entity(subscriber) get owns(surname) get annotations do not contain: @card(0..1)
+    Then entity(subscriber) get owns(surname) get annotations contain: @key
+    Then entity(subscriber) get owns(surname) get cardinality: @card(1..1)
+    Then entity(person) get owns(name) set annotation: @key; fails
+    When entity(customer) get owns(surname) set annotation: @key
+    Then entity(customer) get owns(surname) get annotations contain: @key
+    Then entity(customer) get owns(surname) get cardinality: @card(1..1)
+    When entity(subscriber) get owns(surname) set override: name
+    Then entity(subscriber) get owns overridden(surname) get label: name
+    When entity(subscriber) get owns(third-name) set annotation: @key
+    Then entity(subscriber) get owns(third-name) get annotations contain: @key
+    Then entity(subscriber) get owns(third-name) get cardinality: @card(1..1)
+    Then transaction commits; fails
 
   Scenario Outline: Annotation @key cannot be set if type has not suitable cardinality
     When create attribute type: name
