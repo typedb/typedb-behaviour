@@ -41,6 +41,14 @@ Feature: Concept Owns
 ########################
 # owns common
 ########################
+  Scenario Outline: Root types cannot own attributes
+    When create attribute type: name
+    Then <root-type>(<root-type>) set owns: name; fails
+    Examples:
+      | root-type |
+      | entity    |
+      | relation  |
+
   Scenario Outline: Entity types can own and unset attributes
     When create attribute type: name
     When attribute(name) set value type: <value-type>

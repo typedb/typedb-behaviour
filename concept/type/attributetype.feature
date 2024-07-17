@@ -334,6 +334,17 @@ Feature: Concept Attribute Type
 # @annotations common
 ########################
 
+  Scenario Outline: Root attribute type cannot set or unset @<annotation>
+    Then attribute(attribute) set annotation: @<annotation>; fails
+    Then attribute(attribute) unset annotation: @<annotation-category>; fails
+    Examples:
+      | annotation  | annotation-category |
+      | abstract    | abstract            |
+      | independent | independent         |
+    # TODO: Only for typeql as we can't parse value types without set value types
+#      | values(1)   | values              |
+#      | range(1..3) | range               |
+
   Scenario Outline: Attribute type can set and unset @<annotation>
     When create attribute type: name
     When attribute(name) set value type: <value-type>

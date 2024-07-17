@@ -29,6 +29,9 @@ Feature: Concept Relation Type and Role Type
   Scenario: Root role cannot be renamed
     Then relation(relation) get role(role) set name: superrole; fails
 
+  Scenario: Root relation type cannot get new roles
+    Then relation(relation) create role: new; fails
+
   Scenario: Non-abstract relation and cannot be created without roles
     When create relation type: marriage
     Then transaction commits; fails
@@ -711,6 +714,14 @@ Feature: Concept Relation Type and Role Type
 ########################
 # @annotations common
 ########################
+
+  Scenario Outline: Root relation type cannot set or unset @<annotation>
+    Then relation(relation) set annotation: @<annotation>; fails
+    Then relation(relation) unset annotation: @<annotation-category>; fails
+    Examples:
+      | annotation | annotation-category |
+      | abstract   | abstract            |
+      | cascade    | cascade             |
 
   Scenario Outline: Relation type can set and unset @<annotation>
     When create relation type: marriage
@@ -1946,6 +1957,15 @@ Feature: Concept Relation Type and Role Type
 ########################
 # relates @annotations common
 ########################
+
+  Scenario Outline: Root role type cannot set or unset @<annotation>
+    Then relation(relation) get role(role) set annotation: @<annotation>; fails
+    Then relation(relation) get role(role) unset annotation: @<annotation-category>; fails
+    Examples:
+      | annotation | annotation-category |
+      | abstract   | abstract            |
+      | distinct   | distinct            |
+      | card(1..2) | card                |
 
   Scenario Outline: Role can unset not set @<annotation>
     When create relation type: marriage

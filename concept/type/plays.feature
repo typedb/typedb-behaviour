@@ -35,6 +35,15 @@ Feature: Concept Plays
 ########################
 # plays common
 ########################
+  Scenario Outline: Root types cannot play roles
+    When create relation type: marriage
+    When relation(marriage) create role: husband
+    Then <root-type>(<root-type>) set plays: marriage:husband; fails
+    Examples:
+      | root-type |
+      | entity    |
+      | relation  |
+
   Scenario: Entity types can play role types
     When create relation type: marriage
     When relation(marriage) create role: husband

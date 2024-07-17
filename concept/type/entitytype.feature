@@ -200,6 +200,13 @@ Feature: Concept Entity Type
 # @annotations common
 ########################
 
+  Scenario Outline: Root entity type cannot set or unset @<annotation>
+    Then entity(entity) set annotation: @<annotation>; fails
+    Then entity(entity) unset annotation: @<annotation-category>; fails
+    Examples:
+      | annotation | annotation-category |
+      | abstract   | abstract            |
+
   Scenario Outline: Entity type can set and unset @<annotation>
     When create entity type: person
     When entity(person) set annotation: @<annotation>
