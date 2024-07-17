@@ -372,9 +372,11 @@ Feature: Concept Entity Type
 #    When entity(player) set annotation: @<annotation>
 #    When entity(person) unset annotation: @<annotation>
 #    When transaction commits
-#    When connection open read transaction for database: typedb
+#    When connection open schema transaction for database: typedb
 #    Then entity(person) get annotations do not contain: @<annotation>
 #    Then entity(player) get annotations contain: @<annotation>
+#    When entity(person) set annotation: @<annotation>
+#    Then transaction commits; fails
 #    Examples:
 #      | annotation |
 

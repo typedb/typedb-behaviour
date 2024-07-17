@@ -2386,9 +2386,11 @@ Feature: Concept Plays
     When <root-type>(<subtype-name>) get plays(fathership:father) set annotation: @<annotation>
     When <root-type>(<supertype-name>) get plays(parentship:parent) unset annotation: @<annotation-category>
     When transaction commits
-    When connection open read transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then <root-type>(<supertype-name>) get plays(parentship:parent) get annotations do not contain: @<annotation>
     Then <root-type>(<subtype-name>) get plays(fathership:father) get annotations contain: @<annotation>
+    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @<annotation>
+    Then transaction commits; fails
     Examples:
       | root-type | supertype-name | subtype-name | annotation | annotation-category |
       | entity    | person         | customer     | card(1..1) | card                |

@@ -904,9 +904,11 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) set annotation: @<annotation>
     When relation(parentship) unset annotation: @<annotation>
     When transaction commits
-    When connection open read transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then relation(parentship) get annotations do not contain: @<annotation>
     Then relation(fathership) get annotations contain: @<annotation>
+    When relation(parentship) set annotation: @<annotation>
+    Then transaction commits; fails
     Examples:
       | annotation |
       # abstract is not inherited
@@ -1236,6 +1238,33 @@ Feature: Concept Relation Type and Role Type
     Then relation(mothership) get annotations contain: @cascade
     When relation(mothership) set annotation: @cascade
     Then transaction commits; fails
+
+  Scenario: Relation type cannot change supertype while implicitly acquiring @cascade annotation
+    When create relation type: parentship
+    When create relation type: connection
+    When create relation type: fathership
+    When relation(parentship) set annotation: @abstract
+    When relation(connection) set annotation: @abstract
+    When relation(connection) set annotation: @cascade
+    When relation(fathership) create role: father
+    Then relation(fathership) set supertype: connection; fails
+    When relation(fathership) set annotation: @cascade
+    When relation(fathership) set supertype: connection
+    When relation(fathership) unset annotation: @cascade
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) get supertype: connection
+    When relation(fathership) set supertype: parentship
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) get supertype: parentship
+    Then relation(fathership) set supertype: connection; fails
+    When relation(fathership) set annotation: @cascade
+    When relation(fathership) set supertype: connection
+    When relation(fathership) unset annotation: @cascade
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(fathership) get supertype: connection
 
   #  TODO: Make it only for typeql
 #  Scenario: Relation type cannot set @cascade annotation with arguments
@@ -2285,9 +2314,11 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) get role(father) set annotation: @<annotation>
     When relation(parentship) get role(parent) unset annotation: @<annotation-category>
     When transaction commits
-    When connection open read transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then relation(parentship) get role(parent) get annotations do not contain: @<annotation>
     Then relation(fathership) get role(father) get annotations contain: @<annotation>
+    When relation(parentship) get role(parent) set annotation: @<annotation>
+    Then transaction commits; fails
     Examples:
       | annotation | annotation-category |
       | distinct   | distinct            |

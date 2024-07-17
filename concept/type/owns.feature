@@ -2976,9 +2976,11 @@ Feature: Concept Owns
     When <root-type>(<subtype-name>) get owns(surname) set annotation: @<annotation>
     When <root-type>(<supertype-name>) get owns(name) unset annotation: @<annotation-category>
     When transaction commits
-    When connection open read transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then <root-type>(<supertype-name>) get owns(name) get annotations do not contain: @<annotation>
     Then <root-type>(<subtype-name>) get owns(surname) get annotations contain: @<annotation>
+    When <root-type>(<supertype-name>) get owns(name) set annotation: @<annotation>
+    Then transaction commits; fails
     Examples:
       | root-type | supertype-name | subtype-name | annotation       | annotation-category |
       | entity    | person         | customer     | key              | key                 |
@@ -4289,6 +4291,30 @@ Feature: Concept Owns
       | entity    | person         | customer     | subscriber     |
       | relation  | description    | registration | profile        |
 
+  Scenario: Attribute type can change value type and @values through full value type reset
+    When create attribute type: name
+    When create attribute type: surname
+    When attribute(name) set annotation: @abstract
+    When attribute(surname) set supertype: name
+    When attribute(surname) set value type: string
+    When attribute(surname) set annotation: @values("only this string is allowed")
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When attribute(name) set value type: long
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    Then attribute(surname) set value type: long; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When attribute(name) set value type: long
+    When attribute(surname) unset annotation: @values
+    When attribute(surname) unset value type
+    When attribute(surname) set annotation: @values(1, 2, 3)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(surname) get annotations contain: @values(1, 2, 3)
+    Then attribute(surname) get value type: long
+
 ########################
 # @range
 ########################
@@ -4903,6 +4929,30 @@ Feature: Concept Owns
       | root-type | supertype-name | subtype-name | subtype-name-2 |
       | entity    | person         | customer     | subscriber     |
       | relation  | description    | registration | profile        |
+
+  Scenario: Attribute type can change value type and @range through full value type reset
+    When create attribute type: name
+    When create attribute type: surname
+    When attribute(name) set annotation: @abstract
+    When attribute(surname) set supertype: name
+    When attribute(surname) set value type: string
+    When attribute(surname) set annotation: @range("a start".."finish line")
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When attribute(name) set value type: long
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    Then attribute(surname) set value type: long; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When attribute(name) set value type: long
+    When attribute(surname) unset annotation: @range
+    When attribute(surname) unset value type
+    When attribute(surname) set annotation: @range(1..3)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(surname) get annotations contain: @range(1..3)
+    Then attribute(surname) get value type: long
 
 ########################
 # @card

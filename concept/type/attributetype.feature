@@ -579,9 +579,11 @@ Feature: Concept Attribute Type
     When attribute(surname) set annotation: @<annotation>
     When attribute(name) unset annotation: @<annotation-category>
     When transaction commits
-    When connection open read transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then attribute(name) get annotations do not contain: @<annotation>
     Then attribute(surname) get annotations contain: @<annotation>
+    When attribute(name) set annotation: @<annotation>
+    Then transaction commits; fails
     Examples:
       | value-type | annotation   | annotation-category |
       # abstract is not inherited
@@ -1748,6 +1750,30 @@ Feature: Concept Attribute Type
     When connection open read transaction for database: typedb
     Then attribute(first-name) get annotations do not contain: @independent
     Then attribute(first-name) get declared annotations do not contain: @independent
+
+  Scenario: Attribute type cannot change supertype while implicitly losing @independent annotation
+    When create attribute type: literal
+    When create attribute type: word
+    When create attribute type: name
+    When attribute(literal) set annotation: @abstract
+    When attribute(literal) set annotation: @independent
+    When attribute(word) set annotation: @abstract
+    When attribute(name) set value type: string
+    When attribute(name) set supertype: word
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get supertype: word
+    When attribute(name) set supertype: literal
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get supertype: literal
+    Then attribute(name) set supertype: word; fails
+    When attribute(name) set annotation: @independent
+    When attribute(name) set supertype: word
+    When attribute(name) unset annotation: @independent
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get supertype: word
 
 #  TODO: Make it only for typeql
 #  Scenario: Attribute type cannot set @independent annotation with arguments
