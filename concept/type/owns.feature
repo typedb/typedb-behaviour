@@ -6169,12 +6169,16 @@ Feature: Concept Owns
     Then entity(real-customer) get owns(book) get cardinality: @card(2..6)
     When create attribute type: book-starting-A
     When attribute(book-starting-A) set supertype: book
+    When attribute(book-starting-A) set annotation: @abstract
     When create attribute type: book-starting-B
     When attribute(book-starting-B) set supertype: book
+    When attribute(book-starting-B) set annotation: @abstract
     When create attribute type: book-starting-C
     When attribute(book-starting-C) set supertype: book
+    When attribute(book-starting-C) set annotation: @abstract
     When create entity type: real-customer-with-three-books
     When entity(real-customer-with-three-books) set supertype: real-customer
+    When entity(real-customer-with-three-books) set annotation: @abstract
     When entity(real-customer-with-three-books) set owns: book-starting-A
     When entity(real-customer-with-three-books) get owns(book-starting-A) set override: book
     Then entity(real-customer-with-three-books) get owns(book-starting-A) get cardinality: @card(2..6)
