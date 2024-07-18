@@ -18,7 +18,6 @@ Feature: Schema validation
     Given create attribute type: attr0
     Given attribute(attr0) set value type: string
     Given create attribute type: attr1
-    Given attribute(attr1) set value type: string
     Given attribute(attr0) set annotation: @abstract
     Given attribute(attr1) set annotation: @abstract
     Given attribute(attr1) set supertype: attr0
@@ -56,7 +55,7 @@ Feature: Schema validation
     Then relation(rel0) set supertype: rel1; fails
 
 
-  Scenario: An attribute-type must have the same value type as its ancestors
+  Scenario: An attribute-type must have the same value type as its ancestors, but not declare it redundantly
     Given create attribute type: attr0s
     Given attribute(attr0s) set value type: string
     Given attribute(attr0s) set annotation: @abstract
@@ -68,11 +67,15 @@ Feature: Schema validation
     Given transaction commits
 
     When connection open schema transaction for database: typedb
+    Then attribute(attr1) set supertype: attr0d; fails
     When attribute(attr1) set supertype: attr0s
-    Then transaction commits
+    Then transaction commits; fails
 
     When connection open schema transaction for database: typedb
     Then attribute(attr1) set supertype: attr0d; fails
+    When attribute(attr1) set supertype: attr0s
+    When attribute(attr1) unset value type
+    Then transaction commits
 
 
   Scenario: Only abstract attributes may have subtypes
@@ -85,13 +88,11 @@ Feature: Schema validation
 
     When connection open schema transaction for database: typedb
     When create attribute type: attr1
-    When attribute(attr1) set value type: string
     When attribute(attr1) set supertype: attr0c; fails
 
     When transaction closes
     When connection open schema transaction for database: typedb
     When create attribute type: attr1
-    When attribute(attr1) set value type: string
     When attribute(attr1) set supertype: attr0a
     Then transaction commits
 
@@ -499,7 +500,6 @@ Feature: Schema validation
     Given attribute(attr0) set value type: string
     Given attribute(attr0) set annotation: @abstract
     Given create attribute type: attr1
-    Given attribute(attr1) set value type: string
     Given attribute(attr1) set supertype: attr0
     Given create entity type: ent00
     Given entity(ent00) set annotation: @abstract
@@ -529,16 +529,47 @@ Feature: Schema validation
     When entity(ent1) set supertype: ent01; fails
 
 
+  Scenario: A type may only override a plays it inherits
+    Given create relation type: rel0
+    Given relation(rel0) create role: role0
+    Given create relation type: rel1
+    Given relation(rel1) set supertype: rel0
+    Given relation(rel1) create role: role1
+    Given relation(rel1) get role(role1) set override: role0
+    Given create entity type: ent00
+    Given entity(ent00) set plays: rel0:role0
+    Given create entity type: ent01
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When create entity type: ent1
+    When entity(ent1) set plays: rel1:role1
+    Then entity(ent1) get plays(rel1:role1) set override: rel0:role0; fails
+
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When create entity type: ent1
+    When entity(ent1) set supertype: ent00
+    When entity(ent1) set plays: rel1:role1
+    When entity(ent1) get plays(rel1:role1) set override: rel0:role0
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent00) unset plays: rel0:role0
+    Then transaction commits; fails
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent01; fails
+
+
   Scenario: A type may not declare ownership of an attribute that has been overridden by an inherited ownership
     Given create attribute type: attr0
     Given attribute(attr0) set value type: string
     Given attribute(attr0) set annotation: @abstract
     Given create attribute type: attr1
-    Given attribute(attr1) set value type: string
     Given attribute(attr1) set annotation: @abstract
     Given attribute(attr1) set supertype: attr0
     Given create attribute type: attr2
-    Given attribute(attr2) set value type: string
     Given attribute(attr2) set supertype: attr1
     Given attribute(attr2) set annotation: @abstract
     Given create entity type: ent0
@@ -718,7 +749,7 @@ Feature: Schema validation
 
     When connection open schema transaction for database: typedb
     When entity(ent2) set plays: rel0:role0
-    When entity(ent2) get plays(rel0:role0) set annotation: @card(1, 1)
+    When entity(ent2) get plays(rel0:role0) set annotation: @card(1..1)
     When entity(ent2) get plays(rel0:role0) set override: rel0:role0
     When entity(ent1) set plays: rel1:role1
     When transaction commits
@@ -781,13 +812,11 @@ Feature: Schema validation
     Given attribute(attr00) set value type: string
     Given attribute(attr00) set annotation: @abstract
     Given create attribute type: attr10
-    Given attribute(attr10) set value type: string
     Given attribute(attr10) set supertype: attr00
     Given create attribute type: attr01
     Given attribute(attr01) set value type: string
     Given attribute(attr01) set annotation: @abstract
     Given create attribute type: attr11
-    Given attribute(attr11) set value type: string
     Given attribute(attr11) set supertype: attr01
     Given create entity type: ent00
     Given entity(ent00) set annotation: @abstract
@@ -927,7 +956,6 @@ Feature: Schema validation
     Given attribute(attr0) set value type: string
     Given attribute(attr0) set annotation: @abstract
     Given create attribute type: attr1
-    Given attribute(attr1) set value type: string
     Given attribute(attr1) set supertype: attr0
     Given create entity type: ent0k
     Given entity(ent0k) set annotation: @abstract
