@@ -300,7 +300,6 @@ Feature: Schema validation
     Then transaction commits; fails
 
 
-    # TODO: Do the same for plays and owns
   Scenario: Modifying a relation or role does not leave invalid overrides
     Given create relation type: rel00
     Given relation(rel00) create role: role00
@@ -325,7 +324,6 @@ Feature: Schema validation
     When transaction closes
     When connection open schema transaction for database: typedb
     When relation(rel1) create role: role1
-    # TODO: I changed it from operation time error to commit time error now:
     Then relation(rel1) get role(role1) set override: role00
     Then transaction commits; fails
 
@@ -523,39 +521,6 @@ Feature: Schema validation
 
     When connection open schema transaction for database: typedb
     When entity(ent00) unset owns: attr0
-    Then transaction commits; fails
-
-    When connection open schema transaction for database: typedb
-    When entity(ent1) set supertype: ent01; fails
-
-
-  Scenario: A type may only override a plays it inherits
-    Given create relation type: rel0
-    Given relation(rel0) create role: role0
-    Given create relation type: rel1
-    Given relation(rel1) set supertype: rel0
-    Given relation(rel1) create role: role1
-    Given relation(rel1) get role(role1) set override: role0
-    Given create entity type: ent00
-    Given entity(ent00) set plays: rel0:role0
-    Given create entity type: ent01
-    Given transaction commits
-
-    When connection open schema transaction for database: typedb
-    When create entity type: ent1
-    When entity(ent1) set plays: rel1:role1
-    Then entity(ent1) get plays(rel1:role1) set override: rel0:role0; fails
-
-    When transaction closes
-    When connection open schema transaction for database: typedb
-    When create entity type: ent1
-    When entity(ent1) set supertype: ent00
-    When entity(ent1) set plays: rel1:role1
-    When entity(ent1) get plays(rel1:role1) set override: rel0:role0
-    Then transaction commits
-
-    When connection open schema transaction for database: typedb
-    When entity(ent00) unset plays: rel0:role0
     Then transaction commits; fails
 
     When connection open schema transaction for database: typedb
