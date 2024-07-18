@@ -559,7 +559,7 @@ Feature: Concept Attribute Type
     Examples:
       | value-type | annotation   |
       # abstract is not inherited
-      | decimal    | independent  |
+#      | decimal    | independent  | # Cannot unset supertype while inheriting independence from it, covered by special test
       | string     | regex("\S+") |
       | string     | values("1")  |
       | long       | range(1..3)  |
@@ -1743,7 +1743,10 @@ Feature: Concept Attribute Type
     Then attribute(first-name) get declared annotations do not contain: @independent
     Then attribute(first-name) unset annotation: @independent; fails
     When attribute(first-name) set annotation: @abstract
+    # Can't change supertype while losing independence
+    When attribute(first-name) set annotation: @independent
     When attribute(first-name) set supertype: attribute
+    When attribute(first-name) unset annotation: @independent
     Then attribute(first-name) get annotations do not contain: @independent
     Then attribute(first-name) get declared annotations do not contain: @independent
     When transaction commits
