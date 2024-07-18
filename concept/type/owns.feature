@@ -6235,8 +6235,7 @@ Feature: Concept Owns
     When entity(subscriber) get owns(third-name) set override: name
     Then entity(subscriber) get owns(third-name) get cardinality: @card(0..1)
     When transaction commits
-    When connection open schema transaction for database: typedb
-    When create attribute type: text
+    When connection open read transaction for database: typedb
     Then entity(subscriber) get owns overridden(surname) get label: name
     Then entity(subscriber) get owns overridden(third-name) get label: name
 
