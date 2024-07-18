@@ -36,6 +36,17 @@ Feature: Concept Relation Type and Role Type
     When create relation type: marriage
     Then transaction commits; fails
 
+  Scenario: Cyclic relation type hierarchies are disallowed
+    When create relation type: rel0
+    When relation(rel0) create role: role0
+    When create relation type: rel1
+    When relation(rel1) create role: role1
+    When relation(rel1) set supertype: rel0
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(rel1) set supertype: rel1; fails
+    Then relation(rel0) set supertype: rel1; fails
+
   Scenario: Relation and role types can be created
     When create relation type: marriage
     When relation(marriage) create role: husband
@@ -200,6 +211,58 @@ Feature: Concept Relation Type and Role Type
     Then relation(employment) get role(employee) get name: employee
     Then relation(employment) get role(employer) get name: employer
 
+  Scenario: Relation types may not declare a role with the same name as one declared in its inheritance line
+    When create relation type: rel00
+    When relation(rel00) set annotation: @abstract
+    When relation(rel00) create role: role00
+    When create relation type: rel01
+    When relation(rel01) set annotation: @abstract
+    When relation(rel01) create role: role01
+    When relation(rel01) create role: role02
+    When create relation type: rel1
+    When relation(rel1) set annotation: @abstract
+    When relation(rel1) set supertype: rel00
+    When relation(rel1) create role: role01
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    When relation(rel1) create role: role00; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When relation(rel00) create role: role01
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(rel1) set supertype: rel01; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When create relation type: rel2
+    When relation(rel2) set annotation: @abstract
+    When create relation type: rel02
+    When relation(rel02) set annotation: @abstract
+    When relation(rel02) create role: role02
+    When relation(rel02) set supertype: rel2
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When relation(rel2) set supertype: rel01
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When create relation type: rel3
+    When relation(rel3) set annotation: @abstract
+    When create relation type: rel4
+    When relation(rel4) set annotation: @abstract
+    When relation(rel4) create role: role02
+    When relation(rel4) set supertype: rel3
+    Then relation(rel4) set supertype: rel02; fails
+    When relation(rel3) set supertype: rel02
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When create relation type: rel3
+    When relation(rel3) set annotation: @abstract
+    When create relation type: rel4
+    When relation(rel4) set annotation: @abstract
+    When relation(rel4) create role: role02
+    When relation(rel3) set supertype: rel02
+    Then relation(rel4) set supertype: rel3; fails
+
   Scenario: Relation and role types can be subtypes of other relation and role types
     When create relation type: parentship
     When relation(parentship) create role: parent
@@ -333,6 +396,60 @@ Feature: Concept Relation Type and Role Type
       | parentship:child  |
       | fathership:father |
       | father-son:son    |
+
+  Scenario: Concrete relation types must relate at least one role, cannot unset relates root
+    When create relation type: rel0a
+    Then relation(rel0a) get roles contain:
+      | relation:role |
+    Then relation(rel0a) get declared roles is empty
+    Then relation(rel0a) get role(role) does not exist
+    Then relation(relation) get role(role) exists
+    Then relation(relation) delete role: role; fails
+    Then transaction commits; fails
+
+    When connection open schema transaction for database: typedb
+    When create relation type: rel0b
+    When relation(rel0b) create role: role0b
+    Then relation(rel0b) get roles contain:
+#     TODO: Now we hide relation:role. Do we want this behavior? We show it in typeql 2.x in like "$relation sub relation; $relation relates $r;"
+#      | relation:role |
+      | rel0b:role0b |
+    Then relation(rel0b) get declared roles contain:
+      | rel0b:role0b |
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then relation(rel0b) get roles contain:
+#     TODO: Now we hide relation:role. Do we want this behavior?
+#      | relation:role |
+      | rel0b:role0b |
+    Then relation(rel0b) get declared roles contain:
+      | rel0b:role0b |
+    When relation(rel0b) delete role: role0b
+    Then relation(rel0b) get roles contain:
+      | relation:role |
+    Then relation(rel0b) get roles do not contain:
+      | rel0b:role0b |
+    Then relation(rel0b) get declared roles is empty
+    Then transaction commits; fails
+
+    When connection open schema transaction for database: typedb
+    When create relation type: rel0c
+    When relation(rel0c) set annotation: @abstract
+    Then relation(rel0c) get roles contain:
+      | relation:role |
+    Then relation(rel0c) get declared roles is empty
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then relation(rel0c) get roles contain:
+      | relation:role |
+    Then relation(rel0c) get declared roles is empty
+    When relation(rel0c) unset annotation: @abstract
+    Then relation(rel0c) get roles contain:
+      | relation:role |
+    Then relation(rel0c) get declared roles is empty
+    Then transaction commits; fails
 
   Scenario: Relation types cannot subtype itself
     When create relation type: marriage
@@ -1020,13 +1137,56 @@ Feature: Concept Relation Type and Role Type
 #    When connection open read transaction for database: typedb
 #    Then relation(parentship) get annotations is empty
 
-  Scenario: Relation types must have at least one role in order to commit, unless they are abstract
+  Scenario: Relation types must have at least one role unless they are abstract
     When create relation type: connection
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When create relation type: connection
     When relation(connection) set annotation: @abstract
     Then transaction commits
+    When connection open schema transaction for database: typedb
+    When create relation type: rel00
+    When relation(rel00) set annotation: @abstract
+    When relation(rel00) create role: role00
+    When create relation type: rel01
+    When relation(rel01) set annotation: @abstract
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When create relation type: rel1
+    When relation(rel1) set supertype: rel01
+    Then relation(rel1) get roles contain:
+      | relation:role |
+    Then relation(rel1) get declared roles is empty
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When create relation type: rel1
+    When relation(rel1) set supertype: rel01
+    Then relation(rel1) get roles contain:
+      | relation:role |
+    Then relation(rel1) get declared roles is empty
+    When relation(rel1) set supertype: rel00
+    Then relation(rel1) get roles contain:
+      | rel00:role00 |
+    Then relation(rel1) get declared roles is empty
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When relation(rel00) delete role: role00
+    Then relation(rel00) get roles contain:
+      | relation:role |
+    Then relation(rel1) get roles contain:
+      | relation:role |
+    Then relation(rel00) get roles do not contain:
+      | rel00:role00 |
+    Then relation(rel1) get roles do not contain:
+      | rel00:role00 |
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(rel1) set supertype: rel01
+    Then relation(rel1) get roles contain:
+      | relation:role |
+    Then relation(rel1) get roles do not contain:
+      | rel00:role00 |
+    Then transaction commits; fails
 
   Scenario: Relation type can reset @abstract annotation
     When create relation type: parentship
@@ -1386,6 +1546,95 @@ Feature: Concept Relation Type and Role Type
 #    Then relation(parentship) get annotations do not contain: @<annotation-1>
 #    Examples:
 #      | annotation-1 | annotation-2 |
+
+
+  Scenario: Modifying a relation or role does not leave invalid overrides
+    When create relation type: rel00
+    When relation(rel00) create role: role00
+    When relation(rel00) create role: extra_role
+    When create relation type: rel01
+    When relation(rel01) create role: role01
+    When create relation type: rel1
+    When relation(rel1) set supertype: rel00
+    When create relation type: rel2
+    When relation(rel2) set supertype: rel1
+    When relation(rel2) create role: role2
+    When relation(rel2) get role(role2) set override: role00
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(rel00) delete role: role00; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    Then relation(rel2) set supertype: rel01; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When relation(rel1) create role: role1
+    Then relation(rel1) get role(role1) set override: role00
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When create relation type: rel3
+    When relation(rel3) set supertype: rel1
+    When relation(rel3) create role: role3
+    When create relation type: rel4
+    When relation(rel4) set supertype: rel1
+    When relation(rel2) set supertype: rel3
+    Then relation(rel2) get role(role2) get supertype: rel00:role00
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(rel2) get role(role2) get supertype: rel00:role00
+    When relation(rel2) set supertype: rel4
+    Then relation(rel2) get role(role2) get supertype: rel00:role00
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When relation(rel3) get role(role3) set override: role00
+    Then relation(rel2) set supertype: rel3; fails
+    Then relation(rel3) create role: role00; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When create relation type: rel5
+    When relation(rel5) create role: role00
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(rel2) get role(role2) get supertype: rel00:role00
+    Then relation(rel2) set supertype: rel5; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    Then relation(rel2) get supertype: rel4
+    Then relation(rel2) get role(role2) get supertype: rel00:role00
+    When relation(rel4) set supertype: rel5
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    Then relation(rel2) get supertype: rel4
+    Then relation(rel2) get role(role2) get supertype: rel00:role00
+    When relation(rel4) set supertype: rel01
+    Then transaction commits; fails
+
+  Scenario: A relation-type may only override role-types it inherits
+    When create relation type: rel00
+    When relation(rel00) create role: role00
+    When create relation type: rel01
+    When relation(rel01) create role: role01
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When create relation type: rel1
+    When relation(rel1) create role: role1
+    Then relation(rel1) get role(role1) set override: role00; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When create relation type: rel1
+    When relation(rel1) set supertype: rel00
+    When relation(rel1) create role: role1
+    When relation(rel1) get role(role1) set override: role00
+    Then relation(rel1) get roles contain:
+      | rel1:role1 |
+    Then relation(rel1) get roles do not contain:
+      | rel0:role0 |
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(rel1) set supertype: rel01; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    Then relation(rel00) delete role: role00; fails
 
 ########################
 # relates (roles) lists

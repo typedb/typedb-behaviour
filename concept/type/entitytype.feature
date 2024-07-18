@@ -23,6 +23,15 @@ Feature: Concept Entity Type
   Scenario: Root entity type cannot be renamed
     Then entity(entity) set label: superentity; fails
 
+  Scenario: Cyclic entity type hierarchies are disallowed
+    When create entity type: ent0
+    When create entity type: ent1
+    When entity(ent1) set supertype: ent0
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(ent1) set supertype: ent1; fails
+    Then entity(ent0) set supertype: ent1; fails
+
   Scenario: Entity types can be created
     When create entity type: person
     Then entity(person) exists

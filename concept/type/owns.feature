@@ -152,6 +152,27 @@ Feature: Concept Owns
     Then entity(player) set owns: name; fails
     Then entity(player) set owns: email; fails
     Then entity(player) get owns is empty
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When create attribute type: attr0
+    When attribute(attr0) set value type: string
+    When attribute(attr0) set annotation: @abstract
+    When create entity type: ent0
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(ent0) set owns: attr0; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When entity(ent0) set annotation: @abstract
+    When entity(ent0) set owns: attr0
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(ent0) unset annotation: @abstract; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When create entity type: ent1
+    When entity(ent1) set supertype: ent0
+    Then transaction commits; fails
 
   Scenario: Abstract entity type cannot own non-abstract attribute without value type
     When create entity type: player
@@ -266,6 +287,179 @@ Feature: Concept Owns
       | duration      | boolean      |
       | custom-struct | long         |
 
+  Scenario: The schema does not contain redundant owns declarations
+    When create attribute type: attr0
+    When attribute(attr0) set value type: string
+    When create entity type: ent00
+    When entity(ent00) set owns: attr0
+    When create entity type: ent01
+    When create entity type: ent1
+    When entity(ent1) set supertype: ent00
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(ent1) set owns: attr0
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent01
+    When entity(ent1) set owns: attr0
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(ent1) set supertype: ent00
+    Then transaction commits; fails
+
+
+  Scenario: A type may only override an ownership it inherits
+    When create attribute type: attr0
+    When attribute(attr0) set value type: string
+    When attribute(attr0) set annotation: @abstract
+    When create attribute type: attr1
+    When attribute(attr1) set supertype: attr0
+    When create entity type: ent00
+    When entity(ent00) set annotation: @abstract
+    When entity(ent00) set owns: attr0
+    When create entity type: ent01
+    When entity(ent01) set annotation: @abstract
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When create entity type: ent1
+    When entity(ent1) set owns: attr1
+    Then entity(ent1) get owns(attr1) set override: attr0; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When create entity type: ent1
+    When entity(ent1) set supertype: ent00
+    When entity(ent1) set owns: attr1
+    When entity(ent1) get owns(attr1) set override: attr0
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(ent00) unset owns: attr0
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent01; fails
+
+  Scenario: A type may not declare ownership of an attribute that has been overridden by an inherited ownership
+    When create attribute type: attr0
+    When attribute(attr0) set value type: string
+    When attribute(attr0) set annotation: @abstract
+    When create attribute type: attr1
+    When attribute(attr1) set annotation: @abstract
+    When attribute(attr1) set supertype: attr0
+    When create attribute type: attr2
+    When attribute(attr2) set supertype: attr1
+    When attribute(attr2) set annotation: @abstract
+    When create entity type: ent0
+    When entity(ent0) set annotation: @abstract
+    When entity(ent0) set owns: attr0
+    When create entity type: ent1
+    When entity(ent1) set supertype: ent0
+    When entity(ent1) set annotation: @abstract
+    When entity(ent1) set owns: attr1
+    When entity(ent1) get owns(attr1) set override: attr0
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When create entity type: ent2
+    When entity(ent2) set supertype: ent1
+    When entity(ent2) set annotation: @abstract
+    Then entity(ent2) set owns: attr2
+    Then entity(ent2) get owns(attr2) set override: attr0; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When create entity type: ent2
+    When entity(ent2) set supertype: ent1
+    When entity(ent2) set annotation: @abstract
+    When entity(ent1) unset owns: attr1
+    When entity(ent2) set owns: attr2
+    When entity(ent2) get owns(attr2) set override: attr0
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set owns: attr1
+    When entity(ent1) get owns(attr1) set override: attr0
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When create entity type: ent3
+    When entity(ent3) set annotation: @abstract
+    When entity(ent3) set owns: attr0
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(ent3) set supertype: ent2; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When create entity type: ent4
+    When entity(ent4) set annotation: @abstract
+    When entity(ent4) set owns: attr0
+    When entity(ent4) set supertype: ent3
+    When entity(ent3) unset owns: attr0
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(ent4) get supertype: ent3
+    Then entity(ent4) get owns contain:
+      | attr0 |
+    Then entity(ent3) get owns do not contain:
+      | attr0 |
+    When entity(ent3) set supertype: ent2
+    Then transaction commits; fails
+
+  Scenario: A type may only override an ownership it inherits with a subtype of the inherited attribute
+    When create attribute type: attr0
+    When attribute(attr0) set value type: string
+    When attribute(attr0) set annotation: @abstract
+    When create attribute type: attr1
+    When attribute(attr1) set value type: string
+    # Same, but the attributes are not subtypes
+    When create entity type: ent00
+    When entity(ent00) set annotation: @abstract
+    When entity(ent00) set owns: attr0
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When create entity type: ent1
+    When entity(ent1) set supertype: ent00
+    When entity(ent1) set owns: attr1
+    Then entity(ent1) get owns(attr1) set override: attr0; fails
+
+  Scenario: A concrete type must override any ownerships of abstract attributes it inherits
+    When create attribute type: attr00
+    When attribute(attr00) set value type: string
+    When attribute(attr00) set annotation: @abstract
+    When create attribute type: attr10
+    When attribute(attr10) set supertype: attr00
+    When create attribute type: attr01
+    When attribute(attr01) set value type: string
+    When attribute(attr01) set annotation: @abstract
+    When create attribute type: attr11
+    When attribute(attr11) set supertype: attr01
+    When create entity type: ent00
+    When entity(ent00) set annotation: @abstract
+    When entity(ent00) set owns: attr00
+    When create entity type: ent01
+    When entity(ent01) set annotation: @abstract
+    When entity(ent01) set owns: attr01
+    When create entity type: ent1
+    When transaction commits
+    # inherits abstract ownership but does not override
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent00
+    Then transaction commits; fails
+    # declares concrete ownership with a subtype but is missing override clause
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent00
+    When entity(ent1) set owns: attr10
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent00
+    When entity(ent1) set owns: attr10
+    When entity(ent1) get owns(attr10) set override: attr00
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent00
+    When entity(ent1) set owns: attr10
+    When entity(ent1) get owns(attr10) set override: attr00
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set owns: attr11
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent01; fails
+
   Scenario Outline: Relation types can redeclare owning attributes with <value-type> value type
     When create attribute type: name
     When attribute(name) set value type: <value-type>
@@ -322,6 +516,29 @@ Feature: Concept Owns
     Then relation(reference) set owns: name; fails
     Then relation(reference) set owns: email; fails
     Then relation(reference) get owns is empty
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When create attribute type: attr0
+    When attribute(attr0) set value type: string
+    When attribute(attr0) set annotation: @abstract
+    When create relation type: rel0
+    When relation(rel0) create role: role0
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(rel0) set owns: attr0; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When relation(rel0) set annotation: @abstract
+    When relation(rel0) set owns: attr0
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(rel0) unset annotation: @abstract; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When create relation type: rel1
+    When relation(rel1) set supertype: rel0
+    When relation(rel1) create role: role1
+    Then transaction commits; fails
 
   Scenario: Abstract relation type cannot own non-abstract attribute without value type
     When create relation type: reference
@@ -585,6 +802,27 @@ Feature: Concept Owns
     When <root-type>(<type-name>) unset owns: email
     Then <root-type>(<type-name>) get owns do not contain:
       | email |
+    Examples:
+      | root-type | type-name   |
+      | entity    | person      |
+      | relation  | description |
+
+  Scenario Outline: Deleting an attribute type does not leave dangling owns declarations
+    When create attribute type: attr0
+    When attribute(attr0) set value type: string
+    When create entity type: ent0
+    When <root-type>(<type-name>) set owns: attr0
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<type-name>) get owns contain:
+      | attr0 |
+    When delete attribute type: attr0
+    Then <root-type>(<type-name>) get owns do not contain:
+      | attr0 |
+    Then transaction commits
+    When connection open read transaction for database: typedb
+    Then <root-type>(<type-name>) get owns do not contain:
+      | attr0 |
     Examples:
       | root-type | type-name   |
       | entity    | person      |
@@ -7406,3 +7644,114 @@ Feature: Concept Owns
       | 0..1      |
       | 0..2      |
       | 0..       |
+
+  Scenario: Annotations on ownership overrides must be at least as strict as the overridden ownerships
+    When create attribute type: attr0
+    When attribute(attr0) set value type: string
+    When attribute(attr0) set annotation: @abstract
+    When create attribute type: attr1
+    When attribute(attr1) set supertype: attr0
+    When create entity type: ent0k
+    When entity(ent0k) set annotation: @abstract
+    When entity(ent0k) set owns: attr0
+    When entity(ent0k) get owns(attr0) set annotation: @key
+    When create entity type: ent0n
+    When entity(ent0n) set annotation: @abstract
+    When entity(ent0n) set owns: attr0
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When create entity type: ent1u
+    When entity(ent1u) set supertype: ent0k
+    When entity(ent1u) set owns: attr1
+    When entity(ent1u) get owns(attr1) set override: attr0
+    Then entity(ent1u) get owns(attr1) set annotation: @unique; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When create entity type: ent1u
+    When entity(ent1u) set supertype: ent0k
+    When entity(ent1u) set owns: attr1
+    When entity(ent1u) get owns(attr1) set annotation: @unique
+    Then entity(ent1u) get owns(attr1) set override: attr0; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When create entity type: ent1u
+    When entity(ent1u) set supertype: ent0n
+    When entity(ent1u) set owns: attr1
+    When entity(ent1u) get owns(attr1) set override: attr0
+    When entity(ent1u) get owns(attr1) set annotation: @unique
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(ent1u) set supertype: ent0k; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When entity(ent0n) get owns(attr0) set annotation: @key
+    Then transaction commits; fails
+
+  Scenario: Annotations on ownership redeclarations must be stricter than the previous declaration or will be flagged as redundant on commit.
+    When create attribute type: attr0
+    When attribute(attr0) set value type: string
+    When create entity type: ent0n
+    When entity(ent0n) set annotation: @abstract
+    When entity(ent0n) set owns: attr0
+    When create entity type: ent0k
+    When entity(ent0k) set annotation: @abstract
+    When entity(ent0k) set owns: attr0
+    When entity(ent0k) get owns(attr0) set annotation: @key
+    When create entity type: ent0u
+    When entity(ent0u) set annotation: @abstract
+    When entity(ent0u) set owns: attr0
+    When entity(ent0u) get owns(attr0) set annotation: @unique
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When create entity type: ent1u
+    When entity(ent1u) set supertype: ent0k
+    When entity(ent1u) set owns: attr0
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When create entity type: ent1u
+    When entity(ent1u) set supertype: ent0k
+    When entity(ent1u) set owns: attr0
+    When entity(ent0u) get owns(attr0) set annotation: @unique
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When create entity type: ent1u
+    When entity(ent1u) set supertype: ent0k
+    When entity(ent1u) set owns: attr0
+    When entity(ent1u) get owns(attr0) set override: attr0
+    When entity(ent0u) get owns(attr0) set annotation: @unique
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When create entity type: ent1u
+    When entity(ent1u) set supertype: ent0k
+    When entity(ent1u) set owns: attr0
+    When entity(ent0u) get owns(attr0) set annotation: @unique
+    When entity(ent1u) get owns(attr0) set override: attr0
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When create entity type: ent1u
+    When entity(ent1u) set supertype: ent0u
+    # Fails redundant annotations at commit
+    When entity(ent1u) set owns: attr0
+    When entity(ent1u) get owns(attr0) set annotation: @unique
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When create entity type: ent1u
+    When entity(ent1u) set supertype: ent0n
+    When entity(ent1u) set owns: attr0
+    When entity(ent1u) get owns(attr0) set annotation: @unique
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When create entity type: ent1u
+    When entity(ent1u) set supertype: ent0n
+    When entity(ent1u) set owns: attr0
+    When entity(ent1u) get owns(attr0) set annotation: @unique
+    When entity(ent1u) get owns(attr0) set override: attr0
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(ent1u) set supertype: ent0k; fails
+    When entity(ent1u) get owns(attr0) unset override
+    When entity(ent1u) set supertype: ent0k
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When entity(ent0n) get owns(attr0) set annotation: @key
+    Then transaction commits; fails

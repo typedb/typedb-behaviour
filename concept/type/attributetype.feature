@@ -31,6 +31,18 @@ Feature: Concept Attribute Type
   Scenario: Root attribute type cannot be renamed
     Then attribute(attribute) set label: superattribute; fails
 
+  Scenario: Cyclic attribute type hierarchies are disallowed
+    When create attribute type: attr0
+    When attribute(attr0) set value type: string
+    When create attribute type: attr1
+    When attribute(attr0) set annotation: @abstract
+    When attribute(attr1) set annotation: @abstract
+    When attribute(attr1) set supertype: attr0
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(attr1) set supertype: attr1; fails
+    Then attribute(attr0) set supertype: attr1; fails
+
   Scenario Outline: Attribute types can be created with <value-type> value type
     When create attribute type: name
     When attribute(name) set value type: <value-type>
@@ -1347,10 +1359,17 @@ Feature: Concept Attribute Type
     Then attribute(surname) set supertype: name; fails
     When attribute(name) set annotation: @abstract
     When attribute(surname) set supertype: name
+    Then attribute(name) unset annotation: @abstract; fails
     Then attribute(name) get annotations contain: @abstract
     Then attribute(surname) get annotations contain: @abstract
     Then attribute(surname) get supertype: name
     When transaction commits
+    When connection open schema transaction for database: typedb
+    When create attribute type: non-abstract-name
+    Then attribute(non-abstract-name) get annotations do not contain: @abstract
+    When attribute(non-abstract-name) set value type: string
+    Then attribute(surname) set supertype: non-abstract-name; fails
+    When transaction closes
     When connection open read transaction for database: typedb
     Then attribute(name) get annotations contain: @abstract
     Then attribute(surname) get annotations contain: @abstract

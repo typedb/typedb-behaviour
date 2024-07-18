@@ -414,6 +414,161 @@ Feature: Concept Plays
     Then entity(man) get plays(fathership:father) set override: fathership:father; fails
     Then entity(man) get plays(fathership:father) set override: parentship:parent; fails
 
+  Scenario: The schema does not contain redundant plays declarations
+    When create relation type: rel0
+    When relation(rel0) create role: role0
+    When create entity type: ent00
+    When entity(ent00) set plays: rel0:role0
+    When create entity type: ent01
+    When create entity type: ent1
+    When entity(ent1) set supertype: ent00
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(ent1) set plays: rel0:role0
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent01
+    When entity(ent1) set plays: rel0:role0
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(ent1) set supertype: ent00
+    Then transaction commits; fails
+
+  Scenario: A type may only override a role it plays by inheritance
+    When create relation type: rel0
+    When relation(rel0) create role: role0
+    When create relation type: rel1
+    When relation(rel1) set supertype: rel0
+    # Not yet as an override
+    When relation(rel1) create role: role1
+    When create entity type: ent00
+    When entity(ent00) set plays: rel0:role0
+    When create entity type: ent01
+    When transaction commits
+    # Roles aren't subtypes of each other
+    When connection open schema transaction for database: typedb
+    When create entity type: ent1
+    When entity(ent1) set supertype: ent00
+    When entity(ent1) set plays: rel1:role1
+    Then entity(ent1) get plays(rel1:role1) set override: rel0:role0; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role1) set override: role0
+    Then transaction commits
+    # ent1 doesn't sub ent00
+    When connection open schema transaction for database: typedb
+    When create entity type: ent1
+    When entity(ent1) set plays: rel1:role1
+    Then entity(ent1) get plays(rel1:role1) set override: rel0:role0; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When create entity type: ent1
+    When entity(ent1) set supertype: ent00
+    When entity(ent1) get plays contain:
+      | rel0:role0 |
+    # First without override
+    Then entity(ent1) set plays: rel1:role1
+    Then entity(ent1) get plays contain:
+      | rel0:role0 |
+      | rel1:role1 |
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set plays: rel1:role1
+    When entity(ent1) get plays(rel1:role1) set override: rel0:role0
+    Then entity(ent1) get plays contain:
+      | rel1:role1 |
+    Then entity(ent1) get plays do not contain:
+      | rel0:role0 |
+    Then transaction commits
+
+  Scenario: The schema may not be modified in a way that an overridden plays role is no longer inherited by the overriding type
+    When create relation type: rel0
+    When relation(rel0) create role: role0
+    When create relation type: rel1
+    When relation(rel1) set supertype: rel0
+    When relation(rel1) create role: role1
+    When relation(rel1) get role(role1) set override: role0
+    When create entity type: ent00
+    When entity(ent00) set plays: rel0:role0
+    When create entity type: ent1
+    When entity(ent1) set supertype: ent00
+    When entity(ent1) set plays: rel1:role1
+    When entity(ent1) get plays(rel1:role1) set override: rel0:role0
+    When create entity type: ent01
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(rel1) get role(role1) unset override
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    Then entity(ent00) unset plays: rel0:role0
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    Then entity(ent1) set supertype: ent01; fails
+
+  Scenario: A type may not redeclare the ability to play a role which is hidden by an override
+    When create relation type: rel0
+    When relation(rel0) create role: role0
+    When create relation type: rel1
+    When relation(rel1) set supertype: rel0
+    When relation(rel1) create role: role1
+    When relation(rel1) get role(role1) set override: role0
+    When create entity type: ent0
+    When entity(ent0) set plays: rel0:role0
+    When create entity type: ent1
+    When entity(ent1) set supertype: ent0
+    When create entity type: ent2
+    When entity(ent2) set supertype: ent1
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(ent2) set plays: rel0:role0
+    When entity(ent2) get plays(rel0:role0) set annotation: @card(1..1)
+    When entity(ent2) get plays(rel0:role0) set override: rel0:role0
+    When entity(ent1) set plays: rel1:role1
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(ent1) get plays(rel1:role1) set override: rel0:role0
+    Then transaction commits; fails
+
+  Scenario: A type may not be moved in a way that its plays declarations are hidden by an override
+    When create relation type: rel0
+    When relation(rel0) create role: role0
+    When create relation type: rel10
+    When relation(rel10) set supertype: rel0
+    When relation(rel10) create role: role10
+    When relation(rel10) get role(role10) set override: role0
+    When create relation type: rel11
+    When relation(rel11) set supertype: rel0
+    When relation(rel11) create role: role11
+    When relation(rel11) get role(role11) set override: role0
+    When create entity type: ent0
+    When entity(ent0) set plays: rel0:role0
+    When create entity type: ent1
+    When entity(ent1) set supertype: ent0
+    When entity(ent1) set plays: rel10:role10
+    When entity(ent1) get plays(rel10:role10) set override: rel0:role0
+    # plays will be hidden under ent1
+    When create entity type: ent20
+    When entity(ent20) set plays: rel0:role0
+    # Overridden will be hidden under ent1
+    When create entity type: ent21
+    When entity(ent21) set supertype: ent0
+    When entity(ent21) set plays: rel11:role11
+    When entity(ent21) get plays(rel11:role11) set override: rel0:role0
+    # Will be redundant under ent1
+    When create entity type: ent22
+    When entity(ent22) set supertype: ent0
+    When entity(ent22) set plays: rel10:role10
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(ent20) set supertype: ent1; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    Then entity(ent21) set supertype: ent1; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When entity(ent22) set supertype: ent1
+    Then transaction commits; fails
+
   Scenario: Relation types can play role types
     When create relation type: locates
     When relation(locates) create role: location
@@ -753,6 +908,27 @@ Feature: Concept Plays
     When transaction commits
     When connection open schema transaction for database: typedb
     When <root-type>(<type-name>) set plays: parentship:parent
+    Examples:
+      | root-type | type-name   |
+      | entity    | person      |
+      | relation  | description |
+    
+  Scenario Outline: Deleting a role does not leave dangling plays declarations for <root-type>
+    When create relation type: rel0
+    When relation(rel0) create role: role0
+    When relation(rel0) create role: extra_role
+    When <root-type>(<type-name>) set plays: rel0:role0
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<type-name>) get plays contain:
+      | rel0:role0 |
+    When relation(rel0) delete role: role0
+    Then <root-type>(<type-name>) get plays do not contain:
+      | rel0:role0 |
+    Then transaction commits
+    When connection open read transaction for database: typedb
+    Then <root-type>(<type-name>) get plays do not contain:
+      | rel0:role0 |
     Examples:
       | root-type | type-name   |
       | entity    | person      |
