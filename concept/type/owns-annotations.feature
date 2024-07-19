@@ -12,7 +12,6 @@ Feature: Concept Owns
     Given typedb starts
     Given connection opens with default authentication
     Given connection has been opened
-#    Given connection does not have any database
     Given connection reset database: typedb
     Given connection open schema transaction for database: typedb
 
