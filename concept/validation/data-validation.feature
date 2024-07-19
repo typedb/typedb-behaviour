@@ -54,7 +54,7 @@ Feature: Data validation
     Given transaction commits
     Given connection open write transaction for database: typedb
     Given $ent1 = entity(ent1) create new instance
-    Given $attr00 = attribute(attr00) as(string) put: "attr00"
+    Given $attr00 = attribute(attr00) put instance with value: "attr00"
     Given entity $ent1 set has: $attr00
     Given transaction commits
     Given connection open write transaction for database: typedb
@@ -275,8 +275,8 @@ Feature: Data validation
     Given $ent0n0 = entity(ent0n) create new instance with key(ref): ent0n0
     Given $ent0n1 = entity(ent0n) create new instance with key(ref): ent0n1
     Given $ent0u = entity(ent0u) create new instance with key(ref): ent0u
-    Given $attr0 = attribute(attr0) as(string) put: "attr0"
-    Given $attr1 = attribute(attr0) as(string) put: "attr1"
+    Given $attr0 = attribute(attr0) put instance with value: "attr0"
+    Given $attr1 = attribute(attr0) put instance with value: "attr1"
     Given entity $ent0n0 set has: $attr1
     Given entity $ent0n1 set has: $attr1
     Given entity $ent0u set has: $attr0
@@ -298,7 +298,7 @@ Feature: Data validation
     Given connection open write transaction for database: typedb
     When $ent0n1 = entity(ent0n) get instance with key(ref): ent0n1
     When $ent0u = entity(ent0u) get instance with key(ref): ent0u
-    When $attr1 = attribute(attr0) as(string) get: "attr1"
+    When $attr1 = attribute(attr0) get: "attr1"
     When entity $ent0n1 unset has: $attr1
     When entity $ent0u unset has: $attr1
     Then transaction commits
@@ -328,8 +328,8 @@ Feature: Data validation
     Given entity(ent0k) get owns(ref) set annotation: @key
     Given transaction commits
     Given connection open write transaction for database: typedb
-    Given $attr0 = attribute(attr0) as(string) put: "attr0"
-    Given $attr1 = attribute(attr0) as(string) put: "attr1"
+    Given $attr0 = attribute(attr0) put instance with value: "attr0"
+    Given $attr1 = attribute(attr0) put instance with value: "attr1"
     Given $ent1n = entity(ent1n) create new instance with key(ref): ent1n
     Given entity $ent1n set has: $attr0
     Given entity $ent1n set has: $attr1

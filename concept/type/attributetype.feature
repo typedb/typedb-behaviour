@@ -174,7 +174,7 @@ Feature: Concept Attribute Type
 #    When attribute(name) set value type: string
 #    When transaction commits
 #    When connection open write transaction for database: typedb
-#    When $x = attribute(name) put: alice
+#    When $x = attribute(name) put instance with value: alice
 #    When transaction commits
 #    When connection open schema transaction for database: typedb
 #    Then delete attribute type: name; fails

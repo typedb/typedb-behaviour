@@ -1626,10 +1626,10 @@ Feature: Concept Owns
 #    Then transaction commits
 #    When connection open write transaction for database: typedb
 #    When $a = entity(person) get instance with key(username): alice
-#    When $alice = attribute(email) as(string) put: alice@vaticle.com
+#    When $alice = attribute(email) put instance with value: alice@vaticle.com
 #    When entity $a set has: $alice
 #    When $b = entity(person) get instance with key(username): bob
-#    When $bob = attribute(email) as(string) put: bob@vaticle.com
+#    When $bob = attribute(email) put instance with value: bob@vaticle.com
 #    When entity $b set has: $bob
 #    Then transaction commits
 #    When connection open schema transaction for database: typedb

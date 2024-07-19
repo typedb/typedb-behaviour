@@ -645,7 +645,7 @@ Feature: Concept Owns
 #    Then transaction commits
 #    When connection open write transaction for database: typedb
 #    When $i = <root-type>(<type-name>) create new instance
-#    When $a = attribute(name) as(<value-type>) put: <value>
+#    When $a = attribute(name) put instance with value: <value>
 #    When entity $i set has: $a
 #    Then transaction commits
 #    When connection open schema transaction for database: typedb
@@ -1495,7 +1495,7 @@ Feature: Concept Owns
 #    Then transaction commits
 #    When connection open write transaction for database: typedb
 #    When $i = <root-type>(<type-name>) create new instance
-#    When $a = attribute(name) as(<value-type>) put: [<value>]
+#    When $a = attribute(name) put instance with value: [<value>]
 #    When entity $i set has: $a
 #    Then transaction commits
 #    When connection open schema transaction for database: typedb

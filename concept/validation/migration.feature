@@ -26,7 +26,7 @@ Feature: Schema migration
 
     Given connection open write transaction for database: typedb
     Given $ent1 = entity(ent1) create new instance
-    Given $attr0 = attribute(attr0) as(string) put: "attr0"
+    Given $attr0 = attribute(attr0) put instance with value: "attr0"
     Given entity $ent1 set has: $attr0
     Given transaction commits
 
@@ -64,7 +64,7 @@ Feature: Schema migration
 
     Given connection open write transaction for database: typedb
     Given $ent1 = entity(ent1) create new instance
-    Given $attr0 = attribute(attr0) as(string) put: "attr0"
+    Given $attr0 = attribute(attr0) put instance with value: "attr0"
     Given entity $ent1 set has: $attr0
     Given transaction commits
 
@@ -139,7 +139,7 @@ Feature: Schema migration
 
     Given connection open write transaction for database: typedb
     Given $ent1 = entity(ent1) create new instance
-    Given $attr0 = attribute(attr0) as(string) put: "attr0"
+    Given $attr0 = attribute(attr0) put instance with value: "attr0"
     Given entity $ent1 set has: $attr0
     Given transaction commits
 
