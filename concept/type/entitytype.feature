@@ -9,8 +9,7 @@ Feature: Concept Entity Type
     Given typedb starts
     Given connection opens with default authentication
     Given connection has been opened
-    Given connection does not have any database
-    Given connection create database: typedb
+    Given connection reset database: typedb
     Given connection open schema transaction for database: typedb
 
 ########################
@@ -22,6 +21,15 @@ Feature: Concept Entity Type
 
   Scenario: Root entity type cannot be renamed
     Then entity(entity) set label: superentity; fails
+
+  Scenario: Cyclic entity type hierarchies are disallowed
+    When create entity type: ent0
+    When create entity type: ent1
+    When entity(ent1) set supertype: ent0
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(ent1) set supertype: ent1; fails
+    Then entity(ent0) set supertype: ent1; fails
 
   Scenario: Entity types can be created
     When create entity type: person
@@ -200,6 +208,13 @@ Feature: Concept Entity Type
 # @annotations common
 ########################
 
+  Scenario Outline: Root entity type cannot set or unset @<annotation>
+    Then entity(entity) set annotation: @<annotation>; fails
+    Then entity(entity) unset annotation: @<annotation-category>; fails
+    Examples:
+      | annotation | annotation-category |
+      | abstract   | abstract            |
+
   Scenario Outline: Entity type can set and unset @<annotation>
     When create entity type: person
     When entity(person) set annotation: @<annotation>
@@ -350,6 +365,28 @@ Feature: Concept Entity Type
 #    Examples:
 #      | annotation |
 #      |     |
+
+  # TODO: Uncomment this test and when there appear inherited annotations (abstract is not inherited)
+#  Scenario Outline: Entity type cannot set redundant duplicated @<annotation> while inheriting it
+#    When create entity type: person
+#    When entity(person) set annotation: @<annotation>
+#    When create entity type: player
+#    When entity(player) set supertype: person
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When entity(player) set annotation: @<annotation>
+#    Then transaction commits; fails
+#    When connection open schema transaction for database: typedb
+#    When entity(player) set annotation: @<annotation>
+#    When entity(person) unset annotation: @<annotation>
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then entity(person) get annotations do not contain: @<annotation>
+#    Then entity(player) get annotations contain: @<annotation>
+#    When entity(person) set annotation: @<annotation>
+#    Then transaction commits; fails
+#    Examples:
+#      | annotation |
 
 ########################
 # @abstract
@@ -527,6 +564,53 @@ Feature: Concept Entity Type
     Then entity(player) get supertypes do not contain:
       | person |
     Then entity(player) set supertype: person; fails
+    When entity(person) set annotation: @abstract
+    When entity(player) set supertype: person
+    Then entity(person) get annotations contain: @abstract
+    Then entity(player) get annotations contain: @abstract
+    Then entity(player) get supertype: person
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get annotations contain: @abstract
+    Then entity(player) get annotations contain: @abstract
+    Then entity(player) get supertype: person
+
+  Scenario: Entity type cannot set @abstract annotation while having non-abstract supertype
+    When create entity type: person
+    Then entity(person) get annotations do not contain: @abstract
+    When create entity type: player
+    When entity(player) set supertype: person
+    Then entity(player) set annotation: @abstract; fails
+    Then entity(person) get annotations do not contain: @abstract
+    Then entity(player) get annotations do not contain: @abstract
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get annotations do not contain: @abstract
+    Then entity(player) get annotations do not contain: @abstract
+    Then entity(player) set annotation: @abstract; fails
+    When entity(person) set annotation: @abstract
+    When entity(player) set annotation: @abstract
+    Then entity(person) get annotations contain: @abstract
+    Then entity(player) get annotations contain: @abstract
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get annotations contain: @abstract
+    Then entity(player) get annotations contain: @abstract
+    When entity(person) unset annotation: @abstract
+    Then entity(person) get annotations do not contain: @abstract
+    Then entity(player) get annotations contain: @abstract
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    Then entity(person) get annotations contain: @abstract
+    Then entity(player) get annotations contain: @abstract
+    When entity(person) unset annotation: @abstract
+    When entity(player) unset annotation: @abstract
+    Then entity(person) get annotations do not contain: @abstract
+    Then entity(player) get annotations do not contain: @abstract
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get annotations do not contain: @abstract
+    Then entity(player) get annotations do not contain: @abstract
 
 ########################
 # not compatible @annotations: @distinct, @key, @unique, @subkey, @values, @range, @card, @cascade, @independent, @replace, @regex
@@ -540,7 +624,7 @@ Feature: Concept Entity Type
 #    Then entity(person) set annotation: @subkey(LABEL); fails
 #    Then entity(person) set annotation: @values(1, 2); fails
 #    Then entity(person) set annotation: @range(1, 2); fails
-#    Then entity(person) set annotation: @card(1, 2); fails
+#    Then entity(person) set annotation: @card(1..2); fails
 #    Then entity(person) set annotation: @cascade; fails
 #    Then entity(person) set annotation: @independent; fails
 #    Then entity(person) set annotation: @replace; fails
