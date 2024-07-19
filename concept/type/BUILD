@@ -10,6 +10,9 @@ exports_files([
     "attributetype.feature",
     "entitytype.feature",
     "relationtype.feature",
+    "plays.feature",
+    "owns.feature",
+    "owns-annotations.feature",
 ])
 
 checkstyle_test(
