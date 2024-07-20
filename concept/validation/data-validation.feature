@@ -228,6 +228,25 @@ Feature: Data validation
     Then entity(ent1) get plays(rel1:role1) set override: rel0:role0; fails
 
 
+  Scenario: A type may not be moved if it has instances of it owning an attribute which would be lost as a result of that move
+    Given create attribute type: attr0
+    Given attribute(attr0) set value type: string
+    Given create entity type: ent1
+    Given entity(ent1) set owns: attr0
+    Given create entity type: ent2
+    Given entity(ent2) set supertype: ent1
+    Given create entity type: ent10
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given $ent2 = entity(ent2) create new instance
+    Given $attr0 = attribute(attr0) put instance with value: "attr0"
+    Given entity $ent2 set has: $attr0
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then entity(ent2) set supertype: ent10; fails
+
+
   Scenario: A type may not be moved if it has instances of it playing a role which would be hidden as a result of that move
     Given create relation type: rel0
     Given relation(rel0) create role: role0
