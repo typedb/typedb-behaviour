@@ -283,6 +283,7 @@ Feature: Data validation
     Given entity(ent0n) set owns: attr0
     Given entity(ent0u) set owns: attr0
     Given entity(ent0u) get owns(attr0) set annotation: @unique
+    Given entity(ent0u) get owns(attr0) set annotation: @card(0..2)
     Given create attribute type: ref
     Given attribute(ref) set value type: string
     Given entity(ent0n) set owns: ref
@@ -302,15 +303,11 @@ Feature: Data validation
     Given entity $ent0u set has: $attr1
     Given transaction commits
     Given connection open schema transaction for database: typedb
-
-    # TODO: Either of set owns or set annotation could fail, not sure yet
-    When entity(ent0n) set owns: attr0
     Then entity(ent0n) get owns(attr0) set annotation: @unique; fails
 
     When transaction closes
     Given connection open schema transaction for database: typedb
-    # TODO: Either of set owns or set annotation could fail, not sure yet
-    When entity(ent0u) set owns: attr0
+    When entity(ent0u) get owns(attr0) unset annotation: @card
     Then entity(ent0u) get owns(attr0) set annotation: @key; fails
 
     Given transaction closes
@@ -337,6 +334,7 @@ Feature: Data validation
     Given create entity type: ent1n
     Given entity(ent1n) set supertype: ent0n
     Given entity(ent0n) set owns: attr0
+    Given entity(ent0n) get owns(attr0) set annotation: @card(0..2)
     Given entity(ent0k) set owns: attr0
     Given entity(ent0k) get owns(attr0) set annotation: @key
     Given create attribute type: ref

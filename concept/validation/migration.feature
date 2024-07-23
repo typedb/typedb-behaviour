@@ -35,15 +35,18 @@ Feature: Schema migration
     # TODO: Either of these steps could fail, not sure for now
     When entity(ent1) set owns: attr0
     Then entity(ent1) get owns(attr0) set annotation: @unique; fails
+    Given transaction closes
 
     Given connection open schema transaction for database: typedb
     Then entity(ent0) unset owns: attr0; fails
+    Given transaction closes
 
     Given connection open schema transaction for database: typedb
     When entity(ent1) set owns: attr0
     When entity(ent1) get owns(attr0) set annotation: @key
     # Can't commit yet, because of the redundant declarations
     Then transaction commits; fails
+    Given transaction closes
 
     Given connection open schema transaction for database: typedb
     When entity(ent1) set owns: attr0
@@ -99,6 +102,7 @@ Feature: Schema migration
 
     Given connection open schema transaction for database: typedb
     Then entity(ent0) unset plays: rel0:role0; fails
+    Given transaction closes
 
     Given connection open schema transaction for database: typedb
     Then entity(ent1) set plays: rel0:role0
@@ -147,7 +151,7 @@ Feature: Schema migration
 
     # Should break
     Then entity(ent1) set supertype: entity; fails
-    Given session transaction close
+    Given transaction closes
 
     Given connection open schema transaction for database: typedb
     Then entity(ent1) set owns: attr0
@@ -173,6 +177,7 @@ Feature: Schema migration
 
     Given connection open schema transaction for database: typedb
     Then entity(ent1) set supertype: entity; fails
+    Given transaction closes
 
     Given connection open schema transaction for database: typedb
     Then entity(ent1) set plays: rel0:role0
@@ -183,7 +188,7 @@ Feature: Schema migration
     Given create relation type: rel
     Given relation(rel) create role: role0
     Given create attribute type: attr
-    Given attribute(attr0) set value type: string
+    Given attribute(attr) set value type: string
     Given create entity type: ent0
     Given entity(ent0) set plays: rel:role0
     Given entity(ent0) set owns: attr
@@ -209,7 +214,7 @@ Feature: Schema migration
     Given create relation type: rel
     Given relation(rel) create role: role0
     Given create attribute type: attr
-    Given attribute(attr0) set value type: string
+    Given attribute(attr) set value type: string
     Given create entity type: ent0
     Given entity(ent0) set plays: rel:role0
     Given entity(ent0) set owns: attr
@@ -245,12 +250,8 @@ Feature: Schema migration
     Given entity(dog) set supertype: being
     Given transaction commits
     Given connection open write transaction for database: typedb
-    Given typeql insert
-    """
-    insert
-    $john isa person, has name "john";
-    $scooby isa dog, has name "scooby";
-    """
+    Given $john = entity(person) create new instance with key(name): "john"
+    Given $scooby = entity(dog) create new instance with key(name): "scooby"
     Given transaction commits
 
     When connection open schema transaction for database: typedb
@@ -262,16 +263,12 @@ Feature: Schema migration
     When entity(dog) set owns: dog-name
     Then transaction commits
     When connection open write transaction for database: typedb
-    When typeql insert
-    """
-    match $p isa person, has name $name; ?value = $name;
-    insert $p has person-name ?value;
-    """
-    When typeql insert
-    """
-    match $d isa dog, has name $name; ?value = $name;
-    insert $d has dog-name ?value;
-    """
+    When $p = entity(person) get instance with key(name): "john"
+    When $pn = attribute(person-name) put instance with value: "john"
+    When entity $p set has: $pn
+    When $d = entity(dog) get instance with key(name): "scooby"
+    When $dn = attribute(dog-name) put instance with value: "scooby"
+    When entity $d set has: $dn
     Then transaction commits
     When connection open schema transaction for database: typedb
     # adjust annotations
@@ -279,24 +276,22 @@ Feature: Schema migration
     When entity(person) get owns(person-name) set annotation: @key
     When entity(dog) set owns: dog-name
     When entity(dog) get owns(dog-name) set annotation: @key
-    When entity(being) set owns: name
+    When entity(being) get owns(name) unset annotation: @key
     Then transaction commits
 
     When connection open write transaction for database: typedb
-    When typeql delete
-    """
-    match $n isa! name;
-    delete $n isa name;
-    """
+    When delete attributes of type: name
     Then transaction commits
 
     When connection open schema transaction for database: typedb
     When attribute(name) set annotation: @abstract
     When attribute(person-name) set supertype: name
     When attribute(dog-name) set supertype: name
+    When attribute(dog-name) unset value type
+    When attribute(person-name) unset value type
     When entity(person) set owns: person-name
-    When entity(person) get owns(person-name) set override: name
     When entity(person) get owns(person-name) set annotation: @key
+    When entity(person) get owns(person-name) set override: name
     When entity(dog) set owns: dog-name
     When entity(dog) get owns(dog-name) set override: name
     Then transaction commits
@@ -318,12 +313,20 @@ Feature: Schema migration
     Given entity(person) set owns: female-specific
     Given transaction commits
     Given connection open write transaction for database: typedb
-    Given typeql insert
-    """
-    insert
-      $alice isa person, has gender "F", has common "c-alice", has female-specific "f-alice";
-      $bob isa person, has gender "M", has common "c-bob", has male-specific "m-bob";
-    """
+    When $alice = entity(person) create new instance
+    When $gender1 = attribute(gender) put instance with value: "F"
+    When $common1 = attribute(common) put instance with value: "c-alice"
+    When $specific1 = attribute(female-specific) put instance with value: "f-alice"
+    When entity $alice set has: $gender1
+    When entity $alice set has: $common1
+    When entity $alice set has: $specific1
+    When $bob = entity(person) create new instance
+    When $gender2 = attribute(gender) put instance with value: "M"
+    When $common2 = attribute(common) put instance with value: "c-bob"
+    When $specific2 = attribute(male-specific) put instance with value: "m-bob"
+    When entity $bob set has: $gender2
+    When entity $bob set has: $common2
+    When entity $bob set has: $specific2
     Given transaction commits
 
     When connection open schema transaction for database: typedb
@@ -334,26 +337,18 @@ Feature: Schema migration
     Then transaction commits
 
     When connection open write transaction for database: typedb
-    When typeql insert
-    """
-    match $p isa person, has gender "M", has male-specific $ms, has common $c;
-    insert $m isa male, has $ms, has $c;
-    """
-    When typeql insert
-    """
-    match $p isa person, has gender "F", has female-specific $fs, has common $c;
-    insert $f isa female, has $fs, has $c;
-    """
-    When typeql delete
-    """
-    match $p isa! person;
-    delete $p isa person;
-    """
-    When typeql delete
-    """
-    match $g isa! gender;
-    delete $g isa gender;
-    """
+    When $specific1 = attribute(male-specific) get instance with value: "m-bob"
+    When $common1 = attribute(common) get instance with value: "c-bob"
+    When $m = entity(male) create new instance
+    When entity $m set has: $specific1
+    When entity $m set has: $common1
+    When $specific2 = attribute(female-specific) get instance with value: "f-alice"
+    When $common2 = attribute(common) get instance with value: "c-alice"
+    When $f = entity(female) create new instance
+    When entity $f set has: $specific2
+    When entity $f set has: $common2
+    When delete entities of type: person
+    When delete attributes of type: gender
     Then transaction commits
 
     When connection open schema transaction for database: typedb
