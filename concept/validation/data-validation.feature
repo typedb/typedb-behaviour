@@ -314,15 +314,15 @@ Feature: Data validation
     Given connection open write transaction for database: typedb
     When $ent0n1 = entity(ent0n) get instance with key(ref): ent0n1
     When $ent0u = entity(ent0u) get instance with key(ref): ent0u
-    When $attr1 = attribute(attr0) get: "attr1"
+    When $attr1 = attribute(attr0) get instance with value: "attr1"
     When entity $ent0n1 unset has: $attr1
     When entity $ent0u unset has: $attr1
     Then transaction commits
 
     Given connection open schema transaction for database: typedb
-    When entity(ent0n) set owns: attr0
     When entity(ent0n) get owns(attr0) set annotation: @unique
-    When entity(ent0u) set owns: attr0
+    When entity(ent0u) get owns(attr0) unset annotation: @card
+    When entity(ent0u) get owns(attr0) unset annotation: @unique
     When entity(ent0u) get owns(attr0) set annotation: @key
     Then transaction commits
 

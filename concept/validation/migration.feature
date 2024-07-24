@@ -30,11 +30,21 @@ Feature: Schema migration
     Given entity $ent1 set has: $attr0
     Given transaction commits
 
-    # Should break
     Given connection open schema transaction for database: typedb
-    # TODO: Either of these steps could fail, not sure for now
     When entity(ent1) set owns: attr0
+    When entity(ent1) get owns(attr0) set annotation: @unique
+    Then transaction commits; fails
+
+    Given connection open schema transaction for database: typedb
+    When entity(ent1) set owns: attr0
+    When entity(ent1) get owns(attr0) set override: attr0
     Then entity(ent1) get owns(attr0) set annotation: @unique; fails
+    Given transaction closes
+
+    Given connection open schema transaction for database: typedb
+    When entity(ent1) set owns: attr0
+    When entity(ent1) get owns(attr0) set annotation: @unique
+    Then entity(ent1) get owns(attr0) set override: attr0; fails
     Given transaction closes
 
     Given connection open schema transaction for database: typedb
@@ -46,7 +56,6 @@ Feature: Schema migration
     When entity(ent1) get owns(attr0) set annotation: @key
     # Can't commit yet, because of the redundant declarations
     Then transaction commits; fails
-    Given transaction closes
 
     Given connection open schema transaction for database: typedb
     When entity(ent1) set owns: attr0
