@@ -11,8 +11,7 @@ Feature: TypeQL Define Query
     Given connection has been opened
     Given connection does not have any database
     Given connection create database: typedb
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
 
     Given typeql define
       """
@@ -29,7 +28,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
 
 
   ################
@@ -1478,8 +1477,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open read transaction for database: typedb
     Given typeql insert
       """
       insert
@@ -1490,9 +1488,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     When typeql define
       """
       define
@@ -1500,7 +1496,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x owns barcode @key; get;
@@ -1519,9 +1515,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     Given typeql insert
       """
       insert
@@ -1530,9 +1524,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     Then typeql define; throws exception
       """
       define
@@ -1549,9 +1541,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert
@@ -1560,9 +1550,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     Then typeql define; throws exception
       """
       define
@@ -1579,7 +1567,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x relates employer; get;
@@ -1595,7 +1583,7 @@ Feature: TypeQL Define Query
       define name sub attribute, value long;
       """
 
-    When session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     When typeql define
       """
       define name sub attribute, value string;
@@ -1604,9 +1592,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: a regex constraint can be added to an existing attribute type if all its instances satisfy it
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert
@@ -1614,16 +1600,14 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     When typeql define
       """
       define name regex "^A.*$";
       """
     Then transaction commits
 
-    Then session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     Then get answers of typeql get
       """
       match $x regex "^A.*$"; get;
@@ -1634,9 +1618,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: a regex cannot be added to an existing attribute type if there is an instance that doesn't satisfy it
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert
@@ -1644,9 +1626,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     Then typeql define; throws exception
       """
       define name regex "^A.*$";
@@ -1660,7 +1640,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     Then typeql define; throws exception
       """
       define house-number regex "^A.*$";
@@ -1687,7 +1667,7 @@ Feature: TypeQL Define Query
       define name value long;
       """
 
-    When session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     Then typeql define; throws exception
       """
       define name sub attribute, value long;
@@ -1700,7 +1680,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x owns name @key; get;
@@ -1717,7 +1697,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x owns email; get;
@@ -1733,9 +1713,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: defining a uniqueness on existing ownership is possible if data conforms to uniqueness requirements
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     When typeql insert
       """
       insert $x isa person, has name "Bob", has email "bob@gmail.com";
@@ -1745,17 +1723,13 @@ Feature: TypeQL Define Query
       insert $x isa person, has name "Jane", has name "Doe", has email "janedoe@gmail.com";
       """
     Given transaction commits
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define person owns name @unique;
       """
     Then transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given typeql insert; throws exception
       """
       insert $x isa person, has name "Bob", has email "bob2@gmail.com";
@@ -1763,9 +1737,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: defining a uniqueness on existing ownership fail if data does not conform to uniqueness requirements
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     When typeql insert
       """
       insert $x isa person, has name "Bob", has email "bob@gmail.com";
@@ -1775,9 +1747,7 @@ Feature: TypeQL Define Query
       insert $x isa person, has name "Bob", has email "bob2@gmail.com";
       """
     Given transaction commits
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     Given typeql define; throws exception
       """
       define person owns name @unique;
@@ -1785,9 +1755,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: a key ownership can be converted to a unique ownership
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert
@@ -1795,17 +1763,13 @@ Feature: TypeQL Define Query
       $y isa person, has email "john@gmail.com";
       """
     Given transaction commits
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define person owns email @unique;
       """
     Then transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     When get answers of typeql get
       """
       match $x owns $y @unique; get;
@@ -1831,9 +1795,7 @@ Feature: TypeQL Define Query
       define person owns phone-nr;
       """
     Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert
@@ -1844,9 +1806,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: converting unique to key is possible if the data conforms to key requirements
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert
@@ -1854,18 +1814,14 @@ Feature: TypeQL Define Query
       $y isa person, has phone-nr "456", has email "xyz@gmail.com";
       """
     Given transaction commits
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
       person owns phone-nr @key;
       """
     Then transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Then typeql insert; throws exception
       """
       insert $x isa person, has phone-nr "9999", has phone-nr "8888", has email "pqr@gmail.com";
@@ -1873,17 +1829,13 @@ Feature: TypeQL Define Query
 
 
   Scenario: converting unique to key fails if the data does not conform to key requirements
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert $x isa person, has phone-nr "123", has phone-nr "456", has email "abc@gmail.com";
       """
     Given transaction commits
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     Then typeql define; throws exception
       """
       define
@@ -1930,7 +1882,7 @@ Feature: TypeQL Define Query
       };
       """
     Then transaction commits
-    When session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
@@ -1944,15 +1896,13 @@ Feature: TypeQL Define Query
       };
       """
     Then transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert $x isa person, has email "bob@gmail.com";
       """
     Then transaction commits
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x has name $a; get;
@@ -1987,14 +1937,14 @@ Feature: TypeQL Define Query
       define friendship sub relation, relates friend;
       """
     Then transaction commits
-    When session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     When typeql define
       """
       define friendship abstract;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x sub friendship, abstract; get;
@@ -2010,13 +1960,13 @@ Feature: TypeQL Define Query
       define age sub attribute, value long;
       """
     Then transaction commits
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     When typeql define
       """
       define age abstract;
       """
     Then transaction commits
-    When session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x sub age, abstract; get;
@@ -2027,9 +1977,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: an existing entity type cannot be converted to abstract if it has existing instances
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert
@@ -2037,9 +1985,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     Then typeql define; throws exception
       """
       define person abstract;
@@ -2047,9 +1993,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: an existing relation type cannot be converted to abstract if it has existing instances
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert
@@ -2058,9 +2002,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     Then typeql define; throws exception
       """
       define employment abstract;
@@ -2068,9 +2010,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: an existing attribute type cannot be converted to abstract if it has existing instances
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert
@@ -2078,9 +2018,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     Then typeql define; throws exception
       """
       define name abstract;
@@ -2110,7 +2048,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     When typeql define
       """
       define
@@ -2118,7 +2056,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x sub apple-product; get;
@@ -2142,18 +2080,14 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert $s isa shoe, has shoe-size 9;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     When typeql define
       """
       define
@@ -2162,7 +2096,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x sub shoe-size; get;
@@ -2184,7 +2118,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     When typeql define
       """
       define
@@ -2192,7 +2126,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x sub organism; get;
@@ -2213,18 +2147,14 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert $p isa pigeon;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     When typeql define
       """
       define
@@ -2233,7 +2163,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x sub pigeon; get;
@@ -2253,18 +2183,14 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert $p isa pigeon;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     When typeql define
       """
       define
@@ -2273,7 +2199,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x sub pigeon; get;
@@ -2293,18 +2219,14 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert $p isa pigeon;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     When typeql define
       """
       define
@@ -2313,7 +2235,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x sub pigeon; get;
@@ -2359,7 +2281,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x type child, plays $r; get;
@@ -2381,7 +2303,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x type child, owns $y; get;
@@ -2404,7 +2326,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x type child, owns $y @key; get;
@@ -2424,7 +2346,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x type part-time-employment, relates $r; get;
@@ -2444,7 +2366,7 @@ Feature: TypeQL Define Query
       """
       define dog sub entity;
       """
-    When session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     Then typeql get; throws exception
       """
       match $x type dog; get;
@@ -2534,7 +2456,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x relates function; $x plays recursive-function:function; get;
@@ -2551,7 +2473,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x owns number-of-letters; get;
