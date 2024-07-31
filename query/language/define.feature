@@ -16,15 +16,15 @@ Feature: TypeQL Define Query
     Given typeql define
       """
       define
-      person sub entity, plays employment:employee, plays income:earner, owns name, owns email @key, owns phone-nr @unique;
-      employment sub relation, relates employee, plays income:source, owns start-date, owns employment-reference-code @key;
-      income sub relation, relates earner, relates source;
+      entity person plays employment:employee, plays income:earner, owns name, owns email @key, owns phone-nr @unique;
+      relation employment relates employee, plays income:source, owns start-date, owns employment-reference-code @key;
+      relation income relates earner, relates source;
 
-      name sub attribute, value string;
-      email sub attribute, value string;
-      start-date sub attribute, value datetime;
-      employment-reference-code sub attribute, value string;
-      phone-nr sub attribute, value string;
+      attribute name value string;
+      attribute email value string;
+      attribute start-date value datetime;
+      attribute employment-reference-code value string;
+      attribute phone-nr value string;
       """
     Given transaction commits
 
@@ -38,11 +38,11 @@ Feature: TypeQL Define Query
   Scenario: new entity types can be defined
     When typeql define
       """
-      define dog sub entity;
+      define entity dog;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open schema transaction for database: typedb
     When get answers of typeql get
       """
       match $x type dog; get;
