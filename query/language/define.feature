@@ -9,8 +9,9 @@ Feature: TypeQL Define Query
     Given typedb starts
     Given connection opens with default authentication
     Given connection has been opened
-    Given connection does not have any database
-    Given connection create database: typedb
+    Given connection reset database: typedb
+#    Given connection does not have any database
+#    Given connection create database: typedb
     Given connection open schema transaction for database: typedb
 
     Given typeql define
@@ -55,11 +56,11 @@ Feature: TypeQL Define Query
   Scenario: a new entity type can be defined as a subtype, creating a new child of its parent type
     When typeql define
       """
-      define child sub person;
+      define entity child sub person;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x sub person; get;
@@ -71,42 +72,42 @@ Feature: TypeQL Define Query
 
 
   Scenario: when defining that a type owns a non-existent thing, an error is thrown
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
-      define book sub entity, owns pages;
+      define entity book owns pages;
       """
 
 
   Scenario: types cannot own entity types
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
-      define house sub entity, owns person;
+      define entity house owns person;
       """
 
 
   Scenario: types cannot own relation types
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
-      define company sub entity, owns employment;
+      define entity company owns employment;
       """
 
 
   Scenario: when defining that a type plays a non-existent role, an error is thrown
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
-      define house sub entity, plays constructed:something;
+      define entity house plays constructed:something;
       """
 
 
   Scenario: types cannot play entity types
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
       define parrot sub entity, plays person;
       """
 
 
   Scenario: types can not own entity types as keys
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
       define passport sub entity, owns person @key;
       """
@@ -115,11 +116,11 @@ Feature: TypeQL Define Query
   Scenario: a newly defined entity subtype inherits playable roles from its parent type
     Given typeql define
       """
-      define child sub person;
+      define entity child sub person;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x plays employment:employee; get;
@@ -134,13 +135,13 @@ Feature: TypeQL Define Query
     Given typeql define
       """
       define
-      athlete sub person;
-      runner sub athlete;
-      sprinter sub runner;
+      entity athlete sub person;
+      entity runner sub athlete;
+      entity sprinter sub runner;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x plays employment:employee; get;
@@ -156,11 +157,11 @@ Feature: TypeQL Define Query
   Scenario: a newly defined entity subtype inherits attribute ownerships from its parent type
     Given typeql define
       """
-      define child sub person;
+      define entity child sub person;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x owns name; get;
@@ -175,13 +176,13 @@ Feature: TypeQL Define Query
     Given typeql define
       """
       define
-      athlete sub person;
-      runner sub athlete;
-      sprinter sub runner;
+      entity athlete sub person;
+      entity runner sub athlete;
+      entity sprinter sub runner;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x owns name; get;
@@ -197,11 +198,11 @@ Feature: TypeQL Define Query
   Scenario: a newly defined entity subtype inherits keys from its parent type
     Given typeql define
       """
-      define child sub person;
+      define entity child sub person;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x owns email @key; get;
@@ -216,13 +217,13 @@ Feature: TypeQL Define Query
     Given typeql define
       """
       define
-      athlete sub person;
-      runner sub athlete;
-      sprinter sub runner;
+      entity athlete sub person;
+      entity runner sub athlete;
+      entity sprinter sub runner;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x owns email @key; get;
@@ -239,13 +240,13 @@ Feature: TypeQL Define Query
     Given typeql define
       """
       define
-      house sub entity, plays home-ownership:home, plays home-ownership:home, plays home-ownership:home;
-      home-ownership sub relation, relates home, relates owner;
+      entity house plays home-ownership:home, plays home-ownership:home, plays home-ownership:home;
+      relation home-ownership relates home, relates owner;
       person plays home-ownership:owner;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x plays home-ownership:home; get;
@@ -259,12 +260,12 @@ Feature: TypeQL Define Query
     Given typeql define
       """
       define
-      price sub attribute, value double;
-      house sub entity, owns price, owns price, owns price;
+      attribute price value double;
+      entity house owns price, owns price, owns price;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x owns price; get;
@@ -278,12 +279,12 @@ Feature: TypeQL Define Query
     Given typeql define
       """
       define
-      address sub attribute, value string;
-      house sub entity, owns address @key, owns address @key, owns address @key;
+      attribute address value string;
+      entity house owns address @key, owns address @key, owns address @key;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x owns address @key; get;
@@ -294,56 +295,56 @@ Feature: TypeQL Define Query
 
 
   Scenario: defining a type without a 'sub' clause throws
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
       define flying-spaghetti-monster;
       """
 
 
   Scenario: a type cannot directly subtype 'thing' itself
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
       define column sub thing;
       """
 
 
   Scenario: an entity type can not have a value type defined
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
-      define cream sub entity, value double;
+      define entity cream value double;
       """
 
 
   Scenario: a type cannot have a 'when' block
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
-      define gorilla sub entity, when { $x isa gorilla; };
+      define entity gorilla when { $x isa gorilla; };
       """
 
 
   Scenario: a type cannot have a 'then' block
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
-      define godzilla sub entity, then { $x isa godzilla; };
+      define entity godzilla then { $x isa godzilla; };
       """
 
 
   Scenario: defining a thing with 'isa' is not possible in a 'define' query
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
       define $p isa person;
       """
 
 
   Scenario: adding an attribute instance to a thing is not possible in a 'define' query
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
       define $p has name "Loch Ness Monster";
       """
 
 
   Scenario: writing a variable in a 'define' is not allowed
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
       define $x sub entity;
       """
@@ -357,7 +358,7 @@ Feature: TypeQL Define Query
   Scenario: new relation types can be defined
     When typeql define
       """
-      define pet-ownership sub relation, relates pet-owner, relates owned-pet;
+      define relation pet-ownership relates pet-owner, relates owned-pet;
       """
     Then transaction commits
 
@@ -392,9 +393,9 @@ Feature: TypeQL Define Query
   Scenario: defining a relation type throws on commit if it has no roleplayers and is not abstract
     Then typeql define
       """
-      define useless-relation sub relation;
+      define relation useless-relation;
       """
-    Then transaction commits; throws exception
+    Then transaction commits; fails
 
 
   Scenario: a newly defined relation subtype inherits roles from its supertype
@@ -404,7 +405,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x relates employee; get;
@@ -422,8 +423,8 @@ Feature: TypeQL Define Query
     When typeql define
       """
       define
-      parenthood sub relation, relates parent, relates child;
-      father-sonhood sub parenthood, relates father as parent, relates son as child;
+        relation parenthood relates parent, relates child;
+        relation father-sonhood sub parenthood, relates father as parent, relates son as child;
       """
     Then transaction commits
 
@@ -454,7 +455,7 @@ Feature: TypeQL Define Query
     When typeql define
       """
       define
-      parenthood sub relation, relates parent, relates child;
+      relation parenthood relates parent, relates child;
       father-sonhood sub parenthood, relates father as parent, relates son as child;
       """
     Then transaction commits
@@ -480,7 +481,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x relates employee; get;
@@ -491,10 +492,10 @@ Feature: TypeQL Define Query
 
 
   Scenario: when overriding a role that doesn't exist on the parent relation, an error is thrown
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
       define
-      close-friendship sub relation, relates close-friend as friend;
+      relation close-friendship relates close-friend as friend;
       """
 
 
@@ -502,13 +503,13 @@ Feature: TypeQL Define Query
     Given typeql define
       """
       define
-      plane sub entity, plays pilot-employment:preferred-plane;
+      entity plane plays pilot-employment:preferred-plane;
       pilot-employment sub employment, relates pilot as employee, relates preferred-plane;
       person plays pilot-employment:pilot;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x relates preferred-plane; get;
@@ -522,23 +523,23 @@ Feature: TypeQL Define Query
     Then typeql define
       """
         define
-        locates sub relation, relates located;
+        relation locates relates located;
         contractor-locates sub locates, relates contractor-located as located;
 
-        employment sub relation, relates employee, plays locates:located;
+        relation employment relates employee, plays locates:located;
         contractor-employment sub employment, plays contractor-locates:contractor-located as located;
       """
 
 
   Scenario: already shadowed types should not be overrideable
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
         define
-        locates sub relation, relates located;
+        relation locates relates located;
         contractor-locates sub locates, relates contractor-located as located;
         software-contractor-locates sub contractor-locates, relates software-contractor-located as contractor-located;
 
-        employment sub relation, relates employee, plays locates:located;
+        relation employment relates employee, plays locates:located;
         contractor-employment sub employment, plays contractor-locates:contractor-located as located;
         software-contractor-employment sub contractor-employment, plays software-contractor-locates:software-contractor-located as located;
       """
@@ -551,7 +552,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x plays income:source; get;
@@ -572,7 +573,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x plays income:source; get;
@@ -586,7 +587,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: inherited role types cannot be played via role type aliases
-    Given typeql define; throws exception
+    Given typeql define; fails
       """
       define
       part-time-employment sub employment;
@@ -601,7 +602,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x owns start-date; get;
@@ -622,7 +623,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x owns start-date; get;
@@ -642,7 +643,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x owns employment-reference-code @key; get;
@@ -663,7 +664,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x owns employment-reference-code @key; get;
@@ -679,7 +680,7 @@ Feature: TypeQL Define Query
   Scenario: a relation type can be defined with no roleplayers when it is marked as abstract
     When typeql define
       """
-      define connection sub relation, abstract;
+      define relation connection abstract;
       """
     Then transaction commits
 
@@ -697,12 +698,12 @@ Feature: TypeQL Define Query
     Given typeql define
       """
       define
-      parenthood sub relation, relates parent, relates child, relates child, relates parent, relates child;
+      relation parenthood relates parent, relates child, relates child, relates parent, relates child;
       person plays parenthood:parent, plays parenthood:child;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x relates parent; $x relates child; get;
@@ -716,8 +717,8 @@ Feature: TypeQL Define Query
     When typeql define
       """
       define
-      ownership sub relation, relates owner;
-      loan sub relation, relates owner;
+      relation ownership relates owner;
+      relation loan relates owner;
       """
     Then transaction commits
 
@@ -743,7 +744,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match
@@ -763,16 +764,16 @@ Feature: TypeQL Define Query
 
 
   Scenario: defining an attribute type throws if you don't specify a value type
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
       define colour sub attribute;
       """
 
 
   Scenario: defining an attribute type throws if the specified value type is not a recognised value type
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
-      define colour sub attribute, value rgba;
+      define attribute colour value rgba;
       """
 
 
@@ -780,12 +781,12 @@ Feature: TypeQL Define Query
     When typeql define
       """
       define
-      code sub attribute, value string, abstract;
+      attribute code value string, abstract;
       door-code sub code;
       """
     Then transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x sub code; get;
@@ -800,12 +801,12 @@ Feature: TypeQL Define Query
     When typeql define
       """
       define
-      code sub attribute, value string, abstract;
+      attribute code value string, abstract;
       door-code sub code;
       """
     Then transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x type door-code, value string; get;
@@ -816,7 +817,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: defining an attribute subtype throws if it is given a different value type to what its parent has
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
       define code-name sub name, value long;
       """
@@ -828,11 +829,11 @@ Feature: TypeQL Define Query
   Scenario: a regex constraint can be defined on a 'string' attribute type
     Given typeql define
       """
-      define response sub attribute, value string, regex "^(yes|no|maybe)$";
+      define attribute response value string, regex "^(yes|no|maybe)$";
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x regex "^(yes|no|maybe)$"; get;
@@ -843,9 +844,9 @@ Feature: TypeQL Define Query
 
 
   Scenario: a regex constraint cannot be defined on an attribute type whose value type is anything other than 'string'
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
-      define name-in-binary sub attribute, value long, regex "^(0|1)+$";
+      define attribute name-in-binary value long, regex "^(0|1)+$";
       """
 
 
@@ -853,14 +854,14 @@ Feature: TypeQL Define Query
     Given typeql define
       """
       define
-      car sub entity, plays car-sales-listing:listed-car;
-      car-sales-listing sub relation, relates listed-car, relates available-colour;
-      colour sub attribute, value string, plays car-sales-listing:available-colour, abstract;
+      entity car plays car-sales-listing:listed-car;
+      relation car-sales-listing relates listed-car, relates available-colour;
+      attribute colour value string, plays car-sales-listing:available-colour, abstract;
       grayscale-colour sub colour;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x plays car-sales-listing:available-colour; get;
@@ -876,15 +877,15 @@ Feature: TypeQL Define Query
       """
       define
       person plays phone-contact:person;
-      phone-contact sub relation, relates person, relates number;
-      phone-number sub attribute, value string, plays phone-contact:number, abstract;
+      relation phone-contact relates person, relates number;
+      attribute phone-number value string, plays phone-contact:number, abstract;
       uk-phone-number sub phone-number, abstract;
       uk-landline-number sub uk-phone-number, abstract;
       uk-premium-landline-number sub uk-landline-number;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x plays phone-contact:number; get;
@@ -901,13 +902,13 @@ Feature: TypeQL Define Query
     Given typeql define
       """
       define
-      brightness sub attribute, value double;
-      colour sub attribute, value string, owns brightness, abstract;
+      attribute brightness value double;
+      attribute colour value string, owns brightness, abstract;
       grayscale-colour sub colour;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x owns brightness; get;
@@ -922,15 +923,15 @@ Feature: TypeQL Define Query
     Given typeql define
       """
       define
-      country-calling-code sub attribute, value string;
-      phone-number sub attribute, value string, owns country-calling-code, abstract;
+      attribute country-calling-code value string;
+      attribute phone-number value string, owns country-calling-code, abstract;
       uk-phone-number sub phone-number, abstract;
       uk-landline-number sub uk-phone-number, abstract;
       uk-premium-landline-number sub uk-landline-number;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x owns country-calling-code; get;
@@ -947,13 +948,13 @@ Feature: TypeQL Define Query
     Given typeql define
       """
       define
-      hex-value sub attribute, value string;
-      colour sub attribute, value string, owns hex-value @key, abstract;
+      attribute hex-value value string;
+      attribute colour value string, owns hex-value @key, abstract;
       grayscale-colour sub colour;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x owns hex-value @key; get;
@@ -968,15 +969,15 @@ Feature: TypeQL Define Query
     Given typeql define
       """
       define
-      hex-value sub attribute, value string;
-      colour sub attribute, value string, owns hex-value @key, abstract;
+      attribute hex-value value string;
+      attribute colour value string, owns hex-value @key, abstract;
       dark-colour sub colour, abstract;
       dark-red-colour sub dark-colour, abstract;
       very-dark-red-colour sub dark-red-colour;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x owns hex-value @key; get;
@@ -998,7 +999,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x owns <label>; get;
@@ -1029,11 +1030,11 @@ Feature: TypeQL Define Query
   Scenario: an abstract entity type can be defined
     When typeql define
       """
-      define animal sub entity, abstract;
+      define entity animal abstract;
       """
     Then transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x type animal; $x abstract; get;
@@ -1047,12 +1048,12 @@ Feature: TypeQL Define Query
     When typeql define
       """
       define
-      animal sub entity, abstract;
+      entity animal abstract;
       horse sub animal;
       """
     Then transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x sub animal; get;
@@ -1067,12 +1068,12 @@ Feature: TypeQL Define Query
     When typeql define
       """
       define
-      animal sub entity, abstract;
+      entity animal abstract;
       fish sub animal, abstract;
       """
     Then transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x sub animal; $x abstract; get;
@@ -1092,7 +1093,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x sub exception, abstract; get;
@@ -1105,11 +1106,11 @@ Feature: TypeQL Define Query
   Scenario: an abstract relation type can be defined
     When typeql define
       """
-      define membership sub relation, abstract, relates member;
+      define relation membership abstract, relates member;
       """
     Then transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x type membership; $x abstract; get;
@@ -1123,7 +1124,7 @@ Feature: TypeQL Define Query
     When typeql define
       """
       define
-      membership sub relation, abstract, relates member;
+      relation membership abstract, relates member;
       gym-membership sub membership, relates gym-with-members, relates gym-member as member;
       """
     Then transaction commits
@@ -1143,7 +1144,7 @@ Feature: TypeQL Define Query
     When typeql define
       """
       define
-      requirement sub relation, abstract, relates prerequisite, relates outcome;
+      relation requirement abstract, relates prerequisite, relates outcome;
       tool-requirement sub requirement, abstract, relates required-tool as prerequisite;
       """
     Then transaction commits
@@ -1163,7 +1164,7 @@ Feature: TypeQL Define Query
     When typeql define
       """
       define
-      requirement sub relation, relates prerequisite, relates outcome;
+      relation requirement relates prerequisite, relates outcome;
       tech-requirement sub requirement, abstract, relates required-tech as prerequisite;
       """
     Then transaction commits
@@ -1181,11 +1182,11 @@ Feature: TypeQL Define Query
   Scenario: an abstract attribute type can be defined
     When typeql define
       """
-      define number-of-limbs sub attribute, abstract, value long;
+      define attribute number-of-limbs abstract, value long;
       """
     Then transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x type number-of-limbs; $x abstract; get;
@@ -1199,7 +1200,7 @@ Feature: TypeQL Define Query
     When typeql define
       """
       define
-      number-of-limbs sub attribute, abstract, value long;
+      attribute number-of-limbs abstract, value long;
       number-of-legs sub number-of-limbs;
       """
     Then transaction commits
@@ -1219,12 +1220,12 @@ Feature: TypeQL Define Query
     When typeql define
       """
       define
-      number-of-limbs sub attribute, abstract, value long;
+      attribute number-of-limbs abstract, value long;
       number-of-artificial-limbs sub number-of-limbs, abstract;
       """
     Then transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x sub number-of-limbs; $x abstract; get;
@@ -1238,13 +1239,13 @@ Feature: TypeQL Define Query
   Scenario: defining attribute type hierarchies is idempotent
     When typeql define
       """
-      define super-name sub attribute, abstract, value string; location-name sub super-name;
+      define attribute super-name abstract, value string; location-name sub super-name;
       """
     Then transaction commits
     Then session opens transaction of type: write
     Then typeql define
       """
-      define super-name sub attribute, abstract, value string; location-name sub super-name;
+      define attribute super-name abstract, value string; location-name sub super-name;
       """
     Then transaction commits
     Then session opens transaction of type: read
@@ -1262,9 +1263,9 @@ Feature: TypeQL Define Query
   # TODO: Reenable this scenario after closing https://github.com/vaticle/typeql/issues/281
   @ignore-typedb-driver-rust
   Scenario: repeating the term 'abstract' when defining a type causes an error to be thrown
-    Given typeql define; throws exception
+    Given typeql define; fails
       """
-      define animal sub entity, abstract, abstract, abstract;
+      define entity animal abstract, abstract, abstract;
       """
 
   ##############
@@ -1276,7 +1277,7 @@ Feature: TypeQL Define Query
       """
       define
       child sub person, owns school-id @unique;
-      school-id sub attribute, value string;
+      attribute school-id value string;
       """
     Then transaction commits
 
@@ -1312,13 +1313,13 @@ Feature: TypeQL Define Query
       """
       define child sub person, owns email @key;
       """
-    Then transaction commits; throws exception
+    Then transaction commits; fails
     Then session opens transaction of type: write
     Then typeql define
       """
       define child sub person, owns phone-nr @unique;
       """
-    Then transaction commits; throws exception
+    Then transaction commits; fails
 
 
   Scenario: annotations are inherited through overrides
@@ -1376,11 +1377,11 @@ Feature: TypeQL Define Query
       """
       define child owns mobile as phone-nr @unique;
       """
-    Then transaction commits; throws exception
+    Then transaction commits; fails
 
 
   Scenario: defining a less strict annotation on an inherited ownership throws
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
       define child, owns email @unique;
       """
@@ -1394,9 +1395,9 @@ Feature: TypeQL Define Query
     When typeql define
       """
       define
-      person sub entity, owns name;
-      person sub entity, owns name;
-      person sub entity, owns name;
+      entity person owns name;
+      entity person owns name;
+      entity person owns name;
       """
     Then transaction commits
 
@@ -1409,23 +1410,23 @@ Feature: TypeQL Define Query
 
 
   Scenario: an entity type cannot be changed into a relation type
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
       define
-      person sub relation, relates body-part;
-      arm sub entity, plays person:body-part;
+      relation person relates body-part;
+      entity arm plays person:body-part;
       """
 
 
   Scenario: a relation type cannot be changed into an attribute type
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
-      define employment sub attribute, value string;
+      define attribute employment value string;
       """
 
 
   Scenario: an attribute type cannot be changed into an entity type
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
       define name sub entity;
       """
@@ -1471,13 +1472,12 @@ Feature: TypeQL Define Query
     Given typeql define
       """
       define
-      barcode sub attribute, value string;
-      product sub entity, owns name, owns barcode;
+      attribute barcode value string;
+      entity product owns name, owns barcode;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open read transaction for database: typedb
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert
@@ -1510,12 +1510,12 @@ Feature: TypeQL Define Query
     Given typeql define
       """
       define
-      barcode sub attribute, value string;
-      product sub entity, owns name;
+      attribute barcode value string;
+      entity product owns name;
       """
     Given transaction commits
 
-    Given connection open schema transaction for database: typedb
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert
@@ -1525,7 +1525,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
       define
       product owns barcode @key;
@@ -1536,8 +1536,8 @@ Feature: TypeQL Define Query
     Given typeql define
       """
       define
-      barcode sub attribute, value string;
-      product sub entity, owns name, owns barcode;
+      attribute barcode value string;
+      entity product owns name, owns barcode;
       """
     Given transaction commits
 
@@ -1551,7 +1551,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
       define
       product owns barcode @key;
@@ -1562,7 +1562,7 @@ Feature: TypeQL Define Query
     When typeql define
       """
       define
-      company sub entity, plays employment:employer;
+      entity company plays employment:employer;
       employment relates employer;
       """
     Then transaction commits
@@ -1578,20 +1578,21 @@ Feature: TypeQL Define Query
 
 
   Scenario: Redefining an attribute type succeeds if and only if the value type remains unchanged
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
-      define name sub attribute, value long;
+      define attribute name value long;
       """
 
     Given connection open schema transaction for database: typedb
     When typeql define
       """
-      define name sub attribute, value string;
+      define attribute name value string;
       """
     Then transaction commits
 
 
   Scenario: a regex constraint can be added to an existing attribute type if all its instances satisfy it
+    Given transaction closes
     Given connection open write transaction for database: typedb
     Given typeql insert
       """
@@ -1618,6 +1619,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: a regex cannot be added to an existing attribute type if there is an instance that doesn't satisfy it
+    Given transaction closes
     Given connection open write transaction for database: typedb
     Given typeql insert
       """
@@ -1627,7 +1629,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
       define name regex "^A.*$";
       """
@@ -1636,41 +1638,41 @@ Feature: TypeQL Define Query
   Scenario: a regex constraint can not be added to an existing attribute type whose value type isn't 'string'
     Given typeql define
       """
-      define house-number sub attribute, value long;
+      define attribute house-number value long;
       """
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
       define house-number regex "^A.*$";
       """
 
 
   Scenario: related roles cannot be added to existing entity types
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
       define person relates employee;
       """
 
 
   Scenario: related roles cannot be added to existing attribute types
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
       define name relates employee;
       """
 
 
   Scenario: the value type of an existing attribute type is not modifiable
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
       define name value long;
       """
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
-      define name sub attribute, value long;
+      define attribute name value long;
       """
 
   Scenario: an attribute ownership can be converted to a key ownership
@@ -1713,6 +1715,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: defining a uniqueness on existing ownership is possible if data conforms to uniqueness requirements
+    Given transaction closes
     Given connection open write transaction for database: typedb
     When typeql insert
       """
@@ -1730,13 +1733,14 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
     Given connection open write transaction for database: typedb
-    Given typeql insert; throws exception
+    Given typeql insert; fails
       """
       insert $x isa person, has name "Bob", has email "bob2@gmail.com";
       """
 
 
   Scenario: defining a uniqueness on existing ownership fail if data does not conform to uniqueness requirements
+    Given transaction closes
     Given connection open write transaction for database: typedb
     When typeql insert
       """
@@ -1748,13 +1752,14 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
     Given connection open schema transaction for database: typedb
-    Given typeql define; throws exception
+    Given typeql define; fails
       """
       define person owns name @unique;
       """
 
 
   Scenario: a key ownership can be converted to a unique ownership
+    Given transaction closes
     Given connection open write transaction for database: typedb
     Given typeql insert
       """
@@ -1783,7 +1788,7 @@ Feature: TypeQL Define Query
       match person owns $y @key; get;
       """
     Then answer size is: 0
-    Given typeql insert; throws exception
+    Given typeql insert; fails
       """
       insert $x isa person, has email "jane@gmail.com";
       """
@@ -1806,6 +1811,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: converting unique to key is possible if the data conforms to key requirements
+    Given transaction closes
     Given connection open write transaction for database: typedb
     Given typeql insert
       """
@@ -1822,13 +1828,14 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
     Given connection open write transaction for database: typedb
-    Then typeql insert; throws exception
+    Then typeql insert; fails
       """
       insert $x isa person, has phone-nr "9999", has phone-nr "8888", has email "pqr@gmail.com";
       """
 
 
   Scenario: converting unique to key fails if the data does not conform to key requirements
+    Given transaction closes
     Given connection open write transaction for database: typedb
     Given typeql insert
       """
@@ -1836,78 +1843,78 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
     Given connection open schema transaction for database: typedb
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
       define
       person owns phone-nr @key;
       """
 
-
-  Scenario: defining a rule is idempotent
-    Given typeql define
-      """
-      define
-      nickname sub attribute, value string;
-      person owns nickname;
-      rule robert-has-nickname-bob:
-      when {
-        $p isa person, has name "Robert";
-      } then {
-        $p has nickname "Bob";
-      };
-      """
-    Then typeql define
-      """
-      define
-      rule robert-has-nickname-bob:
-      when {
-        $p isa person, has name "Robert";
-      } then {
-        $p has nickname "Bob";
-      };
-      """
-
-
-  Scenario: redefining a rule and querying updates its definition
-    Given typeql define
-      """
-      define
-      nickname sub attribute, value string;
-      person owns nickname;
-      rule people-bob:
-      when {
-        $p isa person;
-      } then {
-        $p has nickname "Bob";
-      };
-      """
-    Then transaction commits
-    Given connection open schema transaction for database: typedb
-    Given typeql define
-      """
-      define
-      nickname sub attribute, value string;
-      person owns nickname;
-      rule people-bob:
-      when {
-        $p has email "bob@gmail.com";
-      } then {
-        $p has name "Bob";
-      };
-      """
-    Then transaction commits
-    Given connection open write transaction for database: typedb
-    Given typeql insert
-      """
-      insert $x isa person, has email "bob@gmail.com";
-      """
-    Then transaction commits
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x has name $a; get;
-      """
-    Then answer size is: 1
+#
+#  Scenario: defining a rule is idempotent
+#    Given typeql define
+#      """
+#      define
+#      attribute nickname value string;
+#      person owns nickname;
+#      rule robert-has-nickname-bob:
+#      when {
+#        $p isa person, has name "Robert";
+#      } then {
+#        $p has nickname "Bob";
+#      };
+#      """
+#    Then typeql define
+#      """
+#      define
+#      rule robert-has-nickname-bob:
+#      when {
+#        $p isa person, has name "Robert";
+#      } then {
+#        $p has nickname "Bob";
+#      };
+#      """
+#
+#
+#  Scenario: redefining a rule and querying updates its definition
+#    Given typeql define
+#      """
+#      define
+#      attribute nickname value string;
+#      person owns nickname;
+#      rule people-bob:
+#      when {
+#        $p isa person;
+#      } then {
+#        $p has nickname "Bob";
+#      };
+#      """
+#    Then transaction commits
+#    Given connection open schema transaction for database: typedb
+#    Given typeql define
+#      """
+#      define
+#      attribute nickname value string;
+#      person owns nickname;
+#      rule people-bob:
+#      when {
+#        $p has email "bob@gmail.com";
+#      } then {
+#        $p has name "Bob";
+#      };
+#      """
+#    Then transaction commits
+#    Given connection open write transaction for database: typedb
+#    Given typeql insert
+#      """
+#      insert $x isa person, has email "bob@gmail.com";
+#      """
+#    Then transaction commits
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql get
+#      """
+#      match $x has name $a; get;
+#      """
+#    Then answer size is: 1
 
 
   #############################
@@ -1921,7 +1928,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x sub person; $x abstract; get;
@@ -1934,7 +1941,7 @@ Feature: TypeQL Define Query
   Scenario: a concrete relation type can be converted to an abstract relation type
     When typeql define
       """
-      define friendship sub relation, relates friend;
+      define relation friendship relates friend;
       """
     Then transaction commits
     Given connection open schema transaction for database: typedb
@@ -1957,7 +1964,7 @@ Feature: TypeQL Define Query
   Scenario: a concrete attribute type can be converted to an abstract attribute type
     When typeql define
       """
-      define age sub attribute, value long;
+      define attribute age value long;
       """
     Then transaction commits
     Given connection open schema transaction for database: typedb
@@ -1977,6 +1984,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: an existing entity type cannot be converted to abstract if it has existing instances
+    Given transaction closes
     Given connection open write transaction for database: typedb
     Given typeql insert
       """
@@ -1986,13 +1994,14 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
       define person abstract;
       """
 
 
   Scenario: an existing relation type cannot be converted to abstract if it has existing instances
+    Given transaction closes
     Given connection open write transaction for database: typedb
     Given typeql insert
       """
@@ -2003,13 +2012,14 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
       define employment abstract;
       """
 
 
   Scenario: an existing attribute type cannot be converted to abstract if it has existing instances
+    Given transaction closes
     Given connection open write transaction for database: typedb
     Given typeql insert
       """
@@ -2019,7 +2029,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
       define name abstract;
       """
@@ -2031,9 +2041,9 @@ Feature: TypeQL Define Query
   # TODO: re-enable when rules are indexed
   Scenario: changing a concrete relation type to abstract throws on commit if it appears in the conclusion of any rule
 
-  @ignore
-  # TODO: re-enable when rules are indexed
-  Scenario: changing a concrete attribute type to abstract throws on commit if it appears in the conclusion of any rule
+#  @ignore
+#  # TODO: re-enable when rules are indexed
+#  Scenario: changing a concrete attribute type to abstract throws on commit if it appears in the conclusion of any rule
 
   ######################
   # HIERARCHY MUTATION #
@@ -2074,9 +2084,9 @@ Feature: TypeQL Define Query
     Given typeql define
       """
       define
-      measure sub attribute, value double, abstract;
+      attribute measure value double, abstract;
       shoe-size sub measure;
-      shoe sub entity, owns shoe-size;
+      entity shoe owns shoe-size;
       """
     Given transaction commits
 
@@ -2091,7 +2101,7 @@ Feature: TypeQL Define Query
     When typeql define
       """
       define
-      size sub attribute, value double, abstract;
+      attribute size value double, abstract;
       shoe-size sub size;
       """
     Then transaction commits
@@ -2110,10 +2120,10 @@ Feature: TypeQL Define Query
     Given typeql define
       """
       define
-      species sub entity, owns name, plays species-membership:species;
-      species-membership sub relation, relates species, relates member;
-      lifespan sub attribute, value double;
-      organism sub entity, owns lifespan, plays species-membership:member;
+      entity species owns name, plays species-membership:species;
+      relation species-membership relates species, relates member;
+      attribute lifespan value double;
+      entity organism owns lifespan, plays species-membership:member;
       child sub person;
       """
     Given transaction commits
@@ -2177,9 +2187,9 @@ Feature: TypeQL Define Query
     Given typeql define
       """
       define
-      bird sub entity, plays flying:flier;
+      entity bird plays flying:flier;
       pigeon sub bird;
-      flying sub relation, relates flier;
+      relation flying relates flier;
       """
     Given transaction commits
 
@@ -2194,7 +2204,7 @@ Feature: TypeQL Define Query
     When typeql define
       """
       define
-      animal sub entity, plays flying:flier;
+      entity animal plays flying:flier;
       pigeon sub animal;
       """
     Then transaction commits
@@ -2213,8 +2223,8 @@ Feature: TypeQL Define Query
     Given typeql define
       """
       define
-      name sub attribute, value string;
-      bird sub entity, owns name;
+      attribute name value string;
+      entity bird owns name;
       pigeon sub bird;
       """
     Given transaction commits
@@ -2230,7 +2240,7 @@ Feature: TypeQL Define Query
     When typeql define
       """
       define
-      animal sub entity, owns name;
+      entity animal owns name;
       pigeon sub animal;
       """
     Then transaction commits
@@ -2275,9 +2285,9 @@ Feature: TypeQL Define Query
     Given typeql define
       """
       define
-      employment sub relation, relates employer;
+      relation employment relates employer;
       child sub person;
-      person sub entity, plays employment:employer;
+      entity person plays employment:employer;
       """
     Given transaction commits
 
@@ -2297,8 +2307,8 @@ Feature: TypeQL Define Query
     Given typeql define
     """
        define
-       person sub entity, owns mobile;
-       mobile sub attribute, value long;
+       entity person owns mobile;
+       attribute mobile value long;
        child sub person;
       """
     Given transaction commits
@@ -2321,8 +2331,8 @@ Feature: TypeQL Define Query
       """
       define
       child sub person;
-      phone-number sub attribute, value long;
-      person sub entity, owns phone-number @key;
+      attribute phone-number value long;
+      entity person owns phone-number @key;
       """
     Given transaction commits
 
@@ -2342,7 +2352,7 @@ Feature: TypeQL Define Query
       """
       define
       part-time-employment sub employment;
-      employment sub relation, relates employer;
+      relation employment relates employer;
       """
     Given transaction commits
 
@@ -2367,7 +2377,7 @@ Feature: TypeQL Define Query
       define dog sub entity;
       """
     Given connection open read transaction for database: typedb
-    Then typeql get; throws exception
+    Then typeql get; fails
       """
       match $x type dog; get;
       """
@@ -2379,14 +2389,14 @@ Feature: TypeQL Define Query
   ########################
 
   Scenario: a type cannot be a subtype of itself
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
       define dog sub dog;
       """
 
 
   Scenario: a cyclic type hierarchy is not allowed
-    Then typeql define; throws exception
+    Then typeql define; fails
       """
       define
       giant sub person;
@@ -2399,14 +2409,14 @@ Feature: TypeQL Define Query
     Given typeql define
       """
       define
-      nickname sub attribute, value string, owns surname, owns middlename;
-      surname sub attribute, value string, owns nickname;
-      middlename sub attribute, value string, owns firstname;
-      firstname sub attribute, value string, owns surname;
+      attribute nickname value string, owns surname, owns middlename;
+      attribute surname value string, owns nickname;
+      attribute middlename value string, owns firstname;
+      attribute firstname value string, owns surname;
       """
     Then get answers of typeql get
       """
-      match $a sub attribute, owns $b; $b sub attribute, owns $a; get;
+      match $attribute a owns $b; $attribute b owns $a; get;
       """
     Then uniquely identify answer concepts
       | a              | b              |
@@ -2425,18 +2435,18 @@ Feature: TypeQL Define Query
     Given typeql define
       """
       define
-      nickname sub attribute, value string, owns surname, owns middlename;
-      surname sub attribute, value string, owns nickname;
-      middlename sub attribute, value string, owns firstname;
-      firstname sub attribute, value string, owns surname;
+      attribute nickname value string, owns surname, owns middlename;
+      attribute surname value string, owns nickname;
+      attribute middlename value string, owns firstname;
+      attribute firstname value string, owns surname;
       """
     Then get answers of typeql get
       """
       match
-      $a sub attribute, owns $b;
-      $b sub attribute, owns $c;
-      $c sub attribute, owns $d;
-      $d sub attribute, owns $a;
+      $attribute a owns $b;
+      $attribute b owns $c;
+      $attribute c owns $d;
+      $attribute d owns $a;
       get;
       """
     Then uniquely identify answer concepts
@@ -2452,7 +2462,7 @@ Feature: TypeQL Define Query
     When typeql define
       """
       define
-      recursive-function sub relation, relates function, plays recursive-function:function;
+      relation recursive-function relates function, plays recursive-function:function;
       """
     Then transaction commits
 
@@ -2469,7 +2479,7 @@ Feature: TypeQL Define Query
   Scenario: an attribute type can own itself
     When typeql define
       """
-      define number-of-letters sub attribute, value long, owns number-of-letters;
+      define attribute number-of-letters value long, owns number-of-letters;
       """
     Then transaction commits
 
@@ -2487,7 +2497,7 @@ Feature: TypeQL Define Query
     When typeql define
       """
       define
-      apple sub relation, abstract, relates role1, plays big-apple:role2;
+      relation apple abstract, relates role1, plays big-apple:role2;
       big-apple sub apple, plays apple:role1, relates role2;
       """
 
@@ -2502,43 +2512,43 @@ Feature: TypeQL Define Query
       """
       define
 
-      apple sub relation, abstract, plays huge-apple:grows-from;
+      relation apple abstract, plays huge-apple:grows-from;
       big-apple sub apple, abstract;
       huge-apple sub big-apple, relates tree, relates grows-from;
 
-      banana sub relation, abstract, plays huge-banana:grows-from;
+      relation banana abstract, plays huge-banana:grows-from;
       big-banana sub banana, abstract;
       huge-banana sub big-banana, relates tree, relates grows-from;
 
-      orange sub relation, abstract, plays huge-orange:grows-from;
+      relation orange abstract, plays huge-orange:grows-from;
       big-orange sub orange, abstract;
       huge-orange sub big-orange, relates tree, relates grows-from;
 
-      pear sub relation, abstract, plays huge-pear:grows-from;
+      relation pear abstract, plays huge-pear:grows-from;
       big-pear sub pear, abstract;
       huge-pear sub big-pear, relates tree, relates grows-from;
 
-      tomato sub relation, abstract, plays huge-tomato:grows-from;
+      relation tomato abstract, plays huge-tomato:grows-from;
       big-tomato sub tomato, abstract;
       huge-tomato sub big-tomato, relates tree, relates grows-from;
 
-      watermelon sub relation, abstract, plays huge-watermelon:grows-from;
+      relation watermelon abstract, plays huge-watermelon:grows-from;
       big-watermelon sub watermelon, abstract;
       huge-watermelon sub big-watermelon, relates tree, relates grows-from;
 
-      lemon sub relation, abstract, plays huge-lemon:grows-from;
+      relation lemon abstract, plays huge-lemon:grows-from;
       big-lemon sub lemon, abstract;
       huge-lemon sub big-lemon, relates tree, relates grows-from;
 
-      lime sub relation, abstract, plays huge-lime:grows-from;
+      relation lime abstract, plays huge-lime:grows-from;
       big-lime sub lime, abstract;
       huge-lime sub big-lime, relates tree, relates grows-from;
 
-      mango sub relation, abstract, plays huge-mango:grows-from;
+      relation mango abstract, plays huge-mango:grows-from;
       big-mango sub mango, abstract;
       huge-mango sub big-mango, relates tree, relates grows-from;
 
-      pineapple sub relation, abstract, plays huge-pineapple:grows-from;
+      relation pineapple abstract, plays huge-pineapple:grows-from;
       big-pineapple sub pineapple, abstract;
       huge-pineapple sub big-pineapple, relates tree, relates grows-from;
       """
