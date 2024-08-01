@@ -315,18 +315,18 @@ Feature: TypeQL Define Query
       """
 
 
-  Scenario: a type cannot have a 'when' block
-    Then typeql define; fails
-      """
-      define entity gorilla when { $x isa gorilla; };
-      """
+#  Scenario: a type cannot have a 'when' block
+#    Then typeql define; fails
+#      """
+#      define entity gorilla when { $x isa gorilla; };
+#      """
 
 
-  Scenario: a type cannot have a 'then' block
-    Then typeql define; fails
-      """
-      define entity godzilla then { $x isa godzilla; };
-      """
+#  Scenario: a type cannot have a 'then' block
+#    Then typeql define; fails
+#      """
+#      define entity godzilla then { $x isa godzilla; };
+#      """
 
 
   Scenario: defining a thing with 'isa' is not possible in a 'define' query
@@ -346,7 +346,7 @@ Feature: TypeQL Define Query
   Scenario: writing a variable in a 'define' is not allowed
     Then typeql define; fails
       """
-      define $x sub entity;
+      define entity $x;
       """
 
 
@@ -740,7 +740,7 @@ Feature: TypeQL Define Query
   Scenario Outline: a '<value_type>' attribute type can be defined
     Given typeql define
       """
-      define <label> sub attribute, value <value_type>;
+      define attribute <label> value <value_type>;
       """
     Given transaction commits
 
@@ -829,14 +829,14 @@ Feature: TypeQL Define Query
   Scenario: a regex constraint can be defined on a 'string' attribute type
     Given typeql define
       """
-      define attribute response value string, regex "^(yes|no|maybe)$";
+      define attribute response value string, @regex "^(yes|no|maybe)$";
       """
     Given transaction commits
 
     Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
-      match $x regex "^(yes|no|maybe)$"; get;
+      match $x @regex "^(yes|no|maybe)$"; get;
       """
     Then uniquely identify answer concepts
       | x              |
@@ -846,7 +846,7 @@ Feature: TypeQL Define Query
   Scenario: a regex constraint cannot be defined on an attribute type whose value type is anything other than 'string'
     Then typeql define; fails
       """
-      define attribute name-in-binary value long, regex "^(0|1)+$";
+      define attribute name-in-binary value long, @regex "^(0|1)+$";
       """
 
 
@@ -994,7 +994,7 @@ Feature: TypeQL Define Query
     When typeql define
       """
       define
-      <label> sub attribute, value <value_type>;
+      attribute <label> value <value_type>;
       person owns <label>;
       """
     Then transaction commits
@@ -1604,14 +1604,14 @@ Feature: TypeQL Define Query
     Given connection open schema transaction for database: typedb
     When typeql define
       """
-      define name regex "^A.*$";
+      define name @regex "^A.*$";
       """
     Then transaction commits
 
     Given connection open read transaction for database: typedb
     Then get answers of typeql get
       """
-      match $x regex "^A.*$"; get;
+      match $x @regex "^A.*$"; get;
       """
     Then uniquely identify answer concepts
       | x          |
@@ -1631,7 +1631,7 @@ Feature: TypeQL Define Query
     Given connection open schema transaction for database: typedb
     Then typeql define; fails
       """
-      define name regex "^A.*$";
+      define name @regex "^A.*$";
       """
 
 
@@ -1645,7 +1645,7 @@ Feature: TypeQL Define Query
     Given connection open schema transaction for database: typedb
     Then typeql define; fails
       """
-      define house-number regex "^A.*$";
+      define house-number @regex "^A.*$";
       """
 
 
@@ -1850,71 +1850,71 @@ Feature: TypeQL Define Query
       """
 
 
-  Scenario: defining a rule is idempotent
-    Given typeql define
-      """
-      define
-      attribute nickname value string;
-      person owns nickname;
-      rule robert-has-nickname-bob:
-      when {
-        $p isa person, has name "Robert";
-      } then {
-        $p has nickname "Bob";
-      };
-      """
-    Then typeql define
-      """
-      define
-      rule robert-has-nickname-bob:
-      when {
-        $p isa person, has name "Robert";
-      } then {
-        $p has nickname "Bob";
-      };
-      """
+#  Scenario: defining a rule is idempotent
+#    Given typeql define
+#      """
+#      define
+#      attribute nickname value string;
+#      person owns nickname;
+#      rule robert-has-nickname-bob:
+#      when {
+#        $p isa person, has name "Robert";
+#      } then {
+#        $p has nickname "Bob";
+#      };
+#      """
+#    Then typeql define
+#      """
+#      define
+#      rule robert-has-nickname-bob:
+#      when {
+#        $p isa person, has name "Robert";
+#      } then {
+#        $p has nickname "Bob";
+#      };
+#      """
 
-
-  Scenario: redefining a rule and querying updates its definition
-    Given typeql define
-      """
-      define
-      attribute nickname value string;
-      person owns nickname;
-      rule people-bob:
-      when {
-        $p isa person;
-      } then {
-        $p has nickname "Bob";
-      };
-      """
-    Then transaction commits
-    Given connection open schema transaction for database: typedb
-    Given typeql define
-      """
-      define
-      attribute nickname value string;
-      person owns nickname;
-      rule people-bob:
-      when {
-        $p has email "bob@gmail.com";
-      } then {
-        $p has name "Bob";
-      };
-      """
-    Then transaction commits
-    Given connection open write transaction for database: typedb
-    Given typeql insert
-      """
-      insert $x isa person, has email "bob@gmail.com";
-      """
-    Then transaction commits
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x has name $a; get;
-      """
-    Then answer size is: 1
+#
+#  Scenario: redefining a rule and querying updates its definition
+#    Given typeql define
+#      """
+#      define
+#      attribute nickname value string;
+#      person owns nickname;
+#      rule people-bob:
+#      when {
+#        $p isa person;
+#      } then {
+#        $p has nickname "Bob";
+#      };
+#      """
+#    Then transaction commits
+#    Given connection open schema transaction for database: typedb
+#    Given typeql define
+#      """
+#      define
+#      attribute nickname value string;
+#      person owns nickname;
+#      rule people-bob:
+#      when {
+#        $p has email "bob@gmail.com";
+#      } then {
+#        $p has name "Bob";
+#      };
+#      """
+#    Then transaction commits
+#    Given connection open write transaction for database: typedb
+#    Given typeql insert
+#      """
+#      insert $x isa person, has email "bob@gmail.com";
+#      """
+#    Then transaction commits
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql get
+#      """
+#      match $x has name $a; get;
+#      """
+#    Then answer size is: 1
 
 
   #############################
@@ -2374,7 +2374,7 @@ Feature: TypeQL Define Query
   Scenario: uncommitted transaction writes are not persisted
     When typeql define
       """
-      define dog sub entity;
+      define entity dog;
       """
     Given connection open read transaction for database: typedb
     Then typeql get; fails
