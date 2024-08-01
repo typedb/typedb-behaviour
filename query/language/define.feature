@@ -1575,14 +1575,14 @@ Feature: TypeQL Define Query
     Then uniquely identify answer concepts
       | x                |
       | label:employment |
-
+#
 
   Scenario: Redefining an attribute type succeeds if and only if the value type remains unchanged
     Then typeql define; fails
       """
       define attribute name value long;
       """
-
+    Given transaction closes
     Given connection open schema transaction for database: typedb
     When typeql define
       """
@@ -1668,7 +1668,7 @@ Feature: TypeQL Define Query
       """
       define name value long;
       """
-
+    Given transaction closes
     Given connection open schema transaction for database: typedb
     Then typeql define; fails
       """
@@ -1849,72 +1849,72 @@ Feature: TypeQL Define Query
       person owns phone-nr @key;
       """
 
-#
-#  Scenario: defining a rule is idempotent
-#    Given typeql define
-#      """
-#      define
-#      attribute nickname value string;
-#      person owns nickname;
-#      rule robert-has-nickname-bob:
-#      when {
-#        $p isa person, has name "Robert";
-#      } then {
-#        $p has nickname "Bob";
-#      };
-#      """
-#    Then typeql define
-#      """
-#      define
-#      rule robert-has-nickname-bob:
-#      when {
-#        $p isa person, has name "Robert";
-#      } then {
-#        $p has nickname "Bob";
-#      };
-#      """
-#
-#
-#  Scenario: redefining a rule and querying updates its definition
-#    Given typeql define
-#      """
-#      define
-#      attribute nickname value string;
-#      person owns nickname;
-#      rule people-bob:
-#      when {
-#        $p isa person;
-#      } then {
-#        $p has nickname "Bob";
-#      };
-#      """
-#    Then transaction commits
-#    Given connection open schema transaction for database: typedb
-#    Given typeql define
-#      """
-#      define
-#      attribute nickname value string;
-#      person owns nickname;
-#      rule people-bob:
-#      when {
-#        $p has email "bob@gmail.com";
-#      } then {
-#        $p has name "Bob";
-#      };
-#      """
-#    Then transaction commits
-#    Given connection open write transaction for database: typedb
-#    Given typeql insert
-#      """
-#      insert $x isa person, has email "bob@gmail.com";
-#      """
-#    Then transaction commits
-#    Given connection open read transaction for database: typedb
-#    When get answers of typeql get
-#      """
-#      match $x has name $a; get;
-#      """
-#    Then answer size is: 1
+
+  Scenario: defining a rule is idempotent
+    Given typeql define
+      """
+      define
+      attribute nickname value string;
+      person owns nickname;
+      rule robert-has-nickname-bob:
+      when {
+        $p isa person, has name "Robert";
+      } then {
+        $p has nickname "Bob";
+      };
+      """
+    Then typeql define
+      """
+      define
+      rule robert-has-nickname-bob:
+      when {
+        $p isa person, has name "Robert";
+      } then {
+        $p has nickname "Bob";
+      };
+      """
+
+
+  Scenario: redefining a rule and querying updates its definition
+    Given typeql define
+      """
+      define
+      attribute nickname value string;
+      person owns nickname;
+      rule people-bob:
+      when {
+        $p isa person;
+      } then {
+        $p has nickname "Bob";
+      };
+      """
+    Then transaction commits
+    Given connection open schema transaction for database: typedb
+    Given typeql define
+      """
+      define
+      attribute nickname value string;
+      person owns nickname;
+      rule people-bob:
+      when {
+        $p has email "bob@gmail.com";
+      } then {
+        $p has name "Bob";
+      };
+      """
+    Then transaction commits
+    Given connection open write transaction for database: typedb
+    Given typeql insert
+      """
+      insert $x isa person, has email "bob@gmail.com";
+      """
+    Then transaction commits
+    Given connection open read transaction for database: typedb
+    When get answers of typeql get
+      """
+      match $x has name $a; get;
+      """
+    Then answer size is: 1
 
 
   #############################
