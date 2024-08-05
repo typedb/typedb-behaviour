@@ -19,7 +19,7 @@ Feature: TypeQL Insert Query
 
       entity person
         plays employment:employee,
-        owns name,
+        owns name  @card(0..999),
         owns age,
         owns ref @key,
         owns email @unique;
@@ -137,7 +137,6 @@ Feature: TypeQL Insert Query
       """
     Given transaction commits
 
-    Given transaction closes
     Given connection open write transaction for database: typedb
     Given get answers of typeql get
       """
@@ -203,7 +202,6 @@ Feature: TypeQL Insert Query
       """
     Given transaction commits
 
-    Given transaction closes
     Given connection open write transaction for database: typedb
     Then typeql insert; throws exception
       """
