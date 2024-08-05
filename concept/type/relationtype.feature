@@ -16,21 +16,6 @@ Feature: Concept Relation Type and Role Type
 # relation type common
 ########################
 
-  Scenario: Root relation type cannot be deleted
-    Then delete relation type: relation; fails
-
-  Scenario: Root relation type cannot be renamed
-    Then relation(relation) set label: superrelation; fails
-
-  Scenario: Root role cannot be deleted
-    Then relation(relation) delete role: role; fails
-
-  Scenario: Root role cannot be renamed
-    Then relation(relation) get role(role) set name: superrole; fails
-
-  Scenario: Root relation type cannot get new roles
-    Then relation(relation) create role: new; fails
-
   Scenario: Non-abstract relation and cannot be created without roles
     When create relation type: marriage
     Then transaction commits; fails
@@ -51,22 +36,22 @@ Feature: Concept Relation Type and Role Type
     When relation(marriage) create role: husband
     When relation(marriage) create role: wife
     Then relation(marriage) exists
-    Then relation(marriage) get supertype: relation
+    Then relation(marriage) get supertype does not exist
     Then relation(marriage) get role(husband) exists
     Then relation(marriage) get role(wife) exists
-    Then relation(marriage) get role(husband) get supertype: relation:role
-    Then relation(marriage) get role(wife) get supertype: relation:role
+    Then relation(marriage) get role(husband) get supertype does not exist
+    Then relation(marriage) get role(wife) get supertype does not exist
     Then relation(marriage) get roles contain:
       | marriage:husband |
       | marriage:wife    |
     When transaction commits
     When connection open read transaction for database: typedb
     Then relation(marriage) exists
-    Then relation(marriage) get supertype: relation
+    Then relation(marriage) get supertype does not exist
     Then relation(marriage) get role(husband) exists
     Then relation(marriage) get role(wife) exists
-    Then relation(marriage) get role(husband) get supertype: relation:role
-    Then relation(marriage) get role(wife) get supertype: relation:role
+    Then relation(marriage) get role(husband) get supertype does not exist
+    Then relation(marriage) get role(wife) get supertype does not exist
     Then relation(marriage) get roles contain:
       | marriage:husband |
       | marriage:wife    |
@@ -100,13 +85,13 @@ Feature: Concept Relation Type and Role Type
     When relation(parentship) delete role: parent
     Then relation(parentship) get roles do not contain:
       | parent |
-    Then relation(relation) get role(role) get subtypes do not contain:
+    Then get role types do not contain:
       | parentship:parent |
     When transaction commits
     When connection open schema transaction for database: typedb
     When delete relation type: parentship
     Then relation(parentship) does not exist
-    Then relation(relation) get role(role) get subtypes do not contain:
+    Then get role types do not contain:
       | parentship:parent |
       | parentship:child  |
     When relation(marriage) delete role: spouse
@@ -118,7 +103,7 @@ Feature: Concept Relation Type and Role Type
     When connection open schema transaction for database: typedb
     When delete relation type: marriage
     Then relation(marriage) does not exist
-    Then relation(relation) get role(role) get subtypes do not contain:
+    Then get role types do not contain:
       | parentship:parent |
       | parentship:child  |
       | marriage:husband  |
@@ -127,7 +112,7 @@ Feature: Concept Relation Type and Role Type
     When connection open read transaction for database: typedb
     Then relation(parentship) does not exist
     Then relation(marriage) does not exist
-    Then relation(relation) get role(role) get subtypes do not contain:
+    Then get role types do not contain:
       | parentship:parent |
       | parentship:child  |
       | marriage:husband  |
@@ -272,24 +257,24 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) get role(father) set override: parent
     Then relation(fathership) get supertype: parentship
     Then relation(fathership) get role(father) get supertype: parentship:parent
-    Then relation(fathership) get role(child) get supertype: relation:role
+    Then relation(fathership) get role(child) get supertype does not exist
     Then relation(fathership) get supertypes contain:
       | relation   |
       | parentship |
     Then relation(fathership) get role(father) get supertypes contain:
       | relation:role     |
       | parentship:parent |
-    Then relation(fathership) get role(child) get supertypes contain:
+    Then relation(fathership) get role(child) get supertypes do not contain:
       | relation:role |
     Then relation(parentship) get subtypes contain:
       | fathership |
     Then relation(parentship) get role(parent) get subtypes contain:
       | fathership:father |
     Then relation(parentship) get role(child) get subtypes is empty
-    Then relation(relation) get subtypes contain:
+    Then get relation types contain:
       | parentship |
       | fathership |
-    Then relation(relation) get role(role) get subtypes contain:
+    Then get role types contain:
       | parentship:parent |
       | parentship:child  |
       | fathership:father |
@@ -297,24 +282,24 @@ Feature: Concept Relation Type and Role Type
     When connection open schema transaction for database: typedb
     Then relation(fathership) get supertype: parentship
     Then relation(fathership) get role(father) get supertype: parentship:parent
-    Then relation(fathership) get role(child) get supertype: relation:role
+    Then relation(fathership) get role(child) get supertype does not exist
     Then relation(fathership) get supertypes contain:
       | relation   |
       | parentship |
     Then relation(fathership) get role(father) get supertypes contain:
       | relation:role     |
       | parentship:parent |
-    Then relation(fathership) get role(child) get supertypes contain:
+    Then relation(fathership) get role(child) get supertypes do not contain:
       | relation:role |
     Then relation(parentship) get subtypes contain:
       | fathership |
     Then relation(parentship) get role(parent) get subtypes contain:
       | fathership:father |
     Then relation(parentship) get role(child) get subtypes is empty
-    Then relation(relation) get subtypes contain:
+    Then get relation types contain:
       | parentship |
       | fathership |
-    Then relation(relation) get role(role) get subtypes contain:
+    Then get role types contain:
       | parentship:parent |
       | parentship:child  |
       | fathership:father |
@@ -344,10 +329,10 @@ Feature: Concept Relation Type and Role Type
       | fathership:father |
     Then relation(parentship) get role(child) get subtypes contain:
       | father-son:son |
-    Then relation(relation) get subtypes contain:
+    Then get relation types contain:
       | parentship |
       | fathership |
-    Then relation(relation) get role(role) get subtypes contain:
+    Then get role types contain:
       | parentship:parent |
       | parentship:child  |
       | fathership:father |
@@ -369,14 +354,14 @@ Feature: Concept Relation Type and Role Type
       | parentship:child |
     Then relation(fathership) get supertype: parentship
     Then relation(fathership) get role(father) get supertype: parentship:parent
-    Then relation(fathership) get role(child) get supertype: relation:role
+    Then relation(fathership) get role(child) get supertype does not exist
     Then relation(fathership) get supertypes contain:
       | relation   |
       | parentship |
     Then relation(fathership) get role(father) get supertypes contain:
       | relation:role     |
       | parentship:parent |
-    Then relation(fathership) get role(child) get supertypes contain:
+    Then relation(fathership) get role(child) get supertypes do not contain:
       | relation:role |
     Then relation(fathership) get subtypes contain:
       | father-son |
@@ -387,10 +372,10 @@ Feature: Concept Relation Type and Role Type
       | fathership:father |
     Then relation(parentship) get role(child) get subtypes contain:
       | father-son:son |
-    Then relation(relation) get subtypes contain:
+    Then get relation types contain:
       | parentship |
       | fathership |
-    Then relation(relation) get role(role) get subtypes contain:
+    Then get role types contain:
       | parentship:parent |
       | parentship:child  |
       | fathership:father |
@@ -398,20 +383,15 @@ Feature: Concept Relation Type and Role Type
 
   Scenario: Concrete relation types must relate at least one role, cannot unset relates root
     When create relation type: rel0a
-    Then relation(rel0a) get roles contain:
-      | relation:role |
+    Then relation(rel0a) get roles is empty
     Then relation(rel0a) get declared roles is empty
     Then relation(rel0a) get role(role) does not exist
-    Then relation(relation) get role(role) exists
-    Then relation(relation) delete role: role; fails
     Then transaction commits; fails
 
     When connection open schema transaction for database: typedb
     When create relation type: rel0b
     When relation(rel0b) create role: role0b
     Then relation(rel0b) get roles contain:
-#     TODO: Now we hide relation:role. Do we want this behavior? We show it in typeql 2.x in like "$relation sub relation; $relation relates $r;"
-#      | relation:role |
       | rel0b:role0b |
     Then relation(rel0b) get declared roles contain:
       | rel0b:role0b |
@@ -419,14 +399,11 @@ Feature: Concept Relation Type and Role Type
 
     When connection open schema transaction for database: typedb
     Then relation(rel0b) get roles contain:
-#     TODO: Now we hide relation:role. Do we want this behavior?
-#      | relation:role |
       | rel0b:role0b |
     Then relation(rel0b) get declared roles contain:
       | rel0b:role0b |
     When relation(rel0b) delete role: role0b
-    Then relation(rel0b) get roles contain:
-      | relation:role |
+    Then relation(rel0b) get roles is empty
     Then relation(rel0b) get roles do not contain:
       | rel0b:role0b |
     Then relation(rel0b) get declared roles is empty
@@ -435,18 +412,15 @@ Feature: Concept Relation Type and Role Type
     When connection open schema transaction for database: typedb
     When create relation type: rel0c
     When relation(rel0c) set annotation: @abstract
-    Then relation(rel0c) get roles contain:
-      | relation:role |
+    Then relation(rel0c) get roles is empty
     Then relation(rel0c) get declared roles is empty
     When transaction commits
 
     When connection open schema transaction for database: typedb
-    Then relation(rel0c) get roles contain:
-      | relation:role |
+    Then relation(rel0c) get roles is empty
     Then relation(rel0c) get declared roles is empty
     When relation(rel0c) unset annotation: @abstract
-    Then relation(rel0c) get roles contain:
-      | relation:role |
+    Then relation(rel0c) get roles is empty
     Then relation(rel0c) get declared roles is empty
     Then transaction commits; fails
 
@@ -456,13 +430,6 @@ Feature: Concept Relation Type and Role Type
     When transaction commits
     When connection open schema transaction for database: typedb
     Then relation(marriage) set supertype: marriage; fails
-
-  Scenario: Relation types cannot change root's supertype
-    When create relation type: marriage
-    When relation(marriage) create role: wife
-    Then relation(relation) set supertype: marriage; fails
-    Then relation(relation) set supertype: relation; fails
-    Then relation(relation) get supertypes is empty
 
     # TODO: Make it only for typeql
 #  Scenario: Roles cannot subtype itself
@@ -795,18 +762,18 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) set supertype: parentship
     When relation(fathership) create role: father
     When relation(fathership) get role(father) set override: parent
-    Then relation(fathership) set supertype: relation; fails
+    Then relation(fathership) unset supertype; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(fathership) set supertype: relation; fails
+    Then relation(fathership) unset supertype; fails
     When relation(fathership) get role(father) unset override
-    When relation(fathership) set supertype: relation
-    Then relation(fathership) get supertype: relation
-    Then relation(fathership) get role(father) get supertype: relation:role
+    When relation(fathership) unset supertype
+    Then relation(fathership) get supertype does not exist
+    Then relation(fathership) get role(father) get supertype does not exist
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(fathership) get supertype: relation
-    Then relation(fathership) get role(father) get supertype: relation:role
+    Then relation(fathership) get supertype does not exist
+    Then relation(fathership) get role(father) get supertype does not exist
     When relation(fathership) set supertype: parentship
     When create relation type: subfathership
     When relation(subfathership) create role: subfather
@@ -814,30 +781,22 @@ Feature: Concept Relation Type and Role Type
     When relation(subfathership) get role(subfather) set override: parent
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(subfathership) set supertype: relation; fails
-    When relation(fathership) set supertype: relation
+    Then relation(subfathership) unset supertype; fails
+    When relation(fathership) unset supertype
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When relation(subfathership) get role(subfather) unset override
-    When relation(fathership) set supertype: relation
-    Then relation(fathership) get supertype: relation
-    Then relation(subfathership) get role(subfather) get supertype: relation:role
+    When relation(fathership) unset supertype
+    Then relation(fathership) get supertype does not exist
+    Then relation(subfathership) get role(subfather) get supertype does not exist
     When transaction commits
     When connection open read transaction for database: typedb
-    Then relation(fathership) get supertype: relation
-    Then relation(subfathership) get role(subfather) get supertype: relation:role
+    Then relation(fathership) get supertype does not exist
+    Then relation(subfathership) get role(subfather) get supertype does not exist
 
 ########################
 # @annotations common
 ########################
-
-  Scenario Outline: Root relation type cannot set or unset @<annotation>
-    Then relation(relation) set annotation: @<annotation>; fails
-    Then relation(relation) unset annotation: @<annotation-category>; fails
-    Examples:
-      | annotation | annotation-category |
-      | abstract   | abstract            |
-      | cascade    | cascade             |
 
   Scenario Outline: Relation type can set and unset @<annotation>
     When create relation type: marriage
@@ -982,7 +941,7 @@ Feature: Concept Relation Type and Role Type
     When relation(parentship) set annotation: @<annotation>
     Then relation(parentship) get annotations contain: @<annotation>
     Then relation(fathership) get annotations contain: @<annotation>
-    When relation(fathership) set supertype: relation
+    When relation(fathership) unset supertype
     Then relation(parentship) get annotations contain: @<annotation>
     Then relation(fathership) get annotations do not contain: @<annotation>
     When relation(fathership) set annotation: @<annotation>
@@ -997,7 +956,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get annotations contain: @<annotation>
     Then relation(fathership) get annotations contain: @<annotation>
     Then relation(fathership) get declared annotations do not contain: @<annotation>
-    When relation(fathership) set supertype: relation
+    When relation(fathership) unset supertype
     Then relation(parentship) get annotations contain: @<annotation>
     Then relation(fathership) get annotations do not contain: @<annotation>
     When transaction commits
@@ -1043,8 +1002,7 @@ Feature: Concept Relation Type and Role Type
     When transaction commits
     When connection open read transaction for database: typedb
     Then relation(marriage) exists
-    Then relation(marriage) get roles contain:
-    | relation:role |
+    Then relation(marriage) get roles is empty
 
   Scenario: Relation type can be set to abstract while role types remain concrete
     When create relation type: marriage
@@ -1153,15 +1111,13 @@ Feature: Concept Relation Type and Role Type
     When connection open schema transaction for database: typedb
     When create relation type: rel1
     When relation(rel1) set supertype: rel01
-    Then relation(rel1) get roles contain:
-      | relation:role |
+    Then relation(rel1) get roles is empty
     Then relation(rel1) get declared roles is empty
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When create relation type: rel1
     When relation(rel1) set supertype: rel01
-    Then relation(rel1) get roles contain:
-      | relation:role |
+    Then relation(rel1) get roles is empty
     Then relation(rel1) get declared roles is empty
     When relation(rel1) set supertype: rel00
     Then relation(rel1) get roles contain:
@@ -1170,10 +1126,8 @@ Feature: Concept Relation Type and Role Type
     When transaction commits
     When connection open schema transaction for database: typedb
     When relation(rel00) delete role: role00
-    Then relation(rel00) get roles contain:
-      | relation:role |
-    Then relation(rel1) get roles contain:
-      | relation:role |
+    Then relation(rel00) get roles is empty
+    Then relation(rel1) get roles is empty
     Then relation(rel00) get roles do not contain:
       | rel00:role00 |
     Then relation(rel1) get roles do not contain:
@@ -1181,8 +1135,7 @@ Feature: Concept Relation Type and Role Type
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When relation(rel1) set supertype: rel01
-    Then relation(rel1) get roles contain:
-      | relation:role |
+    Then relation(rel1) get roles is empty
     Then relation(rel1) get roles do not contain:
       | rel00:role00 |
     Then transaction commits; fails
@@ -1644,7 +1597,7 @@ Feature: Concept Relation Type and Role Type
     When relation(marriage) create role: husband
     When relation(marriage) create role: wife
     Then relation(marriage) exists
-    Then relation(marriage) get supertype: relation
+    Then relation(marriage) get supertype does not exist
     Then relation(marriage) get role(husband) exists
     Then relation(marriage) get role(husband) get ordering: unordered
     When relation(marriage) get role(husband) set ordering: ordered
@@ -1653,19 +1606,19 @@ Feature: Concept Relation Type and Role Type
     Then relation(marriage) get role(wife) get ordering: unordered
     When relation(marriage) get role(wife) set ordering: ordered
     Then relation(marriage) get role(wife) get ordering: ordered
-    Then relation(marriage) get role(husband) get supertype: relation:role
-    Then relation(marriage) get role(wife) get supertype: relation:role
+    Then relation(marriage) get role(husband) get supertype does not exist
+    Then relation(marriage) get role(wife) get supertype does not exist
     Then relation(marriage) get roles contain:
       | marriage:husband |
       | marriage:wife    |
     When transaction commits
     When connection open read transaction for database: typedb
     Then relation(marriage) exists
-    Then relation(marriage) get supertype: relation
+    Then relation(marriage) get supertype does not exist
     Then relation(marriage) get role(husband) exists
     Then relation(marriage) get role(wife) exists
-    Then relation(marriage) get role(husband) get supertype: relation:role
-    Then relation(marriage) get role(wife) get supertype: relation:role
+    Then relation(marriage) get role(husband) get supertype does not exist
+    Then relation(marriage) get role(wife) get supertype does not exist
     Then relation(marriage) get roles contain:
       | marriage:husband |
       | marriage:wife    |
@@ -1747,13 +1700,13 @@ Feature: Concept Relation Type and Role Type
     When relation(parentship) delete role: parent
     Then relation(parentship) get roles do not contain:
       | parent |
-    Then relation(relation) get role(role) get subtypes do not contain:
+    Then get role types do not contain:
       | parentship:parent |
     When transaction commits
     When connection open schema transaction for database: typedb
     When delete relation type: parentship
     Then relation(parentship) does not exist
-    Then relation(relation) get role(role) get subtypes do not contain:
+    Then get role types do not contain:
       | parentship:parent |
       | parentship:child  |
     When relation(marriage) delete role: spouse
@@ -1767,7 +1720,7 @@ Feature: Concept Relation Type and Role Type
     When connection open schema transaction for database: typedb
     When delete relation type: marriage
     Then relation(marriage) does not exist
-    Then relation(relation) get role(role) get subtypes do not contain:
+    Then get role types do not contain:
       | parentship:parent |
       | parentship:child  |
       | marriage:husband  |
@@ -1776,7 +1729,7 @@ Feature: Concept Relation Type and Role Type
     When connection open read transaction for database: typedb
     Then relation(parentship) does not exist
     Then relation(marriage) does not exist
-    Then relation(relation) get role(role) get subtypes do not contain:
+    Then get role types do not contain:
       | parentship:parent |
       | parentship:child  |
       | marriage:husband  |
@@ -1903,24 +1856,23 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) get role(father) set override: parent
     Then relation(fathership) get supertype: parentship
     Then relation(fathership) get role(father) get supertype: parentship:parent
-    Then relation(fathership) get role(child) get supertype: relation:role
+    Then relation(fathership) get role(child) get supertype does not exist
     Then relation(fathership) get supertypes contain:
       | relation   |
       | parentship |
     Then relation(fathership) get role(father) get supertypes contain:
       | relation:role     |
       | parentship:parent |
-    Then relation(fathership) get role(child) get supertypes contain:
-      | relation:role |
+    Then relation(fathership) get role(child) get supertypes is empty
     Then relation(parentship) get subtypes contain:
       | fathership |
     Then relation(parentship) get role(parent) get subtypes contain:
       | fathership:father |
     Then relation(parentship) get role(child) get subtypes is empty
-    Then relation(relation) get subtypes contain:
+    Then get relation types contain:
       | parentship |
       | fathership |
-    Then relation(relation) get role(role) get subtypes contain:
+    Then get role types contain:
       | parentship:parent |
       | parentship:child  |
       | fathership:father |
@@ -1928,24 +1880,23 @@ Feature: Concept Relation Type and Role Type
     When connection open schema transaction for database: typedb
     Then relation(fathership) get supertype: parentship
     Then relation(fathership) get role(father) get supertype: parentship:parent
-    Then relation(fathership) get role(child) get supertype: relation:role
+    Then relation(fathership) get role(child) get supertype does not exist
     Then relation(fathership) get supertypes contain:
       | relation   |
       | parentship |
     Then relation(fathership) get role(father) get supertypes contain:
       | relation:role     |
       | parentship:parent |
-    Then relation(fathership) get role(child) get supertypes contain:
-      | relation:role |
+    Then relation(fathership) get role(child) get supertypes is empty
     Then relation(parentship) get subtypes contain:
       | fathership |
     Then relation(parentship) get role(parent) get subtypes contain:
       | fathership:father |
     Then relation(parentship) get role(child) get subtypes is empty
-    Then relation(relation) get subtypes contain:
+    Then get relation types contain:
       | parentship |
       | fathership |
-    Then relation(relation) get role(role) get subtypes contain:
+    Then get role types contain:
       | parentship:parent |
       | parentship:child  |
       | fathership:father |
@@ -1976,10 +1927,10 @@ Feature: Concept Relation Type and Role Type
       | fathership:father |
     Then relation(parentship) get role(child) get subtypes contain:
       | father-son:son |
-    Then relation(relation) get subtypes contain:
+    Then get relation types contain:
       | parentship |
       | fathership |
-    Then relation(relation) get role(role) get subtypes contain:
+    Then get role types contain:
       | parentship:parent |
       | parentship:child  |
       | fathership:father |
@@ -2001,15 +1952,13 @@ Feature: Concept Relation Type and Role Type
       | parentship:child |
     Then relation(fathership) get supertype: parentship
     Then relation(fathership) get role(father) get supertype: parentship:parent
-    Then relation(fathership) get role(child) get supertype: relation:role
+    Then relation(fathership) get role(child) get supertype does not exist
     Then relation(fathership) get supertypes contain:
       | relation   |
       | parentship |
     Then relation(fathership) get role(father) get supertypes contain:
-      | relation:role     |
       | parentship:parent |
-    Then relation(fathership) get role(child) get supertypes contain:
-      | relation:role |
+    Then relation(fathership) get role(child) get supertypes is empty
     Then relation(fathership) get subtypes contain:
       | father-son |
     Then relation(fathership) get role(father) get subtypes is empty
@@ -2019,10 +1968,10 @@ Feature: Concept Relation Type and Role Type
       | fathership:father |
     Then relation(parentship) get role(child) get subtypes contain:
       | father-son:son |
-    Then relation(relation) get subtypes contain:
+    Then get relation types contain:
       | parentship |
       | fathership |
-    Then relation(relation) get role(role) get subtypes contain:
+    Then get role types contain:
       | parentship:parent |
       | parentship:child  |
       | fathership:father |
@@ -2251,15 +2200,6 @@ Feature: Concept Relation Type and Role Type
 ########################
 # relates @annotations common
 ########################
-
-  Scenario Outline: Root role type cannot set or unset @<annotation>
-    Then relation(relation) get role(role) set annotation: @<annotation>; fails
-    Then relation(relation) get role(role) unset annotation: @<annotation-category>; fails
-    Examples:
-      | annotation | annotation-category |
-      | abstract   | abstract            |
-      | distinct   | distinct            |
-      | card(1..2) | card                |
 
   Scenario Outline: Role can unset not set @<annotation>
     When create relation type: marriage
@@ -2537,7 +2477,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(parent) get annotations contain: @<annotation>
     Then relation(fathership) get role(father) get annotations contain: @<annotation>
     When relation(fathership) get role(father) unset override
-    When relation(fathership) get role(father) get supertype: relation:role
+    When relation(fathership) get role(father) get supertype does not exist
     Then relation(parentship) get role(parent) get annotations contain: @<annotation>
     Then relation(fathership) get role(father) get annotations do not contain: @<annotation>
     When relation(fathership) get role(father) set override: parent
@@ -2551,7 +2491,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get role(father) get annotations contain: @<annotation>
     Then relation(fathership) get role(father) get declared annotations do not contain: @<annotation>
     When relation(fathership) get role(father) unset override
-    When relation(fathership) get role(father) get supertype: relation:role
+    When relation(fathership) get role(father) get supertype does not exist
     Then relation(parentship) get role(parent) get annotations contain: @<annotation>
     Then relation(fathership) get role(father) get annotations do not contain: @<annotation>
     When transaction commits
@@ -4011,8 +3951,8 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(parent) get supertype: connection:player
     Then relation(fathership) get role(father) get supertype: parentship:parent
     Then relation(fathership) get role(father) get cardinality: @card(1..1)
-    Then relation(fathership) get role(father-2) get supertype: relation:role
-    Then relation(parentship) get role(child) get supertype: relation:role
+    Then relation(fathership) get role(father-2) get supertype does not exist
+    Then relation(parentship) get role(child) get supertype does not exist
     Then relation(fathership) get role(father-child) get supertype: parentship:child
     Then relation(fathership) get role(father-child-2) get supertype: parentship:child
     When transaction commits
@@ -4034,7 +3974,7 @@ Feature: Concept Relation Type and Role Type
     When relation(parentship) get role(child) set override: player
     Then relation(parentship) get role(child) get supertype: connection:player
     Then relation(fathership) get role(father-child) get supertype: parentship:child
-    Then relation(fathership) get role(father-child-2) get supertype: relation:role
+    Then relation(fathership) get role(father-child-2) get supertype does not exist
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When relation(fathership) get role(father-child-2) unset override
@@ -4042,7 +3982,7 @@ Feature: Concept Relation Type and Role Type
     When relation(parentship) get role(child) set override: player
     Then relation(parentship) get role(child) get supertype: connection:player
     Then relation(fathership) get role(father-child) get supertype: parentship:child
-    Then relation(fathership) get role(father-child-2) get supertype: relation:role
+    Then relation(fathership) get role(father-child-2) get supertype does not exist
     When relation(connection) get role(player) set annotation: @card(2..6)
     When transaction commits
     When connection open schema transaction for database: typedb

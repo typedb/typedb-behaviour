@@ -16,12 +16,6 @@ Feature: Concept Entity Type
 # entity type common
 ########################
 
-  Scenario: Root entity type cannot be deleted
-    Then delete entity type: entity; fails
-
-  Scenario: Root entity type cannot be renamed
-    Then entity(entity) set label: superentity; fails
-
   Scenario: Cyclic entity type hierarchies are disallowed
     When create entity type: ent0
     When create entity type: ent1
@@ -34,11 +28,11 @@ Feature: Concept Entity Type
   Scenario: Entity types can be created
     When create entity type: person
     Then entity(person) exists
-    Then entity(person) get supertype: entity
+    Then entity(person) get supertype does not exist
     When transaction commits
     When connection open read transaction for database: typedb
     Then entity(person) exists
-    Then entity(person) get supertype: entity
+    Then entity(person) get supertype does not exist
 
   Scenario: Entity types cannot be redeclared
     When create entity type: person
@@ -56,24 +50,24 @@ Feature: Concept Entity Type
     Then entity(company) exists
     When delete entity type: company
     Then entity(company) does not exist
-    Then entity(entity) get subtypes do not contain:
+    Then get entity types do not contain:
       | company |
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) exists
     Then entity(company) does not exist
-    Then entity(entity) get subtypes do not contain:
+    Then get entity types do not contain:
       | company |
     When delete entity type: person
     Then entity(person) does not exist
-    Then entity(entity) get subtypes do not contain:
+    Then get entity types do not contain:
       | person  |
       | company |
     When transaction commits
     When connection open read transaction for database: typedb
     Then entity(person) does not exist
     Then entity(company) does not exist
-    Then entity(entity) get subtypes do not contain:
+    Then get entity types do not contain:
       | person  |
       | company |
 
@@ -121,18 +115,14 @@ Feature: Concept Entity Type
     Then entity(person) get supertype: animal
     Then entity(cat) get supertype: animal
     Then entity(man) get supertypes contain:
-      | entity |
       | person |
       | animal |
     Then entity(woman) get supertypes contain:
-      | entity |
       | person |
       | animal |
     Then entity(person) get supertypes contain:
-      | entity |
       | animal |
     Then entity(cat) get supertypes contain:
-      | entity |
       | animal |
     Then entity(man) get subtypes is empty
     Then entity(woman) get subtypes is empty
@@ -145,7 +135,7 @@ Feature: Concept Entity Type
       | person |
       | man    |
       | woman  |
-    Then entity(entity) get subtypes contain:
+    Then get entity types contain:
       | animal |
       | cat    |
       | person |
@@ -158,18 +148,14 @@ Feature: Concept Entity Type
     Then entity(person) get supertype: animal
     Then entity(cat) get supertype: animal
     Then entity(man) get supertypes contain:
-      | entity |
       | person |
       | animal |
     Then entity(woman) get supertypes contain:
-      | entity |
       | person |
       | animal |
     Then entity(person) get supertypes contain:
-      | entity |
       | animal |
     Then entity(cat) get supertypes contain:
-      | entity |
       | animal |
     Then entity(man) get subtypes is empty
     Then entity(woman) get subtypes is empty
@@ -182,7 +168,7 @@ Feature: Concept Entity Type
       | person |
       | man    |
       | woman  |
-    Then entity(entity) get subtypes contain:
+    Then get entity types contain:
       | animal |
       | cat    |
       | person |
@@ -198,22 +184,9 @@ Feature: Concept Entity Type
     When connection open schema transaction for database: typedb
     Then entity(person) set supertype: person; fails
 
-  Scenario: Entity types cannot change root's supertype
-    When create entity type: person
-    Then entity(entity) set supertype: person; fails
-    Then entity(entity) set supertype: entity; fails
-    Then entity(entity) get supertypes is empty
-
 ########################
 # @annotations common
 ########################
-
-  Scenario Outline: Root entity type cannot set or unset @<annotation>
-    Then entity(entity) set annotation: @<annotation>; fails
-    Then entity(entity) unset annotation: @<annotation-category>; fails
-    Examples:
-      | annotation | annotation-category |
-      | abstract   | abstract            |
 
   Scenario Outline: Entity type can set and unset @<annotation>
     When create entity type: person
@@ -343,7 +316,7 @@ Feature: Concept Entity Type
 #    When entity(player) set supertype: person
 #    Then entity(person) get annotations contain: @<annotation>
 #    Then entity(player) get annotations contain: @<annotation>
-#    When entity(player) set supertype: entity
+#    When entity(player) unset supertype
 #    Then entity(person) get annotations contain: @<annotation>
 #    Then entity(player) get annotations do not contain: @<annotation>
 #    When entity(player) set supertype: person
@@ -355,7 +328,7 @@ Feature: Concept Entity Type
 #    Then entity(person) get annotations contain: @<annotation>
 #    Then entity(player) get annotations contain: @<annotation>
 #    Then entity(player) get declared annotations do not contain: @<annotation>
-#    When entity(player) set supertype: entity
+#    When entity(player) unset supertype
 #    Then entity(person) get annotations contain: @<annotation>
 #    Then entity(player) get annotations do not contain: @<annotation>
 #    When transaction commits

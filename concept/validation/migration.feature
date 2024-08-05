@@ -159,13 +159,13 @@ Feature: Schema migration
     Given connection open schema transaction for database: typedb
 
     # Should break
-    Then entity(ent1) set supertype: entity; fails
+    Then entity(ent1) unset supertype; fails
     Given transaction closes
 
     Given connection open schema transaction for database: typedb
     Then entity(ent1) set owns: attr0
     Then entity(ent1) get owns(attr0) set annotation: @key
-    Then entity(ent1) set supertype: entity
+    Then entity(ent1) unset supertype
     Then transaction commits
 
 
@@ -185,12 +185,12 @@ Feature: Schema migration
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then entity(ent1) set supertype: entity; fails
+    Then entity(ent1) unset supertype; fails
     Given transaction closes
 
     Given connection open schema transaction for database: typedb
     Then entity(ent1) set plays: rel0:role0
-    Then entity(ent1) set supertype: entity
+    Then entity(ent1) unset supertype
     Then transaction commits
 
   Scenario: A type can be inserted into an existing hierarchy which has data in place

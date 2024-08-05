@@ -34,15 +34,6 @@ Feature: Concept Plays
 ########################
 # plays common
 ########################
-  Scenario Outline: Root types cannot play roles
-    When create relation type: marriage
-    When relation(marriage) create role: husband
-    Then <root-type>(<root-type>) set plays: marriage:husband; fails
-    Examples:
-      | root-type |
-      | entity    |
-      | relation  |
-
   Scenario: Entity types can play role types
     When create relation type: marriage
     When relation(marriage) create role: husband
@@ -1587,11 +1578,11 @@ Feature: Concept Plays
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name>) get plays(fathership:father) unset override
     When relation(fathership) get role(father) unset override
-    Then relation(fathership) get role(father) get supertype: relation:role
+    Then relation(fathership) get role(father) get supertype does not exist
     Then <root-type>(<subtype-name>) get plays overridden(fathership:father) does not exist
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(fathership) get role(father) get supertype: relation:role
+    Then relation(fathership) get role(father) get supertype does not exist
     Then <root-type>(<subtype-name>) get plays overridden(fathership:father) does not exist
     When create relation type: subfathership
     When relation(subfathership) create role: subfather
@@ -1599,28 +1590,28 @@ Feature: Concept Plays
     When relation(subfathership) get role(subfather) set override: parent
     When transaction commits
     When connection open schema transaction for database: typedb
-    When relation(fathership) set supertype: relation
+    When relation(fathership) unset supertype
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When relation(subfathership) get role(subfather) unset override
-    Then relation(subfathership) get role(subfather) get supertype: relation:role
+    Then relation(subfathership) get role(subfather) get supertype does not exist
     Then relation(subfathership) get roles contain:
       | subfathership:subfather |
       | fathership:father       |
       | parentship:parent       |
-    When relation(fathership) set supertype: relation
-    Then relation(subfathership) get role(subfather) get supertype: relation:role
+    When relation(fathership) unset supertype
+    Then relation(subfathership) get role(subfather) get supertype does not exist
     Then relation(subfathership) get roles contain:
       | subfathership:subfather |
       | fathership:father       |
-    Then relation(fathership) get supertype: relation
+    Then relation(fathership) get supertype does not exist
     When transaction commits
     When connection open read transaction for database: typedb
-    Then relation(subfathership) get role(subfather) get supertype: relation:role
+    Then relation(subfathership) get role(subfather) get supertype does not exist
     Then relation(subfathership) get roles contain:
       | subfathership:subfather |
       | fathership:father       |
-    Then relation(fathership) get supertype: relation
+    Then relation(fathership) get supertype does not exist
     Examples:
       | root-type | supertype-name | subtype-name |
       | entity    | person         | customer     |
@@ -1638,10 +1629,10 @@ Feature: Concept Plays
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
     When <root-type>(<subtype-name>) set plays: fathership:father
     When <root-type>(<subtype-name>) get plays(fathership:father) set override: parentship:parent
-    Then relation(fathership) set supertype: relation; fails
+    Then relation(fathership) unset supertype; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(fathership) set supertype: relation; fails
+    Then relation(fathership) unset supertype; fails
     Examples:
       | root-type | supertype-name | subtype-name |
       | entity    | person         | customer     |

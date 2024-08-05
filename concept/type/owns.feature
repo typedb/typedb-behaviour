@@ -40,14 +40,6 @@ Feature: Concept Owns
 ########################
 # owns common
 ########################
-  Scenario Outline: Root types cannot own attributes
-    When create attribute type: name
-    Then <root-type>(<root-type>) set owns: name; fails
-    Examples:
-      | root-type |
-      | entity    |
-      | relation  |
-
   Scenario Outline: Entity types can own and unset attributes
     When create attribute type: name
     When attribute(name) set value type: <value-type>
@@ -1898,16 +1890,16 @@ Feature: Concept Owns
     When <root-type>(<subtype-name>) get owns(surname) set override: name
     When transaction commits
     When connection open schema transaction for database: typedb
-    When attribute(surname) set supertype: attribute
+    When attribute(surname) unset supertype
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name>) get owns(surname) unset override
-    When attribute(surname) set supertype: attribute
-    Then attribute(surname) get supertype: attribute
+    When attribute(surname) unset supertype
+    Then attribute(surname) get supertype does not exist
     Then <root-type>(<subtype-name>) get owns overridden(surname) does not exist
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(surname) get supertype: attribute
+    Then attribute(surname) get supertype does not exist
     Then <root-type>(<subtype-name>) get owns overridden(surname) does not exist
     When create attribute type: subsurname
     When attribute(subsurname) set supertype: surname
@@ -1919,20 +1911,20 @@ Feature: Concept Owns
     When transaction commits
     When connection open schema transaction for database: typedb
     When attribute(subsurname) set annotation: @abstract
-    When attribute(subsurname) set supertype: attribute
+    When attribute(subsurname) unset supertype
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When attribute(surname) set supertype: attribute
+    When attribute(surname) unset supertype
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name>) get owns(subsurname) unset override
-    When attribute(surname) set supertype: attribute
-    Then attribute(surname) get supertype: attribute
+    When attribute(surname) unset supertype
+    Then attribute(surname) get supertype does not exist
     Then <root-type>(<subtype-name>) get owns overridden(subsurname) does not exist
     When attribute(subsurname) set annotation: @abstract
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(surname) get supertype: attribute
+    Then attribute(surname) get supertype does not exist
     Then <root-type>(<subtype-name>) get owns overridden(subsurname) does not exist
     Examples:
       | root-type | supertype-name | subtype-name | value-type  |
