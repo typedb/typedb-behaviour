@@ -355,3 +355,239 @@ Feature: Data validation
     Given transaction commits
     Given connection open schema transaction for database: typedb
     Then entity(ent1n) set supertype: ent0k; fails
+
+    # TODO: Repeat these "cannot be deleted" tests for subtypes instances with reverse "can be deleted". See abstract annotation!
+
+  Scenario: Entity types that have instances cannot be deleted
+    When create entity type: person
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $x = entity(person) create new instance
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then delete entity type: person; fails
+    When transaction closes
+    When connection open write transaction for database: typedb
+    When delete entities of type: person    When transaction commits
+    When connection open schema transaction for database: typedb
+    When delete entity type: person
+    Then entity(person) does not exist
+    Then transaction commits
+
+  Scenario: Relation types that have instances cannot be deleted
+    When create relation type: marriage
+    When relation(marriage) create role: wife
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $m = relation(marriage) create new instance
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then delete relation type: marriage; fails
+    When transaction closes
+    When connection open write transaction for database: typedb
+    When delete relations of type: marriage
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When delete relation type: marriage
+    Then relation(marriage) does not exist
+    Then transaction commits
+
+  Scenario: Attribute types that have instances cannot be deleted
+    When create attribute type: name
+    When attribute(name) set value type: string
+    When attribute(name) set annotation: @independent
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $x = attribute(name) put instance with value: alice
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then delete attribute type: name; fails
+    When transaction closes
+    When connection open write transaction for database: typedb
+    When delete attributes of type: name
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When delete attribute type: name
+    Then attribute(name) does not exist
+    Then transaction commits
+
+  Scenario: Role types that have instances cannot be deleted or unset
+    When create attribute type: id
+    When attribute(id) set value type: string
+    When create relation type: marriage
+    When relation(marriage) create role: wife
+    When relation(marriage) create role: husband
+    When relation(marriage) set owns: id
+    When create entity type: person
+    When entity(person) set plays: marriage:wife
+    When entity(person) set owns: id
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $m = relation(marriage) create new instance with key(id): "m"
+    When $p = entity(person) create new instance with key(id): "p"
+    When relation $m add player for role(wife): $p
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(marriage) delete role: wife; fails
+    Then entity(person) unset plays: marriage:wife; fails
+    Then relation(marriage) delete role: husband
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $m = relation(marriage) get instance with key(id): "m"
+    When $p = entity(person) get instance with key(id): "p"
+    When relation $m remove player for role(wife): $p
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(marriage) delete role: wife; fails
+    When entity(person) unset plays: marriage:wife
+    Then relation(marriage) delete role: wife
+    Then relation(marriage) get role(wife) does not exist
+    Then transaction commits
+
+  Scenario: Owns that have instances cannot be unset
+    When create entity type: person
+    When create attribute type: name
+    When attribute(name) set value type: string
+    When entity(person) set owns: name
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $p = entity(person) create new instance
+    When $n = attribute(name) put instance with value: "bob"
+    When entity $p set has: $n
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) unset owns: name; fails
+    When transaction closes
+    When connection open write transaction for database: typedb
+    When $p = entity(person) get instance with key: "bob"
+    When $n = attribute(name) get instance with value: "bob"
+    When entity $p unset has: $n
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(person) unset owns: name
+    Then entity(person) get owns do not contain:
+      | name |
+    When transaction commits
+
+  Scenario: Plays that have instances cannot be unset
+    When create attribute type: id
+    When attribute(id) set value type: string
+    When create relation type: marriage
+    When relation(marriage) create role: wife
+    When relation(marriage) set owns: id
+    When create entity type: person
+    When entity(person) set plays: marriage:wife
+    When entity(person) set owns: id
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $m = relation(marriage) create new instance with key(id): "m"
+    When $p = entity(person) create new instance with key(id): "p"
+    When relation $m add player for role(wife): $p
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) unset plays: marriage:wife; fails
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $m = relation(marriage) get instance with key(id): "m"
+    When $p = entity(person) get instance with key(id): "p"
+    When relation $m remove player for role(wife): $p
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(person) unset plays: marriage:wife
+    Then entity(person) get plays do not contain:
+      | marriage:wife |
+    Then transaction commits
+
+  Scenario: Entity types can be set to abstract when a subtype has instances
+    When create entity type: person
+    When create entity type: player
+    When entity(player) set supertype: person
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When entity(player) create new instance
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) set annotation: @abstract
+    Then transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get annotations contain: @abstract
+    Then entity(person) get declared annotations contain: @abstract
+    Then entity(player) get annotations do not contain: @abstract
+    Then entity(player) get declared annotations do not contain: @abstract
+    Then entity(player) get instances is not empty
+
+  Scenario: Relation types can be set to abstract when a subtype has instances
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When create relation type: fathership
+    When relation(fathership) create role: father
+    When relation(fathership) set supertype: parent
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When relation(fathership) create new instance
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) set annotation: @abstract
+    Then transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get annotations contain: @abstract
+    Then relation(parentship) get declared annotations contain: @abstract
+    Then relation(fathership) get annotations do not contain: @abstract
+    Then relation(fathership) get declared annotations do not contain: @abstract
+    Then relation(fathership) get instances is not empty
+
+  Scenario: Entity types can be unset as supertype and deleted when a subtype has instances
+    When create entity type: person
+    When create entity type: player
+    When entity(player) set supertype: person
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When entity(player) create new instance
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(player) unset supertype
+    Then delete entity type: person
+    Then transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) does not exist
+    Then entity(player) get instances is not empty
+
+  Scenario: Relation types can be unset as supertype and deleted when a subtype has instances
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When create relation type: fathership
+    When relation(fathership) create role: father
+    When relation(fathership) set supertype: parent
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When relation(fathership) create new instance
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    When relation(fathership) unset supertype
+    Then delete relation type: parentship
+    Then transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) does not exist
+    Then relation(fathership) get instances is not empty
+
+  Scenario: Attribute types can be unset as supertype and deleted when a subtype has instances
+    When create attribute type: literal
+    When attribute(literal) set annotation: @abstract
+    When attribute(literal) set value type: string
+    When create attribute type: name
+    When attribute(name) set supertype: literal
+    When attribute(name) set annotation: @independent
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When attribute(name) put instance with value: "bob"
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) unset supertype; fails
+    When attribute(name) set value type: string
+    Then attribute(name) unset supertype
+    Then delete attribute type: literal
+    Then transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(literal) does not exist
+    Then $a = attribute(name) get instance with value: "bob"
+    Then attribute $a exists

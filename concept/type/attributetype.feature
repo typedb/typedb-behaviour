@@ -162,17 +162,6 @@ Feature: Concept Attribute Type
     Then attribute(name) get supertype does not exist
     Then attribute(timestamp) get supertype does not exist
 
-    # TODO: Move to thing-feature or schema/data-validation?
-#  Scenario: Attribute types that have instances cannot be deleted
-#    When create attribute type: name
-#    When attribute(name) set value type: string
-#    When transaction commits
-#    When connection open write transaction for database: typedb
-#    When $x = attribute(name) put instance with value: alice
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then delete attribute type: name; fails
-
   Scenario: Attribute types can change labels
     When create attribute type: name
     When attribute(name) set value type: string

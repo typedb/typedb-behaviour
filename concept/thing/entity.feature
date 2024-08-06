@@ -204,3 +204,19 @@ Feature: Concept Entity
     When delete entity: $a
     Then entity $a is deleted: true
     When entity $a set has: $email; fails
+
+  Scenario: Cannot create instances of abstract entity type
+    When create entity type: person
+    When entity(person) set annotation: @abstract
+    When transaction commits
+    When connection open write transaction for database: typedb
+    Then entity(person) create new instance; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When entity(person) unset annotation: @abstract
+    When transaction commits
+    When connection open write transaction for database: typedb
+    Then entity(person) create new instance
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get instances is not empty

@@ -118,40 +118,6 @@ Feature: Concept Relation Type and Role Type
       | marriage:husband  |
       | marriage:wife     |
 
-     # TODO: Move to thing-feature or schema/data-validation?
-#  Scenario: Relation types that have instances cannot be deleted
-#    When create relation type: marriage
-#    When relation(marriage) create role: wife
-#    When create entity type: person
-#    When relation(parentship) get role(parent) set plays: marriage:wife
-#    When transaction commits
-#    When connection open write transaction for database: typedb
-#    When $m = relation(marriage) create new instance
-#    When $a = relation(parentship) get role(parent) create new instance
-#    When relation $m add player for role(wife): $a
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then delete relation type: marriage; fails
-#
-#  Scenario: Role types that have instances cannot be deleted
-#    When create relation type: marriage
-#    When relation(marriage) create role: wife
-#    When relation(marriage) create role: husband
-#    When create entity type: person
-#    When relation(parentship) get role(parent) set plays: marriage:wife
-#    When transaction commits
-#    When connection open write transaction for database: typedb
-#    When $m = relation(marriage) create new instance
-#    When $a = relation(parentship) get role(parent) create new instance
-#    When relation $m add player for role(wife): $a
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then relation(marriage) delete role: wife; fails
-#    When transaction closes
-#    When connection open schema transaction for database: typedb
-#    Then relation(marriage) delete role: husband
-#    Then transaction commits
-
   Scenario: Relation and role types can change names
     When create relation type: parentship
     When relation(parentship) create role: parent
@@ -408,18 +374,21 @@ Feature: Concept Relation Type and Role Type
     When relation(rel0c) set annotation: @abstract
     When relation(rel0c) create role: role0c
     When relation(rel0c) get role(role0c) set annotation: @abstract
-    Then relation(rel0c) get roles contain: role0c
+    Then relation(rel0c) get roles contain:
+      | rel0c:role0c |
     Then relation(rel0c) get declared roles contain: role0c
     When transaction commits
 
     When connection open schema transaction for database: typedb
-    Then relation(rel0c) get roles contain: role0c
+    Then relation(rel0c) get roles contain:
+      | rel0c:role0c |
     Then relation(rel0c) get declared roles contain: role0c
     When relation(rel0c) unset annotation: @abstract
     Then transaction commits; fails
 
     When connection open schema transaction for database: typedb
-    Then relation(rel0c) get roles contain: role0c
+    Then relation(rel0c) get roles contain:
+      | rel0c:role0c |
     Then relation(rel0c) get declared roles contain: role0c
     When relation(rel0c) unset annotation: @abstract
     When relation(rel0c) get role(role0c) unset annotation: @abstract
@@ -1378,7 +1347,7 @@ Feature: Concept Relation Type and Role Type
     When transaction commits
     When connection open schema transaction for database: typedb
     Then relation(fathership) get supertype: parentship
-    Then relation(connection) get annotations do not contain: @cascade
+    Then relation(fathership) get annotations do not contain: @cascade
     When relation(fathership) set supertype: connection
     When transaction commits
     When connection open read transaction for database: typedb

@@ -176,3 +176,19 @@ Feature: Concept Attribute
     When $x = attribute(ephemeral) get instance with value: 1337
     Then attribute $x does not exist
 
+  Scenario: Cannot create instances of abstract attribute type
+    When create attribute type: name
+    When attribute(name) set value type: string
+    When attribute(name) set annotation: @abstract
+    When transaction commits
+    When connection open write transaction for database: typedb
+    Then attribute(name) put instance with value: "bob"; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When attribute(name) unset annotation: @abstract
+    When transaction commits
+    When connection open write transaction for database: typedb
+    Then attribute(name) put instance with value: "bob"
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get instances is not empty

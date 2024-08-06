@@ -1546,7 +1546,6 @@ Feature: Concept Plays
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name-2>) unset supertype; fails
     Then <root-type>(<subtype-name>) unset supertype; fails
-    When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name-2>) get plays(fathership:father) unset override
     When <root-type>(<subtype-name>) unset supertype
     Then <root-type>(<subtype-name>) get supertype does not exist

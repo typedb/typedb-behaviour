@@ -71,16 +71,6 @@ Feature: Concept Entity Type
       | person  |
       | company |
 
-    # TODO: Move all "create new instance" into validation?
-#  Scenario: Entity types that have instances cannot be deleted
-#    When create entity type: person
-#    When transaction commits
-#    When connection open write transaction for database: typedb
-#    When $x = entity(person) create new instance
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then delete entity type: person; fails
-
   Scenario: Entity types can change labels
     When create entity type: person
     Then entity(person) get name: person
@@ -365,36 +355,6 @@ Feature: Concept Entity Type
 # @abstract
 ########################
 
-  # TODO: This test with new instances should be in entity.feature!
-#  Scenario: Entity types can be set to abstract
-#    When create entity type: person
-#    When entity(person) set annotation: @abstract
-#    When create entity type: company
-#    Then entity(person) get annotations contain: @abstract
-#    Then entity(person) get declared annotations contain: @abstract
-#    When transaction commits
-#    When connection open write transaction for database: typedb
-#    Then entity(person) create new instance; fails
-#    When connection open write transaction for database: typedb
-#    Then entity(company) get annotations do not contain: @abstract
-#    Then entity(company) get declared annotations do not contain: @abstract
-#    Then entity(person) get annotations contain: @abstract
-#    Then entity(person) get declared annotations contain: @abstract
-#    Then entity(person) create new instance; fails
-#    When transaction closes
-#    When connection open schema transaction for database: typedb
-#    Then entity(company) get annotations do not contain: @abstract
-#    Then entity(company) get declared annotations do not contain: @abstract
-#    When entity(company) set annotation: @abstract
-#    Then entity(company) get annotations contain: @abstract
-#    Then entity(company) get declared annotations contain: @abstract
-#    When transaction commits
-#    When connection open write transaction for database: typedb
-#    Then entity(company) create new instance; fails
-#    When connection open write transaction for database: typedb
-#    Then entity(company) get annotations contain: @abstract
-#    Then entity(company) create new instance; fails
-
   Scenario: Entity types can be set to abstract
     When create entity type: person
     When entity(person) set annotation: @abstract
@@ -414,24 +374,6 @@ Feature: Concept Entity Type
     When connection open read transaction for database: typedb
     Then entity(company) get annotations contain: @abstract
     Then entity(company) get declared annotations contain: @abstract
-
-    # TODO: Move to entity.feature or schema/data-validation?
-#  Scenario: Entity types can be set to abstract when a subtype has instances
-#    When create entity type: person
-#    When create entity type: player
-#    When entity(player) set supertype: person
-#    Then transaction commits
-#    When connection open write transaction for database: typedb
-#    When $m = entity(player) create new instance
-#    Then transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then entity(person) set annotation: @abstract
-#    Then transaction commits
-#    When connection open read transaction for database: typedb
-#    Then entity(person) get annotations contain: @abstract
-#    Then entity(person) get declared annotations contain: @abstract
-#    Then entity(player) get annotations do not contain: @abstract
-#    Then entity(player) get declared annotations do not contain: @abstract
 
 #  TODO: Make it only for typeql
 #  Scenario: Entity cannot set @abstract annotation with arguments

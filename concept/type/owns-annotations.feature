@@ -5098,8 +5098,6 @@ Feature: Concept Owns Annotations
     Then entity(customer) get owns(custom-attribute-2) set override: custom-attribute; fails
     When entity(customer) get owns(custom-attribute-2) set annotation: @regex("S")
     Then entity(customer) get owns(custom-attribute-2) set override: custom-attribute; fails
-    When entity(customer) get owns(custom-attribute-2) set annotation: @regex("\")
-    Then entity(customer) get owns(custom-attribute-2) set override: custom-attribute; fails
     When entity(customer) get owns(custom-attribute-2) set annotation: @regex(".*")
     Then entity(customer) get owns(custom-attribute-2) set override: custom-attribute; fails
     When entity(customer) get owns(custom-attribute-2) set annotation: @regex("\S+")
@@ -5787,8 +5785,7 @@ Feature: Concept Owns Annotations
     Then entity(ent1u) set supertype: ent0k; fails
     When transaction closes
     When connection open schema transaction for database: typedb
-    When entity(ent0n) get owns(attr0) set annotation: @key
-    Then transaction commits; fails
+    Then entity(ent0n) get owns(attr0) set annotation: @key; fails
 
   Scenario: Annotations on ownership redeclarations must be stricter than the previous declaration or will be flagged as redundant on commit.
     When create attribute type: attr0
@@ -5856,5 +5853,4 @@ Feature: Concept Owns Annotations
     When entity(ent1u) set supertype: ent0k
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When entity(ent0n) get owns(attr0) set annotation: @key
-    Then transaction commits; fails
+    Then entity(ent0n) get owns(attr0) set annotation: @key; fails

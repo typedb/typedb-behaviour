@@ -325,10 +325,8 @@ Feature: Concept Owns
     When entity(ent1) get owns(attr1) set override: attr0
     Then transaction commits
     When connection open schema transaction for database: typedb
-    When entity(ent00) unset owns: attr0
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When entity(ent1) set supertype: ent01; fails
+    Then entity(ent00) unset owns: attr0; fails
+    Then entity(ent1) set supertype: ent01; fails
 
   Scenario: A type may not declare ownership of an attribute that has been overridden by an inherited ownership
     When create attribute type: attr0

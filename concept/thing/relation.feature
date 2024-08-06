@@ -205,3 +205,28 @@ Feature: Concept Relation
     When delete relation: $m
     Then relation $m is deleted: true
     When relation $m add player for role(wife): $a; fails
+
+  Scenario: Cannot create instances of abstract relation type and role type
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) set annotation: @abstract
+    When relation(parentship) get role(parent) set annotation: @abstract
+    When create relation type: parentship-player
+    When relation(parentship-player) create role: roleplayer
+    When relation(parentship-player) set plays: parentship:parent
+    When transaction commits
+    When connection open write transaction for database: typedb
+    Then relation(parentship) create new instance; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) unset annotation: @abstract; fails
+    When relation(parentship) get role(parent) unset annotation: @abstract
+    When relation(parentship) unset annotation: @abstract
+    When transaction commits
+    When connection open write transaction for database: typedb
+    Then $r = relation(parentship) create new instance
+    Then $p = relation(parentship-player) create new instance
+    Then relation $r add player for role(parent): $p
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get instances is not empty
