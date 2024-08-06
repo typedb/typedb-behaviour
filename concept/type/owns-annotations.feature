@@ -6,7 +6,7 @@
 # the issue is resolved (see https://github.com/cucumber-rs/cucumber/issues/331).
 
 #noinspection CucumberUndefinedStep
-Feature: Concept Owns
+Feature: Concept Owns Annotations
 
   Background:
     Given typedb starts
@@ -27,7 +27,9 @@ Feature: Concept Owns
     Given create relation type: description
     Given relation(description) create role: object
     Given create relation type: registration
+    Given relation(registration) create role: registration-object
     Given create relation type: profile
+    Given relation(profile) create role: profile-object
     # Notice: supertypes are the same, but can be overridden for the second subtype inside the tests
     Given relation(registration) set supertype: description
     Given relation(profile) set supertype: description
@@ -5038,7 +5040,7 @@ Feature: Concept Owns
       | init-args | reset-args      |
       | "\S+"     | "\S"            |
       | "\S+"     | "S+"            |
-      | "\S+"     | "*"             |
+      | "\S+"     | ".*"            |
       | "\S+"     | "s"             |
       | "\S+"     | " some string " |
 
@@ -5158,6 +5160,7 @@ Feature: Concept Owns
     Then attribute(custom-attribute) set value type: custom-struct; fails
     When attribute(custom-attribute) set value type: string
     Then attribute(custom-attribute) get value type: string
+    Then transaction commits
 
 ########################
 # not compatible @annotations: @abstract, @cascade, @independent, @replace

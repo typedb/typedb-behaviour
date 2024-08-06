@@ -430,7 +430,7 @@ Feature: Concept Attribute Type
     Examples:
       | value-type | annotation   |
       # abstract is not inherited
-#      | decimal    | independent  | # Cannot unset supertype while inheriting independence from it, covered by special test
+      | decimal    | independent  |
       | string     | regex("\S+") |
       | string     | values("1")  |
       | long       | range(1..3)  |
@@ -578,9 +578,7 @@ Feature: Concept Attribute Type
     Then attribute(surname) get annotations do not contain: @abstract
     When transaction commits
     When connection open schema transaction for database: typedb
-    When attribute(name) unset value type
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    When attribute(name) unset value type; fails
     When attribute(surname) set value type: string
     When attribute(name) unset value type
     Then attribute(surname) get value type: string
@@ -593,8 +591,8 @@ Feature: Concept Attribute Type
     When connection open schema transaction for database: typedb
     Then attribute(name) get value type: string
     Then attribute(surname) get value type: string
-    When attribute(name) unset value type
-    Then transaction commits; fails
+    When attribute(name) unset value type; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     When attribute(surname) set annotation: @abstract
     Then attribute(surname) get value type: string
@@ -1111,9 +1109,9 @@ Feature: Concept Attribute Type
       | real-name |
       | name      |
     Then attribute(real-name) get supertypes contain:
-      | name      |
+      | name |
     Then attribute(username) get supertypes contain:
-      | name      |
+      | name |
     Then attribute(first-name) get subtypes is empty
     Then attribute(last-name) get subtypes is empty
     Then attribute(real-name) get subtypes contain:
@@ -1144,9 +1142,9 @@ Feature: Concept Attribute Type
       | real-name |
       | name      |
     Then attribute(real-name) get supertypes contain:
-      | name      |
+      | name |
     Then attribute(username) get supertypes contain:
-      | name      |
+      | name |
     Then attribute(first-name) get subtypes is empty
     Then attribute(last-name) get subtypes is empty
     Then attribute(real-name) get subtypes contain:
@@ -1348,6 +1346,16 @@ Feature: Concept Attribute Type
 #    When connection open read transaction for database: typedb
 #    Then attribute(name) get annotations is empty
 
+  Scenario: Attribute type cannot set @regex annotation with invalid value
+    When create attribute type: name
+    When attribute(name) set value type: string
+    Then attribute(name) set annotation: @regex(""); fails
+    Then attribute(name) set annotation: @regex("*"); fails
+    Then attribute(name) get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get annotations is empty
+
   Scenario Outline: Attribute type can reset @regex annotation
     When create attribute type: name
     When attribute(name) set value type: string
@@ -1381,7 +1389,7 @@ Feature: Concept Attribute Type
       | init-args | reset-args      |
       | "\S+"     | "\S"            |
       | "\S+"     | "S+"            |
-      | "\S+"     | "*"             |
+      | "\S+"     | ".*"            |
       | "\S+"     | "s"             |
       | "\S+"     | " some string " |
 
@@ -1624,7 +1632,7 @@ Feature: Concept Attribute Type
     Then attribute(first-name) get annotations do not contain: @independent
     Then attribute(first-name) get declared annotations do not contain: @independent
 
-  Scenario: Attribute type cannot change supertype while implicitly losing @independent annotation
+  Scenario: Attribute type can change supertype while implicitly losing @independent annotation if it doesn't have data
     When create attribute type: literal
     When create attribute type: word
     When create attribute type: name
@@ -1640,13 +1648,33 @@ Feature: Concept Attribute Type
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(name) get supertype: literal
-    Then attribute(name) set supertype: word; fails
-    When attribute(name) set annotation: @independent
     When attribute(name) set supertype: word
-    When attribute(name) unset annotation: @independent
+    Then attribute(name) get annotations do not contain: @independent
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(name) get supertype: word
+    Then attribute(name) get annotations do not contain: @independent
+
+  Scenario: Attribute type can unset supertype while implicitly losing @independent annotation if it doesn't have data
+    When create attribute type: literal
+    When create attribute type: name
+    When attribute(literal) set annotation: @abstract
+    When attribute(literal) set annotation: @independent
+    When attribute(name) set value type: string
+    When attribute(name) unset supertype
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get supertype does not exist
+    When attribute(name) set supertype: literal
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get supertype: literal
+    When attribute(name) unset supertype
+    Then attribute(name) get annotations do not contain: @independent
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get supertype does not exist
+    Then attribute(name) get annotations do not contain: @independent
 
 #  TODO: Make it only for typeql
 #  Scenario: Attribute type cannot set @independent annotation with arguments

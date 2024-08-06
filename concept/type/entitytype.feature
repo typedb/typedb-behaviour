@@ -548,7 +548,7 @@ Feature: Concept Entity Type
     Then entity(player) get annotations contain: @abstract
     Then entity(player) get supertype: person
 
-  Scenario: Entity type cannot set @abstract annotation while having non-abstract supertype
+  Scenario: Entity type cannot set @abstract annotation while having non-abstract supertype and cannot unset @abstract while having abstract subtype
     When create entity type: person
     Then entity(person) get annotations do not contain: @abstract
     When create entity type: player
@@ -569,15 +569,9 @@ Feature: Concept Entity Type
     When connection open schema transaction for database: typedb
     Then entity(person) get annotations contain: @abstract
     Then entity(player) get annotations contain: @abstract
-    When entity(person) unset annotation: @abstract
-    Then entity(person) get annotations do not contain: @abstract
-    Then entity(player) get annotations contain: @abstract
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    Then entity(person) get annotations contain: @abstract
-    Then entity(player) get annotations contain: @abstract
-    When entity(person) unset annotation: @abstract
+    Then entity(person) unset annotation: @abstract; fails
     When entity(player) unset annotation: @abstract
+    When entity(person) unset annotation: @abstract
     Then entity(person) get annotations do not contain: @abstract
     Then entity(player) get annotations do not contain: @abstract
     When transaction commits

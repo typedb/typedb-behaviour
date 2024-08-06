@@ -24,7 +24,9 @@ Feature: Concept Owns
     Given create relation type: description
     Given relation(description) create role: object
     Given create relation type: registration
+    Given relation(registration) create role: registration-object
     Given create relation type: profile
+    Given relation(profile) create role: profile-object
     # Notice: supertypes are the same, but can be overridden for the second subtype inside the tests
     Given relation(registration) set supertype: description
     Given relation(profile) set supertype: description
@@ -364,8 +366,8 @@ Feature: Concept Owns
     Then transaction commits
     When connection open schema transaction for database: typedb
     When entity(ent1) set owns: attr1
-    When entity(ent1) get owns(attr1) set override: attr0
-    Then transaction commits; fails
+    Then entity(ent1) get owns(attr1) set override: attr0; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     When create entity type: ent3
     When entity(ent3) set annotation: @abstract
@@ -387,8 +389,7 @@ Feature: Concept Owns
       | attr0 |
     Then entity(ent3) get owns do not contain:
       | attr0 |
-    When entity(ent3) set supertype: ent2
-    Then transaction commits; fails
+    Then entity(ent3) set supertype: ent2; fails
 
   Scenario: A type may only override an ownership it inherits with a subtype of the inherited attribute
     When create attribute type: attr0
@@ -1606,7 +1607,7 @@ Feature: Concept Owns
       | relation  | description    | registration | profile        | duration   |
       | relation  | description    | registration | profile        | double     |
 
-  Scenario Outline: <root-type> types cannot override declared owns with owns
+  Scenario Outline: <root-type> types cannot override declared owns by declared owns
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
@@ -1841,17 +1842,17 @@ Feature: Concept Owns
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
     When <root-type>(<subtype-name>) set owns: surname
     When <root-type>(<subtype-name>) get owns(surname) set override: name
-    Then <root-type>(<subtype-name>) set supertype: <root-type>; fails
+    Then <root-type>(<subtype-name>) unset supertype; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) set supertype: <root-type>; fails
+    Then <root-type>(<subtype-name>) unset supertype; fails
     When <root-type>(<subtype-name>) get owns(surname) unset override
-    When <root-type>(<subtype-name>) set supertype: <root-type>
-    Then <root-type>(<subtype-name>) get supertype: <root-type>
+    When <root-type>(<subtype-name>) unset supertype
+    Then <root-type>(<subtype-name>) get supertype does not exist
     Then <root-type>(<subtype-name>) get owns overridden(surname) does not exist
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get supertype: <root-type>
+    Then <root-type>(<subtype-name>) get supertype does not exist
     Then <root-type>(<subtype-name>) get owns overridden(surname) does not exist
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
     When <root-type>(<subtype-name>) unset owns: surname
@@ -1860,17 +1861,15 @@ Feature: Concept Owns
     When <root-type>(<subtype-name-2>) get owns(surname) set override: name
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name-2>) set supertype: <root-type>; fails
-    When <root-type>(<subtype-name>) set supertype: <root-type>
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then <root-type>(<subtype-name-2>) unset supertype; fails
+    Then <root-type>(<subtype-name>) unset supertype; fails
     When <root-type>(<subtype-name-2>) get owns(surname) unset override
-    When <root-type>(<subtype-name>) set supertype: <root-type>
-    Then <root-type>(<subtype-name>) get supertype: <root-type>
+    When <root-type>(<subtype-name>) unset supertype
+    Then <root-type>(<subtype-name>) get supertype does not exist
     Then <root-type>(<subtype-name-2>) get owns overridden(surname) does not exist
     When transaction commits
     When connection open read transaction for database: typedb
-    Then <root-type>(<subtype-name>) get supertype: <root-type>
+    Then <root-type>(<subtype-name>) get supertype does not exist
     Then <root-type>(<subtype-name-2>) get owns overridden(surname) does not exist
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | value-type  |
@@ -1914,14 +1913,15 @@ Feature: Concept Owns
     When attribute(subsurname) unset supertype
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When attribute(surname) unset supertype
-    Then transaction commits; fails
+    Then attribute(surname) unset supertype; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name>) get owns(subsurname) unset override
+    When attribute(surname) unset supertype; fails
+    When attribute(subsurname) set annotation: @abstract
     When attribute(surname) unset supertype
     Then attribute(surname) get supertype does not exist
     Then <root-type>(<subtype-name>) get owns overridden(subsurname) does not exist
-    When attribute(subsurname) set annotation: @abstract
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(surname) get supertype does not exist

@@ -368,3 +368,237 @@ Feature: Schema migration
     When entity(person) set annotation: @abstract
     When delete attribute type: gender
     Then transaction commits
+
+  Scenario: Attribute type cannot change supertype while implicitly losing @independent annotation with data
+    When create attribute type: literal
+    When create attribute type: word
+    When create attribute type: name
+    When attribute(literal) set annotation: @abstract
+    When attribute(literal) set annotation: @independent
+    When attribute(word) set annotation: @abstract
+    When attribute(name) set value type: string
+    When attribute(name) set supertype: word
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get supertype: word
+    When attribute(name) set supertype: literal
+    When transaction commits
+    Given connection open write transaction for database: typedb
+    Given attribute(name) put instance with value: "stopper"
+    Given transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get supertype: literal
+    Then attribute(name) set supertype: word; fails
+    When attribute(name) set annotation: @independent
+    When attribute(name) set supertype: word
+    When attribute(name) unset annotation: @independent
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get supertype: word
+    Then attribute(name) get annotations do not contain: @independent
+    When $name = attribute(name) get instance with value: "stopper"
+    Then attribute $name is deleted: true
+
+  Scenario: Attribute type cannot change supertype while implicitly losing @independent annotation with subtype data
+    When create attribute type: literal
+    When create attribute type: word
+    When create attribute type: name
+    When create attribute type: surname
+    When attribute(literal) set annotation: @abstract
+    When attribute(literal) set annotation: @independent
+    When attribute(word) set annotation: @abstract
+    When attribute(name) set value type: string
+    When attribute(name) set supertype: word
+    When attribute(name) set annotation: @abstract
+    When attribute(surname) set supertype: name
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get supertype: word
+    When attribute(name) set supertype: literal
+    When transaction commits
+    Given connection open write transaction for database: typedb
+    Given attribute(surname) put instance with value: "stopper"
+    Given transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get supertype: literal
+    Then attribute(name) set supertype: word; fails
+    When attribute(name) set annotation: @independent
+    When attribute(name) set supertype: word
+    When attribute(name) unset annotation: @independent
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get supertype: word
+    Then attribute(name) get annotations do not contain: @independent
+    When $surname = attribute(surname) get instance with value: "stopper"
+    Then attribute $surname is deleted: true
+
+  Scenario: Attribute type cannot unset supertype while implicitly losing @independent annotation with data
+    When create attribute type: literal
+    When create attribute type: name
+    When attribute(literal) set annotation: @abstract
+    When attribute(literal) set annotation: @independent
+    When attribute(name) set value type: string
+    When attribute(name) unset supertype
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get supertype does not exist
+    When attribute(name) set supertype: literal
+    When transaction commits
+    Given connection open write transaction for database: typedb
+    Given attribute(name) put instance with value: "stopper"
+    Given transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get supertype: literal
+    Then attribute(name) unset supertype; fails
+    When attribute(name) set annotation: @independent
+    When attribute(name) unset supertype
+    When attribute(name) unset annotation: @independent
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get supertype does not
+    Then attribute(name) get annotations do not contain: @independent
+    When $name = attribute(name) get instance with value: "stopper"
+    Then attribute $name is deleted: true
+
+  Scenario: Attribute type cannot unset supertype while implicitly losing @independent annotation with subtype data
+    When create attribute type: literal
+    When create attribute type: name
+    When create attribute type: surname
+    When attribute(literal) set annotation: @abstract
+    When attribute(literal) set annotation: @independent
+    When attribute(name) set value type: string
+    When attribute(name) unset supertype
+    When attribute(name) set annotation: @abstract
+    When attribute(surname) set supertype: name
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get supertype does not exist
+    When attribute(name) set supertype: literal
+    When transaction commits
+    Given connection open write transaction for database: typedb
+    Given attribute(surname) put instance with value: "stopper"
+    Given transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get supertype: literal
+    Then attribute(name) unset supertype; fails
+    When attribute(name) set annotation: @independent
+    When attribute(name) set supertype does not exist
+    When attribute(name) unset annotation: @independent
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get supertype does not exist
+    Then attribute(name) get annotations do not contain: @independent
+    When $surname = attribute(surname) get instance with value: "stopper"
+    Then attribute $surname is deleted: true
+
+  Scenario: Relation type cannot change supertype while implicitly acquiring @cascade annotation with data
+    When create relation type: parentship
+    When create relation type: connection
+    When create relation type: fathership
+    When relation(parentship) set annotation: @abstract
+    When relation(connection) set annotation: @abstract
+    When relation(connection) set annotation: @cascade
+    When relation(fathership) create role: father
+    When relation(fathership) set supertype: connection
+    When create entity type: person
+    When entity(person) set plays: fathership:father
+    When transaction commits
+    Given connection open write transaction for database: typedb
+    Given $deletable = entity(person) create new instance
+    Given $fathership = relation(fathership) create new instance
+    Given relation $fathership add player for role(father): $deletable
+    Given delete entity: $deletable
+    Given relation(fathership) get instances contain: $fathership
+    Given transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) set supertype: parentship; fails
+    When relation(fathership) set annotation: @cascade
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) unset annotation @cascade
+    Then relation(fathership) get annotations contain: @cascade
+    When transaction commits
+    Given connection open read transaction for database: typedb
+    Then relation(fathership) get instances is empty
+    Then transaction closes
+    When connection open schema transaction for database: typedb
+    When relation(fathership) set supertype: connection
+    Then relation(fathership) get annotations do not contain: @cascade
+    When transaction commits
+    Given connection open write transaction for database: typedb
+    Given $deletable = entity(person) create new instance
+    Given $fathership = relation(fathership) create new instance
+    Given relation $fathership add player for role(father): $deletable
+    Given relation(fathership) get instances contain: $fathership
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) set supertype: parentship; fails
+    When relation(fathership) set annotation: @cascade
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) unset annotation @cascade
+    Then relation(fathership) get annotations contain: @cascade
+    When transaction commits
+    Given connection open write transaction for database: typedb
+    Then relation(fathership) get instances is not empty
+    Given delete entities of type: person
+    Then relation(fathership) get instances is not empty
+    When transaction commits
+    Given connection open read transaction for database: typedb
+    Then relation(fathership) get annotations contain: @cascade
+    Then relation(fathership) get instances is empty
+
+  Scenario: Relation type cannot change supertype while implicitly acquiring @cascade annotation with subtype data
+    When create relation type: parentship
+    When create relation type: connection
+    When create relation type: fathership
+    When create relation type: single-fathership
+    When relation(parentship) set annotation: @abstract
+    When relation(connection) set annotation: @abstract
+    When relation(connection) set annotation: @cascade
+    When relation(fathership) set supertype: connection
+    When relation(single-fathership) set supertype: fathership
+    When relation(single-fathership) create role: father
+    When create entity type: person
+    When entity(person) set plays: single-fathership:father
+    When transaction commits
+    Given connection open write transaction for database: typedb
+    Given $deletable = entity(person) create new instance
+    Given $fathership = relation(single-fathership) create new instance
+    Given relation $fathership add player for role(father): $deletable
+    Given delete entity: $deletable
+    Given relation(single-fathership) get instances contain: $fathership
+    Given transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) set supertype: parentship; fails
+    When relation(fathership) set annotation: @cascade
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) unset annotation @cascade
+    Then relation(single-fathership) get annotations contain: @cascade
+    When transaction commits
+    Given connection open read transaction for database: typedb
+    Then relation(single-fathership) get instances is empty
+    Then transaction closes
+    When connection open schema transaction for database: typedb
+    When relation(fathership) set supertype: connection
+    Then relation(single-fathership) get annotations do not contain: @cascade
+    When transaction commits
+    Given connection open write transaction for database: typedb
+    Given $deletable = entity(person) create new instance
+    Given $fathership = relation(single-fathership) create new instance
+    Given relation $fathership add player for role(father): $deletable
+    Given relation(single-fathership) get instances contain: $fathership
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) set supertype: parentship; fails
+    When relation(fathership) set annotation: @cascade
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) unset annotation @cascade
+    Then relation(single-fathership) get annotations contain: @cascade
+    When transaction commits
+    Given connection open write transaction for database: typedb
+    Then relation(single-fathership) get instances is not empty
+    Given delete entities of type: person
+    Then relation(single-fathership) get instances is not empty
+    When transaction commits
+    Given connection open read transaction for database: typedb
+    Then relation(single-fathership) get annotations contain: @cascade
+    Then relation(single-fathership) get instances is empty

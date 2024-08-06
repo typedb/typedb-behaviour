@@ -21,7 +21,9 @@ Feature: Concept Plays
     Given create relation type: description
     Given relation(description) create role: object
     Given create relation type: registration
+    Given relation(registration) create role: registration-object
     Given create relation type: profile
+    Given relation(profile) create role: profile-object
     # Notice: supertypes are the same, but can be overridden for the second subtype inside the tests
     Given relation(registration) set supertype: description
     Given relation(registration) create role: object2
@@ -516,8 +518,7 @@ Feature: Concept Plays
     When entity(ent1) set plays: rel1:role1
     When transaction commits
     When connection open schema transaction for database: typedb
-    When entity(ent1) get plays(rel1:role1) set override: rel0:role0
-    Then transaction commits; fails
+    Then entity(ent1) get plays(rel1:role1) set override: rel0:role0; fails
 
   Scenario: A type may not be moved in a way that its plays declarations are hidden by an override
     When create relation type: rel0
@@ -1524,17 +1525,17 @@ Feature: Concept Plays
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
     When <root-type>(<subtype-name>) set plays: fathership:father
     When <root-type>(<subtype-name>) get plays(fathership:father) set override: parentship:parent
-    Then <root-type>(<subtype-name>) set supertype: <root-type>; fails
+    Then <root-type>(<subtype-name>) unset supertype; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) set supertype: <root-type>; fails
+    Then <root-type>(<subtype-name>) unset supertype; fails
     When <root-type>(<subtype-name>) get plays(fathership:father) unset override
-    When <root-type>(<subtype-name>) set supertype: <root-type>
-    Then <root-type>(<subtype-name>) get supertype: <root-type>
+    When <root-type>(<subtype-name>) unset supertype
+    Then <root-type>(<subtype-name>) get supertype does not exist
     Then <root-type>(<subtype-name>) get plays overridden(fathership:father) does not exist
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get supertype: <root-type>
+    Then <root-type>(<subtype-name>) get supertype does not exist
     Then <root-type>(<subtype-name>) get plays overridden(fathership:father) does not exist
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
     When <root-type>(<subtype-name>) unset plays: fathership:father
@@ -1543,17 +1544,16 @@ Feature: Concept Plays
     When <root-type>(<subtype-name-2>) get plays(fathership:father) set override: parentship:parent
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name-2>) set supertype: <root-type>; fails
-    When <root-type>(<subtype-name>) set supertype: <root-type>
-    Then transaction commits; fails
+    Then <root-type>(<subtype-name-2>) unset supertype; fails
+    Then <root-type>(<subtype-name>) unset supertype; fails
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name-2>) get plays(fathership:father) unset override
-    When <root-type>(<subtype-name>) set supertype: <root-type>
-    Then <root-type>(<subtype-name>) get supertype: <root-type>
+    When <root-type>(<subtype-name>) unset supertype
+    Then <root-type>(<subtype-name>) get supertype does not exist
     Then <root-type>(<subtype-name-2>) get plays overridden(fathership:father) does not exist
     When transaction commits
     When connection open read transaction for database: typedb
-    Then <root-type>(<subtype-name>) get supertype: <root-type>
+    Then <root-type>(<subtype-name>) get supertype does not exist
     Then <root-type>(<subtype-name-2>) get plays overridden(fathership:father) does not exist
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 |
@@ -1590,9 +1590,7 @@ Feature: Concept Plays
     When relation(subfathership) get role(subfather) set override: parent
     When transaction commits
     When connection open schema transaction for database: typedb
-    When relation(fathership) unset supertype
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then relation(fathership) unset supertype; fails
     When relation(subfathership) get role(subfather) unset override
     Then relation(subfathership) get role(subfather) get supertype does not exist
     Then relation(subfathership) get roles contain:
