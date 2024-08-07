@@ -3298,18 +3298,18 @@ Feature: Concept Owns Annotations
     When attribute(surname) set value type: long
     When attribute(name) set value type: long
     When attribute(surname) unset value type
-    When entity(customer) get owns(surname) set annotation: @range(1, 3)
+    When entity(customer) get owns(surname) set annotation: @range(1..3)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(customer) get owns(surname) get annotations contain: @range(1, 3)
+    Then entity(customer) get owns(surname) get annotations contain: @range(1..3)
     Then attribute(surname) get value type: long
-    When entity(person) get owns(name) set annotation: @range(1, 3)
+    When entity(person) get owns(name) set annotation: @range(1..3)
     When entity(customer) get owns(surname) unset annotation: @range
-    Then entity(customer) get owns(surname) get annotations contain: @range(1, 3)
+    Then entity(customer) get owns(surname) get annotations contain: @range(1..3)
     Then attribute(surname) set value type: string; fails
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(customer) get owns(surname) get annotations contain: @range(1, 3)
+    Then entity(customer) get owns(surname) get annotations contain: @range(1..3)
     Then attribute(surname) get value type: long
 
 ########################
@@ -4586,6 +4586,8 @@ Feature: Concept Owns Annotations
     When connection open read transaction for database: typedb
     Then entity(subscriber) get owns overridden(surname) get label: name
     Then entity(subscriber) get owns overridden(third-name) get label: name
+
+    # TODO: Add tests for set override breaking cardinalities
 
 ########################
 # @distinct

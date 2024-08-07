@@ -3685,6 +3685,8 @@ Feature: Concept Plays
     Then entity(subscriber) get plays overridden(fathership:father) get label: parentship:parent
     Then entity(subscriber) get plays overridden(fathership:father-2) get label: parentship:parent
 
+    # TODO: Add tests for set override breaking cardinalities
+
 ########################
 # not compatible @annotations: @distinct, @key, @unique, @subkey, @values, @range, @regex, @abstract, @cascade, @independent, @replace
 ########################

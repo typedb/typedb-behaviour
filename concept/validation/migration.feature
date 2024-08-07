@@ -602,3 +602,5 @@ Feature: Schema migration
     Given connection open read transaction for database: typedb
     Then relation(single-fathership) get annotations contain: @cascade
     Then relation(single-fathership) get instances is empty
+
+    # TODO: Cannot change value type if have instances of attributes

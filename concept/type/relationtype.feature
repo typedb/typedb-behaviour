@@ -3984,6 +3984,8 @@ Feature: Concept Relation Type and Role Type
     Then relation(mothership) get role(mother-child) get cardinality: @card(1..1)
     When transaction commits
 
+    # TODO: Add tests for set override breaking cardinalities
+
 ########################
 # relates not compatible @annotations: @key, @unique, @subkey, @values, @range, @abstract, @cascade, @independent, @replace, @regex
 ########################

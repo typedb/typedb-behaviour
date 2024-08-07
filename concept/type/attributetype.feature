@@ -774,7 +774,17 @@ Feature: Concept Attribute Type
     Then attribute(name) get value type: <value-type-1>
     Then attribute(first-name) get value type: <value-type-1>
     Then attribute(first-name) set value type: <value-type-2>; fails
-    Then attribute(name) set value type: <value-type-2>; fails
+    When attribute(name) set value type: <value-type-2>
+    Then attribute(name) get value type: <value-type-2>
+    Then attribute(first-name) get value type: <value-type-2>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When attribute(first-name) set value type: <value-type-2>
+    When attribute(name) unset value type
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get value type is none
+    Then attribute(first-name) get value type: <value-type-2>
     Examples:
       | value-type-1  | value-type-2    |
       | long          | string          |
@@ -859,11 +869,17 @@ Feature: Concept Attribute Type
     Then attribute(sub-first-name) get value type: <value-type-2>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) set value type: <value-type-1>; fails
-    Then attribute(name) get value type: <value-type-2>
-    Then attribute(first-name) get value type: <value-type-2>
-    Then attribute(second-name) get value type: <value-type-2>
-    Then attribute(sub-first-name) get value type: <value-type-2>
+    When attribute(name) set value type: <value-type-1>
+    Then attribute(name) get value type: <value-type-1>
+    Then attribute(first-name) get value type: <value-type-1>
+    Then attribute(second-name) get value type: <value-type-1>
+    Then attribute(sub-first-name) get value type: <value-type-1>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get value type: <value-type-1>
+    Then attribute(first-name) get value type: <value-type-1>
+    Then attribute(second-name) get value type: <value-type-1>
+    Then attribute(sub-first-name) get value type: <value-type-1>
     When attribute(name) unset value type
     Then attribute(name) get value type is none
     Then attribute(first-name) get value type is none
@@ -2603,18 +2619,18 @@ Feature: Concept Attribute Type
     When attribute(surname) set value type: long
     When attribute(name) set value type: long
     When attribute(surname) unset value type
-    When attribute(surname) set annotation: @range(1, 3)
+    When attribute(surname) set annotation: @range(1..3)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(surname) get annotations contain: @range(1, 3)
+    Then attribute(surname) get annotations contain: @range(1..3)
     Then attribute(surname) get value type: long
-    When attribute(name) set annotation: @range(1, 3)
+    When attribute(name) set annotation: @range(1..3)
     When attribute(surname) unset annotation: @range
-    Then attribute(surname) get annotations contain: @range(1, 3)
+    Then attribute(surname) get annotations contain: @range(1..3)
     Then attribute(surname) set value type: string; fails
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(surname) get annotations contain: @range(1, 3)
+    Then attribute(surname) get annotations contain: @range(1..3)
     Then attribute(surname) get value type: long
 
 ########################
