@@ -300,7 +300,6 @@ Feature: Concept Owns
     Then entity(ent1) set supertype: ent00
     Then transaction commits; fails
 
-
   Scenario: A type may only override an ownership it inherits
     When create attribute type: attr0
     When attribute(attr0) set value type: string
@@ -1545,7 +1544,7 @@ Feature: Concept Owns
       | entity    | person         | customer     | long       |
       | relation  | description    | registration | string     |
 
-  Scenario Outline: <root-type> types cannot redeclare inherited owns as owns
+  Scenario Outline: <root-type> types cannot redeclare ordered inherited owns as owns
     When create attribute type: email
     When attribute(email) set value type: <value-type>
     When create attribute type: name
@@ -1561,7 +1560,7 @@ Feature: Concept Owns
       | relation  | description    | registration | string     |
       | relation  | description    | registration | datetime   |
 
-  Scenario Outline: <root-type> types cannot redeclare inherited owns in multiple layers of inheritance
+  Scenario Outline: <root-type> types cannot redeclare ordered inherited owns in multiple layers of inheritance
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
@@ -1582,7 +1581,7 @@ Feature: Concept Owns
       | relation  | description    | registration | profile        | decimal       |
       | relation  | description    | registration | profile        | string        |
 
-  Scenario Outline: <root-type> types cannot redeclare overridden owns as owns
+  Scenario Outline: <root-type> types cannot redeclare ordered overridden owns as owns
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
@@ -1605,7 +1604,7 @@ Feature: Concept Owns
       | relation  | description    | registration | profile        | duration   |
       | relation  | description    | registration | profile        | double     |
 
-  Scenario Outline: <root-type> types cannot override declared owns by declared owns
+  Scenario Outline: <root-type> types cannot override ordered declared owns by declared owns
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
@@ -1625,7 +1624,7 @@ Feature: Concept Owns
       | entity    | person      | string     |
       | relation  | description | string     |
 
-  Scenario Outline: <root-type> types cannot override inherited owns other than with their subtypes
+  Scenario Outline: <root-type> types cannot override ordered inherited owns other than with their subtypes
     When create attribute type: username
     When attribute(username) set value type: <value-type>
     When create attribute type: reference
@@ -1693,12 +1692,16 @@ Feature: Concept Owns
     When attribute(surname) set value type: <value-type>
     When <root-type>(<supertype-name>) set owns: surname
     When <root-type>(<supertype-name>) get owns(surname) set ordering: ordered
+    Then attribute(name) set supertype: surname; fails
+    When <root-type>(<subtype-name>) get owns(name) unset override
     When attribute(name) set supertype: surname
     When <root-type>(<subtype-name>) get owns(name) set override: surname
     Then <root-type>(<subtype-name>) get owns overridden(name) get label: surname
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get owns overridden(name) get label: surname
+    Then attribute(name) set supertype: other; fails
+    When <root-type>(<subtype-name>) get owns(name) unset override
     When attribute(name) set supertype: other
     When <root-type>(<subtype-name>) get owns(name) set override: other
     Then <root-type>(<subtype-name>) get owns overridden(name) get label: other
@@ -1706,10 +1709,10 @@ Feature: Concept Owns
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get owns overridden(name) get label: other
     When <root-type>(<supertype-name>) get owns(surname) set ordering: unordered
+    Then attribute(name) set supertype: surname; fails
+    When <root-type>(<subtype-name>) get owns(name) unset override
     When attribute(name) set supertype: surname
     Then <root-type>(<subtype-name>) get owns(name) set override: surname; fails
-    Then <root-type>(<subtype-name>) get owns overridden(name) get label: other
-    When <root-type>(<subtype-name>) get owns(name) unset override
     When <root-type>(<subtype-name>) get owns(name) set ordering: unordered
     When <root-type>(<subtype-name>) get owns(name) set override: surname
     Then <root-type>(<subtype-name>) get owns overridden(name) get label: surname
@@ -1722,6 +1725,8 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get owns(name) get ordering: unordered
     Then <root-type>(<supertype-name>) get owns(other) get ordering: ordered
     Then <root-type>(<subtype-name>) get owns overridden(name) get label: surname
+    Then attribute(name) set supertype: other; fails
+    When <root-type>(<subtype-name>) get owns(name) unset override
     When attribute(name) set supertype: other
     Then <root-type>(<subtype-name>) get owns(name) set override: other; fails
     When <root-type>(<supertype-name>) get owns(other) set ordering: unordered
@@ -1887,9 +1892,7 @@ Feature: Concept Owns
     When <root-type>(<subtype-name>) get owns(surname) set override: name
     When transaction commits
     When connection open schema transaction for database: typedb
-    When attribute(surname) unset supertype
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    When attribute(surname) unset supertype; fails
     When <root-type>(<subtype-name>) get owns(surname) unset override
     When attribute(surname) unset supertype
     Then attribute(surname) get supertype does not exist
@@ -1908,9 +1911,7 @@ Feature: Concept Owns
     When transaction commits
     When connection open schema transaction for database: typedb
     When attribute(subsurname) set annotation: @abstract
-    When attribute(subsurname) unset supertype
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then attribute(subsurname) unset supertype; fails
     Then attribute(surname) unset supertype; fails
     When transaction closes
     When connection open schema transaction for database: typedb

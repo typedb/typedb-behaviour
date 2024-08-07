@@ -326,6 +326,13 @@ Feature: Data validation
     When entity(ent0u) get owns(attr0) set annotation: @key
     Then transaction commits
 
+    # TODO: Add a test for unique where we have a supertype without unique, subtype with unique, and multiple subsubtypes for it. Supertype can be duplicated
+    # with the subtypes or subsubtypes!
+
+  # TODO: Add test when data is invalid while we change any of the new annotations (regex, values, range, independent, ...)
+
+  # TODO: Add test how data is cleaned up when we set cascade / remove independent (maybe it's for migration.feature)
+
   Scenario: When the super-type of a type is changed, the data is consistent with the annotations on ownerships
     Given create attribute type: attr0
     Given attribute(attr0) set value type: string

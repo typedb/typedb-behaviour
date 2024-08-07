@@ -201,6 +201,26 @@ Feature: Concept Attribute Type
     Then attribute(name) set supertype: name; fails
     Then attribute(timestamp) set supertype: timestamp; fails
 
+  Scenario: The schema may not be modified in a way that an overridden owns attribute is no longer inherited by the overriding type
+    When create attribute type: attr0
+    When attribute(attr0) set annotation: @abstract
+    When create attribute type: attr1
+    When attribute(attr1) set supertype: attr0
+    When attribute(attr1) set value type: string
+    When create entity type: ent00
+    When entity(ent00) set annotation: @abstract
+    When entity(ent00) set owns: attr0
+    When create entity type: ent1
+    When entity(ent1) set supertype: ent00
+    When entity(ent1) set owns: attr1
+    When entity(ent1) get owns(attr1) set override: attr0
+    When create entity type: ent01
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(attr1) unset supertype; fails
+    Then entity(ent00) unset owns: attr0; fails
+    Then entity(ent1) set supertype: ent01; fails
+
 ########################
 # @annotations common
 ########################
@@ -804,46 +824,34 @@ Feature: Concept Attribute Type
     When attribute(first-name) set value type: <value-type-1>
     When transaction commits
     When connection open schema transaction for database: typedb
-    When attribute(name) set value type: <value-type-2>
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then attribute(name) set value type: <value-type-2>; fails
     When attribute(first-name) unset value type
     When attribute(second-name) set value type: <value-type-1>
     When transaction commits
     When connection open schema transaction for database: typedb
-    When attribute(name) set value type: <value-type-2>
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then attribute(name) set value type: <value-type-2>; fails
     When attribute(second-name) unset value type
     When attribute(sub-first-name) set value type: <value-type-1>
     When transaction commits
     When connection open schema transaction for database: typedb
-    When attribute(name) set value type: <value-type-2>
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then attribute(name) set value type: <value-type-2>; fails
     When attribute(sub-first-name) unset value type
     When transaction commits
     When connection open schema transaction for database: typedb
     When attribute(first-name) set value type: <value-type-1>
     When transaction commits
     When connection open schema transaction for database: typedb
-    When attribute(name) set value type: <value-type-2>
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then attribute(name) set value type: <value-type-2>; fails
     When attribute(first-name) unset value type
     When attribute(second-name) set value type: <value-type-1>
     When transaction commits
     When connection open schema transaction for database: typedb
-    When attribute(name) set value type: <value-type-2>
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then attribute(name) set value type: <value-type-2>; fails
     When attribute(second-name) unset value type
     When attribute(sub-first-name) set value type: <value-type-1>
     When transaction commits
     When connection open schema transaction for database: typedb
-    When attribute(name) set value type: <value-type-2>
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then attribute(name) set value type: <value-type-2>; fails
     When attribute(sub-first-name) unset value type
     Then attribute(name) set value type: <value-type-2>
     Then attribute(first-name) get value type: <value-type-2>
@@ -2090,6 +2098,36 @@ Feature: Concept Attribute Type
       | datetime-tz | 2024-06-04+0010, 2024-06-04 Asia/Kathmandu, 2024-06-05+0010, 2024-06-05+0100 | 2024-06-04 Europe/London |
       | duration    | P6M, P1Y, P1Y1M, P1Y2M, P1Y3M, P1Y4M, P1Y6M                                  | P3M, P1Y3M, P1Y4M, P1Y6M |
 
+  Scenario: Attribute type can change value type and @values through @values resetting
+    When create attribute type: name
+    When create attribute type: surname
+    When attribute(name) set annotation: @abstract
+    When attribute(surname) set supertype: name
+    When attribute(surname) set value type: string
+    When attribute(surname) set annotation: @values("only this string is allowed")
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) set value type: long; fails
+    Then attribute(surname) set value type: long; fails
+    When attribute(surname) unset annotation: @values
+    Then attribute(surname) unset value type; fails
+    When attribute(surname) set value type: long
+    When attribute(name) set value type: long
+    When attribute(surname) unset value type
+    When attribute(surname) set annotation: @values(1, 2, 3)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(surname) get annotations contain: @values(1, 2, 3)
+    Then attribute(surname) get value type: long
+    When attribute(name) set annotation: @values(1, 2, 3)
+    When attribute(surname) unset annotation: @values
+    Then attribute(surname) get annotations contain: @values(1, 2, 3)
+    Then attribute(surname) set value type: string; fails
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(surname) get annotations contain: @values(1, 2, 3)
+    Then attribute(surname) get value type: long
+
 ########################
 # @range
 ########################
@@ -2548,6 +2586,36 @@ Feature: Concept Attribute Type
       | date        | 2024-06-04..2024-06-05           | 2023-06-04..2024-06-04                    |
       | datetime    | 2024-06-04..2024-06-05           | 2023-06-04..2024-06-04T12:00:00           |
       | datetime-tz | 2024-06-04+0010..2024-06-05+0010 | 2024-06-04+0010..2024-06-05T01:00:00+0010 |
+
+  Scenario: Attribute type can change value type and @range through @range resetting
+    When create attribute type: name
+    When create attribute type: surname
+    When attribute(name) set annotation: @abstract
+    When attribute(surname) set supertype: name
+    When attribute(surname) set value type: string
+    When attribute(surname) set annotation: @range("a start".."finish line")
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) set value type: long; fails
+    Then attribute(surname) set value type: long; fails
+    When attribute(surname) unset annotation: @range
+    Then attribute(surname) unset value type; fails
+    When attribute(surname) set value type: long
+    When attribute(name) set value type: long
+    When attribute(surname) unset value type
+    When attribute(surname) set annotation: @range(1, 3)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(surname) get annotations contain: @range(1, 3)
+    Then attribute(surname) get value type: long
+    When attribute(name) set annotation: @range(1, 3)
+    When attribute(surname) unset annotation: @range
+    Then attribute(surname) get annotations contain: @range(1, 3)
+    Then attribute(surname) set value type: string; fails
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(surname) get annotations contain: @range(1, 3)
+    Then attribute(surname) get value type: long
 
 ########################
 # not compatible @annotations: @distinct, @key, @unique, @subkey, @card, @cascade, @replace

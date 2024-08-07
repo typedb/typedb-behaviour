@@ -2631,28 +2631,37 @@ Feature: Concept Owns Annotations
       | entity    | person         | customer     | subscriber     |
       | relation  | description    | registration | profile        |
 
-  Scenario: Attribute type can change value type and @values through full value type reset
+  Scenario: Owns can change attribute type value type and @values through @values resetting
     When create attribute type: name
     When create attribute type: surname
     When attribute(name) set annotation: @abstract
     When attribute(surname) set supertype: name
     When attribute(surname) set value type: string
-    When attribute(surname) set annotation: @values("only this string is allowed")
+    When entity(person) set owns: name
+    When entity(customer) set owns: surname
+    When entity(customer) get owns(surname) set override: name
+    When entity(customer) get owns(surname) set annotation: @values("only this string is allowed")
     When transaction commits
     When connection open schema transaction for database: typedb
-    When attribute(name) set value type: long
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then attribute(name) set value type: long; fails
     Then attribute(surname) set value type: long; fails
-    When transaction closes
-    When connection open schema transaction for database: typedb
+    When entity(customer) get owns(surname) unset annotation: @values
+    Then attribute(surname) unset value type; fails
+    When attribute(surname) set value type: long
     When attribute(name) set value type: long
-    When attribute(surname) unset annotation: @values
     When attribute(surname) unset value type
-    When attribute(surname) set annotation: @values(1, 2, 3)
+    When entity(customer) get owns(surname) set annotation: @values(1, 2, 3)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(surname) get annotations contain: @values(1, 2, 3)
+    Then entity(customer) get owns(surname) get annotations contain: @values(1, 2, 3)
+    Then attribute(surname) get value type: long
+    When entity(person) get owns(name) set annotation: @values(1, 2, 3)
+    When entity(customer) get owns(surname) unset annotation: @values
+    Then entity(customer) get owns(surname) get annotations contain: @values(1, 2, 3)
+    Then attribute(surname) set value type: string; fails
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(customer) get owns(surname) get annotations contain: @values(1, 2, 3)
     Then attribute(surname) get value type: long
 
 ########################
@@ -3270,28 +3279,37 @@ Feature: Concept Owns Annotations
       | entity    | person         | customer     | subscriber     |
       | relation  | description    | registration | profile        |
 
-  Scenario: Attribute type can change value type and @range through full value type reset
+  Scenario: Owns can change attribute type value type and @range through @range resetting
     When create attribute type: name
     When create attribute type: surname
     When attribute(name) set annotation: @abstract
     When attribute(surname) set supertype: name
     When attribute(surname) set value type: string
-    When attribute(surname) set annotation: @range("a start".."finish line")
+    When entity(person) set owns: name
+    When entity(customer) set owns: surname
+    When entity(customer) get owns(surname) set override: name
+    When entity(customer) get owns(surname) set annotation: @range("a start".."finish line")
     When transaction commits
     When connection open schema transaction for database: typedb
-    When attribute(name) set value type: long
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then attribute(name) set value type: long; fails
     Then attribute(surname) set value type: long; fails
-    When transaction closes
-    When connection open schema transaction for database: typedb
+    When entity(customer) get owns(surname) unset annotation: @range
+    Then attribute(surname) unset value type; fails
+    When attribute(surname) set value type: long
     When attribute(name) set value type: long
-    When attribute(surname) unset annotation: @range
     When attribute(surname) unset value type
-    When attribute(surname) set annotation: @range(1..3)
+    When entity(customer) get owns(surname) set annotation: @range(1, 3)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(surname) get annotations contain: @range(1..3)
+    Then entity(customer) get owns(surname) get annotations contain: @range(1, 3)
+    Then attribute(surname) get value type: long
+    When entity(person) get owns(name) set annotation: @range(1, 3)
+    When entity(customer) get owns(surname) unset annotation: @range
+    Then entity(customer) get owns(surname) get annotations contain: @range(1, 3)
+    Then attribute(surname) set value type: string; fails
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(customer) get owns(surname) get annotations contain: @range(1, 3)
     Then attribute(surname) get value type: long
 
 ########################
@@ -4056,12 +4074,8 @@ Feature: Concept Owns Annotations
     Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0..2)
     Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(1..2)
     Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(2..2)
-    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(0..1)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(2..2)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) set annotation: @card(0..1); fails
+    Then <root-type>(<supertype-name>) get owns(name) set annotation: @card(2..2); fails
     When <root-type>(<supertype-name>) get owns(name) set annotation: @card(0..)
     When transaction commits
     When connection open schema transaction for database: typedb
@@ -4074,15 +4088,9 @@ Feature: Concept Owns Annotations
     Then <root-type>(<supertype-name>) get owns(name) get cardinality: @card(0..)
     Then <root-type>(<subtype-name>) get owns(overridden-name) get cardinality: @card(1..2)
     Then <root-type>(<subtype-name-2>) get owns(overridden-name-2) get cardinality: @card(4..5)
-    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(0..4)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(3..3)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(2..5)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) set annotation: @card(0..4); fails
+    Then <root-type>(<supertype-name>) get owns(name) set annotation: @card(3..3); fails
+    Then <root-type>(<supertype-name>) get owns(name) set annotation: @card(2..5); fails
     When <root-type>(<supertype-name>) get owns(name) unset annotation: @card
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
@@ -4112,7 +4120,6 @@ Feature: Concept Owns Annotations
       | root-type | supertype-name | subtype-name | subtype-name-2 | value-type |
       | entity    | person         | customer     | subscriber     | decimal    |
       | relation  | description    | registration | profile        | double     |
-
 
   Scenario Outline: Owns can have multiple overriding owns with narrowing cardinalities and correct min sum
     When create attribute type: attribute-to-disturb
@@ -4191,11 +4198,12 @@ Feature: Concept Owns Annotations
     Then <root-type>(<subtype-name>) get owns(name) get cardinality: @card(0..1)
     Then <root-type>(<subtype-name>) get owns(text) get cardinality: @card(1..1)
     Then <root-type>(<subtype-name>) get owns(cardinality-destroyer) get cardinality: @card(2..3)
-    When <root-type>(<supertype-name>) get owns(literal) set annotation: @card(0..1)
-    Then <root-type>(<supertype-name>) get owns(literal) get cardinality: @card(0..1)
+    Then <root-type>(<supertype-name>) get owns(literal) set annotation: @card(0..1); fails
     When <root-type>(<subtype-name>) get owns(name) unset annotation: @card
     When <root-type>(<subtype-name>) get owns(text) unset annotation: @card
     When <root-type>(<subtype-name>) get owns(cardinality-destroyer) unset annotation: @card
+    When <root-type>(<supertype-name>) get owns(literal) set annotation: @card(0..1)
+    Then <root-type>(<supertype-name>) get owns(literal) get cardinality: @card(0..1)
     Then <root-type>(<subtype-name>) get owns(name) get cardinality: @card(0..1)
     Then <root-type>(<subtype-name>) get owns(text) get cardinality: @card(0..1)
     Then <root-type>(<subtype-name>) get owns(cardinality-destroyer) get cardinality: @card(0..1)
@@ -5787,7 +5795,7 @@ Feature: Concept Owns Annotations
     When connection open schema transaction for database: typedb
     Then entity(ent0n) get owns(attr0) set annotation: @key; fails
 
-  Scenario: Annotations on ownership redeclarations must be stricter than the previous declaration or will be flagged as redundant on commit.
+  Scenario: Annotations on ownership redeclarations must be stricter than the previous declaration or will be flagged as redundant on commit
     When create attribute type: attr0
     When attribute(attr0) set value type: string
     When create entity type: ent0n

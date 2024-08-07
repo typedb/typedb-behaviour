@@ -176,14 +176,8 @@ Feature: Concept Relation Type and Role Type
     Then transaction commits
     When connection open schema transaction for database: typedb
     When relation(rel1) create role: role00; fails
-    When transaction closes
-    When connection open schema transaction for database: typedb
-    When relation(rel00) create role: role01
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    When relation(rel00) create role: role01; fails
     When relation(rel1) set supertype: rel01; fails
-    When transaction closes
-    When connection open schema transaction for database: typedb
     When create relation type: rel2
     When relation(rel2) set annotation: @abstract
     When relation(rel2) create role: role2
@@ -194,9 +188,7 @@ Feature: Concept Relation Type and Role Type
     When relation(rel02) set supertype: rel2
     When transaction commits
     When connection open schema transaction for database: typedb
-    When relation(rel2) set supertype: rel01
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then relation(rel2) set supertype: rel01; fails
     When create relation type: rel3
     When relation(rel3) set annotation: @abstract
     When create relation type: rel4
@@ -204,14 +196,8 @@ Feature: Concept Relation Type and Role Type
     When relation(rel4) create role: role02
     When relation(rel4) set supertype: rel3
     Then relation(rel4) set supertype: rel02; fails
-    When relation(rel3) set supertype: rel02
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When create relation type: rel3
-    When relation(rel3) set annotation: @abstract
-    When create relation type: rel4
-    When relation(rel4) set annotation: @abstract
-    When relation(rel4) create role: role02
+    Then relation(rel3) set supertype: rel02; fails
+    When relation(rel4) unset supertype
     When relation(rel3) set supertype: rel02
     Then relation(rel4) set supertype: rel3; fails
 
@@ -376,22 +362,18 @@ Feature: Concept Relation Type and Role Type
     When relation(rel0c) get role(role0c) set annotation: @abstract
     Then relation(rel0c) get roles contain:
       | rel0c:role0c |
-    Then relation(rel0c) get declared roles contain: role0c
+    Then relation(rel0c) get declared roles contain:
+      | rel0c:role0c |
     When transaction commits
 
     When connection open schema transaction for database: typedb
     Then relation(rel0c) get roles contain:
       | rel0c:role0c |
-    Then relation(rel0c) get declared roles contain: role0c
-    When relation(rel0c) unset annotation: @abstract
-    Then transaction commits; fails
-
-    When connection open schema transaction for database: typedb
-    Then relation(rel0c) get roles contain:
+    Then relation(rel0c) get declared roles contain:
       | rel0c:role0c |
-    Then relation(rel0c) get declared roles contain: role0c
-    When relation(rel0c) unset annotation: @abstract
+    Then relation(rel0c) unset annotation: @abstract; fails
     When relation(rel0c) get role(role0c) unset annotation: @abstract
+    When relation(rel0c) unset annotation: @abstract
     Then transaction commits
 
   Scenario: Relation types cannot subtype itself
@@ -964,7 +946,7 @@ Feature: Concept Relation Type and Role Type
 # @abstract
 ########################
 
-  Scenario: Abstract relation and cannot be created without roles
+  Scenario: Abstract relation cannot be created without roles
     When create relation type: marriage
     When relation(marriage) set annotation: @abstract
     When transaction commits; fails
@@ -1073,18 +1055,13 @@ Feature: Concept Relation Type and Role Type
     When relation(rel00) set annotation: @abstract
     When relation(rel00) create role: role00
     When create relation type: rel01
-    When relation(rel01) set annotation: @abstract
+    When relation(rel01) create role: role01
     When transaction commits
     When connection open schema transaction for database: typedb
     When create relation type: rel1
     When relation(rel1) set supertype: rel01
-    Then relation(rel1) get roles is empty
-    Then relation(rel1) get declared roles is empty
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When create relation type: rel1
-    When relation(rel1) set supertype: rel01
-    Then relation(rel1) get roles is empty
+    Then relation(rel1) get roles contain:
+      | rel01:role01 |
     Then relation(rel1) get declared roles is empty
     When relation(rel1) set supertype: rel00
     Then relation(rel1) get roles contain:
@@ -1101,10 +1078,8 @@ Feature: Concept Relation Type and Role Type
       | rel00:role00 |
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When relation(rel1) set supertype: rel01
+    When relation(rel1) unset supertype
     Then relation(rel1) get roles is empty
-    Then relation(rel1) get roles do not contain:
-      | rel00:role00 |
     Then transaction commits; fails
 
   Scenario: Relation type can reset @abstract annotation
@@ -3538,12 +3513,8 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(parent) get cardinality: @card(0..2)
     Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1..2)
     Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(2..2)
-    When relation(parentship) get role(parent) set annotation: @card(0..1)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When relation(parentship) get role(parent) set annotation: @card(2..2)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) set annotation: @card(0..1); fails
+    Then relation(parentship) get role(parent) set annotation: @card(2..2); fails
     When relation(parentship) get role(parent) set annotation: @card(0..)
     When transaction commits
     When connection open schema transaction for database: typedb
@@ -3556,15 +3527,9 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(parent) get cardinality: @card(0..)
     Then relation(overridden-parentship) get role(overridden-parent) get cardinality: @card(1..2)
     Then relation(overridden-parentship-2) get role(overridden-parent-2) get cardinality: @card(4..5)
-    When relation(parentship) get role(parent) set annotation: @card(0..4)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When relation(parentship) get role(parent) set annotation: @card(3..3)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When relation(parentship) get role(parent) set annotation: @card(2..5)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) set annotation: @card(0..4); fails
+    Then relation(parentship) get role(parent) set annotation: @card(3..3); fails
+    Then relation(parentship) get role(parent) set annotation: @card(2..5); fails
     When relation(parentship) get role(parent) unset annotation: @card
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
@@ -3657,11 +3622,12 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(parent) get cardinality: @card(0..1)
     Then relation(parentship) get role(child) get cardinality: @card(1..1)
     Then relation(parentship) get role(cardinality-destroyer) get cardinality: @card(2..3)
-    When relation(connection) get role(player) set annotation: @card(0..1)
-    Then relation(connection) get role(player) get cardinality: @card(0..1)
+    Then relation(connection) get role(player) set annotation: @card(0..1); fails
     When relation(parentship) get role(parent) unset annotation: @card
     When relation(parentship) get role(child) unset annotation: @card
     When relation(parentship) get role(cardinality-destroyer) unset annotation: @card
+    When relation(connection) get role(player) set annotation: @card(0..1)
+    Then relation(connection) get role(player) get cardinality: @card(0..1)
     Then relation(parentship) get role(parent) get cardinality: @card(0..1)
     Then relation(parentship) get role(child) get cardinality: @card(0..1)
     Then relation(parentship) get role(cardinality-destroyer) get cardinality: @card(0..1)
