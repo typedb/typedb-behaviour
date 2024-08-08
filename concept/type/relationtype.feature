@@ -1717,6 +1717,7 @@ Feature: Concept Relation Type and Role Type
 #    Then relation(parentship) get role(parent) set ordering: ordered; fails
 #    Then relation(parentship) get role(child) set ordering: unordered; fails
 #    Then relation(parentship) get role(child) set ordering: ordered; fails
+#    When transaction closes
 #    When connection open write transaction for database: typedb
 #    When $m = relation(parentship) get instance with key(id): 1
 #    When $a = relation(parentship) get role(parent) get instance with key(id): 1
@@ -2084,6 +2085,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(connection) get role(part) get ordering: ordered
     Then relation(parentship) get role(parent) get ordering: ordered
     Then relation(fathership) get role(father) get ordering: ordered
+    When transaction closes
     When connection open schema transaction for database: typedb
     When relation(connection) get role(part) set ordering: unordered
     Then transaction commits; fails
@@ -3930,7 +3932,49 @@ Feature: Concept Relation Type and Role Type
     Then relation(mothership) get role(mother-child) get cardinality: @card(1..1)
     When transaction commits
 
-    # TODO: Add tests for set override breaking cardinalities
+  Scenario: Relates set and unset override revalidate cardinality between affected siblings
+    When create relation type: connection
+    When relation(connection) create role: player
+    Then relation(connection) get role(player) get cardinality: @card(1..1)
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: child
+    Then relation(parentship) get role(parent) get cardinality: @card(1..1)
+    Then relation(parentship) get role(child) get cardinality: @card(1..1)
+    When create relation type: fathership
+    When relation(fathership) create role: father
+    When relation(fathership) create role: father-2
+    Then relation(fathership) get role(father) get cardinality: @card(1..1)
+    Then relation(fathership) get role(father-2) get cardinality: @card(1..1)
+    When relation(parentship) get role(parent) set override: player
+    Then relation(parentship) get role(child) set override: player; fails
+    Then relation(connection) get role(player) set annotation: @card(1..2)
+    When relation(parentship) get role(child) set override: player
+    When relation(fathership) get role(father) set override: parent
+    When relation(fathership) get role(father-2) set override: parent
+    Then relation(fathership) get role(father) get cardinality: @card(1..2)
+    Then relation(fathership) get role(father-2) get cardinality: @card(1..2)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When relation(connection) create role: bad-player
+    Then relation(connection) get role(bad-player) get cardinality: @card(1..1)
+    Then relation(parentship) get role(parent) set override: bad-player; fails
+    When relation(connection) get role(bad-player) set annotation: @card(1..1)
+    Then relation(connection) get role(bad-player) get cardinality: @card(1..1)
+    Then relation(parentship) get role(parent) set override: bad-player; fails
+    When relation(connection) get role(bad-player) set annotation: @card(0..1)
+    Then relation(connection) get role(bad-player) get cardinality: @card(0..1)
+    When relation(parentship) get role(parent) set override: bad-player
+    Then relation(fathership) get role(father) get cardinality: @card(0..1)
+    Then relation(fathership) get role(father-2) get cardinality: @card(0..1)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) unset override; fails
+    When relation(fathership) delete role: father-2
+    When relation(parentship) get role(parent) unset override
+    Then relation(fathership) get role(father) get cardinality: @card(1..1)
+    Then transaction commits
+
 
 ########################
 # relates not compatible @annotations: @key, @unique, @subkey, @values, @range, @abstract, @cascade, @independent, @replace, @regex

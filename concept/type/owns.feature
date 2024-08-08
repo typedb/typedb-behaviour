@@ -1929,3 +1929,57 @@ Feature: Concept Owns
       | root-type | supertype-name | subtype-name | value-type  |
       | entity    | person         | customer     | datetime-tz |
       | relation  | description    | registration | double      |
+
+  Scenario Outline: Attribute type can change supertype only if <root-type>'s owns overrides are in the inheritance tree of supertype
+    When create attribute type: literal
+    When attribute(literal) set annotation: @abstract
+    When attribute(literal) set value type: <value-type>
+    When create attribute type: text
+    When attribute(text) set annotation: @abstract
+    When attribute(text) set supertype: literal
+    When create attribute type: latin-text
+    When attribute(latin-text) set annotation: @abstract
+    When attribute(latin-text) set supertype: text
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set supertype: text
+    When create attribute type: surname
+    When attribute(surname) set annotation: @abstract
+    When attribute(surname) set supertype: name
+    When create attribute type: matronymic-surname
+    When attribute(matronymic-surname) set annotation: @abstract
+    When attribute(matronymic-surname) set supertype: surname
+    When <root-type>(<subtype-name>) set supertype: <supertype-name>
+    When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
+    When <root-type>(<supertype-name>) set owns: literal
+    When <root-type>(<supertype-name>) set owns: text
+    When <root-type>(<supertype-name>) set owns: latin-text
+    When <root-type>(<subtype-name>) set owns: name
+    When <root-type>(<subtype-name-2>) set owns: surname
+    When <root-type>(<subtype-name-2>) set owns: matronymic-surname
+    When <root-type>(<subtype-name>) get owns(name) set override: text
+    When <root-type>(<subtype-name-2>) get owns(surname) set override: literal
+    When <root-type>(<subtype-name-2>) get owns(matronymic-surname) set override: name
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) set supertype: literal; fails
+    When create attribute type: another-literal
+    When attribute(another-literal) set annotation: @abstract
+    When attribute(another-literal) set value type: <value-type>
+    Then attribute(name) set supertype: another-literal; fails
+    When <root-type>(<supertype-name>) set owns: another-literal
+    Then attribute(name) set supertype: another-literal; fails
+    When attribute(name) set supertype: latin-text
+    Then <root-type>(<subtype-name>) get owns overridden(name) get label: text
+    Then <root-type>(<subtype-name-2>) get owns overridden(surname) get label: literal
+    Then <root-type>(<subtype-name-2>) get owns overridden(matronymic-surname) get label: name
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get supertype: latin-text
+    Then <root-type>(<subtype-name>) get owns overridden(name) get label: text
+    Then <root-type>(<subtype-name-2>) get owns overridden(surname) get label: literal
+    Then <root-type>(<subtype-name-2>) get owns overridden(matronymic-surname) get label: name
+    Examples:
+      | root-type | supertype-name | subtype-name | subtype-name-2 | value-type  |
+      | entity    | person         | customer     | subscriber     | datetime-tz |
+      | relation  | description    | registration | profile        | double      |

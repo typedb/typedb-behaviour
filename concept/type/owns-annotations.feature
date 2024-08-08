@@ -3458,8 +3458,8 @@ Feature: Concept Owns Annotations
     When connection open read transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get annotations is empty
     Examples:
-      | value-type  |
-      | long        |
+      | value-type |
+      | long       |
 
   Scenario: Owns can have @card annotation for none value type
     When create attribute type: custom-attribute
@@ -3489,9 +3489,9 @@ Feature: Concept Owns Annotations
     When entity(person) get owns(custom-attribute) set annotation: @card(<args>)
     Then entity(person) get owns(custom-attribute) get annotations contain: @card(<args>)
     Examples:
-      | value-type  | args |
-      | long        | 1..2 |
-      | duration    | 0..9 |
+      | value-type | args |
+      | long       | 1..2 |
+      | duration   | 0..9 |
 
   Scenario Outline: Owns can reset @card annotations
     When create attribute type: custom-attribute
@@ -4531,7 +4531,73 @@ Feature: Concept Owns Annotations
     Then entity(subscriber) get owns overridden(surname) get label: name
     Then entity(subscriber) get owns overridden(third-name) get label: name
 
-    # TODO: Add tests for set override breaking cardinalities
+    # TODO: Add the same test for PLAYS!
+    # Cannot break anything with unset override as default cards start with 0
+  Scenario Outline: Owns set override revalidate cardinality between affected siblings
+    When create attribute type: literal
+    When attribute(literal) set value type: string
+    When attribute(literal) set annotation: @abstract
+    When <root-type>(<supertype-name>) set owns: literal
+    Then <root-type>(<supertype-name>) get owns(literal) set annotation: @card(1..1)
+    Then <root-type>(<supertype-name>) get owns(literal) get cardinality: @card(1..1)
+    When create attribute type: name
+    When attribute(name) set supertype: literal
+    When attribute(name) set annotation: @abstract
+    When create attribute type: letter
+    When attribute(letter) set supertype: literal
+    When attribute(letter) set annotation: @abstract
+    When <root-type>(<subtype-name>) set supertype: <supertype-name>
+    When <root-type>(<subtype-name>) set owns: name
+    When <root-type>(<subtype-name>) get owns(name) set override: literal
+    Then <root-type>(<subtype-name>) get owns(name) get cardinality: @card(1..1)
+    When <root-type>(<subtype-name>) set owns: letter
+    Then <root-type>(<subtype-name>) get owns(letter) set override: literal; fails
+    Then <root-type>(<supertype-name>) get owns(literal) set annotation: @card(1..2)
+    When <root-type>(<subtype-name>) get owns(letter) set override: literal
+    Then <root-type>(<subtype-name>) get owns(name) get cardinality: @card(1..2)
+    Then <root-type>(<subtype-name>) get owns(letter) get cardinality: @card(1..2)
+    When create attribute type: surname
+    When attribute(surname) set supertype: name
+    When create attribute type: first-name
+    When attribute(first-name) set supertype: name
+    When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
+    When <root-type>(<subtype-name-2>) set owns: first-name
+    When <root-type>(<subtype-name-2>) set owns: surname
+    When <root-type>(<subtype-name-2>) get owns(first-name) set override: name
+    When <root-type>(<subtype-name-2>) get owns(surname) set override: name
+    Then <root-type>(<subtype-name-2>) get owns(first-name) get cardinality: @card(1..2)
+    Then <root-type>(<subtype-name-2>) get owns(surname) get cardinality: @card(1..2)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When create attribute type: strict-literal
+    When attribute(strict-literal) set value type: string
+    When attribute(strict-literal) set annotation: @abstract
+    When <root-type>(<supertype-name>) set owns: strict-literal
+    When <root-type>(<supertype-name>) get owns(strict-literal) set annotation: @card(1..1)
+    Then <root-type>(<supertype-name>) get owns(strict-literal) get cardinality: @card(1..1)
+    Then attribute(name) set supertype: strict-literal; fails
+    Then <root-type>(<subtype-name>) get owns(name) set override: strict-literal; fails
+    When attribute(strict-literal) set supertype: literal
+    When attribute(strict-literal) unset value type
+    When attribute(name) set supertype: strict-literal
+    Then <root-type>(<subtype-name>) get owns(name) set override: strict-literal; fails
+    When <root-type>(<supertype-name>) get owns(strict-literal) set annotation: @card(0..1)
+    Then <root-type>(<supertype-name>) get owns(strict-literal) get cardinality: @card(0..1)
+    When <root-type>(<subtype-name>) get owns(name) set override: strict-literal
+    Then <root-type>(<subtype-name-2>) get owns(first-name) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name-2>) get owns(surname) get cardinality: @card(0..1)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<subtype-name-2>) get owns(first-name) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name-2>) get owns(surname) get cardinality: @card(0..1)
+    When <root-type>(<subtype-name>) get owns(name) unset override
+    Then <root-type>(<subtype-name-2>) get owns(first-name) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name-2>) get owns(surname) get cardinality: @card(0..1)
+    Then transaction commits
+    Examples:
+      | root-type | supertype-name | subtype-name | subtype-name-2 |
+      | entity    | person         | customer     | subscriber     |
+      | relation  | description    | registration | profile        |
 
 ########################
 # @distinct
@@ -4595,9 +4661,9 @@ Feature: Concept Owns Annotations
     When connection open read transaction for database: typedb
     Then <root-type>(<type-name>) get owns(custom-attribute) get annotations is empty
     Examples:
-      | root-type | type-name   | value-type    |
-      | entity    | person      | long          |
-      | relation  | description | double        |
+      | root-type | type-name   | value-type |
+      | entity    | person      | long       |
+      | relation  | description | double     |
 
   Scenario: Owns can have @distinct annotation for none value type
     When create attribute type: custom-attribute
@@ -4654,9 +4720,9 @@ Feature: Concept Owns Annotations
     When entity(person) get owns(custom-attribute) set annotation: @distinct
     Then entity(person) get owns(custom-attribute) get annotations contain: @distinct
     Examples:
-      | value-type    |
-      | long          |
-      | decimal       |
+      | value-type |
+      | long       |
+      | decimal    |
 
   Scenario Outline: <root-type> types can redeclare owns as owns with @distinct
     When create attribute type: name
