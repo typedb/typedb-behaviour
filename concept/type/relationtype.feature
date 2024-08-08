@@ -3556,7 +3556,6 @@ Feature: Concept Relation Type and Role Type
     Then relation(overridden-parentship) get role(overridden-parent) get annotations contain: @card(1..1)
     Then relation(overridden-parentship-2) get role(overridden-parent-2) get annotations contain: @card(1..1)
 
-
   Scenario: Relates can have multiple overriding relates with narrowing cardinalities and correct min sum
     When create relation type: relation-to-disturb
     When relation(relation-to-disturb) create role: disturber
@@ -3587,14 +3586,10 @@ Feature: Concept Relation Type and Role Type
     When transaction commits
     When connection open schema transaction for database: typedb
     When relation(parentship) create role: cardinality-destroyer
-    When relation(parentship) get role(cardinality-destroyer) set override: player
-    When relation(parentship) get role(cardinality-destroyer) set annotation: @card(0..2); fails
-    Then relation(parentship) get role(cardinality-destroyer) get cardinality: @card(1..2)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When relation(parentship) create role: cardinality-destroyer
-    When relation(parentship) get role(cardinality-destroyer) set override: player
+    # card becomes 1..2
+    When relation(parentship) get role(cardinality-destroyer) set override: player; fails
     When relation(connection) get role(player) set annotation: @card(1..3)
+    When relation(parentship) get role(cardinality-destroyer) set override: player
     Then relation(connection) get role(player) get cardinality: @card(1..3)
     Then relation(parentship) get role(parent) get cardinality: @card(1..1)
     Then relation(parentship) get role(child) get cardinality: @card(1..1)
@@ -3608,14 +3603,10 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(cardinality-destroyer) get cardinality: @card(0..3)
     When transaction commits
     When connection open schema transaction for database: typedb
-    When relation(parentship) get role(cardinality-destroyer) set annotation: @card(3..3)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When relation(parentship) get role(cardinality-destroyer) set annotation: @card(2..3)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When relation(parentship) get role(cardinality-destroyer) set annotation: @card(2..3)
+    Then relation(parentship) get role(cardinality-destroyer) set annotation: @card(3..3); fails
+    Then relation(parentship) get role(cardinality-destroyer) set annotation: @card(2..3); fails
     When relation(parentship) get role(parent) set annotation: @card(0..1)
+    When relation(parentship) get role(cardinality-destroyer) set annotation: @card(2..3)
     When transaction commits
     When connection open schema transaction for database: typedb
     Then relation(connection) get role(player) get cardinality: @card(0..3)
@@ -3640,9 +3631,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(cardinality-destroyer) get cardinality: @card(0..1)
     When transaction commits
     When connection open schema transaction for database: typedb
-    When relation(parentship) get role(cardinality-destroyer) set annotation: @card(1..1)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(cardinality-destroyer) set annotation: @card(1..1); fails
     When create relation type: subsubtype-to-disturb
     When relation(subsubtype-to-disturb) create role: subsubdisturber
     When relation(subsubtype-to-disturb) set supertype: subtype-to-disturb
@@ -3666,16 +3655,10 @@ Feature: Concept Relation Type and Role Type
     Then relation(family) get role(mother) get cardinality: @card(1..1)
     When transaction commits
     When connection open schema transaction for database: typedb
-    When relation(family) get role(father) set override: player
-    Then relation(family) get role(father) get cardinality: @card(1..1)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When relation(family) get role(father) set override: player
-    Then relation(family) get role(father) get cardinality: @card(1..1)
-    When relation(family) get role(child) set override: player
-    Then relation(family) get role(child) get cardinality: @card(1..1)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    # card becomes 1..1
+    When relation(family) get role(father) set override: player; fails
+    # card becomes 1..1
+    When relation(family) get role(child) set override: player; fails
     When relation(family) get role(mother) unset override
     When relation(connection) get role(player) set annotation: @card(1..2)
     Then relation(connection) get role(player) get cardinality: @card(1..2)
@@ -3687,18 +3670,12 @@ Feature: Concept Relation Type and Role Type
     When connection open schema transaction for database: typedb
     When relation(family) get role(father) set override: player
     Then relation(family) get role(father) get cardinality: @card(1..2)
-    When relation(family) get role(child) set override: player
-    Then relation(family) get role(child) get cardinality: @card(1..2)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When relation(family) get role(father) set override: player
-    Then relation(family) get role(father) get cardinality: @card(1..2)
+    # card becomes 1..2
+    Then relation(family) get role(child) set override: player; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    When relation(family) get role(child) set override: player
-    Then relation(family) get role(child) get cardinality: @card(1..2)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    # card becomes 1..2
+    Then relation(family) get role(child) set override: player; fails
     When relation(family) get role(mother) unset override
     When relation(family) get role(father) unset override
     When relation(connection) get role(player) set annotation: @card(1..3)
@@ -3717,57 +3694,40 @@ Feature: Concept Relation Type and Role Type
     Then relation(family) get role(mother) get cardinality: @card(1..3)
     When transaction commits
     When connection open schema transaction for database: typedb
-    When relation(connection) get role(player) set annotation: @card(2..3)
-    Then relation(connection) get role(player) get cardinality: @card(2..3)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When relation(connection) get role(player) set annotation: @card(2..3)
-    Then relation(connection) get role(player) get cardinality: @card(2..3)
+    When relation(connection) get role(player) set annotation: @card(2..3); fails
     When relation(family) get role(child) unset override
-    Then transaction commits; fails
+    When relation(connection) get role(player) set annotation: @card(2..3); fails
+    When transaction closes
     When connection open schema transaction for database: typedb
-    When relation(connection) get role(player) set annotation: @card(2..3)
-    Then relation(connection) get role(player) get cardinality: @card(2..3)
     When relation(family) get role(child) unset override
     When relation(family) get role(father) unset override
+    When relation(connection) get role(player) set annotation: @card(2..3)
+    Then relation(connection) get role(player) get cardinality: @card(2..3)
     When transaction commits
     When connection open schema transaction for database: typedb
-    When relation(family) get role(father) set override: player
-    Then relation(family) get role(father) get cardinality: @card(2..3)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    # card becomes 2..3
+    Then relation(family) get role(father) set override: player; fails
     When relation(connection) get role(player) set annotation: @card(2..4)
     Then relation(connection) get role(player) get cardinality: @card(2..4)
     When relation(family) get role(father) set override: player
     Then relation(family) get role(father) get cardinality: @card(2..4)
     When transaction commits
     When connection open schema transaction for database: typedb
-    When relation(family) get role(child) set override: player
-    Then relation(family) get role(child) get cardinality: @card(2..4)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    # card becomes 2..4
+    Then relation(family) get role(child) set override: player; fails
     When relation(connection) get role(player) set annotation: @card(2..6)
     Then relation(connection) get role(player) get cardinality: @card(2..6)
     When relation(family) get role(child) set override: player
     Then relation(family) get role(child) get cardinality: @card(2..6)
     When transaction commits
     When connection open schema transaction for database: typedb
-    When relation(connection) get role(player) set annotation: @card(2..5)
-    Then relation(connection) get role(player) get cardinality: @card(2..5)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When relation(connection) get role(player) set annotation: @card(3..8)
-    Then relation(connection) get role(player) get cardinality: @card(3..8)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then relation(connection) get role(player) set annotation: @card(2..5); fails
+    Then relation(connection) get role(player) set annotation: @card(3..8); fails
     When relation(connection) get role(player) set annotation: @card(3..9)
     Then relation(connection) get role(player) get cardinality: @card(3..9)
     When transaction commits
     When connection open schema transaction for database: typedb
-    When relation(connection) get role(player) set annotation: @card(1..1)
-    Then relation(connection) get role(player) get cardinality: @card(1..1)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then relation(connection) get role(player) set annotation: @card(1..1); fails
     When relation(connection) get role(player) set annotation: @card(0..1)
     Then relation(connection) get role(player) get cardinality: @card(0..1)
     When transaction commits
@@ -3778,11 +3738,9 @@ Feature: Concept Relation Type and Role Type
     Then relation(family) get role(mother) get cardinality: @card(0..1)
     When transaction commits
     When connection open schema transaction for database: typedb
-    When relation(family) get role(father) set annotation: @card(1..1)
     Then relation(family) get role(child) get cardinality: @card(1..1)
-    Then relation(family) get role(father) get cardinality: @card(1..1)
     Then relation(family) get role(mother) get cardinality: @card(0..1)
-    Then transaction commits; fails
+    Then relation(family) get role(father) set annotation: @card(1..1); fails
 
   Scenario: Relates cardinality should be checked against overrides' overrides cardinality
     When create relation type: connection
@@ -3813,16 +3771,10 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get role(father-child-2) get cardinality: @card(1..1)
     When transaction commits
     When connection open schema transaction for database: typedb
-    When relation(fathership) get role(father-2) set override: parent
-    Then relation(fathership) get role(father-2) get cardinality: @card(5..10)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When relation(fathership) get role(father-2) set override: parent
-    Then relation(fathership) get role(father-2) get cardinality: @card(5..10)
-    When relation(fathership) get role(father-child-2) set override: child
-    Then relation(fathership) get role(father-child-2) get cardinality: @card(5..10)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    # card becomes 5..10
+    Then relation(fathership) get role(father-2) set override: parent; fails
+    # card becomes 5..10
+    When relation(fathership) get role(father-child-2) set override: child; fails
     When relation(connection) get role(player) set annotation: @card(3..10)
     Then relation(connection) get role(player) get cardinality: @card(3..10)
     When relation(fathership) get role(father-2) set override: parent
@@ -3832,19 +3784,23 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) get role(father-2) set override: parent
     When transaction commits
     When connection open schema transaction for database: typedb
-    When relation(fathership) get role(father-child-2) set override: child
-    Then relation(fathership) get role(father-child-2) get cardinality: @card(3..10)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    # card becomes 3..10
+    Then relation(fathership) get role(father-child-2) set override: child; fails
     When relation(connection) get role(player) set annotation: @card(3..)
     Then relation(connection) get role(player) get cardinality: @card(3..)
     When relation(fathership) get role(father-child-2) set override: child
     Then relation(fathership) get role(father-child-2) get cardinality: @card(3..)
     When transaction commits
     When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(parent) unset override; fails
+    Then relation(parentship) get role(parent) set annotation: @card(0..); fails
+    When relation(parentship) get role(parent) set annotation: @card(3..)
     When relation(parentship) get role(parent) unset override
-    When relation(parentship) get role(child) unset override
     When relation(parentship) get role(parent) set annotation: @card(0..)
+    Then relation(parentship) get role(child) unset override; fails
+    Then relation(parentship) get role(child) set annotation: @card(0..); fails
+    When relation(parentship) get role(child) set annotation: @card(3..)
+    When relation(parentship) get role(child) unset override
     When relation(parentship) get role(child) set annotation: @card(0..)
     When relation(connection) get role(player) set annotation: @card(1..1)
     Then relation(connection) get role(player) get cardinality: @card(1..1)
@@ -3862,38 +3818,33 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get role(father-child-2) get supertype: parentship:child
     When transaction commits
     When connection open schema transaction for database: typedb
-    When relation(fathership) get role(father-2) set override: parent
+    # card becomes 1..1
     Then relation(parentship) get role(parent) get supertype: connection:player
     Then relation(fathership) get role(father) get supertype: parentship:parent
-    Then relation(fathership) get role(father-2) get supertype: parentship:parent
     Then relation(fathership) get role(father) get cardinality: @card(1..1)
-    Then relation(fathership) get role(father-2) get cardinality: @card(1..1)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    When relation(fathership) get role(father-2) set override: parent; fails
     When relation(connection) get role(player) set annotation: @card(2..5)
     When relation(fathership) get role(father-2) set override: parent
     When transaction commits
     When connection open schema transaction for database: typedb
     When relation(fathership) get role(father-child-2) unset override
     When relation(parentship) get role(child) unset annotation: @card
-    When relation(parentship) get role(child) set override: player
-    Then relation(parentship) get role(child) get supertype: connection:player
     Then relation(fathership) get role(father-child) get supertype: parentship:child
     Then relation(fathership) get role(father-child-2) get supertype does not exist
-    Then transaction commits; fails
+    Then relation(parentship) get role(child) set override: player; fails
+    Then transaction closes
     When connection open schema transaction for database: typedb
     When relation(fathership) get role(father-child-2) unset override
     When relation(parentship) get role(child) unset annotation: @card
-    When relation(parentship) get role(child) set override: player
-    Then relation(parentship) get role(child) get supertype: connection:player
     Then relation(fathership) get role(father-child) get supertype: parentship:child
     Then relation(fathership) get role(father-child-2) get supertype does not exist
+    Then relation(parentship) get role(child) set override: player; fails
     When relation(connection) get role(player) set annotation: @card(2..6)
+    When relation(parentship) get role(child) set override: player
+    Then relation(parentship) get role(child) get supertype: connection:player
     When transaction commits
     When connection open schema transaction for database: typedb
-    When relation(fathership) get role(father-child-2) set override: child
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then relation(fathership) get role(father-child-2) set override: child; fails
     When create relation type: mothership
     When relation(mothership) set supertype: parentship
     When relation(mothership) create role: mother
@@ -3916,13 +3867,11 @@ Feature: Concept Relation Type and Role Type
     When transaction commits
     When connection open schema transaction for database: typedb
     When relation(mothership-with-three-children) create role: three-children-mother
-    When relation(mothership-with-three-children) get role(three-children-mother) set override: mother
-    Then relation(mothership-with-three-children) get role(three-children-mother) get cardinality: @card(2..6)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When relation(parentship) get role(parent) unset override
+    # card becomes 2..6
+    When relation(mothership-with-three-children) get role(three-children-mother) set override: mother; fails
+    Then relation(parentship) get role(parent) unset override; fails
     When relation(parentship) get role(parent) set annotation: @card(2..6)
-    When relation(mothership-with-three-children) create role: three-children-mother
+    When relation(parentship) get role(parent) unset override
     When relation(mothership-with-three-children) get role(three-children-mother) set override: mother
     Then relation(mothership-with-three-children) get role(three-children-mother) get cardinality: @card(2..6)
     When transaction commits
@@ -3946,14 +3895,14 @@ Feature: Concept Relation Type and Role Type
     When transaction commits
     When connection open schema transaction for database: typedb
     When relation(fathership) create role: father-2
-    When relation(fathership) get role(father-2) set override: parent
-    Then relation(fathership) get role(father-2) get cardinality: @card(1..1)
-    Then transaction commits; fails
+    # card becomes 1..1
+    Then relation(fathership) get role(father-2) set override: parent; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     When relation(parentship) create role: child
-    When relation(parentship) get role(child) set override: player
-    Then relation(parentship) get role(child) get cardinality: @card(1..1)
-    Then transaction commits; fails
+    # card becomes 1..1
+    Then relation(parentship) get role(child) set override: player; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     When relation(connection) create role: player-2
     Then relation(connection) get role(player-2) get cardinality: @card(1..1)
@@ -3975,11 +3924,8 @@ Feature: Concept Relation Type and Role Type
     When transaction commits
     When connection open schema transaction for database: typedb
     When relation(mothership) create role: mother-child
-    When relation(mothership) get role(mother-child) set override: parent
-    Then relation(mothership) get role(mother-child) get cardinality: @card(1..1)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When relation(mothership) create role: mother-child
+    # card becomes 1..1
+    Then relation(mothership) get role(mother-child) set override: parent; fails
     When relation(mothership) get role(mother-child) set override: child
     Then relation(mothership) get role(mother-child) get cardinality: @card(1..1)
     When transaction commits
