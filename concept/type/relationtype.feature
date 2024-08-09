@@ -1007,31 +1007,6 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(child) get annotations do not contain: @abstract
     Then relation(parentship) get role(child) get declared annotations do not contain: @abstract
 
-     # TODO: Move to thing-feature or schema/data-validation?
-#  Scenario: Relation types can be set to abstract when a subtype has instances
-#    When create relation type: parentship
-#    When relation(parentship) create role: parent
-#    When relation(parentship) create role: child
-#    When create relation type: fathership
-#    When relation(fathership) set supertype: parentship
-#    When relation(fathership) create role: father
-#    When relation(fathership) get role(father) set override: parent
-#    When relation(fathership) create role: father-child
-#    When relation(fathership) get role(father-child) set override: child
-#    When create entity type: person
-#    When relation(parentship) get role(parent) set plays: fathership:father
-#    Then transaction commits
-#    When connection open write transaction for database: typedb
-#    Then $m = relation(fathership) create new instance
-#    When $a = relation(parentship) get role(parent) create new instance
-#    When relation $m add player for role(father): $a
-#    Then transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then relation(parentship) set annotation: @abstract
-#    Then transaction commits
-#    When connection open read transaction for database: typedb
-#    Then relation(parentship) get annotations contain: @abstract
-
 # TODO: Make it only for typeql
 #  Scenario: Relation type cannot set @abstract annotation with arguments
 #    When create relation type: parentship
@@ -1665,74 +1640,6 @@ Feature: Concept Relation Type and Role Type
       | parentship:child  |
       | marriage:husband  |
       | marriage:wife     |
-
-     # TODO: Move to thing-feature or schema/data-validation?
-#  Scenario: Role can change ordering if it does not have role instances even if its relation has instances
-#    When create relation type: parentship
-#    When relation(parentship) create role: parent
-#    When relation(parentship) create role: child
-#    When create entity type: person
-#    When relation(parentship) get role(parent) set plays: parentship:parent
-#    When transaction commits
-#    When connection open write transaction for database: typedb
-#    When $m = relation(parentship) create new instance
-#    When $a = relation(parentship) get role(parent) create new instance
-#    When relation $m add player for role(parent): $a
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    When relation(parentship) get role(child) set ordering: ordered
-#    Then relation(parentship) get role(child) get ordering: ordered
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then relation(parentship) get role(child) get ordering: ordered
-#    When relation(parentship) get role(child) set ordering: unordered
-#    Then relation(parentship) get role(child) get ordering: unordered
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then relation(parentship) get role(child) get ordering: unordered
-#
-#  Scenario: Role cannot change ordering if it has role instances
-#    When create relation type: parentship
-#    When relation(parentship) create role: parent
-#    When relation(parentship) create role: child
-#    When relation(parentship) get role(child) set ordering: ordered
-#    When create attribute type: id
-#    When attribute(id) set value type: long
-#    When relation(parentship) set owns: id
-#    When relation(parentship) get owns(id) set annotation: @key
-#    When create entity type: person
-#    When relation(parentship) get role(parent) set plays: parentship:parent
-#    When relation(parentship) get role(parent) set plays: parentship:child
-#    When relation(parentship) get role(parent) set owns: id
-#    When relation(parentship) get role(parent) get owns(id) set annotation: @key
-#    When transaction commits
-#    When connection open write transaction for database: typedb
-#    When $m = relation(parentship) create new instance with key(id): 1
-#    When $a = relation(parentship) get role(parent) create new instance with key(id): 1
-#    When relation $m add player for role(parent): $a
-#    When relation $m add player for role(child): $a
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then relation(parentship) get role(parent) set ordering: unordered; fails
-#    Then relation(parentship) get role(parent) set ordering: ordered; fails
-#    Then relation(parentship) get role(child) set ordering: unordered; fails
-#    Then relation(parentship) get role(child) set ordering: ordered; fails
-#    When transaction closes
-#    When connection open write transaction for database: typedb
-#    When $m = relation(parentship) get instance with key(id): 1
-#    When $a = relation(parentship) get role(parent) get instance with key(id): 1
-#    When delete entity: $a
-#    When delete relation: $m
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    When relation(parentship) get role(parent) set ordering: ordered
-#    Then relation(parentship) get role(parent) get ordering: ordered
-#    When relation(parentship) get role(child) set ordering: unordered
-#    Then relation(parentship) get role(child) get ordering: unordered
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then relation(parentship) get role(parent) get ordering: ordered
-#    Then relation(parentship) get role(child) get ordering: unordered
 
   Scenario: Relation and role lists can change labels
     When create relation type: parentship

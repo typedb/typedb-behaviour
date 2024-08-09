@@ -2,8 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-# TODO: This file is separated from owns.feature to speed up Rust cucumber execution and can be merged back after
-# the issue is resolved (see https://github.com/cucumber-rs/cucumber/issues/331).
+# This file is separated from owns.feature to speed up Rust cucumber execution
 
 #noinspection CucumberUndefinedStep
 Feature: Concept Owns Annotations
@@ -1661,44 +1660,6 @@ Feature: Concept Owns Annotations
       | root-type | supertype-name | subtype-name | subtype-name-2 |
       | entity    | person         | customer     | subscriber     |
       | relation  | description    | registration | profile        |
-
-     # TODO: Move to thing-feature or schema/data-validation?
-#  Scenario: Entity types can only commit keys if every instance owns a distinct key
-#    When create attribute type: email
-#    When attribute(email) set value type: string
-#    When create attribute type: username
-#    When attribute(username) set value type: string
-#    When entity(person) set owns: username
-#    When entity(person) get owns(username) set annotation: @key
-#    Then transaction commits
-#    When connection open write transaction for database: typedb
-#    When $a = entity(person) create new instance with key(username): alice
-#    When $b = entity(person) create new instance with key(username): bob
-#    Then transaction commits
-#    When connection open schema transaction for database: typedb
-#    When entity(person) set owns: email
-#    When entity(person) get owns(email) set annotation: @key; fails
-#    When transaction closes
-#    When connection open schema transaction for database: typedb
-#    When entity(person) set owns: email
-#    Then transaction commits
-#    When connection open write transaction for database: typedb
-#    When $a = entity(person) get instance with key(username): alice
-#    When $alice = attribute(email) put instance with value: alice@vaticle.com
-#    When entity $a set has: $alice
-#    When $b = entity(person) get instance with key(username): bob
-#    When $bob = attribute(email) put instance with value: bob@vaticle.com
-#    When entity $b set has: $bob
-#    Then transaction commits
-#    When connection open schema transaction for database: typedb
-#    When entity(person) set owns: email
-#    When entity(person) get owns(email) set annotation: @key
-#    Then entity(person) get owns(email; get annotations contain: @key
-#    Then entity(person) get owns(username; get annotations contain: @key
-#    Then transaction commits
-#    When connection open read transaction for database: typedb
-#    Then entity(person) get owns(email; get annotations contain: @key
-#    Then entity(person) get owns(username; get annotations contain: @key
 
 #########################
 ## @subkey

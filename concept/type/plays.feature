@@ -940,25 +940,6 @@ Feature: Concept Plays
       | entity    | person      |
       | relation  | description |
 
-     # TODO: Move to thing-feature or schema/data-validation?
-#  Scenario Outline: <root-type> types cannot unset playing role types that are currently played by existing instances
-#    When create relation type: marriage
-#    When relation(marriage) create role: husband
-#    When relation(marriage) create role: wife
-#    When <root-type>(<type-name>) set plays: marriage:wife
-#    Then transaction commits
-#    When connection open write transaction for database: typedb
-#    When $i = <root-type>(<type-name>) create new instance
-#    When $m = relation(marriage) create new instance
-#    When relation $m add player for role(wife): $i
-#    Then transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then <root-type>(<type-name>) unset plays: marriage:wife; fails
-#    Examples:
-#      | root-type | type-name   |
-#      | entity    | person      |
-#      | relation  | description |
-
   Scenario Outline: <root-type> types can re-override inherited playing role types
     When create relation type: parentship
     When relation(parentship) create role: parent
@@ -1406,27 +1387,6 @@ Feature: Concept Plays
       | root-type | type-name   |
       | entity    | person      |
       | relation  | description |
-
-     # TODO: Move to thing-feature or schema/data-validation?
-#  Scenario Outline: <root-type> types cannot unset playing ordered role that is currently played by existing instances
-#    When create relation type: marriage
-#    When relation(marriage) create role: husband
-#    When relation(marriage) get role(husband) set ordering: ordered
-#    When relation(marriage) create role: wife
-#    When relation(marriage) get role(wife) set ordering: ordered
-#    When <root-type>(<type-name>) set plays: marriage:wife
-#    Then transaction commits
-#    When connection open write transaction for database: typedb
-#    When $i = <root-type>(<type-name>) create new instance
-#    When $m = relation(marriage) create new instance
-#    When relation $m add player for role(wife): $i
-#    Then transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then <root-type>(<type-name>) unset plays: marriage:wife; fails
-#    Examples:
-#      | root-type | type-name   |
-#      | entity    | person      |
-#      | relation  | description |
 
   Scenario Outline: <root-type> types can re-override inherited playing ordered role
     When create relation type: parentship

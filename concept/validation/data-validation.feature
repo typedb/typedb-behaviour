@@ -99,7 +99,7 @@ Feature: Data validation
     Then relation(rel1) get role(role1) set override: role00; fails
 
 
-  # If we ever introduce abstract roles, we need a scenario here
+  # TODO: If we ever introduce abstract roles, we need a scenario here
 
   Scenario: Instances of role-playing not in the schema must not exist
     Given create relation type: rel0
@@ -139,7 +139,7 @@ Feature: Data validation
     Then entity(ent1) set supertype: ent01; fails
 
 
-  # If we ever introduce abstract roles, we need a scenario here
+  #  TODO: If we ever introduce abstract roles, we need a scenario here
 
   Scenario: Instances of role-playing hidden by a relates override must not exist
     Given create relation type: rel0
@@ -274,94 +274,9 @@ Feature: Data validation
     When connection open schema transaction for database: typedb
     Then entity(ent2) set supertype: ent11; fails
 
-
-  Scenario: When annotations on an ownership change, data is revalidated
-    Given create attribute type: attr0
-    Given attribute(attr0) set value type: string
-    Given create entity type: ent0n
-    Given create entity type: ent0u
-    Given entity(ent0n) set owns: attr0
-    Given entity(ent0u) set owns: attr0
-    Given entity(ent0u) get owns(attr0) set annotation: @unique
-    Given entity(ent0u) get owns(attr0) set annotation: @card(0..2)
-    Given create attribute type: ref
-    Given attribute(ref) set value type: string
-    Given entity(ent0n) set owns: ref
-    Given entity(ent0n) get owns(ref) set annotation: @key
-    Given entity(ent0u) set owns: ref
-    Given entity(ent0u) get owns(ref) set annotation: @key
-    Given transaction commits
-    Given connection open write transaction for database: typedb
-    Given $ent0n0 = entity(ent0n) create new instance with key(ref): ent0n0
-    Given $ent0n1 = entity(ent0n) create new instance with key(ref): ent0n1
-    Given $ent0u = entity(ent0u) create new instance with key(ref): ent0u
-    Given $attr0 = attribute(attr0) put instance with value: "attr0"
-    Given $attr1 = attribute(attr0) put instance with value: "attr1"
-    Given entity $ent0n0 set has: $attr1
-    Given entity $ent0n1 set has: $attr1
-    Given entity $ent0u set has: $attr0
-    Given entity $ent0u set has: $attr1
-    Given transaction commits
-    Given connection open schema transaction for database: typedb
-    Then entity(ent0n) get owns(attr0) set annotation: @unique; fails
-
-    When transaction closes
-    Given connection open schema transaction for database: typedb
-    When entity(ent0u) get owns(attr0) unset annotation: @card
-    Then entity(ent0u) get owns(attr0) set annotation: @key; fails
-
-    Given transaction closes
-    Given connection open write transaction for database: typedb
-    When $ent0n1 = entity(ent0n) get instance with key(ref): ent0n1
-    When $ent0u = entity(ent0u) get instance with key(ref): ent0u
-    When $attr1 = attribute(attr0) get instance with value: "attr1"
-    When entity $ent0n1 unset has: $attr1
-    When entity $ent0u unset has: $attr1
-    Then transaction commits
-
-    Given connection open schema transaction for database: typedb
-    When entity(ent0n) get owns(attr0) set annotation: @unique
-    When entity(ent0u) get owns(attr0) unset annotation: @card
-    When entity(ent0u) get owns(attr0) unset annotation: @unique
-    When entity(ent0u) get owns(attr0) set annotation: @key
-    Then transaction commits
-
-    # TODO: Add a test for unique where we have a supertype without unique, subtype with unique, and multiple subsubtypes for it. Supertype can be duplicated
-    # with the subtypes or subsubtypes!
-
-  # TODO: Add test when data is invalid while we change any of the new annotations (regex, values, range, independent, ...)
-
-  # TODO: Add test how data is cleaned up when we set cascade / remove independent (maybe it's for migration.feature)
-
-  Scenario: When the super-type of a type is changed, the data is consistent with the annotations on ownerships
-    Given create attribute type: attr0
-    Given attribute(attr0) set value type: string
-    Given create entity type: ent0k
-    Given create entity type: ent0n
-    Given create entity type: ent1n
-    Given entity(ent1n) set supertype: ent0n
-    Given entity(ent0n) set owns: attr0
-    Given entity(ent0n) get owns(attr0) set annotation: @card(0..2)
-    Given entity(ent0k) set owns: attr0
-    Given entity(ent0k) get owns(attr0) set annotation: @key
-    Given create attribute type: ref
-    Given attribute(ref) set value type: string
-    Given entity(ent0n) set owns: ref
-    Given entity(ent0n) get owns(ref) set annotation: @key
-    Given entity(ent0k) set owns: ref
-    Given entity(ent0k) get owns(ref) set annotation: @key
-    Given transaction commits
-    Given connection open write transaction for database: typedb
-    Given $attr0 = attribute(attr0) put instance with value: "attr0"
-    Given $attr1 = attribute(attr0) put instance with value: "attr1"
-    Given $ent1n = entity(ent1n) create new instance with key(ref): ent1n
-    Given entity $ent1n set has: $attr0
-    Given entity $ent1n set has: $attr1
-    Given $ent0k = entity(ent0k) create new instance with key(ref): ent0k
-    Given entity $ent0k set has: $attr0
-    Given transaction commits
-    Given connection open schema transaction for database: typedb
-    Then entity(ent1n) set supertype: ent0k; fails
+########################
+# delete/unset with existing data
+########################
 
     # TODO: Repeat these "cannot be deleted" tests for subtypes instances with reverse "can be deleted". See abstract annotation!
 
@@ -449,25 +364,60 @@ Feature: Data validation
     When entity(person) unset plays: marriage:wife
     Then relation(marriage) delete role: wife
     Then relation(marriage) get role(wife) does not exist
+    Then transaction commits=
+
+  Scenario: Ordered role types that have instances cannot be deleted or unset
+    When create attribute type: id
+    When attribute(id) set value type: string
+    When create relation type: marriage
+    When relation(marriage) create role: wife
+    When relation(marriage) create role: husband
+    When relation(marriage) get role(wife) set ordering: ordered
+    When relation(marriage) get role(husband) set ordering: ordered
+    When relation(marriage) set owns: id
+    When create entity type: person
+    When entity(person) set plays: marriage:wife
+    When entity(person) set owns: id
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $m = relation(marriage) create new instance with key(id): "m"
+    When $p = entity(person) create new instance with key(id): "p"
+    When relation $m add player for role(wife): $p
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(marriage) delete role: wife; fails
+    Then entity(person) unset plays: marriage:wife; fails
+    Then relation(marriage) delete role: husband
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $m = relation(marriage) get instance with key(id): "m"
+    When $p = entity(person) get instance with key(id): "p"
+    When relation $m remove player for role(wife): $p
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(marriage) delete role: wife; fails
+    When entity(person) unset plays: marriage:wife
+    Then relation(marriage) delete role: wife
+    Then relation(marriage) get role(wife) does not exist
     Then transaction commits
 
-  Scenario: Owns that have instances cannot be unset
+  Scenario Outline: Owns that have instances of type <value-type> cannot be unset
     When create entity type: person
     When create attribute type: name
-    When attribute(name) set value type: string
+    When attribute(name) set value type: <value-type>
     When entity(person) set owns: name
     When transaction commits
     When connection open write transaction for database: typedb
     When $p = entity(person) create new instance
-    When $n = attribute(name) put instance with value: "bob"
+    When $n = attribute(name) put instance with value: <value>
     When entity $p set has: $n
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) unset owns: name; fails
     When transaction closes
     When connection open write transaction for database: typedb
-    When $p = entity(person) get instance with key: "bob"
-    When $n = attribute(name) get instance with value: "bob"
+    When $p = entity(person) get instance with key: <value>
+    When $n = attribute(name) get instance with value: <value>
     When entity $p unset has: $n
     When transaction commits
     When connection open schema transaction for database: typedb
@@ -475,6 +425,55 @@ Feature: Data validation
     Then entity(person) get owns do not contain:
       | name |
     When transaction commits
+    Examples:
+      | value-type  | value           |
+      | long        | 1               |
+      | double      | 1.0             |
+      | decimal     | 1.0             |
+      | string      | "alice"         |
+      | boolean     | true            |
+      | date        | 2024-05-04      |
+      | datetime    | 2024-05-04      |
+      | datetime-tz | 2024-05-04+0010 |
+      | duration    | P1Y             |
+
+  Scenario Outline: Ordered owns that have instances of type <value-type> cannot be unset
+    When create entity type: person
+    When create attribute type: name
+    When attribute(name) set value type: <value-type>
+    When entity(person) set owns: name
+    When entity(person) get owns(name) set ordering: ordered
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $p = entity(person) create new instance
+    When $n = attribute(name) put instance with value: <value>
+    When entity $p set has: $n
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) unset owns: name; fails
+    When transaction closes
+    When connection open write transaction for database: typedb
+    # TODO: If cant get by ordered key, just create another owns for get!
+    When $p = entity(person) get instance with key: <value>
+    When $n = attribute(name) get instance with value: <value>
+    When entity $p unset has: $n
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(person) unset owns: name
+    Then entity(person) get owns do not contain:
+      | name |
+    When transaction commits
+    Examples:
+      | value-type  | value           |
+      | long        | 1               |
+      | double      | 1.0             |
+      | decimal     | 1.0             |
+      | string      | "alice"         |
+      | boolean     | true            |
+      | date        | 2024-05-04      |
+      | datetime    | 2024-05-04      |
+      | datetime-tz | 2024-05-04+0010 |
+      | duration    | P1Y             |
 
   Scenario: Plays that have instances cannot be unset
     When create attribute type: id
@@ -598,3 +597,266 @@ Feature: Data validation
     Then attribute(literal) does not exist
     Then $a = attribute(name) get instance with value: "bob"
     Then attribute $a exists
+
+########################
+# ordering update with existing data
+########################
+
+  Scenario: Role can change ordering if it does not have role instances even if its relation has instances
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: child
+    When create entity type: person
+    When entity(person) set plays: parentship:parent
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $m = relation(parentship) create new instance
+    When $a = entity(person) create new instance
+    When relation $m add player for role(parent): $a
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When relation(parentship) get role(child) set ordering: ordered
+    Then relation(parentship) get role(child) get ordering: ordered
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(child) get ordering: ordered
+    When relation(parentship) get role(child) set ordering: unordered
+    Then relation(parentship) get role(child) get ordering: unordered
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) get role(child) get ordering: unordered
+
+  Scenario: Role cannot change ordering if it has role instances
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: child
+    When relation(parentship) get role(child) set ordering: ordered
+    When create attribute type: id
+    When attribute(id) set value type: long
+    When relation(parentship) set owns: id
+    When relation(parentship) get owns(id) set annotation: @key
+    When create entity type: person
+    When entity(person) set plays: parentship:parent
+    When entity(person) set plays: parentship:child
+    When entity(person) set owns: id
+    When entity(person) get owns(id) set annotation: @key
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $m = relation(parentship) create new instance with key(id): 1
+    When $a = entity(person) create new instance with key(id): 1
+    When relation $m add player for role(parent): $a
+    When relation $m add player for role(child): $a
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) set ordering: unordered; fails
+    Then entity(person) set ordering: ordered; fails
+    Then relation(parentship) get role(child) set ordering: unordered; fails
+    Then relation(parentship) get role(child) set ordering: ordered; fails
+    When transaction closes
+    When connection open write transaction for database: typedb
+    When $m = relation(parentship) get instance with key(id): 1
+    When $a = entity(person) get instance with key(id): 1
+    When delete entity: $a
+    When delete relation: $m
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(person) set ordering: ordered
+    Then entity(person) get ordering: ordered
+    When relation(parentship) get role(child) set ordering: unordered
+    Then relation(parentship) get role(child) get ordering: unordered
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get ordering: ordered
+    Then relation(parentship) get role(child) get ordering: unordered
+
+  Scenario: Owns can change ordering if it does not have instances even if its owner has instances for entity type
+    When create attribute type: name
+    When attribute(name) set value type: double
+    When create entity type: person
+    When entity(person) set owns: name
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $a = entity(person) create new instance
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(person) get owns(name) set ordering: ordered
+    Then entity(person) get owns(name) get ordering: ordered
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get owns(name) get ordering: ordered
+    When entity(person) get owns(name) set ordering: unordered
+    Then entity(person) get owns(name) get ordering: unordered
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get owns(name) get ordering: unordered
+
+  Scenario: Owns cannot change ordering if it has role instances for entity type
+    When create attribute type: id
+    When attribute(id) set value type: long
+    When create attribute type: name
+    When attribute(name) set value type: string
+    When create attribute type: email
+    When attribute(email) set value type: decimal
+    When create entity type: person
+    When entity(person) set owns: id
+    When entity(person) get owns(id) set annotation: @key
+    When entity(person) set owns: name
+    When entity(person) set owns: email
+    When entity(person) get owns(email) set ordering: ordered
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $e = entity(person) create new instance with key(id): 1
+    When $a1 = attribute(name) create new instance
+    When $a2 = attribute(name) create new instance
+    When entity $e set has: $a1
+    When entity $e set has: $a2
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get owns(name) set ordering: unordered; fails
+    Then entity(person) get owns(name) set ordering: ordered; fails
+    Then entity(person) get owns(email) set ordering: unordered; fails
+    Then entity(person) get owns(email) set ordering: ordered; fails
+    When connection open write transaction for database: typedb
+    When $a = entity(person) get instance with key(id): 1
+    When delete entity: $a
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(person) get owns(name) set ordering: ordered
+    Then entity(person) get owns(name) get ordering: ordered
+    When entity(person) get owns(email) set ordering: unordered
+    Then entity(person) get owns(email) get ordering: unordered
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get owns(name) get ordering: ordered
+    Then entity(person) get owns(email) get ordering: unordered
+
+########################
+# @annotations update with existing data
+########################
+
+     # TODO: Make a series of annotations validations on the existing data for each type and capability
+  Scenario: Entity types can only commit keys if every instance owns a distinct key
+    When create attribute type: email
+    When attribute(email) set value type: string
+    When create attribute type: username
+    When attribute(username) set value type: string
+    When entity(person) set owns: username
+    When entity(person) get owns(username) set annotation: @key
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $a = entity(person) create new instance with key(username): alice
+    When $b = entity(person) create new instance with key(username): bob
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(person) set owns: email
+    When entity(person) get owns(email) set annotation: @key; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When entity(person) set owns: email
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $a = entity(person) get instance with key(username): alice
+    When $alice = attribute(email) put instance with value: alice@vaticle.com
+    When entity $a set has: $alice
+    When $b = entity(person) get instance with key(username): bob
+    When $bob = attribute(email) put instance with value: bob@vaticle.com
+    When entity $b set has: $bob
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(person) set owns: email
+    When entity(person) get owns(email) set annotation: @key
+    Then entity(person) get owns(email; get annotations contain: @key
+    Then entity(person) get owns(username; get annotations contain: @key
+    Then transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get owns(email; get annotations contain: @key
+    Then entity(person) get owns(username; get annotations contain: @key
+
+
+  Scenario: When annotations on an ownership change, data is revalidated
+    Given create attribute type: attr0
+    Given attribute(attr0) set value type: string
+    Given create entity type: ent0n
+    Given create entity type: ent0u
+    Given entity(ent0n) set owns: attr0
+    Given entity(ent0u) set owns: attr0
+    Given entity(ent0u) get owns(attr0) set annotation: @unique
+    Given entity(ent0u) get owns(attr0) set annotation: @card(0..2)
+    Given create attribute type: ref
+    Given attribute(ref) set value type: string
+    Given entity(ent0n) set owns: ref
+    Given entity(ent0n) get owns(ref) set annotation: @key
+    Given entity(ent0u) set owns: ref
+    Given entity(ent0u) get owns(ref) set annotation: @key
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given $ent0n0 = entity(ent0n) create new instance with key(ref): ent0n0
+    Given $ent0n1 = entity(ent0n) create new instance with key(ref): ent0n1
+    Given $ent0u = entity(ent0u) create new instance with key(ref): ent0u
+    Given $attr0 = attribute(attr0) put instance with value: "attr0"
+    Given $attr1 = attribute(attr0) put instance with value: "attr1"
+    Given entity $ent0n0 set has: $attr1
+    Given entity $ent0n1 set has: $attr1
+    Given entity $ent0u set has: $attr0
+    Given entity $ent0u set has: $attr1
+    Given transaction commits
+    Given connection open schema transaction for database: typedb
+    Then entity(ent0n) get owns(attr0) set annotation: @unique; fails
+
+    When transaction closes
+    Given connection open schema transaction for database: typedb
+    When entity(ent0u) get owns(attr0) unset annotation: @card
+    Then entity(ent0u) get owns(attr0) set annotation: @key; fails
+
+    Given transaction closes
+    Given connection open write transaction for database: typedb
+    When $ent0n1 = entity(ent0n) get instance with key(ref): ent0n1
+    When $ent0u = entity(ent0u) get instance with key(ref): ent0u
+    When $attr1 = attribute(attr0) get instance with value: "attr1"
+    When entity $ent0n1 unset has: $attr1
+    When entity $ent0u unset has: $attr1
+    Then transaction commits
+
+    Given connection open schema transaction for database: typedb
+    When entity(ent0n) get owns(attr0) set annotation: @unique
+    When entity(ent0u) get owns(attr0) unset annotation: @card
+    When entity(ent0u) get owns(attr0) unset annotation: @unique
+    When entity(ent0u) get owns(attr0) set annotation: @key
+    Then transaction commits
+
+    # TODO: Add a test for unique where we have a supertype without unique, subtype with unique, and multiple subsubtypes for it. Supertype can be duplicated
+    # with the subtypes or subsubtypes!
+
+  # TODO: Add test when data is invalid while we change any of the new annotations (regex, values, range, independent, ...)
+
+  # TODO: Add test how data is cleaned up when we set cascade / remove independent (maybe it's for migration.feature)
+
+  Scenario: When the super-type of a type is changed, the data is consistent with the annotations on ownerships
+    Given create attribute type: attr0
+    Given attribute(attr0) set value type: string
+    Given create entity type: ent0k
+    Given create entity type: ent0n
+    Given create entity type: ent1n
+    Given entity(ent1n) set supertype: ent0n
+    Given entity(ent0n) set owns: attr0
+    Given entity(ent0n) get owns(attr0) set annotation: @card(0..2)
+    Given entity(ent0k) set owns: attr0
+    Given entity(ent0k) get owns(attr0) set annotation: @key
+    Given create attribute type: ref
+    Given attribute(ref) set value type: string
+    Given entity(ent0n) set owns: ref
+    Given entity(ent0n) get owns(ref) set annotation: @key
+    Given entity(ent0k) set owns: ref
+    Given entity(ent0k) get owns(ref) set annotation: @key
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given $attr0 = attribute(attr0) put instance with value: "attr0"
+    Given $attr1 = attribute(attr0) put instance with value: "attr1"
+    Given $ent1n = entity(ent1n) create new instance with key(ref): ent1n
+    Given entity $ent1n set has: $attr0
+    Given entity $ent1n set has: $attr1
+    Given $ent0k = entity(ent0k) create new instance with key(ref): ent0k
+    Given entity $ent0k set has: $attr0
+    Given transaction commits
+    Given connection open schema transaction for database: typedb
+    Then entity(ent1n) set supertype: ent0k; fails
