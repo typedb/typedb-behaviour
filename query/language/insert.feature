@@ -19,7 +19,7 @@ Feature: TypeQL Insert Query
 
       entity person
         plays employment:employee,
-        owns name  @card(0..999),
+        owns name  @card(0..),
         owns age,
         owns ref @key,
         owns email @unique;
